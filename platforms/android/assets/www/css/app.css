@@ -1,0 +1,38 @@
+/*
+ * Various hacks to get jQuery widgets to display properly.
+ */
+
+.page-body {
+    margin:5px;
+}
+
+div[data-role="header"] > h1.dialog-heading {
+    overflow: visible;
+}
+
+.ui-listview > li p.label-unreadcount {
+    font-weight: bold;
+}
+
+.ui-listview > li p.label-datetime-outer {
+    overflow: visible;
+}
+
+.ui-listview > li span.label-datetime-inner {
+    position: relative;
+    left: 30px;
+}
+
+.ui-listview > li p.text-message {
+    white-space: normal;
+}
+
+.textbox-send-message {
+    margin-left: 5px;
+    margin-right: 42px
+}
+
+.button-send-message {
+    position: relative;
+    bottom: -4px
+}

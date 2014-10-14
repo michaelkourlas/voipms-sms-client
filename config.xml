@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="net.kourlas.voipms-sms" version="0.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>VoIP.ms SMS</name>
+    <description>
+        An application that sends and receives text messages through the VoIP.ms service.
+    </description>
+    <author email="michael@kourlas.net" href="http://www.kourlas.net">
+        Michael Kourlas
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+</widget>

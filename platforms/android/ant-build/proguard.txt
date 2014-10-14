@@ -1,0 +1,3 @@
+# view AndroidManifest.xml #generated:6
+-keep class net.kourlas.voipms_sms.VoipMsSms { <init>(...); }
+
