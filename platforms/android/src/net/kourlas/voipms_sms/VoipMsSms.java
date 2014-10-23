@@ -22,7 +22,7 @@ package net.kourlas.voipms_sms;
 import android.os.Bundle;
 import org.apache.cordova.*;
 
-public class VoipMsSms extends CordovaActivity
+public class VoIPmsSMS extends CordovaActivity
 {
     @Override
     public void onCreate(Bundle savedInstanceState)

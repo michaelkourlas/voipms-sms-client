@@ -9,34 +9,34 @@
 </head>
 <body>
     <div data-role="page" id="page-conversations">
-        <div id="panel-menu" data-role="panel" data-display="overlay">
+        <div id="menu" data-role="panel" data-display="overlay">
             <ul data-role="listview">
                 <li data-icon="refresh"><a id="button-menu-refresh" class="button-menu" href="#">Refresh</a></li>
                 <li data-icon="gear"><a id="button-menu-settings" class="button-menu" href="#page-settings">Settings</a></li>
-                <li data-icon="info"><a id="button-menu-help" class="button-menu" href="#page-help">Help</a></li>
-                <li data-icon="delete"><a id="button-menu-exit" class="button-menu" href="#">Exit</a></li>
+                <li data-icon="question"><a id="button-menu-help" class="button-menu" href="#page-help">Help</a></li>
+                <li data-icon="info"><a id="button-menu-about" class="button-menu" href="#page-about">About</a></li>
             </ul>
         </div>
         <div data-role="header" data-position="fixed">
-            <a href="#panel-menu" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-bars"></a>
+            <a href="#menu" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-bars"></a>
             <h1>VoIP.ms SMS</h1>
-            <a href="#page-new-conversation" class="ui-btn ui-btn-corner-all ui-btn-right ui-btn-icon-notext ui-icon-plus"></a>
+            <a href="#page-conversation-new" class="ui-btn ui-btn-corner-all ui-btn-right ui-btn-icon-notext ui-icon-plus"></a>
         </div>
         <div class="page-body">
             <form class="ui-filterable">
                 <input id="input-search" data-type="search" placeholder="Search...">
             </form>
-            <ul id="listview-conversations" data-role="listview" data-filter="true" data-icon="false"
+            <ul id="conversations-listview" data-role="listview" data-filter="true" data-icon="false"
                 data-input="#input-search">
             </ul>
         </div>
     </div>
     <div data-role="page" id="page-conversation">
         <div data-role="header" data-position="fixed">
-            <a href="#page-conversations" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back"></a>
+            <a href="#" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back button-back"></a>
             <h1 id="page-conversation-header"></h1>
         </div>
-        <ul id="listview-conversation" data-role="listview">
+        <ul id="conversation-listview" data-role="listview">
         </ul>
         <div data-role="footer" data-position="fixed">
             <div class="ui-mini textbox-send-message">
@@ -47,14 +47,14 @@
             </div>
         </div>
     </div>
-    <div data-role="page" data-dialog="true" id="page-new-conversation">
+    <div data-role="page" data-dialog="true" id="page-conversation-new">
         <div data-role="header" data-position="fixed">
-            <h1 class="dialog-heading">New Conversation</h1>
+            <h1>New Conversation</h1>
         </div>
     </div>
     <div data-role="page" id="page-settings">
         <div data-role="header" data-position="fixed">
-            <a href="#page-conversations" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back"></a>
+            <a href="#" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back button-back"></a>
             <h1>Settings</h1>
         </div>
         <div class="page-body">
@@ -81,16 +81,43 @@
     </div>
     <div data-role="page" id="page-help">
         <div data-role="header" data-position="fixed">
-            <a href="#page-conversations" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back"></a>
+            <a href="#"
+               class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back button-back"></a>
             <h1>Help</h1>
         </div>
     </div>
+    <div data-role="page" id="page-about">
+        <div data-role="header" data-position="fixed">
+            <a href="#"
+               class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back button-back"></a>
+            <h1>About</h1>
+        </div>
+        <div class="page-body">
+            <p>App icon designed by
+                <a href="#"
+                   class="external-link"
+                   data-link="http://www.thenounproject.com/hansmosl">Hans Paul Mösl Junior</a>
+                from the <a href="#"
+                            class="external-link"
+                            data-link="http://www.thenounproject.com">Noun Project</a>.
+            </p>
+        </div>
+    </div>
+
+    <script src="cordova.js"></script>
 
     <script src="third-party/async/async.js"></script>
     <script src="third-party/jquery/jquery-2.1.1.min.js"></script>
     <script src="third-party/jquerymobile/jquery.mobile-1.4.4.min.js"></script>
     <script src="third-party/jquery.noty/packaged/jquery.noty.packaged.min.js"></script>
     <script src="third-party/moment/moment.js"></script>
-    <script src="ts/app.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/conversation.js"></script>
+    <script src="js/conversations.js"></script>
+    <script src="js/interface.js"></script>
+    <script src="js/message.js"></script>
+    <script src="js/phone.js"></script>
+    <script src="js/settings.js"></script>
 </body>
 </html>

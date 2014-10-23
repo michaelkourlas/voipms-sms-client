@@ -9,4 +9,9 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+	<platform name="android">
+        <icon src="res/android/mdpi.png" density="mdpi" />
+        <icon src="res/android/hdpi.png" density="hdpi" />
+        <icon src="res/android/xhdpi.png" density="xhdpi" />
+     </platform>
 </widget>

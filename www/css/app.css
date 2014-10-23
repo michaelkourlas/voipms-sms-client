@@ -6,7 +6,7 @@
     margin:5px;
 }
 
-div[data-role="header"] > h1.dialog-heading {
+div[data-role="header"] > h1 {
     overflow: visible;
 }
 

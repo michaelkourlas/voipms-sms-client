@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xml:space="preserve"
+   width="100px"
+   height="100px"
+   version="1.1"
+   style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+   viewBox="0 0 10000 10000"
+   id="svg2"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="icon.svg"
+   inkscape:export-filename="D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\res\android\mdpi.png"
+   inkscape:export-xdpi="43.200001"
+   inkscape:export-ydpi="43.200001"><metadata
+   id="metadata14"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="944"
+   inkscape:window-height="1001"
+   id="namedview12"
+   showgrid="false"
+   inkscape:zoom="4.72"
+   inkscape:cx="34.260591"
+   inkscape:cy="14.401613"
+   inkscape:window-x="960"
+   inkscape:window-y="0"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="svg2" />
+ <defs
+   id="defs4">
+  <style
+   type="text/css"
+   id="style6">
+   
+    .fil0 {fill:black}
+   
+  </style>
+ </defs>
+ <g
+   id="Camada_x0020_1"
+   style="fill:#aa0000"
+   transform="matrix(1.1111111,0,0,1.1111111,-555.5555,-555.67619)">
+  <metadata
+   id="CorelCorpID_0Corel-Layer" />
+  <path
+   class="fil0"
+   d="m 6669,6442 -2652,0 c -158,176 -347,379 -523,578 -399,451 -1334,822 -1470,858 -136,36 -499,18 -281,-235 218,-253 435,-903 435,-1201 l -626,0 C 974,6442 500,5971 500,5394 l 0,-3359 C 500,1459 974,988 1552,988 l 5117,0 c 579,0 1053,471 1053,1047 l 0,3359 c 0,577 -474,1048 -1053,1048 z M 5889,3155 c -280,0 -508,226 -508,506 0,279 228,505 508,505 281,0 508,-226 508,-505 0,-280 -227,-506 -508,-506 z m -1742,54 c -280,0 -508,227 -508,506 0,279 228,506 508,506 281,0 508,-227 508,-506 0,-279 -227,-506 -508,-506 z m -1742,54 c -280,0 -508,227 -508,506 0,279 228,506 508,506 281,0 508,-227 508,-506 0,-279 -227,-506 -508,-506 z m 6115,-523 -149,0 c 6,41 9,83 9,126 l 0,3197 c 0,536 -441,975 -980,975 l -3090,0 c -201,218 -538,583 -538,583 0,0 108,266 448,266 l 2712,0 c 103,328 379,603 563,745 200,153 549,365 839,379 290,13 322,-81 272,-145 -50,-63 -195,-406 -254,-560 -38,-99 -34,-294 -27,-419 l 195,0 c 539,0 980,-439 980,-976 l 0,-3196 c 0,-537 -441,-975 -980,-975 z"
+   id="path10"
+   style="fill:#aa0000"
+   inkscape:connector-curvature="0" />
+ </g>
+</svg>
