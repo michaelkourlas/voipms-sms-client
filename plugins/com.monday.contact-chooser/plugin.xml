@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="com.monday.contact-chooser"
+        version="0.2">
+
+    <name>Contact Chooser</name>
+    <description>Native contact-picker overlay, accessing the address book</description>
+    <license>MIT Licence</license>
+    <keywords>cordova,addressbook,contacts</keywords>
+
+    <js-module src="www/ContactChooser.js" name="ContactChooser">
+        <clobbers target="ContactChooser" />
+    </js-module>
+
+    <!-- android -->
+    <platform name="android">
+
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="ContactChooser">
+                <param name="android-package" value="com.monday.cordova.ContactChooserPlugin"/>
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.READ_CONTACTS" />
+        </config-file>
+
+        <source-file src="src/android/ContactChooserPlugin.java" target-dir="src/com/monday/cordova" />
+
+    </platform>
+
+    <!-- ios -->
+    <platform name="ios">
+
+        <config-file target="config.xml" parent="/*">
+            <feature name="ContactChooser">
+                <param name="ios-package" value="ContactChooser"/>
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/ContactChooser.h" />
+        <source-file src="src/ios/ContactChooser.m" />
+
+        <framework src="AddressBook.framework" />
+        <framework src="AddressBookUI.framework" />
+
+    </platform>
+
+</plugin>

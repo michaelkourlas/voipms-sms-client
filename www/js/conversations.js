@@ -1,7 +1,7 @@
-/// <reference path="../third-party/async/async.d.ts" />
-/// <reference path="../third-party/jquery/jquery.d.ts" />
-/// <reference path="conversation.ts" />
-/// <reference path="settings.ts" />
+/// <reference path="_references.ts" />
+/**
+ * Represents an interface for accessing conversation information.
+ */
 var Conversations = (function () {
     function Conversations() {
     }
@@ -19,8 +19,19 @@ var Conversations = (function () {
             return conversations;
         }
         catch (err) {
-            return null;
+            return [];
         }
+    };
+    Conversations.setConversations = function (conversations) {
+        window.localStorage.setItem(Conversations.CONVERSATIONS_KEY, JSON.stringify(conversations));
+    };
+    Conversations.hash = function (str) {
+        var hash = 5381;
+        for (i = 0; i < str.length; i++) {
+            char = str.charCodeAt(i);
+            hash = ((hash << 5) + hash) + char; /* hash * 33 + c */
+        }
+        return hash;
     };
     /**
      * Refreshes the SMS conversations through a call to the VoIP.ms API. If the conversations could be successfully
@@ -29,148 +40,123 @@ var Conversations = (function () {
      * were successfully refreshed.
      */
     Conversations.refreshConversations = function (callback) {
-        Conversations.getApiConversations(Settings.getUsername(), Settings.getPassword(), function (conversations, err) {
+        Api.getConversations(Settings.getUsername(), Settings.getPassword(), Settings.getMessagesHistory(), Settings.getLocalPhoneNumber(), function (conversations, err) {
             if (conversations === null) {
                 callback(err);
             }
             else {
                 var oldConversations = Conversations.getConversations();
-                for (var i = 0; i < conversations.length; i++) {
-                    var match = false;
-                    var conversation = null;
-                    for (var j = 0; j < oldConversations.length; j++) {
-                        if (conversations[i].equals(oldConversations[j])) {
-                            match = true;
-                            conversation = oldConversations[j];
+                async.eachSeries(conversations, function (conversation, asyncCallback) {
+                    var oldConversation = null;
+                    var noChange = false;
+                    for (var i = 0; i < oldConversations.length; i++) {
+                        if (conversation.getRemotePhoneNumber() === oldConversations[i].getRemotePhoneNumber()) {
+                            if (conversation.equals(oldConversations[i])) {
+                                noChange = true;
+                            }
+                            else {
+                                oldConversation = oldConversations[i];
+                            }
                             break;
                         }
                     }
-                    if (!match) {
-                        // New message (or message removed)
-                        if (conversations[i].getRemotePhoneNumber() === oldConversations[j].getRemotePhoneNumber()) {
+                    if (!noChange) {
+                        // New message(s)
+                        if (oldConversation !== null) {
+                            var mostRecentReadMessage = null;
+                            for (var i = oldConversation.messages.length - 1; i >= 0; i--) {
+                                if (!oldConversation.messages[i].unread && oldConversation.messages[i].type === 0 /* Incoming */) {
+                                    mostRecentReadMessage = oldConversation.messages[i];
+                                    break;
+                                }
+                            }
+                            var notificationString = "";
+                            var badgeCount = 0;
+                            for (var i = conversation.messages.length - 1; i >= 0; i--) {
+                                if ((mostRecentReadMessage === null || mostRecentReadMessage.date.isBefore(conversation.messages[i].date)) && conversation.messages[i].type === 0 /* Incoming */) {
+                                    conversation.messages[i].unread = true;
+                                    notificationString = conversation.messages[i].text + "\n" + notificationString;
+                                    badgeCount++;
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                            notificationString = notificationString.trim();
+                            if (notificationString !== "" && !oldConversation.messages[oldConversation.messages.length - 1].unread) {
+                                showNotification(notificationString, conversation.getRemotePhoneNumber(), badgeCount);
+                            }
+                            else {
+                                asyncCallback();
+                            }
                         }
                         else {
+                            var notificationString = "";
+                            var badgeCount = 0;
+                            for (var i = conversation.messages.length - 1; i >= 0; i--) {
+                                if (conversation.messages[i].type === 0 /* Incoming */) {
+                                    conversation.messages[i].unread = true;
+                                    notificationString = conversation.messages[i].text + "\n" + notificationString;
+                                    badgeCount++;
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                            notificationString = notificationString.trim();
+                            if (notificationString !== "") {
+                                showNotification(notificationString, conversation.getRemotePhoneNumber(), badgeCount);
+                            }
+                            else {
+                                asyncCallback();
+                            }
+                        }
+                        function showNotification(message, remotePhoneNumber, badgeCount) {
+                            Phone.getContact(null, remotePhoneNumber, function (contact) {
+                                MainInterface.hideStatusBarNotification(parseInt(Conversations.hash(remotePhoneNumber)));
+                                if (contact !== null) {
+                                    MainInterface.showStatusBarNotification(parseInt(Conversations.hash(remotePhoneNumber)), contact.displayName, message, badgeCount, JSON.stringify(remotePhoneNumber));
+                                    asyncCallback();
+                                }
+                                else {
+                                    MainInterface.showStatusBarNotification(parseInt(Conversations.hash(remotePhoneNumber)), remotePhoneNumber, message, badgeCount, JSON.stringify(remotePhoneNumber));
+                                    asyncCallback();
+                                }
+                            });
                         }
                     }
-                }
-                window.plugin.notification.local.add({
-                    title: "Title",
-                    message: "Message",
-                    autoCancel: true
-                });
-                window.localStorage.setItem(Conversations.CONVERSATIONS_KEY, JSON.stringify(conversations));
-                callback(null);
-            }
-        });
-    };
-    /**
-     * Gets SMS conversations from the VoIP.ms API.
-     * @param username The API username.
-     * @param password The API password.
-     * @param callback A callback function with a conversation array argument and error argument.
-     */
-    Conversations.getApiConversations = function (username, password, callback) {
-        // Continue making API requests until limit exceeds number of messages returned
-        var limitArr = [Conversations.DEFAULT_LIMIT];
-        async.eachSeries(limitArr, function (limit, limitCallback) {
-            var url = Conversations.createApiUrl(username, password, limit);
-            var request = $.getJSON(url);
-            request.done(function (data) {
-                var conversations = Conversations.parseApiRequest(data);
-                if (conversations != null) {
-                    var messageCount = 0;
-                    for (var i = 0; i < conversations.length; i++) {
-                        messageCount += conversations[i].messages.length;
-                    }
-                    if (messageCount >= limit) {
-                        limitArr.push(limit + Conversations.LIMIT_INCREMENT);
-                    }
                     else {
-                        callback(conversations, null);
+                        asyncCallback();
                     }
-                }
-                else {
-                    callback(null, "Error decoding VoIP.ms API response. Are your username and password correct?");
-                }
-                limitCallback(null, null);
-            });
-            request.fail(function () {
-                callback(null, "Error accessing VoIP.ms API. Are you connected to the Internet?");
-                limitCallback(null, null);
-            });
-        }, function () {
+                }, function () {
+                    Conversations.setConversations(conversations);
+                    callback(null);
+                });
+            }
         });
     };
     /**
-     * Creates an API URL for retrieving SMS conversations.
-     * @param username The API username.
-     * @param password The API password.
-     * @param limit The total number of SMS conversations to retrieve.
-     * @returns {string} The API URL for retrieving SMS conversations.
+     * Gets the active conversation index.
+     * @returns {number} The active conversation index.
      */
-    Conversations.createApiUrl = function (username, password, limit) {
-        var startDate = moment().utc().subtract(Settings.getHistory(), "day");
-        var endDate = moment().utc();
-        var voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" + "api_username=" + encodeURIComponent(username) + "&" + "api_password=" + encodeURIComponent(password) + "&" + "method=getSMS" + "&" + "limit=" + encodeURIComponent(String(limit)) + "&" + "from=" + encodeURIComponent(startDate.toISOString().substr(0, 10)) + "&" + "to=" + encodeURIComponent(endDate.toISOString().substr(0, 10));
-        var yqlCommand = "select * from json where url=\"" + voipUrl + "\"";
-        var yqlUrl = "https://query.yahooapis.com/v1/public/yql?" + "q=" + encodeURIComponent(yqlCommand) + "&" + "format=json" + "&" + "callback=?";
-        return yqlUrl;
+    Conversations.getActiveConversationIndex = function () {
+        return JSON.parse(window.localStorage.getItem(Conversations.ACTIVE_CONVERSATION_INDEX_KEY));
     };
     /**
-     * Parses the API request into an array of conversations.
-     * @param data Raw data from the VoIP.ms API.
-     * @returns {*} An array of conversations.
+     * Sets the active conversation index.
+     * @param index The index of the active conversation within the conversations array.
      */
-    Conversations.parseApiRequest = function (data) {
-        try {
-            var conversations = [];
-            var rawMessages = data["query"]["results"]["json"]["sms"];
-            if (!(rawMessages instanceof Array)) {
-                rawMessages = [rawMessages];
-            }
-            for (var i = rawMessages.length - 1; i >= 0; i--) {
-                var conversation = null;
-                for (var j = 0; j < conversations.length; j++) {
-                    if (conversations[j].getRemotePhoneNumber() === rawMessages[i]["contact"]) {
-                        conversation = conversations[j];
-                    }
-                }
-                if (conversation === null) {
-                    conversation = new Conversation();
-                    conversations.push(conversation);
-                }
-                var message = new Message(parseInt(rawMessages[i]["id"]), rawMessages[i]["message"], moment.utc(rawMessages[i]["date"]), parseInt(rawMessages[i]["type"]) === 0 ? 1 /* Outgoing */ : 0 /* Incoming */, rawMessages[i]["did"], rawMessages[i]["contact"]);
-                conversation.messages.push(message);
-            }
-            conversations.sort(function (a, b) {
-                if (a.getEndDate().isSame(b.getEndDate())) {
-                    return 0;
-                }
-                else if (a.getEndDate().isBefore(b.getEndDate())) {
-                    return 1;
-                }
-                else {
-                    return -1;
-                }
-            });
-            return conversations;
-        }
-        catch (err) {
-            return null;
-        }
+    Conversations.setActiveConversationIndex = function (index) {
+        window.localStorage.setItem(Conversations.ACTIVE_CONVERSATION_INDEX_KEY, JSON.stringify(index));
     };
     /**
-     * The local storage key for the username setting.
+     * The local storage key for conversations.
      */
     Conversations.CONVERSATIONS_KEY = "conversations";
     /**
-     * The initial limit for an SMS API request.
+     * The local storage key for the index of the conversation being displayed.
      */
-    Conversations.DEFAULT_LIMIT = 10000;
-    /**
-     * The limit increment for an SMS API request.
-     */
-    Conversations.LIMIT_INCREMENT = 1000;
+    Conversations.ACTIVE_CONVERSATION_INDEX_KEY = "activeConversationIndex";
     return Conversations;
 })();
-//# sourceMappingURL=conversations.js.map
+//# sourceMappingURL=Conversations.js.map

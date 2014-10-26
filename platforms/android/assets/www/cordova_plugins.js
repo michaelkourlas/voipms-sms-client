@@ -1,6 +1,20 @@
 cordova.define('cordova/plugin_list', function(require, exports, module) {
 module.exports = [
     {
+        "file": "plugins/de.appplant.cordova.plugin.local-notification/www/local-notification.js",
+        "id": "de.appplant.cordova.plugin.local-notification.LocalNotification",
+        "clobbers": [
+            "plugin.notification.local"
+        ]
+    },
+    {
+        "file": "plugins/com.monday.contact-chooser/www/ContactChooser.js",
+        "id": "com.monday.contact-chooser.ContactChooser",
+        "clobbers": [
+            "ContactChooser"
+        ]
+    },
+    {
         "file": "plugins/org.apache.cordova.contacts/www/contacts.js",
         "id": "org.apache.cordova.contacts.contacts",
         "clobbers": [
@@ -64,13 +78,6 @@ module.exports = [
         ]
     },
     {
-        "file": "plugins/de.appplant.cordova.plugin.local-notification/www/local-notification.js",
-        "id": "de.appplant.cordova.plugin.local-notification.LocalNotification",
-        "clobbers": [
-            "plugin.notification.local"
-        ]
-    },
-    {
         "file": "plugins/org.apache.cordova.inappbrowser/www/inappbrowser.js",
         "id": "org.apache.cordova.inappbrowser.inappbrowser",
         "clobbers": [
@@ -88,8 +95,9 @@ module.exports = [
 module.exports.metadata = 
 // TOP OF METADATA
 {
-    "org.apache.cordova.contacts": "0.2.14",
     "de.appplant.cordova.plugin.local-notification": "0.7.6",
+    "com.monday.contact-chooser": "0.2",
+    "org.apache.cordova.contacts": "0.2.14",
     "org.apache.cordova.inappbrowser": "0.5.3",
     "org.apache.cordova.device": "0.2.13-dev"
 }

@@ -1,30 +1,36 @@
+/// <reference path="_references.ts" />
+
 /**
- * Provides access to the application's settings.
+ * Represents the settings of the application.
  */
 class Settings {
     /**
-     * The local storage key for the username setting.
+     * The local storage key for the API username setting.
      */
-    private static USERNAME_KEY: string = "username";
+    private static API_USERNAME_KEY: string = "username";
     /**
-     * The local storage key for the password setting.
+     * The local storage key for the API password setting.
      */
-    private static PASSWORD_KEY: string = "password";
+    private static API_PASSWORD_KEY: string = "password";
+    /**
+     * The local storage key to use for the local phone number setting.
+     */
+    private static LOCAL_PHONE_NUMBER_KEY: string = "localPhoneNumber";
+    /**
+     * The local storage key for the days of messages history setting.
+     */
+    private static DAYS_OF_MESSAGES_HISTORY_KEY: string = "messagesHistory";
     /**
      * The local storage key for the poll rate setting.
      */
     private static POLL_RATE_KEY: string = "pollRate";
-    /**
-     * The local storage key for the history setting.
-     */
-    private static HISTORY_KEY: string = "history";
 
     /**
      * Gets the API username.
      * @returns {string} The API username.
      */
-    static getUsername(): string {
-        var username = window.localStorage.getItem(Settings.USERNAME_KEY);
+    public static getUsername(): string {
+        var username = window.localStorage.getItem(Settings.API_USERNAME_KEY);
         return username === null ? "" : username;
     }
 
@@ -32,16 +38,16 @@ class Settings {
      * Sets the API username.
      * @param username The API username.
      */
-    static setUsername(username: string) {
-        window.localStorage.setItem(Settings.USERNAME_KEY, username);
+    public static setUsername(username: string) {
+        window.localStorage.setItem(Settings.API_USERNAME_KEY, username);
     }
 
     /**
      * Gets the API password.
      * @returns {string} The API password.
      */
-    static getPassword(): string {
-        var password = window.localStorage.getItem(Settings.PASSWORD_KEY);
+    public static getPassword(): string {
+        var password = window.localStorage.getItem(Settings.API_PASSWORD_KEY);
         return password === null ? "" : password;
     }
 
@@ -49,13 +55,47 @@ class Settings {
      * Sets the API password.
      * @param password The API password.
      */
-    static setPassword(password: string) {
-        window.localStorage.setItem(Settings.PASSWORD_KEY, password);
+    public static setPassword(password: string) {
+        window.localStorage.setItem(Settings.API_PASSWORD_KEY, password);
     }
 
     /**
-     * Gets the SMS poll rate (in minutes). The default is 5.
-     * @returns {string} The SMS poll rate (in minutes).
+     * Gets the local phone number for use in the application.
+     * @returns {string} The local phone number.
+     */
+    static getLocalPhoneNumber(): string {
+        var phoneNumber = window.localStorage.getItem(Settings.LOCAL_PHONE_NUMBER_KEY);
+        return phoneNumber === null ? "" : phoneNumber;
+    }
+
+    /**
+     * Sets the local phone number for use in the application.
+     * @param phoneNumber The local phone number.
+     */
+    static setLocalPhoneNumber(phoneNumber: string): void {
+        window.localStorage.setItem(Settings.LOCAL_PHONE_NUMBER_KEY, phoneNumber);
+    }
+
+    /**
+     * Gets the days of messages history to retrieve. The default is 90.
+     * @returns {number} The days of messages history to retrieve.
+     */
+    static getMessagesHistory(): number {
+        var history: number = parseInt(window.localStorage.getItem(Settings.DAYS_OF_MESSAGES_HISTORY_KEY));
+        return isNaN(history) ? 90 : history;
+    }
+
+    /**
+     * Sets the days of messages history to retrieve.
+     * @param history The days of messages history to retrieve.
+     */
+    static setMessagesHistory(history: number) {
+        window.localStorage.setItem(Settings.DAYS_OF_MESSAGES_HISTORY_KEY, String(history));
+    }
+
+    /**
+     * Gets the poll rate (in minutes). The default is 5.
+     * @returns {string} The poll rate (in minutes).
      */
     static getPollRate(): number {
         var pollRate: number = parseInt(window.localStorage.getItem(Settings.POLL_RATE_KEY));
@@ -63,27 +103,11 @@ class Settings {
     }
 
     /**
-     * Sets the SMS poll rate (in minutes).
-     * @returns {string} The SMS poll rate (in minutes).
+     * Sets the poll rate (in minutes).
+     * @param pollRate The poll rate (in minutes).
      */
     static setPollRate(pollRate: number) {
         window.localStorage.setItem(Settings.POLL_RATE_KEY, String(pollRate));
-    }
-
-    /**
-     * Gets the number of days to get SMS history (in minutes). The default is 90.
-     * @returns {string} The SMS poll rate (in minutes).
-     */
-    static getHistory(): number {
-        var history: number = parseInt(window.localStorage.getItem(Settings.HISTORY_KEY));
-        return isNaN(history) ? 90 : history;
-    }
-
-    /**
-     * Sets the SMS poll rate (in minutes).
-     * @returns {string} The SMS poll rate (in minutes).
-     */
-    static setHistory(history: number) {
-        window.localStorage.setItem(Settings.HISTORY_KEY, String(history));
+        MainInterface.monitor();
     }
 }

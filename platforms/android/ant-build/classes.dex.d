@@ -1,4 +1,5 @@
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes.dex : \
+D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\com\monday\cordova\ContactChooserPlugin.class \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\de\appplant\cordova\plugin\localnotification\LocalNotification$1.class \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\de\appplant\cordova\plugin\localnotification\LocalNotification$2.class \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\de\appplant\cordova\plugin\localnotification\LocalNotification$3.class \
@@ -26,18 +27,4 @@ D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\plat
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\contacts\ContactManager$4.class \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\contacts\ContactManager.class \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\device\Device.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$1.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$2.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$3.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$4$1.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$4.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$5$1.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$5$2.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$5$3.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$5$4.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$5.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser$InAppBrowserClient.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowser.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppBrowserDialog.class \
-D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\classes\org\apache\cordova\inappbrowser\InAppChromeClient.class \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\dexedLibs\classes-dd019bf58266bc133559d9f7b3950c79.jar \

@@ -12,9 +12,10 @@
         <div id="menu" data-role="panel" data-display="overlay">
             <ul data-role="listview">
                 <li data-icon="refresh"><a id="button-menu-refresh" class="button-menu" href="#">Refresh</a></li>
+                <li data-icon="check"><a id="button-menu-mark-all-read" class="button-menu" href="#">Mark All as Read</a></li>
                 <li data-icon="gear"><a id="button-menu-settings" class="button-menu" href="#page-settings">Settings</a></li>
-                <li data-icon="question"><a id="button-menu-help" class="button-menu" href="#page-help">Help</a></li>
-                <li data-icon="info"><a id="button-menu-about" class="button-menu" href="#page-about">About</a></li>
+                <li data-icon="info"><a id="button-menu-help" class="button-menu" href="#help-page">Help</a></li>
+                <li data-icon="star"><a id="button-menu-about" class="button-menu" href="#about-page">About</a></li>
             </ul>
         </div>
         <div data-role="header" data-position="fixed">
@@ -31,93 +32,195 @@
             </ul>
         </div>
     </div>
-    <div data-role="page" id="page-conversation">
-        <div data-role="header" data-position="fixed">
+
+    <article data-role="page" id="page-conversation">
+        <header data-role="header" data-position="fixed">
             <a href="#" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back button-back"></a>
             <h1 id="page-conversation-header"></h1>
-        </div>
-        <ul id="conversation-listview" data-role="listview">
-        </ul>
-        <div data-role="footer" data-position="fixed">
-            <div class="ui-mini textbox-send-message">
-                <input type="text" data-clear-btn="true" id="input-message" placeholder="Type message...">
+        </header>
+        <section>
+            <ul id="conversation-listview" data-role="listview">
+            </ul>
+        </section>
+        <footer data-role="footer" data-position="fixed">
+            <div class="ui-mini inline-input-footer">
+                <input id="conversation-message-input" type="text" data-clear-btn="true" placeholder="Type message...">
             </div>
             <div class="ui-btn-right">
-                <a href="#" class="ui-btn ui-btn-corner-all ui-btn-icon-notext ui-icon-arrow-r button-send-message"></a>
+                <a href="#" id="conversation-send-message-button"
+                   class="ui-btn ui-btn-corner-all ui-btn-icon-notext ui-icon-arrow-r inline-button-footer"></a>
             </div>
-        </div>
-    </div>
-    <div data-role="page" data-dialog="true" id="page-conversation-new">
-        <div data-role="header" data-position="fixed">
+        </footer>
+    </article>
+
+    <article data-role="page" data-dialog="true" id="page-conversation-new">
+        <header data-role="header" data-position="fixed">
             <h1>New Conversation</h1>
-        </div>
-    </div>
-    <div data-role="page" id="page-settings">
-        <div data-role="header" data-position="fixed">
+        </header>
+        <section class="page-body">
+            <label for="new-conversation-recipient-input">Recipient</label>
+            <a href="#" id="new-conversation-contacts-button"
+               class="ui-btn ui-btn-corner-all ui-btn-icon-notext ui-icon-user inline-button"></a>
+            <div class="inline-input-container">
+                <input id="new-conversation-recipient-input" class="inline-input" type="tel" data-clear-btn="true"
+                       placeholder="Phone number...">
+            </div>
+            <aside>
+                <p>Click the above button to select a recipient from your contacts list. The above value must be a
+                standard 10 digit phone number.</p>
+            </aside>
+            <label for="new-conversation-message-textarea">Message</label>
+            <textarea id="new-conversation-message-textarea"></textarea>
+            <div class="final-dialog-container">
+                <a href="#" id="new-conversation-send-button" class="ui-btn">Send</a>
+            </div>
+        </section>
+    </article>
+
+    <article data-role="page" id="page-settings">
+        <header data-role="header" data-position="fixed">
             <a href="#" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back button-back"></a>
             <h1>Settings</h1>
-        </div>
-        <div class="page-body">
-            <div>
-                <h3>VoIP.ms API Credentials</h3>
-                <p>Before using this application, please ensure that you have:
-                <ul>
-                    <li>enabled API access for your VoIP.ms account;</li>
-                    <li>set an API password (which is <em>distinct</em> from your account password); and</li>
-                    <li>set a list of approved IP addresses (or "0.0.0.0" to allow access from any IP address.</li>
-                </ul>
-                <div>
-                    <p><label for="textbox-settings-username">Username:</label></p>
-                    <input type="text" data-clear-btn="true" id="textbox-settings-username" value="">
-                </div>
-                <div>
-                    <p><label for="textbox-settings-password">Password:</label></p>
-                    <input class="textbox-settings" type="password" data-clear-btn="true" id="textbox-settings-password"
-                           value="" autocomplete="off">
-                </div>
-                <a href="#" id="button-settings-save" class="ui-btn">Save</a>
+        </header>
+        <section class="page-body">
+            <section>
+                <header>
+                    <h3>API Settings</h3>
+                </header>
+                <section>
+                    <label for="settings-username-input">API username:</label>
+                    <input id="settings-username-input" type="text" data-clear-btn="true">
+                    <label for="settings-password-input">API password:</label>
+                    <input id="settings-password-input" type="password" data-clear-btn="true" autocomplete="off">
+                    <aside>
+                        <p>Before using this application, please ensure that you have</p>
+                        <ul>
+                            <li>enabled API access for your VoIP.ms account;</li>
+                            <li>set an API password (which is <strong>distinct</strong> from your account password);
+                                and</li>
+                            <li>set a list of approved IP addresses (or "0.0.0.0" to allow access from any IP
+                                address.</li>
+                        </ul>
+                    </aside>
+                </section>
+            </section>
+            <section>
+                <header>
+                    <h3>SMS Settings</h3>
+                </header>
+                <section>
+                    <label for="settings-phone-number-input">Phone number:</label>
+                    <a href="#" id="settings-phone-numbers-button"
+                       class="ui-btn ui-btn-corner-all ui-btn-icon-notext ui-icon-phone inline-button"></a>
+                    <div id="settings-phone-number-input-container" class="inline-input-container">
+                        <input id="settings-phone-number-input" class="inline-input" type="number"
+                               data-clear-btn="true" disabled="disabled">
+                    </div>
+                    <aside>
+                        <p>Click the button above to select an SMS-enabled phone number from your account for use in
+                            this application.</p>
+                    </aside>
+                </section>
+                <section>
+                    <label for="settings-history-input">Number of days of SMS history to retrieve:</label>
+                    <input id="settings-history-input" type="number" data-clear-btn="true">
+                    <aside>
+                        <p>This value must be an integer greater than 0 and less than or equal to 90.</p>
+                    </aside>
+                </section>
+                <section>
+                    <label for="settings-poll-rate-input">SMS poll rate (in minutes):</label>
+                    <input id="settings-poll-rate-input" type="number" data-clear-btn="true">
+                    <aside>
+                        <p>This value must be an integer greater than or equal to 0. Set the poll rate to 0 to turn
+                            polling off.</p>
+                    </aside>
+                </section>
+            </section>
+            <section>
+                <a href="#" id="settings-save-button" class="ui-btn">Save</a>
+            </section>
+        </section>
+    </article>
+
+
+    <article data-role="page" data-dialog="true" id="page-settings-phone-numbers">
+        <header data-role="header" data-position="fixed">
+            <h1>Phone Numbers</h1>
+        </header>
+        <section class="page-body">
+            <p>The following phone numbers on your account have SMS enabled:</p>
+            <form id="settings-phone-numbers-form">
+                <fieldset id="settings-phone-numbers-fieldset" data-role="controlgroup">
+                    <!-- Dynamic content -->
+                </fieldset>
+            </form>
+            <div class="final-dialog-container">
+                <a href="#" id="settings-phone-numbers-select-button" class="ui-btn">Select</a>
             </div>
-        </div>
-    </div>
-    <div data-role="page" id="page-help">
-        <div data-role="header" data-position="fixed">
+        </section>
+    </article>
+
+    <article data-role="page" id="help-page">
+        <header data-role="header" data-position="fixed">
             <a href="#"
                class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back button-back"></a>
             <h1>Help</h1>
-        </div>
-    </div>
-    <div data-role="page" id="page-about">
-        <div data-role="header" data-position="fixed">
+        </header>
+        <section class="page-body">
+            <p>No help available.</p>
+        </section>
+    </article>
+
+    <article data-role="page" id="about-page">
+        <header data-role="header" data-position="fixed">
             <a href="#"
                class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-back button-back"></a>
             <h1>About</h1>
-        </div>
-        <div class="page-body">
-            <p>App icon designed by
-                <a href="#"
-                   class="external-link"
-                   data-link="http://www.thenounproject.com/hansmosl">Hans Paul Mösl Junior</a>
-                from the <a href="#"
-                            class="external-link"
-                            data-link="http://www.thenounproject.com">Noun Project</a>.
+        </header>
+        <section class="page-body">
+            <h3>Application</h3>
+            <p>VoIP.ms SMS<br>Version 0.1.0</p>
+            <h3>License</h3>
+            <p>Copyright (C) 2014 Michael Kourlas</p>
+            <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+                associated documentation files (the "Software"), to deal in the Software without restriction, including
+                without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+                following conditions:</p>
+            <p>The above copyright notice and this permission notice shall be included in all copies or substantial
+                portions of the Software.</p>
+            <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+                LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+                NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+                WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+                SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+            <h3>Acknowledgements</h3>
+            <p>App icon base design created by <a href="#" class="external-link"
+                                                  data-link="http://www.thenounproject.com/hansmosl">
+                Hans Paul Mösl Junior</a> from the <a href="#" class="external-link"
+                                                      data-link="http://www.thenounproject.com">Noun Project</a>.
             </p>
-        </div>
-    </div>
+        </section>
+    </article>
 
     <script src="cordova.js"></script>
-
     <script src="third-party/async/async.js"></script>
     <script src="third-party/jquery/jquery-2.1.1.min.js"></script>
     <script src="third-party/jquerymobile/jquery.mobile-1.4.4.min.js"></script>
     <script src="third-party/jquery.noty/packaged/jquery.noty.packaged.min.js"></script>
     <script src="third-party/moment/moment.js"></script>
-
-    <script src="js/app.js"></script>
-    <script src="js/conversation.js"></script>
-    <script src="js/conversations.js"></script>
-    <script src="js/interface.js"></script>
-    <script src="js/message.js"></script>
-    <script src="js/phone.js"></script>
-    <script src="js/settings.js"></script>
+    <script src="js/Api.js"></script>
+    <script src="js/Conversations.js"></script>
+    <script src="js/Phone.js"></script>
+    <script src="js/Settings.js"></script>
+    <script src="js/data/Conversation.js"></script>
+    <script src="js/data/Message.js"></script>
+    <script src="js/interface/ConversationInterface.js"></script>
+    <script src="js/interface/ConversationsInterface.js"></script>
+    <script src="js/interface/NewConversationInterface.js"></script>
+    <script src="js/interface/SettingsInterface.js"></script>
+    <script src="js/interface/MainInterface.js"></script>
+    <script src="js/Main.js"></script>
 </body>
 </html>

@@ -1,38 +1,56 @@
-/*
- * Various hacks to get jQuery widgets to display properly.
- */
-
-.page-body {
-    margin:5px;
-}
-
-div[data-role="header"] > h1 {
+header > h1 {
     overflow: visible;
 }
 
-.ui-listview > li p.label-unreadcount {
+.page-body {
+    margin: 10px;
+}
+
+.ui-listview > li .unread-count {
     font-weight: bold;
 }
 
-.ui-listview > li p.label-datetime-outer {
+.ui-listview > li .date-time-container {
     overflow: visible;
 }
 
-.ui-listview > li span.label-datetime-inner {
+.ui-listview > li .date-time {
     position: relative;
     left: 30px;
 }
 
-.ui-listview > li p.text-message {
+.ui-listview > li .message {
     white-space: normal;
 }
 
-.textbox-send-message {
+aside {
+    font-style: italic;
+}
+
+.inline-button {
+    float: right;
+    position: relative;
+    top: -3px;
+}
+
+.inline-input {
+    width: 100%
+}
+
+.inline-input-container {
+    padding-right: 40px;
+}
+
+.final-dialog-container {
+    padding-bottom: 5px;
+}
+
+.inline-input-footer {
     margin-left: 5px;
     margin-right: 42px
 }
 
-.button-send-message {
+.inline-button-footer {
     position: relative;
     bottom: -4px
 }
