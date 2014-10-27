@@ -2,6 +2,10 @@
 
 $(document).on("ready", function() {
     $(document).on("deviceready", function() {
-        MainInterface.initialize();
+        ui.initialize();
+        contacts.refreshContacts(function() {
+            ui.conversationspage.display();
+            polling.initialize();
+        });
     });
 });

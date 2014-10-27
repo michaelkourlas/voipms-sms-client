@@ -13,9 +13,14 @@
     <feature name="Contacts">
         <param name="android-package" value="org.apache.cordova.contacts.ContactManager" />
     </feature>
+    <feature name="InAppBrowser">
+        <param name="android-package" value="org.apache.cordova.inappbrowser.InAppBrowser" />
+    </feature>
     <icon density="mdpi" src="res/android/mdpi.png" />
     <icon density="hdpi" src="res/android/hdpi.png" />
     <icon density="xhdpi" src="res/android/xhdpi.png" />
+    <icon density="xxhdpi" src="res/android/xxhdpi.png" />
+    <icon density="xxxhdpi" src="res/android/xxxhdpi.png" />
     <name>VoIP.ms SMS</name>
     <description>
         An application that sends and receives text messages through the VoIP.ms service.
@@ -25,7 +30,4 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
-    <feature name="InAppBrowser">
-        <param name="android-package" value="org.apache.cordova.inappbrowser.InAppBrowser" />
-    </feature>
 </widget>

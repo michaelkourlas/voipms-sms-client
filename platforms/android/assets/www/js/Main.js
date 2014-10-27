@@ -1,7 +1,11 @@
 /// <reference path="_references.ts" />
 $(document).on("ready", function () {
     $(document).on("deviceready", function () {
-        MainInterface.initialize();
+        ui.initialize();
+        contacts.refreshContacts(function () {
+            ui.conversationspage.display();
+            polling.initialize();
+        });
     });
 });
-//# sourceMappingURL=Main.js.map
+//# sourceMappingURL=main.js.map

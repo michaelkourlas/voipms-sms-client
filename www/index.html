@@ -5,33 +5,44 @@
     <title>VoIP.ms SMS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="third-party/jquerymobile/jquery.mobile-1.4.4.css">
-    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div data-role="page" id="page-conversations">
+    <article data-role="page" id="conversations-page">
         <div id="menu" data-role="panel" data-display="overlay">
             <ul data-role="listview">
-                <li data-icon="refresh"><a id="button-menu-refresh" class="button-menu" href="#">Refresh</a></li>
-                <li data-icon="check"><a id="button-menu-mark-all-read" class="button-menu" href="#">Mark All as Read</a></li>
-                <li data-icon="gear"><a id="button-menu-settings" class="button-menu" href="#page-settings">Settings</a></li>
-                <li data-icon="info"><a id="button-menu-help" class="button-menu" href="#help-page">Help</a></li>
-                <li data-icon="star"><a id="button-menu-about" class="button-menu" href="#about-page">About</a></li>
+                <li data-icon="refresh">
+                    <a id="menu-refresh-button-button" class="menu-button" href="#">Refresh</a>
+                </li>
+                <li data-icon="check">
+                    <a id="menu-mark-all-read-button" class="menu-button" href="#">Mark All as Read</a>
+                </li>
+                <li data-icon="gear">
+                    <a id="menu-settings-button" class="menu-button" href="#page-settings">Settings</a>
+                </li>
+                <li data-icon="info">
+                    <a id="menu-help-button" class="menu-button" href="#help-page">Help</a>
+                </li>
+                <li data-icon="star">
+                    <a id="menu-about-button" class="menu-button" href="#about-page">About</a>
+                </li>
             </ul>
         </div>
-        <div data-role="header" data-position="fixed">
+        <header data-role="header" data-position="fixed">
             <a href="#menu" class="ui-btn ui-btn-corner-all ui-btn-left ui-btn-icon-notext ui-icon-bars"></a>
             <h1>VoIP.ms SMS</h1>
-            <a href="#page-conversation-new" class="ui-btn ui-btn-corner-all ui-btn-right ui-btn-icon-notext ui-icon-plus"></a>
-        </div>
-        <div class="page-body">
+            <a href="#new-conversation-page"
+               class="ui-btn ui-btn-corner-all ui-btn-right ui-btn-icon-notext ui-icon-plus"></a>
+        </header>
+        <section class="page-body">
             <form class="ui-filterable">
-                <input id="input-search" data-type="search" placeholder="Search...">
+                <input id="conversations-search-input" data-type="search" placeholder="Search...">
             </form>
             <ul id="conversations-listview" data-role="listview" data-filter="true" data-icon="false"
-                data-input="#input-search">
+                data-input="#conversations-search-input">
             </ul>
-        </div>
-    </div>
+        </section>
+    </article>
 
     <article data-role="page" id="page-conversation">
         <header data-role="header" data-position="fixed">
@@ -53,7 +64,7 @@
         </footer>
     </article>
 
-    <article data-role="page" data-dialog="true" id="page-conversation-new">
+    <article data-role="page" data-dialog="true" id="new-conversation-page">
         <header data-role="header" data-position="fixed">
             <h1>New Conversation</h1>
         </header>
@@ -210,17 +221,14 @@
     <script src="third-party/jquerymobile/jquery.mobile-1.4.4.min.js"></script>
     <script src="third-party/jquery.noty/packaged/jquery.noty.packaged.min.js"></script>
     <script src="third-party/moment/moment.js"></script>
-    <script src="js/Api.js"></script>
-    <script src="js/Conversations.js"></script>
-    <script src="js/Phone.js"></script>
-    <script src="js/Settings.js"></script>
-    <script src="js/data/Conversation.js"></script>
-    <script src="js/data/Message.js"></script>
-    <script src="js/interface/ConversationInterface.js"></script>
-    <script src="js/interface/ConversationsInterface.js"></script>
-    <script src="js/interface/NewConversationInterface.js"></script>
-    <script src="js/interface/SettingsInterface.js"></script>
-    <script src="js/interface/MainInterface.js"></script>
-    <script src="js/Main.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/contacts.js"></script>
+    <script src="js/conversation.js"></script>
+    <script src="js/conversations.js"></script>
+    <script src="js/message.js"></script>
+    <script src="js/polling.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

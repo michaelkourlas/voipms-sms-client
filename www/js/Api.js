@@ -227,4 +227,4 @@ var Api = (function () {
     Api.LIMIT_INCREMENT = 1000;
     return Api;
 })();
-//# sourceMappingURL=Api.js.map
+//# sourceMappingURL=api.js.map

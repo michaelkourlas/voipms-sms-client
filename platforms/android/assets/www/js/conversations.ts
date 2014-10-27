@@ -1,48 +1,69 @@
 /// <reference path="_references.ts" />
 
-/**
- * Represents an interface for accessing conversation information.
- */
-class Conversations {
+module conversations {
     /**
      * The local storage key for conversations.
      */
-    private static CONVERSATIONS_KEY: string = "conversations";
+    var CONVERSATIONS_KEY: string = "conversations";
     /**
-     * The local storage key for the index of the conversation being displayed.
+     * The local storage key for the phone number associated with the conversation being displayed.
      */
-    private static ACTIVE_CONVERSATION_INDEX_KEY: string = "activeConversationIndex";
+    var ACTIVE_CONVERSATION_PHONE_NUMBER_KEY: string = "activeConversationPhoneNumber";
+
+    /**
+     * Hashes a string.
+     * @param str The string to hash.
+     * @returns {number} The hash.
+     */
+    function hash(str) {
+        var hash = 5381;
+        for (var i = 0; i < str.length; i++) {
+            var char = str.charCodeAt(i);
+            hash = ((hash << 5) + hash) + char; /* hash * 33 + c */
+        }
+        return hash;
+    }
 
     /**
      * Gets the SMS conversations in local storage.
      * @returns {*} An array of conversations.
      */
-    static getConversations(): Conversation[] {
+    export function get(): Conversation[] {
         try {
-            var conversationsJson = JSON.parse(window.localStorage.getItem(Conversations.CONVERSATIONS_KEY));
-            var conversations: Conversation[] = [];
+            var conversationsJson = JSON.parse(window.localStorage.getItem(CONVERSATIONS_KEY));
+            var conversationsData: Conversation[] = [];
             for (var i = 0; i < conversationsJson.length; i++) {
-                conversations[i] = Conversation.createConversation(conversationsJson[i]);
+                conversationsData[i] = Conversation.createConversation(conversationsJson[i]);
             }
-            return conversations;
+            return conversationsData;
         }
         catch (err) {
             return [];
         }
     }
 
-    static setConversations(conversations: Conversation[]) {
-        window.localStorage.setItem(Conversations.CONVERSATIONS_KEY, JSON.stringify(conversations));
+    /**
+     * Sets the SMS conversations in local storage.
+     * @param conversations The conversations to store.
+     */
+    export function set(conversations: Conversation[]) {
+        window.localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(conversations));
     }
 
+    /**
+     * Gets the active conversation phone number.
+     * @returns {number} The active conversation phone number.
+     */
+    export function getActiveConversationPhoneNumber(): string {
+        return JSON.parse(window.localStorage.getItem(ACTIVE_CONVERSATION_PHONE_NUMBER_KEY));
+    }
 
-    private static hash(str) {
-        var hash = 5381;
-        for (i = 0; i < str.length; i++) {
-            char = str.charCodeAt(i);
-            hash = ((hash << 5) + hash) + char; /* hash * 33 + c */
-        }
-        return hash;
+    /**
+     * Sets the active conversation phone number.
+     * @param index The active conversation phone number.
+     */
+    export function setActiveConversationPhoneNumber(index: string) {
+        window.localStorage.setItem(ACTIVE_CONVERSATION_PHONE_NUMBER_KEY, JSON.stringify(index));
     }
 
     /**
@@ -51,15 +72,15 @@ class Conversations {
      * @param callback A callback function with a single error argument; if the error is null, then the conversations
      * were successfully refreshed.
      */
-    static refreshConversations(callback: (err: string) => void): void {
-        Api.getConversations(Settings.getUsername(), Settings.getPassword(), Settings.getMessagesHistory(),
-            Settings.getLocalPhoneNumber(), function(conversations: Conversation[], err: string) {
-                if (conversations === null) {
+    export function refresh(callback: (err: string) => void): void {
+        Api.getConversations(settings.getUsername(), settings.getPassword(), settings.getMessagesHistory(),
+            settings.getLocalPhoneNumber(), function(conversationsData: Conversation[], err: string) {
+                if (conversationsData === null) {
                     callback(err);
                 }
                 else {
-                    var oldConversations: Conversation[] = Conversations.getConversations();
-                    async.eachSeries(conversations, function(conversation, asyncCallback: () => void) {
+                    var oldConversations: Conversation[] = conversations.get();
+                    async.eachSeries(conversationsData, function(conversation, asyncCallback: () => void) {
                         var oldConversation: Conversation = null;
                         var noChange: boolean = false;
 
@@ -139,20 +160,19 @@ class Conversations {
                             }
 
                             function showNotification(message: string, remotePhoneNumber: string, badgeCount: number) {
-                                Phone.getContact(null, remotePhoneNumber,
+                                contacts.getContact(null, remotePhoneNumber,
                                     function(contact) {
-                                        MainInterface.hideStatusBarNotification(parseInt(
-                                            Conversations.hash(remotePhoneNumber)));
+                                        ui.notifications.hideStatusBarNotification(hash(remotePhoneNumber));
                                         if (contact !== null) {
-                                            MainInterface.showStatusBarNotification(parseInt(
-                                                    Conversations.hash(remotePhoneNumber)), contact.displayName,
-                                                message, badgeCount, JSON.stringify(remotePhoneNumber));
+                                            ui.notifications.showStatusBarNotification(
+                                                hash(remotePhoneNumber), contact.displayName, message, badgeCount,
+                                                JSON.stringify(remotePhoneNumber));
                                             asyncCallback();
                                         }
                                         else {
-                                            MainInterface.showStatusBarNotification(parseInt(
-                                                    Conversations.hash(remotePhoneNumber)), remotePhoneNumber, message,
-                                                badgeCount, JSON.stringify(remotePhoneNumber));
+                                            ui.notifications.showStatusBarNotification(
+                                                hash(remotePhoneNumber), remotePhoneNumber, message, badgeCount,
+                                                JSON.stringify(remotePhoneNumber));
                                             asyncCallback();
                                         }
                                     }
@@ -163,7 +183,7 @@ class Conversations {
                             asyncCallback();
                         }
                     }, function() {
-                        Conversations.setConversations(conversations);
+                        conversations.set(conversationsData);
                         callback(null);
                     });
                 }
@@ -172,18 +192,13 @@ class Conversations {
     }
 
     /**
-     * Gets the active conversation index.
-     * @returns {number} The active conversation index.
+     * Marks all of the conversations as read.
      */
-    public static getActiveConversationIndex(): number {
-        return JSON.parse(window.localStorage.getItem(Conversations.ACTIVE_CONVERSATION_INDEX_KEY));
-    }
-
-    /**
-     * Sets the active conversation index.
-     * @param index The index of the active conversation within the conversations array.
-     */
-    public static setActiveConversationIndex(index: number) {
-        window.localStorage.setItem(Conversations.ACTIVE_CONVERSATION_INDEX_KEY, JSON.stringify(index));
+    export function markAllAsRead() {
+        var conversationsData = conversations.get();
+        for (var i = 0; i < conversationsData.length; i++) {
+            conversationsData[i].markAllMessagesAsRead();
+        }
+        conversations.set(conversationsData);
     }
 }
