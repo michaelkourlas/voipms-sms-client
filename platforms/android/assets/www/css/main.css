@@ -1,3 +1,7 @@
+/**
+ * Common
+ */
+
 header > h1 {
     overflow: visible;
 }
@@ -6,8 +10,8 @@ header > h1 {
     margin: 10px;
 }
 
-.ui-listview > li .unread-count {
-    font-weight: bold;
+section > .search-form {
+    margin: 5px;
 }
 
 .ui-listview > li .date-time-container {
@@ -17,10 +21,6 @@ header > h1 {
 .ui-listview > li .date-time {
     position: relative;
     left: 30px;
-}
-
-.ui-listview > li .message {
-    white-space: normal;
 }
 
 aside {
@@ -53,4 +53,53 @@ aside {
 .inline-button-footer {
     position: relative;
     bottom: -4px
+}
+
+/**
+ * Conversations page
+ */
+
+.ui-listview > li .unread-count {
+    font-weight: bold;
+}
+
+.ui-listview > li .back-icon-link {
+    display: inline;
+    position: relative;
+    left: 5px;
+}
+
+.ui-listview > li .message-preview-text {
+    position: relative;
+    left: 17px;
+    bottom: 1px;
+}
+
+/**
+ * Conversation page
+ */
+
+.ui-listview > li .message-text {
+    white-space: normal;
+}
+
+/**
+ * About page
+ */
+
+.logo-container {
+    display: inline-block;
+}
+
+.name-version-outer-container {
+    display: inline-block;
+    position: relative;
+}
+
+.name-version-inner-container {
+    position: absolute;
+    top: 50%;
+    margin-left: 10px;
+    margin-top: -57px;
+    width: 100px;
 }

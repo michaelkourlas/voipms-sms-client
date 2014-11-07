@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1024"
+   height="500"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="banner.svg"
+   inkscape:export-filename="D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\res\banner.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3771">
+      <stop
+         style="stop-color:#aa0000;stop-opacity:1;"
+         offset="0"
+         id="stop3773" />
+      <stop
+         style="stop-color:#aa0000;stop-opacity:0;"
+         offset="1"
+         id="stop3775" />
+    </linearGradient>
+    <style
+       id="style6"
+       type="text/css">
+   
+    .fil0 {fill:black}
+   
+  </style>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3771"
+       id="linearGradient3777"
+       x1="192.4812"
+       y1="196.73199"
+       x2="192.4812"
+       y2="19.442863"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(4.5855892,0,0,2.6181102,-265.48148,316.14165)" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.72"
+     inkscape:cx="296.74352"
+     inkscape:cy="291.80661"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-552.36218)">
+    <rect
+       style="fill:url(#linearGradient3777);fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="rect3769"
+       width="1024"
+       height="500"
+       x="0"
+       y="552.36218" />
+    <g
+       style="fill:#ffffff;fill-rule:evenodd"
+       id="g2995"
+       transform="matrix(0.02571428,0,0,0.02571428,348.70638,206.57306)">
+      <g
+         transform="matrix(1.1111111,0,0,1.1111111,794.75344,15864.081)"
+         style="fill:#ffffff"
+         id="Camada_x0020_1">
+        <metadata
+           id="CorelCorpID_0Corel-Layer" />
+        <path
+           inkscape:connector-curvature="0"
+           style="fill:#ffffff"
+           id="path10"
+           d="m 6669,6442 -2652,0 c -158,176 -347,379 -523,578 -399,451 -1334,822 -1470,858 -136,36 -499,18 -281,-235 218,-253 435,-903 435,-1201 l -626,0 C 974,6442 500,5971 500,5394 l 0,-3359 C 500,1459 974,988 1552,988 l 5117,0 c 579,0 1053,471 1053,1047 l 0,3359 c 0,577 -474,1048 -1053,1048 z M 5889,3155 c -280,0 -508,226 -508,506 0,279 228,505 508,505 281,0 508,-226 508,-505 0,-280 -227,-506 -508,-506 z m -1742,54 c -280,0 -508,227 -508,506 0,279 228,506 508,506 281,0 508,-227 508,-506 0,-279 -227,-506 -508,-506 z m -1742,54 c -280,0 -508,227 -508,506 0,279 228,506 508,506 281,0 508,-227 508,-506 0,-279 -227,-506 -508,-506 z m 6115,-523 -149,0 c 6,41 9,83 9,126 l 0,3197 c 0,536 -441,975 -980,975 l -3090,0 c -201,218 -538,583 -538,583 0,0 108,266 448,266 l 2712,0 c 103,328 379,603 563,745 200,153 549,365 839,379 290,13 322,-81 272,-145 -50,-63 -195,-406 -254,-560 -38,-99 -34,-294 -27,-419 l 195,0 c 539,0 980,-439 980,-976 l 0,-3196 c 0,-537 -441,-975 -980,-975 z"
+           class="fil0" />
+      </g>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:50px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Century Gothic;-inkscape-font-specification:Century Gothic"
+       x="123.4502"
+       y="951.58893"
+       id="text3823"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3825"
+         x="123.4502"
+         y="951.58893"
+         style="fill:#ffffff">Text using your VoIP.ms account</tspan></text>
+  </g>
+</svg>
