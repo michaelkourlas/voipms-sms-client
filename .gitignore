@@ -1,5 +1,7 @@
 .idea
 
+build
+
 # Cordova
 android/bin/
 android/gen/

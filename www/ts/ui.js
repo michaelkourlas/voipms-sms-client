@@ -192,7 +192,7 @@ var ui;
                                     listviewItemLink.append("<h2>" + conversation.getRemotePhoneNumber() + "</h2>");
                                 }
                                 if (conversation.messages[conversation.messages.length - 1].type === 1 /* Outgoing */) {
-                                    listviewItemLink.append("<p>" + "<a href=\"#\" " + "class=\"back-icon-link ui-btn ui-btn-d ui-nodisc-icon ui-btn-corner-all ui-icon-back ui-btn-icon-notext ui-alt-icon\"></a><span class=\"message-preview-text\">" + conversation.messages[conversation.messages.length - 1].text + "</span></p>");
+                                    listviewItemLink.append("<p class=\"back-icon-container\">" + "<a href=\"#\" " + "class=\"back-icon-link ui-btn ui-btn-d ui-nodisc-icon ui-btn-corner-all ui-icon-back ui-btn-icon-notext ui-alt-icon\"></a><span class=\"message-preview-text\">" + conversation.messages[conversation.messages.length - 1].text + "</span></p>");
                                 }
                                 else {
                                     listviewItemLink.append("<p>" + conversation.messages[conversation.messages.length - 1].text + "</p>");

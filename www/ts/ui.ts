@@ -217,7 +217,7 @@ module ui {
                                 }
 
                                 if (conversation.messages[conversation.messages.length - 1].type === MessageType.Outgoing) {
-                                    listviewItemLink.append("<p>" + "<a href=\"#\" " +
+                                    listviewItemLink.append("<p class=\"back-icon-container\">" + "<a href=\"#\" " +
                                     "class=\"back-icon-link ui-btn ui-btn-d ui-nodisc-icon ui-btn-corner-all ui-icon-back ui-btn-icon-notext ui-alt-icon\"></a><span class=\"message-preview-text\">" +
                                     conversation.messages[conversation.messages.length - 1].text + "</span></p>");
                                 }

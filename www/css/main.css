@@ -63,6 +63,10 @@ aside {
     font-weight: bold;
 }
 
+.ui-listview > li .back-icon-container {
+    margin: 0
+}
+
 .ui-listview > li .back-icon-link {
     display: inline;
     position: relative;

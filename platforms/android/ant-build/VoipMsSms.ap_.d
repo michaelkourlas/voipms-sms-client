@@ -509,6 +509,10 @@ D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\plat
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\assets\www\ts\ui.js \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\assets\www\ts\ui.js.map \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\assets\www\ts\ui.ts \
+D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\assets\www\ts\_fixes.js \
+D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\assets\www\ts\_fixes.js.map \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\assets\www\ts\_fixes.ts \
+D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\assets\www\ts\_references.js \
+D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\assets\www\ts\_references.js.map \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\assets\www\ts\_references.ts \
 D:\Users\Michael\Google Drive\Documents\Programming\Applications\voipms-sms\platforms\android\ant-build\AndroidManifest.xml \
