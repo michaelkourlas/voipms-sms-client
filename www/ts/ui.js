@@ -501,7 +501,7 @@ var ui;
                         else {
                             phoneNumbersFieldset.empty();
                             for (var i = 0; i < phoneNumbers.length; i++) {
-                                phoneNumbersFieldset.append($("<input id=\"settings-phone-numbers-radio-button-" + i + "\" name=\"" + phoneNumbers[i] + "\" type=\"radio\">"));
+                                phoneNumbersFieldset.append($("<input id=\"settings-phone-numbers-radio-button-" + i + "\" value=\"" + phoneNumbers[i] + "\" name=\"phone-number-radio\" type=\"radio\">"));
                                 phoneNumbersFieldset.append($("<label for=\"settings-phone-numbers-radio-button-" + i + "\">" + phoneNumbers[i] + "</label>"));
                             }
                             phoneNumbersFieldset.children().first().prop("checked", true);
@@ -517,7 +517,7 @@ var ui;
                 });
             });
             $("#settings-phone-numbers-select-button").on("click", function () {
-                settings.setLocalPhoneNumber($('input:checked', '#settings-phone-numbers-fieldset').attr("name"));
+                settings.setLocalPhoneNumber($('input:checked', '#settings-phone-numbers-form').val());
                 history.back();
             });
             $("#settings-save-button").on("click", function () {
