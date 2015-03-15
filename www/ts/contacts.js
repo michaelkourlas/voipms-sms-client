@@ -44,7 +44,7 @@ var contacts;
             }
         }
         function filterContacts() {
-            for (var j = 0; j < contactsData.length; j++) {
+            for (var j = 0; contactsData !== null && (j < contactsData.length); j++) {
                 if (contactsData[j].phoneNumbers !== null) {
                     for (var k = 0; k < contactsData[j].phoneNumbers.length; k++) {
                         var contactData = null;
