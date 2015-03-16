@@ -68,9 +68,7 @@ var api;
     function createGetConversationsApiUrl(username, password, limit, history, localPhoneNumber) {
         var startDate = moment().utc().subtract(history, "day");
         var endDate = moment().utc();
-        var voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" + "api_username=" + encodeURIComponent(username) + "&" + "api_password=" + encodeURIComponent(password) + "&" + "method=getSMS" + "&" + "did=" + encodeURIComponent(localPhoneNumber) + "&" + "limit=" + encodeURIComponent(String(limit)) + "&" + "from=" + encodeURIComponent(startDate.toISOString().substr(0, 10)) + "&" + "to=" + encodeURIComponent(endDate.toISOString().substr(0, 10));
-        var yqlCommand = "select * from json where url=\"" + voipUrl + "\"";
-        return "https://query.yahooapis.com/v1/public/yql?" + "q=" + encodeURIComponent(yqlCommand) + "&" + "format=json" + "&" + "callback=?";
+        return "https://www.voip.ms/api/v1/rest.php?" + "&" + "api_username=" + encodeURIComponent(username) + "&" + "api_password=" + encodeURIComponent(password) + "&" + "method=getSMS" + "&" + "did=" + encodeURIComponent(localPhoneNumber) + "&" + "limit=" + encodeURIComponent(String(limit)) + "&" + "from=" + encodeURIComponent(startDate.toISOString().substr(0, 10)) + "&" + "to=" + encodeURIComponent(endDate.toISOString().substr(0, 10));
     }
     api.createGetConversationsApiUrl = createGetConversationsApiUrl;
     /**
@@ -81,7 +79,7 @@ var api;
     function parseGetConversationsApiResponse(data) {
         try {
             var conversations = [];
-            var rawMessages = data["query"]["results"]["json"]["sms"];
+            var rawMessages = data["sms"];
             if (!(rawMessages instanceof Array)) {
                 rawMessages = [rawMessages];
             }
@@ -148,9 +146,7 @@ var api;
      * @returns {string} The URL for the getDIDsInfo method.
      */
     function createGetLocalPhoneNumbersApiUrl(username, password) {
-        var voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" + "api_username=" + encodeURIComponent(username) + "&" + "api_password=" + encodeURIComponent(password) + "&" + "method=getDIDsInfo";
-        var yqlCommand = "select * from json where url=\"" + voipUrl + "\"";
-        return "https://query.yahooapis.com/v1/public/yql?" + "q=" + encodeURIComponent(yqlCommand) + "&" + "format=json" + "&" + "callback=?";
+        return "https://www.voip.ms/api/v1/rest.php?" + "&" + "api_username=" + encodeURIComponent(username) + "&" + "api_password=" + encodeURIComponent(password) + "&" + "method=getDIDsInfo";
     }
     api.createGetLocalPhoneNumbersApiUrl = createGetLocalPhoneNumbersApiUrl;
     /**
@@ -161,7 +157,7 @@ var api;
     function parseGetLocalPhoneNumbersApiResponse(data) {
         try {
             var phoneNumbers = [];
-            var rawPhoneNumbers = data["query"]["results"]["json"]["dids"];
+            var rawPhoneNumbers = data["dids"];
             if (!(rawPhoneNumbers instanceof Array)) {
                 rawPhoneNumbers = [rawPhoneNumbers];
             }
@@ -215,9 +211,7 @@ var api;
      * @returns {string} The URL for the sendSMS method.
      */
     function createSendMessageApiUrl(username, password, localPhoneNumber, remotePhoneNumber, messageText) {
-        var voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" + "api_username=" + encodeURIComponent(username) + "&" + "api_password=" + encodeURIComponent(password) + "&" + "method=sendSMS" + "&" + "did=" + encodeURIComponent(localPhoneNumber) + "&" + "dst=" + encodeURIComponent(remotePhoneNumber) + "&" + "message=" + encodeURIComponent(messageText);
-        var yqlCommand = "select * from json where url=\"" + voipUrl + "\"";
-        return "https://query.yahooapis.com/v1/public/yql?" + "q=" + encodeURIComponent(yqlCommand) + "&" + "format=json" + "&" + "callback=?";
+        return "https://www.voip.ms/api/v1/rest.php?" + "&" + "api_username=" + encodeURIComponent(username) + "&" + "api_password=" + encodeURIComponent(password) + "&" + "method=sendSMS" + "&" + "did=" + encodeURIComponent(localPhoneNumber) + "&" + "dst=" + encodeURIComponent(remotePhoneNumber) + "&" + "message=" + encodeURIComponent(messageText);
     }
     api.createSendMessageApiUrl = createSendMessageApiUrl;
     /**
@@ -227,7 +221,7 @@ var api;
      */
     function parseSendMessageApiResponse(data) {
         try {
-            var status = data["query"]["results"]["json"]["status"];
+            var status = data["status"];
             return status === "success";
         }
         catch (err) {
