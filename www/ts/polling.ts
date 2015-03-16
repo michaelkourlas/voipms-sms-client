@@ -21,10 +21,12 @@ module polling {
      */
     export function monitor() {
         window.clearInterval(pollingInterval);
-        pollingInterval = window.setInterval(function() {
+        if (settings.getPollRate() > 0) {
+          pollingInterval = window.setInterval(function() {
             conversations.refresh(function() {
                 monitor();
             });
-        }, settings.getPollRate() * 60 * 1000);
+          }, settings.getPollRate() * 60 * 1000);
+        }
     }
 }
