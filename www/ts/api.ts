@@ -56,6 +56,7 @@ module api {
                 callback(null, "Error accessing VoIP.ms API. Are you connected to the Internet?");
                 limitCallback(null, null);
             });
+
         }, function() {
         });
     }
@@ -74,20 +75,14 @@ module api {
         var startDate: Moment = moment().utc().subtract(history, "day");
         var endDate: Moment = moment().utc();
 
-        var voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" +
+        return "https://www.voip.ms/api/v1/rest.php?" + "&" +
             "api_username=" + encodeURIComponent(username) + "&" +
             "api_password=" + encodeURIComponent(password) + "&" +
             "method=getSMS" + "&" +
             "did=" + encodeURIComponent(localPhoneNumber) + "&" +
             "limit=" + encodeURIComponent(String(limit)) + "&" +
             "from=" + encodeURIComponent(startDate.toISOString().substr(0, 10)) + "&" +
-            "to=" + encodeURIComponent(endDate.toISOString().substr(0, 10));
-        var yqlCommand = "select * from json where url=\"" + voipUrl + "\"";
-
-        return "https://query.yahooapis.com/v1/public/yql?" +
-            "q=" + encodeURIComponent(yqlCommand) + "&" +
-            "format=json" + "&" +
-            "callback=?";
+            "to=" + encodeURIComponent(endDate.toISOString().substr(0, 10))
     }
 
     /**
@@ -98,7 +93,7 @@ module api {
     export function parseGetConversationsApiResponse(data: any): Conversation[] {
         try {
             var conversations: Conversation[] = [];
-            var rawMessages = data["query"]["results"]["json"]["sms"];
+            var rawMessages = data["sms"];
 
             if (!(rawMessages instanceof Array)) {
                 rawMessages = [rawMessages];
@@ -174,16 +169,10 @@ module api {
      * @returns {string} The URL for the getDIDsInfo method.
      */
     export function createGetLocalPhoneNumbersApiUrl(username: string, password: string) {
-        var voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" +
+        return "https://www.voip.ms/api/v1/rest.php?" + "&" +
             "api_username=" + encodeURIComponent(username) + "&" +
             "api_password=" + encodeURIComponent(password) + "&" +
             "method=getDIDsInfo";
-        var yqlCommand = "select * from json where url=\"" + voipUrl + "\"";
-
-        return "https://query.yahooapis.com/v1/public/yql?" +
-            "q=" + encodeURIComponent(yqlCommand) + "&" +
-            "format=json" + "&" +
-            "callback=?";
     }
 
     /**
@@ -194,7 +183,7 @@ module api {
     export function parseGetLocalPhoneNumbersApiResponse(data: any): string[] {
         try {
             var phoneNumbers: string[] = [];
-            var rawPhoneNumbers = data["query"]["results"]["json"]["dids"];
+            var rawPhoneNumbers = data["dids"];
 
             if (!(rawPhoneNumbers instanceof Array)) {
                 rawPhoneNumbers = [rawPhoneNumbers];
@@ -255,19 +244,13 @@ module api {
      */
     export function createSendMessageApiUrl(username: string, password: string, localPhoneNumber: string,
                                             remotePhoneNumber: string, messageText: string) {
-        var voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" +
+        return "https://www.voip.ms/api/v1/rest.php?" + "&" +
             "api_username=" + encodeURIComponent(username) + "&" +
             "api_password=" + encodeURIComponent(password) + "&" +
             "method=sendSMS" + "&" +
             "did=" + encodeURIComponent(localPhoneNumber) + "&" +
             "dst=" + encodeURIComponent(remotePhoneNumber) + "&" +
             "message=" + encodeURIComponent(messageText);
-        var yqlCommand = "select * from json where url=\"" + voipUrl + "\"";
-
-        return "https://query.yahooapis.com/v1/public/yql?" +
-            "q=" + encodeURIComponent(yqlCommand) + "&" +
-            "format=json" + "&" +
-            "callback=?";
     }
 
     /**
@@ -277,7 +260,7 @@ module api {
      */
     export function parseSendMessageApiResponse(data: any): boolean {
         try {
-            var status = data["query"]["results"]["json"]["status"];
+            var status = data["status"];
             return status === "success";
         }
         catch (err) {
