@@ -20,11 +20,13 @@ var polling;
      */
     function monitor() {
         window.clearInterval(pollingInterval);
-        pollingInterval = window.setInterval(function () {
-            conversations.refresh(function () {
-                monitor();
-            });
-        }, settings.getPollRate() * 60 * 1000);
+        if (settings.getPollRate() > 0) {
+            pollingInterval = window.setInterval(function () {
+                conversations.refresh(function () {
+                    monitor();
+                });
+            }, settings.getPollRate() * 60 * 1000);
+        }
     }
     polling.monitor = monitor;
 })(polling || (polling = {}));
