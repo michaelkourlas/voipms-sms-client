@@ -4,6 +4,20 @@
  * Interface for creating and manipulating the application's UI.
  */
 module ui {
+
+    export function onPullDown(event, data) {
+      conversations.refresh(function(success) {
+        data.iscrollview.refresh();
+      })
+    }
+
+    export function onPullUp(event, data) {
+      conversations.refresh(function(success) {
+        data.iscrollview.refresh();
+      })
+    }
+
+
     export function initialize() {
         menu.initialize();
         newconversationpage.initialize();
