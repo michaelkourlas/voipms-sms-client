@@ -4,6 +4,18 @@
  */
 var ui;
 (function (_ui) {
+    function onPullDown(event, data) {
+        conversations.refresh(function (success) {
+            data.iscrollview.refresh();
+        });
+    }
+    _ui.onPullDown = onPullDown;
+    function onPullUp(event, data) {
+        conversations.refresh(function (success) {
+            data.iscrollview.refresh();
+        });
+    }
+    _ui.onPullUp = onPullUp;
     function initialize() {
         menu.initialize();
         newconversationpage.initialize();

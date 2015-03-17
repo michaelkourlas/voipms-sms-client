@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="third-party/jquerymobile/themes/jquery.mobile.icons.min.css"/>
     <link rel="stylesheet" href="third-party/jquerymobile/jquery.mobile.structure-1.4.4.min.css"/>
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/jquery.mobile.iscrollview.css" />
+    <link rel="stylesheet" href="css/jquery.mobile.iscrollview-pull.css" />
 </head>
 <body>
 <article data-role="page" id="conversations-page">
@@ -46,14 +48,22 @@
         <a href="#new-conversation-page"
            class="ui-btn ui-btn-b ui-nodisc-icon ui-btn-corner-all ui-btn-right ui-btn-icon-notext ui-icon-plus"></a>
     </header>
-    <section>
+    <section data-iscroll="" data-role="content" class="iscroll-wrapper">
+        <div class="iscroll-pulldown">
+            <span class="iscroll-pull-icon"></span>
+            <span class="iscroll-pull-label"></span>
+        </div>
         <form class="search-form ui-filterable">
             <input id="conversations-search-input" data-type="search" placeholder="Search...">
         </form>
         <ul id="conversations-listview" data-role="listview" data-filter="true" data-icon="false"
-            data-input="#conversations-search-input">
+            data-input="#conversations-search-input" class="iscroll-wrapper">
             <!-- Dynamic content -->
         </ul>
+        <div class="iscroll-pullup">
+            <span class="iscroll-pull-icon"></span>
+            <span class="iscroll-pull-label"></span>
+        </div>
     </section>
 </article>
 
@@ -300,5 +310,7 @@
 <script src="js/settings.min.js"></script>
 <script src="js/ui.min.js"></script>
 <script src="js/main.min.js"></script>
+<script src="js/iscroll.js"></script>
+<script src="js/jquery.mobile.iscrollview.js"></script>
 </body>
 </html>
