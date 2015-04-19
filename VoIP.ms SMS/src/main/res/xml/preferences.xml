@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/settings_category_account">
+        <EditTextPreference
+            android:defaultValue=""
+            android:inputType="textEmailAddress"
+            android:key="settings_api_email"
+            android:title="@string/settings_account_email"/>
+        <EditTextPreference
+            android:defaultValue=""
+            android:inputType="textPassword"
+            android:key="settings_api_password"
+            android:title="@string/settings_account_password"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/settings_category_sms">
+        <ListPreference
+            android:defaultValue="7"
+            android:entries="@array/settings_sms_days_to_sync_entries"
+            android:entryValues="@array/settings_sms_days_to_sync_values"
+            android:key="settings_sms_days_to_sync"
+            android:title="@string/settings_sms_days_to_sync"/>
+        <ListPreference
+            android:defaultValue="15"
+            android:entries="@array/settings_sms_poll_rate_entries"
+            android:entryValues="@array/settings_sms_poll_rate_values"
+            android:key="settings_sms_poll_rate"
+            android:title="@string/settings_sms_poll_rate"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/settings_category_reset">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="settings_reset"
+            android:summary="@string/settings_reset_summary"
+            android:title="@string/settings_reset"/>
+    </PreferenceCategory>
+</PreferenceScreen>

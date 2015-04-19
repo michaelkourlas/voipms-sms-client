@@ -1,11 +1,5 @@
+# IntelliJ IDEA
 .idea
-
-build
-
-# Cordova
-android/bin/
-android/gen/
-android/assets/
 
 # Built application files
 *.apk

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <ripple android:color="@color/accent">
+            <item>
+                <shape>
+                    <solid android:color="@color/primary"/>
+                </shape>
+            </item>
+        </ripple>
+    </item>
+</selector>
