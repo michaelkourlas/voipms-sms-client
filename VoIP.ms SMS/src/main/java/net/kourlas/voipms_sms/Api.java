@@ -28,6 +28,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
+import android.support.v4.app.NavUtils;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
@@ -37,9 +38,9 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
-import net.kourlas.voipms_sms.data.Conversation;
-import net.kourlas.voipms_sms.data.Sms;
-import net.kourlas.voipms_sms.data.SmsDatabaseAdapter;
+import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
+import net.kourlas.voipms_sms.model.Conversation;
+import net.kourlas.voipms_sms.model.Sms;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -440,7 +441,7 @@ public class Api {
                                 stackBuilder.addParentStack(ConversationActivity.class);
                                 stackBuilder.addNextIntent(intent);
                                 PendingIntent resultPendingIntent =
-                                        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_CANCEL_CURRENT);
+                                        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
                                 notificationBuilder.setContentIntent(resultPendingIntent);
                                 notificationBuilder.setAutoCancel(true);
@@ -534,7 +535,7 @@ public class Api {
 
                         ListView listView = (ListView) conversationActivity.findViewById(R.id.listview);
                         if (listView.getCount() == 0) {
-                            conversationActivity.onBackPressed();
+                            NavUtils.navigateUpFromSameTask(conversationActivity);
                         }
                     }
                 } else {

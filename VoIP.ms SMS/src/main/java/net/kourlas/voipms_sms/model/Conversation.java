@@ -16,7 +16,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package net.kourlas.voipms_sms.data;
+package net.kourlas.voipms_sms.model;
 
 import android.support.annotation.NonNull;
 
@@ -49,10 +49,6 @@ public class Conversation implements Comparable<Conversation> {
     public void addSms(Sms sms) {
         smses.add(sms);
         Collections.sort(smses);
-    }
-
-    public String getDid() {
-        return smses.get(0).getDid();
     }
 
     public String getContact() {

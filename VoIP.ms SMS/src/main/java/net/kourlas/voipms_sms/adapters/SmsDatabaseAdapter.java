@@ -16,7 +16,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package net.kourlas.voipms_sms.data;
+package net.kourlas.voipms_sms.adapters;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -24,8 +24,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import net.kourlas.voipms_sms.data.Conversation;
-import net.kourlas.voipms_sms.data.Sms;
+import net.kourlas.voipms_sms.model.Conversation;
+import net.kourlas.voipms_sms.model.Sms;
 
 import java.util.ArrayList;
 import java.util.Collections;

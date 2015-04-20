@@ -28,7 +28,7 @@ import android.os.SystemClock;
 import android.preference.*;
 import android.text.InputType;
 import net.kourlas.voipms_sms.R;
-import net.kourlas.voipms_sms.data.SmsDatabaseAdapter;
+import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
 
 public class PreferencesActivity extends PreferenceActivity {
 

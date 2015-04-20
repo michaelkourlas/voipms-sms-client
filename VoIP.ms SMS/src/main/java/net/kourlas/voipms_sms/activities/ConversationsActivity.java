@@ -32,12 +32,15 @@ import android.view.*;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.SearchView;
 import com.example.android.floatingactionbuttonbasic.FloatingActionButton;
-import net.kourlas.voipms_sms.*;
-import net.kourlas.voipms_sms.data.Conversation;
-import net.kourlas.voipms_sms.data.ConversationsListViewAdapter;
-import net.kourlas.voipms_sms.data.Sms;
-import net.kourlas.voipms_sms.data.SmsDatabaseAdapter;
+import net.kourlas.voipms_sms.Api;
+import net.kourlas.voipms_sms.Preferences;
+import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.adapters.ConversationsListViewAdapter;
+import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
+import net.kourlas.voipms_sms.model.Conversation;
+import net.kourlas.voipms_sms.model.Sms;
 import net.kourlas.voipms_sms.receivers.BootReceiver;
 import net.kourlas.voipms_sms.receivers.RefreshReceiver;
 
@@ -99,7 +102,7 @@ public class ConversationsActivity extends Activity {
                 SparseBooleanArray checkedItemPositions = listView.getCheckedItemPositions();
                 for (int i = 0; i < conversationsListViewAdapter.getCount(); i++) {
                     if (checkedItemPositions.get(i)) {
-                        Conversation conversation = conversationsListViewAdapter.getItem(i);
+                        Conversation conversation = (Conversation) conversationsListViewAdapter.getItem(i);
                         if (conversation.isUnread()) {
                             unread++;
                         } else {
@@ -131,7 +134,7 @@ public class ConversationsActivity extends Activity {
                         SparseBooleanArray checkedItemPositions = listView.getCheckedItemPositions();
                         for (int i = 0; i < conversationsListViewAdapter.getCount(); i++) {
                             if (checkedItemPositions.get(i)) {
-                                Conversation conversation = conversationsListViewAdapter.getItem(i);
+                                Conversation conversation = (Conversation) conversationsListViewAdapter.getItem(i);
                                 Sms[] smses = conversation.getAllSms();
                                 for (Sms sms : smses) {
                                     sms.setUnread(item.getTitle().equals(getResources().getString(
@@ -148,7 +151,7 @@ public class ConversationsActivity extends Activity {
                         checkedItemPositions = listView.getCheckedItemPositions();
                         for (int i = 0; i < checkedItemPositions.size(); i++) {
                             if (checkedItemPositions.get(i)) {
-                                Conversation conversation = conversationsListViewAdapter.getItem(i);
+                                Conversation conversation = (Conversation) conversationsListViewAdapter.getItem(i);
                                 for (Sms sms : conversation.getAllSms()) {
                                     api.deleteSms(sms.getId());
                                 }
@@ -228,6 +231,21 @@ public class ConversationsActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.conversations, menu);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.conversations_action_search).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                conversationsListViewAdapter.getFilter().filter(newText);
+                return true;
+            }
+        });
+
         return super.onCreateOptionsMenu(menu);
     }
 

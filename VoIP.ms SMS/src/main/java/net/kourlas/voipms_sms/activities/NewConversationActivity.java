@@ -21,23 +21,34 @@ package net.kourlas.voipms_sms.activities;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.text.Editable;
 import android.text.InputType;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.WindowManager;
+import android.text.TextWatcher;
+import android.view.*;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter.PhoneNumberEntry;
 
 public class NewConversationActivity extends Activity {
-    Menu actionBarMenu;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_conversation);
+
+        final Activity newConversationActivity = this;
 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
@@ -48,12 +59,92 @@ public class NewConversationActivity extends Activity {
             actionBar.setCustomView(R.layout.new_conversation_text);
             actionBar.setDisplayShowCustomEnabled(true);
 
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            final List<PhoneNumberEntry> phoneNumberEntries = new ArrayList<PhoneNumberEntry>();
+            Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null,
+                    null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    if (cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)).equals(
+                            "1")) {
+                        String contact = cursor.getString(cursor.getColumnIndex(
+                                ContactsContract.Contacts.DISPLAY_NAME));
+                        String phoneNumber = cursor.getString(cursor.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI));
+
+                        boolean showPhoto = true;
+                        for (PhoneNumberEntry phoneNumberEntry : phoneNumberEntries) {
+                            if (contact.equals(phoneNumberEntry.getName())) {
+                                showPhoto = false;
+                            }
+                        }
+
+                        PhoneNumberEntry phoneNumberEntry = new PhoneNumberEntry(contact, phoneNumber, photoUri, showPhoto, false);
+                        phoneNumberEntries.add(phoneNumberEntry);
+                    }
+                }
+            }
+            cursor.close();
+
+            final NewConversationListViewAdapter newConversationListViewAdapter = new NewConversationListViewAdapter(
+                    this, phoneNumberEntries);
 
             EditText editText = (EditText) actionBar.getCustomView().findViewById(R.id.new_conversation_text);
             editText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
+            editText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    // Do nothing.
+                }
 
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    String phoneNumber = s.toString().replaceAll("[^0-9]", "");
+                    if (phoneNumber.equals("")) {
+                        if (newConversationListViewAdapter.getCount() > 0 && ((PhoneNumberEntry) newConversationListViewAdapter.getItem(0)).isTypedIn()) {
+                            newConversationListViewAdapter.remove(0);
+                        }
+                    } else {
+                        if (newConversationListViewAdapter.getCount() > 0 && ((PhoneNumberEntry) newConversationListViewAdapter.getItem(0)).isTypedIn()) {
+                            ((PhoneNumberEntry) newConversationListViewAdapter.getItem(0)).setName(phoneNumber);
+                            ((PhoneNumberEntry) newConversationListViewAdapter.getItem(0)).setPhoneNumber(phoneNumber);
+                        } else {
+                            newConversationListViewAdapter.add(0, new PhoneNumberEntry(phoneNumber, phoneNumber, null, true, true));
+                        }
+                    }
+                    newConversationListViewAdapter.notifyDataSetChanged();
 
+                    newConversationListViewAdapter.getFilter().filter(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    // Do nothing.
+                }
+            });
+            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    return true;
+                }
+            });
+            editText.requestFocus();
+
+            final ListView listView = (ListView) findViewById(R.id.list);
+            listView.setAdapter(newConversationListViewAdapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    PhoneNumberEntry phoneNumberEntry = (PhoneNumberEntry) newConversationListViewAdapter.getItem(position);
+
+                    String phoneNumber = phoneNumberEntry.getPhoneNumber().replaceAll("[^0-9]", "");
+
+                    Intent intent = new Intent(newConversationActivity, ConversationActivity.class);
+                    intent.putExtra("contact", phoneNumber);
+                    startActivity(intent);
+                }
+            });
+            listView.setFastScrollEnabled(true);
         }
     }
 
@@ -61,8 +152,6 @@ public class NewConversationActivity extends Activity {
     public boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.new_conversation, menu);
-
-        actionBarMenu = menu;
 
         return super.onCreateOptionsMenu(menu);
     }

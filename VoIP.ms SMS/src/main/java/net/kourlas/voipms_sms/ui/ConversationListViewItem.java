@@ -22,8 +22,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 import com.example.android.customchoicelist.CheckableLinearLayout;
-import net.kourlas.voipms_sms.data.ConversationListViewAdapter;
 import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.adapters.ConversationListViewAdapter;
 
 public class ConversationListViewItem extends CheckableLinearLayout {
     public ConversationListViewItem(Context context, AttributeSet attrs) {

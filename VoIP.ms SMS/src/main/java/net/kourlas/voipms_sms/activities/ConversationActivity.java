@@ -28,17 +28,19 @@ import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.SparseBooleanArray;
 import android.view.*;
 import android.widget.*;
 import net.kourlas.voipms_sms.Api;
-import net.kourlas.voipms_sms.data.ConversationListViewAdapter;
+import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
-import net.kourlas.voipms_sms.data.SmsDatabaseAdapter;
-import net.kourlas.voipms_sms.data.Conversation;
-import net.kourlas.voipms_sms.data.Sms;
+import net.kourlas.voipms_sms.adapters.ConversationListViewAdapter;
+import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
+import net.kourlas.voipms_sms.model.Conversation;
+import net.kourlas.voipms_sms.model.Sms;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -50,6 +52,7 @@ public class ConversationActivity extends Activity {
 
     private Api api;
     private SmsDatabaseAdapter smsDatabaseAdapter;
+    private String contact;
     private Conversation conversation;
     private ConversationListViewAdapter conversationListViewAdapter;
 
@@ -64,7 +67,9 @@ public class ConversationActivity extends Activity {
         smsDatabaseAdapter = new SmsDatabaseAdapter(this);
         smsDatabaseAdapter.open();
 
-        conversation = smsDatabaseAdapter.getConversation(getIntent().getExtras().getString("contact"));
+        final String contact = getIntent().getExtras().getString("contact");
+        this.contact = contact;
+        conversation = smsDatabaseAdapter.getConversation(contact);
         List<Sms> conversationSmses = new ArrayList<Sms>();
         conversationSmses.addAll(Arrays.asList(conversation.getAllSms()));
         Collections.reverse(conversationSmses);
@@ -81,21 +86,21 @@ public class ConversationActivity extends Activity {
 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
-            Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(conversation.getContact()));
+            Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(contact));
             Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
                             ContactsContract.PhoneLookup.DISPLAY_NAME}, null,
                     null, null);
             if (cursor.moveToFirst()) {
                 actionBar.setTitle(cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)));
             } else {
-                String contact = conversation.getContact();
-                if (contact.length() == 10) {
+                String formattedContact = contact;
+                if (formattedContact.length() == 10) {
                     MessageFormat phoneNumberFormat = new MessageFormat("({0}) {1}-{2}");
-                    String[] phoneNumberArray = new String[]{contact.substring(0, 3), contact.substring(3, 6),
-                            contact.substring(6)};
-                    contact = phoneNumberFormat.format(phoneNumberArray);
+                    String[] phoneNumberArray = new String[]{formattedContact.substring(0, 3), formattedContact.substring(3, 6),
+                            formattedContact.substring(6)};
+                    formattedContact = phoneNumberFormat.format(phoneNumberArray);
                 }
-                actionBar.setTitle(contact);
+                actionBar.setTitle(formattedContact);
             }
             cursor.close();
             actionBar.setHomeButtonEnabled(true);
@@ -153,16 +158,16 @@ public class ConversationActivity extends Activity {
                 switch (item.getItemId()) {
                     case R.id.conversation_action_copy:
                         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("Text message", conversationListViewAdapter.getItem(
-                                selectedItems.get(0)).getMessage());
+                        ClipData clip = ClipData.newPlainText("Text message", ((Sms) conversationListViewAdapter.getItem(
+                                selectedItems.get(0))).getMessage());
                         clipboard.setPrimaryClip(clip);
                         mode.finish();
                         return true;
                     case R.id.conversation_action_share:
                         Intent intent = new Intent(android.content.Intent.ACTION_SEND);
                         intent.setType("text/plain");
-                        intent.putExtra(android.content.Intent.EXTRA_TEXT, conversationListViewAdapter.getItem(
-                                selectedItems.get(0)).getMessage());
+                        intent.putExtra(android.content.Intent.EXTRA_TEXT, ((Sms) conversationListViewAdapter.getItem(
+                                selectedItems.get(0))).getMessage());
                         startActivity(Intent.createChooser(intent, null));
                         mode.finish();
                         return true;
@@ -170,7 +175,7 @@ public class ConversationActivity extends Activity {
                         SparseBooleanArray checkedItemPositions = listView.getCheckedItemPositions();
                         for (int i = 0; i < checkedItemPositions.size(); i++) {
                             if (checkedItemPositions.get(i)) {
-                                api.deleteSms(conversationListViewAdapter.getItem(i).getId());
+                                api.deleteSms(((Sms) conversationListViewAdapter.getItem(i)).getId());
                             }
                         }
                         mode.finish();
@@ -222,6 +227,8 @@ public class ConversationActivity extends Activity {
             }
         });
 
+        Preferences preferences = new Preferences(this);
+
         QuickContactBadge photo = (QuickContactBadge) findViewById(R.id.photo);
         photo.setOutlineProvider(new ViewOutlineProvider() {
             @Override
@@ -230,9 +237,9 @@ public class ConversationActivity extends Activity {
             }
         });
         photo.setClipToOutline(true);
-        photo.assignContactFromPhone(conversation.getDid(), true);
+        photo.assignContactFromPhone(preferences.getDid(), true);
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(
-                conversation.getDid()));
+                preferences.getDid()));
         Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
                         ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI, ContactsContract.PhoneLookup.DISPLAY_NAME}, null,
                 null, null);
@@ -261,7 +268,7 @@ public class ConversationActivity extends Activity {
             public void onClick(View v) {
                 ProgressBar progressBar = (ProgressBar) conversationActivity.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.VISIBLE);
-                api.sendSms(conversation.getContact(), messageText.getText().toString());
+                api.sendSms(contact, messageText.getText().toString());
             }
         });
     }
@@ -270,6 +277,21 @@ public class ConversationActivity extends Activity {
     public boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.conversation, menu);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.conversation_action_search).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                conversationListViewAdapter.getFilter().filter(newText);
+                return true;
+            }
+        });
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -280,12 +302,16 @@ public class ConversationActivity extends Activity {
             switch (item.getItemId()) {
                 case R.id.call_button:
                     Intent intent = new Intent(Intent.ACTION_CALL);
-                    intent.setData(Uri.parse("tel:" + conversation.getContact()));
+                    intent.setData(Uri.parse("tel:" + contact));
                     startActivity(intent);
                     return true;
                 case R.id.delete_button:
-                    for (Sms sms : conversation.getAllSms()) {
-                        api.deleteSms(sms.getId());
+                    if (conversation.getAllSms().length == 0) {
+                        NavUtils.navigateUpFromSameTask(this);
+                    } else {
+                        for (Sms sms : conversation.getAllSms()) {
+                            api.deleteSms(sms.getId());
+                        }
                     }
                     return true;
             }
@@ -296,7 +322,7 @@ public class ConversationActivity extends Activity {
 
     public void refreshListView() {
         conversationListViewAdapter.clear();
-        conversation = smsDatabaseAdapter.getConversation(conversation.getContact());
+        conversation = smsDatabaseAdapter.getConversation(contact);
         List<Sms> conversationSmses = new ArrayList<Sms>();
         conversationSmses.addAll(Arrays.asList(conversation.getAllSms()));
         Collections.reverse(conversationSmses);
