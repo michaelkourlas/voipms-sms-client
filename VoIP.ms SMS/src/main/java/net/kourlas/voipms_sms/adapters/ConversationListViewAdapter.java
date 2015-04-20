@@ -35,7 +35,6 @@ import android.widget.*;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
-import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
 
 import java.util.ArrayList;
@@ -131,22 +130,22 @@ public class ConversationListViewAdapter extends BaseAdapter implements Filterab
         switch (viewType) {
             case LEFT_START:
                 if (convertView == null) {
-                    convertView = inflater.inflate(R.layout.conversation_listview_item_left_start, parent, false);
+                    convertView = inflater.inflate(R.layout.conversation_listview_item_left_primary, parent, false);
                 }
                 break;
             case LEFT_CONTINUE:
                 if (convertView == null) {
-                    convertView = inflater.inflate(R.layout.conversation_listview_item_left_continue, parent, false);
+                    convertView = inflater.inflate(R.layout.conversation_listview_item_left_secondary, parent, false);
                 }
                 break;
             case RIGHT_START:
                 if (convertView == null) {
-                    convertView = inflater.inflate(R.layout.conversation_listview_item_right_start, parent, false);
+                    convertView = inflater.inflate(R.layout.conversation_listview_item_right_primary, parent, false);
                 }
                 break;
             case RIGHT_CONTINUE:
                 if (convertView == null) {
-                    convertView = inflater.inflate(R.layout.conversation_listview_item_right_continue, parent, false);
+                    convertView = inflater.inflate(R.layout.conversation_listview_item_right_secondary, parent, false);
                 }
                 break;
         }

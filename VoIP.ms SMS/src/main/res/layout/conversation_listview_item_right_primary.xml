@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<net.kourlas.voipms_sms.ui.ConversationListViewItem xmlns:android="http://schemas.android.com/apk/res/android"
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="match_parent"
+                                                    android:orientation="horizontal"
+                                                    android:paddingLeft="15dp"
+                                                    android:paddingRight="15dp"
+                                                    android:paddingTop="10dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <View
+            android:id="@+id/placeholder"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="10dp"/>
+
+        <QuickContactBadge
+            android:id="@+id/photo"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="10dp"
+            android:scaleType="centerCrop"/>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/placeholder"
+            android:layout_toStartOf="@id/photo">
+
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_gravity="bottom"
+                android:background="@android:color/white"
+                android:padding="10dp"
+                android:textSize="16sp"/>
+        </RelativeLayout>
+    </RelativeLayout>
+</net.kourlas.voipms_sms.ui.ConversationListViewItem>

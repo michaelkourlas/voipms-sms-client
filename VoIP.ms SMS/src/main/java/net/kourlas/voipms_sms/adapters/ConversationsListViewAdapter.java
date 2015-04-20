@@ -36,7 +36,9 @@ import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class ConversationsListViewAdapter extends BaseAdapter implements Filterable {
 

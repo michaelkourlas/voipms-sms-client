@@ -323,6 +323,7 @@ public class Api {
                                 if (context instanceof ConversationsActivity) {
                                     ConversationsActivity conversationsActivity = (ConversationsActivity) context;
                                     conversationsActivity.refreshListView();
+                                    updateSmses();
                                 }
                             }
                         });
@@ -466,7 +467,7 @@ public class Api {
                         EditText messageText = (EditText) conversationActivity.findViewById(R.id.message_text);
                         messageText.setText("");
 
-                        ListView listView = (ListView) conversationActivity.findViewById(R.id.listview);
+                        ListView listView = (ListView) conversationActivity.findViewById(R.id.list);
                         listView.smoothScrollToPosition(listView.getCount() - 1);
 
                         ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(R.id.progress_bar);
@@ -533,7 +534,7 @@ public class Api {
                         ConversationActivity conversationActivity = (ConversationActivity) context;
                         conversationActivity.refreshListView();
 
-                        ListView listView = (ListView) conversationActivity.findViewById(R.id.listview);
+                        ListView listView = (ListView) conversationActivity.findViewById(R.id.list);
                         if (listView.getCount() == 0) {
                             NavUtils.navigateUpFromSameTask(conversationActivity);
                         }

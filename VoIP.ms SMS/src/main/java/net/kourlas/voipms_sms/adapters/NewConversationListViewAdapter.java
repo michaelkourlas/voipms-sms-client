@@ -112,7 +112,7 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Secti
 
         // Add indexes to entries where appropriate
         TextView textView = (TextView) convertView.findViewById(R.id.letter);
-        if (!phoneNumberEntry.isTypedIn()) {
+        if (phoneNumberEntry.isPrimary() && !phoneNumberEntry.isTypedIn()) {
             if (position == 0 || phoneNumberEntry.getName().charAt(0) !=
                     ((PhoneNumberEntry) getItem(position - 1)).getName().charAt(0)) {
                 textView.setText(phoneNumberEntry.getName().toUpperCase().charAt(0) + "");
@@ -135,8 +135,7 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Secti
                 photo.setScaleType(ImageView.ScaleType.CENTER);
                 photo.setBackgroundResource(R.color.primary);
                 photo.setImageResource(R.drawable.ic_dialpad_white_24dp);
-            }
-            else if (phoneNumberEntry.getPhotoUri() == null) {
+            } else if (phoneNumberEntry.getPhotoUri() == null) {
                 photo.setImageToDefault();
             } else {
                 photo.setImageURI(Uri.parse(phoneNumberEntry.getPhotoUri()));
@@ -145,8 +144,7 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Secti
             TextView contactTextView = (TextView) convertView.findViewById(R.id.contact);
             if (phoneNumberEntry.isTypedIn()) {
                 contactTextView.setText("Manual entry");
-            }
-            else {
+            } else {
                 contactTextView.setText(phoneNumberEntry.getName());
             }
         }
@@ -253,7 +251,9 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Secti
                 currentFilterQuery = constraint.toString();
 
                 filteredEntries.clear();
-                filteredEntries.addAll((List<PhoneNumberEntry>) results.values);
+                if (results.values != null) {
+                    filteredEntries.addAll((List<PhoneNumberEntry>) results.values);
+                }
 
                 notifyDataSetChanged();
             }

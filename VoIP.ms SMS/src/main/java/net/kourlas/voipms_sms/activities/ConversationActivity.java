@@ -107,7 +107,7 @@ public class ConversationActivity extends Activity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        final ListView listView = (ListView) findViewById(R.id.listview);
+        final ListView listView = (ListView) findViewById(R.id.list);
         listView.setSelector(android.R.color.transparent);
         listView.setAdapter(conversationListViewAdapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
