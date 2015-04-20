@@ -28,62 +28,33 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
-import android.widget.*;
+import android.widget.Filter;
+import android.widget.ImageView;
+import android.widget.QuickContactBadge;
+import android.widget.TextView;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-public class ConversationsListViewAdapter extends BaseAdapter implements Filterable {
+public class ConversationsListViewAdapter extends FilterableListViewAdapter<Conversation> {
 
     ConversationsActivity activity;
-    List<Conversation> originalConversations;
-    List<Conversation> filteredConversations;
-    String currentFilterQuery;
+    SmsDatabaseAdapter smsDatabaseAdapter;
 
-    public ConversationsListViewAdapter(ConversationsActivity activity, List<Conversation> conversations) {
+    public ConversationsListViewAdapter(ConversationsActivity activity) {
+        super();
+
         this.activity = activity;
 
-        this.originalConversations = new ArrayList<Conversation>();
-        this.originalConversations.addAll(conversations);
+        smsDatabaseAdapter = new SmsDatabaseAdapter(activity);
+        smsDatabaseAdapter.open();
 
-        this.filteredConversations = new ArrayList<Conversation>();
-        this.filteredConversations.addAll(conversations);
-
-        this.currentFilterQuery = "";
-    }
-
-    public void addAll(Collection<Conversation> collection) {
-        originalConversations.addAll(collection);
-
-        getFilter().filter(currentFilterQuery);
-    }
-
-    public void clear() {
-        originalConversations.clear();
-
-        getFilter().filter(currentFilterQuery);
-    }
-
-    @Override
-    public int getCount() {
-        return filteredConversations.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return filteredConversations.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
+        refresh();
     }
 
     @Override
@@ -95,6 +66,15 @@ public class ConversationsListViewAdapter extends BaseAdapter implements Filtera
 
         Sms sms = ((Conversation) getItem(position)).getMostRecentSms();
 
+        ImageView checkedButton = (ImageView) convertView.findViewById(R.id.conversations_photo_checked);
+        checkedButton.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setOval(0, 0, view.getWidth(), view.getHeight());
+            }
+        });
+        checkedButton.setClipToOutline(true);
+
         QuickContactBadge contactBadge = (QuickContactBadge) convertView.findViewById(R.id.photo);
         contactBadge.assignContactFromPhone(sms.getContact(), true);
         contactBadge.setOutlineProvider(new ViewOutlineProvider() {
@@ -105,42 +85,20 @@ public class ConversationsListViewAdapter extends BaseAdapter implements Filtera
         });
         contactBadge.setClipToOutline(true);
 
-        ImageView checkedButton = (ImageView) convertView.findViewById(R.id.conversations_photo_checked);
-        checkedButton.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setOval(0, 0, view.getWidth(), view.getHeight());
-            }
-        });
-        checkedButton.setClipToOutline(true);
-
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(sms.getContact()));
-        Cursor cursor = activity.getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
-                        ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI, ContactsContract.PhoneLookup.DISPLAY_NAME}, null,
-                null, null);
-        TextView contactTextView = (TextView) convertView.findViewById(R.id.contact);
-        if (cursor.moveToFirst()) {
-            String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
-            if (photoUri != null) {
-                contactBadge.setImageURI(Uri.parse(photoUri));
-            } else {
-                contactBadge.setImageToDefault();
-            }
-
-            contactTextView.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)));
+        String photoUri = Utils.getContactPhotoUri(activity, sms.getContact());
+        if (photoUri != null) {
+            contactBadge.setImageURI(Uri.parse(photoUri));
         } else {
             contactBadge.setImageToDefault();
-
-            String contactText = sms.getContact();
-            if (contactText.length() == 10) {
-                MessageFormat phoneNumberFormat = new MessageFormat("({0}) {1}-{2}");
-                String[] phoneNumberArray = new String[]{contactText.substring(0, 3), contactText.substring(3, 6),
-                        contactText.substring(6)};
-                contactText = phoneNumberFormat.format(phoneNumberArray);
-            }
-            contactTextView.setText(contactText);
         }
-        cursor.close();
+
+        TextView contactTextView = (TextView) convertView.findViewById(R.id.contact);
+        String contactName = Utils.getContactName(activity, sms.getContact());
+        if (contactName != null) {
+            contactTextView.setText(contactName);
+        } else {
+            contactTextView.setText(Utils.getFormattedPhoneNumber(sms.getContact()));
+        }
 
         TextView messageTextView = (TextView) convertView.findViewById(R.id.message);
         if (sms.getType() == Sms.Type.INCOMING) {
@@ -163,36 +121,42 @@ public class ConversationsListViewAdapter extends BaseAdapter implements Filtera
         return convertView;
     }
 
-
     @Override
     public Filter getFilter() {
-        return new Filter() {
+        return new FilterableAdapterFilter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
                 List<Conversation> conversationResults = new ArrayList<Conversation>();
 
                 String searchText = constraint.toString();
-                for (Conversation conversation : originalConversations) {
-                    String name = "";
-                    Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(conversation.getContact()));
-                    Cursor cursor = activity.getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
-                                    ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI, ContactsContract.PhoneLookup.DISPLAY_NAME}, null,
-                            null, null);
+
+                Conversation[] conversations = smsDatabaseAdapter.getAllConversations();
+                for (Conversation conversation : conversations) {
+                    String contactName = "";
+                    Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                            Uri.encode(conversation.getContact()));
+                    Cursor cursor = activity.getContentResolver().query(uri, new String[]{
+                                    ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null,
+                            null);
                     if (cursor.moveToFirst()) {
-                        name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+                        contactName = cursor.getString(cursor.getColumnIndex(
+                                ContactsContract.PhoneLookup.DISPLAY_NAME));
                     }
+                    cursor.close();
 
+                    String conversationText = "";
                     Sms[] allSms = conversation.getAllSms();
-                    String message = "";
                     for (Sms sms : allSms) {
-                        message += sms.getMessage() + " ";
+                        conversationText += sms.getMessage() + " ";
                     }
 
-                    if (name.toLowerCase().contains(searchText.toLowerCase()) ||
-                            message.toLowerCase().contains(searchText.toLowerCase()) ||
+                    if (contactName.toLowerCase().contains(searchText.toLowerCase()) ||
+                            conversationText.toLowerCase().contains(searchText.toLowerCase()) ||
                             conversation.getContact().toLowerCase().contains(searchText.toLowerCase()) ||
-                            (!searchText.replaceAll("[^0-9]", "").equals("") && conversation.getContact().replaceAll("[^0-9]", "").contains(searchText.replaceAll("[^0-9]", "")))) {
+                            (!searchText.replaceAll("[^0-9]", "").equals("") &&
+                                    conversation.getContact().replaceAll("[^0-9]", "").contains(
+                                            searchText.replaceAll("[^0-9]", "")))) {
                         conversationResults.add(conversation);
                     }
                 }
@@ -201,17 +165,6 @@ public class ConversationsListViewAdapter extends BaseAdapter implements Filtera
                 results.values = conversationResults;
 
                 return results;
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                currentFilterQuery = constraint.toString();
-
-                filteredConversations.clear();
-                filteredConversations.addAll((List<Conversation>) results.values);
-
-                notifyDataSetChanged();
             }
         };
     }

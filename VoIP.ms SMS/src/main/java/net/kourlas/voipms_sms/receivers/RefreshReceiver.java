@@ -23,9 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import net.kourlas.voipms_sms.Api;
 
-/**
- * Created by Michael on 2015-04-17.
- */
 public class RefreshReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {

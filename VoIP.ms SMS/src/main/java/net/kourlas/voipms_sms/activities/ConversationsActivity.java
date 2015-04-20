@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.InputType;
 import android.util.SparseBooleanArray;
 import android.view.*;
 import android.widget.AbsListView;
@@ -41,12 +42,7 @@ import net.kourlas.voipms_sms.adapters.ConversationsListViewAdapter;
 import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
-import net.kourlas.voipms_sms.receivers.BootReceiver;
 import net.kourlas.voipms_sms.receivers.RefreshReceiver;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class ConversationsActivity extends Activity {
     private Api api;
@@ -61,17 +57,11 @@ public class ConversationsActivity extends Activity {
         final Activity conversationsActivity = this;
 
         api = new Api(this);
-
         smsDatabaseAdapter = new SmsDatabaseAdapter(this);
         smsDatabaseAdapter.open();
-        final SmsDatabaseAdapter smsDatabaseAdapter = this.smsDatabaseAdapter;
+        conversationsListViewAdapter = new ConversationsListViewAdapter(this);
 
-        final Conversation[] conversations = smsDatabaseAdapter.getAllConversations();
-        List<Conversation> conversationList = new ArrayList<Conversation>();
-        conversationList.addAll(Arrays.asList(conversations));
-        this.conversationsListViewAdapter = new ConversationsListViewAdapter(this, conversationList);
-
-        final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(
+        SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(
                 R.id.conversations_swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -111,7 +101,7 @@ public class ConversationsActivity extends Activity {
                     }
                 }
 
-                MenuItem item = mode.getMenu().findItem(R.id.conversations_action_mark_read_unread);
+                MenuItem item = mode.getMenu().findItem(R.id.mark_read_unread_button);
                 if (read > unread) {
                     item.setIcon(R.drawable.ic_markunread_white_24dp);
                     item.setTitle(R.string.mark_unread);
@@ -130,7 +120,7 @@ public class ConversationsActivity extends Activity {
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.conversations_action_mark_read_unread:
+                    case R.id.mark_read_unread_button:
                         SparseBooleanArray checkedItemPositions = listView.getCheckedItemPositions();
                         for (int i = 0; i < conversationsListViewAdapter.getCount(); i++) {
                             if (checkedItemPositions.get(i)) {
@@ -140,14 +130,14 @@ public class ConversationsActivity extends Activity {
                                     sms.setUnread(item.getTitle().equals(getResources().getString(
                                             R.string.mark_unread)));
                                     smsDatabaseAdapter.replaceSms(sms);
-                                    refreshListView();
                                 }
                             }
                         }
+                        conversationsListViewAdapter.refresh();
                         updateReadUnreadButton(mode);
                         mode.finish();
                         return true;
-                    case R.id.conversations_action_delete:
+                    case R.id.delete_button:
                         checkedItemPositions = listView.getCheckedItemPositions();
                         for (int i = 0; i < checkedItemPositions.size(); i++) {
                             if (checkedItemPositions.get(i)) {
@@ -191,7 +181,8 @@ public class ConversationsActivity extends Activity {
             }
         });
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent("net.kourlas.voipms_sms.REFRESH"), 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent("net.kourlas.voipms_sms.REFRESH"),
+                0);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
 
@@ -203,26 +194,18 @@ public class ConversationsActivity extends Activity {
     }
 
     public void onPause() {
-        ComponentName receiver = new ComponentName(this, RefreshReceiver.class);
-        PackageManager pm = getPackageManager();
-
-        pm.setComponentEnabledSetting(receiver,
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                PackageManager.DONT_KILL_APP);
+        getPackageManager().setComponentEnabledSetting(new ComponentName(this, RefreshReceiver.class),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
 
         super.onPause();
     }
 
     public void onResume() {
-        refreshListView();
+        conversationsListViewAdapter.refresh();
         api.updateSmses();
 
-        ComponentName receiver = new ComponentName(this, BootReceiver.class);
-        PackageManager pm = getPackageManager();
-
-        pm.setComponentEnabledSetting(receiver,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP);
+        getPackageManager().setComponentEnabledSetting(new ComponentName(this, RefreshReceiver.class),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
 
         super.onResume();
     }
@@ -232,7 +215,8 @@ public class ConversationsActivity extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.conversations, menu);
 
-        SearchView searchView = (SearchView) menu.findItem(R.id.conversations_action_search).getActionView();
+        SearchView searchView = (SearchView) menu.findItem(R.id.search_button).getActionView();
+        searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -241,7 +225,7 @@ public class ConversationsActivity extends Activity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                conversationsListViewAdapter.getFilter().filter(newText);
+                conversationsListViewAdapter.refresh(newText);
                 return true;
             }
         });
@@ -272,10 +256,7 @@ public class ConversationsActivity extends Activity {
         }
     }
 
-    public void refreshListView() {
-        conversationsListViewAdapter.clear();
-        Conversation[] conversations = smsDatabaseAdapter.getAllConversations();
-        conversationsListViewAdapter.addAll(Arrays.asList(conversations));
-        conversationsListViewAdapter.notifyDataSetChanged();
+    public ConversationsListViewAdapter getConversationsListViewAdapter() {
+        return conversationsListViewAdapter;
     }
 }

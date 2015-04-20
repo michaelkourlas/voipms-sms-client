@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/new_conversation_action_keyboard"
+        android:id="@+id/keyboard_button"
         android:icon="@drawable/ic_dialpad_white_24dp"
         android:showAsAction="ifRoom"
         android:title="@string/new_conversation_action_dialpad"/>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<EditText
+<SearchView
     android:id="@+id/new_conversation_text"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:hint="@string/new_conversation_text_hint"
+    android:queryHint="@string/new_conversation_text_hint"
     android:inputType="textPersonName"
-    android:maxLines="1"/>
+    android:iconifiedByDefault="false"/>

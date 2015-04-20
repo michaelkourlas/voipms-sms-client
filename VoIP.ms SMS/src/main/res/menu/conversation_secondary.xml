@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/conversation_action_copy"
+        android:id="@+id/copy_button"
         android:icon="@drawable/ic_content_copy_white_24dp"
         android:showAsAction="ifRoom"
         android:title="@string/conversation_action_copy"/>
     <item
-        android:id="@+id/conversation_action_share"
+        android:id="@+id/share_button"
         android:icon="@drawable/ic_share_white_24dp"
         android:showAsAction="ifRoom"
         android:title="@string/conversation_action_share"/>

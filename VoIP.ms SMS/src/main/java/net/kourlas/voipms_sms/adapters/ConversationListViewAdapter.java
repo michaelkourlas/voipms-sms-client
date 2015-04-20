@@ -31,70 +31,46 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
-import android.widget.*;
+import android.widget.Filter;
+import android.widget.QuickContactBadge;
+import android.widget.TextView;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.model.Sms;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-public class ConversationListViewAdapter extends BaseAdapter implements Filterable {
+public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> {
 
-    public static final int LEFT_START = 0;
-    public static final int LEFT_CONTINUE = 1;
-    public static final int RIGHT_START = 2;
-    public static final int RIGHT_CONTINUE = 3;
+    public static final int ITEM_LEFT_PRIMARY = 0;
+    public static final int ITEM_LEFT_SECONDARY = 1;
+    private static final int ITEM_COUNT = 4;
+    private static final int ITEM_RIGHT_PRIMARY = 2;
+    private static final int ITEM_RIGHT_SECONDARY = 3;
 
     ConversationActivity activity;
-    List<Sms> originalSmses;
-    List<Sms> filteredSmses;
-    String currentFilterQuery;
+    String contact;
+    SmsDatabaseAdapter smsDatabaseAdapter;
 
-    public ConversationListViewAdapter(ConversationActivity activity, List<Sms> smses) {
+    public ConversationListViewAdapter(ConversationActivity activity, String contact) {
+        super();
+
         this.activity = activity;
 
-        this.originalSmses = new ArrayList<Sms>();
-        this.originalSmses.addAll(smses);
+        this.contact = contact;
 
-        this.filteredSmses = new ArrayList<Sms>();
-        this.filteredSmses.addAll(smses);
+        smsDatabaseAdapter = new SmsDatabaseAdapter(activity);
+        smsDatabaseAdapter.open();
 
-        this.currentFilterQuery = "";
-    }
-
-    public void addAll(Collection<Sms> collection) {
-        originalSmses.addAll(collection);
-
-        getFilter().filter(currentFilterQuery);
-    }
-
-    public void clear() {
-        originalSmses.clear();
-
-        getFilter().filter(currentFilterQuery);
-    }
-
-    @Override
-    public int getCount() {
-        return filteredSmses.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return filteredSmses.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
+        refresh();
     }
 
     @Override
     public int getViewTypeCount() {
-        return 4;
+        return ITEM_COUNT;
     }
 
     @Override
@@ -106,16 +82,18 @@ public class ConversationListViewAdapter extends BaseAdapter implements Filterab
         }
 
         if (sms.getType() == Sms.Type.INCOMING) {
-            if (previousSms == null || previousSms.getType() == Sms.Type.OUTGOING || sms.getRawDate() - previousSms.getRawDate() > 10) {
-                return LEFT_START;
+            if (previousSms == null || previousSms.getType() == Sms.Type.OUTGOING ||
+                    sms.getRawDate() - previousSms.getRawDate() > 10) {
+                return ITEM_LEFT_PRIMARY;
             } else {
-                return LEFT_CONTINUE;
+                return ITEM_LEFT_SECONDARY;
             }
         } else {
-            if (previousSms == null || previousSms.getType() == Sms.Type.INCOMING || sms.getRawDate() - previousSms.getRawDate() > 10) {
-                return RIGHT_START;
+            if (previousSms == null || previousSms.getType() == Sms.Type.INCOMING ||
+                    sms.getRawDate() - previousSms.getRawDate() > 10) {
+                return ITEM_RIGHT_PRIMARY;
             } else {
-                return RIGHT_CONTINUE;
+                return ITEM_RIGHT_SECONDARY;
             }
         }
     }
@@ -128,22 +106,22 @@ public class ConversationListViewAdapter extends BaseAdapter implements Filterab
 
         int viewType = getItemViewType(position);
         switch (viewType) {
-            case LEFT_START:
+            case ITEM_LEFT_PRIMARY:
                 if (convertView == null) {
                     convertView = inflater.inflate(R.layout.conversation_listview_item_left_primary, parent, false);
                 }
                 break;
-            case LEFT_CONTINUE:
+            case ITEM_LEFT_SECONDARY:
                 if (convertView == null) {
                     convertView = inflater.inflate(R.layout.conversation_listview_item_left_secondary, parent, false);
                 }
                 break;
-            case RIGHT_START:
+            case ITEM_RIGHT_PRIMARY:
                 if (convertView == null) {
                     convertView = inflater.inflate(R.layout.conversation_listview_item_right_primary, parent, false);
                 }
                 break;
-            case RIGHT_CONTINUE:
+            case ITEM_RIGHT_SECONDARY:
                 if (convertView == null) {
                     convertView = inflater.inflate(R.layout.conversation_listview_item_right_secondary, parent, false);
                 }
@@ -152,7 +130,7 @@ public class ConversationListViewAdapter extends BaseAdapter implements Filterab
 
         convertView.setTag(viewType);
 
-        if (viewType == LEFT_START || viewType == RIGHT_START) {
+        if (viewType == ITEM_LEFT_PRIMARY || viewType == ITEM_RIGHT_PRIMARY) {
             QuickContactBadge photo = (QuickContactBadge) convertView.findViewById(R.id.photo);
             photo.setOutlineProvider(new ViewOutlineProvider() {
                 @Override
@@ -161,14 +139,14 @@ public class ConversationListViewAdapter extends BaseAdapter implements Filterab
                 }
             });
             photo.setClipToOutline(true);
-            if (viewType == LEFT_START) {
+            if (viewType == ITEM_LEFT_PRIMARY) {
                 photo.assignContactFromPhone(sms.getContact(), true);
             } else {
                 photo.assignContactFromPhone(sms.getDid(), true);
             }
 
             Uri uri;
-            if (viewType == LEFT_START) {
+            if (viewType == ITEM_LEFT_PRIMARY) {
                 uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(
                         sms.getContact()));
             } else {
@@ -210,34 +188,26 @@ public class ConversationListViewAdapter extends BaseAdapter implements Filterab
 
     @Override
     public Filter getFilter() {
-        return new Filter() {
+        return new FilterableAdapterFilter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
                 List<Sms> smsResults = new ArrayList<Sms>();
 
                 String searchText = constraint.toString();
-                for (Sms sms : originalSmses) {
+
+                Sms[] smses = smsDatabaseAdapter.getConversation(contact).getAllSms();
+                for (Sms sms : smses) {
                     if (sms.getMessage().toLowerCase().contains(searchText.toLowerCase())) {
                         smsResults.add(sms);
                     }
                 }
+                Collections.reverse(smsResults);
 
                 results.count = smsResults.size();
                 results.values = smsResults;
 
                 return results;
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                currentFilterQuery = constraint.toString();
-
-                filteredSmses.clear();
-                filteredSmses.addAll((List<Sms>) results.values);
-
-                notifyDataSetChanged();
             }
         };
     }

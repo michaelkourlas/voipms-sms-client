@@ -6,7 +6,7 @@
         android:showAsAction="ifRoom"
         android:title="@string/conversation_action_call"/>
     <item
-        android:id="@+id/conversation_action_search"
+        android:id="@+id/search_button"
         android:actionViewClass="android.widget.SearchView"
         android:icon="@drawable/ic_search_white_24dp"
         android:showAsAction="never|collapseActionView"

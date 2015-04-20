@@ -18,20 +18,46 @@
 
 package net.kourlas.voipms_sms;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract;
+
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class Utils {
 
-    private static int compareDateWithoutTime(Calendar c1, Calendar c2) {
-        if (c1.get(Calendar.YEAR) != c2.get(Calendar.YEAR))
-            return c1.get(Calendar.YEAR) - c2.get(Calendar.YEAR);
-        if (c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH))
-            return c1.get(Calendar.MONTH) - c2.get(Calendar.MONTH);
-        return c1.get(Calendar.DAY_OF_MONTH) - c2.get(Calendar.DAY_OF_MONTH);
+    public static String getContactName(Context context, String phoneNumber) {
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+        Cursor cursor = context.getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
+                ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
+        if (cursor.moveToFirst()) {
+            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+            cursor.close();
+            return name;
+        } else {
+            return null;
+        }
+    }
+
+    public static String getContactPhotoUri(Context context, String phoneNumber) {
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+        Cursor cursor = context.getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
+                ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI}, null, null, null);
+        if (cursor.moveToFirst()) {
+            String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
+            cursor.close();
+            return photoUri;
+        } else {
+            cursor.close();
+            return null;
+        }
     }
 
     public static String getFormattedDate(Date smsDate) {
@@ -64,7 +90,7 @@ public class Utils {
 
         if (compareDateWithoutTime(Calendar.getInstance(), smsCalendar) == 0) {
             // Today: h:mm a
-            DateFormat format = new SimpleDateFormat("h:mm a");
+            DateFormat format = new SimpleDateFormat("h:mm a", Locale.getDefault());
             return format.format(smsDate);
         }
 
@@ -72,18 +98,36 @@ public class Utils {
                 Calendar.WEEK_OF_YEAR) && Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(
                 Calendar.YEAR) == smsCalendar.get(Calendar.YEAR)) {
             // This week: EEE
-            DateFormat format = new SimpleDateFormat("EEE");
+            DateFormat format = new SimpleDateFormat("EEE", Locale.getDefault());
             return format.format(smsDate);
         }
 
         if (Calendar.getInstance().get(Calendar.YEAR) == smsCalendar.get(Calendar.YEAR)) {
             // This year: EEE, MMM d
-            DateFormat format = new SimpleDateFormat("EEE, MMM d");
+            DateFormat format = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
             return format.format(smsDate);
         }
 
         // Any: EEE, MMM d, yyyy
-        DateFormat format = new SimpleDateFormat("EEE, MMM d, yyyy");
+        DateFormat format = new SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault());
         return format.format(smsDate);
+    }
+
+    private static int compareDateWithoutTime(Calendar c1, Calendar c2) {
+        if (c1.get(Calendar.YEAR) != c2.get(Calendar.YEAR))
+            return c1.get(Calendar.YEAR) - c2.get(Calendar.YEAR);
+        if (c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH))
+            return c1.get(Calendar.MONTH) - c2.get(Calendar.MONTH);
+        return c1.get(Calendar.DAY_OF_MONTH) - c2.get(Calendar.DAY_OF_MONTH);
+    }
+
+    public static String getFormattedPhoneNumber(String phoneNumber) {
+        if (phoneNumber.length() == 10) {
+            MessageFormat phoneNumberFormat = new MessageFormat("({0}) {1}-{2}");
+            String[] phoneNumberArray = new String[]{phoneNumber.substring(0, 3), phoneNumber.substring(3, 6),
+                    phoneNumber.substring(6)};
+            phoneNumber = phoneNumberFormat.format(phoneNumberArray);
+        }
+        return phoneNumber;
     }
 }

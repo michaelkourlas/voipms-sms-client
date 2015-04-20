@@ -22,12 +22,9 @@ import android.app.*;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.provider.ContactsContract;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -53,13 +50,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 public class Api {
 
@@ -126,7 +119,7 @@ public class Api {
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             calendar.add(Calendar.DAY_OF_YEAR, -preferences.getDaysToSync());
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
             try {
@@ -322,7 +315,7 @@ public class Api {
 
                                 if (context instanceof ConversationsActivity) {
                                     ConversationsActivity conversationsActivity = (ConversationsActivity) context;
-                                    conversationsActivity.refreshListView();
+                                    conversationsActivity.getConversationsListViewAdapter().refresh();
                                     updateSmses();
                                 }
                             }
@@ -395,26 +388,12 @@ public class Api {
                         for (Conversation conversation : conversations) {
                             if (conversation.isUnread() && newSmses.contains(conversation.getMostRecentSms())) {
 
-                                String smsContact;
-                                String smsText = "";
-
-                                Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(conversation.getContact()));
-                                Cursor cursor = context.getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
-                                                ContactsContract.PhoneLookup.DISPLAY_NAME}, null,
-                                        null, null);
-                                if (cursor.moveToFirst()) {
-                                    smsContact = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
-                                } else {
-                                    smsContact = conversation.getContact();
-                                    if (smsContact.length() == 10) {
-                                        MessageFormat phoneNumberFormat = new MessageFormat("({0}) {1}-{2}");
-                                        String[] phoneNumberArray = new String[]{smsContact.substring(0, 3), smsContact.substring(3, 6),
-                                                smsContact.substring(6)};
-                                        smsContact = phoneNumberFormat.format(phoneNumberArray);
-                                    }
+                                String smsContact = Utils.getContactName(context, conversation.getContact());
+                                if (smsContact == null) {
+                                    smsContact = Utils.getFormattedPhoneNumber(conversation.getContact());
                                 }
-                                cursor.close();
 
+                                String smsText = "";
                                 long smsId = 0;
                                 Sms[] smsArray = conversation.getAllSms();
                                 for (Sms sms : smsArray) {
@@ -455,14 +434,14 @@ public class Api {
 
                     } else if (context instanceof ConversationsActivity) {
                         ConversationsActivity conversationsActivity = (ConversationsActivity) context;
-                        conversationsActivity.refreshListView();
+                        conversationsActivity.getConversationsListViewAdapter().refresh();
 
                         SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) conversationsActivity.findViewById(
                                 R.id.conversations_swipe_refresh_layout);
                         swipeRefreshLayout.setRefreshing(false);
                     } else if (context instanceof ConversationActivity) {
                         ConversationActivity conversationActivity = (ConversationActivity) context;
-                        conversationActivity.refreshListView();
+                        conversationActivity.getConversationListViewAdapter().refresh();
 
                         EditText messageText = (EditText) conversationActivity.findViewById(R.id.message_text);
                         messageText.setText("");
@@ -529,10 +508,10 @@ public class Api {
 
                     if (context instanceof ConversationsActivity) {
                         ConversationsActivity conversationsActivity = (ConversationsActivity) context;
-                        conversationsActivity.refreshListView();
+                        conversationsActivity.getConversationsListViewAdapter().refresh();
                     } else if (context instanceof ConversationActivity) {
                         ConversationActivity conversationActivity = (ConversationActivity) context;
-                        conversationActivity.refreshListView();
+                        conversationActivity.getConversationListViewAdapter().refresh();
 
                         ListView listView = (ListView) conversationActivity.findViewById(R.id.list);
                         if (listView.getCount() == 0) {

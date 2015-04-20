@@ -29,12 +29,14 @@ import net.kourlas.voipms_sms.Preferences;
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent("net.kourlas.voipms_sms.REFRESH"), 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0,
+                new Intent("net.kourlas.voipms_sms.REFRESH"), 0);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
         Preferences preferences = new Preferences(context);
         if (preferences.getPollRate() != 0) {
-            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), preferences.getPollRate() * 60 * 1000, pendingIntent);
+            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(),
+                    preferences.getPollRate() * 60 * 1000, pendingIntent);
         }
     }
 }

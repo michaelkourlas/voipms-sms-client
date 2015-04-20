@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class Sms implements Comparable<Sms> {
@@ -67,7 +68,7 @@ public class Sms implements Comparable<Sms> {
      * @throws ParseException when the date parameter does not contain a valid date string from the VoIP.ms API.
      */
     public Sms(String id, String date, String type, String did, String contact, String message) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         this.id = Long.parseLong(id);

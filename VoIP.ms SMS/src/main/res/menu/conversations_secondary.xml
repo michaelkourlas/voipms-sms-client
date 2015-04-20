@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/conversations_action_mark_read_unread"
+        android:id="@+id/mark_read_unread_button"
         android:icon="@drawable/ic_markunread_white_24dp"
         android:showAsAction="ifRoom"
         android:title="@string/mark_unread"/>
     <item
-        android:id="@+id/conversations_action_delete"
+        android:id="@+id/delete_button"
         android:icon="@drawable/ic_delete_white_24dp"
         android:showAsAction="ifRoom"
         android:title="@string/conversations_action_delete"/>

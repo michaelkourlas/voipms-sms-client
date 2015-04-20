@@ -20,8 +20,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.ConversationActivity"
+                  android:windowSoftInputMode="adjustPan"
                   android:parentActivityName=".activities.ConversationsActivity"/>
         <activity android:name=".activities.NewConversationActivity"
+                  android:windowSoftInputMode="adjustPan"
                   android:parentActivityName=".activities.ConversationsActivity"/>
         <activity android:name=".activities.PreferencesActivity"
                   android:parentActivityName=".activities.ConversationsActivity"
