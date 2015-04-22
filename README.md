@@ -6,7 +6,7 @@ VoIP.ms SMS is an Android application that sends and receives SMS messages using
 
 ## Features ##
 
-Many people use VoIP.ms as an alternative to a voice plan on our mobile devices. Unfortunately, this can make texting 
+Many people use VoIP.ms as an alternative to a voice plan on mobile devices. Unfortunately, this can make texting 
 rather difficult, as the VoIP.ms SMS Message Center is built for desktop browsers and is difficult to navigate and use 
 on a mobile device. While VoIP.ms does provide a [mobile version](https://sms.voip.ms/) of this interface, they do not 
 provide a dedicated mobile application, precluding important features like notifications and contacts synchronization.
