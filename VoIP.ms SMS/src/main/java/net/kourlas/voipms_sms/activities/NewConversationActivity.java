@@ -27,9 +27,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.SearchView;
+import android.widget.*;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter;
 
@@ -55,9 +53,9 @@ public class NewConversationActivity extends Activity {
             final NewConversationListViewAdapter newConversationListViewAdapter = new NewConversationListViewAdapter(
                     this);
 
-            SearchView editText = (SearchView) actionBar.getCustomView().findViewById(R.id.new_conversation_text);
-            editText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
-            editText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            SearchView searchView = (SearchView) actionBar.getCustomView().findViewById(R.id.new_conversation_text);
+            searchView.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
                     return false;
@@ -75,7 +73,12 @@ public class NewConversationActivity extends Activity {
                     return true;
                 }
             });
-            editText.requestFocus();
+            searchView.requestFocus();
+
+            // Hide search icon
+            int magId = getResources().getIdentifier("android:id/search_mag_icon", null, null);
+            ImageView searchMagIcon = (ImageView) searchView.findViewById(magId);
+            searchMagIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
 
             final ListView listView = (ListView) findViewById(R.id.list);
             listView.setAdapter(newConversationListViewAdapter);
@@ -109,13 +112,13 @@ public class NewConversationActivity extends Activity {
         if (actionBar != null) {
             switch (item.getItemId()) {
                 case R.id.keyboard_button:
-                    SearchView editText = (SearchView) actionBar.getCustomView().findViewById(R.id.new_conversation_text);
-                    if (editText.getInputType() == (InputType.TYPE_TEXT_VARIATION_PERSON_NAME)) {
-                        editText.setInputType(InputType.TYPE_CLASS_PHONE);
+                    SearchView searchView = (SearchView) actionBar.getCustomView().findViewById(R.id.new_conversation_text);
+                    if (searchView.getInputType() == (InputType.TYPE_TEXT_VARIATION_PERSON_NAME)) {
+                        searchView.setInputType(InputType.TYPE_CLASS_PHONE);
                         item.setIcon(R.drawable.ic_keyboard_white_24dp);
                         item.setTitle(R.string.new_conversation_action_keyboard);
                     } else {
-                        editText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
+                        searchView.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
                         item.setIcon(R.drawable.ic_dialpad_white_24dp);
                         item.setTitle(R.string.new_conversation_action_dialpad);
                     }

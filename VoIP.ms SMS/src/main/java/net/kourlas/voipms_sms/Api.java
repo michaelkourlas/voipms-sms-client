@@ -25,12 +25,10 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.support.v4.app.NavUtils;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
@@ -156,6 +154,8 @@ public class Api {
         } else if (context instanceof ConversationActivity) {
             ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.INVISIBLE);
+
+
         }
     }
 
@@ -446,9 +446,6 @@ public class Api {
                         EditText messageText = (EditText) conversationActivity.findViewById(R.id.message_text);
                         messageText.setText("");
 
-                        ListView listView = (ListView) conversationActivity.findViewById(R.id.list);
-                        listView.smoothScrollToPosition(listView.getCount() - 1);
-
                         ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(R.id.progress_bar);
                         progressBar.setVisibility(View.INVISIBLE);
                     }
@@ -512,11 +509,6 @@ public class Api {
                     } else if (context instanceof ConversationActivity) {
                         ConversationActivity conversationActivity = (ConversationActivity) context;
                         conversationActivity.getConversationListViewAdapter().refresh();
-
-                        ListView listView = (ListView) conversationActivity.findViewById(R.id.list);
-                        if (listView.getCount() == 0) {
-                            NavUtils.navigateUpFromSameTask(conversationActivity);
-                        }
                     }
                 } else {
                     Toast.makeText(context.getApplicationContext(),

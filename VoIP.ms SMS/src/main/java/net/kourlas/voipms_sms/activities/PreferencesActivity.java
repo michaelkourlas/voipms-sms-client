@@ -87,13 +87,16 @@ public class PreferencesActivity extends PreferenceActivity {
                     editor.apply();
                 }
             } else if (key.equals("settings_sms_poll_rate")) {
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, new Intent("net.kourlas.voipms_sms.REFRESH"), 0);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0,
+                        new Intent("net.kourlas.voipms_sms.REFRESH"), 0);
                 AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(ALARM_SERVICE);
                 alarmManager.cancel(pendingIntent);
 
                 if (Integer.parseInt(sharedPreferences.getString("settings_sms_poll_rate", "")) != 0) {
                     alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() +
-                            Integer.parseInt(sharedPreferences.getString("settings_sms_poll_rate", "")) * 60 * 1000, Integer.parseInt(sharedPreferences.getString("settings_sms_poll_rate", "")) * 60 * 1000, pendingIntent);
+                                    Integer.parseInt(sharedPreferences.getString("settings_sms_poll_rate", "")) * 60 * 1000,
+                            Integer.parseInt(sharedPreferences.getString("settings_sms_poll_rate", "")) * 60 * 1000,
+                            pendingIntent);
                 }
             }
         }

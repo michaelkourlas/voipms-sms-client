@@ -153,8 +153,10 @@ public class ConversationActivity extends Activity {
                         return true;
                     case R.id.delete_button:
                         SparseBooleanArray checkedItemPositions = listView.getCheckedItemPositions();
-                        for (int i = 0; i < checkedItemPositions.size(); i++) {
+                        for (int i = 0; i < listView.getCount(); i++) {
                             if (checkedItemPositions.get(i)) {
+//                                listView.getChildAt(i).setTag(R.id.TAG_DELETING, true);
+//                                listView.getChildAt(i).setAlpha(0.5f);
                                 api.deleteSms(((Sms) conversationListViewAdapter.getItem(i)).getId());
                             }
                         }
@@ -219,8 +221,8 @@ public class ConversationActivity extends Activity {
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(
                 preferences.getDid()));
         Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
-                        ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI, ContactsContract.PhoneLookup.DISPLAY_NAME}, null,
-                null, null);
+                        ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI, ContactsContract.PhoneLookup.DISPLAY_NAME},
+                null, null, null);
         if (cursor.moveToFirst()) {
             String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
             if (photoUri != null) {
