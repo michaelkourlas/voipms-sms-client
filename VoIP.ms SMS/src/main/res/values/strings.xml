@@ -35,6 +35,9 @@
     <string name="preferences_reset">Clear SMS cache</string>
     <string name="preferences_reset_summary">Delete local copy of SMS database</string>
 
+    <string name="preferences_sms_days_to_sync_default_value">7</string>
+    <string name="preferences_sms_poll_rate_default_value">15</string>
+
     <string name="help_name">Help</string>
 
     <string name="credits_name">Credits</string>

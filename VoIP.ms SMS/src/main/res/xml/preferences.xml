@@ -15,13 +15,13 @@
 
     <PreferenceCategory android:title="@string/preferences_category_sms">
         <ListPreference
-            android:defaultValue="7"
+            android:defaultValue="@string/preferences_sms_days_to_sync_default_value"
             android:entries="@array/preferences_sms_days_to_sync_entries"
             android:entryValues="@array/preferences_sms_days_to_sync_values"
             android:key="sms_days_to_sync"
             android:title="@string/preferences_sms_days_to_sync"/>
         <ListPreference
-            android:defaultValue="15"
+            android:defaultValue="@string/preferences_sms_poll_rate_default_value"
             android:entries="@array/preferences_sms_poll_rate_entries"
             android:entryValues="@array/preferences_sms_poll_rate_values"
             android:key="sms_poll_rate"

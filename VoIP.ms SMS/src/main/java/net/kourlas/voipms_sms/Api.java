@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright ï¿½ 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -75,8 +75,7 @@ public class Api {
         } else if (preferences.getPassword().equals("")) {
             Toast.makeText(context.getApplicationContext(), "Update DID: VoIP.ms API password not set",
                     Toast.LENGTH_SHORT).show();
-        }
-        if (isNetworkConnectionAvailable()) {
+        } else if (isNetworkConnectionAvailable()) {
             try {
                 String voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" +
                         "api_username=" + URLEncoder.encode(preferences.getEmail(), "UTF-8") + "&" +
@@ -167,8 +166,7 @@ public class Api {
         } else if (preferences.getPassword().equals("")) {
             Toast.makeText(context.getApplicationContext(), "Delete SMS: VoIP.ms API password not set",
                     Toast.LENGTH_SHORT).show();
-        }
-        if (isNetworkConnectionAvailable()) {
+        } else if (isNetworkConnectionAvailable()) {
             try {
                 String voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" +
                         "api_username=" + URLEncoder.encode(preferences.getEmail(), "UTF-8") + "&" +
@@ -196,8 +194,7 @@ public class Api {
                     Toast.LENGTH_SHORT).show();
         } else if (preferences.getDid().equals("")) {
             Toast.makeText(context.getApplicationContext(), "Send SMS: DID not set", Toast.LENGTH_SHORT).show();
-        }
-        if (isNetworkConnectionAvailable()) {
+        } else if (isNetworkConnectionAvailable()) {
             try {
                 String voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" +
                         "api_username=" + URLEncoder.encode(preferences.getEmail(), "UTF-8") + "&" +

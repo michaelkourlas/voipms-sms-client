@@ -20,8 +20,10 @@ package net.kourlas.voipms_sms.activities;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -30,10 +32,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.InputType;
 import android.util.SparseBooleanArray;
 import android.view.*;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.SearchView;
+import android.widget.*;
 import com.example.android.floatingactionbuttonbasic.FloatingActionButton;
 import net.kourlas.voipms_sms.Api;
 import net.kourlas.voipms_sms.Preferences;
@@ -48,6 +47,7 @@ public class ConversationsActivity extends Activity {
     private Api api;
     private SmsDatabaseAdapter smsDatabaseAdapter;
     private ConversationsListViewAdapter conversationsListViewAdapter;
+    private Preferences preferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,6 +60,9 @@ public class ConversationsActivity extends Activity {
         smsDatabaseAdapter = new SmsDatabaseAdapter(this);
         smsDatabaseAdapter.open();
         conversationsListViewAdapter = new ConversationsListViewAdapter(this);
+
+        preferences = new Preferences(this);
+        final Preferences preferences = this.preferences;
 
         SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(
                 R.id.swipe_refresh_layout);
@@ -176,8 +179,19 @@ public class ConversationsActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(conversationsActivity, NewConversationActivity.class);
-                startActivity(intent);
+                if (preferences.getEmail().equals("")) {
+                    Toast.makeText(getApplicationContext(), "New Conversation: VoIP.ms portal email not set",
+                            Toast.LENGTH_SHORT).show();
+                } else if (preferences.getPassword().equals("")) {
+                    Toast.makeText(getApplicationContext(), "New Conversation: VoIP.ms API password not set",
+                            Toast.LENGTH_SHORT).show();
+                } else if (preferences.getDid().equals("")) {
+                    Toast.makeText(getApplicationContext(), "New Conversation: DID not set",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Intent intent = new Intent(conversationsActivity, NewConversationActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -186,10 +200,30 @@ public class ConversationsActivity extends Activity {
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
 
-        Preferences preferences = new Preferences(this);
         if (preferences.getPollRate() != 0) {
             alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() +
                     preferences.getPollRate() * 60 * 1000, preferences.getPollRate() * 60 * 1000, pendingIntent);
+        }
+
+        if (preferences.getFirstRun()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Before using this app, make sure to set your VoIP.ms portal email address and API " +
+                    "password in Settings.\n\nAfter setting your email and password, you will also need to pick an " +
+                    "SMS-enabled DID by tapping the Select DID option in the menu at the upper right-hand corner of " +
+                    "this screen.");
+            builder.setNegativeButton("Settings", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    Intent preferencesIntent = new Intent(conversationsActivity, PreferencesActivity.class);
+                    startActivity(preferencesIntent);
+                    preferences.setFirstRun(false);
+                }
+            });
+            builder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    preferences.setFirstRun(false);
+                }
+            });
+            builder.show();
         }
     }
 
@@ -202,7 +236,10 @@ public class ConversationsActivity extends Activity {
 
     public void onResume() {
         conversationsListViewAdapter.refresh();
-        api.updateSmses();
+
+        if (!preferences.getFirstRun()) {
+            api.updateSmses();
+        }
 
         getPackageManager().setComponentEnabledSetting(new ComponentName(this, RefreshReceiver.class),
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);

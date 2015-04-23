@@ -25,9 +25,11 @@ import android.preference.PreferenceManager;
 
 public class Preferences {
 
+    private Context context;
     private SharedPreferences sharedPreferences;
 
     public Preferences(Context context) {
+        this.context = context;
         if (context instanceof Activity) {
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(((Activity) context).getBaseContext());
         } else {
@@ -44,7 +46,8 @@ public class Preferences {
     }
 
     public int getDaysToSync() {
-        return Integer.parseInt(sharedPreferences.getString("sms_days_to_sync", ""));
+        return Integer.parseInt(sharedPreferences.getString("sms_days_to_sync", context.getResources().getString(
+                R.string.preferences_sms_days_to_sync_default_value)));
     }
 
     public String getDid() {
@@ -58,7 +61,18 @@ public class Preferences {
     }
 
     public int getPollRate() {
-        return Integer.parseInt(sharedPreferences.getString("sms_poll_rate", ""));
+        return Integer.parseInt(sharedPreferences.getString("sms_poll_rate", context.getResources().getString(
+                R.string.preferences_sms_poll_rate_default_value)));
+    }
+
+    public boolean getFirstRun() {
+        return sharedPreferences.getBoolean("first_run", true);
+    }
+
+    public void setFirstRun(boolean firstRun) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("first_run", firstRun);
+        editor.apply();
     }
 }
 
