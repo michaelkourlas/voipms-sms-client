@@ -38,11 +38,11 @@ import com.example.android.floatingactionbuttonbasic.FloatingActionButton;
 import net.kourlas.voipms_sms.Api;
 import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.RefreshReceiver;
 import net.kourlas.voipms_sms.adapters.ConversationsListViewAdapter;
 import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
-import net.kourlas.voipms_sms.RefreshReceiver;
 
 public class ConversationsActivity extends Activity {
     private Api api;
