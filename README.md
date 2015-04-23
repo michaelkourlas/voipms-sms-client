@@ -9,10 +9,11 @@ VoIP.ms SMS is an Android application that sends and receives SMS messages using
 Many people use VoIP.ms as an alternative to a voice plan on mobile devices. Unfortunately, this can make texting 
 rather difficult, as the VoIP.ms SMS Message Center is built for desktop browsers and is difficult to navigate and use 
 on a mobile device. While VoIP.ms does provide a [mobile version](https://sms.voip.ms/) of this interface, they do not 
-provide a dedicated mobile application, precluding important features like notifications and contacts synchronization.
+provide a dedicated mobile application, depriving users of important features like notifications and contacts
+synchronization.
 
-Cue VoIP.ms SMS, an application that allows you to send and receive SMS messages using your VoIP.ms account. The
-application's features include:
+VoIP.ms SMS is an Android application that fixes this problem by allowing you to send and receive SMS messages using 
+your VoIP.ms account. The application's features include:
 
 * The ability to send, receive, and delete texts;
 * Conversation-based organization (all texts to and from a particular phone number are grouped together);
