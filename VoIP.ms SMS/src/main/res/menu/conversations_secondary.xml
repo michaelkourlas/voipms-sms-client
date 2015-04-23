@@ -4,7 +4,7 @@
         android:id="@+id/mark_read_unread_button"
         android:icon="@drawable/ic_markunread_white_24dp"
         android:showAsAction="ifRoom"
-        android:title="@string/mark_unread"/>
+        android:title="@string/conversations_action_mark_unread"/>
     <item
         android:id="@+id/delete_button"
         android:icon="@drawable/ic_delete_white_24dp"

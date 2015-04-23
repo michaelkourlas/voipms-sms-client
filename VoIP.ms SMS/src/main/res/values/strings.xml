@@ -9,8 +9,8 @@
     <string name="conversations_action_credits">Credits</string>
     <string name="conversations_action_delete">Delete</string>
     <string name="conversations_action_add">Add</string>
-    <string name="mark_read">Mark as read</string>
-    <string name="mark_unread">Mark as unread</string>
+    <string name="conversations_action_mark_read">Mark as read</string>
+    <string name="conversations_action_mark_unread">Mark as unread</string>
 
     <string name="conversation_action_call">Make a call</string>
     <string name="conversation_action_search">Search</string>
@@ -24,16 +24,16 @@
     <string name="new_conversation_action_dialpad">Show dialpad</string>
     <string name="new_conversation_text_hint">To</string>
 
-    <string name="settings_name">Settings</string>
-    <string name="settings_category_account">Account</string>
-    <string name="settings_account_email">Email address</string>
-    <string name="settings_account_password">API password</string>
-    <string name="settings_category_sms">SMS</string>
-    <string name="settings_sms_days_to_sync">Days to sync SMS messages</string>
-    <string name="settings_sms_poll_rate">Poll rate</string>
-    <string name="settings_category_reset">Reset</string>
-    <string name="settings_reset">Clear SMS cache</string>
-    <string name="settings_reset_summary">Delete local copy of SMS database</string>
+    <string name="preferences_name">Settings</string>
+    <string name="preferences_category_account">Account</string>
+    <string name="preferences_account_email">Email address</string>
+    <string name="preferences_account_password">API password</string>
+    <string name="preferences_category_sms">SMS</string>
+    <string name="preferences_sms_days_to_sync">Days to sync SMS messages</string>
+    <string name="preferences_sms_poll_rate">Poll rate</string>
+    <string name="preferences_category_reset">Reset</string>
+    <string name="preferences_reset">Clear SMS cache</string>
+    <string name="preferences_reset_summary">Delete local copy of SMS database</string>
 
     <string name="help_name">Help</string>
 

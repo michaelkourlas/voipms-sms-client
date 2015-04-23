@@ -36,29 +36,29 @@ public class Preferences {
     }
 
     public String getEmail() {
-        return sharedPreferences.getString("settings_api_email", "");
+        return sharedPreferences.getString("api_email", "");
     }
 
     public String getPassword() {
-        return sharedPreferences.getString("settings_api_password", "");
+        return sharedPreferences.getString("api_password", "");
     }
 
     public int getDaysToSync() {
-        return Integer.parseInt(sharedPreferences.getString("settings_sms_days_to_sync", ""));
+        return Integer.parseInt(sharedPreferences.getString("sms_days_to_sync", ""));
     }
 
     public String getDid() {
-        return sharedPreferences.getString("settings_did", "");
+        return sharedPreferences.getString("did", "");
     }
 
     public void setDid(String did) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("settings_did", did);
+        editor.putString("did", did);
         editor.apply();
     }
 
     public int getPollRate() {
-        return Integer.parseInt(sharedPreferences.getString("settings_sms_poll_rate", ""));
+        return Integer.parseInt(sharedPreferences.getString("sms_poll_rate", ""));
     }
 }
 

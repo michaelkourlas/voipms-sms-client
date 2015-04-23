@@ -35,7 +35,7 @@ public class PreferencesActivity extends PreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsFragment()).commit();
+        getFragmentManager().beginTransaction().replace(android.R.id.content, new PreferencesFragment()).commit();
 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
@@ -44,7 +44,7 @@ public class PreferencesActivity extends PreferenceActivity {
         }
     }
 
-    public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+    public static class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
         SmsDatabaseAdapter smsDatabaseAdapter;
 
         @Override
@@ -77,25 +77,25 @@ public class PreferencesActivity extends PreferenceActivity {
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             updatePreference(findPreference(key));
 
-            if (key.equals("settings_api_email") || key.equals("settings_api_password") ||
-                    key.equals("settings_reset")) {
+            if (key.equals("api_email") || key.equals("api_password") ||
+                    key.equals("reset")) {
                 smsDatabaseAdapter.deleteAllSMS();
 
-                if (key.equals("settings_reset") && sharedPreferences.getBoolean("settings_reset", false)) {
+                if (key.equals("reset") && sharedPreferences.getBoolean("reset", false)) {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean("settings_reset", false);
+                    editor.putBoolean("reset", false);
                     editor.apply();
                 }
-            } else if (key.equals("settings_sms_poll_rate")) {
+            } else if (key.equals("sms_poll_rate")) {
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0,
                         new Intent("net.kourlas.voipms_sms.REFRESH"), 0);
                 AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(ALARM_SERVICE);
                 alarmManager.cancel(pendingIntent);
 
-                if (Integer.parseInt(sharedPreferences.getString("settings_sms_poll_rate", "")) != 0) {
+                if (Integer.parseInt(sharedPreferences.getString("sms_poll_rate", "")) != 0) {
                     alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() +
-                                    Integer.parseInt(sharedPreferences.getString("settings_sms_poll_rate", "")) * 60 * 1000,
-                            Integer.parseInt(sharedPreferences.getString("settings_sms_poll_rate", "")) * 60 * 1000,
+                                    Integer.parseInt(sharedPreferences.getString("sms_poll_rate", "")) * 60 * 1000,
+                            Integer.parseInt(sharedPreferences.getString("sms_poll_rate", "")) * 60 * 1000,
                             pendingIntent);
                 }
             }

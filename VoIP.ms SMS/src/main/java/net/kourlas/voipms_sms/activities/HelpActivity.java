@@ -36,7 +36,7 @@ public class HelpActivity extends Activity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        WebView browser = (WebView) findViewById(R.id.help_webview);
+        WebView browser = (WebView) findViewById(R.id.web_view);
         browser.loadUrl("file:///android_asset/help.html");
     }
 }

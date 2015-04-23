@@ -42,7 +42,7 @@ import net.kourlas.voipms_sms.adapters.ConversationsListViewAdapter;
 import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
-import net.kourlas.voipms_sms.receivers.RefreshReceiver;
+import net.kourlas.voipms_sms.RefreshReceiver;
 
 public class ConversationsActivity extends Activity {
     private Api api;
@@ -62,7 +62,7 @@ public class ConversationsActivity extends Activity {
         conversationsListViewAdapter = new ConversationsListViewAdapter(this);
 
         SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(
-                R.id.conversations_swipe_refresh_layout);
+                R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -104,10 +104,10 @@ public class ConversationsActivity extends Activity {
                 MenuItem item = mode.getMenu().findItem(R.id.mark_read_unread_button);
                 if (read > unread) {
                     item.setIcon(R.drawable.ic_markunread_white_24dp);
-                    item.setTitle(R.string.mark_unread);
+                    item.setTitle(R.string.conversations_action_mark_unread);
                 } else {
                     item.setIcon(R.drawable.ic_drafts_white_24dp);
-                    item.setTitle(R.string.mark_read);
+                    item.setTitle(R.string.conversations_action_mark_read);
                 }
             }
 
@@ -128,7 +128,7 @@ public class ConversationsActivity extends Activity {
                                 Sms[] smses = conversation.getAllSms();
                                 for (Sms sms : smses) {
                                     sms.setUnread(item.getTitle().equals(getResources().getString(
-                                            R.string.mark_unread)));
+                                            R.string.conversations_action_mark_unread)));
                                     smsDatabaseAdapter.replaceSms(sms);
                                 }
                             }

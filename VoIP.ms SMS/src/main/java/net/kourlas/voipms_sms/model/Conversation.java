@@ -26,9 +26,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class Conversation implements Comparable<Conversation> {
-    /**
-     * A list containing all of the SMS messages in the conversation.
-     */
     private List<Sms> smses;
 
     public Conversation(Sms[] smses) {

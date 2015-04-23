@@ -6,7 +6,7 @@
              android:orientation="vertical">
 
     <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/conversations_swipe_refresh_layout"
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -20,17 +20,17 @@
 
     <com.example.android.floatingactionbuttonbasic.FloatingActionButton
         android:id="@+id/new_button"
-        android:layout_width="@dimen/fab_size"
-        android:layout_height="@dimen/fab_size"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:background="@drawable/button_background"
-        android:elevation="@dimen/fab_elevation">
+        android:elevation="8dp">
 
         <ImageView
-            android:layout_width="@dimen/fab_icon_size"
-            android:layout_height="@dimen/fab_icon_size"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="center"
             android:contentDescription="@string/conversations_action_add"
             android:duplicateParentState="true"

@@ -45,7 +45,7 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
     NewConversationActivity activity;
 
     public NewConversationListViewAdapter(NewConversationActivity activity) {
-        super();
+        super((ListView) activity.findViewById(R.id.list));
 
         this.activity = activity;
 

@@ -35,7 +35,7 @@ public class ConversationListViewItem extends CheckableLinearLayout {
         super.setChecked(b);
 
         int viewType = (Integer) getTag();
-        TextView textView = (TextView) this.findViewById(R.id.text);
+        TextView textView = (TextView) this.findViewById(R.id.message);
         if (viewType == ConversationListViewAdapter.ITEM_LEFT_PRIMARY ||
                 viewType == ConversationListViewAdapter.ITEM_LEFT_SECONDARY) {
             textView.setBackgroundResource(b ? android.R.color.holo_blue_dark : R.color.primary);

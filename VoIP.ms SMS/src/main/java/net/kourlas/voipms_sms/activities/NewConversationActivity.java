@@ -53,7 +53,7 @@ public class NewConversationActivity extends Activity {
             final NewConversationListViewAdapter newConversationListViewAdapter = new NewConversationListViewAdapter(
                     this);
 
-            SearchView searchView = (SearchView) actionBar.getCustomView().findViewById(R.id.new_conversation_text);
+            SearchView searchView = (SearchView) actionBar.getCustomView().findViewById(R.id.search_view);
             searchView.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
@@ -112,7 +112,7 @@ public class NewConversationActivity extends Activity {
         if (actionBar != null) {
             switch (item.getItemId()) {
                 case R.id.keyboard_button:
-                    SearchView searchView = (SearchView) actionBar.getCustomView().findViewById(R.id.new_conversation_text);
+                    SearchView searchView = (SearchView) actionBar.getCustomView().findViewById(R.id.search_view);
                     if (searchView.getInputType() == (InputType.TYPE_TEXT_VARIATION_PERSON_NAME)) {
                         searchView.setInputType(InputType.TYPE_CLASS_PHONE);
                         item.setIcon(R.drawable.ic_keyboard_white_24dp);

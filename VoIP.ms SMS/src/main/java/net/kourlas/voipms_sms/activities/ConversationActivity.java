@@ -179,7 +179,7 @@ public class ConversationActivity extends Activity {
             }
         });
 
-        final EditText messageText = (EditText) findViewById(R.id.message_text);
+        final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
         messageText.setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
@@ -303,5 +303,9 @@ public class ConversationActivity extends Activity {
 
     public ConversationListViewAdapter getConversationListViewAdapter() {
         return conversationListViewAdapter;
+    }
+
+    public String getContact() {
+        return contact;
     }
 }

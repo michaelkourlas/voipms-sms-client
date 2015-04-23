@@ -34,7 +34,7 @@
             android:layout_toStartOf="@id/placeholder_2">
 
             <TextView
-                android:id="@+id/text"
+                android:id="@+id/message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"

@@ -36,7 +36,7 @@ public class CreditsActivity extends Activity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        WebView browser = (WebView) findViewById(R.id.credits_webview);
+        WebView browser = (WebView) findViewById(R.id.web_view);
         browser.loadUrl("file:///android_asset/credits.html");
     }
 }

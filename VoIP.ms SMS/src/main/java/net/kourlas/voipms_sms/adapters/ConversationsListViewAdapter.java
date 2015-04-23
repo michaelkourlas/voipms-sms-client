@@ -28,10 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
-import android.widget.Filter;
-import android.widget.ImageView;
-import android.widget.QuickContactBadge;
-import android.widget.TextView;
+import android.widget.*;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
@@ -47,7 +44,7 @@ public class ConversationsListViewAdapter extends FilterableListViewAdapter<Conv
     SmsDatabaseAdapter smsDatabaseAdapter;
 
     public ConversationsListViewAdapter(ConversationsActivity activity) {
-        super();
+        super((ListView) activity.findViewById(R.id.list));
 
         this.activity = activity;
 

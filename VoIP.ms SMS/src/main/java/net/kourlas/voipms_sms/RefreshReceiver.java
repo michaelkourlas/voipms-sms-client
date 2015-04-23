@@ -16,27 +16,17 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package net.kourlas.voipms_sms.receivers;
+package net.kourlas.voipms_sms;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.SystemClock;
-import net.kourlas.voipms_sms.Preferences;
+import net.kourlas.voipms_sms.Api;
 
-public class BootReceiver extends BroadcastReceiver {
+public class RefreshReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0,
-                new Intent("net.kourlas.voipms_sms.REFRESH"), 0);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(pendingIntent);
-        Preferences preferences = new Preferences(context);
-        if (preferences.getPollRate() != 0) {
-            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(),
-                    preferences.getPollRate() * 60 * 1000, pendingIntent);
-        }
+        Api api = new Api(context);
+        api.updateSmses(true);
     }
 }

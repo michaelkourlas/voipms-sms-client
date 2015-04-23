@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.support.v4.app.NavUtils;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
@@ -149,7 +150,7 @@ public class Api {
 
         if (context instanceof ConversationsActivity) {
             SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) ((ConversationsActivity) context).findViewById(
-                    R.id.conversations_swipe_refresh_layout);
+                    R.id.swipe_refresh_layout);
             swipeRefreshLayout.setRefreshing(false);
         } else if (context instanceof ConversationActivity) {
             ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(R.id.progress_bar);
@@ -437,14 +438,16 @@ public class Api {
                         conversationsActivity.getConversationsListViewAdapter().refresh();
 
                         SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) conversationsActivity.findViewById(
-                                R.id.conversations_swipe_refresh_layout);
+                                R.id.swipe_refresh_layout);
                         swipeRefreshLayout.setRefreshing(false);
                     } else if (context instanceof ConversationActivity) {
                         ConversationActivity conversationActivity = (ConversationActivity) context;
                         conversationActivity.getConversationListViewAdapter().refresh();
 
-                        EditText messageText = (EditText) conversationActivity.findViewById(R.id.message_text);
+                        EditText messageText = (EditText) conversationActivity.findViewById(R.id.message_edit_text);
                         messageText.setText("");
+
+                        conversationActivity.getConversationListViewAdapter().requestScrollToBottom();
 
                         ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(R.id.progress_bar);
                         progressBar.setVisibility(View.INVISIBLE);
@@ -473,7 +476,7 @@ public class Api {
 
             if (!silent && context instanceof ConversationsActivity) {
                 SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) ((ConversationsActivity) context).findViewById(
-                        R.id.conversations_swipe_refresh_layout);
+                        R.id.swipe_refresh_layout);
                 swipeRefreshLayout.setRefreshing(false);
             } else if (!silent && context instanceof ConversationActivity) {
                 ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(R.id.progress_bar);
@@ -509,6 +512,10 @@ public class Api {
                     } else if (context instanceof ConversationActivity) {
                         ConversationActivity conversationActivity = (ConversationActivity) context;
                         conversationActivity.getConversationListViewAdapter().refresh();
+
+                        if (smsDatabaseAdapter.getConversation(conversationActivity.getContact()).getAllSms().length == 0) {
+                            NavUtils.navigateUpFromSameTask(conversationActivity);
+                        }
                     }
                 } else {
                     Toast.makeText(context.getApplicationContext(),

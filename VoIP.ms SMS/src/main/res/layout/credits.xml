@@ -5,7 +5,7 @@
               android:orientation="vertical">
 
     <WebView
-        android:id="@+id/credits_webview"
+        android:id="@+id/web_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"/>

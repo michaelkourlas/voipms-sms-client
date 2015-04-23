@@ -31,7 +31,7 @@
             android:parentActivityName=".activities.ConversationsActivity"/>
         <activity
             android:name=".activities.PreferencesActivity"
-            android:label="@string/settings_name"
+            android:label="@string/preferences_name"
             android:parentActivityName=".activities.ConversationsActivity">
         </activity>
         <activity
@@ -46,14 +46,7 @@
         </activity>
 
         <receiver
-            android:name=".receivers.BootReceiver"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".receivers.RefreshReceiver"
+            android:name=".RefreshReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="net.kourlas.voipms_sms.REFRESH"/>

@@ -21,6 +21,7 @@ package net.kourlas.voipms_sms.adapters;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +30,17 @@ public abstract class FilterableListViewAdapter<T> extends BaseAdapter implement
 
     private List<T> items;
     private String filterConstraint;
+    private ListView listView;
+    private boolean requestScrollToBottom;
 
-    public FilterableListViewAdapter() {
+    public FilterableListViewAdapter(ListView listView) {
         this.items = new ArrayList<T>();
         this.filterConstraint = "";
+        this.listView = listView;
+    }
+
+    public void requestScrollToBottom() {
+        requestScrollToBottom = true;
     }
 
     public void refresh() {
@@ -66,6 +74,11 @@ public abstract class FilterableListViewAdapter<T> extends BaseAdapter implement
             items.clear();
             items.addAll((List<T>) results.values);
             notifyDataSetChanged();
+
+            if (requestScrollToBottom) {
+                listView.smoothScrollToPosition(listView.getCount() - 1);
+                requestScrollToBottom = false;
+            }
         }
     }
 }

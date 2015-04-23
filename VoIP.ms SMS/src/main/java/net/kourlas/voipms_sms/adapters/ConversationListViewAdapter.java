@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.Filter;
+import android.widget.ListView;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
 import net.kourlas.voipms_sms.R;
@@ -56,7 +57,7 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
     SmsDatabaseAdapter smsDatabaseAdapter;
 
     public ConversationListViewAdapter(ConversationActivity activity, String contact) {
-        super();
+        super((ListView) activity.findViewById(R.id.list));
 
         this.activity = activity;
 
@@ -168,7 +169,7 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
             cursor.close();
         }
 
-        TextView text = (TextView) convertView.findViewById(R.id.text);
+        TextView text = (TextView) convertView.findViewById(R.id.message);
         text.setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
