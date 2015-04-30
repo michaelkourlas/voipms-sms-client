@@ -277,7 +277,8 @@ public class Api {
                     final List<String> dids = new ArrayList<String>();
                     JSONArray rawDids = result.getJSONArray("dids");
                     for (int i = 0; i < rawDids.length(); i++) {
-                        if (rawDids.getJSONObject(i).getString("sms_enabled").equals("1")) {
+                        if (rawDids.getJSONObject(i).getString("sms_available").equals("1") &&
+                                rawDids.getJSONObject(i).getString("sms_enabled").equals("1")) {
                             dids.add(rawDids.getJSONObject(i).getString("did"));
                         }
                     }
