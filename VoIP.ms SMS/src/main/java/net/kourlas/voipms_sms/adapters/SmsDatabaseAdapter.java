@@ -42,8 +42,8 @@ public class SmsDatabaseAdapter {
     private static final String COLUMN_MESSAGE = "message";
     private static final String COLUMN_UNREAD = "unread";
     private SQLiteDatabase database;
-    private SmsDatabaseHelper dbHelper;
-    private String[] columns = {COLUMN_ID, COLUMN_DATE,
+    private final SmsDatabaseHelper dbHelper;
+    private final String[] columns = {COLUMN_ID, COLUMN_DATE,
             COLUMN_TYPE, COLUMN_DID, COLUMN_CONTACT,
             COLUMN_MESSAGE, COLUMN_UNREAD};
 

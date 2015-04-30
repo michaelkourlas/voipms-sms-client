@@ -29,11 +29,12 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.text.InputType;
 import android.util.SparseBooleanArray;
 import android.view.*;
 import android.widget.*;
-import com.example.android.floatingactionbuttonbasic.FloatingActionButton;
 import net.kourlas.voipms_sms.Api;
 import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
@@ -43,7 +44,7 @@ import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
 
-public class ConversationsActivity extends Activity {
+public class ConversationsActivity extends ActionBarActivity {
     private Api api;
     private SmsDatabaseAdapter smsDatabaseAdapter;
     private ConversationsListViewAdapter conversationsListViewAdapter;
@@ -175,7 +176,7 @@ public class ConversationsActivity extends Activity {
             }
         });
 
-        FloatingActionButton button = (FloatingActionButton) findViewById(R.id.new_button);
+        ImageButton button = (ImageButton) findViewById(R.id.new_button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

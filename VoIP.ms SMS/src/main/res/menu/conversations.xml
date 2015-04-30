@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/search_button"
-        android:actionViewClass="android.widget.SearchView"
         android:icon="@drawable/ic_search_white_24dp"
-        android:showAsAction="ifRoom|collapseActionView"
-        android:title="@string/conversations_action_search"/>
+        android:title="@string/conversations_action_search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView"/>
     <item
         android:id="@+id/select_did_button"
-        android:showAsAction="never"
-        android:title="@string/conversations_action_select_dids"/>
+        android:title="@string/conversations_action_select_dids"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/preferences_button"
-        android:showAsAction="never"
-        android:title="@string/conversations_action_settings"/>
+        android:title="@string/conversations_action_settings"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/help_button"
-        android:showAsAction="never"
-        android:title="@string/conversations_action_help"/>
+        android:title="@string/conversations_action_help"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/credits_button"
-        android:showAsAction="never"
-        android:title="@string/conversations_action_credits"/>
+        android:title="@string/conversations_action_credits"
+        app:showAsAction="never"/>
 </menu>

@@ -27,7 +27,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class Sms implements Comparable<Sms> {
-    private long id;
+    private final long id;
     private Date date;
     private Type type;
     private String did;

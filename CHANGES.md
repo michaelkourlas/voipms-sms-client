@@ -1,6 +1,7 @@
 ## 0.2.2 ##
 
 * Bug fixes
+* Added compatibility with API version 16 (Jelly Bean)
 
 ## 0.2.1 ##
 

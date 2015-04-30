@@ -18,17 +18,20 @@
 
 package net.kourlas.voipms_sms.activities;
 
-import android.app.ActionBar;
-import android.app.Activity;
+import android.annotation.TargetApi;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Outline;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.SparseBooleanArray;
@@ -46,7 +49,7 @@ import net.kourlas.voipms_sms.model.Sms;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConversationActivity extends Activity {
+public class ConversationActivity extends ActionBarActivity {
     private String contact;
     private Api api;
     private SmsDatabaseAdapter smsDatabaseAdapter;
@@ -75,7 +78,7 @@ public class ConversationActivity extends Activity {
         }
 
         // Set up action bar
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             String contactName = Utils.getContactName(this, contact);
             if (contactName != null) {
@@ -155,8 +158,6 @@ public class ConversationActivity extends Activity {
                         SparseBooleanArray checkedItemPositions = listView.getCheckedItemPositions();
                         for (int i = 0; i < listView.getCount(); i++) {
                             if (checkedItemPositions.get(i)) {
-//                                listView.getChildAt(i).setTag(R.id.TAG_DELETING, true);
-//                                listView.getChildAt(i).setAlpha(0.5f);
                                 api.deleteSms(((Sms) conversationListViewAdapter.getItem(i)).getId());
                             }
                         }
@@ -180,13 +181,16 @@ public class ConversationActivity extends Activity {
         });
 
         final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        messageText.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 15);
-            }
-        });
-        messageText.setClipToOutline(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            messageText.setOutlineProvider(new ViewOutlineProvider() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 15);
+                }
+            });
+            messageText.setClipToOutline(true);
+        }
         messageText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -210,13 +214,16 @@ public class ConversationActivity extends Activity {
         });
 
         QuickContactBadge photo = (QuickContactBadge) findViewById(R.id.photo);
-        photo.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setOval(0, 0, view.getWidth(), view.getHeight());
-            }
-        });
-        photo.setClipToOutline(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            photo.setOutlineProvider(new ViewOutlineProvider() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                }
+            });
+            photo.setClipToOutline(true);
+        }
         photo.assignContactFromPhone(preferences.getDid(), true);
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(
                 preferences.getDid()));
@@ -236,13 +243,16 @@ public class ConversationActivity extends Activity {
         cursor.close();
 
         ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
-        sendButton.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setOval(0, 0, view.getWidth(), view.getHeight());
-            }
-        });
-        sendButton.setClipToOutline(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            sendButton.setOutlineProvider(new ViewOutlineProvider() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                }
+            });
+            sendButton.setClipToOutline(true);
+        }
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -277,7 +287,7 @@ public class ConversationActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             switch (item.getItemId()) {
                 case R.id.call_button:

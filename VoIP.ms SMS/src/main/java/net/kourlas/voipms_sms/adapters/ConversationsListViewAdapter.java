@@ -18,11 +18,13 @@
 
 package net.kourlas.voipms_sms.adapters;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Outline;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,8 +42,8 @@ import java.util.List;
 
 public class ConversationsListViewAdapter extends FilterableListViewAdapter<Conversation> {
 
-    ConversationsActivity activity;
-    SmsDatabaseAdapter smsDatabaseAdapter;
+    private final ConversationsActivity activity;
+    private final SmsDatabaseAdapter smsDatabaseAdapter;
 
     public ConversationsListViewAdapter(ConversationsActivity activity) {
         super((ListView) activity.findViewById(R.id.list));
@@ -64,23 +66,29 @@ public class ConversationsListViewAdapter extends FilterableListViewAdapter<Conv
         Sms sms = ((Conversation) getItem(position)).getMostRecentSms();
 
         ImageView checkedButton = (ImageView) convertView.findViewById(R.id.conversations_photo_checked);
-        checkedButton.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setOval(0, 0, view.getWidth(), view.getHeight());
-            }
-        });
-        checkedButton.setClipToOutline(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            checkedButton.setOutlineProvider(new ViewOutlineProvider() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                }
+            });
+            checkedButton.setClipToOutline(true);
+        }
 
         QuickContactBadge contactBadge = (QuickContactBadge) convertView.findViewById(R.id.photo);
         contactBadge.assignContactFromPhone(sms.getContact(), true);
-        contactBadge.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setOval(0, 0, view.getWidth(), view.getHeight());
-            }
-        });
-        contactBadge.setClipToOutline(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            contactBadge.setOutlineProvider(new ViewOutlineProvider() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                }
+            });
+            contactBadge.setClipToOutline(true);
+        }
 
         String photoUri = Utils.getContactPhotoUri(activity, sms.getContact());
         if (photoUri != null) {

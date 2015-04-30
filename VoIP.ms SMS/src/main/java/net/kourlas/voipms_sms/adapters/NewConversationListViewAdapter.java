@@ -18,10 +18,12 @@
 
 package net.kourlas.voipms_sms.adapters;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Outline;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,8 +43,8 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
     private static final int ITEM_PRIMARY = 0;
     private static final int ITEM_SECONDARY = 1;
 
-    String typedInPhoneNumber;
-    NewConversationActivity activity;
+    private String typedInPhoneNumber;
+    private final NewConversationActivity activity;
 
     public NewConversationListViewAdapter(NewConversationActivity activity) {
         super((ListView) activity.findViewById(R.id.list));
@@ -100,13 +102,16 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
 
         if (contactItem.isPrimary()) {
             QuickContactBadge photo = (QuickContactBadge) convertView.findViewById(R.id.photo);
-            photo.setOutlineProvider(new ViewOutlineProvider() {
-                @Override
-                public void getOutline(View view, Outline outline) {
-                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
-                }
-            });
-            photo.setClipToOutline(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                photo.setOutlineProvider(new ViewOutlineProvider() {
+                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                    @Override
+                    public void getOutline(View view, Outline outline) {
+                        outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                    }
+                });
+                photo.setClipToOutline(true);
+            }
 
             photo.assignContactFromPhone(contactItem.getPhoneNumber(), true);
 
@@ -261,11 +266,11 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
     }
 
     public static class ContactItem {
-        private String name;
-        private String phoneNumber;
-        private String photoUri;
+        private final String name;
+        private final String phoneNumber;
+        private final String photoUri;
         private boolean primary;
-        private boolean typedIn;
+        private final boolean typedIn;
 
         public ContactItem(String name, String phoneNumber, String photoUri, boolean primary, boolean typedIn) {
             this.name = name;

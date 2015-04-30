@@ -18,10 +18,12 @@
 
 package net.kourlas.voipms_sms.activities;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +35,7 @@ import net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter;
 
 import static net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter.ContactItem;
 
-public class NewConversationActivity extends Activity {
+public class NewConversationActivity extends ActionBarActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +43,7 @@ public class NewConversationActivity extends Activity {
 
         final Activity newConversationActivity = this;
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -75,9 +77,10 @@ public class NewConversationActivity extends Activity {
             });
             searchView.requestFocus();
 
+
+
             // Hide search icon
-            int magId = getResources().getIdentifier("android:id/search_mag_icon", null, null);
-            ImageView searchMagIcon = (ImageView) searchView.findViewById(magId);
+            ImageView searchMagIcon = (ImageView) searchView.findViewById(R.id.search_mag_icon);
             searchMagIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
 
             final ListView listView = (ListView) findViewById(R.id.list);
@@ -108,7 +111,7 @@ public class NewConversationActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             switch (item.getItemId()) {
                 case R.id.keyboard_button:

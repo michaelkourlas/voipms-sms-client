@@ -25,8 +25,8 @@ import android.preference.PreferenceManager;
 
 public class Preferences {
 
-    private Context context;
-    private SharedPreferences sharedPreferences;
+    private final Context context;
+    private final SharedPreferences sharedPreferences;
 
     public Preferences(Context context) {
         this.context = context;

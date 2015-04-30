@@ -25,8 +25,8 @@
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
         android:background="@drawable/button_background"
         android:contentDescription="@string/conversations_action_add"
+        android:elevation="8dp"
         android:src="@drawable/ic_add_white_24dp"/>
 </merge>

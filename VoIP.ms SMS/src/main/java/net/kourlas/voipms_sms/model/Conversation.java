@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Conversation implements Comparable<Conversation> {
-    private List<Sms> smses;
+    private final List<Sms> smses;
 
     public Conversation(Sms[] smses) {
         this.smses = new ArrayList<Sms>();

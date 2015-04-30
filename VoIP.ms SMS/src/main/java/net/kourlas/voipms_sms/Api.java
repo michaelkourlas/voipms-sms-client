@@ -55,9 +55,9 @@ import java.util.*;
 
 public class Api {
 
-    private Context context;
-    private Preferences preferences;
-    private SmsDatabaseAdapter smsDatabaseAdapter;
+    private final Context context;
+    private final Preferences preferences;
+    private final SmsDatabaseAdapter smsDatabaseAdapter;
 
     public Api(Context context) {
         this.context = context;

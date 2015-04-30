@@ -22,14 +22,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/primary"
+            android:contentDescription="@string/conversations_list_view_item_checked"
             android:scaleType="center"
             android:src="@drawable/ic_check_white_36dp"/>
     </ViewSwitcher>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:layout_width="match_parent"
-
                   android:layout_height="match_parent"
+                  android:layout_marginLeft="15dp"
                   android:layout_marginStart="15dp"
                   android:orientation="vertical">
 

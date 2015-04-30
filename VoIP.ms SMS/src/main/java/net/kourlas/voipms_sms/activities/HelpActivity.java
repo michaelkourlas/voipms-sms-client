@@ -18,19 +18,19 @@
 
 package net.kourlas.voipms_sms.activities;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.webkit.WebView;
 import net.kourlas.voipms_sms.R;
 
-public class HelpActivity extends Activity {
+public class HelpActivity extends ActionBarActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.help);
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);

@@ -18,7 +18,6 @@
 
 package net.kourlas.voipms_sms.activities;
 
-import android.app.ActionBar;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -26,18 +25,20 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.*;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
 
-public class PreferencesActivity extends PreferenceActivity {
+public class PreferencesActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PreferencesFragment()).commit();
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);

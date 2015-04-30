@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
-        minSdkVersion 21
+        minSdkVersion 16
         targetSdkVersion 22
         versionCode 103
         versionName "0.2.2"
@@ -30,7 +30,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -38,5 +38,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-v4:22.0.0'
+    compile 'com.android.support:support-v4:22.1.1'
+    compile 'com.android.support:appcompat-v7:22.1.1'
 }

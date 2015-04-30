@@ -11,6 +11,7 @@
     <string name="conversations_action_add">Add</string>
     <string name="conversations_action_mark_read">Mark as read</string>
     <string name="conversations_action_mark_unread">Mark as unread</string>
+    <string name="conversations_list_view_item_checked">Checked</string>
 
     <string name="conversation_action_call">Make a call</string>
     <string name="conversation_action_search">Search</string>

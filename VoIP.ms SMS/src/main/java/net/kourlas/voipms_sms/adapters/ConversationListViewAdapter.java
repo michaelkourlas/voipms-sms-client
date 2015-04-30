@@ -18,10 +18,12 @@
 
 package net.kourlas.voipms_sms.adapters;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Outline;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -52,9 +54,9 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
     private static final int ITEM_RIGHT_PRIMARY = 2;
     private static final int ITEM_RIGHT_SECONDARY = 3;
 
-    ConversationActivity activity;
-    String contact;
-    SmsDatabaseAdapter smsDatabaseAdapter;
+    private final ConversationActivity activity;
+    private final String contact;
+    private final SmsDatabaseAdapter smsDatabaseAdapter;
 
     public ConversationListViewAdapter(ConversationActivity activity, String contact) {
         super((ListView) activity.findViewById(R.id.list));
@@ -133,13 +135,16 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
 
         if (viewType == ITEM_LEFT_PRIMARY || viewType == ITEM_RIGHT_PRIMARY) {
             QuickContactBadge photo = (QuickContactBadge) convertView.findViewById(R.id.photo);
-            photo.setOutlineProvider(new ViewOutlineProvider() {
-                @Override
-                public void getOutline(View view, Outline outline) {
-                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
-                }
-            });
-            photo.setClipToOutline(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                photo.setOutlineProvider(new ViewOutlineProvider() {
+                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                    @Override
+                    public void getOutline(View view, Outline outline) {
+                        outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                    }
+                });
+                photo.setClipToOutline(true);
+            }
             if (viewType == ITEM_LEFT_PRIMARY) {
                 photo.assignContactFromPhone(sms.getContact(), true);
             } else {
@@ -170,13 +175,16 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
         }
 
         TextView text = (TextView) convertView.findViewById(R.id.message);
-        text.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 15);
-            }
-        });
-        text.setClipToOutline(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            text.setOutlineProvider(new ViewOutlineProvider() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 15);
+                }
+            });
+            text.setClipToOutline(true);
+        }
 
         final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(sms.getMessage() + "\n" + Utils.getFormattedDate(sms.getDate()));
         final AbsoluteSizeSpan sizeSpan = new AbsoluteSizeSpan(12, true);

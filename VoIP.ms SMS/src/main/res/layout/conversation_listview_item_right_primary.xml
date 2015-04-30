@@ -15,8 +15,10 @@
             android:id="@+id/placeholder"
             android:layout_width="45dp"
             android:layout_height="45dp"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_gravity="bottom"
+            android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp"/>
 
         <QuickContactBadge
@@ -24,7 +26,9 @@
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
             android:layout_gravity="bottom"
+            android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp"
             android:scaleType="centerCrop"/>
 
@@ -32,6 +36,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/placeholder"
+            android:layout_toLeftOf="@id/photo"
+            android:layout_toRightOf="@id/placeholder"
             android:layout_toStartOf="@id/photo">
 
             <TextView
@@ -39,6 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_gravity="bottom"
                 android:background="@android:color/white"
                 android:padding="10dp"

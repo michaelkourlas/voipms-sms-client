@@ -28,9 +28,9 @@ import java.util.List;
 
 public abstract class FilterableListViewAdapter<T> extends BaseAdapter implements Filterable {
 
-    private List<T> items;
+    private final List<T> items;
     private String filterConstraint;
-    private ListView listView;
+    private final ListView listView;
     private boolean requestScrollToBottom;
 
     public FilterableListViewAdapter(ListView listView) {
