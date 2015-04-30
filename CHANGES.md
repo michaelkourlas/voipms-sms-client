@@ -1,3 +1,7 @@
+## 0.2.2 ##
+
+* Bug fixes
+
 ## 0.2.1 ##
 
 * First run setup dialog added
