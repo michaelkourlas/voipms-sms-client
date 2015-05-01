@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -142,8 +142,8 @@ public class ConversationsListViewAdapter extends FilterableListViewAdapter<Conv
                     Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
                             Uri.encode(conversation.getContact()));
                     Cursor cursor = activity.getContentResolver().query(uri, new String[]{
-                                    ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null,
-                            null);
+                                    ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.DISPLAY_NAME}, null,
+                            null, null);
                     if (cursor.moveToFirst()) {
                         contactName = cursor.getString(cursor.getColumnIndex(
                                 ContactsContract.PhoneLookup.DISPLAY_NAME));

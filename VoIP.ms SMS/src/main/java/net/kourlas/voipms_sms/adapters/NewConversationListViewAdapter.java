@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -42,9 +42,8 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
     private static final int ITEM_COUNT = 2;
     private static final int ITEM_PRIMARY = 0;
     private static final int ITEM_SECONDARY = 1;
-
-    private String typedInPhoneNumber;
     private final NewConversationActivity activity;
+    private String typedInPhoneNumber;
 
     public NewConversationListViewAdapter(NewConversationActivity activity) {
         super((ListView) activity.findViewById(R.id.list));
@@ -127,7 +126,7 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
 
             TextView contactTextView = (TextView) convertView.findViewById(R.id.contact);
             if (contactItem.isTypedIn()) {
-                contactTextView.setText("Manual entry");
+                contactTextView.setText(activity.getString(R.string.new_conversation_manual_entry));
             } else {
                 contactTextView.setText(contactItem.getName());
             }
@@ -227,7 +226,8 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
                 }
                 cursor.close();
                 if (typedInPhoneNumber != null) {
-                    phoneNumberEntries.add(0, new ContactItem(typedInPhoneNumber, typedInPhoneNumber, null, true, true));
+                    phoneNumberEntries.add(0, new ContactItem(typedInPhoneNumber, typedInPhoneNumber, null, true,
+                            true));
                 }
 
                 for (ContactItem contactItem : phoneNumberEntries) {
@@ -269,8 +269,8 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
         private final String name;
         private final String phoneNumber;
         private final String photoUri;
-        private boolean primary;
         private final boolean typedIn;
+        private boolean primary;
 
         public ContactItem(String name, String phoneNumber, String photoUri, boolean primary, boolean typedIn) {
             this.name = name;

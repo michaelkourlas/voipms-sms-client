@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -29,7 +29,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.text.InputType;
 import android.util.SparseBooleanArray;
@@ -44,7 +44,7 @@ import net.kourlas.voipms_sms.adapters.SmsDatabaseAdapter;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
 
-public class ConversationsActivity extends ActionBarActivity {
+public class ConversationsActivity extends AppCompatActivity {
     private Api api;
     private SmsDatabaseAdapter smsDatabaseAdapter;
     private ConversationsListViewAdapter conversationsListViewAdapter;
@@ -70,7 +70,7 @@ public class ConversationsActivity extends ActionBarActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                api.updateSmses();
+                api.updateSmsDatabase();
             }
         });
 
@@ -181,14 +181,14 @@ public class ConversationsActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 if (preferences.getEmail().equals("")) {
-                    Toast.makeText(getApplicationContext(), "New Conversation: VoIP.ms portal email not set",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getResources().getString(
+                            R.string.api_new_conversation_email), Toast.LENGTH_LONG).show();
                 } else if (preferences.getPassword().equals("")) {
-                    Toast.makeText(getApplicationContext(), "New Conversation: VoIP.ms API password not set",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getResources().getString(
+                            R.string.api_new_conversation_password), Toast.LENGTH_LONG).show();
                 } else if (preferences.getDid().equals("")) {
-                    Toast.makeText(getApplicationContext(), "New Conversation: DID not set",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.api_new_conversation_did),
+                            Toast.LENGTH_LONG).show();
                 } else {
                     Intent intent = new Intent(conversationsActivity, NewConversationActivity.class);
                     startActivity(intent);
@@ -208,22 +208,15 @@ public class ConversationsActivity extends ActionBarActivity {
 
         if (preferences.getFirstRun()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Before using this app, make sure to set your VoIP.ms portal email address and API " +
-                    "password in Settings.\n\nAfter setting your email and password, you will also need to pick an " +
-                    "SMS-enabled DID by tapping the Select DID option in the menu at the upper right-hand corner of " +
-                    "this screen.");
-            builder.setNegativeButton("Settings", new DialogInterface.OnClickListener() {
+            builder.setMessage(getString(R.string.conversations_first_run_dialog_text));
+            builder.setPositiveButton(getString(R.string.preferences_name), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     Intent preferencesIntent = new Intent(conversationsActivity, PreferencesActivity.class);
                     startActivity(preferencesIntent);
                     preferences.setFirstRun(false);
                 }
             });
-            builder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    preferences.setFirstRun(false);
-                }
-            });
+            builder.setCancelable(false);
             builder.show();
         }
     }
@@ -239,7 +232,7 @@ public class ConversationsActivity extends ActionBarActivity {
         conversationsListViewAdapter.refresh();
 
         if (!preferences.getFirstRun()) {
-            api.updateSmses();
+            api.updateSmsDatabase();
         }
 
         getPackageManager().setComponentEnabledSetting(new ComponentName(this, RefreshReceiver.class),
@@ -275,7 +268,7 @@ public class ConversationsActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.select_did_button:
-                api.updateDid();
+                api.showSelectDidDialog();
                 return true;
             case R.id.preferences_button:
                 Intent preferencesIntent = new Intent(this, PreferencesActivity.class);

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -162,7 +162,8 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
                     ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI,
                     ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
             if (cursor.moveToFirst()) {
-                String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
+                String photoUri = cursor.getString(cursor.getColumnIndex(
+                        ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
                 if (photoUri != null) {
                     photo.setImageURI(Uri.parse(photoUri));
                 } else {
@@ -186,10 +187,13 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
             text.setClipToOutline(true);
         }
 
-        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(sms.getMessage() + "\n" + Utils.getFormattedDate(sms.getDate()));
+        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(sms.getMessage() + "\n" +
+                Utils.getFormattedDate(sms.getDate()));
         final AbsoluteSizeSpan sizeSpan = new AbsoluteSizeSpan(12, true);
-        spannableStringBuilder.setSpan(sizeSpan, sms.getMessage().length(), spannableStringBuilder.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        spannableStringBuilder.setSpan(new SubscriptSpan(), sms.getMessage().length(), spannableStringBuilder.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        spannableStringBuilder.setSpan(sizeSpan, sms.getMessage().length(), spannableStringBuilder.length(),
+                Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        spannableStringBuilder.setSpan(new SubscriptSpan(), sms.getMessage().length(), spannableStringBuilder.length(),
+                Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         text.setText(spannableStringBuilder);
 
         return convertView;

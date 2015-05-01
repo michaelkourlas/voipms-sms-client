@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -41,11 +41,11 @@ public class SmsDatabaseAdapter {
     private static final String COLUMN_CONTACT = "contact";
     private static final String COLUMN_MESSAGE = "message";
     private static final String COLUMN_UNREAD = "unread";
-    private SQLiteDatabase database;
     private final SmsDatabaseHelper dbHelper;
     private final String[] columns = {COLUMN_ID, COLUMN_DATE,
             COLUMN_TYPE, COLUMN_DID, COLUMN_CONTACT,
             COLUMN_MESSAGE, COLUMN_UNREAD};
+    private SQLiteDatabase database;
 
     public SmsDatabaseAdapter(Context context) {
         dbHelper = new SmsDatabaseHelper(context);

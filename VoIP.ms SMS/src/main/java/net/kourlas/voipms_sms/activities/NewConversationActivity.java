@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -22,20 +22,23 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter;
 
 import static net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter.ContactItem;
 
-public class NewConversationActivity extends ActionBarActivity {
+public class NewConversationActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,8 +79,6 @@ public class NewConversationActivity extends ActionBarActivity {
                 }
             });
             searchView.requestFocus();
-
-
 
             // Hide search icon
             ImageView searchMagIcon = (ImageView) searchView.findViewById(R.id.search_mag_icon);

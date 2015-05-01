@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -22,6 +22,7 @@ import android.annotation.TargetApi;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Outline;
 import android.net.Uri;
@@ -30,7 +31,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -49,7 +50,7 @@ import net.kourlas.voipms_sms.model.Sms;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConversationActivity extends ActionBarActivity {
+public class ConversationActivity extends AppCompatActivity {
     private String contact;
     private Api api;
     private SmsDatabaseAdapter smsDatabaseAdapter;
@@ -141,8 +142,8 @@ public class ConversationActivity extends ActionBarActivity {
                 switch (item.getItemId()) {
                     case R.id.copy_button:
                         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("Text message", ((Sms) conversationListViewAdapter.getItem(
-                                selectedItems.get(0))).getMessage());
+                        ClipData clip = ClipData.newPlainText("Text message",
+                                ((Sms) conversationListViewAdapter.getItem(selectedItems.get(0))).getMessage());
                         clipboard.setPrimaryClip(clip);
                         mode.finish();
                         return true;
@@ -267,6 +268,11 @@ public class ConversationActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.conversation, menu);
+
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            MenuItem phoneMenuItem = menu.findItem(R.id.call_button);
+            phoneMenuItem.setVisible(false);
+        }
 
         SearchView searchView = (SearchView) menu.findItem(R.id.search_button).getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

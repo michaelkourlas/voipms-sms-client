@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -29,8 +29,8 @@ import java.util.List;
 public abstract class FilterableListViewAdapter<T> extends BaseAdapter implements Filterable {
 
     private final List<T> items;
-    private String filterConstraint;
     private final ListView listView;
+    private String filterConstraint;
     private boolean requestScrollToBottom;
 
     public FilterableListViewAdapter(ListView listView) {

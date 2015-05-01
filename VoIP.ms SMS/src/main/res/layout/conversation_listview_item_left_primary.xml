@@ -8,47 +8,47 @@
                                                     android:paddingTop="10dp">
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <QuickContactBadge
-            android:id="@+id/photo"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_gravity="bottom"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:scaleType="centerCrop"/>
+                android:id="@+id/photo"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_gravity="bottom"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:scaleType="centerCrop"/>
 
         <View
-            android:id="@+id/placeholder"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_gravity="bottom"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"/>
+                android:id="@+id/placeholder"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"/>
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/photo"
-            android:layout_toLeftOf="@id/placeholder"
-            android:layout_toRightOf="@id/photo"
-            android:layout_toStartOf="@id/placeholder">
-
-            <TextView
-                android:id="@+id/message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:background="@color/primary"
-                android:padding="10dp"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"/>
+                android:layout_toEndOf="@id/photo"
+                android:layout_toLeftOf="@id/placeholder"
+                android:layout_toRightOf="@id/photo"
+                android:layout_toStartOf="@id/placeholder">
+
+            <TextView
+                    android:id="@+id/message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:background="@color/primary"
+                    android:padding="10dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"/>
         </LinearLayout>
     </RelativeLayout>
 </net.kourlas.voipms_sms.ui.ConversationListViewItem>

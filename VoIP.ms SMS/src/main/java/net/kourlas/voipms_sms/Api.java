@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright � 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -28,6 +28,7 @@ import android.os.AsyncTask;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -54,6 +55,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Api {
+    private static final String TAG = "Api";
 
     private final Context context;
     private final Preferences preferences;
@@ -61,20 +63,20 @@ public class Api {
 
     public Api(Context context) {
         this.context = context;
-
         this.preferences = new Preferences(context);
-
         this.smsDatabaseAdapter = new SmsDatabaseAdapter(context);
         this.smsDatabaseAdapter.open();
     }
 
-    public void updateDid() {
+    public void showSelectDidDialog() {
         if (preferences.getEmail().equals("")) {
-            Toast.makeText(context.getApplicationContext(), "Update DID: VoIP.ms portal email not set",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_did_email),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_update_did_email");
         } else if (preferences.getPassword().equals("")) {
-            Toast.makeText(context.getApplicationContext(), "Update DID: VoIP.ms API password not set",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_did_password),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_update_did_password");
         } else if (isNetworkConnectionAvailable()) {
             try {
                 String voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" +
@@ -83,36 +85,40 @@ public class Api {
                         "method=getDIDsInfo";
                 new UpdateDidAsyncTask().execute(voipUrl);
             } catch (UnsupportedEncodingException ex) {
-                Toast.makeText(context.getApplicationContext(),
-                        "Update DID: Email address or password contains invalid characters " +
-                                "(UnsupportedEncodingException)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context.getApplicationContext(), context.getString(
+                        R.string.api_update_did_unsupported_encoding_exception), Toast.LENGTH_LONG).show();
+                Log.w(TAG, "api_update_did_unsupported_encoding_exception: " + Log.getStackTraceString(ex));
             }
         } else {
-            Toast.makeText(context.getApplicationContext(), "Update DID: Network connection unavailable",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_did_network),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_update_did_network");
         }
     }
 
-    public void updateSmses() {
-        updateSmses(false);
+    public void updateSmsDatabase() {
+        updateSmsDatabase(false);
     }
 
-    public void updateSmses(boolean silent) {
+    public void updateSmsDatabase(boolean background) {
         if (preferences.getEmail().equals("")) {
-            if (!silent) {
-                Toast.makeText(context.getApplicationContext(), "Update SMSes: VoIP.ms portal email not set",
-                        Toast.LENGTH_SHORT).show();
+            if (!background) {
+                Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_smses_email),
+                        Toast.LENGTH_LONG).show();
             }
+            Log.w(TAG, "api_update_smses_email");
         } else if (preferences.getPassword().equals("")) {
-            if (!silent) {
-                Toast.makeText(context.getApplicationContext(), "Update SMSes: VoIP.ms API password not set",
-                        Toast.LENGTH_SHORT).show();
+            if (!background) {
+                Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_smses_password),
+                        Toast.LENGTH_LONG).show();
             }
+            Log.w(TAG, "api_update_smses_password");
         } else if (preferences.getDid().equals("")) {
-            if (!silent) {
-                Toast.makeText(context.getApplicationContext(), "Update SMSes: DID not set",
-                        Toast.LENGTH_SHORT).show();
+            if (!background) {
+                Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_smses_did),
+                        Toast.LENGTH_LONG).show();
             }
+            Log.w(TAG, "api_update_smses_did");
         } else if (isNetworkConnectionAvailable()) {
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             calendar.add(Calendar.DAY_OF_YEAR, -preferences.getDaysToSync());
@@ -131,20 +137,21 @@ public class Api {
                         "to=" + URLEncoder.encode(sdf.format(Calendar.getInstance(
                         TimeZone.getTimeZone("UTC")).getTime()), "UTF-8") + "&" +
                         "timezone=-1";
-                new UpdateSmsesAsyncTask().execute(voipUrl, Boolean.toString(silent));
+                new UpdateSmsesAsyncTask().execute(voipUrl, Boolean.toString(background));
                 return;
             } catch (UnsupportedEncodingException ex) {
-                if (!silent) {
-                    Toast.makeText(context.getApplicationContext(),
-                            "Update SMSes: Email address or password contains invalid characters " +
-                                    "(UnsupportedEncodingException)", Toast.LENGTH_SHORT).show();
+                if (!background) {
+                    Toast.makeText(context.getApplicationContext(), context.getString(
+                            R.string.api_update_smses_unsupported_encoding_exception), Toast.LENGTH_LONG).show();
                 }
+                Log.w(TAG, "api_update_smses_unsupported_encoding_exception: " + Log.getStackTraceString(ex));
             }
         } else {
-            if (!silent) {
-                Toast.makeText(context.getApplicationContext(), "Update SMSes: Network connection unavailable",
-                        Toast.LENGTH_SHORT).show();
+            if (!background) {
+                Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_smses_network),
+                        Toast.LENGTH_LONG).show();
             }
+            Log.w(TAG, "api_update_smses_network");
         }
 
         if (context instanceof ConversationsActivity) {
@@ -154,18 +161,18 @@ public class Api {
         } else if (context instanceof ConversationActivity) {
             ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.INVISIBLE);
-
-
         }
     }
 
     public void deleteSms(long smsId) {
         if (preferences.getEmail().equals("")) {
-            Toast.makeText(context.getApplicationContext(), "Delete SMS: VoIP.ms portal email not set",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_delete_sms_email),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_delete_sms_email");
         } else if (preferences.getPassword().equals("")) {
-            Toast.makeText(context.getApplicationContext(), "Delete SMS: VoIP.ms API password not set",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_delete_sms_password),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_delete_sms_password");
         } else if (isNetworkConnectionAvailable()) {
             try {
                 String voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" +
@@ -175,25 +182,30 @@ public class Api {
                         "id=" + smsId;
                 new DeleteSmsAsyncTask().execute(voipUrl, smsId + "");
             } catch (UnsupportedEncodingException ex) {
-                Toast.makeText(context.getApplicationContext(),
-                        "Delete SMS: Email address or password contains invalid characters " +
-                                "(UnsupportedEncodingException)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context.getApplicationContext(), context.getString(
+                        R.string.api_delete_sms_unsupported_encoding_exception), Toast.LENGTH_LONG).show();
+                Log.w(TAG, "api_delete_sms_unsupported_encoding_exception: " + Log.getStackTraceString(ex));
             }
         } else {
-            Toast.makeText(context.getApplicationContext(), "Delete SMS: Network connection unavailable",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_delete_sms_network),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_delete_sms_network");
         }
     }
 
     public void sendSms(String contact, String message) {
         if (preferences.getEmail().equals("")) {
-            Toast.makeText(context.getApplicationContext(), "Send SMS: VoIP.ms portal email not set",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_send_sms_email),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_send_sms_email");
         } else if (preferences.getPassword().equals("")) {
-            Toast.makeText(context.getApplicationContext(), "Send SMS: VoIP.ms API password not set",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_send_sms_password),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_send_sms_password");
         } else if (preferences.getDid().equals("")) {
-            Toast.makeText(context.getApplicationContext(), "Send SMS: DID not set", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_send_sms_did),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_send_sms_did");
         } else if (isNetworkConnectionAvailable()) {
             try {
                 String voipUrl = "https://www.voip.ms/api/v1/rest.php?" + "&" +
@@ -206,13 +218,14 @@ public class Api {
                 new SendSmsAsyncTask().execute(voipUrl);
                 return;
             } catch (UnsupportedEncodingException ex) {
-                Toast.makeText(context.getApplicationContext(),
-                        "Send SMS: Email address or password contains invalid characters " +
-                                "(UnsupportedOperationException)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context.getApplicationContext(), context.getString(
+                        R.string.api_send_sms_unsupported_encoding_exception), Toast.LENGTH_LONG).show();
+                Log.w(TAG, "api_send_sms_unsupported_encoding_exception: " + Log.getStackTraceString(ex));
             }
         } else {
-            Toast.makeText(context.getApplicationContext(), "Send SMS: Network connection unavailable",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_send_sms_network),
+                    Toast.LENGTH_LONG).show();
+            Log.w(TAG, "api_send_sms_network");
         }
 
         if (context instanceof ConversationActivity) {
@@ -251,11 +264,6 @@ public class Api {
         }
     }
 
-    /**
-     * Tests whether or not there is a network connection available.
-     *
-     * @return true if there is an available network connection, false otherwise.
-     */
     private boolean isNetworkConnectionAvailable() {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -263,7 +271,6 @@ public class Api {
     }
 
     private class UpdateDidAsyncTask extends AsyncTask<String, Void, JSONObject> {
-
         @Override
         protected JSONObject doInBackground(String... params) {
             return getJson(params[0]);
@@ -284,8 +291,8 @@ public class Api {
                     }
 
                     if (dids.size() == 0) {
-                        Toast.makeText(context.getApplicationContext(), "Update DID: No DIDs in account",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context.getApplicationContext(), context.getResources().getString(
+                                R.string.api_update_did_no_dids), Toast.LENGTH_LONG).show();
                     } else {
                         // A list is used instead of a simple integer because the variable must be made final
                         final List<Integer> selectedItemList = new ArrayList<Integer>();
@@ -295,7 +302,7 @@ public class Api {
                         dids.toArray(didsArray);
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                        builder.setTitle("Select DID");
+                        builder.setTitle(context.getString(R.string.conversations_select_did_dialog_title));
                         builder.setSingleChoiceItems(didsArray, 0, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -303,8 +310,9 @@ public class Api {
                                 selectedItemList.add(which);
                             }
                         });
-                        builder.setNegativeButton("Cancel", null);
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        builder.setNegativeButton(context.getString(R.string.cancel), null);
+                        builder.setPositiveButton(context.getString(R.string.ok),
+                                new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 int selectedItem = selectedItemList.get(0);
@@ -315,25 +323,26 @@ public class Api {
                                 if (context instanceof ConversationsActivity) {
                                     ConversationsActivity conversationsActivity = (ConversationsActivity) context;
                                     conversationsActivity.getConversationsListViewAdapter().refresh();
-                                    updateSmses();
+                                    updateSmsDatabase();
                                 }
                             }
                         });
                         builder.show();
                     }
                 } else {
-                    Toast.makeText(context.getApplicationContext(),
-                            "Update DID: VoIP.ms API returned error (" + status + ")", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_did_api) +
+                            status + ")", Toast.LENGTH_LONG).show();
+                    Log.w(TAG, "api_update_did_api: " + status);
                 }
             } catch (JSONException ex) {
-                Toast.makeText(context.getApplicationContext(),
-                        "Update DID: Unable to parse VoIP.ms API response (JSONException)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_did_parse),
+                        Toast.LENGTH_LONG).show();
+                Log.w(TAG, "api_update_did_parse: " + Log.getStackTraceString(ex));
             }
         }
     }
 
     private class UpdateSmsesAsyncTask extends AsyncTask<String, Void, List<Object>> {
-
         @Override
         protected List<Object> doInBackground(String... params) {
             List<Object> list = new ArrayList<Object>();
@@ -386,7 +395,6 @@ public class Api {
                         Conversation[] conversations = smsDatabaseAdapter.getAllConversations();
                         for (Conversation conversation : conversations) {
                             if (conversation.isUnread() && newSmses.contains(conversation.getMostRecentSms())) {
-
                                 String smsContact = Utils.getContactName(context, conversation.getContact());
                                 if (smsContact == null) {
                                     smsContact = Utils.getFormattedPhoneNumber(conversation.getContact());
@@ -407,7 +415,8 @@ public class Api {
                                     }
                                 }
 
-                                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+                                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
+                                        context);
                                 notificationBuilder.setSmallIcon(R.drawable.ic_message_white_18dp);
                                 notificationBuilder.setContentTitle(smsContact);
                                 notificationBuilder.setContentText(smsText);
@@ -425,12 +434,11 @@ public class Api {
                                 notificationBuilder.setContentIntent(resultPendingIntent);
                                 notificationBuilder.setAutoCancel(true);
 
-                                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                                NotificationManager notificationManager = (NotificationManager)
+                                        context.getSystemService(Context.NOTIFICATION_SERVICE);
                                 notificationManager.notify((int) smsId, notificationBuilder.build());
                             }
                         }
-
-
                     } else if (context instanceof ConversationsActivity) {
                         ConversationsActivity conversationsActivity = (ConversationsActivity) context;
                         conversationsActivity.getConversationsListViewAdapter().refresh();
@@ -447,28 +455,30 @@ public class Api {
 
                         conversationActivity.getConversationListViewAdapter().requestScrollToBottom();
 
-                        ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(R.id.progress_bar);
+                        ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(
+                                R.id.progress_bar);
                         progressBar.setVisibility(View.INVISIBLE);
                     }
 
                     return;
                 } else {
                     if (!silent) {
-                        Toast.makeText(context.getApplicationContext(),
-                                "Update SMSes: VoIP.ms API returned error (" + status + ")", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context.getApplicationContext(), context.getString(
+                                R.string.api_update_smses_api) + status + ")", Toast.LENGTH_LONG).show();
+                        Log.w(TAG, "api_update_smses_api: " + status);
                     }
                 }
             } catch (JSONException ex) {
                 if (!silent) {
-                    Toast.makeText(context.getApplicationContext(),
-                            "Update SMSes: Unable to parse VoIP.ms API response (JSONException)",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_smses_parse),
+                            Toast.LENGTH_LONG).show();
+                    Log.w(TAG, "api_update_smses_parse: " + Log.getStackTraceString(ex));
                 }
             } catch (ParseException ex) {
                 if (!silent) {
-                    Toast.makeText(context.getApplicationContext(),
-                            "Update SMSes: Unable to parse VoIP.ms API response (ParseException)",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context.getApplicationContext(), context.getString(R.string.api_update_smses_parse),
+                            Toast.LENGTH_LONG).show();
+                    Log.w(TAG, "api_update_smses_parse: " + Log.getStackTraceString(ex));
                 }
             }
 
@@ -484,13 +494,11 @@ public class Api {
     }
 
     private class DeleteSmsAsyncTask extends AsyncTask<String, Void, List<Object>> {
-
         @Override
         protected List<Object> doInBackground(String... params) {
             List<Object> list = new ArrayList<Object>();
             list.add(getJson(params[0]));
             list.add(params[1]);
-
             return list;
         }
 
@@ -511,23 +519,25 @@ public class Api {
                         ConversationActivity conversationActivity = (ConversationActivity) context;
                         conversationActivity.getConversationListViewAdapter().refresh();
 
-                        if (smsDatabaseAdapter.getConversation(conversationActivity.getContact()).getAllSms().length == 0) {
+                        if (smsDatabaseAdapter.getConversation(
+                                conversationActivity.getContact()).getAllSms().length == 0) {
                             NavUtils.navigateUpFromSameTask(conversationActivity);
                         }
                     }
                 } else {
-                    Toast.makeText(context.getApplicationContext(),
-                            "Delete SMS: VoIP.ms API returned error (" + status + ")", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context.getApplicationContext(), context.getResources().getString(
+                            R.string.api_delete_sms_api) + status + ")", Toast.LENGTH_LONG).show();
+                    Log.w(TAG, "api_delete_sms_api: " + status);
                 }
             } catch (JSONException ex) {
-                Toast.makeText(context.getApplicationContext(),
-                        "Delete SMS: Unable to parse VoIP.ms API response (JSONException)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context.getApplicationContext(), context.getResources().getString(
+                        R.string.api_delete_sms_parse), Toast.LENGTH_LONG).show();
+                Log.w(TAG, "api_delete_sms_parse: " + Log.getStackTraceString(ex));
             }
         }
     }
 
     private class SendSmsAsyncTask extends AsyncTask<String, Void, JSONObject> {
-
         @Override
         protected JSONObject doInBackground(String... params) {
             return getJson(params[0]);
@@ -538,19 +548,22 @@ public class Api {
             try {
                 String status = result.getString("status");
                 if (status.equals("success")) {
-                    updateSmses();
+                    updateSmsDatabase();
                     return;
                 } else {
-                    Toast.makeText(context.getApplicationContext(),
-                            "Send SMS: VoIP.ms API returned error (" + status + ")", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context.getApplicationContext(), context.getResources().getString(
+                            R.string.api_send_sms_api) + status + ")", Toast.LENGTH_LONG).show();
+                    Log.w(TAG, "api_send_sms_api: " + status);
                 }
             } catch (JSONException ex) {
-                Toast.makeText(context.getApplicationContext(),
-                        "Send SMS: Unable to parse VoIP.ms API response (JSONException)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context.getApplicationContext(), context.getResources().getString(
+                        R.string.api_send_sms_parse), Toast.LENGTH_LONG).show();
+                Log.w(TAG, "api_send_sms_parse: " + Log.getStackTraceString(ex));
             }
 
             if (context instanceof ConversationActivity) {
-                ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(R.id.progress_bar);
+                ProgressBar progressBar = (ProgressBar) ((ConversationActivity) context).findViewById(
+                        R.id.progress_bar);
                 progressBar.setVisibility(View.INVISIBLE);
             }
         }

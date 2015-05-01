@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -35,16 +35,6 @@ public class Sms implements Comparable<Sms> {
     private String message;
     private boolean isUnread;
 
-    /**
-     * Initializes a new instance of the Sms class. This constructor is used to re-create SMS objects from the database.
-     *
-     * @param id      The ID associated with the SMS.
-     * @param date    The date the SMS was received.
-     * @param type    The type of SMS (incoming or outgoing).
-     * @param did     The local phone number associated with the SMS.
-     * @param contact The remote phone number associated with the SMS.
-     * @param message The text of the SMS.
-     */
     public Sms(long id, long date, long type, String did, String contact, String message, long isUnread) {
         this.id = id;
         this.date = new Date(date * 1000);
@@ -55,18 +45,6 @@ public class Sms implements Comparable<Sms> {
         this.isUnread = isUnread == 1;
     }
 
-    /**
-     * Initializes a new instance of the Sms class. This constructor is used to create SMS objects from data collected
-     * from the VoIP.ms API. SMSes are unread by default.
-     *
-     * @param id      The ID associated with the SMS.
-     * @param date    The date the SMS was received.
-     * @param type    The type of SMS (incoming or outgoing).
-     * @param did     The local phone number associated with the SMS.
-     * @param contact The remote phone number associated with the SMS.
-     * @param message The text of the SMS.
-     * @throws ParseException when the date parameter does not contain a valid date string from the VoIP.ms API.
-     */
     public Sms(String id, String date, String type, String did, String contact, String message) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -80,11 +58,6 @@ public class Sms implements Comparable<Sms> {
         this.isUnread = type.equals("1");
     }
 
-    /**
-     * Gets the ID associated with the SMS.
-     *
-     * @return the ID associated with the SMS.
-     */
     public long getId() {
         return id;
     }

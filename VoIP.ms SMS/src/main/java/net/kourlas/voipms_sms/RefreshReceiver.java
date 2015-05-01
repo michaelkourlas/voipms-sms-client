@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright © 2015 Michael Kourlas
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -26,6 +26,6 @@ public class RefreshReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Api api = new Api(context);
-        api.updateSmses(true);
+        api.updateSmsDatabase(true);
     }
 }
