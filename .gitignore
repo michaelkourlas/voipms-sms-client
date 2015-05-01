@@ -6,8 +6,8 @@
 release
 
 # IntelliJ IDEA
-.idea
-*.iml
+.idea/workspace.xml
+.idea/tasks.xml
 
 #############
 ## Android
