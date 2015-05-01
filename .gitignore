@@ -41,7 +41,7 @@ proguard/
 *.log
 
 #############
-## Windows
+## Windows and OS X
 #############
 
 # Windows image file caches
