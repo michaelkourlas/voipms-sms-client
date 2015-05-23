@@ -1,5 +1,4 @@
-VoIP.ms SMS
-
+VoIP.ms SMS<br\>
 Copyright (C) 2015 Michael Kourlas and other contributors
 
 ## Apache License 2.0 ##
