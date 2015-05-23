@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.notifications;
+package net.kourlas.voipms_sms.gcm;
 
 import android.app.Activity;
 import android.content.ComponentName;

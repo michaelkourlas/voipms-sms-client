@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.notifications;
+package net.kourlas.voipms_sms.gcm;
 
 import android.app.Activity;
 import android.content.Context;
@@ -33,6 +33,8 @@ import org.json.simple.JSONObject;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Gcm {
     private static final String SENDER_ID = "626231576786";
@@ -90,10 +92,10 @@ public class Gcm {
         return true;
     }
 
-    private void registerInBackground(final Activity activity) {
-        new AsyncTask<Void, Void, Boolean>() {
+    private void registerInBackground(final Activity activity, final boolean showFeedback) {
+        new AsyncTask<Boolean, Void, List<Object>>() {
             @Override
-            protected Boolean doInBackground(Void... params) {
+            protected List<Object> doInBackground(Boolean... params) {
                 try {
                     GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(applicationContext);
 
@@ -101,21 +103,32 @@ public class Gcm {
                     preferences.setRegistrationId(registrationId);
                     preferences.setRegistrationIdVersion(getAppVersion(applicationContext));
 
-                    return sendRegistrationIdToBackend();
-                }
-                catch (IOException ex) {
-                    return false;
+                    List<Object> list = new ArrayList<Object>();
+                    list.add(showFeedback);
+                    list.add(sendRegistrationIdToBackend());
+                    return list;
+                } catch (IOException ex) {
+                    List<Object> list = new ArrayList<Object>();
+                    list.add(showFeedback);
+                    list.add(false);
+                    return list;
                 }
             }
 
             @Override
-            protected void onPostExecute(Boolean success) {
+            protected void onPostExecute(List<Object> list) {
+                boolean showFeedback = (Boolean) list.get(0);
+                boolean success = (Boolean) list.get(1);
+
                 if (!success) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                    builder.setCancelable(false);
-                    builder.setMessage("Google Cloud Messaging registration failed. Please try again later.");
-                    builder.setPositiveButton(R.string.ok, null);
-                    builder.show();
+                    if (showFeedback) {
+                        showDialog(activity, "Google Cloud Messaging registration failed. Please try again later.");
+                    }
+                } else {
+                    if (showFeedback) {
+                        showDialog(activity, "Google Cloud Messaging registration succeeded.");
+
+                    }
                 }
             }
         }.execute();
@@ -129,39 +142,46 @@ public class Gcm {
             JSONObject result = Utils.getJson(registrationBackendUrl);
             String status = (String) result.get("status");
             return status.equals("success");
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             return false;
-        }
-        catch (org.json.simple.parser.ParseException ex) {
+        } catch (org.json.simple.parser.ParseException ex) {
             return false;
-        }
-        catch (ClassCastException ex) {
+        } catch (ClassCastException ex) {
             return false;
         }
     }
 
-    public void registerForGcm(Activity activity) {
+    public void registerForGcm(Activity activity, boolean showFeedback) {
         if (preferences.getNotificationsEnabled()) {
             if (preferences.getDid().equals("")) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setMessage("Google Cloud Messaging registration requires that a DID be set.");
-                builder.setPositiveButton(R.string.ok, null);
-                builder.show();
+                if (showFeedback) {
+                    showDialog(activity, "Google Cloud Messaging registration requires that a DID be set.");
+                }
+                return;
             }
 
             Boolean playServices = Gcm.getInstance(applicationContext).checkPlayServices(activity);
             if (playServices == null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setMessage("This device does not support Google Play Services.");
-                builder.setPositiveButton(R.string.ok, null);
-                builder.show();
+                if (showFeedback) {
+                    showDialog(activity, "This device does not support Google Play Services.");
+                }
             } else if (playServices) {
                 String registrationId = Gcm.getInstance(applicationContext).getRegistrationId();
                 if (registrationId.isEmpty()) {
-                    Gcm.getInstance(applicationContext).registerInBackground(activity);
+                    Gcm.getInstance(applicationContext).registerInBackground(activity, showFeedback);
+                } else {
+                    if (showFeedback) {
+                        showDialog(activity, "Google Cloud Messaging registration succeeded.");
+                    }
                 }
             }
         }
+    }
+
+    private void showDialog(Activity activity, String text) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(text);
+        builder.setPositiveButton(R.string.ok, null);
+        builder.show();
     }
 }

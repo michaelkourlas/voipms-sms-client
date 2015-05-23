@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.NotificationCompat;
@@ -30,10 +31,12 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
+import net.kourlas.voipms_sms.gcm.Gcm;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
 import org.json.simple.JSONArray;
@@ -51,10 +54,14 @@ public class Api {
     private static Api instance = null;
     private final Context applicationContext;
     private final Preferences preferences;
+    private final Map<String, Integer> notificationIds;
+    private int notificationIdCount;
 
     private Api(Context context) {
         this.applicationContext = context.getApplicationContext();
         this.preferences = Preferences.getInstance(applicationContext);
+        this.notificationIds = new HashMap<String, Integer>();
+        this.notificationIdCount = 0;
     }
 
     public static Api getInstance(Context applicationContext) {
@@ -283,7 +290,7 @@ public class Api {
                             final String[] didsArray = new String[dids.size()];
                             dids.toArray(didsArray);
 
-                            AlertDialog.Builder builder = new AlertDialog.Builder(applicationContext);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(sourceActivity);
                             builder.setTitle(applicationContext.getString(
                                     R.string.conversations_select_did_dialog_title));
                             builder.setSingleChoiceItems(didsArray, 0, new DialogInterface.OnClickListener() {
@@ -309,6 +316,8 @@ public class Api {
                                                 conversationsActivity.getConversationsListViewAdapter().refresh();
                                                 updateSmsDatabase(sourceActivity, true, false);
                                             }
+
+                                            Gcm.getInstance(applicationContext).registerForGcm(sourceActivity, false);
                                         }
                                     });
                             builder.show();
@@ -395,6 +404,8 @@ public class Api {
             if (sourceActivity instanceof ConversationActivity) {
                 ProgressBar progressBar = (ProgressBar) sourceActivity.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.INVISIBLE);
+                ImageButton sendButton = (ImageButton) sourceActivity.findViewById(R.id.send_button);
+                sendButton.setEnabled(true);
             }
         }
 
@@ -537,15 +548,9 @@ public class Api {
                                     }
 
                                     String smsText = "";
-                                    long smsId = 0;
-                                    Sms[] smsArray = conversation.getAllSms();
-                                    for (Sms sms : smsArray) {
+                                    for (Sms sms : conversation.getAllSms()) {
                                         if (sms.getType() == Sms.Type.INCOMING && sms.isUnread()) {
-                                            smsText = smsText + "\n" + sms.getMessage();
-                                            if (smsId == 0) {
-                                                smsText = sms.getMessage();
-                                                smsId = sms.getId();
-                                            }
+                                            smsText = sms.getMessage() + " " + smsText;
                                         } else {
                                             break;
                                         }
@@ -556,7 +561,15 @@ public class Api {
                                     notificationBuilder.setSmallIcon(R.drawable.ic_message_white_18dp);
                                     notificationBuilder.setContentTitle(smsContact);
                                     notificationBuilder.setContentText(smsText);
-                                    notificationBuilder.setDefaults(Notification.DEFAULT_ALL);
+
+                                    notificationBuilder.setSound(Uri.parse(preferences.getNotificationSound()));
+                                    notificationBuilder.setLights(0xFFAA0000, 1000, 5000);
+                                    if (preferences.getNotificationVibrateEnabled()) {
+                                        notificationBuilder.setVibrate(new long[]{0, 250, 250, 250});
+                                    } else {
+                                        notificationBuilder.setVibrate(new long[]{0});
+                                    }
+                                    notificationBuilder.setPriority(Notification.PRIORITY_HIGH);
 
                                     Intent intent = new Intent(applicationContext, ConversationActivity.class);
                                     intent.putExtra("contact", conversation.getContact());
@@ -570,9 +583,17 @@ public class Api {
                                     notificationBuilder.setContentIntent(resultPendingIntent);
                                     notificationBuilder.setAutoCancel(true);
 
+                                    int id;
+                                    if (notificationIds.get(conversation.getContact()) != null) {
+                                        id = notificationIds.get(conversation.getContact());
+                                    } else {
+                                        id = notificationIdCount++;
+                                        notificationIds.put(conversation.getContact(), id);
+                                    }
+
                                     NotificationManager notificationManager = (NotificationManager)
                                             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                                    notificationManager.notify((int) smsId, notificationBuilder.build());
+                                    notificationManager.notify(id, notificationBuilder.build());
                                 }
                             }
                         }

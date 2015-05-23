@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.text.Editable;
@@ -42,8 +43,12 @@ import net.kourlas.voipms_sms.adapters.ConversationListViewAdapter;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class ConversationActivity extends AppCompatActivity {
     private final ConversationActivity conversationsActivity = this;
@@ -104,10 +109,13 @@ public class ConversationActivity extends AppCompatActivity {
 
                 MenuItem copyAction = mode.getMenu().findItem(R.id.copy_button);
                 MenuItem shareAction = mode.getMenu().findItem(R.id.share_button);
+                MenuItem infoAction = mode.getMenu().findItem(R.id.info_button);
                 if (count < 2) {
+                    infoAction.setVisible(true);
                     copyAction.setVisible(true);
                     shareAction.setVisible(true);
                 } else {
+                    infoAction.setVisible(false);
                     copyAction.setVisible(false);
                     shareAction.setVisible(false);
                 }
@@ -136,6 +144,26 @@ public class ConversationActivity extends AppCompatActivity {
                 }
 
                 switch (item.getItemId()) {
+                    case R.id.info_button:
+                        Sms sms = ((Sms) conversationListViewAdapter.getItem(selectedItems.get(0)));
+                        DateFormat iso8601format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+                        iso8601format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        AlertDialog.Builder builder = new AlertDialog.Builder(conversationActivity);
+                        if (sms.getType() == Sms.Type.INCOMING) {
+                            builder.setMessage("ID: " + sms.getId() +
+                                    "\nTo: " + sms.getDid() +
+                                    "\nFrom: " + sms.getContact() +
+                                    "\nDate: " + iso8601format.format(sms.getDate()));
+                        } else {
+                            builder.setMessage("ID: " + sms.getId() +
+                                    "\nTo: " + sms.getContact() +
+                                    "\nFrom: " + sms.getDid() +
+                                    "\nDate: " + iso8601format.format(sms.getDate()));
+                        }
+                        builder.setTitle("Message details");
+                        builder.show();
+                        mode.finish();
+                        return true;
                     case R.id.copy_button:
                         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
                         ClipData clip = ClipData.newPlainText("Text message",
@@ -234,7 +262,7 @@ public class ConversationActivity extends AppCompatActivity {
         }
         cursor.close();
 
-        ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
+        final ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             sendButton.setOutlineProvider(new ViewOutlineProvider() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -250,6 +278,7 @@ public class ConversationActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ProgressBar progressBar = (ProgressBar) conversationActivity.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.VISIBLE);
+                sendButton.setEnabled(false);
                 Api.getInstance(getApplicationContext()).sendSms(conversationsActivity, contact, messageText.getText().toString());
             }
         });

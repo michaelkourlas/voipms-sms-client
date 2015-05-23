@@ -30,7 +30,7 @@ import android.text.InputType;
 import net.kourlas.voipms_sms.App;
 import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.R;
-import net.kourlas.voipms_sms.notifications.Gcm;
+import net.kourlas.voipms_sms.gcm.Gcm;
 
 public class PreferencesActivity extends AppCompatActivity {
     @Override
@@ -108,7 +108,7 @@ public class PreferencesActivity extends AppCompatActivity {
                         builder.setPositiveButton(R.string.ok, null);
                         builder.show();
 
-                        Gcm.getInstance(getActivity().getApplicationContext()).registerForGcm(getActivity());
+                        Gcm.getInstance(getActivity().getApplicationContext()).registerForGcm(getActivity(), true);
                     }
                 }
             }

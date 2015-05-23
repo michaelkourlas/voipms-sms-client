@@ -16,4 +16,9 @@
             android:icon="@drawable/ic_delete_white_24dp"
             android:title="@string/conversation_action_delete"
             app:showAsAction="ifRoom"/>
+    <item
+            android:id="@+id/info_button"
+            android:icon="@drawable/ic_info_white_24dp"
+            android:title="@string/conversation_action_info"
+            app:showAsAction="ifRoom"/>
 </menu>

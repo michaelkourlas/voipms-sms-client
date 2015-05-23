@@ -94,4 +94,14 @@ public class Preferences {
         editor.putBoolean("first_run", firstRun);
         editor.apply();
     }
+
+    public String getNotificationSound() {
+        return sharedPreferences.getString("sms_notification_ringtone",
+                applicationContext.getResources().getString(
+                        R.string.preferences_sms_notification_ringtone_default_value));
+    }
+
+    public boolean getNotificationVibrateEnabled() {
+        return sharedPreferences.getBoolean("sms_notification_vibrate", true);
+    }
 }

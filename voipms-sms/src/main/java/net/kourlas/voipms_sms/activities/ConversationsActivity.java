@@ -30,9 +30,9 @@ import android.view.*;
 import android.widget.*;
 import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.adapters.ConversationsListViewAdapter;
+import net.kourlas.voipms_sms.gcm.Gcm;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
-import net.kourlas.voipms_sms.notifications.Gcm;
 
 public class ConversationsActivity extends AppCompatActivity {
     private final ConversationsActivity conversationsActivity = this;
@@ -51,6 +51,7 @@ public class ConversationsActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 Api.getInstance(getApplicationContext()).updateSmsDatabase(conversationsActivity, true, false);
+                Gcm.getInstance(getApplicationContext()).registerForGcm(conversationsActivity, false);
             }
         });
 
@@ -201,7 +202,7 @@ public class ConversationsActivity extends AppCompatActivity {
             Api.getInstance(getApplicationContext()).updateSmsDatabase(conversationsActivity, true, false);
         }
 
-        Gcm.getInstance(getApplicationContext()).registerForGcm(this);
+        Gcm.getInstance(getApplicationContext()).registerForGcm(this, false);
 
         super.onResume();
     }
