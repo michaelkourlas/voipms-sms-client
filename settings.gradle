@@ -1,1 +1,1 @@
-include ':voipms-sms-client'
+include ':voipms-sms'
