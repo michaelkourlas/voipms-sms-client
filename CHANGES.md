@@ -1,3 +1,9 @@
+## 0.3.0 ##
+
+* Support for push notifications
+* Additional notification settings
+* Bug fixes
+
 ## 0.2.2 ##
 
 * Bug fixes

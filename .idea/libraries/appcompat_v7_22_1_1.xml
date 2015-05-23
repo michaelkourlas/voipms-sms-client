@@ -1,13 +1,15 @@
 <component name="libraryTable">
   <library name="appcompat-v7-22.1.1">
     <ANNOTATIONS>
-      <root url="jar://$PROJECT_DIR$/VoIP.ms SMS/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.1.1/annotations.zip!/" />
+      <root url="jar://$PROJECT_DIR$/voipms-sms-client/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.1.1/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/VoIP.ms SMS/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.1.1/res" />
-      <root url="jar://$PROJECT_DIR$/VoIP.ms SMS/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.1.1/classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/voipms-sms-client/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.1.1/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/voipms-sms-client/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.1.1/res" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://C:/Program Files (x86)/Android/android-sdk/extras/android/m2repository/com/android/support/appcompat-v7/22.1.1/appcompat-v7-22.1.1-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

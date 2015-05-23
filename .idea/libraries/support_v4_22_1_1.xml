@@ -1,11 +1,13 @@
 <component name="libraryTable">
   <library name="support-v4-22.1.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/VoIP.ms SMS/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/libs/internal_impl-22.1.1.jar!/" />
-      <root url="file://$PROJECT_DIR$/VoIP.ms SMS/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/res" />
-      <root url="jar://$PROJECT_DIR$/VoIP.ms SMS/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/voipms-sms-client/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/voipms-sms-client/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/libs/internal_impl-22.1.1.jar!/" />
+      <root url="file://$PROJECT_DIR$/voipms-sms-client/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/res" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://C:/Program Files (x86)/Android/android-sdk/extras/android/m2repository/com/android/support/support-v4/22.1.1/support-v4-22.1.1-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
