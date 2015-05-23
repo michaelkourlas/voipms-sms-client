@@ -57,6 +57,12 @@ public class ConversationActivity extends AppCompatActivity {
         final ConversationActivity conversationActivity = this;
 
         contact = getIntent().getExtras().getString("contact");
+
+        // Check if the contact is stored as international format (+1 234 555 6789)
+        if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
+            contact = contact.substring(1);
+        }
+
         conversationListViewAdapter = new ConversationListViewAdapter(this, contact);
 
         final String contact = this.contact;
