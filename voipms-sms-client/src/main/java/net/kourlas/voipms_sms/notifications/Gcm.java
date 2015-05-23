@@ -2,25 +2,23 @@
  * VoIP.ms SMS
  * Copyright (C) 2015 Michael Kourlas
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package net.kourlas.voipms_sms.notifications;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -31,14 +29,13 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 
 public class Gcm {
-    private static String SENDER_ID = "626231576786";
+    private static final String SENDER_ID = "626231576786";
     private static Gcm instance = null;
     private final Context applicationContext;
     private final Preferences preferences;
@@ -105,9 +102,8 @@ public class Gcm {
                     preferences.setRegistrationIdVersion(getAppVersion(applicationContext));
 
                     return sendRegistrationIdToBackend();
-                } catch (IOException ex) {
-                    return false;
-                } catch (JSONException ex) {
+                }
+                catch (IOException ex) {
                     return false;
                 }
             }
@@ -125,13 +121,24 @@ public class Gcm {
         }.execute();
     }
 
-    private boolean sendRegistrationIdToBackend() throws IOException, JSONException {
-        String registrationBackendUrl = "https://voipmssms-kourlas.rhcloud.com/register?" +
-                "did=" + URLEncoder.encode(preferences.getDid()) + "&" +
-                "reg_id=" + URLEncoder.encode(preferences.getRegistrationId());
-        JSONObject result = Utils.getJson(registrationBackendUrl);
-        String status = result.getString("status");
-        return status.equals("success");
+    private boolean sendRegistrationIdToBackend() {
+        try {
+            String registrationBackendUrl = "https://voipmssms-kourlas.rhcloud.com/register?" +
+                    "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
+                    "reg_id=" + URLEncoder.encode(preferences.getRegistrationId(), "UTF-8");
+            JSONObject result = Utils.getJson(registrationBackendUrl);
+            String status = (String) result.get("status");
+            return status.equals("success");
+        }
+        catch (IOException ex) {
+            return false;
+        }
+        catch (org.json.simple.parser.ParseException ex) {
+            return false;
+        }
+        catch (ClassCastException ex) {
+            return false;
+        }
     }
 
     public void registerForGcm(Activity activity) {

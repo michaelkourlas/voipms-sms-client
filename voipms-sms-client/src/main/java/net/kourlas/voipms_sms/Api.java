@@ -2,18 +2,17 @@
  * VoIP.ms SMS
  * Copyright (C) 2015 Michael Kourlas
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package net.kourlas.voipms_sms;
@@ -37,9 +36,8 @@ import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -248,7 +246,7 @@ public class Api {
                     return Utils.getJson(params[0]);
                 } catch (IOException ex) {
                     processError(R.string.api_update_did_request, ex);
-                } catch (JSONException ex) {
+                } catch (org.json.simple.parser.ParseException ex) {
                     processError(R.string.api_update_did_parse, ex);
                 }
 
@@ -262,14 +260,15 @@ public class Api {
                 }
 
                 try {
-                    String status = result.getString("status");
+                    String status = (String) result.get("status");
                     if (status.equals("success")) {
                         final List<String> dids = new ArrayList<String>();
-                        JSONArray rawDids = result.getJSONArray("dids");
-                        for (int i = 0; i < rawDids.length(); i++) {
-                            if (rawDids.getJSONObject(i).getString("sms_available").equals("1") &&
-                                    rawDids.getJSONObject(i).getString("sms_enabled").equals("1")) {
-                                dids.add(rawDids.getJSONObject(i).getString("did"));
+                        JSONArray rawDids = (JSONArray) result.get("dids");
+                        for (Object rawDidObj : rawDids) {
+                            JSONObject rawDid = (JSONObject) rawDidObj;
+                            if (rawDid.get("sms_available").equals("1") &&
+                                    rawDid.get("sms_enabled").equals("1")) {
+                                dids.add((String) rawDid.get("did"));
                             }
                         }
 
@@ -317,7 +316,7 @@ public class Api {
                     } else {
                         processError(R.string.api_update_did_api, status);
                     }
-                } catch (JSONException ex) {
+                } catch (ClassCastException ex) {
                     processError(R.string.api_update_did_parse, ex);
                 }
             }
@@ -344,7 +343,7 @@ public class Api {
                     return Utils.getJson(params[0]);
                 } catch (IOException ex) {
                     processError(R.string.api_delete_sms_request, ex);
-                } catch (JSONException ex) {
+                } catch (org.json.simple.parser.ParseException ex) {
                     processError(R.string.api_delete_sms_parse, ex);
                 }
 
@@ -354,7 +353,7 @@ public class Api {
             @Override
             protected void onPostExecute(JSONObject result) {
                 try {
-                    String status = result.getString("status");
+                    String status = (String) result.get("status");
                     if (status.equals("success")) {
                         Database.getInstance(applicationContext).deleteSMS(smsId);
 
@@ -373,7 +372,7 @@ public class Api {
                     } else {
                         processError(R.string.api_delete_sms_api, status);
                     }
-                } catch (JSONException ex) {
+                } catch (ClassCastException ex) {
                     processError(R.string.api_delete_sms_parse, ex);
                 }
             }
@@ -406,7 +405,7 @@ public class Api {
                     return Utils.getJson(params[0]);
                 } catch (IOException ex) {
                     processError(R.string.api_send_sms_request, ex);
-                } catch (JSONException ex) {
+                } catch (org.json.simple.parser.ParseException ex) {
                     processError(R.string.api_send_sms_parse, ex);
                 }
 
@@ -418,14 +417,14 @@ public class Api {
             @Override
             protected void onPostExecute(JSONObject result) {
                 try {
-                    String status = result.getString("status");
+                    String status = (String) result.get("status");
                     if (status.equals("success")) {
                         updateSmsDatabase(sourceActivity, true, false);
                         return;
                     } else {
                         processError(R.string.api_send_sms_api, status);
                     }
-                } catch (JSONException ex) {
+                } catch (ClassCastException ex) {
                     processError(R.string.api_send_sms_parse, ex);
                 }
 
@@ -468,7 +467,7 @@ public class Api {
                     return Utils.getJson(params[0]);
                 } catch (IOException ex) {
                     processError(showErrorToasts, R.string.api_update_smses_request, ex);
-                } catch (JSONException ex) {
+                } catch (org.json.simple.parser.ParseException ex) {
                     processError(showErrorToasts, R.string.api_update_smses_parse, ex);
                 }
 
@@ -484,18 +483,19 @@ public class Api {
                 }
 
                 try {
-                    String status = result.getString("status");
+                    String status = (String) result.get("status");
                     if (status.equals("success")) {
                         // Process API response
                         List<Sms> smses = new ArrayList<Sms>();
-                        JSONArray rawSmses = result.getJSONArray("sms");
-                        for (int i = 0; i < rawSmses.length(); i++) {
-                            String id = rawSmses.getJSONObject(i).getString("id");
-                            String date = rawSmses.getJSONObject(i).getString("date");
-                            String type = rawSmses.getJSONObject(i).getString("type");
-                            String did = rawSmses.getJSONObject(i).getString("did");
-                            String contact = rawSmses.getJSONObject(i).getString("contact");
-                            String message = rawSmses.getJSONObject(i).getString("message");
+                        JSONArray rawSmses = (JSONArray) result.get("sms");
+                        for (Object rawSmsObj : rawSmses) {
+                            JSONObject rawSms = (JSONObject) rawSmsObj;
+                            String id = (String) rawSms.get("id");
+                            String date = (String) rawSms.get("date");
+                            String type = (String) rawSms.get("type");
+                            String did = (String) rawSms.get("did");
+                            String contact = (String) rawSms.get("contact");
+                            String message = (String) rawSms.get("message");
 
                             Sms sms = new Sms(id, date, type, did, contact, message);
                             smses.add(sms);
@@ -608,9 +608,9 @@ public class Api {
                     } else {
                         processError(showErrorToasts, R.string.api_update_smses_api, status);
                     }
-                } catch (JSONException ex) {
-                    processError(showErrorToasts, R.string.api_update_smses_parse, ex);
                 } catch (ParseException ex) {
+                    processError(showErrorToasts, R.string.api_update_smses_parse, ex);
+                } catch (ClassCastException ex) {
                     processError(showErrorToasts, R.string.api_update_smses_parse, ex);
                 }
 

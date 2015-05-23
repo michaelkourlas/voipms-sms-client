@@ -5,7 +5,7 @@
     <title></title>
 </head>
 <body>
-<h3>Application Setup</h3>
+<h1>Application Setup</h1>
 <p>Before using this application, please ensure that you have:</p>
 <ul>
     <li>enabled API access for your VoIP.ms account;</li>
@@ -18,10 +18,22 @@
     <li>the email address you use to sign into the VoIP.ms portal (<strong>not</strong> your SIP username); and</li>
     <li>the API password which you set above.</li>
 </ul>
-<h4>Push Notifications</h4>
-<h3>Contacting the Developer</h3>
+<h2>Push Notifications</h2>
+<p>This application supports push notifications using Google Cloud Messaging. To enable push notifications:</p>
+<ul>
+    <li>make sure your device is connected to the Internet, then enable notifications in Settings; and</li>
+    <li>copy and paste the following URL in the the following URL into the "SMS URL Callback" field of the SMS settings
+        for your DID on the VoIP.ms portal: <a href="http://voipmssms-kourlas.rhcloud.com/sms_callback?did={DID}">http://voipmssms-kourlas.rhcloud.com/sms_callback?did={DID}</a></li>
+</ul>
+<p>You can make changes to VoIP.ms DID settings <a href="https://voip.ms/m/managedid.php">here</a>.</p>
+<p>When push notifications are enabled, the application stores your DID and GCM registration ID on a server run by the
+    developer. When your DID receives a text message, VoIP.ms will send a callback to the server. The server will then
+    forward the callback to your device using Google Cloud Messaging.</p>
+<p>To protect your privacy, the server <strong>only</strong> links DIDs with GCM registration IDs and tells your
+    device when to sync with the VoIP.ms servers. It does not process or store the text of individual SMSes.</p>
+<h1>Contacting the Developer</h1>
 <p>If you have any further questions, feel free to contact the developer at <a href="mailto:michael@kourlas.net">michael@kourlas.net</a>.</p>
-<h3>Reporting Bugs</h3>
+<h1>Reporting Bugs</h1>
 <p>If you believe you've found a bug, feel free to file a report at the project's GitHub repository <a href="https://github.com/michaelkourlas/voipms-sms/issues">here</a>.</p>
 </body>
 </html>

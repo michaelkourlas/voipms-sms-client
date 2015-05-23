@@ -27,4 +27,4 @@ and from the [Releases section](https://github.com/michaelkourlas/voipms-sms-cli
 
 ## License ##
 
-VoIP.ms SMS is licensed under the MIT license. Please see the LICENSE.md file for more information.
+VoIP.ms SMS is licensed under the Apache License 2.0. Please see the LICENSE.md file for more information.
