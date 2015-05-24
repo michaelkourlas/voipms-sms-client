@@ -40,6 +40,8 @@ public class ConversationListViewItem extends CheckableLinearLayout {
             textView.setBackgroundResource(b ? android.R.color.holo_blue_dark : R.color.primary);
         } else {
             textView.setBackgroundResource(b ? android.R.color.holo_blue_dark : android.R.color.white);
+            textView.setTextColor(b ? getResources().getColor(android.R.color.white) : getResources().getColor(
+                    android.R.color.black));
         }
     }
 }

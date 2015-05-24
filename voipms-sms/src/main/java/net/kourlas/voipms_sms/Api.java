@@ -21,10 +21,12 @@ import android.app.*;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.*;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -54,6 +56,11 @@ public class Api {
     private static Api instance = null;
     private final Context applicationContext;
     private final Preferences preferences;
+
+    public Map<String, Integer> getNotificationIds() {
+        return notificationIds;
+    }
+
     private final Map<String, Integer> notificationIds;
     private int notificationIdCount;
 
@@ -404,6 +411,7 @@ public class Api {
             if (sourceActivity instanceof ConversationActivity) {
                 ProgressBar progressBar = (ProgressBar) sourceActivity.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.INVISIBLE);
+
                 ImageButton sendButton = (ImageButton) sourceActivity.findViewById(R.id.send_button);
                 sendButton.setEnabled(true);
             }
@@ -431,6 +439,7 @@ public class Api {
                     String status = (String) result.get("status");
                     if (status.equals("success")) {
                         updateSmsDatabase(sourceActivity, true, false);
+
                         return;
                     } else {
                         processError(R.string.api_send_sms_api, status);
@@ -468,6 +477,9 @@ public class Api {
             } else if (sourceActivity instanceof ConversationActivity) {
                 ProgressBar progressBar = (ProgressBar) sourceActivity.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.INVISIBLE);
+
+                ImageButton sendButton = (ImageButton) sourceActivity.findViewById(R.id.send_button);
+                sendButton.setEnabled(true);
             }
         }
 
@@ -548,9 +560,18 @@ public class Api {
                                     }
 
                                     String smsText = "";
+                                    String last = "";
+                                    boolean initial = true;
                                     for (Sms sms : conversation.getAllSms()) {
                                         if (sms.getType() == Sms.Type.INCOMING && sms.isUnread()) {
-                                            smsText = sms.getMessage() + " " + smsText;
+                                            if (initial) {
+                                                smsText = sms.getMessage();
+                                                last = sms.getMessage();
+                                                initial = false;
+                                            }
+                                            else {
+                                                smsText = sms.getMessage() + "\n" + smsText;
+                                            }
                                         } else {
                                             break;
                                         }
@@ -560,7 +581,7 @@ public class Api {
                                             applicationContext);
                                     notificationBuilder.setSmallIcon(R.drawable.ic_message_white_18dp);
                                     notificationBuilder.setContentTitle(smsContact);
-                                    notificationBuilder.setContentText(smsText);
+                                    notificationBuilder.setContentText(last);
 
                                     notificationBuilder.setSound(Uri.parse(preferences.getNotificationSound()));
                                     notificationBuilder.setLights(0xFFAA0000, 1000, 5000);
@@ -570,6 +591,17 @@ public class Api {
                                         notificationBuilder.setVibrate(new long[]{0});
                                     }
                                     notificationBuilder.setPriority(Notification.PRIORITY_HIGH);
+                                    notificationBuilder.setColor(0xFFAA0000);
+
+                                    try {
+                                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(applicationContext.getContentResolver(), Uri.parse(Utils.getContactPhotoUri(applicationContext, conversation.getContact())));
+                                        bitmap = Bitmap.createScaledBitmap(bitmap, 256, 256, false);
+                                        bitmap = getCroppedBitmap(bitmap);
+                                        notificationBuilder.setLargeIcon(bitmap);
+                                    }
+                                    catch (Exception ex) {
+
+                                    }
 
                                     Intent intent = new Intent(applicationContext, ConversationActivity.class);
                                     intent.putExtra("contact", conversation.getContact());
@@ -590,6 +622,8 @@ public class Api {
                                         id = notificationIdCount++;
                                         notificationIds.put(conversation.getContact(), id);
                                     }
+
+                                    notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(smsText));
 
                                     NotificationManager notificationManager = (NotificationManager)
                                             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -638,5 +672,27 @@ public class Api {
                 cleanup();
             }
         }
+    }
+
+    public static Bitmap getCroppedBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        // canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
+        //return _bmp;
+        return output;
     }
 }

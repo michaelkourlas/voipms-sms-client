@@ -104,20 +104,23 @@ public class NewConversationActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        App.getInstance().setCurrentActivity(this);
         super.onResume();
+
+        App.getInstance().setCurrentActivity(this);
     }
 
     @Override
     protected void onPause() {
-        App.getInstance().deleteReferenceToActivity(this);
         super.onPause();
+
+        App.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override
     protected void onDestroy() {
-        App.getInstance().deleteReferenceToActivity(this);
         super.onDestroy();
+
+        App.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override

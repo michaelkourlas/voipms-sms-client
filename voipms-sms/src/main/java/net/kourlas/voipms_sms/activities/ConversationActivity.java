@@ -18,11 +18,14 @@
 package net.kourlas.voipms_sms.activities;
 
 import android.annotation.TargetApi;
+import android.app.NotificationManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.LightingColorFilter;
 import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Build;
@@ -59,19 +62,22 @@ public class ConversationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.conversation);
 
+        // Set the progress bar colour to red; normally this kind of thing is done using XML but there doesn't seem to
+        // be a way to do it here
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar.getIndeterminateDrawable().setColorFilter(new LightingColorFilter(0x000000, 0xAA0000));
+
         final ConversationActivity conversationActivity = this;
 
         contact = getIntent().getExtras().getString("contact");
-
-        // Check if the contact is stored as international format (+1 234 555 6789)
+        // Remove the leading one from a North American phone number (e.g. +1 (123) 555-4567)
         if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
             contact = contact.substring(1);
         }
-
-        conversationListViewAdapter = new ConversationListViewAdapter(this, contact);
-
         final String contact = this.contact;
         Conversation conversation = Database.getInstance(getApplicationContext()).getConversation(contact);
+
+        conversationListViewAdapter = new ConversationListViewAdapter(this, contact);
 
         // Mark conversation as read
         for (Sms sms : conversation.getAllSms()) {
@@ -213,14 +219,10 @@ public class ConversationActivity extends AppCompatActivity {
         }
         messageText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Do nothing.
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Do nothing.
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -234,16 +236,7 @@ public class ConversationActivity extends AppCompatActivity {
         });
 
         QuickContactBadge photo = (QuickContactBadge) findViewById(R.id.photo);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            photo.setOutlineProvider(new ViewOutlineProvider() {
-                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                @Override
-                public void getOutline(View view, Outline outline) {
-                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
-                }
-            });
-            photo.setClipToOutline(true);
-        }
+        Utils.applyCircularMask(photo);
         photo.assignContactFromPhone(Preferences.getInstance(getApplicationContext()).getDid(), true);
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(
                 Preferences.getInstance(getApplicationContext()).getDid()));
@@ -263,46 +256,45 @@ public class ConversationActivity extends AppCompatActivity {
         cursor.close();
 
         final ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            sendButton.setOutlineProvider(new ViewOutlineProvider() {
-                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                @Override
-                public void getOutline(View view, Outline outline) {
-                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
-                }
-            });
-            sendButton.setClipToOutline(true);
-        }
+        Utils.applyCircularMask(sendButton);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ProgressBar progressBar = (ProgressBar) conversationActivity.findViewById(R.id.progress_bar);
-                progressBar.setVisibility(View.VISIBLE);
                 sendButton.setEnabled(false);
-                Api.getInstance(getApplicationContext()).sendSms(conversationsActivity, contact, messageText.getText().toString());
+                conversationActivity.findViewById(R.id.progress_bar).setVisibility(View.VISIBLE);
+                Api.getInstance(getApplicationContext()).sendSms(conversationsActivity, contact,
+                        messageText.getText().toString());
             }
         });
 
         conversationListViewAdapter.requestScrollToBottom();
-        conversationListViewAdapter.refresh();
     }
 
     @Override
     protected void onResume() {
-        App.getInstance().setCurrentActivity(this);
         super.onResume();
+        App.getInstance().setCurrentActivity(this);
+
+        Integer id = Api.getInstance(getApplicationContext()).getNotificationIds().get(contact);
+        if (id != null) {
+            NotificationManager notificationManager = (NotificationManager)
+                    getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(id);
+        }
+
+        conversationListViewAdapter.refresh();
     }
 
     @Override
     protected void onPause() {
-        App.getInstance().deleteReferenceToActivity(this);
         super.onPause();
+        App.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override
     protected void onDestroy() {
-        App.getInstance().deleteReferenceToActivity(this);
         super.onDestroy();
+        App.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override
@@ -324,7 +316,7 @@ public class ConversationActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                conversationListViewAdapter.getFilter().filter(newText);
+                conversationListViewAdapter.refresh(newText);
                 return true;
             }
         });

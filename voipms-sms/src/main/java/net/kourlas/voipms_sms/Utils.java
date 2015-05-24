@@ -17,10 +17,15 @@
 
 package net.kourlas.voipms_sms;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Outline;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract;
+import android.view.View;
+import android.view.ViewOutlineProvider;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -162,5 +167,18 @@ public class Utils {
         reader.close();
 
         return (JSONObject) JSONValue.parseWithException(data.toString());
+    }
+
+    public static void applyCircularMask(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.setOutlineProvider(new ViewOutlineProvider() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                }
+            });
+            view.setClipToOutline(true);
+        }
     }
 }

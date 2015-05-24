@@ -147,9 +147,7 @@ public class ConversationsActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onDestroyActionMode(ActionMode mode) {
-                // Do nothing.
-            }
+            public void onDestroyActionMode(ActionMode mode) {}
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
@@ -194,6 +192,7 @@ public class ConversationsActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
+        super.onResume();
         App.getInstance().setCurrentActivity(this);
 
         conversationsListViewAdapter.refresh();
@@ -203,20 +202,18 @@ public class ConversationsActivity extends AppCompatActivity {
         }
 
         Gcm.getInstance(getApplicationContext()).registerForGcm(this, false);
-
-        super.onResume();
     }
 
     @Override
     protected void onPause() {
-        App.getInstance().deleteReferenceToActivity(this);
         super.onPause();
+        App.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override
     protected void onDestroy() {
-        App.getInstance().deleteReferenceToActivity(this);
         super.onDestroy();
+        App.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override

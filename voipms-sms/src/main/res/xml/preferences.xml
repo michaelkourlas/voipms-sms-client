@@ -1,51 +1,67 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ VoIP.ms SMS
+  ~ Copyright (C) 2015 Michael Kourlas and other contributors
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/preferences_category_account">
         <EditTextPreference
-                android:defaultValue=""
-                android:inputType="textEmailAddress"
-                android:key="api_email"
-                android:title="@string/preferences_account_email"/>
+            android:defaultValue=""
+            android:inputType="textEmailAddress"
+            android:key="api_email"
+            android:title="@string/preferences_account_email" />
         <EditTextPreference
-                android:defaultValue=""
-                android:inputType="textPassword"
-                android:key="api_password"
-                android:title="@string/preferences_account_password"/>
+            android:defaultValue=""
+            android:inputType="textPassword"
+            android:key="api_password"
+            android:title="@string/preferences_account_password" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preferences_category_sms">
         <ListPreference
-                android:defaultValue="@string/preferences_sms_days_to_sync_default_value"
-                android:entries="@array/preferences_sms_days_to_sync_entries"
-                android:entryValues="@array/preferences_sms_days_to_sync_values"
-                android:key="sms_days_to_sync"
-                android:title="@string/preferences_sms_days_to_sync"/>
+            android:defaultValue="@string/preferences_sms_days_to_sync_default_value"
+            android:entries="@array/preferences_sms_days_to_sync_entries"
+            android:entryValues="@array/preferences_sms_days_to_sync_values"
+            android:key="sms_days_to_sync"
+            android:title="@string/preferences_sms_days_to_sync" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preferences_category_sms_notifications">
         <SwitchPreference
-                android:defaultValue="true"
-                android:key="sms_notification"
-                android:summary="@string/preferences_sms_notification_summary"
-                android:title="@string/preferences_sms_notification"/>
+            android:defaultValue="true"
+            android:key="sms_notification"
+            android:summary="@string/preferences_sms_notification_summary"
+            android:title="@string/preferences_sms_notification" />
         <RingtonePreference
-                android:key="sms_notification_ringtone"
-                android:ringtoneType="notification"
-                android:defaultValue="@string/preferences_sms_notification_ringtone_default_value"
-                android:dependency="sms_notification"
-                android:title="@string/preferences_sms_notification_ringtone"/>
+            android:defaultValue="@string/preferences_sms_notification_ringtone_default_value"
+            android:dependency="sms_notification"
+            android:key="sms_notification_ringtone"
+            android:ringtoneType="notification"
+            android:title="@string/preferences_sms_notification_ringtone" />
         <SwitchPreference
-                android:defaultValue="true"
-                android:key="sms_notification_vibrate"
-                android:dependency="sms_notification"
-                android:title="@string/preferences_sms_notification_vibrate"/>
+            android:defaultValue="true"
+            android:dependency="sms_notification"
+            android:key="sms_notification_vibrate"
+            android:title="@string/preferences_sms_notification_vibrate" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preferences_category_reset">
         <SwitchPreference
-                android:defaultValue="false"
-                android:key="reset"
-                android:summary="@string/preferences_reset_summary"
-                android:title="@string/preferences_reset"/>
+            android:defaultValue="false"
+            android:key="reset"
+            android:summary="@string/preferences_reset_summary"
+            android:title="@string/preferences_reset" />
     </PreferenceCategory>
 </PreferenceScreen>
