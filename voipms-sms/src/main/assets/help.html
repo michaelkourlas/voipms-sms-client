@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<h1>Application Setup</h1>
+<p>Before using this application, please ensure that you have:</p>
+<ul>
+    <li>enabled API access for your VoIP.ms account;</li>
+    <li>set an API password (which is <strong>distinct</strong> from your account password); and</li>
+    <li>set a list of approved IP addresses (or "0.0.0.0" to allow access from any IP address).</li>
+</ul>
+<p>You can make changes to VoIP.ms API settings <a href="https://www.voip.ms/m/api.php">here</a>.</p>
+<p>When signing into this application, please use:</p>
+<ul>
+    <li>the email address you use to sign into the VoIP.ms portal (<strong>not</strong> your SIP username); and</li>
+    <li>the API password which you set above.</li>
+</ul>
+<h2>Push Notifications</h2>
+<p>This application supports push notifications using Google Cloud Messaging. To enable push notifications:</p>
+<ul>
+    <li>make sure your device is connected to the Internet, then enable notifications in Settings; and</li>
+    <li>access the SMS settings for your DID on the VoIP.ms portal and enable the \'SMS URL Callback\' feature,
+        entering the following URL into the neighbouring field: <a href="http://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}">http://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}</a></li>
+</ul>
+<p>You can make changes to VoIP.ms DID settings <a href="https://voip.ms/m/managedid.php">here</a>.</p>
+<p>When push notifications are enabled, the application stores your DID and GCM registration ID on a server run by the
+    developer. When your DID receives a text message, VoIP.ms will send a callback to the server. The server will then
+    forward the callback to your device using Google Cloud Messaging.</p>
+<p>To protect your privacy, the server <strong>only</strong> links DIDs with GCM registration IDs and tells your
+    device when to sync with the VoIP.ms servers. It does not process or store the text of individual SMSes.</p>
+<h1>Contacting the Developer</h1>
+<p>If you have any further questions, feel free to contact the developer at <a href="mailto:michael@kourlas.net">michael@kourlas.net</a>.</p>
+<h1>Reporting Bugs</h1>
+<p>If you believe you've found a bug, feel free to file a report at the project's GitHub repository <a href="https://github.com/michaelkourlas/voipms-sms-client/issues">here</a>.</p>
+</body>
+</html>

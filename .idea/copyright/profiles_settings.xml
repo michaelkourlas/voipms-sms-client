@@ -1,3 +1,7 @@
 <component name="CopyrightManager">
-  <settings default="VoIP.ms SMS" />
+  <settings default="">
+    <module2copyright>
+      <element module="Project Files" copyright="VoIP.ms SMS" />
+    </module2copyright>
+  </settings>
 </component>

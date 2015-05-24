@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/VoIP.ms-SMS/VoIP.ms-SMS.iml" filepath="$PROJECT_DIR$/VoIP.ms-SMS/VoIP.ms-SMS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/voipms-sms/voipms-sms.iml" filepath="$PROJECT_DIR$/voipms-sms/voipms-sms.iml" />
       <module fileurl="file://$PROJECT_DIR$/voipms-sms-client.iml" filepath="$PROJECT_DIR$/voipms-sms-client.iml" />
     </modules>
   </component>

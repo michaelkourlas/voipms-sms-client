@@ -1,3 +1,16 @@
+## 0.3.1 ##
+
+* Fix error in push notification instructions
+* Bug fixes
+
+## 0.3.0 ##
+
+* Support for push notifications
+* Additional notification settings
+* License change to Apache License 2.0
+* Minor UI changes
+* Bug fixes
+
 ## 0.2.2 ##
 
 * Bug fixes
