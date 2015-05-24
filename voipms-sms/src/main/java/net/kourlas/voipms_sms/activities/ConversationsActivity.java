@@ -51,7 +51,7 @@ public class ConversationsActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 Api.getInstance(getApplicationContext()).updateSmsDatabase(conversationsActivity, true, false);
-                Gcm.getInstance(getApplicationContext()).registerForGcm(conversationsActivity, false);
+                Gcm.getInstance(getApplicationContext()).registerForGcm(conversationsActivity, false, false);
             }
         });
 
@@ -201,7 +201,7 @@ public class ConversationsActivity extends AppCompatActivity {
             Api.getInstance(getApplicationContext()).updateSmsDatabase(conversationsActivity, true, false);
         }
 
-        Gcm.getInstance(getApplicationContext()).registerForGcm(this, false);
+        Gcm.getInstance(getApplicationContext()).registerForGcm(this, false, false);
     }
 
     @Override

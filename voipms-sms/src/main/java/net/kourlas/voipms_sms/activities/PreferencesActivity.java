@@ -108,7 +108,8 @@ public class PreferencesActivity extends AppCompatActivity {
                         builder.setPositiveButton(R.string.ok, null);
                         builder.show();
 
-                        Gcm.getInstance(getActivity().getApplicationContext()).registerForGcm(getActivity(), true);
+                        Gcm.getInstance(getActivity().getApplicationContext()).registerForGcm(getActivity(), true,
+                                true);
                     }
                 }
             }

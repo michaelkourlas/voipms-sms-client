@@ -324,7 +324,8 @@ public class Api {
                                                 updateSmsDatabase(sourceActivity, true, false);
                                             }
 
-                                            Gcm.getInstance(applicationContext).registerForGcm(sourceActivity, false);
+                                            Gcm.getInstance(applicationContext).registerForGcm(sourceActivity, false,
+                                                    false);
                                         }
                                     });
                             builder.show();

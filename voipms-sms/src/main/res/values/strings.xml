@@ -54,7 +54,7 @@
     <string name="preferences_category_sms_notifications">Notifications</string>
     <string name="preferences_sms_notification">Notifications</string>
     <string name="preferences_sms_notification_summary">Enable push notifications using the developer\'s Google Cloud Messaging server</string>
-    <string name="preferences_enable_notifications_text">To enable push notifications, you must enter the following URL in the \'SMS URL Callback\' field of the SMS settings for your DID on the VoIP.ms portal:\n\nhttp://voipmssms-kourlas.rhcloud.com/sms_callback?did={DID}\n\nNote that the developer\'s Google Cloud Messaging server will store your DID to forward callbacks from VoIP.ms to your device. See Help for more details.</string>
+    <string name="preferences_enable_notifications_text">To enable push notifications, you must access the SMS settings for your DID on the VoIP.ms portal and enable the \'SMS URL Callback\' feature, entering the following URL into the neighbouring field:\n\nhttp://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}\n\nNote that the developer\'s Google Cloud Messaging server will store your DID to forward callbacks from VoIP.ms to your device. See Help for more details.</string>
     <string name="preferences_sms_notification_ringtone">Sound</string>
     <string name="preferences_sms_notification_ringtone_default_value" translatable="false">content://settings/system/notification_sound</string>
     <string name="preferences_sms_notification_vibrate">Vibrate</string>
@@ -108,4 +108,8 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="conversation_action_info">View details</string>
+    <string name="gcm_success">Google Cloud Messaging registration succeeded.</string>
+    <string name="gcm_support">This device does not support Google Play Services.</string>
+    <string name="gcm_did">Google Cloud Messaging registration requires that a DID be set.</string>
+    <string name="gcm_fail">Google Cloud Messaging registration failed. Please try again later.</string>
 </resources>

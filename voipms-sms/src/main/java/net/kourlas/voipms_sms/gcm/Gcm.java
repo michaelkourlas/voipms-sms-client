@@ -30,8 +30,10 @@ import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,20 +98,27 @@ public class Gcm {
         new AsyncTask<Boolean, Void, List<Object>>() {
             @Override
             protected List<Object> doInBackground(Boolean... params) {
+                List<Object> list = new ArrayList<Object>();
+                list.add(showFeedback);
+
                 try {
                     GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(applicationContext);
 
                     String registrationId = gcm.register(SENDER_ID);
+                    sendRegistrationIdToBackend(registrationId);
+
                     preferences.setRegistrationId(registrationId);
                     preferences.setRegistrationIdVersion(getAppVersion(applicationContext));
 
-                    List<Object> list = new ArrayList<Object>();
-                    list.add(showFeedback);
-                    list.add(sendRegistrationIdToBackend());
+                    list.add(true);
                     return list;
                 } catch (IOException ex) {
-                    List<Object> list = new ArrayList<Object>();
-                    list.add(showFeedback);
+                    list.add(false);
+                    return list;
+                } catch (ParseException ex) {
+                    list.add(false);
+                    return list;
+                } catch (ClassCastException ex) {
                     list.add(false);
                     return list;
                 }
@@ -122,11 +131,11 @@ public class Gcm {
 
                 if (!success) {
                     if (showFeedback) {
-                        showDialog(activity, "Google Cloud Messaging registration failed. Please try again later.");
+                        showDialog(activity, applicationContext.getResources().getString(R.string.gcm_fail));
                     }
                 } else {
                     if (showFeedback) {
-                        showDialog(activity, "Google Cloud Messaging registration succeeded.");
+                        showDialog(activity, applicationContext.getResources().getString(R.string.gcm_success));
 
                     }
                 }
@@ -134,28 +143,20 @@ public class Gcm {
         }.execute();
     }
 
-    private boolean sendRegistrationIdToBackend() {
-        try {
-            String registrationBackendUrl = "https://voipmssms-kourlas.rhcloud.com/register?" +
-                    "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
-                    "reg_id=" + URLEncoder.encode(preferences.getRegistrationId(), "UTF-8");
-            JSONObject result = Utils.getJson(registrationBackendUrl);
-            String status = (String) result.get("status");
-            return status.equals("success");
-        } catch (IOException ex) {
-            return false;
-        } catch (org.json.simple.parser.ParseException ex) {
-            return false;
-        } catch (ClassCastException ex) {
-            return false;
-        }
+    private boolean sendRegistrationIdToBackend(String registrationId) throws IOException, ParseException {
+        String registrationBackendUrl = "https://voipmssms-kourlas.rhcloud.com/register?" +
+                "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
+                "reg_id=" + URLEncoder.encode(registrationId, "UTF-8");
+        JSONObject result = Utils.getJson(registrationBackendUrl);
+        String status = (String) result.get("status");
+        return status.equals("success");
     }
 
-    public void registerForGcm(Activity activity, boolean showFeedback) {
+    public void registerForGcm(Activity activity, boolean showFeedback, boolean force) {
         if (preferences.getNotificationsEnabled()) {
             if (preferences.getDid().equals("")) {
                 if (showFeedback) {
-                    showDialog(activity, "Google Cloud Messaging registration requires that a DID be set.");
+                    showDialog(activity, applicationContext.getResources().getString(R.string.gcm_did));
                 }
                 return;
             }
@@ -163,15 +164,15 @@ public class Gcm {
             Boolean playServices = Gcm.getInstance(applicationContext).checkPlayServices(activity);
             if (playServices == null) {
                 if (showFeedback) {
-                    showDialog(activity, "This device does not support Google Play Services.");
+                    showDialog(activity, applicationContext.getResources().getString(R.string.gcm_support));
                 }
             } else if (playServices) {
                 String registrationId = Gcm.getInstance(applicationContext).getRegistrationId();
-                if (registrationId.isEmpty()) {
+                if (registrationId.isEmpty() || force) {
                     Gcm.getInstance(applicationContext).registerInBackground(activity, showFeedback);
                 } else {
                     if (showFeedback) {
-                        showDialog(activity, "Google Cloud Messaging registration succeeded.");
+                        showDialog(activity, applicationContext.getResources().getString(R.string.gcm_success));
                     }
                 }
             }

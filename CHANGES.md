@@ -1,3 +1,8 @@
+## 0.3.1 ##
+
+* Fix error in push notification instructions
+* Bug fixes
+
 ## 0.3.0 ##
 
 * Support for push notifications
