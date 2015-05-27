@@ -49,6 +49,7 @@
             android:dependency="sms_notification"
             android:key="sms_notification_ringtone"
             android:ringtoneType="notification"
+            android:summary="Select a notification sound"
             android:title="@string/preferences_sms_notification_ringtone" />
         <SwitchPreference
             android:defaultValue="true"
