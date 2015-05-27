@@ -127,14 +127,6 @@ public class PreferencesActivity extends AppCompatActivity {
                         InputType.TYPE_TEXT_VARIATION_PASSWORD) {
                     editTextPreference.setSummary(editTextPreference.getText());
                 }
-            } else if (preference instanceof RingtonePreference) {
-                // Display selected notification sound as summary text for notification setting
-                RingtonePreference ringtonePreference = (RingtonePreference) preference;
-                String ringtonePath = getPreferenceManager().getSharedPreferences().getString(
-                        "sms_notification_ringtone", getResources().getString(
-                                R.string.preferences_sms_notification_ringtone_default_value));
-                Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), Uri.parse(ringtonePath));
-                ringtonePreference.setSummary(ringtone.getTitle(getActivity()));
             }
         }
     }
