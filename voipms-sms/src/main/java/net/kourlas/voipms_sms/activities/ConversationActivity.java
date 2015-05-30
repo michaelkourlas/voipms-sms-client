@@ -19,13 +19,10 @@ package net.kourlas.voipms_sms.activities;
 
 import android.annotation.TargetApi;
 import android.app.NotificationManager;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
+import android.app.ProgressDialog;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.LightingColorFilter;
 import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Build;
@@ -51,21 +48,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class ConversationActivity extends AppCompatActivity {
-    private final ConversationActivity conversationsActivity = this;
+    private final ConversationActivity conversationActivity = this;
     private ConversationListViewAdapter conversationListViewAdapter;
     private String contact;
+    private ProgressDialog deleteSmsProgressDialog;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.conversation);
-
-        // Set the progress bar colour to red; normally this kind of thing is done using XML but there doesn't seem to
-        // be a way to do it here
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        progressBar.getIndeterminateDrawable().setColorFilter(new LightingColorFilter(0x000000, 0xAA0000));
 
         final ConversationActivity conversationActivity = this;
 
@@ -141,7 +133,7 @@ public class ConversationActivity extends AppCompatActivity {
 
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                List<Integer> selectedItems = new ArrayList<Integer>();
+                List<Integer> selectedItems = new ArrayList<>();
                 SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
                 for (int i = 0; i < listView.getCount(); i++) {
                     if (sparseBooleanArray.get(i)) {
@@ -152,19 +144,18 @@ public class ConversationActivity extends AppCompatActivity {
                 switch (item.getItemId()) {
                     case R.id.info_button:
                         Sms sms = ((Sms) conversationListViewAdapter.getItem(selectedItems.get(0)));
-                        DateFormat iso8601format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
-                        iso8601format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                         AlertDialog.Builder builder = new AlertDialog.Builder(conversationActivity);
                         if (sms.getType() == Sms.Type.INCOMING) {
                             builder.setMessage("ID: " + sms.getId() +
-                                    "\nTo: " + sms.getDid() +
-                                    "\nFrom: " + sms.getContact() +
-                                    "\nDate: " + iso8601format.format(sms.getDate()));
+                                    "\nTo: " + Utils.getFormattedPhoneNumber(sms.getDid()) +
+                                    "\nFrom: " + Utils.getFormattedPhoneNumber(sms.getContact()) +
+                                    "\nDate: " + dateFormat.format(sms.getDate()));
                         } else {
                             builder.setMessage("ID: " + sms.getId() +
-                                    "\nTo: " + sms.getContact() +
-                                    "\nFrom: " + sms.getDid() +
-                                    "\nDate: " + iso8601format.format(sms.getDate()));
+                                    "\nTo: " + Utils.getFormattedPhoneNumber(sms.getContact()) +
+                                    "\nFrom: " + Utils.getFormattedPhoneNumber(sms.getDid()) +
+                                    "\nDate: " + dateFormat.format(sms.getDate()));
                         }
                         builder.setTitle("Message details");
                         builder.show();
@@ -186,13 +177,18 @@ public class ConversationActivity extends AppCompatActivity {
                         mode.finish();
                         return true;
                     case R.id.delete_button:
+                        List<Sms> smses = new ArrayList<>();
                         SparseBooleanArray checkedItemPositions = listView.getCheckedItemPositions();
                         for (int i = 0; i < listView.getCount(); i++) {
                             if (checkedItemPositions.get(i)) {
-                                Api.getInstance(getApplicationContext()).deleteSms(conversationsActivity,
-                                        ((Sms) conversationListViewAdapter.getItem(i)).getId());
+                                smses.add((Sms) conversationListViewAdapter.getItem(i));
                             }
                         }
+
+                        Sms[] smsArray = new Sms[smses.size()];
+                        smses.toArray(smsArray);
+                        preDeleteSms(smsArray);
+
                         mode.finish();
                         return true;
                     default:
@@ -219,10 +215,12 @@ public class ConversationActivity extends AppCompatActivity {
         }
         messageText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -260,14 +258,9 @@ public class ConversationActivity extends AppCompatActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendButton.setEnabled(false);
-                conversationActivity.findViewById(R.id.progress_bar).setVisibility(View.VISIBLE);
-                Api.getInstance(getApplicationContext()).sendSms(conversationsActivity, contact,
-                        messageText.getText().toString());
+                preSendSms();
             }
         });
-
-        conversationListViewAdapter.requestScrollToBottom();
     }
 
     @Override
@@ -275,7 +268,7 @@ public class ConversationActivity extends AppCompatActivity {
         super.onResume();
         App.getInstance().setCurrentActivity(this);
 
-        Integer id = Api.getInstance(getApplicationContext()).getNotificationIds().get(contact);
+        Integer id = Notifications.getInstance(getApplicationContext()).getNotificationIds().get(contact);
         if (id != null) {
             NotificationManager notificationManager = (NotificationManager)
                     getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -339,9 +332,7 @@ public class ConversationActivity extends AppCompatActivity {
                     if (conversation.getAllSms().length == 0) {
                         NavUtils.navigateUpFromSameTask(this);
                     } else {
-                        for (Sms sms : conversation.getAllSms()) {
-                            Api.getInstance(getApplicationContext()).deleteSms(conversationsActivity, sms.getId());
-                        }
+                        preDeleteSms(conversation.getAllSms());
                     }
                     return true;
             }
@@ -350,8 +341,85 @@ public class ConversationActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public ConversationListViewAdapter getConversationListViewAdapter() {
-        return conversationListViewAdapter;
+    public void preDeleteSms(final Sms[] smses) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
+        builder.setMessage("Delete messages?");
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteSmsProgressDialog = new ProgressDialog(conversationActivity);
+                deleteSmsProgressDialog.setTitle("Deleting messages...");
+                deleteSmsProgressDialog.setCancelable(false);
+                deleteSmsProgressDialog.setIndeterminate(false);
+                deleteSmsProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                deleteSmsProgressDialog.setMax(smses.length);
+                deleteSmsProgressDialog.show();
+
+                for (Sms sms : smses) {
+                    Api.getInstance(getApplicationContext()).deleteSms(conversationActivity, sms.getId());
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    public void postDeleteSms() {
+        if (deleteSmsProgressDialog != null) {
+            deleteSmsProgressDialog.incrementProgressBy(1);
+            if (deleteSmsProgressDialog.getProgress() == deleteSmsProgressDialog.getMax()) {
+                deleteSmsProgressDialog.dismiss();
+                deleteSmsProgressDialog = null;
+            }
+        }
+
+        conversationListViewAdapter.refresh();
+        if (Database.getInstance(this).getConversation(contact).getAllSms().length == 0) {
+            NavUtils.navigateUpFromSameTask(this);
+        }
+    }
+
+    public void preSendSms() {
+        ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
+        sendButton.setEnabled(false);
+
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
+
+        EditText messageText = (EditText) findViewById(R.id.message_edit_text);
+        messageText.setFocusable(false);
+
+        Api.getInstance(getApplicationContext()).sendSms(ConversationActivity.this.conversationActivity, contact,
+                messageText.getText().toString());
+    }
+
+    public void postSendSms(boolean success) {
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.INVISIBLE);
+
+        ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
+        sendButton.setEnabled(true);
+
+        EditText messageText = (EditText) findViewById(R.id.message_edit_text);
+        messageText.setFocusable(true);
+        messageText.setFocusableInTouchMode(true);
+        messageText.setClickable(true);
+        messageText.requestFocus();
+
+        if (success) {
+            messageText.setText("");
+            Api.getInstance(getApplicationContext()).updateSmsDatabase(this, true, false);
+        }
+    }
+
+    public void postUpdate() {
+        // Mark conversation as read
+        for (Sms sms : Database.getInstance(getApplicationContext()).getConversation(contact).getAllSms()) {
+            sms.setUnread(false);
+            Database.getInstance(getApplicationContext()).replaceSms(sms);
+        }
+
+        conversationListViewAdapter.refresh();
     }
 
     public String getContact() {

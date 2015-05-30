@@ -17,11 +17,12 @@
 
 package net.kourlas.voipms_sms.activities;
 
-import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.text.InputType;
@@ -34,9 +35,14 @@ import net.kourlas.voipms_sms.gcm.Gcm;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ConversationsActivity extends AppCompatActivity {
     private final ConversationsActivity conversationsActivity = this;
     private ConversationsListViewAdapter conversationsListViewAdapter;
+    private ProgressDialog deleteSmsProgressDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +60,7 @@ public class ConversationsActivity extends AppCompatActivity {
                 Gcm.getInstance(getApplicationContext()).registerForGcm(conversationsActivity, false, false);
             }
         });
+        swipeRefreshLayout.setColorSchemeResources(R.color.accent);
 
         final ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(conversationsListViewAdapter);
@@ -124,14 +131,16 @@ public class ConversationsActivity extends AppCompatActivity {
                         return true;
                     case R.id.delete_button:
                         checkedItemPositions = listView.getCheckedItemPositions();
+                        List<Sms> smses = new ArrayList<>();
                         for (int i = 0; i < checkedItemPositions.size(); i++) {
                             if (checkedItemPositions.get(i)) {
                                 Conversation conversation = (Conversation) conversationsListViewAdapter.getItem(i);
-                                for (Sms sms : conversation.getAllSms()) {
-                                    Api.getInstance(getApplicationContext()).deleteSms(conversationsActivity, sms.getId());
-                                }
+                                smses.addAll(Arrays.asList(conversation.getAllSms()));
                             }
                         }
+                        Sms[] smsArray = new Sms[smses.size()];
+                        smses.toArray(smsArray);
+                        preDeleteSms(smsArray);
                         mode.finish();
                         return true;
                     default:
@@ -147,7 +156,8 @@ public class ConversationsActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onDestroyActionMode(ActionMode mode) {}
+            public void onDestroyActionMode(ActionMode mode) {
+            }
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
@@ -262,7 +272,71 @@ public class ConversationsActivity extends AppCompatActivity {
         }
     }
 
-    public ConversationsListViewAdapter getConversationsListViewAdapter() {
-        return conversationsListViewAdapter;
+    public void preDeleteSms(final Sms[] smses) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
+        builder.setMessage("Delete messages?");
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteSmsProgressDialog = new ProgressDialog(conversationsActivity);
+                deleteSmsProgressDialog.setTitle("Deleting messages...");
+                deleteSmsProgressDialog.setCancelable(false);
+                deleteSmsProgressDialog.setIndeterminate(false);
+                deleteSmsProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                deleteSmsProgressDialog.setMax(smses.length);
+                deleteSmsProgressDialog.show();
+
+                for (Sms sms : smses) {
+                    Api.getInstance(getApplicationContext()).deleteSms(conversationsActivity, sms.getId());
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    public void postDeleteSms() {
+        if (deleteSmsProgressDialog != null) {
+            deleteSmsProgressDialog.incrementProgressBy(1);
+            if (deleteSmsProgressDialog.getProgress() == deleteSmsProgressDialog.getMax()) {
+                deleteSmsProgressDialog.dismiss();
+                deleteSmsProgressDialog = null;
+            }
+        }
+
+        conversationsListViewAdapter.refresh();
+    }
+
+    /**
+     * Shows the "Select DIDs" dialog. This method should only be called by the corresponding method in the Api class.
+     *
+     * @param dids The DIDs to be shown in the "Select DIDs" dialog.
+     */
+    public void showSelectDidDialog(final String[] dids) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getResources().getString(R.string.conversations_select_did_dialog_title));
+        builder.setItems(dids, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Preferences.getInstance(getApplicationContext()).setDid(dids[which].replaceAll("[^0-9]", ""));
+                Database.getInstance(getApplicationContext()).deleteAllSMS();
+                conversationsListViewAdapter.refresh();
+                Api.getInstance(getApplicationContext()).updateSmsDatabase(conversationsActivity, true, false);
+                Gcm.getInstance(getApplicationContext()).registerForGcm(conversationsActivity, false, false);
+
+            }
+        });
+        builder.show();
+    }
+
+    /**
+     * Called by the Api class after updating the SMS database if this activity made the update request or, if the
+     * update request was initiated by the GCM service, if this activity is currently visible to the user.
+     */
+    public void postUpdate() {
+        SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setRefreshing(false);
+
+        conversationsListViewAdapter.refresh();
     }
 }

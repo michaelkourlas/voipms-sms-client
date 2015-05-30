@@ -19,6 +19,7 @@ package net.kourlas.voipms_sms.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.example.android.customchoicelist.CheckableLinearLayout;
 import net.kourlas.voipms_sms.R;
@@ -34,14 +35,20 @@ public class ConversationListViewItem extends CheckableLinearLayout {
         super.setChecked(b);
 
         int viewType = (Integer) getTag();
-        TextView textView = (TextView) this.findViewById(R.id.message);
+        LinearLayout smsContainer = (LinearLayout) this.findViewById(R.id.sms_container);
+        TextView messageText = (TextView) this.findViewById(R.id.message);
+        TextView dateText = (TextView) this.findViewById(R.id.date);
         if (viewType == ConversationListViewAdapter.ITEM_LEFT_PRIMARY ||
                 viewType == ConversationListViewAdapter.ITEM_LEFT_SECONDARY) {
-            textView.setBackgroundResource(b ? android.R.color.holo_blue_dark : R.color.primary);
+            smsContainer.setBackgroundResource(b ? android.R.color.holo_blue_dark : R.color.primary);
+            dateText.setTextColor(0x89FFFFFF);
         } else {
-            textView.setBackgroundResource(b ? android.R.color.holo_blue_dark : android.R.color.white);
-            textView.setTextColor(b ? getResources().getColor(android.R.color.white) : getResources().getColor(
+            smsContainer.setBackgroundResource(b ? android.R.color.holo_blue_dark : android.R.color.white);
+            messageText.setTextColor(b ? getResources().getColor(android.R.color.white) : getResources().getColor(
                     android.R.color.black));
+            messageText.setLinkTextColor(b ? getResources().getColor(android.R.color.white) : getResources().getColor(
+                    android.R.color.black));
+            dateText.setTextColor(b ? 0x89FFFFFF : 0x89000000);
         }
     }
 }

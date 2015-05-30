@@ -4,6 +4,7 @@
       <w>dialpad</w>
       <w>dids</w>
       <w>smses</w>
+      <w>voip</w>
     </words>
   </dictionary>
 </component>

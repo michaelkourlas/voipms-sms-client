@@ -22,10 +22,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import net.kourlas.voipms_sms.Api;
+import net.kourlas.voipms_sms.receivers.GcmReceiver;
 
 public class GcmService extends IntentService {
     public GcmService() {
-        super("RefreshService");
+        super("GcmService");
     }
 
     @Override

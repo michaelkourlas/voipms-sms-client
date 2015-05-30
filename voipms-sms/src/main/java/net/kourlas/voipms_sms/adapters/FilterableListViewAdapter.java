@@ -39,14 +39,6 @@ public abstract class FilterableListViewAdapter<T> extends BaseAdapter implement
         this.listView = listView;
     }
 
-    public void requestScrollToTop() {
-        requestScrollToTop = true;
-    }
-
-    public void requestScrollToBottom() {
-        requestScrollToBottom = true;
-    }
-
     public void refresh() {
         getFilter().filter(filterConstraint);
     }
