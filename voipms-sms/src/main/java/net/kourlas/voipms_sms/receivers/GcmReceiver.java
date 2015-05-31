@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.gcm;
+package net.kourlas.voipms_sms.receivers;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 import net.kourlas.voipms_sms.Preferences;
+import net.kourlas.voipms_sms.gcm.GcmService;
 
 public class GcmReceiver extends WakefulBroadcastReceiver {
     @Override

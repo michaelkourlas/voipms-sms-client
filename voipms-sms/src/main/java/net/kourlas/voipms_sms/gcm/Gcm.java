@@ -33,7 +33,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +57,7 @@ public class Gcm {
 
     private static int getAppVersion(Context context) {
         try {
-            PackageInfo packageInfo = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0);
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return packageInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException("Could not get package name: " + e);
@@ -105,7 +103,10 @@ public class Gcm {
                     GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(applicationContext);
 
                     String registrationId = gcm.register(SENDER_ID);
-                    sendRegistrationIdToBackend(registrationId);
+                    if (!sendRegistrationIdToBackend(registrationId)) {
+                        list.add(false);
+                        return list;
+                    }
 
                     preferences.setRegistrationId(registrationId);
                     preferences.setRegistrationIdVersion(getAppVersion(applicationContext));
@@ -116,9 +117,6 @@ public class Gcm {
                     list.add(false);
                     return list;
                 } catch (ParseException ex) {
-                    list.add(false);
-                    return list;
-                } catch (ClassCastException ex) {
                     list.add(false);
                     return list;
                 }
@@ -149,7 +147,7 @@ public class Gcm {
                 "reg_id=" + URLEncoder.encode(registrationId, "UTF-8");
         JSONObject result = Utils.getJson(registrationBackendUrl);
         String status = (String) result.get("status");
-        return status.equals("success");
+        return status != null && status.equals("success");
     }
 
     public void registerForGcm(Activity activity, boolean showFeedback, boolean force) {

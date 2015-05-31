@@ -37,6 +37,7 @@
     <string name="conversation_action_send">Send</string>
     <string name="conversation_action_copy">Copy text</string>
     <string name="conversation_action_share">Share</string>
+    <string name="conversation_action_info">View details</string>
     <string name="conversation_text_hint">Send message</string>
 
     <string name="new_conversation_action_keyboard">Show keyboard</string>
@@ -68,7 +69,7 @@
 
     <string name="api_update_did_email">Could not retrieve DIDs because no VoIP.ms portal email has been set. (update_did_email)</string>
     <string name="api_update_did_password">Could not retrieve DIDs because no VoIP.ms API password has been set. (update_did_password)</string>
-    <string name="api_update_did_unsupported_encoding_exception">Could not retrieve DIDs because your VoIP.ms portal email or API password contains invalid characters. (update_did_unsupported_encoding_exception)</string>
+    <string name="api_update_did_other">Could not retrieve DIDs because of an unknown error. (update_did_other)</string>
     <string name="api_update_did_network">Could not retrieve DIDs because no network connection is available. (update_did_network)</string>
     <string name="api_update_did_no_dids">Could not retrieve DIDs because there are no DIDs in your account. (update_did_no_dids)</string>
     <string name="api_update_did_parse">Could not retrieve DIDs because the VoIP.ms API response could not be parsed. (update_did_parse)</string>
@@ -78,7 +79,7 @@
     <string name="api_update_smses_email">Could not update the SMS database because no VoIP.ms portal email has been set. (update_smses_email)</string>
     <string name="api_update_smses_password">Could not update the SMS database because no VoIP.ms API password has been set. (update_smses_password)</string>
     <string name="api_update_smses_did">Could not update the SMS database because no DID has been selected. (update_smses_did)</string>
-    <string name="api_update_smses_unsupported_encoding_exception">Could not update the SMS database because your VoIP.ms portal email or API password contains invalid characters. (update_smses_unsupported_encoding_exception)</string>
+    <string name="api_update_smses_other">Could not update the SMS database because of an unknown error. (update_smses_other)</string>
     <string name="api_update_smses_network">Could not update the SMS database because no network connection is available. (update_smses_network)</string>
     <string name="api_update_smses_request">Could not update the SMS database because the application failed to fetch information from the VoIP.ms API. (update_sms_request)</string>
     <string name="api_update_smses_parse">Could not update the SMS database because the VoIP.ms API response could not be parsed. (update_smses_parse)</string>
@@ -86,7 +87,7 @@
 
     <string name="api_delete_sms_email">Could not delete the SMS because no VoIP.ms portal email has been set. (delete_sms_email)</string>
     <string name="api_delete_sms_password">Could not delete the SMS because no VoIP.ms API password has been set. (delete_sms_password)</string>
-    <string name="api_delete_sms_unsupported_encoding_exception">Could not delete the SMS because your VoIP.ms portal email or API password contains invalid characters. (delete_sms_unsupported_encoding_exception)</string>
+    <string name="api_delete_sms_other">Could not delete the SMS because of an unknown error. (delete_sms_other)</string>
     <string name="api_delete_sms_network">Could not delete the SMS because no network connection is available. (delete_sms_network)</string>
     <string name="api_delete_sms_request">Could not delete the SMS because the application failed to fetch information from the VoIP.ms API. (delete_sms_request)</string>
     <string name="api_delete_sms_parse">Could not delete the SMS because the VoIP.ms API response could not be parsed. (delete_sms_parse)</string>
@@ -95,7 +96,7 @@
     <string name="api_send_sms_email">Could not send the SMS because no VoIP.ms portal email has been set. (send_sms_email)</string>
     <string name="api_send_sms_password">Could not send the SMS because no VoIP.ms API password has been set. (send_sms_password)</string>
     <string name="api_send_sms_did">Could not send the SMS because no DID has been selected. (send_sms_did)</string>
-    <string name="api_send_sms_unsupported_encoding_exception">Could not send the SMS because your VoIP.ms portal email or API password contains invalid characters. (send_sms_unsupported_encoding_exception)</string>
+    <string name="api_send_sms_other">Could not send the SMS because of an unknown error. (send_sms_other)</string>
     <string name="api_send_sms_network">Could not send the SMS because no network connection is available. (send_sms_network)</string>
     <string name="api_send_sms_request">Could not send the SMS because the application failed to fetch information from the VoIP.ms API. (send_sms_request)</string>
     <string name="api_send_sms_parse">Could not send the SMS because the VoIP.ms API response could not be parsed. (send_sms_parse)</string>
@@ -105,11 +106,11 @@
     <string name="api_new_conversation_password">Could not create new conversation because no VoIP.ms API password has been set. (new_conversation_password)</string>
     <string name="api_new_conversation_did">Could not create new conversation because no DID has been selected. (new_conversation_did)</string>
 
-    <string name="cancel">Cancel</string>
-    <string name="ok">OK</string>
-    <string name="conversation_action_info">View details</string>
     <string name="gcm_success">Google Cloud Messaging registration succeeded.</string>
     <string name="gcm_support">This device does not support Google Play Services.</string>
     <string name="gcm_did">Google Cloud Messaging registration requires that a DID be set.</string>
     <string name="gcm_fail">Google Cloud Messaging registration failed. Please try again later.</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 </resources>

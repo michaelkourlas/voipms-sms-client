@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -95,7 +96,10 @@ public class NewConversationActivity extends AppCompatActivity {
 
                     Intent intent = new Intent(newConversationActivity, ConversationActivity.class);
                     intent.putExtra("contact", phoneNumber);
-                    startActivity(intent);
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+                    stackBuilder.addParentStack(ConversationActivity.class);
+                    stackBuilder.addNextIntent(intent);
+                    stackBuilder.startActivities();
                 }
             });
             listView.setFastScrollEnabled(true);

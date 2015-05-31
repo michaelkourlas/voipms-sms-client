@@ -28,7 +28,8 @@
         android:clipToPadding="false"
         android:divider="@null"
         android:dividerHeight="0dp"
-        android:paddingTop="10dp" />
+        android:stackFromBottom="true"
+        android:transcriptMode="normal" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -91,12 +92,11 @@
             android:background="@android:color/white"
             android:gravity="start"
             android:hint="@string/conversation_text_hint"
-            android:inputType="textMultiLine"
+            android:inputType="textMultiLine|textCapSentences|textAutoCorrect"
             android:isScrollContainer="true"
             android:maxLength="160"
             android:maxLines="4"
             android:padding="10dp"
-            android:textCursorDrawable="@drawable/black_cursor"
             android:textSize="16sp" />
     </RelativeLayout>
 </LinearLayout>

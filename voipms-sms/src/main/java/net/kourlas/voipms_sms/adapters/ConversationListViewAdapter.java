@@ -24,10 +24,6 @@ import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.SubscriptSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,14 +75,14 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
 
         if (sms.getType() == Sms.Type.INCOMING) {
             if (previousSms == null || previousSms.getType() == Sms.Type.OUTGOING ||
-                    sms.getRawDate() - previousSms.getRawDate() > 10) {
+                    sms.getRawDate() - previousSms.getRawDate() > 60) {
                 return ITEM_LEFT_PRIMARY;
             } else {
                 return ITEM_LEFT_SECONDARY;
             }
         } else {
             if (previousSms == null || previousSms.getType() == Sms.Type.INCOMING ||
-                    sms.getRawDate() - previousSms.getRawDate() > 10) {
+                    sms.getRawDate() - previousSms.getRawDate() > 60) {
                 return ITEM_RIGHT_PRIMARY;
             } else {
                 return ITEM_RIGHT_SECONDARY;
@@ -123,8 +119,6 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
                 }
                 break;
         }
-
-        convertView.setTag(viewType);
 
         if (viewType == ITEM_LEFT_PRIMARY || viewType == ITEM_RIGHT_PRIMARY) {
             QuickContactBadge photo = (QuickContactBadge) convertView.findViewById(R.id.photo);
@@ -168,26 +162,33 @@ public class ConversationListViewAdapter extends FilterableListViewAdapter<Sms> 
             cursor.close();
         }
 
-        TextView text = (TextView) convertView.findViewById(R.id.message);
+        View view = convertView.findViewById(R.id.sms_container);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            text.setOutlineProvider(new ViewOutlineProvider() {
+            view.setOutlineProvider(new ViewOutlineProvider() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                 @Override
                 public void getOutline(View view, Outline outline) {
                     outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 15);
                 }
             });
-            text.setClipToOutline(true);
+            view.setClipToOutline(true);
         }
 
-        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(sms.getMessage() + "\n" +
-                Utils.getFormattedDate(sms.getDate()));
-        final AbsoluteSizeSpan sizeSpan = new AbsoluteSizeSpan(12, true);
-        spannableStringBuilder.setSpan(sizeSpan, sms.getMessage().length(), spannableStringBuilder.length(),
-                Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        spannableStringBuilder.setSpan(new SubscriptSpan(), sms.getMessage().length(), spannableStringBuilder.length(),
-                Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        text.setText(spannableStringBuilder);
+        TextView messageText = (TextView) convertView.findViewById(R.id.message);
+        messageText.setText(sms.getMessage());
+
+        if (position == getCount() - 1 ||
+                ((viewType == ITEM_LEFT_PRIMARY || viewType == ITEM_LEFT_SECONDARY) && getItemViewType(position + 1) != ITEM_LEFT_SECONDARY) ||
+                ((viewType == ITEM_RIGHT_PRIMARY || viewType == ITEM_RIGHT_SECONDARY) && getItemViewType(position + 1) != ITEM_RIGHT_SECONDARY)) {
+            TextView dateText = (TextView) convertView.findViewById(R.id.date);
+            dateText.setText(Utils.getFormattedDate(sms.getDate(), false));
+            dateText.setVisibility(View.VISIBLE);
+        } else {
+            TextView dateText = (TextView) convertView.findViewById(R.id.date);
+            dateText.setVisibility(View.GONE);
+        }
+
+        convertView.setTag(viewType);
 
         return convertView;
     }

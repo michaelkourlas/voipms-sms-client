@@ -115,7 +115,7 @@ public class ConversationsListViewAdapter extends FilterableListViewAdapter<Conv
         }
 
         TextView dateTextView = (TextView) convertView.findViewById(R.id.date);
-        dateTextView.setText(Utils.getFormattedDate(sms.getDate()));
+        dateTextView.setText(Utils.getFormattedDate(sms.getDate(), true));
 
         return convertView;
     }

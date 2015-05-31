@@ -18,19 +18,40 @@
 <resources>
 
     <style name="AppTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:actionBarStyle">@style/ActionBarTheme</item>
-        <item name="actionBarStyle">@style/ActionBarTheme</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+
         <item name="android:actionModeBackground">@color/primary</item>
         <item name="actionModeBackground">@color/primary</item>
-        <item name="android:autoCompleteTextViewStyle">@style/cursorColor</item>
+        <item name="android:alertDialogTheme">@style/DialogTheme</item>
+        <item name="alertDialogTheme">@style/DialogTheme</item>
     </style>
 
-    <style name="cursorColor" parent="Widget.AppCompat.AutoCompleteTextView">
-        <item name="android:textCursorDrawable">@drawable/white_cursor</item>
+    <!-- Style UI elements for dialogs -->
+    <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
+        <item name="windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
-    <style name="ActionBarTheme" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/primary</item>
-        <item name="background">@color/primary</item>
+    <style name="TranslucentTheme" parent="AppTheme">
+
+        <item name="colorPrimaryDark">@color/transparent</item>
+
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+
+        <item name="android:actionBarStyle">@style/TranslucentActionBar</item>
+        <item name="actionBarStyle">@style/TranslucentActionBar</item>
+    </style>
+
+    <style name="TranslucentActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="android:background">@color/transparent</item>
+        <item name="background">@color/transparent</item>
     </style>
 </resources>

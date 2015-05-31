@@ -1,3 +1,11 @@
+## 0.3.2 ##
+
+* Added quick reply screen
+* Added actions to notification
+* New icon
+* UI changes
+* Bug fixes
+
 ## 0.3.1 ##
 
 * Fix error in push notification instructions
@@ -13,8 +21,8 @@
 
 ## 0.2.2 ##
 
-* Bug fixes
 * Added compatibility with API version 16 (Jelly Bean)
+* Bug fixes
 
 ## 0.2.1 ##
 

@@ -20,7 +20,7 @@ package net.kourlas.voipms_sms;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Outline;
+import android.graphics.*;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
@@ -70,7 +70,7 @@ public class Utils {
         }
     }
 
-    public static String getFormattedDate(Date smsDate) {
+    public static String getFormattedDate(Date smsDate, boolean conversationsView) {
         Calendar smsCalendar = Calendar.getInstance();
         smsCalendar.setTimeInMillis(smsDate.getTime());
 
@@ -107,20 +107,38 @@ public class Utils {
         if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) == smsCalendar.get(
                 Calendar.WEEK_OF_YEAR) && Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(
                 Calendar.YEAR) == smsCalendar.get(Calendar.YEAR)) {
-            // This week: EEE
-            DateFormat format = new SimpleDateFormat("EEE", Locale.getDefault());
-            return format.format(smsDate);
+            if (conversationsView) {
+                // This week: EEE
+                DateFormat format = new SimpleDateFormat("EEE", Locale.getDefault());
+                return format.format(smsDate);
+            } else {
+                // This week: EEE h:mm a
+                DateFormat format = new SimpleDateFormat("EEE h:mm a", Locale.getDefault());
+                return format.format(smsDate);
+            }
         }
 
         if (Calendar.getInstance().get(Calendar.YEAR) == smsCalendar.get(Calendar.YEAR)) {
-            // This year: EEE, MMM d
-            DateFormat format = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
-            return format.format(smsDate);
+            if (conversationsView) {
+                // This year: MMM d
+                DateFormat format = new SimpleDateFormat("MMM d", Locale.getDefault());
+                return format.format(smsDate);
+            } else {
+                // This year: MMM d h:mm a
+                DateFormat format = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault());
+                return format.format(smsDate);
+            }
         }
 
-        // Any: EEE, MMM d, yyyy
-        DateFormat format = new SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault());
-        return format.format(smsDate);
+        if (conversationsView) {
+            // Any: MMM d, yyyy
+            DateFormat format = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
+            return format.format(smsDate);
+        } else {
+            // Any: MMM d, yyyy h:mm a
+            DateFormat format = new SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault());
+            return format.format(smsDate);
+        }
     }
 
     private static int compareDateWithoutTime(Calendar c1, Calendar c2) {
@@ -180,5 +198,20 @@ public class Utils {
             });
             view.setClipToOutline(true);
         }
+    }
+
+    public static Bitmap applyCircularMask(Bitmap bitmap) {
+        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(output);
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        canvas.drawARGB(0, 0, 0, 0);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2, paint);
+        paint.setAntiAlias(true);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
     }
 }
