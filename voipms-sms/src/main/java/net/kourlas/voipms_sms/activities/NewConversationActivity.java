@@ -96,6 +96,15 @@ public class NewConversationActivity extends AppCompatActivity {
 
                     Intent intent = new Intent(newConversationActivity, ConversationActivity.class);
                     intent.putExtra("contact", phoneNumber);
+                    intent.putExtra("focus", true);
+
+                    Intent sendIntent = getIntent();
+                    if (Intent.ACTION_SEND.equals(sendIntent.getAction()) && sendIntent.getType() != null) {
+                        if ("text/plain".equals(sendIntent.getType())) {
+                            intent.putExtra("send_message",sendIntent.getStringExtra(Intent.EXTRA_TEXT));
+                        }
+                    }
+
                     TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
                     stackBuilder.addParentStack(ConversationActivity.class);
                     stackBuilder.addNextIntent(intent);

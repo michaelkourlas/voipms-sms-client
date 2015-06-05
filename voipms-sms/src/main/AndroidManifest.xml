@@ -61,7 +61,16 @@
             android:excludeFromRecents="true" />
         <activity
             android:name=".activities.NewConversationActivity"
-            android:parentActivityName=".activities.ConversationsActivity" />
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:parentActivityName=".activities.ConversationsActivity" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".activities.PreferencesActivity"
             android:label="@string/preferences_name"

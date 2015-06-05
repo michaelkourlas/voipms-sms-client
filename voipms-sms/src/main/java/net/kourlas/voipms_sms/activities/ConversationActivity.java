@@ -61,7 +61,7 @@ public class ConversationActivity extends AppCompatActivity {
 
         final ConversationActivity conversationActivity = this;
 
-        contact = getIntent().getExtras().getString("contact");
+        contact = getIntent().getStringExtra("contact");
         // Remove the leading one from a North American phone number (e.g. +1 (123) 555-4567)
         if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
             contact = contact.substring(1);
@@ -232,6 +232,17 @@ public class ConversationActivity extends AppCompatActivity {
                 }
             }
         });
+
+        String send_message = getIntent().getStringExtra("send_message");
+        if (send_message != null) {
+            messageText.setText(send_message);
+        }
+
+        if ( getIntent().getBooleanExtra("focus", false) ) {
+            messageText.setFocusable(true);
+            messageText.setClickable(true);
+            messageText.requestFocus();
+        }
 
         QuickContactBadge photo = (QuickContactBadge) findViewById(R.id.photo);
         Utils.applyCircularMask(photo);
