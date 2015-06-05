@@ -400,8 +400,16 @@ public class ConversationActivity extends AppCompatActivity {
         EditText messageText = (EditText) findViewById(R.id.message_edit_text);
         messageText.setFocusable(false);
 
-        Api.getInstance(getApplicationContext()).sendSms(ConversationActivity.this.conversationActivity, contact,
-                messageText.getText().toString());
+        String message = messageText.getText().toString();
+        if (message.length() > 160) {
+            for (int index = 0; index < message.length(); index += 160) {
+                Api.getInstance(getApplicationContext()).sendSms(ConversationActivity.this.conversationActivity, contact,
+                        message.substring(index, Math.min(index + 160, message.length())));
+            }
+        } else {
+            Api.getInstance(getApplicationContext()).sendSms(ConversationActivity.this.conversationActivity, contact,
+                message);
+        }
     }
 
     public void postSendSms(boolean success) {
