@@ -412,7 +412,7 @@ public class ConversationActivity extends AppCompatActivity {
         }
     }
 
-    public void postSendSms(boolean success) {
+    public void postSendSms(boolean success, Sms sms) {
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.INVISIBLE);
 
@@ -425,9 +425,9 @@ public class ConversationActivity extends AppCompatActivity {
         messageText.setClickable(true);
         messageText.requestFocus();
 
-        if (success) {
+        if ( success && (sms.getId() != Sms.ID_NULL) ) {
             messageText.setText("");
-            Api.getInstance(getApplicationContext()).updateSmsDatabase(this, true, false);
+            Api.getInstance(getApplicationContext()).writeSmsDatabase(this, sms);
         }
     }
 

@@ -26,13 +26,14 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class Sms implements Comparable<Sms> {
-    private final long id;
+    private long id;
     private Date date;
     private Type type;
     private String did;
     private String contact;
     private String message;
     private boolean isUnread;
+    public static final long ID_NULL = -1;
 
     public Sms(long id, long date, long type, String did, String contact, String message, long isUnread) {
         this.id = id;
@@ -95,6 +96,10 @@ public class Sms implements Comparable<Sms> {
 
     public void setUnread(boolean unread) {
         isUnread = unread;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public int getRawUnread() {

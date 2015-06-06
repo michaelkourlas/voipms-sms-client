@@ -134,7 +134,8 @@ public class Api {
                         "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
                         "dst=" + URLEncoder.encode(contact, "UTF-8") + "&" +
                         "message=" + URLEncoder.encode(message, "UTF-8");
-                task.start(voipUrl);
+                task.start(voipUrl, new Sms(Sms.ID_NULL, Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis(),
+                        0, preferences.getDid(), contact, message, 0));
                 return;
             } catch (UnsupportedEncodingException ex) {
                 processError(true, R.string.api_send_sms_other, null, Log.getStackTraceString(ex));
@@ -143,7 +144,7 @@ public class Api {
             processError(true, R.string.api_send_sms_network, null, null);
         }
 
-        task.cleanup(false);
+        task.cleanup(false, Sms.ID_NULL);
     }
 
     public void updateSmsDatabase(Activity sourceActivity, boolean showErrors, boolean showNotifications) {
@@ -185,6 +186,24 @@ public class Api {
         }
 
         task.cleanup();
+    }
+
+    public void writeSmsDatabase(Activity sourceActivity, Sms sms) {
+        if (!Database.getInstance(applicationContext).smsExists(sms.getId())) {
+            Database.getInstance(applicationContext).addSms(sms);
+        }
+
+        if (sourceActivity instanceof ConversationsActivity) {
+            ((ConversationsActivity) sourceActivity).postUpdate();
+        } else if (sourceActivity instanceof ConversationActivity) {
+            ((ConversationActivity) sourceActivity).postUpdate();
+        } else if (sourceActivity == null) {
+            if (App.getInstance().getCurrentActivity() instanceof ConversationsActivity) {
+                ((ConversationsActivity) App.getInstance().getCurrentActivity()).postUpdate();
+            } else if (App.getInstance().getCurrentActivity() instanceof ConversationActivity) {
+                ((ConversationActivity) App.getInstance().getCurrentActivity()).postUpdate();
+            }
+        }
     }
 
     private boolean isNetworkConnectionAvailable() {
@@ -380,18 +399,21 @@ public class Api {
 
     public class SendSmsTask {
         private final Activity sourceActivity;
+        private Sms sms;
 
         public SendSmsTask(Activity sourceActivity) {
             this.sourceActivity = sourceActivity;
         }
 
-        public void start(String voipUrl) {
+        public void start(String voipUrl, Sms sms) {
+            this.sms = sms;
             new SendSmsAsyncTask().execute(voipUrl);
         }
 
-        public void cleanup(boolean success) {
+        public void cleanup(boolean success, long id) {
+            sms.setId(id);
             if (sourceActivity instanceof ConversationActivity) {
-                ((ConversationActivity) sourceActivity).postSendSms(success);
+                ((ConversationActivity) sourceActivity).postSendSms(success, sms);
             } else if (sourceActivity instanceof ConversationQuickReplyActivity) {
                 ((ConversationQuickReplyActivity) sourceActivity).postSendSms(success);
             }
@@ -414,23 +436,24 @@ public class Api {
                 if (resultObject.getJsonObject() == null) {
                     processError(true, resultObject.getMessageResource(), null,
                             Log.getStackTraceString(resultObject.getException()));
-                    cleanup(false);
+                    cleanup(false, Sms.ID_NULL);
                     return;
                 }
 
                 String status = (String) resultObject.getJsonObject().get("status");
+                long id = (long) resultObject.getJsonObject().get("sms");
                 if (status == null) {
                     processError(true, R.string.api_send_sms_parse, null, null);
-                    cleanup(false);
+                    cleanup(false, Sms.ID_NULL);
                     return;
                 }
                 if (!status.equals("success")) {
                     processError(true, R.string.api_send_sms_api, status, null);
-                    cleanup(false);
+                    cleanup(false, Sms.ID_NULL);
                     return;
                 }
 
-                cleanup(true);
+                cleanup(true, id);
             }
         }
     }
