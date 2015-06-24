@@ -35,7 +35,6 @@ import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Sms;
 import net.kourlas.voipms_sms.receivers.MarkAsReadReceiver;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +123,7 @@ public class Notifications {
                     largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap, 256, 256, false);
                     largeIconBitmap = Utils.applyCircularMask(largeIconBitmap);
                     notificationBuilder.setLargeIcon(largeIconBitmap);
-                } catch (IOException ignored) {
+                } catch (Exception ignored) {
 
                 }
 

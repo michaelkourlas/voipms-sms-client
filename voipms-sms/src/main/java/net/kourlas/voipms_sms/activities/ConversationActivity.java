@@ -61,7 +61,7 @@ public class ConversationActivity extends AppCompatActivity {
 
         final ConversationActivity conversationActivity = this;
 
-        contact = getIntent().getExtras().getString("contact");
+        contact = getIntent().getStringExtra("contact");
         // Remove the leading one from a North American phone number (e.g. +1 (123) 555-4567)
         if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
             contact = contact.substring(1);
@@ -233,6 +233,17 @@ public class ConversationActivity extends AppCompatActivity {
             }
         });
 
+        String send_message = getIntent().getStringExtra("send_message");
+        if (send_message != null) {
+            messageText.setText(send_message);
+        }
+
+        if ( getIntent().getBooleanExtra("focus", false) ) {
+            messageText.setFocusable(true);
+            messageText.setClickable(true);
+            messageText.requestFocus();
+        }
+
         QuickContactBadge photo = (QuickContactBadge) findViewById(R.id.photo);
         Utils.applyCircularMask(photo);
         photo.assignContactFromPhone(Preferences.getInstance(getApplicationContext()).getDid(), true);
@@ -389,11 +400,19 @@ public class ConversationActivity extends AppCompatActivity {
         EditText messageText = (EditText) findViewById(R.id.message_edit_text);
         messageText.setFocusable(false);
 
-        Api.getInstance(getApplicationContext()).sendSms(ConversationActivity.this.conversationActivity, contact,
-                messageText.getText().toString());
+        String message = messageText.getText().toString();
+        if (message.length() > 160) {
+            for (int index = 0; index < message.length(); index += 160) {
+                Api.getInstance(getApplicationContext()).sendSms(ConversationActivity.this.conversationActivity, contact,
+                        message.substring(index, Math.min(index + 160, message.length())));
+            }
+        } else {
+            Api.getInstance(getApplicationContext()).sendSms(ConversationActivity.this.conversationActivity, contact,
+                message);
+        }
     }
 
-    public void postSendSms(boolean success) {
+    public void postSendSms(boolean success, Sms sms) {
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.INVISIBLE);
 
@@ -406,9 +425,9 @@ public class ConversationActivity extends AppCompatActivity {
         messageText.setClickable(true);
         messageText.requestFocus();
 
-        if (success) {
+        if ( success && (sms.getId() != Sms.ID_NULL) ) {
             messageText.setText("");
-            Api.getInstance(getApplicationContext()).updateSmsDatabase(this, true, false);
+            Api.getInstance(getApplicationContext()).writeSmsDatabase(this, sms);
         }
     }
 

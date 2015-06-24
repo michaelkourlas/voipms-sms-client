@@ -38,7 +38,7 @@ public class GcmService extends IntentService {
             if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 // It is not necessary to process the GCM message itself, as the application server only supports
                 // "send-to-sync" messages; simply update the SMS database in the background.
-                Api.getInstance(getApplicationContext()).updateSmsDatabase(null, false, true);
+                Api.getInstance(getApplicationContext()).getReceivedSms(null, false, true);
             }
         }
         GcmReceiver.completeWakefulIntent(intent);

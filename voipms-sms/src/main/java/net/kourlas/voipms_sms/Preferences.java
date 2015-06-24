@@ -21,6 +21,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
 public class Preferences {
     private static Preferences instance;
     private final Context applicationContext;
@@ -49,6 +53,23 @@ public class Preferences {
     public int getDaysToSync() {
         return Integer.parseInt(sharedPreferences.getString("sms_days_to_sync",
                 applicationContext.getResources().getString(R.string.preferences_sms_days_to_sync_default_value)));
+    }
+
+    public long getLastSync() {
+
+        Calendar calendarThen = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendarThen.add(Calendar.DAY_OF_YEAR, -getDaysToSync());
+        long then = calendarThen.getTimeInMillis();
+        return sharedPreferences.getLong("last_sync",then); //milliseconds
+    }
+
+    // Last time the app performed an automatic sync (usually via GCM)
+    public void setLastSync(long date) {
+
+        // It's saved in milliseconds
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong("last_sync", date);
+        editor.apply();
     }
 
     public String getDid() {

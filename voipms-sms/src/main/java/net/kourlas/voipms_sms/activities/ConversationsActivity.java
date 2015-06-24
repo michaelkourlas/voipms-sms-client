@@ -132,7 +132,7 @@ public class ConversationsActivity extends AppCompatActivity {
                     case R.id.delete_button:
                         checkedItemPositions = listView.getCheckedItemPositions();
                         List<Sms> smses = new ArrayList<>();
-                        for (int i = 0; i < checkedItemPositions.size(); i++) {
+                        for (int i = 0; i < listView.getCount(); i++) {
                             if (checkedItemPositions.get(i)) {
                                 Conversation conversation = (Conversation) conversationsListViewAdapter.getItem(i);
                                 smses.addAll(Arrays.asList(conversation.getAllSms()));
@@ -206,12 +206,6 @@ public class ConversationsActivity extends AppCompatActivity {
         App.getInstance().setCurrentActivity(this);
 
         conversationsListViewAdapter.refresh();
-
-        if (!Preferences.getInstance(getApplicationContext()).getFirstRun()) {
-            Api.getInstance(getApplicationContext()).updateSmsDatabase(conversationsActivity, true, false);
-        }
-
-        Gcm.getInstance(getApplicationContext()).registerForGcm(this, false, false);
     }
 
     @Override

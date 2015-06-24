@@ -15,26 +15,25 @@
   ~ limitations under the License.
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
         android:id="@+id/copy_button"
         android:icon="@drawable/ic_content_copy_white_24dp"
         android:title="@string/conversation_action_copy"
-        app:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom" />
     <item
         android:id="@+id/share_button"
         android:icon="@drawable/ic_share_white_24dp"
         android:title="@string/conversation_action_share"
-        app:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom"/>
     <item
         android:id="@+id/delete_button"
         android:icon="@drawable/ic_delete_white_24dp"
         android:title="@string/conversation_action_delete"
-        app:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom" />
     <item
         android:id="@+id/info_button"
         android:icon="@drawable/ic_info_white_24dp"
         android:title="@string/conversation_action_info"
-        app:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom" />
 </menu>
