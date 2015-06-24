@@ -188,6 +188,48 @@ public class Api {
         task.cleanup();
     }
 
+    public void getReceivedSms(Activity sourceActivity, boolean showErrors, boolean showNotifications) {
+        GetReceivedSmsTask task = new GetReceivedSmsTask(sourceActivity, showErrors, showNotifications);
+
+        if (preferences.getEmail().equals("")) {
+            processError(showErrors, R.string.api_update_smses_email, null, null);
+        } else if (preferences.getPassword().equals("")) {
+            processError(showErrors, R.string.api_update_smses_password, null, null);
+        } else if (preferences.getDid().equals("")) {
+            processError(showErrors, R.string.api_update_smses_did, null, null);
+        } else if (isNetworkConnectionAvailable()) {
+            try {
+                Calendar calendarThen = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                calendarThen.add(Calendar.DAY_OF_YEAR, -preferences.getDaysToSync());
+                Date then = calendarThen.getTime();
+
+                Date now = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                String voipUrl = "https://www.voip.ms/api/v1/rest.php?" +
+                        "api_username=" + URLEncoder.encode(preferences.getEmail(), "UTF-8") + "&" +
+                        "api_password=" + URLEncoder.encode(preferences.getPassword(), "UTF-8") + "&" +
+                        "method=getSMS" + "&" +
+                        "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
+                        "limit=" + URLEncoder.encode("1000000", "UTF-8") + "&" +
+                        "from=" + URLEncoder.encode(sdf.format(then), "UTF-8") + "&" +
+                        "to=" + URLEncoder.encode(sdf.format(now), "UTF-8") + "&" +
+                        "type=" + URLEncoder.encode("1", "UTF-8") + "&" +
+                        "timezone=-1";
+                task.start(voipUrl);
+                return;
+            } catch (UnsupportedEncodingException ex) {
+                processError(showErrors, R.string.api_update_smses_other, null, Log.getStackTraceString(ex));
+            }
+        } else {
+            processError(showErrors, R.string.api_update_smses_network, null, null);
+        }
+
+        task.cleanup();
+    }
+
     public void writeSmsDatabase(Activity sourceActivity, Sms sms) {
         if (!Database.getInstance(applicationContext).smsExists(sms.getId())) {
             Database.getInstance(applicationContext).addSms(sms);
@@ -570,6 +612,134 @@ public class Api {
                 // Add new SMSes from the server
                 List<Sms> newSmses = new ArrayList<>();
                 for (Sms sms : smses) {
+                    if (!Database.getInstance(applicationContext).smsExists(sms.getId())) {
+                        newSmses.add(sms);
+                        Database.getInstance(applicationContext).addSms(sms);
+                    }
+                }
+
+                // Show notifications for new SMSes
+                if (showNotifications) {
+                    Notifications.getInstance(applicationContext).showNotification(newSmses);
+                }
+
+                cleanup();
+            }
+        }
+    }
+
+    private class GetReceivedSmsTask {
+        private final Activity sourceActivity;
+        private final boolean showErrors;
+        private final boolean showNotifications;
+
+        public GetReceivedSmsTask(Activity sourceActivity, boolean showErrors, boolean showNotifications) {
+            this.sourceActivity = sourceActivity;
+            this.showErrors = showErrors;
+            this.showNotifications = showNotifications;
+        }
+
+        public void start(String voipUrl) {
+            new GetReceivedSmsAsyncTask().execute(voipUrl);
+        }
+
+        public void cleanup() {
+            if (sourceActivity instanceof ConversationsActivity) {
+                ((ConversationsActivity) sourceActivity).postUpdate();
+            } else if (sourceActivity instanceof ConversationActivity) {
+                ((ConversationActivity) sourceActivity).postUpdate();
+            } else if (sourceActivity == null) {
+                if (App.getInstance().getCurrentActivity() instanceof ConversationsActivity) {
+                    ((ConversationsActivity) App.getInstance().getCurrentActivity()).postUpdate();
+                } else if (App.getInstance().getCurrentActivity() instanceof ConversationActivity) {
+                    ((ConversationActivity) App.getInstance().getCurrentActivity()).postUpdate();
+                }
+            }
+        }
+
+        private class GetReceivedSmsAsyncTask extends AsyncTask<String, Void, AsyncTaskResultObject> {
+            @Override
+            protected AsyncTaskResultObject doInBackground(String... params) {
+                try {
+                    return new AsyncTaskResultObject(Utils.getJson(params[0]), null, null);
+                } catch (org.json.simple.parser.ParseException ex) {
+                    return new AsyncTaskResultObject(null, R.string.api_update_smses_parse, ex);
+                } catch (Exception ex) {
+                    return new AsyncTaskResultObject(null, R.string.api_update_smses_request, ex);
+                }
+            }
+
+            @Override
+            protected void onPostExecute(AsyncTaskResultObject resultObject) {
+                if (resultObject.getJsonObject() == null) {
+                    processError(true, resultObject.getMessageResource(), null,
+                            Log.getStackTraceString(resultObject.getException()));
+                    cleanup();
+                    return;
+                }
+
+                String status = (String) resultObject.getJsonObject().get("status");
+                if (status == null) {
+                    processError(showErrors, R.string.api_update_smses_parse, null, null);
+                    cleanup();
+                    return;
+                }
+                if (!status.equals("success")) {
+                    processError(showErrors, R.string.api_update_smses_api, status, null);
+                    cleanup();
+                    return;
+                }
+
+                List<Sms> receivedSmses = new ArrayList<>();
+
+                JSONArray rawSmses = (JSONArray) resultObject.getJsonObject().get("sms");
+                if (rawSmses == null) {
+                    processError(showErrors, R.string.api_update_smses_parse, null, null);
+                    cleanup();
+                    return;
+                }
+
+                for (Object rawSmsObj : rawSmses) {
+                    JSONObject rawSms = (JSONObject) rawSmsObj;
+                    if (rawSms == null || rawSms.get("id") == null || rawSms.get("date") == null ||
+                            rawSms.get("type") == null || rawSms.get("did") == null || rawSms.get("contact") == null ||
+                            rawSms.get("message") == null || !(rawSms.get("id") instanceof String) ||
+                            !(rawSms.get("date") instanceof String) || !(rawSms.get("type") instanceof String) ||
+                            !(rawSms.get("did") instanceof String) || !(rawSms.get("contact") instanceof String) ||
+                            !(rawSms.get("message") instanceof String)) {
+                        processError(true, R.string.api_update_did_parse, null, null);
+                        cleanup();
+                        return;
+                    }
+
+                    String id = (String) rawSms.get("id");
+                    String date = (String) rawSms.get("date");
+                    String type = (String) rawSms.get("type");
+                    String did = (String) rawSms.get("did");
+                    String contact = (String) rawSms.get("contact");
+                    String message = (String) rawSms.get("message");
+
+                    try {
+                        Sms sms = new Sms(id, date, type, did, contact, message);
+                        receivedSmses.add(sms);
+                    } catch (ParseException ex) {
+                        processError(showErrors, R.string.api_update_did_parse, null, Log.getStackTraceString(ex));
+                        cleanup();
+                        return;
+                    }
+                }
+
+                // Remove SMSes that have been deleted from the server
+                Sms[] oldSmses = Database.getInstance(applicationContext).getReceivedSmses();
+                for (Sms sms : oldSmses) {
+                    if (!receivedSmses.contains(sms)) {
+                        Database.getInstance(applicationContext).deleteSMS(sms.getId());
+                    }
+                }
+
+                // Add new SMSes from the server
+                List<Sms> newSmses = new ArrayList<>();
+                for (Sms sms : receivedSmses) {
                     if (!Database.getInstance(applicationContext).smsExists(sms.getId())) {
                         newSmses.add(sms);
                         Database.getInstance(applicationContext).addSms(sms);
