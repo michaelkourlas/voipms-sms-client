@@ -134,7 +134,7 @@ public class Api {
                         "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
                         "dst=" + URLEncoder.encode(contact, "UTF-8") + "&" +
                         "message=" + URLEncoder.encode(message, "UTF-8");
-                task.start(voipUrl, new Sms(Sms.ID_NULL, Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis(),
+                task.start(voipUrl, new Sms(Sms.ID_NULL, Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis()/1000,
                         0, preferences.getDid(), contact, message, 0));
                 return;
             } catch (UnsupportedEncodingException ex) {

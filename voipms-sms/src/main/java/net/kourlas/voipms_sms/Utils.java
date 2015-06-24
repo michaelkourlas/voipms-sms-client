@@ -78,7 +78,7 @@ public class Utils {
         oneMinuteAgo.add(Calendar.MINUTE, -1);
         if (oneMinuteAgo.getTime().before(smsDate)) {
             // Last minute: X seconds ago
-            long seconds = (Calendar.getInstance().getTime().getTime() - smsCalendar.getTime().getTime()) / 1000;
+            long seconds = (Calendar.getInstance().getTimeInMillis() - smsCalendar.getTimeInMillis()) / 1000;
             if (seconds < 10) {
                 return "Just now";
             } else {
@@ -90,7 +90,7 @@ public class Utils {
         oneHourAgo.add(Calendar.HOUR_OF_DAY, -1);
         if (oneHourAgo.getTime().before(smsDate)) {
             // Last hour: X minutes ago
-            long minutes = (Calendar.getInstance().getTime().getTime() - smsCalendar.getTime().getTime()) / (1000 * 60);
+            long minutes = (Calendar.getInstance().getTimeInMillis() - smsCalendar.getTimeInMillis()) / (1000 * 60);
             if (minutes == 1) {
                 return "1 minute ago";
             } else {

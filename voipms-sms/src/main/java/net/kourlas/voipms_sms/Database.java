@@ -115,7 +115,7 @@ public class Database {
     public synchronized Sms[] getReceivedSmses() {
         List<Sms> smsList = new ArrayList<Sms>();
 
-        Cursor cursor = database.query(TABLE_SMS, columns, "type=1", null, null, null, null);
+        Cursor cursor = database.query(TABLE_SMS, columns, COLUMN_TYPE + "=1", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             Sms sms = new Sms(cursor.getLong(0), cursor.getLong(1), cursor.getLong(2), cursor.getString(3),

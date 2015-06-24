@@ -206,12 +206,6 @@ public class ConversationsActivity extends AppCompatActivity {
         App.getInstance().setCurrentActivity(this);
 
         conversationsListViewAdapter.refresh();
-
-        if (!Preferences.getInstance(getApplicationContext()).getFirstRun()) {
-            Api.getInstance(getApplicationContext()).updateSmsDatabase(conversationsActivity, true, false);
-        }
-
-        Gcm.getInstance(getApplicationContext()).registerForGcm(this, false, false);
     }
 
     @Override
