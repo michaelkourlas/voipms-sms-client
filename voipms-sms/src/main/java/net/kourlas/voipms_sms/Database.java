@@ -27,6 +27,7 @@ import net.kourlas.voipms_sms.model.Sms;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class Database {
@@ -112,10 +113,10 @@ public class Database {
         return smsList.toArray(smses);
     }
 
-    public synchronized Sms[] getReceivedSmses() {
+    public synchronized Sms[] getReceivedSmses(long from) {
         List<Sms> smsList = new ArrayList<Sms>();
 
-        Cursor cursor = database.query(TABLE_SMS, columns, COLUMN_TYPE + "=1", null, null, null, null);
+        Cursor cursor = database.query(TABLE_SMS, columns, COLUMN_TYPE + "=1" + " AND " + COLUMN_DATE + ">=" + String.valueOf(from/1000), null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             Sms sms = new Sms(cursor.getLong(0), cursor.getLong(1), cursor.getLong(2), cursor.getString(3),

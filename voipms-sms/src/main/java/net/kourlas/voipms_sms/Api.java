@@ -135,7 +135,7 @@ public class Api {
                         "dst=" + URLEncoder.encode(contact, "UTF-8") + "&" +
                         "message=" + URLEncoder.encode(message, "UTF-8");
                 task.start(voipUrl, new Sms(Sms.ID_NULL, Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis()/1000,
-                        0, preferences.getDid(), contact, message, 0));
+                        0, preferences.getDid(), contact, message, 0)); //Time in seconds
                 return;
             } catch (UnsupportedEncodingException ex) {
                 processError(true, R.string.api_send_sms_other, null, Log.getStackTraceString(ex));
@@ -199,9 +199,7 @@ public class Api {
             processError(showErrors, R.string.api_update_smses_did, null, null);
         } else if (isNetworkConnectionAvailable()) {
             try {
-                Calendar calendarThen = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                calendarThen.add(Calendar.DAY_OF_YEAR, -preferences.getDaysToSync());
-                Date then = calendarThen.getTime();
+                Date then = new Date(preferences.getLastSync());
 
                 Date now = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
 
@@ -729,8 +727,10 @@ public class Api {
                     }
                 }
 
-                // Remove SMSes that have been deleted from the server
-                Sms[] oldSmses = Database.getInstance(applicationContext).getReceivedSmses();
+                /* Remove SMSes that have been deleted from the server since the last GCM sync
+                 This is necessary when GCM was turned off momentarily and deletions occurred at the server
+                */
+                Sms[] oldSmses = Database.getInstance(applicationContext).getReceivedSmses(preferences.getLastSync());
                 for (Sms sms : oldSmses) {
                     if (!receivedSmses.contains(sms)) {
                         Database.getInstance(applicationContext).deleteSMS(sms.getId());
@@ -745,6 +745,9 @@ public class Api {
                         Database.getInstance(applicationContext).addSms(sms);
                     }
                 }
+
+                // Sets the new lastSync field
+                preferences.setLastSync(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 
                 // Show notifications for new SMSes
                 if (showNotifications) {

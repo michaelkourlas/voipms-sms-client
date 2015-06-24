@@ -67,6 +67,7 @@ public class Sms implements Comparable<Sms> {
     }
 
     public long getRawDate() {
+        // In seconds
         return date.getTime() / 1000;
     }
 
