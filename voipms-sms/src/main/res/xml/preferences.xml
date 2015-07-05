@@ -16,52 +16,86 @@
   -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="@string/preferences_category_account">
+    <PreferenceCategory android:title="@string/preferences_account_category_name">
         <EditTextPreference
             android:defaultValue=""
             android:inputType="textEmailAddress"
-            android:key="api_email"
-            android:title="@string/preferences_account_email" />
+            android:key="@string/preferences_account_email_key"
+            android:title="@string/preferences_account_email_title" />
         <EditTextPreference
             android:defaultValue=""
             android:inputType="textPassword"
-            android:key="api_password"
-            android:title="@string/preferences_account_password" />
+            android:key="@string/preferences_account_password_key"
+            android:title="@string/preferences_account_password_title" />
+        <net.kourlas.voipms_sms.preferences.DidPreference
+            android:key="@string/preferences_account_did_key"
+            android:title="@string/preferences_account_did_title" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/preferences_category_sms">
+    <PreferenceCategory android:title="Synchronization">
         <ListPreference
-            android:defaultValue="@string/preferences_sms_days_to_sync_default_value"
-            android:entries="@array/preferences_sms_days_to_sync_entries"
-            android:entryValues="@array/preferences_sms_days_to_sync_values"
-            android:key="sms_days_to_sync"
-            android:title="@string/preferences_sms_days_to_sync" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="@string/preferences_category_sms_notifications">
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="sms_notification"
-            android:summary="@string/preferences_sms_notification_summary"
-            android:title="@string/preferences_sms_notification" />
-        <RingtonePreference
-            android:defaultValue="@string/preferences_sms_notification_ringtone_default_value"
-            android:dependency="sms_notification"
-            android:key="sms_notification_ringtone"
-            android:ringtoneType="notification"
-            android:title="@string/preferences_sms_notification_ringtone" />
+            android:defaultValue="0"
+            android:entries="@array/preferences_sync_interval_entries"
+            android:entryValues="@array/preferences_sync_interval_values"
+            android:key="@string/preferences_sync_interval_key"
+            android:title="@string/preferences_sync_interval_title" />
+        <net.kourlas.voipms_sms.preferences.StartDatePreference
+            android:key="@string/preferences_sync_start_date_key"
+            android:numeric="integer"
+            android:title="@string/preferences_sync_start_date_title" />
         <SwitchPreference
             android:defaultValue="true"
-            android:dependency="sms_notification"
-            android:key="sms_notification_vibrate"
-            android:title="@string/preferences_sms_notification_vibrate" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="@string/preferences_category_reset">
+            android:key="@string/preferences_sync_retrieve_only_recent_messages_key"
+            android:summary="@string/preferences_sync_retrieve_only_recent_messages_summary"
+            android:title="@string/preferences_sync_retrieve_only_recent_messages_title" />
         <SwitchPreference
             android:defaultValue="false"
-            android:key="reset"
+            android:key="@string/preferences_sync_retrieve_deleted_messages_key"
+            android:summary="@string/preferences_sync_retrieve_deleted_messages_summary"
+            android:title="@string/preferences_sync_retrieve_deleted_messages_title" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="@string/preferences_sync_propagate_local_deletions_key"
+            android:summary="@string/preferences_sync_propagate_local_deletions_summary"
+            android:title="@string/preferences_sync_propagate_local_deletions_title" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/preferences_sync_propagate_remote_deletions_key"
+            android:summary="@string/preferences_sync_propagate_remote_deletions_summary"
+            android:title="@string/preferences_sync_propagate_remote_deletions_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/preferences_notifications_category_name">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/preferences_notifications_enable_key"
+            android:summary="@string/preferences_notifications_enable_summary"
+            android:title="@string/preferences_notifications_enable_title" />
+        <RingtonePreference
+            android:defaultValue="@string/preferences_notifications_sound_default_value"
+            android:dependency="@string/preferences_notifications_enable_key"
+            android:key="@string/preferences_notifications_sound_key"
+            android:ringtoneType="notification"
+            android:title="@string/preferences_notifications_sound_title" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:dependency="@string/preferences_notifications_enable_key"
+            android:key="@string/preferences_notifications_vibrate_key"
+            android:title="@string/preferences_notifications_vibrate_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Import and Export">
+        <Preference
+            android:summary="@string/preferences_import_summary"
+            android:title="@string/preferences_import_title" />
+        <Preference
+            android:summary="@string/preferences_export_summary"
+            android:title="@string/preferences_export_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/preferences_reset_category_name">
+        <net.kourlas.voipms_sms.preferences.ResetPreference
             android:summary="@string/preferences_reset_summary"
-            android:title="@string/preferences_reset" />
+            android:title="@string/preferences_reset_title" />
     </PreferenceCategory>
 </PreferenceScreen>

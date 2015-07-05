@@ -1,9 +1,13 @@
-## 0.3.2 ##
+## 0.4.0 ##
 
-* Added quick reply screen
-* Added actions to notification
+* New synchronization options
+* Access to messages older than 90 days
+* Quick reply screen
+* Action buttons for notifications
+* Search term highlighting
+* Import/export mechanism
 * New icon
-* UI changes
+* Other UI changes
 * Bug fixes
 
 ## 0.3.1 ##

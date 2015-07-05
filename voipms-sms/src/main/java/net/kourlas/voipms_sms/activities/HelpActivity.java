@@ -18,10 +18,12 @@
 package net.kourlas.voipms_sms.activities;
 
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.webkit.WebView;
-import net.kourlas.voipms_sms.App;
+import net.kourlas.voipms_sms.ActivityMonitor;
 import net.kourlas.voipms_sms.R;
 
 public class HelpActivity extends AppCompatActivity {
@@ -30,6 +32,9 @@ public class HelpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.help);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.toolbar_elevation));
+        setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
@@ -43,18 +48,18 @@ public class HelpActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        App.getInstance().setCurrentActivity(this);
+        ActivityMonitor.getInstance().setCurrentActivity(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 }

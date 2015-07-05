@@ -29,9 +29,10 @@
     <string name="conversations_action_mark_unread">Mark as unread</string>
     <string name="conversations_list_view_item_checked">Checked</string>
     <string name="conversations_select_did_dialog_title">Select DID</string>
-    <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address and API password in Settings. If you do not know what an API password is, see Help.\n\nAfter setting your email and password, you will also need to pick an SMS-enabled DID using the Select DID menu in order to receive texts.\n\nYou may also wish to enable push notifications. For more information, see Help.</string>
+    <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and an SMS-enabled DID in Settings. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings.\n\nYou may also wish to enable push notifications. For more information, see Help.</string>
 
     <string name="conversation_action_call">Make a call</string>
+    <string name="conversation_action_resend">Resend</string>
     <string name="conversation_action_search">Search</string>
     <string name="conversation_action_delete">Delete</string>
     <string name="conversation_action_send">Send</string>
@@ -45,36 +46,11 @@
     <string name="new_conversation_text_hint">To</string>
     <string name="new_conversation_manual_entry">Manual entry</string>
 
-    <string name="preferences_name">Settings</string>
-    <string name="preferences_category_account">Account</string>
-    <string name="preferences_account_email">Email address</string>
-    <string name="preferences_account_password">API password</string>
-    <string name="preferences_category_sms">SMS</string>
-    <string name="preferences_sms_days_to_sync">Days to sync SMS messages</string>
-    <string name="preferences_sms_days_to_sync_default_value" translatable="false">7</string>
-    <string name="preferences_category_sms_notifications">Notifications</string>
-    <string name="preferences_sms_notification">Notifications</string>
-    <string name="preferences_sms_notification_summary">Enable push notifications using the developer\'s Google Cloud Messaging server</string>
-    <string name="preferences_enable_notifications_text">To enable push notifications, you must access the SMS settings for your DID on the VoIP.ms portal and enable the \'SMS URL Callback\' feature, entering the following URL into the neighbouring field:\n\nhttp://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}\n\nNote that the developer\'s Google Cloud Messaging server will store your DID to forward callbacks from VoIP.ms to your device. See Help for more details.</string>
-    <string name="preferences_sms_notification_ringtone">Sound</string>
-    <string name="preferences_sms_notification_ringtone_default_value" translatable="false">content://settings/system/notification_sound</string>
-    <string name="preferences_sms_notification_vibrate">Vibrate</string>
-    <string name="preferences_category_reset">Reset</string>
-    <string name="preferences_reset">Clear SMS cache</string>
-    <string name="preferences_reset_summary">Delete local copy of SMS database</string>
 
     <string name="help_name">Help</string>
 
     <string name="credits_name">Credits</string>
 
-    <string name="api_update_did_email">Could not retrieve DIDs because no VoIP.ms portal email has been set. (update_did_email)</string>
-    <string name="api_update_did_password">Could not retrieve DIDs because no VoIP.ms API password has been set. (update_did_password)</string>
-    <string name="api_update_did_other">Could not retrieve DIDs because of an unknown error. (update_did_other)</string>
-    <string name="api_update_did_network">Could not retrieve DIDs because no network connection is available. (update_did_network)</string>
-    <string name="api_update_did_no_dids">Could not retrieve DIDs because there are no DIDs in your account. (update_did_no_dids)</string>
-    <string name="api_update_did_parse">Could not retrieve DIDs because the VoIP.ms API response could not be parsed. (update_did_parse)</string>
-    <string name="api_update_did_request">Could not retrieve DIDs because the application failed to fetch information from the VoIP.ms API. (update_did_request)</string>
-    <string name="api_update_did_api">Could not retrieve DIDs because the VoIP.ms API returned an error. (update_did_api_</string>
 
     <string name="api_update_smses_email">Could not update the SMS database because no VoIP.ms portal email has been set. (update_smses_email)</string>
     <string name="api_update_smses_password">Could not update the SMS database because no VoIP.ms API password has been set. (update_smses_password)</string>
@@ -111,6 +87,99 @@
     <string name="gcm_did">Google Cloud Messaging registration requires that a DID be set.</string>
     <string name="gcm_fail">Google Cloud Messaging registration failed. Please try again later.</string>
 
-    <string name="cancel">Cancel</string>
+    <string name="conversations_no_messages">You have no messages.</string>
+    <string name="conversations_no_results">No results found for</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- ConversationActivity -->
+    <string name="conversation_send_error_network">Failed to send message. No network connection is available. (300)</string>
+    <string name="conversation_send_error_api_request">Failed to send message. A request to the VoIP.ms API failed. (301)</string>
+    <string name="conversation_send_error_api_parse">Failed to send message. The VoIP.ms API response could not be parsed. (302)</string>
+    <string name="conversation_send_error_api_error">Failed to send message. The VoIP.ms API returned an error: {error}. (303)</string>
+
+    <!-- Database -->
+    <string name="database_sync_error_network">Database synchronization failed. No network connection is available. (100)</string>
+    <string name="database_sync_error_api_request">Database synchronization failed. A request to the VoIP.ms API failed. (101)</string>
+    <string name="database_sync_error_api_parse">Database synchronization failed. The VoIP.ms API response could not be parsed. (102)</string>
+    <string name="database_sync_error_api_error">Database synchronization failed. The VoIP.ms API returned an error: {error}. (103)</string>
+
+    <!-- Preferences -->
+    <string name="preferences_name">Settings</string>
+    <!-- Account -->
+    <string name="preferences_account_category_name">Account</string>
+    <string name="preferences_account_email_key" translatable="false">api_email</string>
+    <string name="preferences_account_email_title">Email address</string>
+    <string name="preferences_account_password_key" translatable="false">api_password</string>
+    <string name="preferences_account_password_title">API password</string>
+    <string name="preferences_account_did_key" translatable="false">did</string>
+    <string name="preferences_account_did_title">DID (phone number)</string>
+    <string name="preferences_account_did_status">Retrieving DIDs…</string>
+    <string name="preferences_account_did_error_network">Failed to retrieve DIDs. No network connection is available. (200)</string>
+    <string name="preferences_account_did_error_api_request">Failed to retrieve DIDs. A request to the VoIP.ms API failed. (201)</string>
+    <string name="preferences_account_did_error_api_parse">Failed to retrieve DIDs. The VoIP.ms API response could not be parsed. (202)</string>
+    <string name="preferences_account_did_error_api_error">Failed to retrieve DIDs. The VoIP.ms API returned the following error: {error}. (203)</string>
+    <string name="preferences_account_did_error_email">You must set your VoIP.ms portal email address and API password before selecting a DID. (204)</string>
+    <string name="preferences_account_did_error_password">You must set your VoIP.ms portal email address and API password before selecting a DID. (205)</string>
+    <string name="preferences_account_did_error_no_dids">There are no DIDs in your VoIP.ms account. (206)</string>
+    <!-- Synchronization -->
+    <string name="preferences_sync_interval_key" translatable="false">sync_interval</string>
+    <string name="preferences_sync_interval_title">Synchronization interval</string>
+    <string name="preferences_sync_start_date_key" translatable="false">start_date</string>
+    <string name="preferences_sync_start_date_title">Message retrieval start date</string>
+    <string name="preferences_sync_retrieve_only_recent_messages_key" translatable="false">sync_retrieve_only_recent_messages</string>
+    <string name="preferences_sync_retrieve_only_recent_messages_title">Retrieve only recent messages</string>
+    <string name="preferences_sync_retrieve_only_recent_messages_summary">Retrieve only messages from VoIP.ms dated after the most recent message stored locally</string>
+    <string name="preferences_sync_retrieve_deleted_messages_key" translatable="false">sync_retrieve_deleted_messages</string>
+    <string name="preferences_sync_retrieve_deleted_messages_title">Retrieve deleted messages</string>
+    <string name="preferences_sync_retrieve_deleted_messages_summary">Retrieve messages from VoIP.ms that were deleted locally</string>
+    <string name="preferences_sync_propagate_local_deletions_key" translatable="false">sync_propagate_local_deletions</string>
+    <string name="preferences_sync_propagate_local_deletions_title">Propagate local deletions</string>
+    <string name="preferences_sync_propagate_local_deletions_summary">Delete messages from VoIP.ms that were deleted locally</string>
+    <string name="preferences_sync_propagate_remote_deletions_key" translatable="false">sync_propagate_remote_deletions</string>
+    <string name="preferences_sync_propagate_remote_deletions_title">Propagate remote deletions</string>
+    <string name="preferences_sync_propagate_remote_deletions_summary">Delete messages stored locally that were deleted from VoIP.ms</string>
+    <!-- Notifications -->
+    <string name="preferences_notifications_category_name">Notifications</string>
+    <string name="preferences_notifications_enable_key" translatable="false">sms_notification</string>
+    <string name="preferences_notifications_enable_title">Notifications</string>
+    <string name="preferences_notifications_enable_summary">Enable push notifications using the developer\'s Google Cloud Messaging server</string>
+    <string name="preferences_notifications_enable_dialog_text">To enable notifications, you must first access the SMS settings for your DID on the VoIP.ms portal. Enable the \"SMS URL Callback\" feature and enter the following URL into the neighbouring field:\n\nhttp://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}\n\nNote that the developer\'s server will store your DID to forward callbacks from VoIP.ms to your device. See Help for more details.</string>
+    <string name="preferences_notifications_sound_key" translatable="false">sms_notification_ringtone</string>
+    <string name="preferences_notifications_sound_title">Sound</string>
+    <string name="preferences_notifications_sound_default_value" translatable="false">content://settings/system/notification_sound</string>
+    <string name="preferences_notifications_vibrate_key" translatable="false">sms_notification_vibrate</string>
+    <string name="preferences_notifications_vibrate_title">Vibrate</string>
+    <!-- Import and Export -->
+    <string name="preferences_import_title">Import</string>
+    <string name="preferences_import_summary">Import message database</string>
+    <string name="preferences_export_title">Export</string>
+    <string name="preferences_export_summary">Export message database</string>
+    <!-- Reset -->
+    <string name="preferences_reset_category_name">Reset</string>
+    <string name="preferences_reset_title">Delete message database</string>
+    <string name="preferences_reset_summary">Delete all messages stored locally (to prepare for later message importation or retrieval)</string>
+    <!-- Uncategorized -->
+    <string name="preferences_dids_key" translatable="false">dids</string>
+    <string name="preferences_registration_id_key" translatable="false">registration_id</string>
+    <string name="preferences_registration_id_version_key" translatable="false">registration_id_ver</string>
+
+    <!-- Uncategorized -->
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
 </resources>

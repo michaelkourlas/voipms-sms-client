@@ -21,7 +21,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import net.kourlas.voipms_sms.Api;
+import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.receivers.GcmReceiver;
 
 public class GcmService extends IntentService {
@@ -38,7 +38,7 @@ public class GcmService extends IntentService {
             if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 // It is not necessary to process the GCM message itself, as the application server only supports
                 // "send-to-sync" messages; simply update the SMS database in the background.
-                Api.getInstance(getApplicationContext()).updateSmsDatabase(null, false, true);
+                Database.getInstance(getApplicationContext()).update(true, false, true, null);
             }
         }
         GcmReceiver.completeWakefulIntent(intent);

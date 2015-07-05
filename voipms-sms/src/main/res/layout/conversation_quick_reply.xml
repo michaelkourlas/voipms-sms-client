@@ -16,10 +16,20 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/transparent"
+    android:background="@color/translucent_black"
     android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/transparent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:titleTextAppearance="@style/ToolbarTitle" />
 
     <TextView
         android:id="@+id/reply_to_edit_text"
@@ -75,7 +85,7 @@
                 android:id="@+id/send_button"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/button_background"
+                android:background="@drawable/button"
                 android:contentDescription="@string/conversation_action_send"
                 android:scaleType="center"
                 android:src="@drawable/ic_send_white_18dp" />
@@ -108,9 +118,9 @@
         android:layout_marginLeft="70dp"
         android:layout_marginStart="70dp"
         android:background="@android:color/transparent"
-        android:textColor="@android:color/white"
-        android:drawableStart="@drawable/ic_launch_white_24dp"
         android:drawableLeft="@drawable/ic_launch_white_24dp"
         android:drawablePadding="5dp"
-        android:text="Open VoIP.ms SMS"/>
+        android:drawableStart="@drawable/ic_launch_white_24dp"
+        android:text="Open VoIP.ms SMS"
+        android:textColor="@android:color/white" />
 </LinearLayout>

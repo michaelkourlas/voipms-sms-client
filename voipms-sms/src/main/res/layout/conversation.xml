@@ -16,87 +16,119 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/list"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:divider="@null"
-        android:dividerHeight="0dp"
-        android:stackFromBottom="true"
-        android:transcriptMode="normal" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/primary"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:titleTextAppearance="@style/ToolbarTitle" />
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="10dp"
-        android:focusableInTouchMode="true">
+        android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:indeterminateOnly="true"
-            android:visibility="invisible" />
-
-        <ViewSwitcher
-            android:id="@+id/view_switcher"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"
-            android:inAnimation="@android:anim/fade_in"
-            android:outAnimation="@android:anim/fade_out">
-
-            <QuickContactBadge
-                android:id="@+id/photo"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop" />
-
-            <ImageButton
-                android:id="@+id/send_button"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/button_background"
-                android:contentDescription="@string/conversation_action_send"
-                android:scaleType="center"
-                android:src="@drawable/ic_send_white_18dp" />
-        </ViewSwitcher>
-
-        <EditText
-            android:id="@+id/message_edit_text"
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/empty_text"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_toEndOf="@id/progress_bar"
-            android:layout_toLeftOf="@id/view_switcher"
-            android:layout_toRightOf="@id/progress_bar"
-            android:layout_toStartOf="@id/view_switcher"
-            android:background="@android:color/white"
-            android:gravity="start"
-            android:hint="@string/conversation_text_hint"
-            android:inputType="textMultiLine|textCapSentences|textAutoCorrect"
-            android:isScrollContainer="true"
-            android:maxLength="160"
-            android:maxLines="4"
-            android:padding="10dp"
-            android:textSize="16sp" />
-    </RelativeLayout>
+            android:layout_marginTop="30dp"
+            android:gravity="center" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.0"
+                android:clipToPadding="false"
+                android:divider="@null"
+                android:dividerHeight="0dp" />
+
+            <RelativeLayout
+                android:id="@+id/message_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="10dp"
+                android:focusableInTouchMode="true">
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginRight="10dp"
+                    android:indeterminateOnly="true"
+                    android:visibility="invisible" />
+
+                <ViewSwitcher
+                    android:id="@+id/view_switcher"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:inAnimation="@android:anim/fade_in"
+                    android:outAnimation="@android:anim/fade_out">
+
+                    <QuickContactBadge
+                        android:id="@+id/photo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop" />
+
+                    <ImageButton
+                        android:id="@+id/send_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/button"
+                        android:contentDescription="@string/conversation_action_send"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_send_white_18dp" />
+                </ViewSwitcher>
+
+                <EditText
+                    android:id="@+id/message_edit_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toEndOf="@id/progress_bar"
+                    android:layout_toLeftOf="@id/view_switcher"
+                    android:layout_toRightOf="@id/progress_bar"
+                    android:layout_toStartOf="@id/view_switcher"
+                    android:background="@android:color/white"
+                    android:gravity="start"
+                    android:hint="@string/conversation_text_hint"
+                    android:inputType="textMultiLine|textCapSentences|textAutoCorrect"
+                    android:isScrollContainer="true"
+                    android:maxLength="160"
+                    android:maxLines="4"
+                    android:padding="10dp"
+                    android:textSize="16sp" />
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
 </LinearLayout>

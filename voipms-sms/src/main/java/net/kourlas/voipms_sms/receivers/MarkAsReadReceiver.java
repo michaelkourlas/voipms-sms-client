@@ -23,11 +23,13 @@ import android.content.Context;
 import android.content.Intent;
 import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.Notifications;
-import net.kourlas.voipms_sms.model.Sms;
+import net.kourlas.voipms_sms.Preferences;
+import net.kourlas.voipms_sms.model.Message;
 
 public class MarkAsReadReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        Preferences preferences = Preferences.getInstance(context.getApplicationContext());
         String contact = intent.getExtras().getString("contact");
 
         NotificationManager manager = (NotificationManager) context.getApplicationContext().getSystemService(
@@ -38,9 +40,9 @@ public class MarkAsReadReceiver extends BroadcastReceiver {
             manager.cancel(notificationId);
         }
 
-        for (Sms sms : Database.getInstance(context.getApplicationContext()).getConversation(contact).getAllSms()) {
-            sms.setUnread(false);
-            Database.getInstance(context.getApplicationContext()).replaceSms(sms);
+        for (Message message : Database.getInstance(context.getApplicationContext()).getConversation(preferences.getDid(), contact).getMessages()) {
+            message.setUnread(false);
+            Database.getInstance(context.getApplicationContext()).insertMessage(message);
         }
     }
 }

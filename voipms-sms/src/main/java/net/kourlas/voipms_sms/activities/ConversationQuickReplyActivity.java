@@ -30,6 +30,7 @@ import android.provider.ContactsContract;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
@@ -37,9 +38,14 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.widget.*;
 import net.kourlas.voipms_sms.*;
+import net.kourlas.voipms_sms.model.Message;
 
 public class ConversationQuickReplyActivity extends AppCompatActivity {
-    private final ConversationQuickReplyActivity conversationQuickReplyActivity = this;
+    private final ConversationQuickReplyActivity activity = this;
+
+    private Database database;
+    private Preferences preferences;
+
     private String contact;
 
     @Override
@@ -47,14 +53,13 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.conversation_quick_reply);
 
+        database = Database.getInstance(getApplicationContext());
+        preferences = Preferences.getInstance(getApplicationContext());
+
         contact = getIntent().getExtras().getString("contact");
 
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Integer notificationId = Notifications.getInstance(getApplicationContext()).getNotificationIds().get(contact);
-        if (notificationId != null) {
-            manager.cancel(notificationId);
-        }
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
@@ -62,11 +67,18 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
             actionBar.setDisplayShowTitleEnabled(false);
         }
 
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Integer notificationId = Notifications.getInstance(getApplicationContext()).getNotificationIds().get(contact);
+        if (notificationId != null) {
+            manager.cancel(notificationId);
+        }
+
         TextView replyToText = (TextView) findViewById(R.id.reply_to_edit_text);
         String contactName = Utils.getContactName(getApplicationContext(), contact);
         if (contactName == null) {
             replyToText.setText("Reply to " + Utils.getFormattedPhoneNumber(contact));
-        } else {
+        }
+        else {
             replyToText.setText("Reply to " + contactName);
         }
 
@@ -95,7 +107,8 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
                 ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.view_switcher);
                 if (s.toString().equals("") && viewSwitcher.getDisplayedChild() == 1) {
                     viewSwitcher.setDisplayedChild(0);
-                } else if (viewSwitcher.getDisplayedChild() == 0) {
+                }
+                else if (viewSwitcher.getDisplayedChild() == 0) {
                     viewSwitcher.setDisplayedChild(1);
                 }
             }
@@ -113,10 +126,12 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
             String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
             if (photoUri != null) {
                 photo.setImageURI(Uri.parse(photoUri));
-            } else {
+            }
+            else {
                 photo.setImageToDefault();
             }
-        } else {
+        }
+        else {
             photo.setImageToDefault();
         }
         cursor.close();
@@ -126,7 +141,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                preSendSms();
+                preSendMessage();
             }
         });
 
@@ -136,7 +151,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
             public void onClick(View v) {
                 finish();
 
-                Intent intent = new Intent(conversationQuickReplyActivity, ConversationActivity.class);
+                Intent intent = new Intent(activity, ConversationActivity.class);
                 intent.putExtra("contact", contact);
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
                 stackBuilder.addParentStack(ConversationActivity.class);
@@ -148,25 +163,15 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
-        App.getInstance().setCurrentActivity(this);
+        ActivityMonitor.getInstance().setCurrentActivity(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
         finish();
     }
 
@@ -179,40 +184,45 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
         finish();
     }
 
-    public void preSendSms() {
-        ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
-        sendButton.setEnabled(false);
-
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        progressBar.setVisibility(View.VISIBLE);
-
-        EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        messageText.setFocusable(false);
-
-        Api.getInstance(getApplicationContext()).sendSms(conversationQuickReplyActivity, contact,
-                messageText.getText().toString());
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
-    public void postSendSms(boolean success) {
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        progressBar.setVisibility(View.INVISIBLE);
-
-        ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
-        sendButton.setEnabled(true);
-
+    public void preSendMessage() {
         EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        messageText.setFocusable(true);
-        messageText.setFocusableInTouchMode(true);
-        messageText.setClickable(true);
-        messageText.requestFocus();
+        long databaseId = Database.getInstance(getApplicationContext()).insertMessage(
+                new Message(Preferences.getInstance(getApplicationContext()).getDid(), contact,
+                        messageText.getText().toString()));
+        messageText.setText("");
 
+        sendMessage(databaseId);
+        finish();
+    }
+
+    public void sendMessage(long databaseId) {
+        ConversationActivity.sendMessage(this, databaseId);
+    }
+
+    public void postSendMessage(boolean success, long databaseId) {
         if (success) {
-            messageText.setText("");
-            finish();
+            database.removeMessage(databaseId);
+            database.update(true, false, true, null);
+        }
+        else {
+            Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
+            message.setDelivered(false);
+            message.setDeliveryInProgress(false);
+            database.insertMessage(message);
         }
     }
 }

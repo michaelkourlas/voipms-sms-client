@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.support.v7.app.AlertDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -84,7 +83,8 @@ public class Gcm {
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, activity, 9000).show();
-            } else {
+            }
+            else {
                 return null;
             }
             return false;
@@ -129,11 +129,12 @@ public class Gcm {
 
                 if (!success) {
                     if (showFeedback) {
-                        showDialog(activity, applicationContext.getResources().getString(R.string.gcm_fail));
+                        Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_fail));
                     }
-                } else {
+                }
+                else {
                     if (showFeedback) {
-                        showDialog(activity, applicationContext.getResources().getString(R.string.gcm_success));
+                        Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_success));
 
                     }
                 }
@@ -154,7 +155,7 @@ public class Gcm {
         if (preferences.getNotificationsEnabled()) {
             if (preferences.getDid().equals("")) {
                 if (showFeedback) {
-                    showDialog(activity, applicationContext.getResources().getString(R.string.gcm_did));
+                    Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_did));
                 }
                 return;
             }
@@ -162,25 +163,21 @@ public class Gcm {
             Boolean playServices = Gcm.getInstance(applicationContext).checkPlayServices(activity);
             if (playServices == null) {
                 if (showFeedback) {
-                    showDialog(activity, applicationContext.getResources().getString(R.string.gcm_support));
+                    Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_support));
                 }
-            } else if (playServices) {
+            }
+            else if (playServices) {
                 String registrationId = Gcm.getInstance(applicationContext).getRegistrationId();
                 if (registrationId.isEmpty() || force) {
                     Gcm.getInstance(applicationContext).registerInBackground(activity, showFeedback);
-                } else {
+                }
+                else {
                     if (showFeedback) {
-                        showDialog(activity, applicationContext.getResources().getString(R.string.gcm_success));
+                        Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_success));
                     }
                 }
             }
         }
     }
 
-    private void showDialog(Activity activity, String text) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(text);
-        builder.setPositiveButton(R.string.ok, null);
-        builder.show();
-    }
 }

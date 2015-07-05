@@ -17,124 +17,185 @@
 
 package net.kourlas.voipms_sms.activities;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.*;
+import android.support.annotation.NonNull;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputType;
-import net.kourlas.voipms_sms.App;
-import net.kourlas.voipms_sms.Database;
-import net.kourlas.voipms_sms.R;
+import android.support.v7.widget.Toolbar;
+import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.gcm.Gcm;
+import net.kourlas.voipms_sms.preferences.DidPreference;
+import net.kourlas.voipms_sms.preferences.StartDatePreference;
+
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class PreferencesActivity extends AppCompatActivity {
+    PreferenceFragment fragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getFragmentManager().beginTransaction().replace(android.R.id.content, new PreferencesFragment()).commit();
+        setContentView(R.layout.preferences);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.toolbar_elevation));
+        setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        fragment = new PreferencesFragment();
+        getFragmentManager().beginTransaction().replace(R.id.preference_fragment_content, fragment).commit();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        App.getInstance().setCurrentActivity(this);
+        ActivityMonitor.getInstance().setCurrentActivity(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 
-    public static class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+    public void showSelectDidDialog(boolean success, final String[] dids, String message) {
+        DidPreference preference = (DidPreference) fragment.getPreferenceManager().findPreference("did");
+        preference.showSelectDidDialog(success, dids, message);
+    }
+
+    /**
+     * A fragment is used only because PreferenceActivity is deprecated.
+     */
+    public static class PreferencesFragment
+            extends PreferenceFragment
+            implements SharedPreferences.OnSharedPreferenceChangeListener {
+        Context applicationContext;
+        Database database;
+        Preferences preferences;
+        Gcm gcm;
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.preferences);
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+
+            applicationContext = getActivity().getApplicationContext();
+            database = Database.getInstance(applicationContext);
+            preferences = Preferences.getInstance(applicationContext);
+            gcm = Gcm.getInstance(applicationContext);
         }
 
         @Override
         public void onResume() {
             super.onResume();
+
+            // Update summary text for all preferences
             for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); ++i) {
                 Preference preference = getPreferenceScreen().getPreference(i);
                 if (preference instanceof PreferenceGroup) {
                     PreferenceGroup preferenceGroup = (PreferenceGroup) preference;
                     for (int j = 0; j < preferenceGroup.getPreferenceCount(); ++j) {
-                        updatePreference(preferenceGroup.getPreference(j));
+                        updateSummaryTextForPreference(preferenceGroup.getPreference(j));
                     }
-                } else {
-                    updatePreference(preference);
+                }
+                else {
+                    updateSummaryTextForPreference(preference);
                 }
             }
         }
 
         @Override
+        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, @NonNull Preference preference) {
+            return super.onPreferenceTreeClick(preferenceScreen, preference);
+        }
+
+        @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            // This check shouldn't be necessary, but it apparently is...
             if (isAdded()) {
-                updatePreference(findPreference(key));
+                // Update summary text for changed preference
+                updateSummaryTextForPreference(findPreference(key));
 
-                if (key.equals("api_email") || key.equals("api_password") ||
-                        key.equals("reset")) {
-                    Database.getInstance(getActivity().getApplicationContext()).deleteAllSMS();
-
-                    if (key.equals("reset") && sharedPreferences.getBoolean("reset", false)) {
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean("reset", false);
-                        editor.apply();
-                    }
-                } else if (key.equals("sms_notification")) {
-                    if (sharedPreferences.getBoolean("sms_notification", false)) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                        builder.setMessage(getResources().getString(R.string.preferences_enable_notifications_text));
-                        builder.setPositiveButton(R.string.ok, null);
-                        builder.show();
-
-                        Gcm.getInstance(getActivity().getApplicationContext()).registerForGcm(getActivity(), true,
-                                true);
-                    }
+                // Clear the SMS cache when messages are invalidated by account or synchronization changes
+                if (key.equals(applicationContext.getString(R.string.preferences_account_email_key)) ||
+                        key.equals(applicationContext.getString(R.string.preferences_account_password_key))
+                    // key.equals(applicationContext.getString(R.string.preferences_sms_days_to_sync_key)) ||
+                    // TODO: FIX
+                        ) {
+                    database.deleteAllMessages();
+                }
+                // Show informational message and attempt to register for GCM if notificatons are enabled
+                else if (key.equals(applicationContext.getString(R.string.preferences_notifications_enable_key)) && preferences.getNotificationsEnabled()) {
+                    // Notifications are not yet enabled, so the check above is the inverse of what one might expect
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage(getResources().getString(R.string.preferences_notifications_enable_dialog_text));
+                    builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            gcm.registerForGcm(getActivity(), true, true);
+                        }
+                    });
+                    builder.show();
                 }
             }
         }
 
-        private void updatePreference(Preference preference) {
+        private void updateSummaryTextForPreference(Preference preference) {
+            if (preference instanceof DidPreference) {
+                DidPreference didPreference = (DidPreference) preference;
+                didPreference.setSummary(Utils.getFormattedPhoneNumber(preferences.getDid()));
+            }
             if (preference instanceof ListPreference) {
-                // Display selected days to sync setting as summary text for days to sync setting
                 ListPreference listPreference = (ListPreference) preference;
                 listPreference.setSummary(listPreference.getEntry());
-            } else if (preference instanceof EditTextPreference) {
-                // Display email address as summary text for email address setting
+            }
+            // Display email address as summary text for email address setting
+            else if (preference instanceof EditTextPreference) {
                 EditTextPreference editTextPreference = (EditTextPreference) preference;
-                if ((editTextPreference.getEditText().getInputType() & InputType.TYPE_TEXT_VARIATION_PASSWORD) !=
-                        InputType.TYPE_TEXT_VARIATION_PASSWORD) {
+                if (editTextPreference.getKey().equals(getString(R.string.preferences_account_password_key))) {
+                    if (!editTextPreference.getText().equals("")) {
+                        editTextPreference.setSummary("********");
+                    }
+                    else {
+                        editTextPreference.setSummary("");
+                    }
+                }
+                else {
                     editTextPreference.setSummary(editTextPreference.getText());
                 }
-            } else if (preference instanceof RingtonePreference) {
-                // Display selected notification sound as summary text for notification setting
+            }
+            // Display selected notification sound as summary text for notification setting
+            else if (preference instanceof RingtonePreference) {
                 RingtonePreference ringtonePreference = (RingtonePreference) preference;
-                String ringtonePath = getPreferenceManager().getSharedPreferences().getString(
-                        "sms_notification_ringtone", getResources().getString(
-                                R.string.preferences_sms_notification_ringtone_default_value));
-                Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), Uri.parse(ringtonePath));
+                Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), Uri.parse(Preferences.getInstance(
+                        getActivity().getApplicationContext()).getNotificationSound()));
                 ringtonePreference.setSummary(ringtone.getTitle(getActivity()));
+            }
+            else if (preference instanceof StartDatePreference) {
+                StartDatePreference datePreference = (StartDatePreference) preference;
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                datePreference.setSummary(sdf.format(preferences.getStartDate()));
             }
         }
     }

@@ -16,15 +16,17 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:tools="http://schemas.android.com/tools">
     <item
         android:id="@+id/mark_read_unread_button"
         android:icon="@drawable/ic_markunread_white_24dp"
+        android:showAsAction="always"
         android:title="@string/conversations_action_mark_unread"
-        app:showAsAction="ifRoom" />
+        tools:ignore="AlwaysShowAction,AppCompatResource" />
     <item
         android:id="@+id/delete_button"
         android:icon="@drawable/ic_delete_white_24dp"
+        android:showAsAction="always"
         android:title="@string/conversations_action_delete"
-        app:showAsAction="ifRoom" />
+        tools:ignore="AlwaysShowAction,AppCompatResource" />
 </menu>

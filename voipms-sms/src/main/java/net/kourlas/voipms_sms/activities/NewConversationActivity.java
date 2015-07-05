@@ -20,10 +20,11 @@ package net.kourlas.voipms_sms.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +34,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import net.kourlas.voipms_sms.App;
+import net.kourlas.voipms_sms.ActivityMonitor;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter;
 
@@ -45,20 +46,25 @@ public class NewConversationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_conversation);
 
-        final Activity newConversationActivity = this;
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.toolbar_elevation));
+        setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowTitleEnabled(false);
 
-            actionBar.setCustomView(R.layout.new_conversation_text);
+            actionBar.setCustomView(R.layout.new_conversation_toolbar);
             actionBar.setDisplayShowCustomEnabled(true);
+        }
 
-            final NewConversationListViewAdapter newConversationListViewAdapter = new NewConversationListViewAdapter(
-                    this);
+        final Activity newConversationActivity = this;
 
+        final NewConversationListViewAdapter newConversationListViewAdapter = new NewConversationListViewAdapter(
+                this);
+
+        if (actionBar != null) {
             SearchView searchView = (SearchView) actionBar.getCustomView().findViewById(R.id.search_view);
             searchView.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -72,7 +78,8 @@ public class NewConversationActivity extends AppCompatActivity {
                     String phoneNumber = newText.replaceAll("[^0-9]", "");
                     if (phoneNumber.equals("")) {
                         newConversationListViewAdapter.hideTypedInItem();
-                    } else {
+                    }
+                    else {
                         newConversationListViewAdapter.showTypedInItem(phoneNumber);
                     }
                     newConversationListViewAdapter.refresh(newText);
@@ -84,47 +91,46 @@ public class NewConversationActivity extends AppCompatActivity {
             // Hide search icon
             ImageView searchMagIcon = (ImageView) searchView.findViewById(R.id.search_mag_icon);
             searchMagIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-
-            final ListView listView = (ListView) findViewById(R.id.list);
-            listView.setAdapter(newConversationListViewAdapter);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    ContactItem contactItem = (ContactItem) newConversationListViewAdapter.getItem(position);
-
-                    String phoneNumber = contactItem.getPhoneNumber().replaceAll("[^0-9]", "");
-
-                    Intent intent = new Intent(newConversationActivity, ConversationActivity.class);
-                    intent.putExtra("contact", phoneNumber);
-                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-                    stackBuilder.addParentStack(ConversationActivity.class);
-                    stackBuilder.addNextIntent(intent);
-                    stackBuilder.startActivities();
-                }
-            });
-            listView.setFastScrollEnabled(true);
         }
+
+        final ListView listView = (ListView) findViewById(R.id.list);
+        listView.setAdapter(newConversationListViewAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ContactItem contactItem = (ContactItem) newConversationListViewAdapter.getItem(position);
+
+                String phoneNumber = contactItem.getPhoneNumber().replaceAll("[^0-9]", "");
+
+                Intent intent = new Intent(newConversationActivity, ConversationActivity.class);
+                intent.putExtra("contact", phoneNumber);
+                startActivity(intent);
+            }
+        });
+        listView.setFastScrollEnabled(true);
+
+        newConversationListViewAdapter.refresh("");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        App.getInstance().setCurrentActivity(this);
+        ActivityMonitor.getInstance().setCurrentActivity(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override
@@ -146,7 +152,8 @@ public class NewConversationActivity extends AppCompatActivity {
                         searchView.setInputType(InputType.TYPE_CLASS_PHONE);
                         item.setIcon(R.drawable.ic_keyboard_white_24dp);
                         item.setTitle(R.string.new_conversation_action_keyboard);
-                    } else {
+                    }
+                    else {
                         searchView.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
                         item.setIcon(R.drawable.ic_dialpad_white_24dp);
                         item.setTitle(R.string.new_conversation_action_dialpad);

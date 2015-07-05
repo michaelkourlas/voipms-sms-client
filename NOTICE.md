@@ -5,8 +5,6 @@ Copyright (C) 2015 Michael Kourlas and other contributors
 
 The following components are provided under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0):
 
-* [CheckableLinearLayout.java](https://developer.android.com/samples/CustomChoiceList/src/com.example.android.customchoicelist/CheckableLinearLayout.html) 
-from the [Android Open Source Project](https://source.android.com/); and
 * [JSON.simple](https://code.google.com/p/json-simple/) from [fangyidong](https://github.com/fangyidong).
 
 ## Creative Commons Attribution 4.0 International ##

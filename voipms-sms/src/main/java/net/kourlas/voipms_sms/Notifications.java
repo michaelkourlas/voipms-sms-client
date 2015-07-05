@@ -32,10 +32,9 @@ import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationQuickReplyActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
 import net.kourlas.voipms_sms.model.Conversation;
-import net.kourlas.voipms_sms.model.Sms;
+import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.receivers.MarkAsReadReceiver;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,11 +42,15 @@ import java.util.Map;
 public class Notifications {
     private static Notifications instance = null;
     private final Context applicationContext;
+    private final Preferences preferences;
+
     private final Map<String, Integer> notificationIds;
     private int notificationIdCount;
 
     private Notifications(Context context) {
         this.applicationContext = context.getApplicationContext();
+        this.preferences = Preferences.getInstance(applicationContext);
+
         this.notificationIds = new HashMap<>();
         this.notificationIdCount = 0;
     }
@@ -63,17 +66,16 @@ public class Notifications {
         return notificationIds;
     }
 
-    public void showNotification(List<Sms> newSmses) {
-        if (!(App.getInstance().getCurrentActivity() instanceof ConversationsActivity)) {
-            Conversation[] conversations = Database.getInstance(applicationContext).getAllConversations();
+    public void showNotification(List<String> contacts) {
+        if (!(ActivityMonitor.getInstance().getCurrentActivity() instanceof ConversationsActivity)) {
+            Conversation[] conversations = Database.getInstance(applicationContext).getConversations(
+                    preferences.getDid());
             for (Conversation conversation : conversations) {
-                if (!conversation.isUnread() || !newSmses.contains(conversation.getMostRecentSms())) {
-                    continue;
-                }
-
-                if (App.getInstance().getCurrentActivity() instanceof ConversationActivity &&
-                        ((ConversationActivity) App.getInstance().getCurrentActivity()).getContact().equals(
-                                conversation.getContact())) {
+                if (!conversation.isUnread() || !contacts.contains(conversation.getContact()) ||
+                        (ActivityMonitor.getInstance().getCurrentActivity() instanceof ConversationActivity &&
+                                ((ConversationActivity)
+                                        ActivityMonitor.getInstance().getCurrentActivity()).getContact().equals(
+                                        conversation.getContact()))) {
                     continue;
                 }
 
@@ -85,16 +87,18 @@ public class Notifications {
                 String allSmses = "";
                 String mostRecentSms = "";
                 boolean initial = true;
-                for (Sms sms : conversation.getAllSms()) {
-                    if (sms.getType() == Sms.Type.INCOMING && sms.isUnread()) {
+                for (Message message : conversation.getMessages()) {
+                    if (message.getType() == Message.Type.INCOMING && message.isUnread()) {
                         if (initial) {
-                            allSmses = sms.getMessage();
-                            mostRecentSms = sms.getMessage();
+                            allSmses = message.getText();
+                            mostRecentSms = message.getText();
                             initial = false;
-                        } else {
-                            allSmses = sms.getMessage() + "\n" + allSmses;
                         }
-                    } else {
+                        else {
+                            allSmses = message.getText() + "\n" + allSmses;
+                        }
+                    }
+                    else {
                         break;
                     }
                 }
@@ -110,7 +114,8 @@ public class Notifications {
                 notificationBuilder.setLights(0xFFAA0000, 1000, 5000);
                 if (Preferences.getInstance(applicationContext).getNotificationVibrateEnabled()) {
                     notificationBuilder.setVibrate(new long[]{0, 250, 250, 250});
-                } else {
+                }
+                else {
                     notificationBuilder.setVibrate(new long[]{0});
                 }
                 notificationBuilder.setColor(0xFFAA0000);
@@ -124,7 +129,7 @@ public class Notifications {
                     largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap, 256, 256, false);
                     largeIconBitmap = Utils.applyCircularMask(largeIconBitmap);
                     notificationBuilder.setLargeIcon(largeIconBitmap);
-                } catch (IOException ignored) {
+                } catch (Exception ignored) {
 
                 }
 
@@ -140,7 +145,8 @@ public class Notifications {
                 Intent replyIntent = new Intent(applicationContext, ConversationQuickReplyActivity.class);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     replyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-                } else {
+                }
+                else {
                     //noinspection deprecation
                     replyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                 }
@@ -162,7 +168,8 @@ public class Notifications {
                 int id;
                 if (notificationIds.get(conversation.getContact()) != null) {
                     id = notificationIds.get(conversation.getContact());
-                } else {
+                }
+                else {
                     id = notificationIdCount++;
                     notificationIds.put(conversation.getContact(), id);
                 }

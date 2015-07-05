@@ -18,189 +18,142 @@
 package net.kourlas.voipms_sms.activities;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.NotificationManager;
-import android.app.ProgressDialog;
 import android.content.*;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Outline;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.NavUtils;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.SparseBooleanArray;
+import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import net.kourlas.voipms_sms.*;
-import net.kourlas.voipms_sms.adapters.ConversationListViewAdapter;
+import net.kourlas.voipms_sms.adapters.ConversationRecyclerViewAdapter;
 import net.kourlas.voipms_sms.model.Conversation;
-import net.kourlas.voipms_sms.model.Sms;
+import net.kourlas.voipms_sms.model.Message;
+import org.json.simple.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class ConversationActivity extends AppCompatActivity {
-    private final ConversationActivity conversationActivity = this;
-    private ConversationListViewAdapter conversationListViewAdapter;
+public class ConversationActivity
+        extends AppCompatActivity
+        implements ActionMode.Callback, View.OnLongClickListener, View.OnClickListener {
+    public static final String TAG = "ConversationActivity";
+
+    private final ConversationActivity activity = this;
+
     private String contact;
-    private ProgressDialog deleteSmsProgressDialog;
+
+    private Menu menu;
+
+    private RecyclerView recyclerView;
+    private LinearLayoutManager layoutManager;
+    private ConversationRecyclerViewAdapter adapter;
+
+    private ActionMode actionMode;
+    private boolean actionModeEnabled;
+
+    private Database database;
+    private Preferences preferences;
+
+    public static void sendMessage(Activity sourceActivity, long databaseId) {
+        Context applicationContext = sourceActivity.getApplicationContext();
+        Database database = Database.getInstance(applicationContext);
+        Preferences preferences = Preferences.getInstance(applicationContext);
+
+        Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
+        SendMessageTask task = new SendMessageTask(sourceActivity.getApplicationContext(), message, sourceActivity);
+
+        if (preferences.getEmail().equals("") || preferences.getPassword().equals("") ||
+                preferences.getDid().equals("")) {
+            // Do not show an error; this method should never be called unless the email, password and DID are set
+            task.cleanup(false);
+            return;
+        }
+
+        if (!Utils.isNetworkConnectionAvailable(applicationContext)) {
+            Toast.makeText(applicationContext, applicationContext.getString(R.string.conversation_send_error_network),
+                    Toast.LENGTH_SHORT).show();
+            task.cleanup(false);
+            return;
+        }
+
+        try {
+            String voipUrl = "https://www.voip.ms/api/v1/rest.php?" +
+                    "api_username=" + URLEncoder.encode(preferences.getEmail(), "UTF-8") + "&" +
+                    "api_password=" + URLEncoder.encode(preferences.getPassword(), "UTF-8") + "&" +
+                    "method=sendSMS" + "&" +
+                    "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
+                    "dst=" + URLEncoder.encode(message.getContact(), "UTF-8") + "&" +
+                    "message=" + URLEncoder.encode(message.getText(), "UTF-8");
+            task.start(voipUrl);
+        } catch (UnsupportedEncodingException ex) {
+            // This should never happen since the encoding (UTF-8) is hardcoded
+            throw new Error(ex);
+        }
+    }
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.conversation);
 
-        final ConversationActivity conversationActivity = this;
+        database = Database.getInstance(getApplicationContext());
+        preferences = Preferences.getInstance(getApplicationContext());
 
         contact = getIntent().getExtras().getString("contact");
         // Remove the leading one from a North American phone number (e.g. +1 (123) 555-4567)
         if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
             contact = contact.substring(1);
         }
-        final String contact = this.contact;
-        Conversation conversation = Database.getInstance(getApplicationContext()).getConversation(contact);
 
-        conversationListViewAdapter = new ConversationListViewAdapter(this, contact);
-
-        // Mark conversation as read
-        for (Sms sms : conversation.getAllSms()) {
-            sms.setUnread(false);
-            Database.getInstance(getApplicationContext()).replaceSms(sms);
-        }
-
-        // Set up action bar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.toolbar_elevation));
+        setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             String contactName = Utils.getContactName(this, contact);
             if (contactName != null) {
                 actionBar.setTitle(contactName);
-            } else {
+            }
+            else {
                 actionBar.setTitle(Utils.getFormattedPhoneNumber(contact));
             }
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        final ListView listView = (ListView) findViewById(R.id.list);
-        listView.setSelector(android.R.color.transparent);
-        listView.setAdapter(conversationListViewAdapter);
-        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-            @Override
-            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                int count = 0;
-                SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
-                for (int i = 0; i < listView.getCount(); i++) {
-                    if (sparseBooleanArray.get(i)) {
-                        count++;
-                    }
-                }
+        layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        layoutManager.setStackFromEnd(true);
+        adapter = new ConversationRecyclerViewAdapter(this, layoutManager, contact);
+        recyclerView = (RecyclerView) findViewById(R.id.list);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
 
-                MenuItem copyAction = mode.getMenu().findItem(R.id.copy_button);
-                MenuItem shareAction = mode.getMenu().findItem(R.id.share_button);
-                MenuItem infoAction = mode.getMenu().findItem(R.id.info_button);
-                if (count < 2) {
-                    infoAction.setVisible(true);
-                    copyAction.setVisible(true);
-                    shareAction.setVisible(true);
-                } else {
-                    infoAction.setVisible(false);
-                    copyAction.setVisible(false);
-                    shareAction.setVisible(false);
-                }
-            }
-
-            @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                MenuInflater inflater = mode.getMenuInflater();
-                inflater.inflate(R.menu.conversation_secondary, menu);
-                return true;
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                return false;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                List<Integer> selectedItems = new ArrayList<>();
-                SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
-                for (int i = 0; i < listView.getCount(); i++) {
-                    if (sparseBooleanArray.get(i)) {
-                        selectedItems.add(i);
-                    }
-                }
-
-                switch (item.getItemId()) {
-                    case R.id.info_button:
-                        Sms sms = ((Sms) conversationListViewAdapter.getItem(selectedItems.get(0)));
-                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                        AlertDialog.Builder builder = new AlertDialog.Builder(conversationActivity);
-                        if (sms.getType() == Sms.Type.INCOMING) {
-                            builder.setMessage("ID: " + sms.getId() +
-                                    "\nTo: " + Utils.getFormattedPhoneNumber(sms.getDid()) +
-                                    "\nFrom: " + Utils.getFormattedPhoneNumber(sms.getContact()) +
-                                    "\nDate: " + dateFormat.format(sms.getDate()));
-                        } else {
-                            builder.setMessage("ID: " + sms.getId() +
-                                    "\nTo: " + Utils.getFormattedPhoneNumber(sms.getContact()) +
-                                    "\nFrom: " + Utils.getFormattedPhoneNumber(sms.getDid()) +
-                                    "\nDate: " + dateFormat.format(sms.getDate()));
-                        }
-                        builder.setTitle("Message details");
-                        builder.show();
-                        mode.finish();
-                        return true;
-                    case R.id.copy_button:
-                        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("Text message",
-                                ((Sms) conversationListViewAdapter.getItem(selectedItems.get(0))).getMessage());
-                        clipboard.setPrimaryClip(clip);
-                        mode.finish();
-                        return true;
-                    case R.id.share_button:
-                        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
-                        intent.setType("text/plain");
-                        intent.putExtra(android.content.Intent.EXTRA_TEXT, ((Sms) conversationListViewAdapter.getItem(
-                                selectedItems.get(0))).getMessage());
-                        startActivity(Intent.createChooser(intent, null));
-                        mode.finish();
-                        return true;
-                    case R.id.delete_button:
-                        List<Sms> smses = new ArrayList<>();
-                        SparseBooleanArray checkedItemPositions = listView.getCheckedItemPositions();
-                        for (int i = 0; i < listView.getCount(); i++) {
-                            if (checkedItemPositions.get(i)) {
-                                smses.add((Sms) conversationListViewAdapter.getItem(i));
-                            }
-                        }
-
-                        Sms[] smsArray = new Sms[smses.size()];
-                        smses.toArray(smsArray);
-                        preDeleteSms(smsArray);
-
-                        mode.finish();
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode mode) {
-                // Do nothing.
-            }
-        });
+        actionMode = null;
+        actionModeEnabled = false;
 
         final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -216,10 +169,12 @@ public class ConversationActivity extends AppCompatActivity {
         messageText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing.
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing.
             }
 
             @Override
@@ -227,38 +182,41 @@ public class ConversationActivity extends AppCompatActivity {
                 ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.view_switcher);
                 if (s.toString().equals("") && viewSwitcher.getDisplayedChild() == 1) {
                     viewSwitcher.setDisplayedChild(0);
-                } else if (viewSwitcher.getDisplayedChild() == 0) {
+                }
+                else if (viewSwitcher.getDisplayedChild() == 0) {
                     viewSwitcher.setDisplayedChild(1);
                 }
             }
         });
+        messageText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    adapter.refresh();
+                }
+            }
+        });
+
+        RelativeLayout messageSection = (RelativeLayout) findViewById(R.id.message_section);
+        ViewCompat.setElevation(messageSection, 8);
 
         QuickContactBadge photo = (QuickContactBadge) findViewById(R.id.photo);
         Utils.applyCircularMask(photo);
-        photo.assignContactFromPhone(Preferences.getInstance(getApplicationContext()).getDid(), true);
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(
-                Preferences.getInstance(getApplicationContext()).getDid()));
-        Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
-                        ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI, ContactsContract.PhoneLookup.DISPLAY_NAME},
-                null, null, null);
-        if (cursor.moveToFirst()) {
-            String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
-            if (photoUri != null) {
-                photo.setImageURI(Uri.parse(photoUri));
-            } else {
-                photo.setImageToDefault();
-            }
-        } else {
+        photo.assignContactFromPhone(preferences.getDid(), true);
+        String photoUri = Utils.getContactPhotoUri(getApplicationContext(), preferences.getDid());
+        if (photoUri != null) {
+            photo.setImageURI(Uri.parse(photoUri));
+        }
+        else {
             photo.setImageToDefault();
         }
-        cursor.close();
 
         final ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
         Utils.applyCircularMask(sendButton);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                preSendSms();
+                preSendMessage();
             }
         });
     }
@@ -266,7 +224,7 @@ public class ConversationActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        App.getInstance().setCurrentActivity(this);
+        ActivityMonitor.getInstance().setCurrentActivity(this);
 
         Integer id = Notifications.getInstance(getApplicationContext()).getNotificationIds().get(contact);
         if (id != null) {
@@ -275,25 +233,45 @@ public class ConversationActivity extends AppCompatActivity {
             notificationManager.cancel(id);
         }
 
-        conversationListViewAdapter.refresh();
+        markConversationAsRead();
+
+        adapter.refresh();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        App.getInstance().deleteReferenceToActivity(this);
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (actionModeEnabled) {
+            actionMode.finish();
+        }
+        else if (menu != null) {
+            MenuItem searchItem = menu.findItem(R.id.search_button);
+            SearchView searchView = (SearchView) searchItem.getActionView();
+            if (!searchView.isIconified()) {
+                searchItem.collapseActionView();
+            }
+            else {
+                super.onBackPressed();
+            }
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.conversation, menu);
+        this.menu = menu;
 
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
             MenuItem phoneMenuItem = menu.findItem(R.id.call_button);
@@ -309,7 +287,7 @@ public class ConversationActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                conversationListViewAdapter.refresh(newText);
+                adapter.refresh(newText);
                 return true;
             }
         });
@@ -328,11 +306,21 @@ public class ConversationActivity extends AppCompatActivity {
                     startActivity(intent);
                     return true;
                 case R.id.delete_button:
-                    Conversation conversation = Database.getInstance(getApplicationContext()).getConversation(contact);
-                    if (conversation.getAllSms().length == 0) {
+                    Conversation conversation = database.getConversation(preferences.getDid(), contact);
+                    if (conversation.getMessages().length == 0) {
                         NavUtils.navigateUpFromSameTask(this);
-                    } else {
-                        preDeleteSms(conversation.getAllSms());
+                    }
+                    else {
+                        List<Long> databaseIds = new ArrayList<>();
+                        for (int i = 0; i < adapter.getItemCount(); i++) {
+                            if (adapter.getItem(i).getDatabaseId() != null) {
+                                databaseIds.add(adapter.getItem(i).getDatabaseId());
+                            }
+                        }
+
+                        Long[] databaseIdsArray = new Long[databaseIds.size()];
+                        databaseIds.toArray(databaseIdsArray);
+                        deleteMessages(databaseIdsArray);
                     }
                     return true;
             }
@@ -341,88 +329,344 @@ public class ConversationActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void preDeleteSms(final Sms[] smses) {
+    @Override
+    public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+        MenuInflater inflater = actionMode.getMenuInflater();
+        inflater.inflate(R.menu.conversation_secondary, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+        if (menuItem.getItemId() == R.id.resend_button) {
+            for (int i = 0; i < adapter.getItemCount(); i++) {
+                if (adapter.isItemChecked(i)) {
+                    sendMessage(adapter.getItem(i).getDatabaseId());
+                    break;
+                }
+            }
+
+            actionMode.finish();
+            return true;
+        }
+        else if (menuItem.getItemId() == R.id.info_button) {
+            Message message = null;
+            for (int i = 0; i < adapter.getItemCount(); i++) {
+                if (adapter.isItemChecked(i)) {
+                    message = adapter.getItem(i);
+                    break;
+                }
+            }
+
+            if (message != null) {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                if (message.getType() == Message.Type.INCOMING) {
+                    builder.setMessage((message.getVoipId() == null ? "" : ("ID: " + message.getVoipId() + "\n")) +
+                            "To: " + Utils.getFormattedPhoneNumber(message.getDid()) +
+                            "\nFrom: " + Utils.getFormattedPhoneNumber(message.getContact()) +
+                            "\nDate: " + dateFormat.format(message.getDate()));
+                }
+                else {
+                    builder.setMessage((message.getVoipId() == null ? "" : ("ID: " + message.getVoipId() + "\n")) +
+                            "To: " + Utils.getFormattedPhoneNumber(message.getContact()) +
+                            "\nFrom: " + Utils.getFormattedPhoneNumber(message.getDid()) +
+                            "\nDate: " + dateFormat.format(message.getDate()));
+                }
+                builder.setTitle("Message details");
+                builder.show();
+            }
+
+            actionMode.finish();
+            return true;
+        }
+        else if (menuItem.getItemId() == R.id.copy_button) {
+            Message message = null;
+            for (int i = 0; i < adapter.getItemCount(); i++) {
+                if (adapter.isItemChecked(i)) {
+                    message = adapter.getItem(i);
+                    break;
+                }
+            }
+
+            if (message != null) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Text message", message.getText());
+                clipboard.setPrimaryClip(clip);
+            }
+
+            actionMode.finish();
+            return true;
+        }
+        else if (menuItem.getItemId() == R.id.share_button) {
+            Message message = null;
+            for (int i = 0; i < adapter.getItemCount(); i++) {
+                if (adapter.isItemChecked(i)) {
+                    message = adapter.getItem(i);
+                    break;
+                }
+            }
+
+            if (message != null) {
+                Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(android.content.Intent.EXTRA_TEXT, message.getText());
+                startActivity(Intent.createChooser(intent, null));
+            }
+
+            actionMode.finish();
+            return true;
+        }
+        else if (menuItem.getItemId() == R.id.delete_button) {
+            List<Long> databaseIds = new ArrayList<>();
+            for (int i = 0; i < adapter.getItemCount(); i++) {
+                if (adapter.isItemChecked(i)) {
+                    databaseIds.add(adapter.getItem(i).getDatabaseId());
+                }
+            }
+
+            Long[] databaseIdsArray = new Long[databaseIds.size()];
+            databaseIds.toArray(databaseIdsArray);
+            deleteMessages(databaseIdsArray);
+
+            actionMode.finish();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode actionMode) {
+        for (int i = 0; i < adapter.getItemCount(); i++) {
+            adapter.setItemChecked(i, false);
+        }
+        actionModeEnabled = false;
+    }
+
+    private void updateButtons() {
+        MenuItem resendAction = actionMode.getMenu().findItem(R.id.resend_button);
+        MenuItem copyAction = actionMode.getMenu().findItem(R.id.copy_button);
+        MenuItem shareAction = actionMode.getMenu().findItem(R.id.share_button);
+        MenuItem infoAction = actionMode.getMenu().findItem(R.id.info_button);
+
+        int count = adapter.getCheckedItemCount();
+
+        boolean resendVisible = false;
+        if (count == 1) {
+            for (int i = 0; i < adapter.getItemCount(); i++) {
+                if (adapter.isItemChecked(i)) {
+                    if (!adapter.getItem(i).isDelivered() && !adapter.getItem(i).isDeliveryInProgress()) {
+                        resendVisible = true;
+                        break;
+                    }
+                }
+            }
+        }
+        resendAction.setVisible(resendVisible);
+
+        if (count >= 2) {
+            infoAction.setVisible(false);
+            copyAction.setVisible(false);
+            shareAction.setVisible(false);
+        }
+        else {
+            infoAction.setVisible(true);
+            copyAction.setVisible(true);
+            shareAction.setVisible(true);
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (actionModeEnabled) {
+            toggleItem(view);
+        }
+        else {
+            Message message = adapter.getItem(recyclerView.getChildAdapterPosition(view));
+            if (!message.isDelivered() && !message.isDeliveryInProgress()) {
+                preSendMessage(message.getDatabaseId());
+            }
+        }
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        toggleItem(view);
+        return true;
+    }
+
+    private void toggleItem(View view) {
+        adapter.toggleItemChecked(recyclerView.getChildAdapterPosition(view));
+
+        if (adapter.getCheckedItemCount() == 0) {
+            if (actionMode != null) {
+                actionMode.finish();
+            }
+            actionModeEnabled = false;
+            return;
+        }
+
+        if (!actionModeEnabled) {
+            actionMode = startSupportActionMode(this);
+            actionModeEnabled = true;
+        }
+        updateButtons();
+    }
+
+    public void deleteMessages(final Long[] databaseIds) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
-        builder.setMessage("Delete messages?");
-        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+        builder.setTitle("Delete messages?");
+        builder.setMessage("This action cannot be undone.");
+        builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                deleteSmsProgressDialog = new ProgressDialog(conversationActivity);
-                deleteSmsProgressDialog.setTitle("Deleting messages...");
-                deleteSmsProgressDialog.setCancelable(false);
-                deleteSmsProgressDialog.setIndeterminate(false);
-                deleteSmsProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                deleteSmsProgressDialog.setMax(smses.length);
-                deleteSmsProgressDialog.show();
-
-                for (Sms sms : smses) {
-                    Api.getInstance(getApplicationContext()).deleteSms(conversationActivity, sms.getId());
+                for (long databaseId : databaseIds) {
+                    Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
+                    if (message.getVoipId() == null) {
+                        database.removeMessage(databaseId);
+                    }
+                    else {
+                        message.setDeleted(true);
+                        database.insertMessage(message);
+                    }
+                    adapter.refresh();
                 }
             }
         });
-        builder.setNegativeButton("Cancel", null);
+        builder.setNegativeButton(getString(R.string.cancel), null);
         builder.show();
     }
 
-    public void postDeleteSms() {
-        if (deleteSmsProgressDialog != null) {
-            deleteSmsProgressDialog.incrementProgressBy(1);
-            if (deleteSmsProgressDialog.getProgress() == deleteSmsProgressDialog.getMax()) {
-                deleteSmsProgressDialog.dismiss();
-                deleteSmsProgressDialog = null;
-            }
-        }
+    public void preSendMessage() {
+        EditText messageText = (EditText) findViewById(R.id.message_edit_text);
+        long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
+                messageText.getText().toString()));
+        messageText.setText("");
+        adapter.refresh();
 
-        conversationListViewAdapter.refresh();
-        if (Database.getInstance(this).getConversation(contact).getAllSms().length == 0) {
-            NavUtils.navigateUpFromSameTask(this);
-        }
+        preSendMessage(databaseId);
     }
 
-    public void preSendSms() {
-        ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
-        sendButton.setEnabled(false);
+    public void preSendMessage(long databaseId) {
+        Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
+        message.setDelivered(false);
+        message.setDeliveryInProgress(true);
+        database.insertMessage(message);
+        adapter.refresh();
 
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        progressBar.setVisibility(View.VISIBLE);
-
-        EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        messageText.setFocusable(false);
-
-        Api.getInstance(getApplicationContext()).sendSms(ConversationActivity.this.conversationActivity, contact,
-                messageText.getText().toString());
+        sendMessage(databaseId);
     }
 
-    public void postSendSms(boolean success) {
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        progressBar.setVisibility(View.INVISIBLE);
-
-        ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
-        sendButton.setEnabled(true);
-
-        EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        messageText.setFocusable(true);
-        messageText.setFocusableInTouchMode(true);
-        messageText.setClickable(true);
-        messageText.requestFocus();
-
+    public void postSendMessage(boolean success, long databaseId) {
         if (success) {
-            messageText.setText("");
-            Api.getInstance(getApplicationContext()).updateSmsDatabase(this, true, false);
+            database.removeMessage(databaseId);
+            database.update(true, true, false, this);
+        }
+        else {
+            Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
+            message.setDelivered(false);
+            message.setDeliveryInProgress(false);
+            database.insertMessage(message);
+            adapter.refresh();
+        }
+
+        if (adapter.getItemCount() > 0) {
+            layoutManager.scrollToPosition(adapter.getItemCount() - 1);
         }
     }
 
     public void postUpdate() {
-        // Mark conversation as read
-        for (Sms sms : Database.getInstance(getApplicationContext()).getConversation(contact).getAllSms()) {
-            sms.setUnread(false);
-            Database.getInstance(getApplicationContext()).replaceSms(sms);
-        }
-
-        conversationListViewAdapter.refresh();
+        markConversationAsRead();
+        adapter.refresh();
     }
 
     public String getContact() {
         return contact;
+    }
+
+    public void markConversationAsRead() {
+        for (Message message : database.getConversation(preferences.getDid(), contact).getMessages()) {
+            message.setUnread(false);
+            database.insertMessage(message);
+        }
+    }
+
+    public void sendMessage(long databaseId) {
+        sendMessage(this, databaseId);
+    }
+
+    public static class SendMessageTask {
+        private final Context applicationContext;
+
+        private final Message message;
+        private final Activity sourceActivity;
+
+        public SendMessageTask(Context applicationContext, Message message, Activity sourceActivity) {
+            this.applicationContext = applicationContext;
+
+            this.message = message;
+            this.sourceActivity = sourceActivity;
+        }
+
+        public void start(String voipUrl) {
+            new SendMessageAsyncTask().execute(voipUrl);
+        }
+
+        public void cleanup(boolean success) {
+            if (sourceActivity instanceof ConversationActivity) {
+                ((ConversationActivity) sourceActivity).postSendMessage(success, message.getDatabaseId());
+            }
+            else if (sourceActivity instanceof ConversationQuickReplyActivity) {
+                ((ConversationQuickReplyActivity) sourceActivity).postSendMessage(success, message.getDatabaseId());
+            }
+        }
+
+        private class SendMessageAsyncTask extends AsyncTask<String, Void, Boolean> {
+            @Override
+            protected Boolean doInBackground(String... params) {
+                JSONObject resultJson;
+                try {
+                    resultJson = Utils.getJson(params[0]);
+                } catch (org.json.simple.parser.ParseException ex) {
+                    Log.w(TAG, Log.getStackTraceString(ex));
+                    Toast.makeText(applicationContext, applicationContext.getString(
+                            R.string.conversation_send_error_api_parse), Toast.LENGTH_SHORT).show();
+                    return false;
+                } catch (Exception ex) {
+                    Log.w(TAG, Log.getStackTraceString(ex));
+                    Toast.makeText(applicationContext, applicationContext.getString(
+                            R.string.conversation_send_error_api_request), Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                String status = (String) resultJson.get("status");
+                if (status == null) {
+                    Toast.makeText(applicationContext,
+                            applicationContext.getString(R.string.conversation_send_error_api_parse),
+                            Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                if (!status.equals("success")) {
+                    Toast.makeText(applicationContext,
+                            applicationContext.getString(R.string.conversation_send_error_api_error).replace(
+                                    "{error}", status), Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                return true;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                cleanup(success);
+            }
+        }
     }
 }

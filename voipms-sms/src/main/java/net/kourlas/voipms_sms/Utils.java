@@ -18,12 +18,16 @@
 package net.kourlas.voipms_sms;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.*;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import org.json.simple.JSONObject;
@@ -51,7 +55,9 @@ public class Utils {
             String name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
             cursor.close();
             return name;
-        } else {
+        }
+        else {
+            cursor.close();
             return null;
         }
     }
@@ -64,7 +70,8 @@ public class Utils {
             String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
             cursor.close();
             return photoUri;
-        } else {
+        }
+        else {
             cursor.close();
             return null;
         }
@@ -81,7 +88,8 @@ public class Utils {
             long seconds = (Calendar.getInstance().getTime().getTime() - smsCalendar.getTime().getTime()) / 1000;
             if (seconds < 10) {
                 return "Just now";
-            } else {
+            }
+            else {
                 return seconds + " seconds ago";
             }
         }
@@ -93,7 +101,8 @@ public class Utils {
             long minutes = (Calendar.getInstance().getTime().getTime() - smsCalendar.getTime().getTime()) / (1000 * 60);
             if (minutes == 1) {
                 return "1 minute ago";
-            } else {
+            }
+            else {
                 return minutes + " minutes ago";
             }
         }
@@ -111,7 +120,8 @@ public class Utils {
                 // This week: EEE
                 DateFormat format = new SimpleDateFormat("EEE", Locale.getDefault());
                 return format.format(smsDate);
-            } else {
+            }
+            else {
                 // This week: EEE h:mm a
                 DateFormat format = new SimpleDateFormat("EEE h:mm a", Locale.getDefault());
                 return format.format(smsDate);
@@ -123,7 +133,8 @@ public class Utils {
                 // This year: MMM d
                 DateFormat format = new SimpleDateFormat("MMM d", Locale.getDefault());
                 return format.format(smsDate);
-            } else {
+            }
+            else {
                 // This year: MMM d h:mm a
                 DateFormat format = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault());
                 return format.format(smsDate);
@@ -134,7 +145,8 @@ public class Utils {
             // Any: MMM d, yyyy
             DateFormat format = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
             return format.format(smsDate);
-        } else {
+        }
+        else {
             // Any: MMM d, yyyy h:mm a
             DateFormat format = new SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault());
             return format.format(smsDate);
@@ -155,7 +167,8 @@ public class Utils {
             String[] phoneNumberArray = new String[]{phoneNumber.substring(0, 3), phoneNumber.substring(3, 6),
                     phoneNumber.substring(6)};
             phoneNumber = phoneNumberFormat.format(phoneNumberArray);
-        } else if (phoneNumber.length() == 11 && phoneNumber.charAt(0) == '1') {
+        }
+        else if (phoneNumber.length() == 11 && phoneNumber.charAt(0) == '1') {
             MessageFormat phoneNumberFormat = new MessageFormat("({0}) {1}-{2}");
             String[] phoneNumberArray = new String[]{phoneNumber.substring(1, 4), phoneNumber.substring(4, 7),
                     phoneNumber.substring(7)};
@@ -213,5 +226,32 @@ public class Utils {
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return output;
+    }
+
+    public static void applyRoundedCornersMask(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.setOutlineProvider(new ViewOutlineProvider() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 15);
+                }
+            });
+            view.setClipToOutline(true);
+        }
+    }
+
+    public static boolean isNetworkConnectionAvailable(Context applicationContext) {
+        ConnectivityManager connMgr = (ConnectivityManager) applicationContext.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
+    public static void showInfoDialog(Activity activity, String text) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(text);
+        builder.setPositiveButton(R.string.ok, null);
+        builder.show();
     }
 }

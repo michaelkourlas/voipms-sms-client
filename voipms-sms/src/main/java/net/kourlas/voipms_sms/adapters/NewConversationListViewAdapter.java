@@ -35,21 +35,40 @@ import net.kourlas.voipms_sms.activities.NewConversationActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewConversationListViewAdapter extends FilterableListViewAdapter<
-        NewConversationListViewAdapter.ContactItem> implements SectionIndexer {
-
+public class NewConversationListViewAdapter extends BaseAdapter implements Filterable, SectionIndexer {
     private static final int ITEM_COUNT = 2;
     private static final int ITEM_PRIMARY = 0;
     private static final int ITEM_SECONDARY = 1;
+
     private final NewConversationActivity activity;
+
+    private final List<NewConversationListViewAdapter.ContactItem> items;
     private String typedInPhoneNumber;
 
     public NewConversationListViewAdapter(NewConversationActivity activity) {
-        super((ListView) activity.findViewById(R.id.list));
-
         this.activity = activity;
 
-        refresh();
+        this.typedInPhoneNumber = null;
+        this.items = new ArrayList<>();
+    }
+
+    public void refresh(String newFilterConstraint) {
+        getFilter().filter(newFilterConstraint);
+    }
+
+    @Override
+    public int getCount() {
+        return items.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return items.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     public void showTypedInItem(String phoneNumber) {
@@ -70,7 +89,8 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
         ContactItem contactItem = (ContactItem) getItem(position);
         if (contactItem.isPrimary()) {
             return ITEM_PRIMARY;
-        } else {
+        }
+        else {
             return ITEM_SECONDARY;
         }
     }
@@ -84,9 +104,10 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
 
         // Set item layout
         if (contactItem.isPrimary()) {
-            convertView = inflater.inflate(R.layout.new_conversation_listview_item_primary, parent, false);
-        } else {
-            convertView = inflater.inflate(R.layout.new_conversation_listview_item_secondary, parent, false);
+            convertView = inflater.inflate(R.layout.new_conversation_item_primary, parent, false);
+        }
+        else {
+            convertView = inflater.inflate(R.layout.new_conversation_item_secondary, parent, false);
         }
 
         // Add indexes to entries where appropriate
@@ -117,16 +138,19 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
                 photo.setScaleType(ImageView.ScaleType.CENTER);
                 photo.setBackgroundResource(R.color.primary);
                 photo.setImageResource(R.drawable.ic_dialpad_white_24dp);
-            } else if (contactItem.getPhotoUri() == null) {
+            }
+            else if (contactItem.getPhotoUri() == null) {
                 photo.setImageToDefault();
-            } else {
+            }
+            else {
                 photo.setImageURI(Uri.parse(contactItem.getPhotoUri()));
             }
 
             TextView contactTextView = (TextView) convertView.findViewById(R.id.contact);
             if (contactItem.isTypedIn()) {
                 contactTextView.setText(activity.getString(R.string.new_conversation_manual_entry));
-            } else {
+            }
+            else {
                 contactTextView.setText(contactItem.getName());
             }
         }
@@ -189,79 +213,7 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
     }
 
     public Filter getFilter() {
-        return new FilterableAdapterFilter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                FilterResults results = new FilterResults();
-                List<ContactItem> contactItemResults = new ArrayList<ContactItem>();
-
-                String searchText = constraint.toString();
-
-                List<ContactItem> phoneNumberEntries = new ArrayList<ContactItem>();
-                Cursor cursor = activity.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                        null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
-                if (cursor.getCount() > 0) {
-                    while (cursor.moveToNext()) {
-                        if (cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)).equals(
-                                "1")) {
-                            String contact = cursor.getString(cursor.getColumnIndex(
-                                    ContactsContract.Contacts.DISPLAY_NAME));
-                            String phoneNumber = cursor.getString(cursor.getColumnIndex(
-                                    ContactsContract.CommonDataKinds.Phone.NUMBER));
-                            String photoUri = cursor.getString(cursor.getColumnIndex(
-                                    ContactsContract.Contacts.PHOTO_URI));
-
-                            boolean showPhoto = true;
-                            for (ContactItem contactItem : phoneNumberEntries) {
-                                if (contact.equals(contactItem.getName())) {
-                                    showPhoto = false;
-                                }
-                            }
-
-                            ContactItem contactItem = new ContactItem(contact, phoneNumber, photoUri, showPhoto, false);
-                            phoneNumberEntries.add(contactItem);
-                        }
-                    }
-                }
-                cursor.close();
-                if (typedInPhoneNumber != null) {
-                    phoneNumberEntries.add(0, new ContactItem(typedInPhoneNumber, typedInPhoneNumber, null, true,
-                            true));
-                }
-
-                for (ContactItem contactItem : phoneNumberEntries) {
-                    if (contactItem.getName().toLowerCase().contains(searchText.toLowerCase()) ||
-                            contactItem.getPhoneNumber().toLowerCase().contains(searchText.toLowerCase()) ||
-                            (!searchText.replaceAll("[^0-9]", "").equals("") &&
-                                    contactItem.getPhoneNumber().replaceAll("[^0-9]", "").contains(
-                                            searchText.replaceAll("[^0-9]", ""))) ||
-                            contactItem.isTypedIn()) {
-                        contactItemResults.add(contactItem);
-                    }
-                }
-
-                for (int i = 0; i < contactItemResults.size(); i++) {
-                    boolean found = false;
-                    for (int j = 0; j < i; j++) {
-                        if (contactItemResults.get(i).getName().equals(contactItemResults.get(j).getName())) {
-                            contactItemResults.get(i).setPrimary(false);
-                            contactItemResults.get(j).setPrimary(true);
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        contactItemResults.get(i).setPrimary(true);
-                    }
-                }
-
-                results.count = contactItemResults.size();
-                results.values = contactItemResults;
-
-                return results;
-            }
-        };
+        return new NewConversationFilter();
     }
 
     public static class ContactItem {
@@ -301,6 +253,89 @@ public class NewConversationListViewAdapter extends FilterableListViewAdapter<
 
         public boolean isTypedIn() {
             return typedIn;
+        }
+    }
+
+    class NewConversationFilter extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults results = new FilterResults();
+            List<ContactItem> contactItemResults = new ArrayList<ContactItem>();
+
+            String searchText = constraint.toString();
+
+            List<ContactItem> phoneNumberEntries = new ArrayList<ContactItem>();
+            Cursor cursor = activity.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    if (cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)).equals(
+                            "1")) {
+                        String contact = cursor.getString(cursor.getColumnIndex(
+                                ContactsContract.Contacts.DISPLAY_NAME));
+                        String phoneNumber = cursor.getString(cursor.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        String photoUri = cursor.getString(cursor.getColumnIndex(
+                                ContactsContract.Contacts.PHOTO_URI));
+
+                        boolean showPhoto = true;
+                        for (ContactItem contactItem : phoneNumberEntries) {
+                            if (contact.equals(contactItem.getName())) {
+                                showPhoto = false;
+                            }
+                        }
+
+                        ContactItem contactItem = new ContactItem(contact, phoneNumber, photoUri, showPhoto, false);
+                        phoneNumberEntries.add(contactItem);
+                    }
+                }
+            }
+            cursor.close();
+            if (typedInPhoneNumber != null) {
+                phoneNumberEntries.add(0, new ContactItem(typedInPhoneNumber, typedInPhoneNumber, null, true,
+                        true));
+            }
+
+            for (ContactItem contactItem : phoneNumberEntries) {
+                if (contactItem.getName().toLowerCase().contains(searchText.toLowerCase()) ||
+                        contactItem.getPhoneNumber().toLowerCase().contains(searchText.toLowerCase()) ||
+                        (!searchText.replaceAll("[^0-9]", "").equals("") &&
+                                contactItem.getPhoneNumber().replaceAll("[^0-9]", "").contains(
+                                        searchText.replaceAll("[^0-9]", ""))) ||
+                        contactItem.isTypedIn()) {
+                    contactItemResults.add(contactItem);
+                }
+            }
+
+            for (int i = 0; i < contactItemResults.size(); i++) {
+                boolean found = false;
+                for (int j = 0; j < i; j++) {
+                    if (contactItemResults.get(i).getName().equals(contactItemResults.get(j).getName())) {
+                        contactItemResults.get(i).setPrimary(false);
+                        contactItemResults.get(j).setPrimary(true);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    contactItemResults.get(i).setPrimary(true);
+                }
+            }
+
+            results.count = contactItemResults.size();
+            results.values = contactItemResults;
+
+            return results;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            items.clear();
+            items.addAll((List<ContactItem>) results.values);
+            notifyDataSetChanged();
         }
     }
 }

@@ -25,38 +25,67 @@ import java.util.Collections;
 import java.util.List;
 
 public class Conversation implements Comparable<Conversation> {
-    private final List<Sms> smses;
+    private final List<Message> messages;
 
-    public Conversation(Sms[] smses) {
-        this.smses = new ArrayList<Sms>();
-        this.smses.addAll(Arrays.asList(smses));
-        Collections.sort(this.smses);
+    public Conversation(Message[] messages) {
+        this.messages = new ArrayList<>();
+        this.messages.addAll(Arrays.asList(messages));
+        Collections.sort(this.messages);
     }
 
-    public Sms getMostRecentSms() {
-        return smses.get(0);
+    public Message getMostRecentSms() {
+        return messages.get(0);
     }
 
-    public Sms[] getAllSms() {
-        Sms[] smsArray = new Sms[smses.size()];
-        return smses.toArray(smsArray);
+    public Message[] getMessages() {
+        Message[] messageArray = new Message[messages.size()];
+        return messages.toArray(messageArray);
     }
 
-    public void addSms(Sms sms) {
-        smses.add(sms);
-        Collections.sort(smses);
+    public void addSms(Message message) {
+        messages.add(message);
+        Collections.sort(messages);
     }
 
     public String getContact() {
-        return smses.get(0).getContact();
+        return messages.get(0).getContact();
+    }
+
+    public String getDid() {
+        return messages.get(0).getDid();
     }
 
     public boolean isUnread() {
-        return smses.get(0).isUnread();
+        return messages.get(0).isUnread();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Conversation) {
+            if (this == o) {
+                return true;
+            }
+
+            Conversation other = (Conversation) o;
+            if (messages.size() != other.messages.size()) {
+                return false;
+            }
+
+            for (int i = 0; i < messages.size(); i++) {
+                if (!messages.get(i).equals(other.messages.get(i))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        else {
+            return super.equals(o);
+        }
     }
 
     @Override
     public int compareTo(@NonNull Conversation another) {
-        return smses.get(0).compareTo(another.smses.get(0));
+        return messages.get(0).compareTo(another.messages.get(0));
     }
 }
