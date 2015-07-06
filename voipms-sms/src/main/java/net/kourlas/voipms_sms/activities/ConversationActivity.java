@@ -545,13 +545,25 @@ public class ConversationActivity
     }
 
     public void preSendMessage() {
-        EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
-                messageText.getText().toString()));
-        messageText.setText("");
-        adapter.refresh();
-
-        preSendMessage(databaseId);
+        EditText messageEditText = (EditText) findViewById(R.id.message_edit_text);
+        String messageText = messageEditText.getText().toString();
+        while (true) {
+            if (messageText.length() > 160) {
+                long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
+                        messageText.substring(0, 160)));
+                messageText = messageText.substring(160);
+                adapter.refresh();
+                preSendMessage(databaseId);
+            }
+            else {
+                long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
+                        messageText.substring(0, messageText.length())));
+                adapter.refresh();
+                preSendMessage(databaseId);
+                break;
+            }
+        }
+        messageEditText.setText("");
     }
 
     public void preSendMessage(long databaseId) {

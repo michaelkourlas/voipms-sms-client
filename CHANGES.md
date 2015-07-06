@@ -3,6 +3,7 @@
 * New synchronization options
 * Access to messages older than 90 days
 * Quick reply screen
+* Automatic splitting of messages greater than 160 characters
 * Action buttons for notifications
 * Search term highlighting
 * Import/export mechanism
