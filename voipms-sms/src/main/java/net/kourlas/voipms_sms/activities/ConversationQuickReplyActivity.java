@@ -199,13 +199,23 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
     }
 
     public void preSendMessage() {
-        EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        long databaseId = Database.getInstance(getApplicationContext()).insertMessage(
-                new Message(Preferences.getInstance(getApplicationContext()).getDid(), contact,
-                        messageText.getText().toString()));
-        messageText.setText("");
-
-        sendMessage(databaseId);
+        EditText messageEditText = (EditText) findViewById(R.id.message_edit_text);
+        String messageText = messageEditText.getText().toString();
+        while (true) {
+            if (messageText.length() > 160) {
+                long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
+                        messageText.substring(0, 160)));
+                messageText = messageText.substring(160);
+                sendMessage(databaseId);
+            }
+            else {
+                long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
+                        messageText.substring(0, messageText.length())));
+                sendMessage(databaseId);
+                break;
+            }
+        }
+        messageEditText.setText("");
         finish();
     }
 
