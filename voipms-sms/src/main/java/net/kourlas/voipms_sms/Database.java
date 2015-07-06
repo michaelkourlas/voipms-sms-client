@@ -352,23 +352,20 @@ public class Database {
      * <li> retrieving messages from VoIP.ms that were deleted locally;
      * <li> deleting messages from VoIP.ms that were deleted locally; and
      * <li> deleting messages stored locally that were deleted from VoIP.ms.
-     *
-     * @param forceRecent       Retrieve only recent messages (and do nothing else) if true, regardless of synchronization
+     *  @param forceRecent       Retrieve only recent messages (and do nothing else) if true, regardless of synchronization
      *                          settings.
      * @param showErrors        Shows error messages if true.
-     * @param showNotifications Shows notifications for new unread messages if true.
      * @param sourceActivity    The calling activity.
      */
     @SuppressWarnings("SimplifiableConditionalExpression")
-    public synchronized void update(boolean forceRecent, boolean showErrors, boolean showNotifications,
-                                    Activity sourceActivity) {
+    public synchronized void update(boolean forceRecent, boolean showErrors, Activity sourceActivity) {
         boolean retrieveOnlyRecentMessages = forceRecent ? true : preferences.getRetrieveOnlyRecentMessages();
         boolean retrieveDeletedMessages = forceRecent ? false : preferences.getRetrieveDeletedMessages();
         boolean propagateLocalDeletions = forceRecent ? false : preferences.getPropagateLocalDeletions();
         boolean propagateRemoteDeletions = forceRecent ? false : preferences.getPropagateRemoteDeletions();
 
         SynchronizeDatabaseTask task = new SynchronizeDatabaseTask(applicationContext, retrieveDeletedMessages,
-                propagateRemoteDeletions, showErrors, showNotifications, sourceActivity);
+                propagateRemoteDeletions, showErrors, sourceActivity);
 
         if (preferences.getEmail().equals("") || preferences.getPassword().equals("") ||
                 preferences.getDid().equals("")) {
@@ -497,7 +494,6 @@ public class Database {
         private final boolean retrieveDeletedMessages;
         private final boolean propagateRemoteDeletions;
         private final boolean showErrors;
-        private final boolean showNotifications;
         private final Activity sourceActivity;
         private List<RequestObject> requests;
 
@@ -509,12 +505,10 @@ public class Database {
          * @param propagateRemoteDeletions Deletes local copies of messages if they were delected from the VoIP.ms
          *                                 servers if true.
          * @param showErrors               Shows error messages if true.
-         * @param showNotifications        Shows notifications for new unread messages if true.
          * @param sourceActivity           The calling activity.
          */
         public SynchronizeDatabaseTask(Context applicationContext, boolean retrieveDeletedMessages,
-                                       boolean propagateRemoteDeletions, boolean showErrors, boolean showNotifications,
-                                       Activity sourceActivity) {
+                                       boolean propagateRemoteDeletions, boolean showErrors, Activity sourceActivity) {
             this.applicationContext = applicationContext;
             this.database = Database.getInstance(applicationContext);
             this.preferences = Preferences.getInstance(applicationContext);
@@ -524,7 +518,6 @@ public class Database {
             this.retrieveDeletedMessages = retrieveDeletedMessages;
             this.propagateRemoteDeletions = propagateRemoteDeletions;
             this.showErrors = showErrors;
-            this.showNotifications = showNotifications;
             this.sourceActivity = sourceActivity;
         }
 
@@ -772,9 +765,7 @@ public class Database {
                 for (Message newMessage : newMessages) {
                     newContacts.add(newMessage.getContact());
                 }
-                if (showNotifications) {
-                    Notifications.getInstance(applicationContext).showNotification(new LinkedList<>(newContacts));
-                }
+                Notifications.getInstance(applicationContext).showNotifications(new LinkedList<>(newContacts));
 
                 int current = requests.indexOf(request);
                 if (current != requests.size() - 1) {

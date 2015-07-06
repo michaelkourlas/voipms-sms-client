@@ -53,6 +53,10 @@ public class ConversationsActivity
         implements ActionMode.Callback, View.OnClickListener, View.OnLongClickListener {
     private final ConversationsActivity conversationsActivity = this;
 
+    private Database database;
+    private Gcm gcm;
+    private Preferences preferences;
+
     private RecyclerView recyclerView;
     private ConversationsRecyclerViewAdapter adapter;
 
@@ -61,15 +65,13 @@ public class ConversationsActivity
     private ActionMode actionMode;
     private boolean actionModeEnabled;
 
-    private Database database;
-    private Preferences preferences;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.conversations);
 
         database = Database.getInstance(getApplicationContext());
+        gcm = Gcm.getInstance(getApplicationContext());
         preferences = Preferences.getInstance(getApplicationContext());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -91,7 +93,7 @@ public class ConversationsActivity
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                preForcedUpdate();
+                preFullUpdate();
             }
         });
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
@@ -128,7 +130,7 @@ public class ConversationsActivity
 
         if (!(preferences.getEmail().equals("") || preferences.getPassword().equals("") ||
                 preferences.getDid().equals(""))) {
-            preUpdate();
+            preRecentUpdate();
         }
         else {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -235,6 +237,13 @@ public class ConversationsActivity
         return false;
     }
 
+    /**
+     * Called when an action mode item is clicked.
+     *
+     * @param mode The action mode containing the item that is clicked.
+     * @param item The item that is clicked.
+     * @return Returns true if the method handles the item clicked.
+     */
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         switch (item.getItemId()) {
@@ -274,6 +283,11 @@ public class ConversationsActivity
         }
     }
 
+    /**
+     * Called when the action mode is destroyed.
+     *
+     * @param mode The action mode to be destroyed.
+     */
     @Override
     public void onDestroyActionMode(ActionMode mode) {
         for (int i = 0; i < adapter.getItemCount(); i++) {
@@ -282,6 +296,34 @@ public class ConversationsActivity
         actionModeEnabled = false;
     }
 
+    /**
+     * Toggles the item associated with the specified view. Activates and deactivates the action mode depending on the
+     * checked item count.
+     *
+     * @param view The specified view.
+     */
+    private void toggleItem(View view) {
+        adapter.toggleItemChecked(recyclerView.getChildAdapterPosition(view));
+
+        if (adapter.getCheckedItemCount() == 0) {
+            if (actionMode != null) {
+                actionMode.finish();
+            }
+            actionModeEnabled = false;
+            return;
+        }
+
+        if (!actionModeEnabled) {
+            actionMode = startSupportActionMode(this);
+            actionModeEnabled = true;
+        }
+        updateButtons();
+    }
+
+    /**
+     * Switches between "mark as read" and "mark as unread" buttons for the action mode depending on which items in
+     * the RecyclerView are selected.
+     */
     private void updateButtons() {
         int read = 0;
         int unread = 0;
@@ -307,6 +349,14 @@ public class ConversationsActivity
         }
     }
 
+    /**
+     * Called when any item in the RecyclerView is short-clicked.
+     * <p/>
+     * This method only toggles the selected item (if the action mode is enabled) or opens the ConversationActivity
+     * for that item (if the action mode is not enabled).
+     *
+     * @param view The item to toggle or open.
+     */
     @Override
     public void onClick(View view) {
         if (actionModeEnabled) {
@@ -322,43 +372,42 @@ public class ConversationsActivity
         }
     }
 
+    /**
+     * Called when any item in the RecyclerView is long-clicked.
+     * <p/>
+     * This method only toggles the selected item.
+     *
+     * @param view The item to toggle.
+     * @return Always returns true.
+     */
     @Override
     public boolean onLongClick(View view) {
         toggleItem(view);
         return true;
     }
 
-    private void toggleItem(View view) {
-        adapter.toggleItemChecked(recyclerView.getChildAdapterPosition(view));
-
-        if (adapter.getCheckedItemCount() == 0) {
-            if (actionMode != null) {
-                actionMode.finish();
-            }
-            actionModeEnabled = false;
-            return;
-        }
-
-        if (!actionModeEnabled) {
-            actionMode = startSupportActionMode(this);
-            actionModeEnabled = true;
-        }
-        updateButtons();
-    }
-
+    /**
+     * Deletes the messages with the specified database IDs.
+     *
+     * @param databaseIds The database IDs of the messages to delete.
+     */
     public void deleteMessages(final Long[] databaseIds) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
-        builder.setTitle("Delete this conversation?");
-        builder.setMessage("This action cannot be undone.");
-        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+        builder.setTitle(getString(R.string.conversations_delete_confirm_title));
+        builder.setMessage(getString(R.string.conversations_delete_confirm_message));
+        builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 for (long databaseId : databaseIds) {
                     Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
                     if (message.getVoipId() == null) {
+                        // Simply delete messages with no VoIP.ms ID from the database; no request to the VoIP.ms API
+                        // will be necessary
                         database.removeMessage(databaseId);
                     }
                     else {
+                        // Otherwise, keep the message in the database but set a deleted flag, so the message's VoIP.ms
+                        // ID can be accessed later if local deletions are propagated to the VoIP.ms servers
                         message.setDeleted(true);
                         database.insertMessage(message);
                     }
@@ -366,25 +415,33 @@ public class ConversationsActivity
                 }
             }
         });
-        builder.setNegativeButton("Cancel", null);
+        builder.setNegativeButton(getString(R.string.cancel), null);
         builder.show();
     }
 
-    public void preUpdate() {
+    /**
+     * Initiates a partial update of the message database. This update only retrieves messages dated after the most
+     * recent message.
+     */
+    public void preRecentUpdate() {
         adapter.refresh();
-
-        database.update(true, false, false, conversationsActivity);
-        Gcm.getInstance(getApplicationContext()).registerForGcm(conversationsActivity, false, false);
-    }
-
-    public void preForcedUpdate() {
-        adapter.refresh();
-
-        database.update(false, true, false, conversationsActivity);
-        Gcm.getInstance(getApplicationContext()).registerForGcm(conversationsActivity, false, false);
+        gcm.registerForGcm(conversationsActivity, false, false);
+        database.update(true, false, conversationsActivity);
     }
 
     /**
+     * Initiates a full update of the message database. This update follows all synchronization rules set in the
+     * application's settings.
+     */
+    public void preFullUpdate() {
+        adapter.refresh();
+        gcm.registerForGcm(conversationsActivity, false, false);
+        database.update(false, true, conversationsActivity);
+    }
+
+    /**
+     * Updates this activity's user interface after a database update.
+     * <p/>
      * Called by the Api class after updating the SMS database if this activity made the update request or, if the
      * update request was initiated by the GCM service, if this activity is currently visible to the user.
      */

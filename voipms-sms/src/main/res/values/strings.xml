@@ -103,8 +103,9 @@
 
 
 
-
-
+    <!-- ConversationsActivity -->
+    <string name="conversations_delete_confirm_title">Delete this conversation?</string>
+    <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
 
     <!-- ConversationActivity -->
     <string name="conversation_send_error_network">Failed to send message. No network connection is available. (300)</string>

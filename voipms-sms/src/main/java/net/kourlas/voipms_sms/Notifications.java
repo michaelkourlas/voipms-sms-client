@@ -66,7 +66,7 @@ public class Notifications {
         return notificationIds;
     }
 
-    public void showNotification(List<String> contacts) {
+    public void showNotifications(List<String> contacts) {
         if (!(ActivityMonitor.getInstance().getCurrentActivity() instanceof ConversationsActivity)) {
             Conversation[] conversations = Database.getInstance(applicationContext).getConversations(
                     preferences.getDid());
