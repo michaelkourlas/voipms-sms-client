@@ -41,10 +41,19 @@ import net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter;
 import static net.kourlas.voipms_sms.adapters.NewConversationListViewAdapter.ContactItem;
 
 public class NewConversationActivity extends AppCompatActivity {
+    private String messageText;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_conversation);
+
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null && type.equals("text/plain")) {
+            this.messageText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.toolbar_elevation));
@@ -104,6 +113,10 @@ public class NewConversationActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(newConversationActivity, ConversationActivity.class);
                 intent.putExtra("contact", phoneNumber);
+                if (messageText != null) {
+                    intent.putExtra("messageText", messageText);
+                }
+                intent.putExtra("focus", true);
                 startActivity(intent);
             }
         });

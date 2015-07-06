@@ -121,7 +121,7 @@ public class ConversationActivity
         database = Database.getInstance(getApplicationContext());
         preferences = Preferences.getInstance(getApplicationContext());
 
-        contact = getIntent().getExtras().getString("contact");
+        contact = getIntent().getStringExtra("contact");
         // Remove the leading one from a North American phone number (e.g. +1 (123) 555-4567)
         if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
             contact = contact.substring(1);
@@ -196,6 +196,14 @@ public class ConversationActivity
                 }
             }
         });
+        String intentMessageText = getIntent().getStringExtra("messageText");
+        if (intentMessageText != null) {
+            messageText.setText(intentMessageText);
+        }
+        boolean intentFocus = getIntent().getBooleanExtra("focus", false);
+        if (intentFocus) {
+            messageText.requestFocus();
+        }
 
         RelativeLayout messageSection = (RelativeLayout) findViewById(R.id.message_section);
         ViewCompat.setElevation(messageSection, 8);
