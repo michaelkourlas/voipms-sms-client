@@ -83,17 +83,31 @@
             android:label="@string/credits_name"
             android:parentActivityName=".activities.ConversationsActivity" />
 
+        <receiver android:name=".receivers.MarkAsReadReceiver" />
         <receiver
-            android:name=".receivers.GcmReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
                 <category android:name="net.kourlas.voipms_sms.gcm" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".receivers.MarkAsReadReceiver" />
-
-        <service android:name=".gcm.GcmService" />
+        <service
+            android:name=".gcm.GcmService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".gcm.GcmIdService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID"/>
+            </intent-filter>
+        </service>
     </application>
 </manifest>

@@ -176,11 +176,12 @@
     <string name="preferences_reset_summary">Delete all messages stored locally (to prepare for later message importation or retrieval)</string>
     <!-- Uncategorized -->
     <string name="preferences_dids_key" translatable="false">dids</string>
-    <string name="preferences_registration_id_key" translatable="false">registration_id</string>
-    <string name="preferences_registration_id_version_key" translatable="false">registration_id_ver</string>
+    <string name="preferences_gcm_instance_id_key" translatable="false">instance_id</string>
+    <string name="preferences_gcm_token_key" translatable="false">registration_id</string>
 
     <!-- Uncategorized -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
+    <string name="gcm_sender_id">626231576786</string>
 </resources>

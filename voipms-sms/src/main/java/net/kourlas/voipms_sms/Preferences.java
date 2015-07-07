@@ -95,24 +95,23 @@ public class Preferences {
                 R.string.preferences_notifications_enable_key), false);
     }
 
-    public String getRegistrationId() {
-        return sharedPreferences.getString(applicationContext.getString(R.string.preferences_registration_id_key), "");
+    public String getGcmInstanceId() {
+        return sharedPreferences.getString(applicationContext.getString(R.string.preferences_gcm_instance_id_key), "");
     }
 
-    public void setRegistrationId(String registrationId) {
+    public void setGcmInstanceId(String instanceId) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(applicationContext.getString(R.string.preferences_registration_id_key), registrationId);
+        editor.putString(applicationContext.getString(R.string.preferences_gcm_instance_id_key), instanceId);
         editor.apply();
     }
 
-    public int getRegistrationIdVersion() {
-        return sharedPreferences.getInt(applicationContext.getString(R.string.preferences_registration_id_version_key),
-                Integer.MIN_VALUE);
+    public String getGcmToken() {
+        return sharedPreferences.getString(applicationContext.getString(R.string.preferences_gcm_token_key), "");
     }
 
-    public void setRegistrationIdVersion(int registrationId) {
+    public void setGcmToken(String gcmToken) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(applicationContext.getString(R.string.preferences_registration_id_version_key), registrationId);
+        editor.putString(applicationContext.getString(R.string.preferences_gcm_token_key), gcmToken);
         editor.apply();
     }
 

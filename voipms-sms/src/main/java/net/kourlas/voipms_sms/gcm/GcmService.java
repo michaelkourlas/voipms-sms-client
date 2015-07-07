@@ -17,30 +17,26 @@
 
 package net.kourlas.voipms_sms.gcm;
 
-import android.app.IntentService;
-import android.content.Intent;
 import android.os.Bundle;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.gcm.GcmListenerService;
 import net.kourlas.voipms_sms.Database;
-import net.kourlas.voipms_sms.receivers.GcmReceiver;
+import net.kourlas.voipms_sms.Preferences;
 
-public class GcmService extends IntentService {
-    public GcmService() {
-        super("GcmService");
-    }
-
+/**
+ * Service that processes GCM messages by showing notifications for new SMS messages.
+ */
+public class GcmService extends GcmListenerService {
+    /**
+     * Called when a GCM message is received. If notifications are enabled, this method updates the message database
+     * and shows notifications for any new messages.
+     *
+     * @param from GCM message sender.
+     * @param data GCM message data.
+     */
     @Override
-    protected void onHandleIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        String messageType = gcm.getMessageType(intent);
-        if (!extras.isEmpty()) {
-            if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // It is not necessary to process the GCM message itself, as the application server only supports
-                // "send-to-sync" messages; simply update the SMS database in the background.
-                Database.getInstance(getApplicationContext()).update(true, false, null);
-            }
+    public void onMessageReceived(String from, Bundle data) {
+        if (Preferences.getInstance(getApplicationContext()).getNotificationsEnabled()) {
+            Database.getInstance(getApplicationContext()).update(true, false, null);
         }
-        GcmReceiver.completeWakefulIntent(intent);
     }
 }
