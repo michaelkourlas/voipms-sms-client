@@ -166,10 +166,10 @@
     <string name="preferences_notifications_vibrate_key" translatable="false">sms_notification_vibrate</string>
     <string name="preferences_notifications_vibrate_title">Vibrate</string>
     <!-- Import and Export -->
-    <string name="preferences_import_title">Import</string>
-    <string name="preferences_import_summary">Import message database</string>
+    <string name="preferences_import_title">Import message database</string>
+    <string name="preferences_import_summary">Import message database from a JSON file</string>
     <string name="preferences_export_title">Export</string>
-    <string name="preferences_export_summary">Export message database</string>
+    <string name="preferences_export_summary">Export message database to a JSON file</string>
     <!-- Reset -->
     <string name="preferences_reset_category_name">Reset</string>
     <string name="preferences_reset_title">Delete message database</string>
