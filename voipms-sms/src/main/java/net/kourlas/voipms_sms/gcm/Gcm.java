@@ -19,8 +19,6 @@ package net.kourlas.voipms_sms.gcm;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -30,23 +28,31 @@ import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 
-import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * Handles registration for Google Cloud Messaging, which is necessary for push notifications.
+ */
 public class Gcm {
     private static Gcm instance = null;
     private final Context applicationContext;
     private final Preferences preferences;
 
-    private Gcm(Context context) {
-        this.applicationContext = context.getApplicationContext();
+    /**
+     * Initializes a new instance of the GCM class.
+     * @param applicationContext The application context.
+     */
+    private Gcm(Context applicationContext) {
+        this.applicationContext = applicationContext;
         this.preferences = Preferences.getInstance(applicationContext);
     }
 
+    /**
+     * Gets the sole instance of the GCM class. Initializes the instance if it does not already exist.
+     * @param applicationContext The application context.
+     * @return The sole instance of the GCM class.
+     */
     public static Gcm getInstance(Context applicationContext) {
         if (instance == null) {
             instance = new Gcm(applicationContext);
@@ -54,6 +60,13 @@ public class Gcm {
         return instance;
     }
 
+    /**
+     * Registers for Google Cloud Messaging. Sends the registration token to the application servers.
+     * @param activity The activity that initiated the registration.
+     * @param showFeedback If true, shows a dialog at the end of the registration process indicating the success or
+     *                     failure of the process.
+     * @param force If true, retrieves a new registration token even if one is already stored.
+     */
     public void registerForGcm(final Activity activity, final boolean showFeedback, boolean force) {
         if (!preferences.getNotificationsEnabled()) {
             return;
@@ -112,11 +125,17 @@ public class Gcm {
             }.execute();
         }
         else if (showFeedback) {
-                Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_success));
+            Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_success));
         }
-
     }
 
+    /**
+     * Returns true if Google Play Services is set up properly on the device.
+     * @param activity The activity that initiated the check.
+     * @param showFeedback If true, shows a dialog at the end of the check indicating the success or failure of the
+     *                     process.
+     * @return True if Google Play Services is set up properly on the device.
+     */
     private boolean checkPlayServices(Activity activity, boolean showFeedback) {
         int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(applicationContext);
         if (resultCode != ConnectionResult.SUCCESS) {
@@ -125,7 +144,7 @@ public class Gcm {
                     GoogleApiAvailability.getInstance().getErrorDialog(activity, resultCode, 0).show();
                 }
                 else {
-                    Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_support));
+                    Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_play_services));
                 }
             }
             return false;
