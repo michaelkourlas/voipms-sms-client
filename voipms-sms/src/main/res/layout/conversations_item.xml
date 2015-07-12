@@ -39,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/primary"
-            android:contentDescription="@string/conversations_list_view_item_checked"
+            android:contentDescription="@string/conversations_checked_content_description"
             android:scaleType="center"
             android:src="@drawable/ic_check_white_36dp" />
     </ViewSwitcher>

@@ -106,7 +106,7 @@ public class DidPreference extends Preference {
 
         if (success) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle(getContext().getString(R.string.conversations_select_did_dialog_title));
+            builder.setTitle(getContext().getString(R.string.preferences_account_did_dialog_title));
             builder.setItems(dids, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
