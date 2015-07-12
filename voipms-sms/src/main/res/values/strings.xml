@@ -153,7 +153,7 @@
     <!-- Import and Export -->
     <string name="preferences_import_title">Import message database</string>
     <string name="preferences_import_summary">Import message database from a JSON file</string>
-    <string name="preferences_export_title">Export</string>
+    <string name="preferences_export_title">Export message database</string>
     <string name="preferences_export_summary">Export message database to a JSON file</string>
     <!-- Reset -->
     <string name="preferences_reset_category_name">Reset</string>
