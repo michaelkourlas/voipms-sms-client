@@ -36,14 +36,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
-import net.kourlas.voipms_sms.ActivityMonitor;
-import net.kourlas.voipms_sms.Database;
-import net.kourlas.voipms_sms.Preferences;
-import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.adapters.ConversationsRecyclerViewAdapter;
 import net.kourlas.voipms_sms.gcm.Gcm;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,8 +51,9 @@ public class ConversationsActivity
         implements ActionMode.Callback, View.OnClickListener, View.OnLongClickListener {
     private final ConversationsActivity conversationsActivity = this;
 
-    private Database database;
     private Gcm gcm;
+    private Billing billing;
+    private Database database;
     private Preferences preferences;
 
     private RecyclerView recyclerView;
@@ -70,8 +69,9 @@ public class ConversationsActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.conversations);
 
-        database = Database.getInstance(getApplicationContext());
         gcm = Gcm.getInstance(getApplicationContext());
+        billing = Billing.getInstance(getApplicationContext());
+        database = Database.getInstance(getApplicationContext());
         preferences = Preferences.getInstance(getApplicationContext());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -154,6 +154,21 @@ public class ConversationsActivity
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1001 && resultCode == RESULT_OK) {
+            try {
+                String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
+                JSONObject json = new JSONObject(purchaseData);
+                String token = json.getString("purchaseToken");
+                billing.postDonation(token, this);
+            }
+            catch (Exception ignored) {
+                // Do nothing.
+            }
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         if (actionModeEnabled) {
             actionMode.finish();
@@ -209,6 +224,8 @@ public class ConversationsActivity
                 Intent creditsIntent = new Intent(this, CreditsActivity.class);
                 startActivity(creditsIntent);
                 return true;
+            case R.id.donate_button:
+                billing.preDonation(this);
             default:
                 return super.onOptionsItemSelected(item);
         }

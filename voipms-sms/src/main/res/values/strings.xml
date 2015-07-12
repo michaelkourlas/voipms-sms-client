@@ -51,14 +51,14 @@
 
     <!-- ConversationsActivity -->
     <string name="conversations_action_search">Search</string>
-    <string name="conversations_action_select_dids">Select DID</string>
     <string name="conversations_action_settings">Settings</string>
     <string name="conversations_action_help">Help</string>
     <string name="conversations_action_credits">Credits</string>
+    <string name="conversations_action_donate">Donate</string>
     <string name="conversations_action_delete">Delete</string>
-    <string name="conversations_action_add">Add</string>
     <string name="conversations_action_mark_read">Mark read</string>
     <string name="conversations_action_mark_unread">Mark unread</string>
+    <string name="conversations_action_add">Add</string>
     <string name="conversations_delete_confirm_title">Delete this conversation?</string>
     <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
     <string name="conversations_no_messages">You have no messages.</string>
@@ -80,6 +80,10 @@
     <!-- CreditsActivity -->
     <string name="credits_name">Credits</string>
     <string name="credits_url" translatable="false">file:///android_asset/credits.html</string>
+
+    <!-- Billing -->
+    <string name="billing_pid_donation" translatable="false">donation</string>
+    <string name="billing_failure">Failed to open the in-app purchase dialog. Please try again later. (500)</string>
 
     <!-- GCM -->
     <string name="gcm_success">Google Cloud Messaging registration succeeded. (400)</string>
