@@ -103,7 +103,7 @@ public class ConversationsActivity
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!preferences.getEmail().equals("") && preferences.getPassword().equals("") &&
+                if (!preferences.getEmail().equals("") && !preferences.getPassword().equals("") &&
                         !preferences.getDid().equals("")) {
                     Intent intent = new Intent(conversationsActivity, NewConversationActivity.class);
                     startActivity(intent);
