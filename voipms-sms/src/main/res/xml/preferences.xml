@@ -33,12 +33,12 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Synchronization">
-        <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/preferences_sync_interval_entries"
-            android:entryValues="@array/preferences_sync_interval_values"
-            android:key="@string/preferences_sync_interval_key"
-            android:title="@string/preferences_sync_interval_title" />
+        <!--<ListPreference-->
+            <!--android:defaultValue="0"-->
+            <!--android:entries="@array/preferences_sync_interval_entries"-->
+            <!--android:entryValues="@array/preferences_sync_interval_values"-->
+            <!--android:key="@string/preferences_sync_interval_key"-->
+            <!--android:title="@string/preferences_sync_interval_title" />-->
         <net.kourlas.voipms_sms.preferences.StartDatePreference
             android:key="@string/preferences_sync_start_date_key"
             android:numeric="integer"
@@ -84,14 +84,14 @@
             android:title="@string/preferences_notifications_vibrate_title" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Import and Export">
-        <Preference
-            android:summary="@string/preferences_import_summary"
-            android:title="@string/preferences_import_title" />
-        <Preference
-            android:summary="@string/preferences_export_summary"
-            android:title="@string/preferences_export_title" />
-    </PreferenceCategory>
+    <!--<PreferenceCategory android:title="Import and Export">-->
+        <!--<Preference-->
+            <!--android:summary="@string/preferences_import_summary"-->
+            <!--android:title="@string/preferences_import_title" />-->
+        <!--<Preference-->
+            <!--android:summary="@string/preferences_export_summary"-->
+            <!--android:title="@string/preferences_export_title" />-->
+    <!--</PreferenceCategory>-->
 
     <PreferenceCategory android:title="@string/preferences_reset_category_name">
         <net.kourlas.voipms_sms.preferences.ResetPreference
