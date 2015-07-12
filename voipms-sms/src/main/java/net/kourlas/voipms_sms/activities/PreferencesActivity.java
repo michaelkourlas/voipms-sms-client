@@ -137,16 +137,8 @@ public class PreferencesActivity extends AppCompatActivity {
                 // Update summary text for changed preference
                 updateSummaryTextForPreference(findPreference(key));
 
-                // Clear the SMS cache when messages are invalidated by account or synchronization changes
-                if (key.equals(applicationContext.getString(R.string.preferences_account_email_key)) ||
-                        key.equals(applicationContext.getString(R.string.preferences_account_password_key))
-                    // key.equals(applicationContext.getString(R.string.preferences_sms_days_to_sync_key)) ||
-                    // TODO: FIX
-                        ) {
-                    database.deleteAllMessages();
-                }
                 // Show informational message and attempt to register for GCM if notificatons are enabled
-                else if (key.equals(applicationContext.getString(R.string.preferences_notifications_enable_key)) && preferences.getNotificationsEnabled()) {
+                if (key.equals(applicationContext.getString(R.string.preferences_notifications_enable_key)) && preferences.getNotificationsEnabled()) {
                     // Notifications are not yet enabled, so the check above is the inverse of what one might expect
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(getResources().getString(R.string.preferences_notifications_enable_dialog_text));
