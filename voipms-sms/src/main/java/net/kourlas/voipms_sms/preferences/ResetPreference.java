@@ -42,8 +42,8 @@ public class ResetPreference extends Preference {
     @Override
     protected void onClick() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Delete local copy of SMS database?");
-        builder.setMessage("This action cannot be undone.");
+        builder.setTitle(getContext().getString(R.string.preferences_delete_confirm_title));
+        builder.setMessage(getContext().getString(R.string.preferences_delete_confirm_message));
         builder.setPositiveButton(getContext().getApplicationContext().getString(R.string.delete),
                 new DialogInterface.OnClickListener() {
                     @Override

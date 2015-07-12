@@ -112,11 +112,11 @@ public class NewConversationActivity extends AppCompatActivity {
                 String phoneNumber = contactItem.getPhoneNumber().replaceAll("[^0-9]", "");
 
                 Intent intent = new Intent(newConversationActivity, ConversationActivity.class);
-                intent.putExtra("contact", phoneNumber);
+                intent.putExtra(getString(R.string.conversation_extra_contact), phoneNumber);
                 if (messageText != null) {
-                    intent.putExtra("messageText", messageText);
+                    intent.putExtra(getString(R.string.conversation_extra_message_text), messageText);
                 }
-                intent.putExtra("focus", true);
+                intent.putExtra(getString(R.string.conversation_extra_focus), true);
                 startActivity(intent);
             }
         });

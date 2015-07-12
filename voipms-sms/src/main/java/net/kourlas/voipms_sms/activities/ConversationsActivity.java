@@ -103,19 +103,8 @@ public class ConversationsActivity
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (preferences.getEmail().equals("")) {
-                    Toast.makeText(getApplicationContext(), getResources().getString(
-                            R.string.api_new_conversation_email), Toast.LENGTH_SHORT).show();
-                }
-                else if (preferences.getPassword().equals("")) {
-                    Toast.makeText(getApplicationContext(), getResources().getString(
-                            R.string.api_new_conversation_password), Toast.LENGTH_SHORT).show();
-                }
-                else if (preferences.getDid().equals("")) {
-                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.api_new_conversation_did),
-                            Toast.LENGTH_SHORT).show();
-                }
-                else {
+                if (!preferences.getEmail().equals("") && preferences.getPassword().equals("") &&
+                        !preferences.getDid().equals("")) {
                     Intent intent = new Intent(conversationsActivity, NewConversationActivity.class);
                     startActivity(intent);
                 }
@@ -367,7 +356,7 @@ public class ConversationsActivity
             String contact = conversation.getContact();
 
             Intent intent = new Intent(this, ConversationActivity.class);
-            intent.putExtra("contact", contact);
+            intent.putExtra(getString(R.string.conversation_extra_contact), contact);
             startActivity(intent);
         }
     }

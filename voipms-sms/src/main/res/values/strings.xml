@@ -16,21 +16,7 @@
   -->
 
 <resources>
-    <string name="app_name">VoIP.ms SMS</string>
-
-    <string name="conversations_action_search">Search</string>
-    <string name="conversations_action_select_dids">Select DID</string>
-    <string name="conversations_action_settings">Settings</string>
-    <string name="conversations_action_help">Help</string>
-    <string name="conversations_action_credits">Credits</string>
-    <string name="conversations_action_delete">Delete</string>
-    <string name="conversations_action_add">Add</string>
-    <string name="conversations_action_mark_read">Mark as read</string>
-    <string name="conversations_action_mark_unread">Mark as unread</string>
-    <string name="conversations_list_view_item_checked">Checked</string>
-    <string name="conversations_select_did_dialog_title">Select DID</string>
-    <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and an SMS-enabled DID in Settings. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings.\n\nYou may also wish to enable push notifications. For more information, see Help.</string>
-
+    <!-- ConversationActivity -->
     <string name="conversation_action_call">Make a call</string>
     <string name="conversation_action_resend">Resend</string>
     <string name="conversation_action_search">Search</string>
@@ -39,85 +25,78 @@
     <string name="conversation_action_copy">Copy text</string>
     <string name="conversation_action_share">Share</string>
     <string name="conversation_action_info">View details</string>
+    <string name="conversation_delete_confirm_title">Delete messages?</string>
+    <string name="conversation_delete_confirm_message">This action cannot be undone.</string>
+    <string name="conversation_info_title">Message details</string>
+    <string name="conversation_info_id">ID:</string>
+    <string name="conversation_info_to">To:</string>
+    <string name="conversation_info_from">From:</string>
+    <string name="conversation_info_date">Date:</string>
+    <string name="conversation_no_messages">There are no messages in this conversation.</string>
+    <string name="conversation_no_results">No results found for</string>
     <string name="conversation_text_hint">Send message</string>
+    <string name="conversation_message_sending">Sending…</string>
+    <string name="conversation_message_not_sent">Not sent. Touch to try again.</string>
+    <string name="conversation_message_not_sent_selected">Resend or delete</string>
+    <string name="conversation_send_error_network">Failed to send message. No network connection is available. (300)</string>
+    <string name="conversation_send_error_api_request">Failed to send message. A request to the VoIP.ms API failed. (301)</string>
+    <string name="conversation_send_error_api_parse">Failed to send message. The VoIP.ms API response could not be parsed. (302)</string>
+    <string name="conversation_send_error_api_error">Failed to send message. The VoIP.ms API returned an error: {error}. (303)</string>
+    <string name="conversation_extra_contact" translatable="false">contact</string>
+    <string name="conversation_extra_message_text" translatable="false">messageText</string>
+    <string name="conversation_extra_focus" translatable="false">focus</string>
 
+    <!-- ConversationQuickReplyActivity -->
+    <string name="conversation_quick_reply_reply_to">Reply to</string>
+
+    <!-- ConversationsActivity -->
+    <string name="conversations_action_search">Search</string>
+    <string name="conversations_action_select_dids">Select DID</string>
+    <string name="conversations_action_settings">Settings</string>
+    <string name="conversations_action_help">Help</string>
+    <string name="conversations_action_credits">Credits</string>
+    <string name="conversations_action_delete">Delete</string>
+    <string name="conversations_action_add">Add</string>
+    <string name="conversations_action_mark_read">Mark read</string>
+    <string name="conversations_action_mark_unread">Mark unread</string>
+    <string name="conversations_delete_confirm_title">Delete this conversation?</string>
+    <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
+    <string name="conversations_no_messages">You have no messages.</string>
+    <string name="conversations_no_results">No results found for</string>
+    <string name="conversations_message_you">You:</string>
+    <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and an SMS-enabled DID in Settings. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings.\n\nYou may also wish to enable push notifications. For more information, see Help.</string>
+    <string name="conversations_checked_content_description">Checked</string>
+
+    <!-- NewConversationActivity -->
     <string name="new_conversation_action_keyboard">Show keyboard</string>
     <string name="new_conversation_action_dialpad">Show dialpad</string>
     <string name="new_conversation_text_hint">To</string>
     <string name="new_conversation_manual_entry">Manual entry</string>
 
-
+    <!-- HelpActivity -->
     <string name="help_name">Help</string>
+    <string name="help_url" translatable="false">file:///android_asset/help.html</string>
 
+    <!-- CreditsActivity -->
     <string name="credits_name">Credits</string>
+    <string name="credits_url" translatable="false">file:///android_asset/credits.html</string>
 
-
-    <string name="api_update_smses_email">Could not update the SMS database because no VoIP.ms portal email has been set. (update_smses_email)</string>
-    <string name="api_update_smses_password">Could not update the SMS database because no VoIP.ms API password has been set. (update_smses_password)</string>
-    <string name="api_update_smses_did">Could not update the SMS database because no DID has been selected. (update_smses_did)</string>
-    <string name="api_update_smses_other">Could not update the SMS database because of an unknown error. (update_smses_other)</string>
-    <string name="api_update_smses_network">Could not update the SMS database because no network connection is available. (update_smses_network)</string>
-    <string name="api_update_smses_request">Could not update the SMS database because the application failed to fetch information from the VoIP.ms API. (update_sms_request)</string>
-    <string name="api_update_smses_parse">Could not update the SMS database because the VoIP.ms API response could not be parsed. (update_smses_parse)</string>
-    <string name="api_update_smses_api">Could not update the SMS database because the VoIP.ms API returned an error. (update_smses_api_</string>
-
-    <string name="api_delete_sms_email">Could not delete the SMS because no VoIP.ms portal email has been set. (delete_sms_email)</string>
-    <string name="api_delete_sms_password">Could not delete the SMS because no VoIP.ms API password has been set. (delete_sms_password)</string>
-    <string name="api_delete_sms_other">Could not delete the SMS because of an unknown error. (delete_sms_other)</string>
-    <string name="api_delete_sms_network">Could not delete the SMS because no network connection is available. (delete_sms_network)</string>
-    <string name="api_delete_sms_request">Could not delete the SMS because the application failed to fetch information from the VoIP.ms API. (delete_sms_request)</string>
-    <string name="api_delete_sms_parse">Could not delete the SMS because the VoIP.ms API response could not be parsed. (delete_sms_parse)</string>
-    <string name="api_delete_sms_api">Could not delete the SMS because the VoIP.ms API returned an error. (delete_sms_api_</string>
-
-    <string name="api_send_sms_email">Could not send the SMS because no VoIP.ms portal email has been set. (send_sms_email)</string>
-    <string name="api_send_sms_password">Could not send the SMS because no VoIP.ms API password has been set. (send_sms_password)</string>
-    <string name="api_send_sms_did">Could not send the SMS because no DID has been selected. (send_sms_did)</string>
-    <string name="api_send_sms_other">Could not send the SMS because of an unknown error. (send_sms_other)</string>
-    <string name="api_send_sms_network">Could not send the SMS because no network connection is available. (send_sms_network)</string>
-    <string name="api_send_sms_request">Could not send the SMS because the application failed to fetch information from the VoIP.ms API. (send_sms_request)</string>
-    <string name="api_send_sms_parse">Could not send the SMS because the VoIP.ms API response could not be parsed. (send_sms_parse)</string>
-    <string name="api_send_sms_api">Could not send the SMS because the VoIP.ms API returned an error. (send_sms_api_</string>
-
-    <string name="api_new_conversation_email">Could not create new conversation because no VoIP.ms portal email has been set. (new_conversation_email)</string>
-    <string name="api_new_conversation_password">Could not create new conversation because no VoIP.ms API password has been set. (new_conversation_password)</string>
-    <string name="api_new_conversation_did">Could not create new conversation because no DID has been selected. (new_conversation_did)</string>
-
-    <string name="gcm_success">Google Cloud Messaging registration succeeded.</string>
-    <string name="gcm_support">This device does not support Google Play Services.</string>
-    <string name="gcm_did">Google Cloud Messaging registration requires that a DID be set.</string>
-    <string name="gcm_fail">Google Cloud Messaging registration failed. Please try again later.</string>
-
-    <string name="conversations_no_messages">You have no messages.</string>
-    <string name="conversations_no_results">No results found for</string>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!-- ConversationsActivity -->
-    <string name="conversations_delete_confirm_title">Delete this conversation?</string>
-    <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
-
-    <!-- ConversationActivity -->
-    <string name="conversation_send_error_network">Failed to send message. No network connection is available. (300)</string>
-    <string name="conversation_send_error_api_request">Failed to send message. A request to the VoIP.ms API failed. (301)</string>
-    <string name="conversation_send_error_api_parse">Failed to send message. The VoIP.ms API response could not be parsed. (302)</string>
-    <string name="conversation_send_error_api_error">Failed to send message. The VoIP.ms API returned an error: {error}. (303)</string>
+    <!-- GCM -->
+    <string name="gcm_success">Google Cloud Messaging registration succeeded. (400)</string>
+    <string name="gcm_play_services">This device does not support Google Play Services. (401)</string>
+    <string name="gcm_did">Google Cloud Messaging registration requires that a DID be set. (402)</string>
+    <string name="gcm_fail">Google Cloud Messaging registration failed. Please try again later. (403)</string>
+    <string name="gcm_sender_id" translatable="false">626231576786</string>
 
     <!-- Database -->
     <string name="database_sync_error_network">Database synchronization failed. No network connection is available. (100)</string>
     <string name="database_sync_error_api_request">Database synchronization failed. A request to the VoIP.ms API failed. (101)</string>
     <string name="database_sync_error_api_parse">Database synchronization failed. The VoIP.ms API response could not be parsed. (102)</string>
     <string name="database_sync_error_api_error">Database synchronization failed. The VoIP.ms API returned an error: {error}. (103)</string>
+
+    <!-- Notifications -->
+    <string name="notifications_button_reply">Reply</string>
+    <string name="notifications_button_mark_read">Mark Read</string>
 
     <!-- Preferences -->
     <string name="preferences_name">Settings</string>
@@ -127,9 +106,11 @@
     <string name="preferences_account_email_title">Email address</string>
     <string name="preferences_account_password_key" translatable="false">api_password</string>
     <string name="preferences_account_password_title">API password</string>
+    <string name="preferences_account_password_placeholder" translatable="false">********</string>
     <string name="preferences_account_did_key" translatable="false">did</string>
     <string name="preferences_account_did_title">DID (phone number)</string>
     <string name="preferences_account_did_status">Retrieving DIDs…</string>
+    <string name="preferences_account_did_dialog_title">Select DID</string>
     <string name="preferences_account_did_error_network">Failed to retrieve DIDs. No network connection is available. (200)</string>
     <string name="preferences_account_did_error_api_request">Failed to retrieve DIDs. A request to the VoIP.ms API failed. (201)</string>
     <string name="preferences_account_did_error_api_parse">Failed to retrieve DIDs. The VoIP.ms API response could not be parsed. (202)</string>
@@ -174,14 +155,22 @@
     <string name="preferences_reset_category_name">Reset</string>
     <string name="preferences_reset_title">Delete message database</string>
     <string name="preferences_reset_summary">Delete all messages stored locally (to prepare for later message importation or retrieval)</string>
+    <string name="preferences_delete_confirm_title">Delete local copy of SMS database?</string>
+    <string name="preferences_delete_confirm_message">This action cannot be undone.</string>
     <!-- Uncategorized -->
     <string name="preferences_dids_key" translatable="false">dids</string>
     <string name="preferences_gcm_instance_id_key" translatable="false">instance_id</string>
     <string name="preferences_gcm_token_key" translatable="false">registration_id</string>
 
+    <!-- Utils -->
+    <string name="utils_date_just_now">Just now</string>
+    <string name="utils_date_seconds_ago">seconds ago</string>
+    <string name="utils_date_one_minute_ago">1 minute ago</string>
+    <string name="utils_date_minutes_ago">minutes ago</string>
+
     <!-- Uncategorized -->
+    <string name="app_name">VoIP.ms SMS</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
-    <string name="gcm_sender_id">626231576786</string>
 </resources>

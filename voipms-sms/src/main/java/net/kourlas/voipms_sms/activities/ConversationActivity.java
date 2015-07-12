@@ -121,7 +121,7 @@ public class ConversationActivity
         database = Database.getInstance(getApplicationContext());
         preferences = Preferences.getInstance(getApplicationContext());
 
-        contact = getIntent().getStringExtra("contact");
+        contact = getIntent().getStringExtra(getString(R.string.conversation_extra_contact));
         // Remove the leading one from a North American phone number (e.g. +1 (123) 555-4567)
         if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
             contact = contact.substring(1);
@@ -196,11 +196,11 @@ public class ConversationActivity
                 }
             }
         });
-        String intentMessageText = getIntent().getStringExtra("messageText");
+        String intentMessageText = getIntent().getStringExtra(getString(R.string.conversation_extra_message_text));
         if (intentMessageText != null) {
             messageText.setText(intentMessageText);
         }
-        boolean intentFocus = getIntent().getBooleanExtra("focus", false);
+        boolean intentFocus = getIntent().getBooleanExtra(getString(R.string.conversation_extra_focus), false);
         if (intentFocus) {
             messageText.requestFocus();
         }
@@ -375,18 +375,20 @@ public class ConversationActivity
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 if (message.getType() == Message.Type.INCOMING) {
-                    builder.setMessage((message.getVoipId() == null ? "" : ("ID: " + message.getVoipId() + "\n")) +
-                            "To: " + Utils.getFormattedPhoneNumber(message.getDid()) +
-                            "\nFrom: " + Utils.getFormattedPhoneNumber(message.getContact()) +
-                            "\nDate: " + dateFormat.format(message.getDate()));
+                    builder.setMessage((message.getVoipId() == null ? "" : (getString(R.string.conversation_info_id) +
+                            " " + message.getVoipId() + "\n")) + getString(R.string.conversation_info_to) + " " +
+                            Utils.getFormattedPhoneNumber(message.getDid()) + "\n" +
+                            getString(R.string.conversation_info_from) + " " +
+                            Utils.getFormattedPhoneNumber(message.getContact()) + "\n" +
+                            getString(R.string.conversation_info_date) + " " + dateFormat.format(message.getDate()));
                 }
                 else {
-                    builder.setMessage((message.getVoipId() == null ? "" : ("ID: " + message.getVoipId() + "\n")) +
-                            "To: " + Utils.getFormattedPhoneNumber(message.getContact()) +
-                            "\nFrom: " + Utils.getFormattedPhoneNumber(message.getDid()) +
-                            "\nDate: " + dateFormat.format(message.getDate()));
+                    builder.setMessage((message.getVoipId() == null ? "" : (getString(R.string.conversation_info_id) +
+                            " " + message.getVoipId() + "\n")) + getString(R.string.conversation_info_to) + " " +
+                            Utils.getFormattedPhoneNumber(message.getContact()) + "\n" + "\n" +
+                            getString(R.string.conversation_info_date) + " " + dateFormat.format(message.getDate()));
                 }
-                builder.setTitle("Message details");
+                builder.setTitle(getString(R.string.conversation_info_title));
                 builder.show();
             }
 
@@ -530,8 +532,8 @@ public class ConversationActivity
 
     public void deleteMessages(final Long[] databaseIds) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
-        builder.setTitle("Delete messages?");
-        builder.setMessage("This action cannot be undone.");
+        builder.setTitle(getString(R.string.conversation_delete_confirm_title));
+        builder.setMessage(getString(R.string.conversation_delete_confirm_message));
         builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

@@ -122,7 +122,7 @@ public class ConversationsRecyclerViewAdapter
                 if (index != -1) {
                     int nonMessageOffset = index;
                     if (newestMessage.getType() == Message.Type.OUTGOING) {
-                        messageTextBuilder.insert(0, "You: ");
+                        messageTextBuilder.insert(0, applicationContext.getString(R.string.conversations_message_you) + " ");
                         nonMessageOffset += 5;
                     }
 
@@ -152,14 +152,14 @@ public class ConversationsRecyclerViewAdapter
 
             if (!found) {
                 if (newestMessage.getType() == Message.Type.OUTGOING) {
-                    messageTextBuilder.insert(0, "You: ");
+                    messageTextBuilder.insert(0, applicationContext.getString(R.string.conversations_message_you) + " ");
                 }
                 messageTextBuilder.append(newestMessage.getText());
             }
         }
         else {
             if (newestMessage.getType() == Message.Type.OUTGOING) {
-                messageTextBuilder.insert(0, "You: ");
+                messageTextBuilder.insert(0, applicationContext.getString(R.string.conversations_message_you) + " ");
             }
             messageTextBuilder.append(newestMessage.getText());
         }
@@ -175,7 +175,7 @@ public class ConversationsRecyclerViewAdapter
         }
 
         TextView dateTextView = conversationViewHolder.getDateTextView();
-        dateTextView.setText(Utils.getFormattedDate(newestMessage.getDate(), true));
+        dateTextView.setText(Utils.getFormattedDate(applicationContext, newestMessage.getDate(), true));
     }
 
     @Override

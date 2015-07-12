@@ -135,7 +135,8 @@ public class Notifications {
 
                 Intent intent = new Intent(applicationContext, ConversationActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("contact", conversation.getContact());
+                intent.putExtra(applicationContext.getString(R.string.conversation_extra_contact),
+                        conversation.getContact());
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(applicationContext);
                 stackBuilder.addParentStack(ConversationActivity.class);
                 stackBuilder.addNextIntent(intent);
@@ -150,19 +151,23 @@ public class Notifications {
                     //noinspection deprecation
                     replyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                 }
-                replyIntent.putExtra("contact", conversation.getContact());
+                replyIntent.putExtra(applicationContext.getString(R.string.conversation_extra_contact),
+                        conversation.getContact());
                 PendingIntent replyPendingIntent = PendingIntent.getActivity(applicationContext, 0, replyIntent,
                         PendingIntent.FLAG_CANCEL_CURRENT);
                 NotificationCompat.Action.Builder replyAction = new NotificationCompat.Action.Builder(
-                        R.drawable.ic_reply_white_24dp, "Reply", replyPendingIntent);
+                        R.drawable.ic_reply_white_24dp, applicationContext.getString(R.string.notifications_button_reply),
+                        replyPendingIntent);
                 notificationBuilder.addAction(replyAction.build());
 
                 Intent markAsReadIntent = new Intent(applicationContext, MarkAsReadReceiver.class);
-                markAsReadIntent.putExtra("contact", conversation.getContact());
+                markAsReadIntent.putExtra(applicationContext.getString(R.string.conversation_extra_contact),
+                        conversation.getContact());
                 PendingIntent markAsReadPendingIntent = PendingIntent.getBroadcast(applicationContext, 0,
                         markAsReadIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                 NotificationCompat.Action.Builder markAsReadAction = new NotificationCompat.Action.Builder(
-                        R.drawable.ic_drafts_white_24dp, "Mark Read", markAsReadPendingIntent);
+                        R.drawable.ic_drafts_white_24dp, applicationContext.getString(R.string.notifications_button_mark_read),
+                        markAsReadPendingIntent);
                 notificationBuilder.addAction(markAsReadAction.build());
 
                 int id;

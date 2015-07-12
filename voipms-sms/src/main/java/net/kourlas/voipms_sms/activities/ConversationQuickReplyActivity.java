@@ -56,7 +56,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         database = Database.getInstance(getApplicationContext());
         preferences = Preferences.getInstance(getApplicationContext());
 
-        contact = getIntent().getExtras().getString("contact");
+        contact = getIntent().getExtras().getString(getString(R.string.conversation_extra_contact));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -76,10 +76,11 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         TextView replyToText = (TextView) findViewById(R.id.reply_to_edit_text);
         String contactName = Utils.getContactName(getApplicationContext(), contact);
         if (contactName == null) {
-            replyToText.setText("Reply to " + Utils.getFormattedPhoneNumber(contact));
+            replyToText.setText(getString(R.string.conversation_quick_reply_reply_to) + " " +
+                    Utils.getFormattedPhoneNumber(contact));
         }
         else {
-            replyToText.setText("Reply to " + contactName);
+            replyToText.setText(getString(R.string.conversation_quick_reply_reply_to) + " " + contactName);
         }
 
         final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
@@ -152,7 +153,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
                 finish();
 
                 Intent intent = new Intent(activity, ConversationActivity.class);
-                intent.putExtra("contact", contact);
+                intent.putExtra(getString(R.string.conversation_extra_contact), contact);
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
                 stackBuilder.addParentStack(ConversationActivity.class);
                 stackBuilder.addNextIntent(intent);

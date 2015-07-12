@@ -42,7 +42,7 @@ public class HelpActivity extends AppCompatActivity {
         }
 
         WebView browser = (WebView) findViewById(R.id.web_view);
-        browser.loadUrl("file:///android_asset/help.html");
+        browser.loadUrl(getString(R.string.help_url));
     }
 
     @Override

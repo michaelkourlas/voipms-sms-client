@@ -42,7 +42,7 @@ public class CreditsActivity extends AppCompatActivity {
         }
 
         WebView browser = (WebView) findViewById(R.id.web_view);
-        browser.loadUrl("file:///android_asset/credits.html");
+        browser.loadUrl(getString(R.string.credits_url));
     }
 
     @Override

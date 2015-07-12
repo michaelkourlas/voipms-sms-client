@@ -175,7 +175,8 @@ public class PreferencesActivity extends AppCompatActivity {
                 EditTextPreference editTextPreference = (EditTextPreference) preference;
                 if (editTextPreference.getKey().equals(getString(R.string.preferences_account_password_key))) {
                     if (!editTextPreference.getText().equals("")) {
-                        editTextPreference.setSummary("********");
+                        editTextPreference.setSummary(applicationContext.getString(
+                                R.string.preferences_account_password_placeholder));
                     }
                     else {
                         editTextPreference.setSummary("");

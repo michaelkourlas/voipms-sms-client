@@ -153,10 +153,10 @@ public class ConversationRecyclerViewAdapter
             if (!message.isDeliveryInProgress()) {
                 SpannableStringBuilder dateTextBuilder = new SpannableStringBuilder();
                 if (isItemChecked(i)) {
-                    dateTextBuilder.append("Resend or delete");
+                    dateTextBuilder.append(applicationContext.getString(R.string.conversation_message_not_sent_selected));
                 }
                 else {
-                    dateTextBuilder.append("Not sent. Touch to try again.");
+                    dateTextBuilder.append(applicationContext.getString(R.string.conversation_message_not_sent));
                 }
                 dateTextBuilder.setSpan(new ForegroundColorSpan(
                                 isItemChecked(i) ? applicationContext.getResources().getColor(android.R.color.white) :
@@ -166,7 +166,7 @@ public class ConversationRecyclerViewAdapter
                 dateText.setVisibility(View.VISIBLE);
             }
             else {
-                dateText.setText("Sending...");
+                dateText.setText(applicationContext.getString(R.string.conversation_message_sending));
                 dateText.setVisibility(View.VISIBLE);
             }
         }
@@ -175,7 +175,7 @@ public class ConversationRecyclerViewAdapter
                         getItemViewType(i + 1) != ITEM_LEFT_SECONDARY) ||
                 ((viewType == ITEM_RIGHT_PRIMARY || viewType == ITEM_RIGHT_SECONDARY) &&
                         getItemViewType(i + 1) != ITEM_RIGHT_SECONDARY)) {
-            dateText.setText(Utils.getFormattedDate(message.getDate(), false));
+            dateText.setText(Utils.getFormattedDate(applicationContext, message.getDate(), false));
             dateText.setVisibility(View.VISIBLE);
         }
         else {
@@ -422,10 +422,11 @@ public class ConversationRecyclerViewAdapter
             TextView emptyTextView = (TextView) activity.findViewById(R.id.empty_text);
             if (messages.size() == 0) {
                 if (filterConstraint.equals("")) {
-                    emptyTextView.setText("There are no messages in this conversation.");
+                    emptyTextView.setText(applicationContext.getString(R.string.conversation_no_messages));
                 }
                 else {
-                    emptyTextView.setText("No results found for" + " '" + filterConstraint + "'");
+                    emptyTextView.setText(applicationContext.getString(R.string.conversation_no_results) + " '" +
+                            filterConstraint + "'");
                 }
             }
             else {

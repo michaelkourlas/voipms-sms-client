@@ -24,13 +24,14 @@ import android.content.Intent;
 import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.Notifications;
 import net.kourlas.voipms_sms.Preferences;
+import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.model.Message;
 
 public class MarkAsReadReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Preferences preferences = Preferences.getInstance(context.getApplicationContext());
-        String contact = intent.getExtras().getString("contact");
+        String contact = intent.getExtras().getString(context.getString(R.string.conversation_extra_contact));
 
         NotificationManager manager = (NotificationManager) context.getApplicationContext().getSystemService(
                 Context.NOTIFICATION_SERVICE);
@@ -40,7 +41,8 @@ public class MarkAsReadReceiver extends BroadcastReceiver {
             manager.cancel(notificationId);
         }
 
-        for (Message message : Database.getInstance(context.getApplicationContext()).getConversation(preferences.getDid(), contact).getMessages()) {
+        for (Message message : Database.getInstance(context.getApplicationContext()).getConversation(
+                preferences.getDid(), contact).getMessages()) {
             message.setUnread(false);
             Database.getInstance(context.getApplicationContext()).insertMessage(message);
         }

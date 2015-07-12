@@ -77,7 +77,7 @@ public class Utils {
         }
     }
 
-    public static String getFormattedDate(Date smsDate, boolean conversationsView) {
+    public static String getFormattedDate(Context applicationContext, Date smsDate, boolean conversationsView) {
         Calendar smsCalendar = Calendar.getInstance();
         smsCalendar.setTimeInMillis(smsDate.getTime());
 
@@ -87,10 +87,10 @@ public class Utils {
             // Last minute: X seconds ago
             long seconds = (Calendar.getInstance().getTime().getTime() - smsCalendar.getTime().getTime()) / 1000;
             if (seconds < 10) {
-                return "Just now";
+                return applicationContext.getString(R.string.utils_date_just_now);
             }
             else {
-                return seconds + " seconds ago";
+                return seconds + " " + applicationContext.getString(R.string.utils_date_seconds_ago);
             }
         }
 
@@ -100,10 +100,10 @@ public class Utils {
             // Last hour: X minutes ago
             long minutes = (Calendar.getInstance().getTime().getTime() - smsCalendar.getTime().getTime()) / (1000 * 60);
             if (minutes == 1) {
-                return "1 minute ago";
+                return applicationContext.getString(R.string.utils_date_one_minute_ago);
             }
             else {
-                return minutes + " minutes ago";
+                return minutes + " " + applicationContext.getString(R.string.utils_date_minutes_ago);
             }
         }
 
