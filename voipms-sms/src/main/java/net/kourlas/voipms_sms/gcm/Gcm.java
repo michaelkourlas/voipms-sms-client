@@ -27,7 +27,7 @@ import com.google.android.gms.iid.InstanceID;
 import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 import java.net.URLEncoder;
 
@@ -95,7 +95,7 @@ public class Gcm {
                                 "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
                                 "reg_id=" + URLEncoder.encode(token, "UTF-8");
                         JSONObject result = Utils.getJson(registrationBackendUrl);
-                        String status = (String) result.get("status");
+                        String status = result.optString("status");
                         if (status == null || !status.equals("success")) {
                             return false;
                         }

@@ -35,7 +35,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.Toast;
 import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.adapters.ConversationsRecyclerViewAdapter;
 import net.kourlas.voipms_sms.gcm.Gcm;

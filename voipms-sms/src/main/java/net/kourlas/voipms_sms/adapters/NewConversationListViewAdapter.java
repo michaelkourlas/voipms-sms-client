@@ -163,7 +163,7 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
 
     @Override
     public Object[] getSections() {
-        List<String> sections = new ArrayList<String>();
+        List<String> sections = new ArrayList<>();
 
         if (getCount() > 0 && ((ContactItem) getItem(0)).isTypedIn()) {
             sections.add("");
@@ -261,11 +261,11 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults results = new FilterResults();
-            List<ContactItem> contactItemResults = new ArrayList<ContactItem>();
+            List<ContactItem> contactItemResults = new ArrayList<>();
 
             String searchText = constraint.toString();
 
-            List<ContactItem> phoneNumberEntries = new ArrayList<ContactItem>();
+            List<ContactItem> phoneNumberEntries = new ArrayList<>();
             Cursor cursor = activity.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                     null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
             if (cursor.getCount() > 0) {

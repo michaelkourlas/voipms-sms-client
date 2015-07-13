@@ -78,11 +78,6 @@ public class PreferencesActivity extends AppCompatActivity {
         ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 
-    public void showSelectDidDialog(boolean success, final String[] dids, String message) {
-        DidPreference preference = (DidPreference) fragment.getPreferenceManager().findPreference("did");
-        preference.showSelectDidDialog(success, dids, message);
-    }
-
     /**
      * A fragment is used only because PreferenceActivity is deprecated.
      */

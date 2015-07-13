@@ -30,8 +30,8 @@ import android.provider.ContactsContract;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewOutlineProvider;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -178,7 +178,7 @@ public class Utils {
         return phoneNumber;
     }
 
-    public static JSONObject getJson(String urlString) throws IOException, org.json.simple.parser.ParseException {
+    public static JSONObject getJson(String urlString) throws IOException, JSONException {
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setReadTimeout(10000);
@@ -197,7 +197,7 @@ public class Utils {
         }
         reader.close();
 
-        return (JSONObject) JSONValue.parseWithException(data.toString());
+        return new JSONObject(data.toString());
     }
 
     public static void applyCircularMask(View view) {

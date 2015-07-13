@@ -46,7 +46,8 @@ import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.adapters.ConversationRecyclerViewAdapter;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
-import org.json.simple.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -656,7 +657,7 @@ public class ConversationActivity
                 JSONObject resultJson;
                 try {
                     resultJson = Utils.getJson(params[0]);
-                } catch (org.json.simple.parser.ParseException ex) {
+                } catch (JSONException ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
                     Toast.makeText(applicationContext, applicationContext.getString(
                             R.string.conversation_send_error_api_parse), Toast.LENGTH_SHORT).show();
@@ -668,7 +669,7 @@ public class ConversationActivity
                     return false;
                 }
 
-                String status = (String) resultJson.get("status");
+                String status = resultJson.optString("status");
                 if (status == null) {
                     Toast.makeText(applicationContext,
                             applicationContext.getString(R.string.conversation_send_error_api_parse),

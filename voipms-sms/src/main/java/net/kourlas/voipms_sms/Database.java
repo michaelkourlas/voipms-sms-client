@@ -30,8 +30,9 @@ import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -613,7 +614,7 @@ public class Database {
                 JSONObject resultJson;
                 try {
                     resultJson = Utils.getJson(request.getUrl());
-                } catch (org.json.simple.parser.ParseException ex) {
+                } catch (JSONException ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
                     if (showErrors) {
                         Toast.makeText(applicationContext, applicationContext.getString(
@@ -630,7 +631,7 @@ public class Database {
                 }
 
                 // Parse the VoIP.ms API response
-                String status = (String) resultJson.get("status");
+                String status = resultJson.optString("status");
                 if (status == null) {
                     if (showErrors) {
                         Toast.makeText(applicationContext, applicationContext.getString(
@@ -661,7 +662,7 @@ public class Database {
 
                 // Extract messages from the VoIP.ms API response
                 List<Message> serverMessages = new ArrayList<>();
-                JSONArray rawMessages = (JSONArray) resultJson.get("sms");
+                JSONArray rawMessages = resultJson.optJSONArray("sms");
                 if (rawMessages == null) {
                     if (showErrors) {
                         Toast.makeText(applicationContext, applicationContext.getString(
@@ -669,14 +670,11 @@ public class Database {
                     }
                     return true;
                 }
-                for (Object rawSmsObj : rawMessages) {
-                    JSONObject rawSms = (JSONObject) rawSmsObj;
-                    if (rawSms == null || rawSms.get("id") == null || rawSms.get("date") == null ||
-                            rawSms.get("type") == null || rawSms.get("did") == null || rawSms.get("contact") == null ||
-                            rawSms.get("message") == null || !(rawSms.get("id") instanceof String) ||
-                            !(rawSms.get("date") instanceof String) || !(rawSms.get("type") instanceof String) ||
-                            !(rawSms.get("did") instanceof String) || !(rawSms.get("contact") instanceof String) ||
-                            !(rawSms.get("message") instanceof String)) {
+                for (int i = 0; i < rawMessages.length(); i++) {
+                    JSONObject rawSms = rawMessages.optJSONObject(i);
+                    if (rawSms == null || rawSms.optString("id") == null || rawSms.optString("date") == null ||
+                            rawSms.optString("type") == null || rawSms.optString("did") == null ||
+                            rawSms.optString("contact") == null || rawSms.optString("message") == null) {
                         if (showErrors) {
                             Toast.makeText(applicationContext, applicationContext.getString(
                                     R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
@@ -684,12 +682,12 @@ public class Database {
                         return true;
                     }
 
-                    String id = (String) rawSms.get("id");
-                    String date = (String) rawSms.get("date");
-                    String type = (String) rawSms.get("type");
-                    String did = (String) rawSms.get("did");
-                    String contact = (String) rawSms.get("contact");
-                    String message = (String) rawSms.get("message");
+                    String id = rawSms.optString("id");
+                    String date = rawSms.optString("date");
+                    String type = rawSms.optString("type");
+                    String did = rawSms.optString("did");
+                    String contact = rawSms.optString("contact");
+                    String message = rawSms.optString("message");
                     try {
                         Message sms = new Message(id, date, type, did, contact, message);
                         serverMessages.add(sms);

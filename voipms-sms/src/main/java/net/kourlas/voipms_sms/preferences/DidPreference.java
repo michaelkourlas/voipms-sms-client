@@ -28,8 +28,9 @@ import android.util.Log;
 import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -192,7 +193,7 @@ public class DidPreference extends Preference {
             protected ResultObject doInBackground(String... params) {
                 try {
                     return new ResultObject(Utils.getJson(params[0]));
-                } catch (org.json.simple.parser.ParseException ex) {
+                } catch (JSONException ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
                     return new ResultObject(applicationContext.getString(
                             R.string.preferences_account_did_error_api_parse));
@@ -210,7 +211,7 @@ public class DidPreference extends Preference {
                     return;
                 }
 
-                String status = (String) resultObject.getJsonObject().get("status");
+                String status = resultObject.getJsonObject().optString("status");
                 if (status == null) {
                     cleanup(false, null,
                             applicationContext.getString(R.string.preferences_account_did_error_api_parse));
@@ -224,28 +225,28 @@ public class DidPreference extends Preference {
 
                 final List<String> dids = new ArrayList<>();
 
-                JSONArray rawDids = (JSONArray) resultObject.getJsonObject().get("dids");
+                JSONArray rawDids = resultObject.getJsonObject().optJSONArray("dids");
                 if (rawDids == null) {
                     cleanup(false, null,
                             applicationContext.getString(R.string.preferences_account_did_error_api_parse));
                     return;
                 }
-                for (Object rawDidObj : rawDids) {
-                    JSONObject rawDid = (JSONObject) rawDidObj;
-                    if (rawDid == null || rawDid.get("sms_available") == null || rawDid.get("did") == null ||
-                            !(rawDid.get("did") instanceof String)) {
+                for (int i = 0; i < rawDids.length(); i++) {
+                    JSONObject rawDid = rawDids.optJSONObject(i);
+                    if (rawDid == null || rawDid.optString("sms_available") == null ||
+                            rawDid.optString("did") == null) {
                         cleanup(false, null,
                                 applicationContext.getString(R.string.preferences_account_did_error_api_parse));
                         return;
                     }
-                    if (rawDid.get("sms_available").equals("1")) {
-                        if (rawDid.get("sms_enabled") == null) {
+                    if (rawDid.optString("sms_available").equals("1")) {
+                        if (rawDid.optString("sms_enabled") == null) {
                             cleanup(false, null,
                                     applicationContext.getString(R.string.preferences_account_did_error_api_parse));
                             return;
                         }
-                        if (rawDid.get("sms_enabled").equals("1")) {
-                            dids.add((String) rawDid.get("did"));
+                        if (rawDid.optString("sms_enabled").equals("1")) {
+                            dids.add(rawDid.optString("did"));
                         }
                     }
                 }
