@@ -7,6 +7,7 @@
 * Action buttons for notifications
 * Search term highlighting
 * Import/export mechanism
+* Added donation in-app purchase mechanism
 * New icon
 * Other UI changes
 * Bug fixes
