@@ -103,7 +103,7 @@ public class Billing {
                             protected void onPostExecute(Void aVoid) {
                                 showDonationDialog(sourceActivity);
                             }
-                        };
+                        }.execute();
                         return;
                     }
                 }
@@ -126,7 +126,7 @@ public class Billing {
                 }
                 return null;
             }
-        };
+        }.execute();
     }
 
     private void showDonationDialog(Activity sourceActivity) {
