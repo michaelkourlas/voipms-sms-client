@@ -19,6 +19,7 @@ package net.kourlas.voipms_sms.adapters;
 
 import android.content.Context;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
@@ -120,7 +121,10 @@ public class ConversationRecyclerViewAdapter
 
             }
             else {
-                photoUri = Utils.getContactPhotoUri(applicationContext, message.getDid());
+                photoUri = Utils.getContactPhotoUri(applicationContext, ContactsContract.Profile.CONTENT_URI);
+                if (photoUri == null) {
+                    photoUri = Utils.getContactPhotoUri(applicationContext, message.getDid());
+                }
             }
             if (photoUri != null) {
                 contactBadge.setImageURI(Uri.parse(photoUri));

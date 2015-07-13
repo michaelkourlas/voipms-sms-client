@@ -64,6 +64,10 @@ public class Utils {
 
     public static String getContactPhotoUri(Context applicationContext, String phoneNumber) {
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+        return getContactPhotoUri(applicationContext, uri);
+    }
+
+    public static String getContactPhotoUri(Context applicationContext, Uri uri) {
         Cursor cursor = applicationContext.getContentResolver().query(uri, new String[]{
                 ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI}, null, null, null);
         if (cursor.moveToFirst()) {
