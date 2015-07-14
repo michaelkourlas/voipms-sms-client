@@ -53,7 +53,8 @@
                 android:layout_weight="1.0"
                 android:clipToPadding="false"
                 android:divider="@null"
-                android:dividerHeight="0dp" />
+                android:dividerHeight="0dp"
+                android:scrollbars="vertical" />
 
             <RelativeLayout
                 android:id="@+id/message_section"

@@ -26,24 +26,24 @@ import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.R;
 
 @SuppressWarnings("unused")
-public class ResetPreference extends Preference {
-    public ResetPreference(Context context) {
+public class DatabaseDeletePreference extends Preference {
+    public DatabaseDeletePreference(Context context) {
         super(context);
     }
 
-    public ResetPreference(Context context, AttributeSet attrs) {
+    public DatabaseDeletePreference(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ResetPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+    public DatabaseDeletePreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     @Override
     protected void onClick() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(getContext().getString(R.string.preferences_delete_confirm_title));
-        builder.setMessage(getContext().getString(R.string.preferences_delete_confirm_message));
+        builder.setTitle(getContext().getString(R.string.preferences_database_delete_confirm_title));
+        builder.setMessage(getContext().getString(R.string.preferences_database_delete_confirm_message));
         builder.setPositiveButton(getContext().getApplicationContext().getString(R.string.delete),
                 new DialogInterface.OnClickListener() {
                     @Override

@@ -84,18 +84,12 @@
             android:title="@string/preferences_notifications_vibrate_title" />
     </PreferenceCategory>
 
-    <!--<PreferenceCategory android:title="Import and Export">-->
-        <!--<Preference-->
-            <!--android:summary="@string/preferences_import_summary"-->
-            <!--android:title="@string/preferences_import_title" />-->
-        <!--<Preference-->
-            <!--android:summary="@string/preferences_export_summary"-->
-            <!--android:title="@string/preferences_export_title" />-->
-    <!--</PreferenceCategory>-->
-
-    <PreferenceCategory android:title="@string/preferences_reset_category_name">
-        <net.kourlas.voipms_sms.preferences.ResetPreference
-            android:summary="@string/preferences_reset_summary"
-            android:title="@string/preferences_reset_title" />
+    <PreferenceCategory android:title="@string/preferences_database_category_name">
+        <net.kourlas.voipms_sms.preferences.DatabaseEditPreference
+            android:summary="@string/preferences_database_edit_summary"
+            android:title="@string/preferences_database_edit_title" />
+        <net.kourlas.voipms_sms.preferences.DatabaseDeletePreference
+            android:summary="@string/preferences_database_delete_summary"
+            android:title="@string/preferences_database_delete_title" />
     </PreferenceCategory>
 </PreferenceScreen>

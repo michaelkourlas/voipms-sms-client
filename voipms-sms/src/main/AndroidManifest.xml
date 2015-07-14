@@ -77,6 +77,10 @@
             android:label="@string/preferences_name"
             android:parentActivityName=".activities.ConversationsActivity" />
         <activity
+            android:name=".activities.EditDatabaseActivity"
+            android:label="Edit Database"
+            android:parentActivityName=".activities.PreferencesActivity" />
+        <activity
             android:name=".activities.HelpActivity"
             android:label="@string/help_name"
             android:parentActivityName=".activities.ConversationsActivity" />

@@ -46,18 +46,19 @@ import java.util.*;
 public class Database {
     public static final String TAG = "Database";
 
+    public static final String COLUMN_DATABASE_ID = "DatabaseId";
+    public static final String COLUMN_VOIP_ID = "VoipId";
+    public static final String COLUMN_DATE = "Date";
+    public static final String COLUMN_TYPE = "Type";
+    public static final String COLUMN_DID = "Did";
+    public static final String COLUMN_CONTACT = "Contact";
+    public static final String COLUMN_MESSAGE = "Text";
+    public static final String COLUMN_UNREAD = "Unread";
+    public static final String COLUMN_DELETED = "Deleted";
+    public static final String COLUMN_DELIVERED = "Delivered";
+    public static final String COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress";
+
     private static final String TABLE_MESSAGE = "sms";
-    private static final String COLUMN_DATABASE_ID = "DatabaseId";
-    private static final String COLUMN_VOIP_ID = "VoipId";
-    private static final String COLUMN_DATE = "Date";
-    private static final String COLUMN_TYPE = "Type";
-    private static final String COLUMN_DID = "Did";
-    private static final String COLUMN_CONTACT = "Contact";
-    private static final String COLUMN_MESSAGE = "Text";
-    private static final String COLUMN_UNREAD = "Unread";
-    private static final String COLUMN_DELETED = "Deleted";
-    private static final String COLUMN_DELIVERED = "Delivered";
-    private static final String COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress";
     private static final String[] columns = {COLUMN_DATABASE_ID, COLUMN_VOIP_ID, COLUMN_DATE, COLUMN_TYPE, COLUMN_DID,
             COLUMN_CONTACT, COLUMN_MESSAGE, COLUMN_UNREAD, COLUMN_DELETED, COLUMN_DELIVERED,
             COLUMN_DELIVERY_IN_PROGRESS};
@@ -119,9 +120,9 @@ public class Database {
         values.put(COLUMN_CONTACT, message.getContact());
         values.put(COLUMN_MESSAGE, message.getText());
         values.put(COLUMN_UNREAD, message.isUnreadInDatabaseFormat());
-        values.put(COLUMN_DELETED, message.getRawDeleted());
-        values.put(COLUMN_DELIVERED, message.getRawDelivered());
-        values.put(COLUMN_DELIVERY_IN_PROGRESS, message.getRawDeliveryInProgress());
+        values.put(COLUMN_DELETED, message.isDeletedInDatabaseFormat());
+        values.put(COLUMN_DELIVERED, message.isDeliveredInDatabaseFormat());
+        values.put(COLUMN_DELIVERY_IN_PROGRESS, message.isDeliveryInProgressInDatabaseFormat());
 
         if (values.getAsLong(COLUMN_DATABASE_ID) != null) {
             return database.replace(TABLE_MESSAGE, null, values);
@@ -205,6 +206,40 @@ public class Database {
             cursor.close();
             return null;
         }
+    }
+
+    /**
+     * Gets all of the messages in the database.
+     *
+     * @return All of the messages in the database.
+     */
+    public synchronized Message[] getMessages() {
+        List<Message> messages = new ArrayList<>();
+
+        Cursor cursor = database.query(TABLE_MESSAGE, columns, null, null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
+                    cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_VOIP_ID)) ? null : cursor.getLong(
+                            cursor.getColumnIndex(COLUMN_VOIP_ID)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
+            messages.add(message);
+            cursor.moveToNext();
+        }
+        cursor.close();
+
+        Collections.sort(messages);
+
+        Message[] messageArray = new Message[messages.size()];
+        return messages.toArray(messageArray);
     }
 
     /**

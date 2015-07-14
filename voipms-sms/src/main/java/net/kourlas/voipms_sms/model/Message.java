@@ -18,6 +18,9 @@
 package net.kourlas.voipms_sms.model;
 
 import android.support.annotation.NonNull;
+import net.kourlas.voipms_sms.Database;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -357,7 +360,7 @@ public class Message implements Comparable<Message> {
         this.isDeleted = isDeleted;
     }
 
-    public int getRawDeleted() {
+    public int isDeletedInDatabaseFormat() {
         return isDeleted ? 1 : 0;
     }
 
@@ -369,7 +372,7 @@ public class Message implements Comparable<Message> {
         this.isDelivered = isDelivered;
     }
 
-    public int getRawDelivered() {
+    public int isDeliveredInDatabaseFormat() {
         return isDelivered ? 1 : 0;
     }
 
@@ -381,7 +384,7 @@ public class Message implements Comparable<Message> {
         this.isDeliveryInProgress = isDeliveryInProgress;
     }
 
-    public int getRawDeliveryInProgress() {
+    public int isDeliveryInProgressInDatabaseFormat() {
         return isDeliveryInProgress ? 1 : 0;
     }
 
@@ -448,6 +451,37 @@ public class Message implements Comparable<Message> {
         }
         else {
             return -1;
+        }
+    }
+
+    /**
+     * Returns a JSON version of this message.
+     *
+     * @return A JSON version of this message.
+     */
+    public JSONObject toJSON() {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            if (databaseId != null) {
+                jsonObject.put(Database.COLUMN_DATABASE_ID, getDatabaseId());
+            }
+            if (voipId != null) {
+                jsonObject.put(Database.COLUMN_VOIP_ID, getVoipId());
+            }
+            jsonObject.put(Database.COLUMN_DATE, getDateInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_TYPE, getTypeInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_DID, getDid());
+            jsonObject.put(Database.COLUMN_CONTACT, getContact());
+            jsonObject.put(Database.COLUMN_MESSAGE, getText());
+            jsonObject.put(Database.COLUMN_UNREAD, isUnreadInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_DELETED, isDeletedInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_DELIVERED, isDeliveredInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_DELIVERY_IN_PROGRESS, isDeliveryInProgressInDatabaseFormat());
+            return jsonObject;
+        }
+        catch (JSONException ex) {
+            // This should never happen
+            throw new Error();
         }
     }
 

@@ -150,17 +150,17 @@
     <string name="preferences_notifications_sound_default_value" translatable="false">content://settings/system/notification_sound</string>
     <string name="preferences_notifications_vibrate_key" translatable="false">sms_notification_vibrate</string>
     <string name="preferences_notifications_vibrate_title">Vibrate</string>
-    <!-- Import and Export -->
-    <string name="preferences_import_title">Import message database</string>
-    <string name="preferences_import_summary">Import message database from a JSON file</string>
-    <string name="preferences_export_title">Export message database</string>
-    <string name="preferences_export_summary">Export message database to a JSON file</string>
     <!-- Reset -->
-    <string name="preferences_reset_category_name">Reset</string>
-    <string name="preferences_reset_title">Delete message database</string>
-    <string name="preferences_reset_summary">Delete all messages stored locally (to prepare for later message importation or retrieval)</string>
-    <string name="preferences_delete_confirm_title">Delete local copy of SMS database?</string>
-    <string name="preferences_delete_confirm_message">This action cannot be undone.</string>
+    <string name="preferences_database_category_name">Database</string>
+    <string name="preferences_database_edit_title">Edit message database</string>
+    <string name="preferences_database_edit_summary">Manually edit message database in JSON format</string>
+    <string name="preferences_database_edit_save">Save</string>
+    <string name="preferences_database_edit_failure_load">Failed to load database.</string>
+    <string name="preferences_database_edit_failure_save">Failed to save database. Are you sure the text box contains valid JSON?</string>
+    <string name="preferences_database_delete_title">Delete message database</string>
+    <string name="preferences_database_delete_summary">Delete all messages in database to prepare for later message importation or retrieval</string>
+    <string name="preferences_database_delete_confirm_title">Delete local copy of SMS database?</string>
+    <string name="preferences_database_delete_confirm_message">This action cannot be undone.</string>
     <!-- Uncategorized -->
     <string name="preferences_dids_key" translatable="false">dids</string>
     <string name="preferences_gcm_instance_id_key" translatable="false">instance_id</string>
