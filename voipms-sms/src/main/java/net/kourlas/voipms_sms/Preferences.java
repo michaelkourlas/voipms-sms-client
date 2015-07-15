@@ -74,6 +74,23 @@ public class Preferences {
         editor.apply();
     }
 
+    public long getSyncInterval() {
+        return Long.parseLong(sharedPreferences.getString(applicationContext.getString(
+                R.string.preferences_sync_interval_key), "0"));
+    }
+
+    public long getLastCompleteSyncTime() {
+        return sharedPreferences.getLong(applicationContext.getString(
+                R.string.preferences_sync_last_complete_time_key), 0);
+    }
+
+    public void setLastCompleteSyncTime(long lastCompleteSyncTime) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong(applicationContext.getString(R.string.preferences_sync_last_complete_time_key),
+                lastCompleteSyncTime);
+        editor.apply();
+    }
+
     public boolean getRetrieveOnlyRecentMessages() {
         return sharedPreferences.getBoolean(applicationContext.getString(R.string.preferences_sync_retrieve_only_recent_messages_key), true);
     }

@@ -165,6 +165,7 @@
     <string name="preferences_dids_key" translatable="false">dids</string>
     <string name="preferences_gcm_instance_id_key" translatable="false">instance_id</string>
     <string name="preferences_gcm_token_key" translatable="false">registration_id</string>
+    <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>
 
     <!-- Utils -->
     <string name="utils_date_just_now">Just now</string>

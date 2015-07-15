@@ -35,6 +35,7 @@ import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.gcm.Gcm;
 import net.kourlas.voipms_sms.preferences.DidPreference;
 import net.kourlas.voipms_sms.preferences.StartDatePreference;
+import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -131,6 +132,10 @@ public class PreferencesActivity extends AppCompatActivity {
             if (isAdded()) {
                 // Update summary text for changed preference
                 updateSummaryTextForPreference(findPreference(key));
+
+                if (key.equals(getString(R.string.preferences_sync_interval_key))) {
+                    SynchronizationIntervalReceiver.setupSynchronizationInterval(applicationContext);
+                }
 
                 // Show informational message and attempt to register for GCM if notificatons are enabled
                 if (key.equals(applicationContext.getString(R.string.preferences_notifications_enable_key)) && preferences.getNotificationsEnabled()) {

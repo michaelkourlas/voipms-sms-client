@@ -40,6 +40,7 @@ import net.kourlas.voipms_sms.adapters.ConversationsRecyclerViewAdapter;
 import net.kourlas.voipms_sms.gcm.Gcm;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -109,6 +110,8 @@ public class ConversationsActivity
                 }
             }
         });
+
+        SynchronizationIntervalReceiver.setupSynchronizationInterval(getApplicationContext());
     }
 
     @Override

@@ -388,7 +388,7 @@ public class Database {
      * <li> retrieving messages from VoIP.ms that were deleted locally;
      * <li> deleting messages from VoIP.ms that were deleted locally; and
      * <li> deleting messages stored locally that were deleted from VoIP.ms.
-     *  @param forceRecent       Retrieve only recent messages (and do nothing else) if true, regardless of synchronization
+     * @param forceRecent       Retrieve only recent messages (and do nothing else) if true, regardless of synchronization
      *                          settings.
      * @param showErrors        Shows error messages if true.
      * @param sourceActivity    The calling activity.
@@ -400,13 +400,13 @@ public class Database {
         boolean propagateLocalDeletions = forceRecent ? false : preferences.getPropagateLocalDeletions();
         boolean propagateRemoteDeletions = forceRecent ? false : preferences.getPropagateRemoteDeletions();
 
-        SynchronizeDatabaseTask task = new SynchronizeDatabaseTask(applicationContext, retrieveDeletedMessages,
-                propagateRemoteDeletions, showErrors, sourceActivity);
+        SynchronizeDatabaseTask task = new SynchronizeDatabaseTask(applicationContext, forceRecent,
+                retrieveDeletedMessages, propagateRemoteDeletions, showErrors, sourceActivity);
 
         if (preferences.getEmail().equals("") || preferences.getPassword().equals("") ||
                 preferences.getDid().equals("")) {
             // Do not show an error; this method should never be called unless the email, password and DID are set
-            task.cleanup();
+            task.cleanup(false, forceRecent);
             return;
         }
 
@@ -415,7 +415,7 @@ public class Database {
                 Toast.makeText(applicationContext, applicationContext.getString(R.string.database_sync_error_network),
                         Toast.LENGTH_SHORT).show();
             }
-            task.cleanup();
+            task.cleanup(false, forceRecent);
             return;
         }
 
@@ -527,6 +527,7 @@ public class Database {
         private final Context applicationContext;
         private final Database database;
         private final Preferences preferences;
+        private final boolean forceRecent;
         private final boolean retrieveDeletedMessages;
         private final boolean propagateRemoteDeletions;
         private final boolean showErrors;
@@ -536,14 +537,17 @@ public class Database {
         /**
          * Initializes a new instance of the SynchronizeDatabaseTask class.
          *
-         * @param retrieveDeletedMessages  Retrieves messages that were delected locally from the VoIP.ms servers if
+         * @param forceRecent              Retrieve only recent messages (and do nothing else) if true, regardless of
+         *                                 synchronization settings. This value isn't actually used; it's merely stored
+         *                                 to be used during the cleanup routine.
+         * @param retrieveDeletedMessages  Retrieves messages that were deleted locally from the VoIP.ms servers if
          *                                 true.
-         * @param propagateRemoteDeletions Deletes local copies of messages if they were delected from the VoIP.ms
+         * @param propagateRemoteDeletions Deletes local copies of messages if they were deleted from the VoIP.ms
          *                                 servers if true.
          * @param showErrors               Shows error messages if true.
          * @param sourceActivity           The calling activity.
          */
-        public SynchronizeDatabaseTask(Context applicationContext, boolean retrieveDeletedMessages,
+        public SynchronizeDatabaseTask(Context applicationContext, boolean forceRecent, boolean retrieveDeletedMessages,
                                        boolean propagateRemoteDeletions, boolean showErrors, Activity sourceActivity) {
             this.applicationContext = applicationContext;
             this.database = Database.getInstance(applicationContext);
@@ -551,6 +555,7 @@ public class Database {
 
             this.requests = null;
 
+            this.forceRecent = forceRecent;
             this.retrieveDeletedMessages = retrieveDeletedMessages;
             this.propagateRemoteDeletions = propagateRemoteDeletions;
             this.showErrors = showErrors;
@@ -572,14 +577,14 @@ public class Database {
          *
          * @param i The index of the VoIP.ms API request object to use for the next part of the update.
          */
-        public void start(int i) {
+        private void start(int i) {
             new CustomAsyncTask().execute(i);
         }
 
         /**
          * Cleans up after the database update.
          */
-        public void cleanup() {
+        public void cleanup(boolean success, boolean forceRecent) {
             if (sourceActivity instanceof ConversationsActivity) {
                 ((ConversationsActivity) sourceActivity).postUpdate();
             }
@@ -593,6 +598,10 @@ public class Database {
                 else if (ActivityMonitor.getInstance().getCurrentActivity() instanceof ConversationActivity) {
                     ((ConversationActivity) ActivityMonitor.getInstance().getCurrentActivity()).postUpdate();
                 }
+            }
+
+            if (success && !forceRecent) {
+                preferences.setLastCompleteSyncTime(System.currentTimeMillis());
             }
         }
 
@@ -655,14 +664,14 @@ public class Database {
                         Toast.makeText(applicationContext, applicationContext.getString(
                                 R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                     }
-                    return true;
+                    return false;
                 } catch (Exception ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
                     if (showErrors) {
                         Toast.makeText(applicationContext, applicationContext.getString(
                                 R.string.database_sync_error_api_request), Toast.LENGTH_SHORT).show();
                     }
-                    return true;
+                    return false;
                 }
 
                 // Parse the VoIP.ms API response
@@ -672,7 +681,7 @@ public class Database {
                         Toast.makeText(applicationContext, applicationContext.getString(
                                 R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                     }
-                    return true;
+                    return false;
                 }
                 if (!status.equals("success")) {
                     if (!status.equals("no_sms")) {
@@ -681,6 +690,15 @@ public class Database {
                                             R.string.database_sync_error_api_error).replace("{error}", status),
                                     Toast.LENGTH_SHORT).show();
                         }
+                        return false;
+                    }
+
+                    // Continue the database update by calling the next URL; otherwise, if the database update is
+                    // complete, clean up
+                    int current = requests.indexOf(request);
+                    if (current != requests.size() - 1) {
+                        start(current + 1);
+                        return null;
                     }
                     return true;
                 }
@@ -691,6 +709,7 @@ public class Database {
                     int current = requests.indexOf(request);
                     if (current != requests.size() - 1) {
                         start(current + 1);
+                        return null;
                     }
                     return true;
                 }
@@ -703,7 +722,7 @@ public class Database {
                         Toast.makeText(applicationContext, applicationContext.getString(
                                 R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                     }
-                    return true;
+                    return false;
                 }
                 for (int i = 0; i < rawMessages.length(); i++) {
                     JSONObject rawSms = rawMessages.optJSONObject(i);
@@ -714,7 +733,7 @@ public class Database {
                             Toast.makeText(applicationContext, applicationContext.getString(
                                     R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                         }
-                        return true;
+                        return false;
                     }
 
                     String id = rawSms.optString("id");
@@ -732,7 +751,7 @@ public class Database {
                             Toast.makeText(applicationContext, applicationContext.getString(
                                     R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                         }
-                        return true;
+                        return false;
                     }
                 }
 
@@ -803,15 +822,15 @@ public class Database {
                 int current = requests.indexOf(request);
                 if (current != requests.size() - 1) {
                     start(current + 1);
-                    return false;
+                    return null;
                 }
                 return true;
             }
 
             @Override
-            protected void onPostExecute(Boolean cleanup) {
-                if (cleanup) {
-                    cleanup();
+            protected void onPostExecute(Boolean success) {
+                if (success != null) {
+                    cleanup(success, forceRecent);
                 }
             }
         }
