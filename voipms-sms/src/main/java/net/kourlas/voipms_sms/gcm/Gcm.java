@@ -41,6 +41,7 @@ public class Gcm {
 
     /**
      * Initializes a new instance of the GCM class.
+     *
      * @param applicationContext The application context.
      */
     private Gcm(Context applicationContext) {
@@ -50,6 +51,7 @@ public class Gcm {
 
     /**
      * Gets the sole instance of the GCM class. Initializes the instance if it does not already exist.
+     *
      * @param applicationContext The application context.
      * @return The sole instance of the GCM class.
      */
@@ -62,10 +64,11 @@ public class Gcm {
 
     /**
      * Registers for Google Cloud Messaging. Sends the registration token to the application servers.
-     * @param activity The activity that initiated the registration.
+     *
+     * @param activity     The activity that initiated the registration.
      * @param showFeedback If true, shows a dialog at the end of the registration process indicating the success or
      *                     failure of the process.
-     * @param force If true, retrieves a new registration token even if one is already stored.
+     * @param force        If true, retrieves a new registration token even if one is already stored.
      */
     public void registerForGcm(final Activity activity, final boolean showFeedback, boolean force) {
         if (!preferences.getNotificationsEnabled()) {
@@ -131,7 +134,8 @@ public class Gcm {
 
     /**
      * Returns true if Google Play Services is set up properly on the device.
-     * @param activity The activity that initiated the check.
+     *
+     * @param activity     The activity that initiated the check.
      * @param showFeedback If true, shows a dialog at the end of the check indicating the success or failure of the
      *                     process.
      * @return True if Google Play Services is set up properly on the device.

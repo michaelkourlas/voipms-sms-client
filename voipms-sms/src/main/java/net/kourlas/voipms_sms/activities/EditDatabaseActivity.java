@@ -104,8 +104,7 @@ public class EditDatabaseActivity extends AppCompatActivity {
                                     messageJsonObject.getLong(Database.COLUMN_DELIVERY_IN_PROGRESS));
                             messages.add(message);
                         }
-                    }
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         Utils.showInfoDialog(this, getString(R.string.preferences_database_edit_failure_save));
                         return false;
                     }

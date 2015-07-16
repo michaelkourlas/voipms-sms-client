@@ -388,10 +388,11 @@ public class Database {
      * <li> retrieving messages from VoIP.ms that were deleted locally;
      * <li> deleting messages from VoIP.ms that were deleted locally; and
      * <li> deleting messages stored locally that were deleted from VoIP.ms.
-     * @param forceRecent       Retrieve only recent messages (and do nothing else) if true, regardless of synchronization
-     *                          settings.
-     * @param showErrors        Shows error messages if true.
-     * @param sourceActivity    The calling activity.
+     *
+     * @param forceRecent    Retrieve only recent messages (and do nothing else) if true, regardless of synchronization
+     *                       settings.
+     * @param showErrors     Shows error messages if true.
+     * @param sourceActivity The calling activity.
      */
     @SuppressWarnings("SimplifiableConditionalExpression")
     public synchronized void synchronize(boolean forceRecent, boolean showErrors, Activity sourceActivity) {
@@ -610,6 +611,7 @@ public class Database {
             private RequestType requestType;
             private Date startDate;
             private Date endDate;
+
             public RequestObject(String url, RequestType requestType) {
                 this.url = url;
                 this.requestType = requestType;

@@ -478,8 +478,7 @@ public class Message implements Comparable<Message> {
             jsonObject.put(Database.COLUMN_DELIVERED, isDeliveredInDatabaseFormat());
             jsonObject.put(Database.COLUMN_DELIVERY_IN_PROGRESS, isDeliveryInProgressInDatabaseFormat());
             return jsonObject;
-        }
-        catch (JSONException ex) {
+        } catch (JSONException ex) {
             // This should never happen
             throw new Error();
         }

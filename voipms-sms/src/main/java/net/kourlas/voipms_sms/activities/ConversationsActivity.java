@@ -163,8 +163,7 @@ public class ConversationsActivity
                 JSONObject json = new JSONObject(purchaseData);
                 String token = json.getString("purchaseToken");
                 billing.postDonation(token, this);
-            }
-            catch (Exception ignored) {
+            } catch (Exception ignored) {
                 // Do nothing.
             }
         }

@@ -26,13 +26,7 @@ import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.Preferences;
 
 public class SynchronizationIntervalReceiver extends WakefulBroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        Database.getInstance(context.getApplicationContext()).synchronize(false, false, null);
-    }
-
-    public static void setupSynchronizationInterval(Context applicationContext)
-    {
+    public static void setupSynchronizationInterval(Context applicationContext) {
         Preferences preferences = Preferences.getInstance(applicationContext);
         AlarmManager alarmManager = (AlarmManager) applicationContext.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(applicationContext, SynchronizationIntervalReceiver.class);
@@ -52,5 +46,10 @@ public class SynchronizationIntervalReceiver extends WakefulBroadcastReceiver {
 
             alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, nextSyncTime, syncInterval, pendingIntent);
         }
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Database.getInstance(context.getApplicationContext()).synchronize(false, false, null);
     }
 }

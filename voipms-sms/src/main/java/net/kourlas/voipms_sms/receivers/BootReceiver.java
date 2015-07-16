@@ -24,8 +24,7 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 public class BootReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED"))
-        {
+        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
             SynchronizationIntervalReceiver.setupSynchronizationInterval(context.getApplicationContext());
         }
     }
