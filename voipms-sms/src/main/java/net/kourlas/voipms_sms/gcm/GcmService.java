@@ -36,7 +36,7 @@ public class GcmService extends GcmListenerService {
     @Override
     public void onMessageReceived(String from, Bundle data) {
         if (Preferences.getInstance(getApplicationContext()).getNotificationsEnabled()) {
-            Database.getInstance(getApplicationContext()).update(true, false, null);
+            Database.getInstance(getApplicationContext()).synchronize(true, false, null);
         }
     }
 }

@@ -590,7 +590,7 @@ public class ConversationActivity
     public void postSendMessage(boolean success, long databaseId) {
         if (success) {
             database.removeMessage(databaseId);
-            database.update(true, true, this);
+            database.synchronize(true, true, this);
         }
         else {
             Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);

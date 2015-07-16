@@ -28,7 +28,7 @@ import net.kourlas.voipms_sms.Preferences;
 public class SynchronizationIntervalReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Database.getInstance(context.getApplicationContext()).update(false, false, null);
+        Database.getInstance(context.getApplicationContext()).synchronize(false, false, null);
     }
 
     public static void setupSynchronizationInterval(Context applicationContext)
@@ -46,7 +46,7 @@ public class SynchronizationIntervalReceiver extends WakefulBroadcastReceiver {
 
             long now = System.currentTimeMillis();
             if (nextSyncTime <= now) {
-                Database.getInstance(applicationContext).update(false, false, null);
+                Database.getInstance(applicationContext).synchronize(false, false, null);
                 nextSyncTime = now + syncInterval;
             }
 

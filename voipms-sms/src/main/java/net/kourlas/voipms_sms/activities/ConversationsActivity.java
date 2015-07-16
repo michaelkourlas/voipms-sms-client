@@ -434,7 +434,7 @@ public class ConversationsActivity
     public void preRecentUpdate() {
         adapter.refresh();
         gcm.registerForGcm(conversationsActivity, false, false);
-        database.update(true, false, conversationsActivity);
+        database.synchronize(true, false, conversationsActivity);
     }
 
     /**
@@ -444,7 +444,7 @@ public class ConversationsActivity
     public void preFullUpdate() {
         adapter.refresh();
         gcm.registerForGcm(conversationsActivity, false, false);
-        database.update(false, true, conversationsActivity);
+        database.synchronize(false, true, conversationsActivity);
     }
 
     /**

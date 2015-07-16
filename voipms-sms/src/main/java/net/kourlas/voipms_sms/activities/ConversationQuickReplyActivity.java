@@ -227,7 +227,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
     public void postSendMessage(boolean success, long databaseId) {
         if (success) {
             database.removeMessage(databaseId);
-            database.update(true, false, null);
+            database.synchronize(true, false, null);
         }
         else {
             Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);

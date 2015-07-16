@@ -394,7 +394,7 @@ public class Database {
      * @param sourceActivity    The calling activity.
      */
     @SuppressWarnings("SimplifiableConditionalExpression")
-    public synchronized void update(boolean forceRecent, boolean showErrors, Activity sourceActivity) {
+    public synchronized void synchronize(boolean forceRecent, boolean showErrors, Activity sourceActivity) {
         boolean retrieveOnlyRecentMessages = forceRecent ? true : preferences.getRetrieveOnlyRecentMessages();
         boolean retrieveDeletedMessages = forceRecent ? false : preferences.getRetrieveDeletedMessages();
         boolean propagateLocalDeletions = forceRecent ? false : preferences.getPropagateLocalDeletions();
