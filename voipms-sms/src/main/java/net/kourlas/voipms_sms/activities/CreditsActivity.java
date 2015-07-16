@@ -17,12 +17,15 @@
 
 package net.kourlas.voipms_sms.activities;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import net.kourlas.voipms_sms.ActivityMonitor;
 import net.kourlas.voipms_sms.R;
 
@@ -43,6 +46,17 @@ public class CreditsActivity extends AppCompatActivity {
 
         WebView browser = (WebView) findViewById(R.id.web_view);
         browser.loadUrl(getString(R.string.credits_url));
+        browser.setWebViewClient(new WebViewClient() {
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
+                    view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        });
     }
 
     @Override
