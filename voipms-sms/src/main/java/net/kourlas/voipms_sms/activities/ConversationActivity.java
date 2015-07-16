@@ -386,7 +386,9 @@ public class ConversationActivity
                 else {
                     builder.setMessage((message.getVoipId() == null ? "" : (getString(R.string.conversation_info_id) +
                             " " + message.getVoipId() + "\n")) + getString(R.string.conversation_info_to) + " " +
-                            Utils.getFormattedPhoneNumber(message.getContact()) + "\n" + "\n" +
+                            Utils.getFormattedPhoneNumber(message.getContact()) + "\n" +
+                            getString(R.string.conversation_info_from) + " " +
+                            Utils.getFormattedPhoneNumber(message.getDid()) + "\n" +
                             getString(R.string.conversation_info_date) + " " + dateFormat.format(message.getDate()));
                 }
                 builder.setTitle(getString(R.string.conversation_info_title));
