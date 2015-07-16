@@ -256,6 +256,7 @@ public class Utils {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage(text);
         builder.setPositiveButton(R.string.ok, null);
+        builder.setCancelable(false);
         builder.show();
     }
 }
