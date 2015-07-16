@@ -158,7 +158,7 @@
     <string name="preferences_database_edit_failure_load">Failed to load database.</string>
     <string name="preferences_database_edit_failure_save">Failed to save database. Are you sure the text box contains valid JSON?</string>
     <string name="preferences_database_delete_title">Delete message database</string>
-    <string name="preferences_database_delete_summary">Delete all messages in database to prepare for later message importation or retrieval</string>
+    <string name="preferences_database_delete_summary">Delete all messages in database</string>
     <string name="preferences_database_delete_confirm_title">Delete local copy of SMS database?</string>
     <string name="preferences_database_delete_confirm_message">This action cannot be undone.</string>
     <!-- Uncategorized -->
