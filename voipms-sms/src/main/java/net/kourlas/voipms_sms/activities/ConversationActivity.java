@@ -653,7 +653,7 @@ public class ConversationActivity
             }
         }
 
-        private class SendMessageAsyncTask extends AsyncTask<String, Void, Boolean> {
+        private class SendMessageAsyncTask extends AsyncTask<String, String, Boolean> {
             @Override
             protected Boolean doInBackground(String... params) {
                 JSONObject resultJson;
@@ -661,27 +661,22 @@ public class ConversationActivity
                     resultJson = Utils.getJson(params[0]);
                 } catch (JSONException ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
-                    Toast.makeText(applicationContext, applicationContext.getString(
-                            R.string.conversation_send_error_api_parse), Toast.LENGTH_SHORT).show();
+                    publishProgress(applicationContext.getString(R.string.conversation_send_error_api_parse));
                     return false;
                 } catch (Exception ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
-                    Toast.makeText(applicationContext, applicationContext.getString(
-                            R.string.conversation_send_error_api_request), Toast.LENGTH_SHORT).show();
+                    publishProgress(applicationContext.getString(R.string.conversation_send_error_api_request));
                     return false;
                 }
 
                 String status = resultJson.optString("status");
                 if (status == null) {
-                    Toast.makeText(applicationContext,
-                            applicationContext.getString(R.string.conversation_send_error_api_parse),
-                            Toast.LENGTH_SHORT).show();
+                    publishProgress(applicationContext.getString(R.string.conversation_send_error_api_parse));
                     return false;
                 }
                 if (!status.equals("success")) {
-                    Toast.makeText(applicationContext,
-                            applicationContext.getString(R.string.conversation_send_error_api_error).replace(
-                                    "{error}", status), Toast.LENGTH_SHORT).show();
+                    publishProgress(applicationContext.getString(
+                            R.string.conversation_send_error_api_error).replace("{error}", status));
                     return false;
                 }
 
@@ -691,6 +686,17 @@ public class ConversationActivity
             @Override
             protected void onPostExecute(Boolean success) {
                 cleanup(success);
+            }
+
+            /**
+             * Shows an toast to the user.
+             *
+             * @param message The message to show. This must be a String array with a single element containing the
+             *                message.
+             */
+            @Override
+            protected void onProgressUpdate(String... message) {
+                Toast.makeText(applicationContext, message[0], Toast.LENGTH_SHORT).show();
             }
         }
     }

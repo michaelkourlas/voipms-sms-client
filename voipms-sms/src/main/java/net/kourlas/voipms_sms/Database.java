@@ -651,7 +651,7 @@ public class Database {
         /**
          * Custom AsyncTask for use with database updating.
          */
-        private class CustomAsyncTask extends AsyncTask<Integer, Void, Boolean> {
+        private class CustomAsyncTask extends AsyncTask<Integer, String, Boolean> {
             private RequestObject request;
 
             @Override
@@ -663,15 +663,13 @@ public class Database {
                 } catch (JSONException ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
                     if (showErrors) {
-                        Toast.makeText(applicationContext, applicationContext.getString(
-                                R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                        publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
                     }
                     return false;
                 } catch (Exception ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
                     if (showErrors) {
-                        Toast.makeText(applicationContext, applicationContext.getString(
-                                R.string.database_sync_error_api_request), Toast.LENGTH_SHORT).show();
+                        publishProgress(applicationContext.getString(R.string.database_sync_error_api_request));
                     }
                     return false;
                 }
@@ -680,17 +678,15 @@ public class Database {
                 String status = resultJson.optString("status");
                 if (status == null) {
                     if (showErrors) {
-                        Toast.makeText(applicationContext, applicationContext.getString(
-                                R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                        publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
                     }
                     return false;
                 }
                 if (!status.equals("success")) {
                     if (!status.equals("no_sms")) {
                         if (showErrors) {
-                            Toast.makeText(applicationContext, applicationContext.getString(
-                                            R.string.database_sync_error_api_error).replace("{error}", status),
-                                    Toast.LENGTH_SHORT).show();
+                            publishProgress(applicationContext.getString(
+                                    R.string.database_sync_error_api_error).replace("{error}", status));
                         }
                         return false;
                     }
@@ -721,8 +717,7 @@ public class Database {
                 JSONArray rawMessages = resultJson.optJSONArray("sms");
                 if (rawMessages == null) {
                     if (showErrors) {
-                        Toast.makeText(applicationContext, applicationContext.getString(
-                                R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                        publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
                     }
                     return false;
                 }
@@ -732,8 +727,7 @@ public class Database {
                             rawSms.optString("type") == null || rawSms.optString("did") == null ||
                             rawSms.optString("contact") == null || rawSms.optString("message") == null) {
                         if (showErrors) {
-                            Toast.makeText(applicationContext, applicationContext.getString(
-                                    R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                            publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
                         }
                         return false;
                     }
@@ -750,8 +744,7 @@ public class Database {
                     } catch (ParseException ex) {
                         Log.w(TAG, Log.getStackTraceString(ex));
                         if (showErrors) {
-                            Toast.makeText(applicationContext, applicationContext.getString(
-                                    R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                            publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
                         }
                         return false;
                     }
@@ -834,6 +827,17 @@ public class Database {
                 if (success != null) {
                     cleanup(success, forceRecent);
                 }
+            }
+
+            /**
+             * Shows an toast to the user.
+             *
+             * @param message The message to show. This must be a String array with a single element containing the
+             *                message.
+             */
+            @Override
+            protected void onProgressUpdate(String... message) {
+                Toast.makeText(applicationContext, message[0], Toast.LENGTH_SHORT).show();
             }
         }
     }
