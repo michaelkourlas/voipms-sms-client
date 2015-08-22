@@ -106,6 +106,9 @@
 </ul>
 <p>You can make changes to VoIP.ms DID settings <a href="https://voip.ms/m/managedid.php">here</a>.</p>
 
+<p>The application will attempt to configure the URL callback feature for you automatically when you enable
+    notifications; this second step is only necessary if the automatic configuration fails.</p>
+
 <p>When push notifications are enabled, the application stores your DID and GCM registration ID on a server run by the
     developer. When your DID receives a text message, VoIP.ms will send a callback to the server. The server will then
     forward the callback to your device using Google Cloud Messaging.</p>
