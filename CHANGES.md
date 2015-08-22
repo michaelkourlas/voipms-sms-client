@@ -1,3 +1,8 @@
+## 0.4.1 ##
+
+* Automatically set up URL callback for notifications
+* Bug fixes
+
 ## 0.4.0 ##
 
 * New synchronization options
