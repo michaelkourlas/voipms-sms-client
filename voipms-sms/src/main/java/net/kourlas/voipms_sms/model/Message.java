@@ -47,7 +47,7 @@ public class Message implements Comparable<Message> {
     /**
      * The date of the message.
      */
-    private final Date date;
+    private Date date;
 
     /**
      * The type of the message (incoming or outgoing).
@@ -164,8 +164,8 @@ public class Message implements Comparable<Message> {
      */
     public Message(String voipId, String date, String type, String did, String contact, String text)
             throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 
         this.databaseId = null;
 
@@ -269,6 +269,15 @@ public class Message implements Comparable<Message> {
      */
     public Date getDate() {
         return date;
+    }
+
+    /**
+     * Sets the date of the message.
+     *
+     * @param date The date of the message.
+     */
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     /**

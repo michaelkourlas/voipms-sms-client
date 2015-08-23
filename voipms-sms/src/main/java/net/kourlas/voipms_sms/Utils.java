@@ -44,7 +44,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class Utils {
     public static String getContactName(Context applicationContext, String phoneNumber) {
@@ -83,7 +82,7 @@ public class Utils {
 
     public static String getFormattedDate(Context applicationContext, Date smsDate, boolean conversationsView) {
         Calendar smsCalendar = Calendar.getInstance();
-        smsCalendar.setTimeInMillis(smsDate.getTime());
+        smsCalendar.setTime(smsDate);
 
         Calendar oneMinuteAgo = Calendar.getInstance();
         oneMinuteAgo.add(Calendar.MINUTE, -1);
@@ -118,8 +117,7 @@ public class Utils {
         }
 
         if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) == smsCalendar.get(
-                Calendar.WEEK_OF_YEAR) && Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(
-                Calendar.YEAR) == smsCalendar.get(Calendar.YEAR)) {
+                Calendar.WEEK_OF_YEAR) && Calendar.getInstance().get(Calendar.YEAR) == smsCalendar.get(Calendar.YEAR)) {
             if (conversationsView) {
                 // This week: EEE
                 DateFormat format = new SimpleDateFormat("EEE", Locale.getDefault());

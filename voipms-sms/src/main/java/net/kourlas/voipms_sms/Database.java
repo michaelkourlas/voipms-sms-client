@@ -445,7 +445,8 @@ public class Database {
             // message was received, as appropriate
             Date then = (messages.length == 0 || !retrieveOnlyRecentMessages) ?
                     preferences.getStartDate() : messages[0].getDate();
-            Calendar thenCalendar = Calendar.getInstance();
+            // Use EDT because the VoIP.ms API only works with EDT
+            Calendar thenCalendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"), Locale.US);
             thenCalendar.setTime(then);
             thenCalendar.set(Calendar.HOUR_OF_DAY, 0);
             thenCalendar.set(Calendar.MINUTE, 0);
@@ -454,7 +455,8 @@ public class Database {
             then = thenCalendar.getTime();
 
             Date now = new Date();
-            Calendar nowCalendar = Calendar.getInstance();
+            // Use EDT because the VoIP.ms API only works with EDT
+            Calendar nowCalendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"), Locale.US);
             nowCalendar.setTime(now);
             nowCalendar.set(Calendar.HOUR_OF_DAY, 0);
             nowCalendar.set(Calendar.MINUTE, 0);
@@ -473,7 +475,7 @@ public class Database {
             Date[] dates = new Date[periods + 1];
             dates[0] = then;
             for (int i = 1; i < dates.length - 1; i++) {
-                Calendar calendar = Calendar.getInstance();
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"), Locale.US);
                 calendar.setTime(dates[i - 1]);
                 calendar.add(Calendar.DAY_OF_YEAR, 90);
                 dates[i] = calendar.getTime();
@@ -481,8 +483,8 @@ public class Database {
             dates[dates.length - 1] = now;
 
             // Create VoIP.ms API urls for each of these periods
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
             for (int i = 0; i < dates.length - 1; i++) {
                 String url = "https://www.voip.ms/api/v1/rest.php?" +
                         "api_username=" + URLEncoder.encode(preferences.getEmail(), "UTF-8") + "&" +
@@ -492,7 +494,7 @@ public class Database {
                         "limit=" + URLEncoder.encode("1000000", "UTF-8") + "&" +
                         "from=" + URLEncoder.encode(sdf.format(dates[i]), "UTF-8") + "&" +
                         "to=" + URLEncoder.encode(sdf.format(dates[i + 1]), "UTF-8") + "&" +
-                        "timezone=-1";
+                        "timezone=-5"; // -5 corresponds to EDT
                 requests.add(new SynchronizeDatabaseTask.RequestObject(url,
                         SynchronizeDatabaseTask.RequestObject.RequestType.MESSAGE_RETRIEVAL, dates[i],
                         dates[i + 1]));
@@ -847,7 +849,7 @@ public class Database {
      */
     private class DatabaseHelper extends SQLiteOpenHelper {
         private static final String DATABASE_NAME = "sms.db";
-        private static final int DATABASE_VERSION = 6;
+        private static final int DATABASE_VERSION = 7;
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_MESSAGE + "(" +
                 COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                 COLUMN_VOIP_ID + " INTEGER," +
@@ -889,8 +891,81 @@ public class Database {
          */
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGE);
-            onCreate(db);
+            if (oldVersion <= 5) {
+                // For version 5 and below, the database was nothing more than a cache so it can simply be dropped
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGE);
+                onCreate(db);
+            }
+            else {
+                // After version 5, the database must be converted; it cannot be simply dropped
+                if (oldVersion == 6) {
+                    // In version 6, dates from VoIP.ms were parsed as if they did not have daylight savings time when
+                    // they actually did; the code below re-parses the dates properly
+                    try {
+                        List<Message> messages = new ArrayList<>();
+
+                        String table = "sms";
+                        String[] columns = {"DatabaseId", "VoipId", "Date", "Type", "Did", "Contact", "Text", "Unread",
+                                "Deleted", "Delivered", "DeliveryInProgress"};
+                        Cursor cursor = database.query(table, columns, null, null, null, null, null);
+                        cursor.moveToFirst();
+                        while (!cursor.isAfterLast()) {
+                            messages.add(new Message(cursor.getLong(cursor.getColumnIndexOrThrow(columns[0])),
+                                    cursor.isNull(cursor.getColumnIndexOrThrow(columns[1])) ? null : cursor.getLong(
+                                            cursor.getColumnIndex(columns[1])),
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[2])),
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[3])),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(columns[4])),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(columns[5])),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(columns[6])),
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[7])),
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[8])),
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[9])),
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[10]))));
+                        }
+                        cursor.close();
+
+                        for (Message message : messages) {
+                            // Incorrect date has an hour removed outside of daylight savings time
+                            Date date = message.getDate();
+
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            // Incorrect date converted to UTC with an hour removed outside of daylight savings time
+                            String dateString = sdf.format(date);
+
+                            // Incorrect date string is parsed as if it were EST/EDT; it is now four hours ahead of EST/EDT
+                            // at all times
+                            sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+                            date = sdf.parse(dateString);
+
+                            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"), Locale.US);
+                            calendar.setTime(date);
+                            calendar.add(Calendar.HOUR_OF_DAY, -4);
+                            // Date is now stored correctly
+                            message.setDate(calendar.getTime());
+
+                            ContentValues values = new ContentValues();
+                            values.put(columns[0], message.getDatabaseId());
+                            values.put(columns[1], message.getVoipId());
+                            values.put(columns[2], message.getDateInDatabaseFormat());
+                            values.put(columns[3], message.getTypeInDatabaseFormat());
+                            values.put(columns[4], message.getDid());
+                            values.put(columns[5], message.getContact());
+                            values.put(columns[6], message.getText());
+                            values.put(columns[7], message.isUnreadInDatabaseFormat());
+                            values.put(columns[8], message.isDeletedInDatabaseFormat());
+                            values.put(columns[9], message.isDeliveredInDatabaseFormat());
+                            values.put(columns[10], message.isDeliveryInProgressInDatabaseFormat());
+
+                            database.replace(table, null, values);
+                        }
+                    } catch (ParseException ex) {
+                        // This should never happen since the same SimpleDateFormat that formats the date parses it
+                        throw new Error(ex);
+                    }
+                }
+            }
         }
     }
 }
