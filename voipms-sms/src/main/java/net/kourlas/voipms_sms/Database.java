@@ -902,15 +902,13 @@ public class Database {
                     // In version 6, dates from VoIP.ms were parsed as if they did not have daylight savings time when
                     // they actually did; the code below re-parses the dates properly
                     try {
-                        List<Message> messages = new ArrayList<>();
-
                         String table = "sms";
                         String[] columns = {"DatabaseId", "VoipId", "Date", "Type", "Did", "Contact", "Text", "Unread",
                                 "Deleted", "Delivered", "DeliveryInProgress"};
-                        Cursor cursor = database.query(table, columns, null, null, null, null, null);
+                        Cursor cursor = db.query(table, columns, null, null, null, null, null);
                         cursor.moveToFirst();
                         while (!cursor.isAfterLast()) {
-                            messages.add(new Message(cursor.getLong(cursor.getColumnIndexOrThrow(columns[0])),
+                            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(columns[0])),
                                     cursor.isNull(cursor.getColumnIndexOrThrow(columns[1])) ? null : cursor.getLong(
                                             cursor.getColumnIndex(columns[1])),
                                     cursor.getLong(cursor.getColumnIndexOrThrow(columns[2])),
@@ -921,11 +919,8 @@ public class Database {
                                     cursor.getLong(cursor.getColumnIndexOrThrow(columns[7])),
                                     cursor.getLong(cursor.getColumnIndexOrThrow(columns[8])),
                                     cursor.getLong(cursor.getColumnIndexOrThrow(columns[9])),
-                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[10]))));
-                        }
-                        cursor.close();
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[10])));
 
-                        for (Message message : messages) {
                             // Incorrect date has an hour removed outside of daylight savings time
                             Date date = message.getDate();
 
@@ -958,8 +953,10 @@ public class Database {
                             values.put(columns[9], message.isDeliveredInDatabaseFormat());
                             values.put(columns[10], message.isDeliveryInProgressInDatabaseFormat());
 
-                            database.replace(table, null, values);
+                            db.replace(table, null, values);
+                            cursor.moveToNext();
                         }
+                        cursor.close();
                     } catch (ParseException ex) {
                         // This should never happen since the same SimpleDateFormat that formats the date parses it
                         throw new Error(ex);
