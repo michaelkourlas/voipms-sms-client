@@ -689,7 +689,7 @@ public class ConversationActivity
             }
 
             /**
-             * Shows an toast to the user.
+             * Shows a toast to the user.
              *
              * @param message The message to show. This must be a String array with a single element containing the
              *                message.
