@@ -24,6 +24,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.Utils;
 
 @SuppressWarnings("unused")
 public class DatabaseDeletePreference extends Preference {
@@ -41,18 +42,15 @@ public class DatabaseDeletePreference extends Preference {
 
     @Override
     protected void onClick() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(getContext().getString(R.string.preferences_database_delete_confirm_title));
-        builder.setMessage(getContext().getString(R.string.preferences_database_delete_confirm_message));
-        builder.setPositiveButton(getContext().getApplicationContext().getString(R.string.delete),
+        Utils.showAlertDialog(getContext(), getContext().getString(R.string.preferences_database_delete_confirm_title),
+                getContext().getString(R.string.preferences_database_delete_confirm_message),
+                getContext().getApplicationContext().getString(R.string.delete),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Database.getInstance(getContext().getApplicationContext()).deleteAllMessages();
                     }
-                }
-        );
-        builder.setNegativeButton(R.string.cancel, null);
-        builder.show();
+                },
+                getContext().getString(R.string.cancel), null);
     }
 }

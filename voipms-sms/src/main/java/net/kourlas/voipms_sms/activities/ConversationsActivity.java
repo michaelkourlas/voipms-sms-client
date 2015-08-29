@@ -124,22 +124,18 @@ public class ConversationsActivity
             preRecentUpdate();
         }
         else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(getString(R.string.conversations_first_run_dialog_text));
-            builder.setPositiveButton(getString(R.string.preferences_name), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    Intent preferencesIntent = new Intent(conversationsActivity, PreferencesActivity.class);
-                    startActivity(preferencesIntent);
-                }
-            });
-            builder.setNegativeButton(getString(R.string.help_name), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    Intent helpIntent = new Intent(conversationsActivity, HelpActivity.class);
-                    startActivity(helpIntent);
-                }
-            });
-            builder.setCancelable(false);
-            builder.show();
+            Utils.showAlertDialog(this, null, getString(R.string.conversations_first_run_dialog_text),
+                    getString(R.string.preferences_name), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Intent preferencesIntent = new Intent(conversationsActivity, PreferencesActivity.class);
+                            startActivity(preferencesIntent);
+                        }
+                    }, getString(R.string.help_name), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Intent helpIntent = new Intent(conversationsActivity, HelpActivity.class);
+                            startActivity(helpIntent);
+                        }
+                    });
         }
     }
 
@@ -399,31 +395,31 @@ public class ConversationsActivity
      * @param databaseIds The database IDs of the messages to delete.
      */
     public void deleteMessages(final Long[] databaseIds) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
-        builder.setTitle(getString(R.string.conversations_delete_confirm_title));
-        builder.setMessage(getString(R.string.conversations_delete_confirm_message));
-        builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                for (long databaseId : databaseIds) {
-                    Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
-                    if (message.getVoipId() == null) {
-                        // Simply delete messages with no VoIP.ms ID from the database; no request to the VoIP.ms API
-                        // will be necessary
-                        database.removeMessage(databaseId);
+        Utils.showAlertDialog(this, getString(R.string.conversations_delete_confirm_title),
+                getString(R.string.conversations_delete_confirm_message),
+                getString(R.string.delete), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        for (long databaseId : databaseIds) {
+                            Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
+                            if (message.getVoipId() == null) {
+                                // Simply delete messages with no VoIP.ms ID from the database; no request to the
+                                // VoIP.ms API will be necessary
+                                database.removeMessage(databaseId);
+                            }
+                            else {
+                                // Otherwise, keep the message in the database but set a deleted flag, so the message's
+                                // VoIP.ms ID can be accessed later if local deletions are propagated to the VoIP.ms
+                                // servers
+                                message.setDeleted(true);
+                                database.insertMessage(message);
+                            }
+                            adapter.refresh();
+                        }
                     }
-                    else {
-                        // Otherwise, keep the message in the database but set a deleted flag, so the message's VoIP.ms
-                        // ID can be accessed later if local deletions are propagated to the VoIP.ms servers
-                        message.setDeleted(true);
-                        database.insertMessage(message);
-                    }
-                    adapter.refresh();
-                }
-            }
-        });
-        builder.setNegativeButton(getString(R.string.cancel), null);
-        builder.show();
+                },
+                getString(R.string.cancel), null
+        );
     }
 
     /**

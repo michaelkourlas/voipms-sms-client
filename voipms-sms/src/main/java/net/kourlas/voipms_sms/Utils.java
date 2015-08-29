@@ -18,7 +18,6 @@
 package net.kourlas.voipms_sms;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -255,25 +254,32 @@ public class Utils {
      * Shows a standard information dialog to the user.
      *
      * @param context The source context.
-     * @param text The text of the dialog.
+     * @param text    The text of the dialog.
      */
     public static void showInfoDialog(Context context, String text) {
-        showInfoDialogWithAction(context, text, null);
+        showAlertDialog(context, null, text, context.getString(R.string.ok), null, null, null);
     }
 
     /**
-     * Shows a standard information dialog to the user, with an action to be taken when the "OK" button is clicked.
+     * Shows an alert dialog to the user.
      *
-     * @param context The source context.
-     * @param text The text of the dialog.
-     * @param action The action to be taken when the "OK" button is clicked.
+     * @param context              The source context.
+     * @param title                The title of the dialog.
+     * @param text                 The text of the dialog.
+     * @param positiveButtonText   The text of the positive button of the dialog.
+     * @param positiveButtonAction The action to be taken when the positive button is clicked.
+     * @param negativeButtonText   The text of the negative button of the dialog.
+     * @param negativeButtonAction The action to be taken when the negative button is clicked.
      */
-    public static void showInfoDialogWithAction(Context context, String text,
-                                                DialogInterface.OnClickListener action) {
+    public static void showAlertDialog(Context context, String title, String text, String positiveButtonText,
+                                       DialogInterface.OnClickListener positiveButtonAction, String negativeButtonText,
+                                       DialogInterface.OnClickListener negativeButtonAction) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.DialogTheme);
         builder.setMessage(text);
-        builder.setPositiveButton(R.string.ok, action);
+        builder.setMessage(title);
+        builder.setPositiveButton(positiveButtonText, positiveButtonAction);
+        builder.setNegativeButton(negativeButtonText, negativeButtonAction);
         builder.setCancelable(false);
         builder.show();
     }

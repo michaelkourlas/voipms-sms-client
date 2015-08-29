@@ -106,7 +106,7 @@ public class DidPreference extends Preference {
         }
 
         if (success) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.DialogTheme);
             builder.setTitle(getContext().getString(R.string.preferences_account_did_dialog_title));
             builder.setItems(dids, new DialogInterface.OnClickListener() {
                 @Override
@@ -117,10 +117,7 @@ public class DidPreference extends Preference {
             builder.show();
         }
         else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setMessage(message);
-            builder.setPositiveButton(R.string.ok, null);
-            builder.show();
+            Utils.showInfoDialog(getContext(), message);
         }
     }
 

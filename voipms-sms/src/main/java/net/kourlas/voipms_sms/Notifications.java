@@ -28,7 +28,6 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v7.app.AlertDialog;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationQuickReplyActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
@@ -248,14 +247,14 @@ public class Notifications {
                 };
 
                 if (!success) {
-                    Utils.showInfoDialogWithAction(activity,
+                    Utils.showAlertDialog(activity, null,
                             applicationContext.getString(R.string.notifications_callback_fail),
-                            gcmOnClickListener);
+                            applicationContext.getString(R.string.ok), gcmOnClickListener, null, null);
                 }
                 else {
-                    Utils.showInfoDialogWithAction(activity,
+                    Utils.showAlertDialog(activity, null,
                             applicationContext.getString(R.string.notifications_callback_success),
-                            gcmOnClickListener);
+                            applicationContext.getString(R.string.ok), gcmOnClickListener, null, null);
                 }
             }
         }.execute();

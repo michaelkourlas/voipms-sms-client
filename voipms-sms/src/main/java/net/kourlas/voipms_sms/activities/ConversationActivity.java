@@ -374,25 +374,25 @@ public class ConversationActivity
 
             if (message != null) {
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                String dialogText;
                 if (message.getType() == Message.Type.INCOMING) {
-                    builder.setMessage((message.getVoipId() == null ? "" : (getString(R.string.conversation_info_id) +
+                    dialogText = (message.getVoipId() == null ? "" : (getString(R.string.conversation_info_id) +
                             " " + message.getVoipId() + "\n")) + getString(R.string.conversation_info_to) + " " +
                             Utils.getFormattedPhoneNumber(message.getDid()) + "\n" +
                             getString(R.string.conversation_info_from) + " " +
                             Utils.getFormattedPhoneNumber(message.getContact()) + "\n" +
-                            getString(R.string.conversation_info_date) + " " + dateFormat.format(message.getDate()));
+                            getString(R.string.conversation_info_date) + " " + dateFormat.format(message.getDate());
                 }
                 else {
-                    builder.setMessage((message.getVoipId() == null ? "" : (getString(R.string.conversation_info_id) +
+                    dialogText = (message.getVoipId() == null ? "" : (getString(R.string.conversation_info_id) +
                             " " + message.getVoipId() + "\n")) + getString(R.string.conversation_info_to) + " " +
                             Utils.getFormattedPhoneNumber(message.getContact()) + "\n" +
                             getString(R.string.conversation_info_from) + " " +
                             Utils.getFormattedPhoneNumber(message.getDid()) + "\n" +
-                            getString(R.string.conversation_info_date) + " " + dateFormat.format(message.getDate()));
+                            getString(R.string.conversation_info_date) + " " + dateFormat.format(message.getDate());
                 }
-                builder.setTitle(getString(R.string.conversation_info_title));
-                builder.show();
+                Utils.showAlertDialog(this, getString(R.string.conversation_info_title), dialogText,
+                        getString(R.string.ok), null, null, null);
             }
 
             actionMode.finish();
@@ -534,27 +534,25 @@ public class ConversationActivity
     }
 
     public void deleteMessages(final Long[] databaseIds) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
-        builder.setTitle(getString(R.string.conversation_delete_confirm_title));
-        builder.setMessage(getString(R.string.conversation_delete_confirm_message));
-        builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                for (long databaseId : databaseIds) {
-                    Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
-                    if (message.getVoipId() == null) {
-                        database.removeMessage(databaseId);
+        Utils.showAlertDialog(this, getString(R.string.conversation_delete_confirm_title),
+                getString(R.string.conversation_delete_confirm_message),
+                getString(R.string.delete), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        for (long databaseId : databaseIds) {
+                            Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
+                            if (message.getVoipId() == null) {
+                                database.removeMessage(databaseId);
+                            }
+                            else {
+                                message.setDeleted(true);
+                                database.insertMessage(message);
+                            }
+                            adapter.refresh();
+                        }
                     }
-                    else {
-                        message.setDeleted(true);
-                        database.insertMessage(message);
-                    }
-                    adapter.refresh();
-                }
-            }
-        });
-        builder.setNegativeButton(getString(R.string.cancel), null);
-        builder.show();
+                },
+                getString(R.string.cancel), null);
     }
 
     public void preSendMessage() {
