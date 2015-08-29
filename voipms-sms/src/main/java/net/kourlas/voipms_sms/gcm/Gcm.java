@@ -18,6 +18,7 @@
 package net.kourlas.voipms_sms.gcm;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import com.google.android.gms.common.ConnectionResult;
@@ -75,13 +76,18 @@ public class Gcm {
             return;
         }
         if (preferences.getDid().equals("")) {
-            if (showFeedback) {
-                Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_did));
-            }
+            // Do not show an error; this method should never be called unless a DID is set
             return;
         }
         if (!checkPlayServices(activity, showFeedback)) {
             return;
+        }
+
+        final ProgressDialog progressDialog = new ProgressDialog(activity);
+        if (showFeedback) {
+            progressDialog.setMessage(applicationContext.getString(R.string.notifications_gcm_progress));
+            progressDialog.setCancelable(false);
+            progressDialog.show();
         }
 
         final InstanceID instanceIdObj = InstanceID.getInstance(applicationContext);
@@ -91,7 +97,7 @@ public class Gcm {
                 @Override
                 protected Boolean doInBackground(Boolean... params) {
                     try {
-                        String token = instanceIdObj.getToken(applicationContext.getString(R.string.gcm_sender_id),
+                        String token = instanceIdObj.getToken(applicationContext.getString(R.string.notifications_gcm_sender_id),
                                 GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
 
                         String registrationBackendUrl = "https://voipmssms-kourlas.rhcloud.com/register?" +
@@ -115,20 +121,21 @@ public class Gcm {
                 @Override
                 protected void onPostExecute(Boolean success) {
                     if (showFeedback) {
+                        progressDialog.hide();
                         if (!success) {
                             Utils.showInfoDialog(activity, applicationContext.getResources().getString(
-                                    R.string.gcm_fail));
+                                    R.string.notifications_gcm_fail));
                         }
                         else {
                             Utils.showInfoDialog(activity, applicationContext.getResources().getString(
-                                    R.string.gcm_success));
+                                    R.string.notifications_gcm_success));
                         }
                     }
                 }
             }.execute();
         }
         else if (showFeedback) {
-            Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_success));
+            Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.notifications_gcm_success));
         }
     }
 
@@ -148,7 +155,7 @@ public class Gcm {
                     GoogleApiAvailability.getInstance().getErrorDialog(activity, resultCode, 0).show();
                 }
                 else {
-                    Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.gcm_play_services));
+                    Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.notifications_gcm_play_services));
                 }
             }
             return false;

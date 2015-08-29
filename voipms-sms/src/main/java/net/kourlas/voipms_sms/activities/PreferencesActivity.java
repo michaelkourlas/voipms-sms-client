@@ -18,7 +18,6 @@
 package net.kourlas.voipms_sms.activities;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -28,7 +27,6 @@ import android.preference.*;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import net.kourlas.voipms_sms.*;
@@ -88,6 +86,7 @@ public class PreferencesActivity extends AppCompatActivity {
         Context applicationContext;
         Database database;
         Preferences preferences;
+        Notifications notifications;
         Gcm gcm;
 
         @Override
@@ -99,6 +98,7 @@ public class PreferencesActivity extends AppCompatActivity {
             applicationContext = getActivity().getApplicationContext();
             database = Database.getInstance(applicationContext);
             preferences = Preferences.getInstance(applicationContext);
+            notifications = Notifications.getInstance(applicationContext);
             gcm = Gcm.getInstance(applicationContext);
         }
 
@@ -137,18 +137,9 @@ public class PreferencesActivity extends AppCompatActivity {
                     SynchronizationIntervalReceiver.setupSynchronizationInterval(applicationContext);
                 }
 
-                // Show informational message and attempt to register for GCM if notificatons are enabled
+                // Notifications are not yet enabled, so the check below is the inverse of what one might expect
                 if (key.equals(applicationContext.getString(R.string.preferences_notifications_enable_key)) && preferences.getNotificationsEnabled()) {
-                    // Notifications are not yet enabled, so the check above is the inverse of what one might expect
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage(getResources().getString(R.string.preferences_notifications_enable_dialog_text));
-                    builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            gcm.registerForGcm(getActivity(), true, true);
-                        }
-                    });
-                    builder.show();
+                    notifications.enableNotifications(getActivity());
                 }
             }
         }

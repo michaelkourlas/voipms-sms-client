@@ -85,13 +85,6 @@
     <string name="billing_pid_donation" translatable="false">donation</string>
     <string name="billing_failure">Failed to open the in-app purchase dialog. Please try again later. (500)</string>
 
-    <!-- GCM -->
-    <string name="gcm_success">Google Cloud Messaging registration succeeded. (400)</string>
-    <string name="gcm_play_services">This device does not support Google Play Services. (401)</string>
-    <string name="gcm_did">Google Cloud Messaging registration requires that a DID be set. (402)</string>
-    <string name="gcm_fail">Google Cloud Messaging registration failed. Please try again later. (403)</string>
-    <string name="gcm_sender_id" translatable="false">626231576786</string>
-
     <!-- Database -->
     <string name="database_sync_error_network">Database synchronization failed. No network connection is available. (100)</string>
     <string name="database_sync_error_api_request">Database synchronization failed. A request to the VoIP.ms API failed. (101)</string>
@@ -99,6 +92,15 @@
     <string name="database_sync_error_api_error">Database synchronization failed. The VoIP.ms API returned an error: {error}. (103)</string>
 
     <!-- Notifications -->
+    <string name="notifications_callback_username_password_did">To enable notifications, your VoIP.ms portal email address, API password, and an SMS-enabled DID must be set. (404)</string>
+    <string name="notifications_callback_progress">Configuring VoIP.ms URL callback…</string>
+    <string name="notifications_callback_success">VoIP.ms URL callback configured successfully. (406)</string>
+    <string name="notifications_callback_fail">Failed to configure VoIP.ms URL callback. You must complete this step manually in order to use notifications. (405)\n\nTo configure the URL callback, you must access the SMS settings for your DID on the VoIP.ms portal. Enable the \"SMS URL Callback\" feature and enter the following URL into the neighbouring field:\n\nhttp://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}</string>
+    <string name="notifications_gcm_progress">Registering for Google Cloud Messaging…</string>
+    <string name="notifications_gcm_success">Google Cloud Messaging registration succeeded. (400)</string>
+    <string name="notifications_gcm_play_services">This device does not support Google Play Services. (401)</string>
+    <string name="notifications_gcm_fail">Google Cloud Messaging registration failed. Please try again later. (403)</string>
+    <string name="notifications_gcm_sender_id" translatable="false">626231576786</string>
     <string name="notifications_button_reply">Reply</string>
     <string name="notifications_button_mark_read">Mark Read</string>
 

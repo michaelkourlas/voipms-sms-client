@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.*;
 import android.net.ConnectivityManager;
@@ -250,10 +251,29 @@ public class Utils {
         return networkInfo != null && networkInfo.isConnected();
     }
 
-    public static void showInfoDialog(Activity activity, String text) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+    /**
+     * Shows a standard information dialog to the user.
+     *
+     * @param context The source context.
+     * @param text The text of the dialog.
+     */
+    public static void showInfoDialog(Context context, String text) {
+        showInfoDialogWithAction(context, text, null);
+    }
+
+    /**
+     * Shows a standard information dialog to the user, with an action to be taken when the "OK" button is clicked.
+     *
+     * @param context The source context.
+     * @param text The text of the dialog.
+     * @param action The action to be taken when the "OK" button is clicked.
+     */
+    public static void showInfoDialogWithAction(Context context, String text,
+                                                DialogInterface.OnClickListener action) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage(text);
-        builder.setPositiveButton(R.string.ok, null);
+        builder.setPositiveButton(R.string.ok, action);
         builder.setCancelable(false);
         builder.show();
     }

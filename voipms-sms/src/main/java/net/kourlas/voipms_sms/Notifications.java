@@ -17,24 +17,28 @@
 
 package net.kourlas.voipms_sms;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.*;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.AlertDialog;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationQuickReplyActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
+import net.kourlas.voipms_sms.gcm.Gcm;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.receivers.MarkAsReadReceiver;
+import org.json.JSONObject;
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +47,7 @@ public class Notifications {
     private static Notifications instance = null;
     private final Context applicationContext;
     private final Preferences preferences;
+    private final Gcm gcm;
 
     private final Map<String, Integer> notificationIds;
     private int notificationIdCount;
@@ -50,6 +55,7 @@ public class Notifications {
     private Notifications(Context context) {
         this.applicationContext = context.getApplicationContext();
         this.preferences = Preferences.getInstance(applicationContext);
+        this.gcm = Gcm.getInstance(applicationContext);
 
         this.notificationIds = new HashMap<>();
         this.notificationIdCount = 0;
@@ -110,7 +116,8 @@ public class Notifications {
                 notificationBuilder.setContentText(mostRecentSms);
                 notificationBuilder.setSmallIcon(R.drawable.ic_chat_white_24dp);
                 notificationBuilder.setPriority(Notification.PRIORITY_HIGH);
-                notificationBuilder.setSound(Uri.parse(Preferences.getInstance(applicationContext).getNotificationSound()));
+                notificationBuilder.setSound(Uri.parse(
+                        Preferences.getInstance(applicationContext).getNotificationSound()));
                 notificationBuilder.setLights(0xFFAA0000, 1000, 5000);
                 if (Preferences.getInstance(applicationContext).getNotificationVibrateEnabled()) {
                     notificationBuilder.setVibrate(new long[]{0, 250, 250, 250});
@@ -156,7 +163,8 @@ public class Notifications {
                 PendingIntent replyPendingIntent = PendingIntent.getActivity(applicationContext, 0, replyIntent,
                         PendingIntent.FLAG_CANCEL_CURRENT);
                 NotificationCompat.Action.Builder replyAction = new NotificationCompat.Action.Builder(
-                        R.drawable.ic_reply_white_24dp, applicationContext.getString(R.string.notifications_button_reply),
+                        R.drawable.ic_reply_white_24dp,
+                        applicationContext.getString(R.string.notifications_button_reply),
                         replyPendingIntent);
                 notificationBuilder.addAction(replyAction.build());
 
@@ -166,7 +174,8 @@ public class Notifications {
                 PendingIntent markAsReadPendingIntent = PendingIntent.getBroadcast(applicationContext, 0,
                         markAsReadIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                 NotificationCompat.Action.Builder markAsReadAction = new NotificationCompat.Action.Builder(
-                        R.drawable.ic_drafts_white_24dp, applicationContext.getString(R.string.notifications_button_mark_read),
+                        R.drawable.ic_drafts_white_24dp,
+                        applicationContext.getString(R.string.notifications_button_mark_read),
                         markAsReadPendingIntent);
                 notificationBuilder.addAction(markAsReadAction.build());
 
@@ -183,5 +192,72 @@ public class Notifications {
                 notificationManager.notify(id, notificationBuilder.build());
             }
         }
+    }
+
+    /**
+     * Enable SMS notifications by configuring the VoIP.ms URL callback, registering for GCM and making the appropriate
+     * changes to the application preferences.
+     *
+     * @param activity The source activity.
+     */
+    public void enableNotifications(final Activity activity) {
+        if (preferences.getEmail().equals("") || preferences.getPassword().equals("") ||
+                preferences.getDid().equals("")) {
+            Utils.showInfoDialog(activity, applicationContext.getString(
+                    R.string.notifications_callback_username_password_did));
+            return;
+        }
+
+        final ProgressDialog progressDialog = new ProgressDialog(activity);
+        progressDialog.setMessage(activity.getString(R.string.notifications_callback_progress));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        new AsyncTask<Boolean, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Boolean... params) {
+                try {
+                    String url = "https://www.voip.ms/api/v1/rest.php?" +
+                            "api_username=" + URLEncoder.encode(preferences.getEmail(), "UTF-8") + "&" +
+                            "api_password=" + URLEncoder.encode(preferences.getPassword(), "UTF-8") + "&" +
+                            "method=setSMS" + "&" +
+                            "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
+                            "enable=1" + "&" +
+                            "url_callback_enable=1" + "&" +
+                            "url_callback=" + URLEncoder.encode(
+                            "http://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}", "UTF-8") + "&" +
+                            "url_callback_retry=0";
+
+                    JSONObject result = Utils.getJson(url);
+                    String status = result.optString("status");
+                    return !(status == null || !status.equals("success"));
+                } catch (Exception ex) {
+                    return false;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                progressDialog.hide();
+
+                DialogInterface.OnClickListener gcmOnClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        gcm.registerForGcm(activity, true, true);
+                    }
+                };
+
+                if (!success) {
+                    Utils.showInfoDialogWithAction(activity,
+                            applicationContext.getString(R.string.notifications_callback_fail),
+                            gcmOnClickListener);
+                }
+                else {
+                    Utils.showInfoDialogWithAction(activity,
+                            applicationContext.getString(R.string.notifications_callback_success),
+                            gcmOnClickListener);
+                }
+            }
+        }.execute();
     }
 }
