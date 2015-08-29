@@ -45,7 +45,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Contains various common utility methods.
+ */
 public class Utils {
+    /**
+     * Gets the name of a contact from the Android contacts provider, given a phone number.
+     *
+     * @param applicationContext The application context.
+     * @param phoneNumber        The phone number of the contact.
+     * @return the name of the contact.
+     */
     public static String getContactName(Context applicationContext, String phoneNumber) {
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = applicationContext.getContentResolver().query(uri, new String[]{
@@ -61,11 +71,25 @@ public class Utils {
         }
     }
 
+    /**
+     * Gets a URI pointing to a contact's photo, given a phone number.
+     *
+     * @param applicationContext The application context.
+     * @param phoneNumber        The phone number of the contact.
+     * @return a URI pointing to the contact's photo.
+     */
     public static String getContactPhotoUri(Context applicationContext, String phoneNumber) {
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         return getContactPhotoUri(applicationContext, uri);
     }
 
+    /**
+     * Gets a URI pointing to a contact's photo, given the URI for that contact.
+     *
+     * @param applicationContext The application context.
+     * @param uri                The URI of the contact.
+     * @return a URI pointing to the contact's photo.
+     */
     public static String getContactPhotoUri(Context applicationContext, Uri uri) {
         Cursor cursor = applicationContext.getContentResolver().query(uri, new String[]{
                 ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI}, null, null, null);
@@ -80,15 +104,23 @@ public class Utils {
         }
     }
 
-    public static String getFormattedDate(Context applicationContext, Date smsDate, boolean conversationsView) {
-        Calendar smsCalendar = Calendar.getInstance();
-        smsCalendar.setTime(smsDate);
+    /**
+     * Formats a date for display in the application.
+     *
+     * @param applicationContext The application context.
+     * @param date               The date to format.
+     * @param hideTime           Omits the time in the formatted date if true.
+     * @return the formatted date.
+     */
+    public static String getFormattedDate(Context applicationContext, Date date, boolean hideTime) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
 
         Calendar oneMinuteAgo = Calendar.getInstance();
         oneMinuteAgo.add(Calendar.MINUTE, -1);
-        if (oneMinuteAgo.getTime().before(smsDate)) {
+        if (oneMinuteAgo.getTime().before(date)) {
             // Last minute: X seconds ago
-            long seconds = (Calendar.getInstance().getTime().getTime() - smsCalendar.getTime().getTime()) / 1000;
+            long seconds = (Calendar.getInstance().getTime().getTime() - calendar.getTime().getTime()) / 1000;
             if (seconds < 10) {
                 return applicationContext.getString(R.string.utils_date_just_now);
             }
@@ -99,9 +131,9 @@ public class Utils {
 
         Calendar oneHourAgo = Calendar.getInstance();
         oneHourAgo.add(Calendar.HOUR_OF_DAY, -1);
-        if (oneHourAgo.getTime().before(smsDate)) {
+        if (oneHourAgo.getTime().before(date)) {
             // Last hour: X minutes ago
-            long minutes = (Calendar.getInstance().getTime().getTime() - smsCalendar.getTime().getTime()) / (1000 * 60);
+            long minutes = (Calendar.getInstance().getTime().getTime() - calendar.getTime().getTime()) / (1000 * 60);
             if (minutes == 1) {
                 return applicationContext.getString(R.string.utils_date_one_minute_ago);
             }
@@ -110,51 +142,58 @@ public class Utils {
             }
         }
 
-        if (compareDateWithoutTime(Calendar.getInstance(), smsCalendar) == 0) {
+        if (compareDateWithoutTime(Calendar.getInstance(), calendar) == 0) {
             // Today: h:mm a
             DateFormat format = new SimpleDateFormat("h:mm a", Locale.getDefault());
-            return format.format(smsDate);
+            return format.format(date);
         }
 
-        if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) == smsCalendar.get(
-                Calendar.WEEK_OF_YEAR) && Calendar.getInstance().get(Calendar.YEAR) == smsCalendar.get(Calendar.YEAR)) {
-            if (conversationsView) {
+        if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) == calendar.get(
+                Calendar.WEEK_OF_YEAR) && Calendar.getInstance().get(Calendar.YEAR) == calendar.get(Calendar.YEAR)) {
+            if (hideTime) {
                 // This week: EEE
                 DateFormat format = new SimpleDateFormat("EEE", Locale.getDefault());
-                return format.format(smsDate);
+                return format.format(date);
             }
             else {
                 // This week: EEE h:mm a
                 DateFormat format = new SimpleDateFormat("EEE h:mm a", Locale.getDefault());
-                return format.format(smsDate);
+                return format.format(date);
             }
         }
 
-        if (Calendar.getInstance().get(Calendar.YEAR) == smsCalendar.get(Calendar.YEAR)) {
-            if (conversationsView) {
+        if (Calendar.getInstance().get(Calendar.YEAR) == calendar.get(Calendar.YEAR)) {
+            if (hideTime) {
                 // This year: MMM d
                 DateFormat format = new SimpleDateFormat("MMM d", Locale.getDefault());
-                return format.format(smsDate);
+                return format.format(date);
             }
             else {
                 // This year: MMM d h:mm a
                 DateFormat format = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault());
-                return format.format(smsDate);
+                return format.format(date);
             }
         }
 
-        if (conversationsView) {
+        if (hideTime) {
             // Any: MMM d, yyyy
             DateFormat format = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
-            return format.format(smsDate);
+            return format.format(date);
         }
         else {
             // Any: MMM d, yyyy h:mm a
             DateFormat format = new SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault());
-            return format.format(smsDate);
+            return format.format(date);
         }
     }
 
+    /**
+     * Returns true if two dates are equivalent (excluding times).
+     *
+     * @param c1 The first date to compare.
+     * @param c2 The second date to compare.
+     * @return true if the two dates are equivalent (excluding times).
+     */
     private static int compareDateWithoutTime(Calendar c1, Calendar c2) {
         if (c1.get(Calendar.YEAR) != c2.get(Calendar.YEAR))
             return c1.get(Calendar.YEAR) - c2.get(Calendar.YEAR);
@@ -163,6 +202,12 @@ public class Utils {
         return c1.get(Calendar.DAY_OF_MONTH) - c2.get(Calendar.DAY_OF_MONTH);
     }
 
+    /**
+     * Returns a phone number for display in the application.
+     *
+     * @param phoneNumber The phone number to format.
+     * @return The formatted phone number.
+     */
     public static String getFormattedPhoneNumber(String phoneNumber) {
         if (phoneNumber.length() == 10) {
             MessageFormat phoneNumberFormat = new MessageFormat("({0}) {1}-{2}");
@@ -180,6 +225,16 @@ public class Utils {
         return phoneNumber;
     }
 
+    /**
+     * Retrieves a JSON object from the specified URL.
+     * <p/>
+     * Note that this is a blocking method; it should not be called from the URI thread.
+     *
+     * @param urlString The URL to retrieve the JSON from.
+     * @return The JSON object at the specified URL.
+     * @throws IOException   if a connection to the server could not be established.
+     * @throws JSONException if the server did not return valid JSON.
+     */
     public static JSONObject getJson(String urlString) throws IOException, JSONException {
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -202,6 +257,26 @@ public class Utils {
         return new JSONObject(data.toString());
     }
 
+    /**
+     * Checks if the Internet connection is available.
+     *
+     * @param applicationContext The application context.
+     * @return true if the Internet connection is available, false otherwise.
+     */
+    public static boolean isNetworkConnectionAvailable(Context applicationContext) {
+        ConnectivityManager connMgr = (ConnectivityManager) applicationContext.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
+    /**
+     * Applies a circular mask to a view.
+     * <p/>
+     * Note that this method only works on Lollipop and above; it will silently fail on older versions.
+     *
+     * @param view The view to apply the mask to.
+     */
     public static void applyCircularMask(View view) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setOutlineProvider(new ViewOutlineProvider() {
@@ -215,6 +290,11 @@ public class Utils {
         }
     }
 
+    /**
+     * Applies a circular mask to a bitmap.
+     *
+     * @param bitmap The bitmap to apply the mask to.
+     */
     public static Bitmap applyCircularMask(Bitmap bitmap) {
         final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(output);
@@ -230,6 +310,13 @@ public class Utils {
         return output;
     }
 
+    /**
+     * Applies a rectangular rounded corners mask to a view.
+     * <p/>
+     * Note that this method only works on Lollipop and above; it will silently fail on older versions.
+     *
+     * @param view The view to apply the mask to.
+     */
     public static void applyRoundedCornersMask(View view) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setOutlineProvider(new ViewOutlineProvider() {
@@ -241,13 +328,6 @@ public class Utils {
             });
             view.setClipToOutline(true);
         }
-    }
-
-    public static boolean isNetworkConnectionAvailable(Context applicationContext) {
-        ConnectivityManager connMgr = (ConnectivityManager) applicationContext.getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnected();
     }
 
     /**
