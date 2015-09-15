@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+
 public class ConversationActivity
         extends AppCompatActivity
         implements ActionMode.Callback, View.OnLongClickListener, View.OnClickListener {
@@ -123,6 +124,7 @@ public class ConversationActivity
         preferences = Preferences.getInstance(getApplicationContext());
 
         contact = getIntent().getStringExtra(getString(R.string.conversation_extra_contact));
+
         // Remove the leading one from a North American phone number (e.g. +1 (123) 555-4567)
         if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
             contact = contact.substring(1);
@@ -157,6 +159,13 @@ public class ConversationActivity
         actionModeEnabled = false;
 
         final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
+        final StringBuilder ContactNbr = new StringBuilder(contact);
+        ContactNbr.insert(0, "(");
+        ContactNbr.insert(4, ") ");
+        ContactNbr.insert(9,"-");
+        ContactNbr.insert(0,"Send SMS to ");
+        messageText.setHint(ContactNbr);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             messageText.setOutlineProvider(new ViewOutlineProvider() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -169,8 +178,9 @@ public class ConversationActivity
         }
         messageText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Do nothing.
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+
             }
 
             @Override
@@ -179,17 +189,29 @@ public class ConversationActivity
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(Editable s)
+            {
                 ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.view_switcher);
-                if (s.toString().equals("") && viewSwitcher.getDisplayedChild() == 1) {
-                    viewSwitcher.setDisplayedChild(0);
+                if (s.toString().equals(""))
+                {
+                    messageText.setHint(ContactNbr.toString());
+
+                    if(viewSwitcher.getDisplayedChild() == 1)
+                    {
+                        viewSwitcher.setDisplayedChild(0);
+                    }
                 }
-                else if (viewSwitcher.getDisplayedChild() == 0) {
-                    viewSwitcher.setDisplayedChild(1);
+                else
+                {
+                    if (viewSwitcher.getDisplayedChild() == 0)
+                    {
+                        viewSwitcher.setDisplayedChild(1);
+                    }
                 }
             }
         });
-        messageText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        messageText.setOnFocusChangeListener(new View.OnFocusChangeListener()
+        {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {

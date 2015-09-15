@@ -40,6 +40,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static net.kourlas.voipms_sms.R.string.database_sync_error_api_parse;
+
 /**
  * Provides access to the application's database, which contains the SMS message cache.
  */
@@ -664,7 +666,7 @@ public class Database {
                     Log.w(TAG, Log.getStackTraceString(ex));
                     if (showErrors) {
                         Toast.makeText(applicationContext, applicationContext.getString(
-                                R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                                database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                     }
                     return false;
                 } catch (Exception ex) {
@@ -681,7 +683,7 @@ public class Database {
                 if (status == null) {
                     if (showErrors) {
                         Toast.makeText(applicationContext, applicationContext.getString(
-                                R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                                database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                     }
                     return false;
                 }
@@ -722,7 +724,7 @@ public class Database {
                 if (rawMessages == null) {
                     if (showErrors) {
                         Toast.makeText(applicationContext, applicationContext.getString(
-                                R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                                database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                     }
                     return false;
                 }
@@ -733,7 +735,7 @@ public class Database {
                             rawSms.optString("contact") == null || rawSms.optString("message") == null) {
                         if (showErrors) {
                             Toast.makeText(applicationContext, applicationContext.getString(
-                                    R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                                    database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                         }
                         return false;
                     }
@@ -751,7 +753,7 @@ public class Database {
                         Log.w(TAG, Log.getStackTraceString(ex));
                         if (showErrors) {
                             Toast.makeText(applicationContext, applicationContext.getString(
-                                    R.string.database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
+                                    database_sync_error_api_parse), Toast.LENGTH_SHORT).show();
                         }
                         return false;
                     }

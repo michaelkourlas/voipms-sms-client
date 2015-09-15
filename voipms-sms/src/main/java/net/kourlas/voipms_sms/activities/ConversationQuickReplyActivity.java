@@ -108,6 +108,8 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
                 ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.view_switcher);
                 if (s.toString().equals("") && viewSwitcher.getDisplayedChild() == 1) {
                     viewSwitcher.setDisplayedChild(0);
+                    String contactNbr = Preferences.getInstance(getApplicationContext()).getDid();
+
                 }
                 else if (viewSwitcher.getDisplayedChild() == 0) {
                     viewSwitcher.setDisplayedChild(1);

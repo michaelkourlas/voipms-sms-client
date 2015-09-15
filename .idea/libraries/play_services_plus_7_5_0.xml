@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="play-services-plus-7.5.0">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/voipms-sms/build/intermediates/exploded-aar/com.google.android.gms/play-services-plus/7.5.0/classes.jar!/" />
       <root url="file://$PROJECT_DIR$/voipms-sms/build/intermediates/exploded-aar/com.google.android.gms/play-services-plus/7.5.0/res" />
+      <root url="jar://$PROJECT_DIR$/voipms-sms/build/intermediates/exploded-aar/com.google.android.gms/play-services-plus/7.5.0/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -1,12 +1,12 @@
 <component name="libraryTable">
   <library name="recyclerview-v7-22.2.0">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/voipms-sms/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/22.2.0/classes.jar!/" />
       <root url="file://$PROJECT_DIR$/voipms-sms/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/22.2.0/res" />
+      <root url="jar://$PROJECT_DIR$/voipms-sms/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/22.2.0/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://C:/Program Files (x86)/Android/android-sdk/extras/android/m2repository/com/android/support/recyclerview-v7/22.2.0/recyclerview-v7-22.2.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/AppData/Local/Android/sdk/extras/android/m2repository/com/android/support/recyclerview-v7/22.2.0/recyclerview-v7-22.2.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
