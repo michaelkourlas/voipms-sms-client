@@ -196,11 +196,10 @@ public class Utils {
         StringBuilder data = new StringBuilder();
         String newLine = System.getProperty("line.separator");
         String line;
-        CharSequence BadEscape = "\\\\'";
-        CharSequence GoodEscape = "'";
+
         while ((line = reader.readLine()) != null)
         {
-            line = line.replace(BadEscape,GoodEscape);  //The VOIP API adds a "\\" before each "'" character.  We need to remove it...
+            line = line.replace("\\\\","");  //The VOIP API adds a "\\" before each ' or " characters.  We need to remove it...
             data.append(line);
             data.append(newLine);
 
