@@ -42,6 +42,7 @@ import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.model.Message;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -334,11 +335,19 @@ public class ConversationRecyclerViewAdapter
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
 
-            Message[] smses = Database.getInstance(activity.getApplicationContext()).getConversation(
-                    preferences.getDid(), contact).getMessages();
-            for (Message message : smses) {
-                if (message.getText().toLowerCase().contains(filterConstraint.toLowerCase())) {
-                    messageResults.add(message);
+            //Optimization: do not filter if no constraint is given
+            if(filterConstraint.equals(""))
+            {
+                messageResults = Arrays.asList(Database.getInstance(activity.getApplicationContext()).getConversation(preferences.getDid(), contact).getMessages());
+            }
+            else
+            {
+                Message[] smses = Database.getInstance(activity.getApplicationContext()).getConversation(
+                        preferences.getDid(), contact).getMessages();
+                for (Message message : smses) {
+                    if (message.getText().toLowerCase().contains(filterConstraint.toLowerCase())) {
+                        messageResults.add(message);
+                    }
                 }
             }
             Collections.reverse(messageResults);
@@ -356,17 +365,21 @@ public class ConversationRecyclerViewAdapter
 
             List<Message> oldMessages = new LinkedList<>();
             oldMessages.addAll(messages);
-            for (Message oldMessage : oldMessages) {
+            for (Message oldMessage : oldMessages)
+            {
                 boolean removed = true;
-                for (Message newMessage : newMessages) {
+                for (Message newMessage : newMessages)
+                {
                     if (oldMessage.getDatabaseId() != null && newMessage.getDatabaseId() != null &&
-                            oldMessage.getDatabaseId().equals(newMessage.getDatabaseId())) {
+                            oldMessage.getDatabaseId().equals(newMessage.getDatabaseId()))
+                    {
                         removed = false;
                         break;
                     }
                 }
 
-                if (removed) {
+                if (removed)
+                {
                     // Message was removed
                     int index = messages.indexOf(oldMessage);
                     checkedItems.remove(index);
@@ -375,12 +388,16 @@ public class ConversationRecyclerViewAdapter
                 }
             }
 
-            for (int i = 0; i < messages.size(); i++) {
-                for (Message newMessage : newMessages) {
+            for (int i = 0; i < messages.size(); i++)
+            {
+                for (Message newMessage : newMessages)
+                {
                     if (messages.get(i).getDatabaseId() != null && newMessage.getDatabaseId() != null &&
-                            messages.get(i).getDatabaseId().equals(newMessage.getDatabaseId())) {
+                            messages.get(i).getDatabaseId().equals(newMessage.getDatabaseId()))
+                    {
                         if (!messages.get(i).equals(newMessage) ||
-                                !oldFilterConstraint.equals(filterConstraint)) {
+                                !oldFilterConstraint.equals(filterConstraint))
+                        {
                             // Message was changed
                             messages.set(i, newMessage);
                             notifyItemChanged(i);
@@ -393,14 +410,18 @@ public class ConversationRecyclerViewAdapter
             sortedMessages.addAll(messages);
             Collections.sort(sortedMessages);
             Collections.reverse(sortedMessages);
-            for (int i = 0; i < sortedMessages.size(); i++) {
-                if (sortedMessages.get(i) == messages.get(i)) {
+            for (int i = 0; i < sortedMessages.size(); i++)
+            {
+                if (sortedMessages.get(i) == messages.get(i))
+                {
                     continue;
                 }
 
                 int index = -1;
-                for (int j = 0; j < messages.size(); j++) {
-                    if (messages.get(j) == sortedMessages.get(i)) {
+                for (int j = 0; j < messages.size(); j++)
+                {
+                    if (messages.get(j) == sortedMessages.get(i))
+                    {
                         index = j;
                         break;
                     }
@@ -414,8 +435,10 @@ public class ConversationRecyclerViewAdapter
                 notifyItemMoved(index, i);
             }
 
-            for (int i = 0; i < newMessages.size(); i++) {
-                if (messages.size() <= i || !newMessages.get(i).equals(messages.get(i))) {
+            for (int i = 0; i < newMessages.size(); i++)
+            {
+                if (messages.size() <= i || !newMessages.get(i).equals(messages.get(i)))
+                {
                     // Message is new
                     checkedItems.add(i, false);
                     messages.add(i, newMessages.get(i));
