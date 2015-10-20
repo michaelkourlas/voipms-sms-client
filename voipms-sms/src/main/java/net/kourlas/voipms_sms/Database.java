@@ -71,6 +71,8 @@ public class Database {
     private final Preferences preferences;
     private final SQLiteDatabase database;
 
+    //Master
+
     /**
      * Initializes an instance of the Database class.
      *
