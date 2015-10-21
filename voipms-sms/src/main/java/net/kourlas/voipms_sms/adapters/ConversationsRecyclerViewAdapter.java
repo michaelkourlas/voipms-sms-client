@@ -38,6 +38,7 @@ import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -127,7 +128,8 @@ public class ConversationsRecyclerViewAdapter
                     }
 
                     int substringOffset = index - 20;
-                    if (substringOffset > 0) {
+                    if (substringOffset > 0)
+                    {
                         messageTextBuilder.append("...");
                         nonMessageOffset += 3;
 
@@ -285,23 +287,30 @@ public class ConversationsRecyclerViewAdapter
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
 
-            Conversation[] conversations = Database.getInstance(applicationContext).getConversations(
-                    preferences.getDid());
-            for (Conversation conversation : conversations) {
-                String contactName = Utils.getContactName(applicationContext, conversation.getContact());
+            //Optimization: Do not filter if there is no constraint
+            if(filterConstraint.equals(""))
+            {
+                conversationResults = Arrays.asList(Database.getInstance(applicationContext).getConversations(preferences.getDid()));
+            }
+            else
+            {
+                Conversation[] conversations = Database.getInstance(applicationContext).getConversations(
+                        preferences.getDid());
+                for (Conversation conversation : conversations) {
+                    String contactName = Utils.getContactName(applicationContext, conversation.getContact());
+                    String text = "";
+                    Message[] allSms = conversation.getMessages();
+                    for (Message message : allSms) {
+                        text += message.getText() + " ";
+                    }
 
-                String text = "";
-                Message[] allSms = conversation.getMessages();
-                for (Message message : allSms) {
-                    text += message.getText() + " ";
-                }
-
-                if ((contactName != null && contactName.toLowerCase().contains(filterConstraint.toLowerCase())) ||
-                        text.toLowerCase().contains(filterConstraint.toLowerCase()) ||
-                        (!filterConstraint.replaceAll("[^0-9]", "").equals("") &&
-                                conversation.getContact().replaceAll("[^0-9]", "").contains(
-                                        filterConstraint.replaceAll("[^0-9]", "")))) {
-                    conversationResults.add(conversation);
+                    if ((contactName != null && contactName.toLowerCase().contains(filterConstraint.toLowerCase())) ||
+                            text.toLowerCase().contains(filterConstraint.toLowerCase()) ||
+                            (!filterConstraint.replaceAll("[^0-9]", "").equals("") &&
+                                    conversation.getContact().replaceAll("[^0-9]", "").contains(
+                                            filterConstraint.replaceAll("[^0-9]", "")))) {
+                        conversationResults.add(conversation);
+                    }
                 }
             }
 

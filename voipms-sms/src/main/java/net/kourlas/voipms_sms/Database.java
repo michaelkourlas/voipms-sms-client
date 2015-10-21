@@ -659,7 +659,8 @@ public class Database {
             private RequestObject request;
 
             @Override
-            protected Boolean doInBackground(Integer... params) {
+            protected Boolean doInBackground(Integer... params)
+            {
                 request = requests.get(params[0]);
                 JSONObject resultJson;
                 try {

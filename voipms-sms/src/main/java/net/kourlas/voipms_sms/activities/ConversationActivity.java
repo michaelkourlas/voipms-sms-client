@@ -639,9 +639,14 @@ public class ConversationActivity
     }
 
     public void markConversationAsRead() {
-        for (Message message : database.getConversation(preferences.getDid(), contact).getMessages()) {
-            message.setUnread(false);
-            database.insertMessage(message);
+        for (Message message : database.getConversation(preferences.getDid(), contact).getMessages())
+        {
+            //Optimization: Mark message as read only if needed
+            if(message.isUnread())
+            {
+                message.setUnread(false);
+                database.insertMessage(message);
+            }
         }
     }
 
