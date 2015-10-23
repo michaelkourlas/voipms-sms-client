@@ -34,7 +34,13 @@ public class Conversation implements Comparable<Conversation> {
     }
 
     public Message getMostRecentSms() {
-        return messages.get(0);
+        if(messages.get(0).isDraft() == false){
+            return messages.get(0);
+        }
+        else
+        {
+            return messages.get(1);
+        }
     }
 
     public Message[] getMessages() {

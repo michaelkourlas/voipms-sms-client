@@ -45,6 +45,7 @@
     <string name="conversation_extra_contact" translatable="false">contact</string>
     <string name="conversation_extra_message_text" translatable="false">messageText</string>
     <string name="conversation_extra_focus" translatable="false">focus</string>
+    <string name="conversation_send_sms_to" translatable="false">Send SMS to </string>
 
     <!-- ConversationQuickReplyActivity -->
     <string name="conversation_quick_reply_reply_to">Reply to</string>
@@ -66,6 +67,7 @@
     <string name="conversations_message_you">You:</string>
     <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and an SMS-enabled DID using the Settings option in the application\'s main menu. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings.\n\nYou may also wish to enable push notifications. For more information, see Help.</string>
     <string name="conversations_checked_content_description">Checked</string>
+
 
     <!-- NewConversationActivity -->
     <string name="new_conversation_action_keyboard">Show keyboard</string>

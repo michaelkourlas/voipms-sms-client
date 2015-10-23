@@ -159,12 +159,21 @@ public class ConversationActivity
         actionModeEnabled = false;
 
         final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        final StringBuilder ContactNbr = new StringBuilder(contact);
+        final StringBuilder ContactNbr;
+        ContactNbr = new StringBuilder(contact);
         ContactNbr.insert(0, "(");
         ContactNbr.insert(4, ") ");
-        ContactNbr.insert(9,"-");
-        ContactNbr.insert(0,"Send SMS to ");
+        ContactNbr.insert(9, "-");
+        ContactNbr.insert(0,getString(R.string.conversation_send_sms_to) + " ");
         messageText.setHint(ContactNbr);
+
+        long draftId = database.getDraftMessageDatabaseID(preferences.getDid(), contact);
+        if(draftId >= 0 ){
+            Message draftMessage = database.getMessageWithDatabaseId(preferences.getDid(),draftId);
+            database.removeMessage(draftId);
+            messageText.setText(draftMessage.getText());
+
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             messageText.setOutlineProvider(new ViewOutlineProvider() {
@@ -264,6 +273,7 @@ public class ConversationActivity
             notificationManager.cancel(id);
         }
 
+
         markConversationAsRead();
 
         adapter.refresh();
@@ -293,6 +303,13 @@ public class ConversationActivity
                 searchItem.collapseActionView();
             }
             else {
+                EditText messageEditText = (EditText) findViewById(R.id.message_edit_text);
+                String messageText = messageEditText.getText().toString();
+                if(messageText.length() > 0) {
+                    Message draftMessage = new Message(preferences.getDid(), contact, messageText.substring(0, messageText.length()));
+                    draftMessage.setDraft(true);
+                    long databaseId = database.insertMessage(draftMessage);
+                }
                 super.onBackPressed();
             }
         }

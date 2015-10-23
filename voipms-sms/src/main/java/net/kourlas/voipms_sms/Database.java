@@ -59,11 +59,12 @@ public class Database {
     public static final String COLUMN_DELETED = "Deleted";
     public static final String COLUMN_DELIVERED = "Delivered";
     public static final String COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress";
+    public static final String COLUMN_DRAFT = "Draft";
 
     private static final String TABLE_MESSAGE = "sms";
     private static final String[] columns = {COLUMN_DATABASE_ID, COLUMN_VOIP_ID, COLUMN_DATE, COLUMN_TYPE, COLUMN_DID,
             COLUMN_CONTACT, COLUMN_MESSAGE, COLUMN_UNREAD, COLUMN_DELETED, COLUMN_DELIVERED,
-            COLUMN_DELIVERY_IN_PROGRESS};
+            COLUMN_DELIVERY_IN_PROGRESS,COLUMN_DRAFT};
 
     private static Database instance = null;
 
@@ -127,6 +128,7 @@ public class Database {
         values.put(COLUMN_DELETED, message.isDeletedInDatabaseFormat());
         values.put(COLUMN_DELIVERED, message.isDeliveredInDatabaseFormat());
         values.put(COLUMN_DELIVERY_IN_PROGRESS, message.isDeliveryInProgressInDatabaseFormat());
+        values.put(COLUMN_DRAFT,message.isDraftInDatabaseFormat());
 
         if (values.getAsLong(COLUMN_DATABASE_ID) != null) {
             return database.replace(TABLE_MESSAGE, null, values);
@@ -172,7 +174,8 @@ public class Database {
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DRAFT)));
             cursor.close();
             return message;
         }
@@ -202,7 +205,8 @@ public class Database {
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DRAFT)));
             cursor.close();
             return message;
         }
@@ -234,7 +238,8 @@ public class Database {
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DRAFT)));
             messages.add(message);
             cursor.moveToNext();
         }
@@ -269,7 +274,8 @@ public class Database {
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DRAFT)));
             messages.add(message);
             cursor.moveToNext();
         }
@@ -304,7 +310,8 @@ public class Database {
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DRAFT)));
             messages.add(message);
             cursor.moveToNext();
         }
@@ -340,7 +347,8 @@ public class Database {
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DRAFT)));
             messages.add(message);
             cursor.moveToNext();
         }
@@ -349,6 +357,40 @@ public class Database {
         Message[] messageArray = new Message[messages.size()];
         messages.toArray(messageArray);
         return new Conversation(messageArray);
+    }
+
+    public synchronized long getDraftMessageDatabaseID(String did, String contact){
+        Message draftmessage;
+
+        Cursor cursor = database.query(TABLE_MESSAGE, columns, COLUMN_CONTACT + "=" + contact + " AND " + COLUMN_DID +
+                "=" + did + " AND " + COLUMN_DELETED + "=" + "0" + " AND " + COLUMN_DRAFT + "=" + "1", null, null, null, null);
+
+        if(cursor.getCount() > 0){
+
+            cursor.moveToFirst();
+                draftmessage = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
+                        cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_VOIP_ID)) ? null : cursor.getLong(
+                        cursor.getColumnIndex(COLUMN_VOIP_ID)),
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)),
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DRAFT)));
+
+            cursor.close();
+        }
+        else{
+            return -1;
+        }
+
+
+
+        return draftmessage.getDatabaseId();
     }
 
     /**
@@ -860,7 +902,8 @@ public class Database {
                 COLUMN_UNREAD + " INTEGER NOT NULL," +
                 COLUMN_DELETED + " INTEGER NOT NULL," +
                 COLUMN_DELIVERED + " INTEGER NOT NULL," +
-                COLUMN_DELIVERY_IN_PROGRESS + " INTEGER NOT NULL)";
+                COLUMN_DELIVERY_IN_PROGRESS + " INTEGER NOT NULL," +
+                COLUMN_DRAFT + " INTEGER NOT NULL)";
 
         /**
          * Initializes a new instance of the DatabaseHelper class.
