@@ -34,12 +34,18 @@ public class Conversation implements Comparable<Conversation> {
     }
 
     public Message getMostRecentSms() {
+
         if(messages.get(0).isDraft() == false){
             return messages.get(0);
         }
         else
         {
-            return messages.get(1);
+            if(messages.size() > 1) {
+                return messages.get(1);
+            }
+            else{
+                return messages.get(0); //If the only message is the draft... return it.
+            }
         }
     }
 
