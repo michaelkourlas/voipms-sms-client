@@ -26,6 +26,8 @@ import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.Preferences;
 
 public class SynchronizationIntervalReceiver extends WakefulBroadcastReceiver {
+    public static final long MILLISECONDS_PER_MINUTE = 1000L * 60L;
+
     public static void setupSynchronizationInterval(Context applicationContext) {
         Preferences preferences = Preferences.getInstance(applicationContext);
         AlarmManager alarmManager = (AlarmManager) applicationContext.getSystemService(Context.ALARM_SERVICE);
@@ -34,7 +36,7 @@ public class SynchronizationIntervalReceiver extends WakefulBroadcastReceiver {
 
         alarmManager.cancel(pendingIntent);
 
-        long syncInterval = preferences.getSyncInterval() * (24 * 60 * 60 * 1000);
+        long syncInterval = preferences.getSyncInterval() * MILLISECONDS_PER_MINUTE;
         if (syncInterval != 0) {
             long nextSyncTime = preferences.getLastCompleteSyncTime() + syncInterval;
 
