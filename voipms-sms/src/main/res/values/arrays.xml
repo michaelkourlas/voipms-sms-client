@@ -17,17 +17,24 @@
 
 <resources>
     <string-array name="preferences_sync_interval_entries">
-        <item>Every day</item>
-        <item>Every 3 days</item>
-        <item>Every 7 days</item>
-        <item>Every 30 days</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+        <item>1 day</item>
+        <item>7 days</item>
+        <item>30 days</item>
         <item>Never</item>
     </string-array>
     <string-array name="preferences_sync_interval_values">
-        <item>1</item>
-        <item>3</item>
-        <item>7</item>
         <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>720</item>
+        <item>1440</item>
+        <item>10080</item>
+        <item>43200</item>
         <item>0</item>
     </string-array>
 </resources>
