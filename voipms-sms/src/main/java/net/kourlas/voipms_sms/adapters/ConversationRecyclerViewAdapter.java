@@ -41,10 +41,7 @@ import net.kourlas.voipms_sms.Utils;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.model.Message;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ConversationRecyclerViewAdapter
         extends RecyclerView.Adapter<ConversationRecyclerViewAdapter.MessageViewHolder>
@@ -102,6 +99,17 @@ public class ConversationRecyclerViewAdapter
         return new MessageViewHolder(itemView, viewType);
     }
 
+    private HashMap<String, String> photoCache = new HashMap<String, String>();
+
+    private String fetchContactPhoto(String uri) {
+        if (photoCache.containsKey(uri)) {
+            return photoCache.get(uri);
+        }
+        String photo = Utils.getContactPhotoUri(applicationContext, uri);
+        photoCache.put(uri, photo);
+        return uri;
+    }
+
     @Override
     public void onBindViewHolder(MessageViewHolder messageViewHolder, int i) {
         Message message = messages.get(i);
@@ -117,13 +125,12 @@ public class ConversationRecyclerViewAdapter
             }
             String photoUri;
             if (viewType == ITEM_LEFT_PRIMARY) {
-                photoUri = Utils.getContactPhotoUri(applicationContext, message.getContact());
-
+                photoUri = fetchContactPhoto(message.getContact());
             }
             else {
-                photoUri = Utils.getContactPhotoUri(applicationContext, ContactsContract.Profile.CONTENT_URI);
+                photoUri = fetchContactPhoto(ContactsContract.Profile.CONTENT_URI.toString());
                 if (photoUri == null) {
-                    photoUri = Utils.getContactPhotoUri(applicationContext, message.getDid());
+                    photoUri = fetchContactPhoto(message.getDid());
                 }
             }
             if (photoUri != null) {
