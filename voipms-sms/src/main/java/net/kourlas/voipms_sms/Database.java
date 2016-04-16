@@ -95,6 +95,22 @@ public class Database {
     }
 
     /**
+     * Marks a conversation as read in the database given a did and a contact.
+     * @param did The sender did for the conversation
+     * @param contact The recipient of the conversation
+     */
+    public synchronized void markConversationAsRead(String did, String contact) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_UNREAD, 0);
+        database.update(
+                TABLE_MESSAGE,
+                values,
+                COLUMN_DID + " = ? AND " + COLUMN_CONTACT + " = ?",
+                new String[] {did, contact}
+        );
+    }
+
+    /**
      * Adds a message to the database. If a record with the message's database ID or VoIP.ms ID already exists, that
      * record is replaced. Otherwise, a new record is created.
      *
