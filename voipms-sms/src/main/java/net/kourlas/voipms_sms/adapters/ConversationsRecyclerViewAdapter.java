@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ConversationsRecyclerViewAdapter
         extends RecyclerView.Adapter<ConversationsRecyclerViewAdapter.ConversationViewHolder>
@@ -276,6 +278,7 @@ public class ConversationsRecyclerViewAdapter
         }
     }
 
+    Pattern numFilterPattern = Pattern.compile("[^0-9]");
     class ConversationsFilter extends Filter {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
@@ -284,6 +287,10 @@ public class ConversationsRecyclerViewAdapter
 
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
+            String filterConstraintLower = filterConstraint.toLowerCase();
+
+            Matcher numconstraint = numFilterPattern.matcher(filterConstraint);
+            String numfilter = numconstraint.replaceAll("");
 
             Conversation[] conversations = Database.getInstance(applicationContext).getConversations(
                     preferences.getDid());
@@ -296,11 +303,18 @@ public class ConversationsRecyclerViewAdapter
                     text += message.getText() + " ";
                 }
 
-                if ((contactName != null && contactName.toLowerCase().contains(filterConstraint.toLowerCase())) ||
-                        text.toLowerCase().contains(filterConstraint.toLowerCase()) ||
-                        (!filterConstraint.replaceAll("[^0-9]", "").equals("") &&
-                                conversation.getContact().replaceAll("[^0-9]", "").contains(
-                                        filterConstraint.replaceAll("[^0-9]", "")))) {
+                Boolean addToSet = filterConstraint.equals("");
+
+                if (addToSet ||
+                    (contactName != null && contactName.toLowerCase().contains(filterConstraintLower)) ||
+                    text.toLowerCase().contains(filterConstraintLower)) {
+                    addToSet = true;
+                } else if (!numfilter.equals("")){
+                    Matcher contactmatcher = numFilterPattern.matcher(conversation.getContact());
+                    addToSet = contactmatcher.replaceAll("").contains(numfilter);
+                }
+
+                if (addToSet) {
                     conversationResults.add(conversation);
                 }
             }
