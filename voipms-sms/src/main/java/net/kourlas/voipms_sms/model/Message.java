@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 /**
  * Represents a single SMS message.
@@ -218,14 +219,8 @@ public class Message implements Comparable<Message> {
 
         this.type = Type.OUTGOING;
 
-        if (!did.replaceAll("[^0-9]", "").equals(did)) {
-            throw new IllegalArgumentException("did must consist only of numbers.");
-        }
         this.did = did;
 
-        if (!contact.replaceAll("[^0-9]", "").equals(contact)) {
-            throw new IllegalArgumentException("contact must consist only of numbers.");
-        }
         this.contact = contact;
 
         this.text = text;
