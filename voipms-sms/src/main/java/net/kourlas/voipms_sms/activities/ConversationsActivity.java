@@ -253,12 +253,9 @@ public class ConversationsActivity
             case R.id.mark_read_unread_button:
                 for (int i = 0; i < adapter.getItemCount(); i++) {
                     if (adapter.isItemChecked(i)) {
-                        Message[] smses = adapter.getItem(i).getMessages();
-                        for (Message message : smses) {
-                            message.setUnread(item.getTitle().equals(getResources().getString(
-                                    R.string.conversations_action_mark_unread)));
-                            database.insertMessage(message);
-                        }
+                        Conversation conversation = adapter.getItem(i);
+                        Boolean unread = item.getTitle().equals(getResources().getString(R.string.conversations_action_mark_unread));
+                        database.markConversationAsStatus(conversation.getDid(), conversation.getContact(), unread);
                     }
                 }
                 adapter.refresh();
@@ -268,11 +265,8 @@ public class ConversationsActivity
                 List<Long> databaseIds = new ArrayList<>();
                 for (int i = 0; i < adapter.getItemCount(); i++) {
                     if (adapter.isItemChecked(i)) {
-                        for (Message message : adapter.getItem(i).getMessages()) {
-                            if (message.getDatabaseId() != null) {
-                                databaseIds.add(message.getDatabaseId());
-                            }
-                        }
+                        Conversation conversation = adapter.getItem(i);
+                        databaseIds.addAll(database.getMessageDatabaseIds(conversation.getDid(), conversation.getContact()));
                     }
                 }
 

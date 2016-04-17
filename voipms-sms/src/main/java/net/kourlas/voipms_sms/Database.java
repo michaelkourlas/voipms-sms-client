@@ -95,6 +95,41 @@ public class Database {
         return instance;
     }
 
+    /*
+    * Marks a conversation as read or unread in the database given a did and a contact.
+    * @param did The sender did for the conversation
+    * @param contact The recipient of the conversation
+    * @param unread Mark as unread or read
+    */
+    public synchronized void markConversationAsStatus(String did, String contact, Boolean unread) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_UNREAD, unread ? 1 : 0);
+        database.update(
+                TABLE_MESSAGE,
+                values,
+                COLUMN_DID + " = ? AND " + COLUMN_CONTACT + " = ?",
+                new String[] {did, contact}
+        );
+    }
+
+    /**
+     * Marks a conversation as read in the database given a did and a contact.
+     * @param did The sender did for the conversation
+     * @param contact The recipient of the conversation
+     */
+    public synchronized void markConversationAsRead(String did, String contact) {
+        markConversationAsStatus(did, contact, false);
+    }
+
+    /**
+     * Marks a conversation as read in the database given a did and a contact.
+     * @param did The sender did for the conversation
+     * @param contact The recipient of the conversation
+     */
+    public synchronized void markConversationAsUnread(String did, String contact) {
+        markConversationAsStatus(did, contact, true);
+    }
+
     /**
      * Adds a message to the database. If a record with the message's database ID or VoIP.ms ID already exists, that
      * record is replaced. Otherwise, a new record is created.
@@ -131,6 +166,29 @@ public class Database {
         else {
             return database.insert(TABLE_MESSAGE, null, values);
         }
+    }
+
+    /**
+     * Adds a message to the database. If a record with the message's database ID or VoIP.ms ID already exists, that
+     * record is replaced. Otherwise, a new record is created.
+     *
+     * @param did The sender did for the conversation
+     * @param contact The recipient of the conversation
+     * @return The database ID of the newly added message.
+     */
+    public synchronized List<Long> getMessageDatabaseIds(String did, String contact) {
+        List<Long> messages = new ArrayList<>();
+
+        Cursor cursor = database.query(TABLE_MESSAGE, new String[] {COLUMN_DATABASE_ID}, COLUMN_CONTACT + "=" + contact + " AND " + COLUMN_DID +
+                "=" + did + " AND " + COLUMN_DELETED + "=" + "0", null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            messages.add(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)));
+            cursor.moveToNext();
+        }
+        cursor.close();
+
+        return messages;
     }
 
     /**
