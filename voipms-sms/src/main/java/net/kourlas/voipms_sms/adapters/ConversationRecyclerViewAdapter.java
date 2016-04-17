@@ -282,6 +282,7 @@ public class ConversationRecyclerViewAdapter
 
     public void refresh() {
         getFilter().filter(filterConstraint);
+        photoCache.clear();
     }
 
     public void refresh(String newFilterConstraint) {
