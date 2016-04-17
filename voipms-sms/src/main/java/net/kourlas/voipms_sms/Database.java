@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
@@ -94,6 +95,41 @@ public class Database {
         return instance;
     }
 
+    /*
+    * Marks a conversation as read or unread in the database given a did and a contact.
+    * @param did The sender did for the conversation
+    * @param contact The recipient of the conversation
+    * @param unread Mark as unread or read
+    */
+    public synchronized void markConversationAsStatus(String did, String contact, Boolean unread) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_UNREAD, unread ? 1 : 0);
+        database.update(
+                TABLE_MESSAGE,
+                values,
+                COLUMN_DID + " = ? AND " + COLUMN_CONTACT + " = ?",
+                new String[] {did, contact}
+        );
+    }
+
+    /**
+     * Marks a conversation as read in the database given a did and a contact.
+     * @param did The sender did for the conversation
+     * @param contact The recipient of the conversation
+     */
+    public synchronized void markConversationAsRead(String did, String contact) {
+        markConversationAsStatus(did, contact, false);
+    }
+
+    /**
+     * Marks a conversation as read in the database given a did and a contact.
+     * @param did The sender did for the conversation
+     * @param contact The recipient of the conversation
+     */
+    public synchronized void markConversationAsUnread(String did, String contact) {
+        markConversationAsStatus(did, contact, true);
+    }
+
     /**
      * Adds a message to the database. If a record with the message's database ID or VoIP.ms ID already exists, that
      * record is replaced. Otherwise, a new record is created.
@@ -130,6 +166,29 @@ public class Database {
         else {
             return database.insert(TABLE_MESSAGE, null, values);
         }
+    }
+
+    /**
+     * Adds a message to the database. If a record with the message's database ID or VoIP.ms ID already exists, that
+     * record is replaced. Otherwise, a new record is created.
+     *
+     * @param did The sender did for the conversation
+     * @param contact The recipient of the conversation
+     * @return The database ID of the newly added message.
+     */
+    public synchronized List<Long> getMessageDatabaseIds(String did, String contact) {
+        List<Long> messages = new ArrayList<>();
+
+        Cursor cursor = database.query(TABLE_MESSAGE, new String[] {COLUMN_DATABASE_ID}, COLUMN_CONTACT + "=" + contact + " AND " + COLUMN_DID +
+                "=" + did + " AND " + COLUMN_DELETED + "=" + "0", null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            messages.add(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)));
+            cursor.moveToNext();
+        }
+        cursor.close();
+
+        return messages;
     }
 
     /**
@@ -277,6 +336,70 @@ public class Database {
         return messages.toArray(messageArray);
     }
 
+    private void ConsumeMessages(List<Message> target, Cursor cursor) {
+        if (cursor == null) {
+            return;
+        }
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
+                    cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_VOIP_ID)) ? null : cursor.getLong(
+                            cursor.getColumnIndex(COLUMN_VOIP_ID)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
+            target.add(message);
+            cursor.moveToNext();
+        }
+        cursor.close();
+    }
+
+    private Cursor queryTopFilteredUndeletedMessages(String[] params, Boolean filterText) {
+        try {
+            return database.rawQuery(
+                    "select s.*" +
+                            "from (" +
+                            "   select " + COLUMN_CONTACT + ", max(" + COLUMN_DATE + ") as maxdate" +
+                            "   from " + TABLE_MESSAGE +
+                            "   where did = ? and " + COLUMN_DELETED + " = 0 " + (filterText ? " and text like ?" : "") +
+                            "   group by " + COLUMN_CONTACT +
+                            ") as x inner join " + TABLE_MESSAGE + " as s on x." + COLUMN_CONTACT + " = s." + COLUMN_CONTACT + " and s." + COLUMN_DATE + " = x.maxdate"
+                    ,params
+            );
+        } catch (SQLException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the at-least the top messages per contact for a Did in the database except for deleted messages given a filter
+     *
+     * @return At-least top message per contact in the database except for deleted messages for the given filter
+     */
+    public synchronized Message[] getTopFilteredUndeletedMessages(String did, String filter) {
+        List<Message> messages = new ArrayList<>();
+
+        Cursor top = queryTopFilteredUndeletedMessages(new String[] {did}, false);
+
+        ConsumeMessages(messages, top);
+
+        if (filter != null && !filter.equals("")) {
+            Cursor filtered = queryTopFilteredUndeletedMessages(new String[] {did, "%" + filter + "%"}, true);
+            ConsumeMessages(messages, filtered);
+        }
+
+        Collections.sort(messages);
+
+        Message[] messageArray = new Message[messages.size()];
+        return messages.toArray(messageArray);
+    }
+
     /**
      * Gets all of the deleted messages in the database.
      *
@@ -355,8 +478,10 @@ public class Database {
      * @return All of the conversations in the database with the specified DID. Deleted messages will not be included.
      */
     public synchronized Conversation[] getConversations(String did) {
-        Message[] messages = getUndeletedMessages(did);
+        return getConversationForMessages(getUndeletedMessages(did));
+    }
 
+    private Conversation[] getConversationForMessages(Message[] messages) {
         List<Conversation> conversations = new ArrayList<>();
         for (Message message : messages) {
             Conversation conversation = null;
@@ -379,6 +504,18 @@ public class Database {
 
         Conversation[] conversationArray = new Conversation[conversations.size()];
         return conversations.toArray(conversationArray);
+    }
+
+    /**
+     * Gets all of the conversations in the database with the specified DID and filter
+     * Conversations will not include deleted messages and will only include the latest message for the filter.
+     *
+     * @param did The DID.
+     * @param filter The filter
+     * @return All of the conversations with the latest message in the database with the specified DID matching the filter. Deleted messages will not be included.
+     */
+    public synchronized Conversation[] getLimitedFilteredConversations(String did, String filter) {
+        return getConversationForMessages(getTopFilteredUndeletedMessages(did, filter));
     }
 
     /**

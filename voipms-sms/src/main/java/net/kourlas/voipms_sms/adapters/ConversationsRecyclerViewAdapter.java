@@ -285,8 +285,10 @@ public class ConversationsRecyclerViewAdapter
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
 
-            Conversation[] conversations = Database.getInstance(applicationContext).getConversations(
-                    preferences.getDid());
+            Conversation[] conversations = Database.getInstance(applicationContext).getLimitedFilteredConversations(
+                    preferences.getDid(),
+                    filterConstraint
+            );
             for (Conversation conversation : conversations) {
                 String contactName = Utils.getContactName(applicationContext, conversation.getContact());
 
