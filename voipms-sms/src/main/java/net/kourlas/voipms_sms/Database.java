@@ -367,7 +367,7 @@ public class Database {
                             "from (" +
                             "   select " + COLUMN_CONTACT + ", max(" + COLUMN_DATE + ") as maxdate" +
                             "   from " + TABLE_MESSAGE +
-                            "   where did = ? " + (filterText ? " and text like ?" : "") +
+                            "   where did = ? and " + COLUMN_DELETED + " = 0 " + (filterText ? " and text like ?" : "") +
                             "   group by " + COLUMN_CONTACT +
                             ") as x inner join " + TABLE_MESSAGE + " as s on x." + COLUMN_CONTACT + " = s." + COLUMN_CONTACT + " and s." + COLUMN_DATE + " = x.maxdate"
                     ,params
