@@ -2,7 +2,8 @@
 .idea/
 
 # Android
-build/
+*.apk
 .gradle/
+build/
 gen/
 release/
