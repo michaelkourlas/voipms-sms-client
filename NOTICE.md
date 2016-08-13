@@ -1,5 +1,5 @@
 VoIP.ms SMS  
-Copyright (C) 2015 Michael Kourlas and other contributors
+Copyright (C) 2016 Michael Kourlas and other contributors
 
 ## Creative Commons Attribution 4.0 International ##
 
