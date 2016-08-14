@@ -5,5 +5,4 @@
 *.apk
 .gradle/
 build/
-gen/
 release/
