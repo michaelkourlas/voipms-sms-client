@@ -357,7 +357,7 @@ public class Utils {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.DialogTheme);
         builder.setMessage(text);
-        builder.setMessage(title);
+        builder.setTitle(title);
         builder.setPositiveButton(positiveButtonText, positiveButtonAction);
         builder.setNegativeButton(negativeButtonText, negativeButtonAction);
         builder.setCancelable(false);
