@@ -18,8 +18,10 @@
 package net.kourlas.voipms_sms;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.*;
 import android.net.ConnectivityManager;
@@ -27,6 +29,8 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -61,28 +65,31 @@ public class Utils {
     public static String getContactName(Context applicationContext,
                                         String phoneNumber)
     {
-        Uri uri = Uri.withAppendedPath(
-            ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-            Uri.encode(phoneNumber));
-        Cursor cursor = applicationContext.getContentResolver().query(
-            uri,
-            new String[] {
-                ContactsContract.PhoneLookup._ID,
-                ContactsContract.PhoneLookup.DISPLAY_NAME
-            },
-            null, null, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                String name = cursor.getString(cursor.getColumnIndex(
-                    ContactsContract.PhoneLookup.DISPLAY_NAME));
-                cursor.close();
-                return name;
-            } else {
-                cursor.close();
+        try {
+            Uri uri = Uri.withAppendedPath(
+                ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                Uri.encode(phoneNumber));
+            Cursor cursor = applicationContext.getContentResolver().query(
+                uri,
+                new String[] {
+                    ContactsContract.PhoneLookup._ID,
+                    ContactsContract.PhoneLookup.DISPLAY_NAME
+                },
+                null, null, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    String name = cursor.getString(cursor.getColumnIndex(
+                        ContactsContract.PhoneLookup.DISPLAY_NAME));
+                    cursor.close();
+                    return name;
+                } else {
+                    cursor.close();
+                }
             }
+            return null;
+        } catch (SecurityException ex) {
+            return null;
         }
-
-        return null;
     }
 
     /**
@@ -95,10 +102,14 @@ public class Utils {
     public static String getContactPhotoUri(Context applicationContext,
                                             String phoneNumber)
     {
-        Uri uri = Uri.withAppendedPath(
-            ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-            Uri.encode(phoneNumber));
-        return getContactPhotoUri(applicationContext, uri);
+        try {
+            Uri uri = Uri.withAppendedPath(
+                ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                Uri.encode(phoneNumber));
+            return getContactPhotoUri(applicationContext, uri);
+        } catch (SecurityException ex) {
+            return null;
+        }
     }
 
     /**
@@ -111,24 +122,28 @@ public class Utils {
     public static String getContactPhotoUri(Context applicationContext,
                                             Uri uri)
     {
-        Cursor cursor = applicationContext.getContentResolver().query(
-            uri, new String[] {
-                ContactsContract.PhoneLookup._ID,
-                ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI
-            },
-            null, null, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                String photoUri = cursor.getString(cursor.getColumnIndex(
-                    ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
-                cursor.close();
-                return photoUri;
-            } else {
-                cursor.close();
+        try {
+            Cursor cursor = applicationContext.getContentResolver().query(
+                uri, new String[] {
+                    ContactsContract.PhoneLookup._ID,
+                    ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI
+                },
+                null, null, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    String photoUri = cursor.getString(cursor.getColumnIndex(
+                        ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
+                    cursor.close();
+                    return photoUri;
+                } else {
+                    cursor.close();
+                }
             }
-        }
 
-        return null;
+            return null;
+        } catch (SecurityException ex) {
+            return null;
+        }
     }
 
     /**
