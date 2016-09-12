@@ -2,6 +2,7 @@
 
 * Added support for additional sync intervals
 * Sending/failed to send indicators now visible in conversations view
+* Added PayPal donation link
 * Bug fixes
 
 ## 0.4.1 ##
