@@ -117,25 +117,17 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
 
         QuickContactBadge photo = (QuickContactBadge) findViewById(R.id.photo);
         Utils.applyCircularMask(photo);
-        photo.assignContactFromPhone(Preferences.getInstance(getApplicationContext()).getDid(), true);
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(
-                Preferences.getInstance(getApplicationContext()).getDid()));
-        Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
-                        ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI, ContactsContract.PhoneLookup.DISPLAY_NAME},
-                null, null, null);
-        if (cursor.moveToFirst()) {
-            String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
-            if (photoUri != null) {
-                photo.setImageURI(Uri.parse(photoUri));
-            }
-            else {
-                photo.setImageToDefault();
-            }
+        photo.assignContactFromPhone(Preferences.getInstance(
+            getApplicationContext()).getDid(), true);
+        String photoUri = Utils.getContactPhotoUri(
+            getApplicationContext(),
+            Preferences.getInstance(getApplicationContext()).getDid());
+        if (photoUri != null) {
+            photo.setImageURI(Uri.parse(photoUri));
         }
         else {
             photo.setImageToDefault();
         }
-        cursor.close();
 
         final ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
         Utils.applyCircularMask(sendButton);

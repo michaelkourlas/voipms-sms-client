@@ -244,7 +244,7 @@ public class NewConversationListViewAdapter extends BaseAdapter
         private boolean primary;
 
         ContactItem(String name, String phoneNumber, String photoUri,
-                           boolean primary, boolean typedIn)
+                    boolean primary, boolean typedIn)
         {
             this.name = name;
             this.phoneNumber = phoneNumber;
@@ -280,24 +280,20 @@ public class NewConversationListViewAdapter extends BaseAdapter
 
     class NewConversationFilter extends Filter {
 
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            FilterResults results = new FilterResults();
-            List<ContactItem> contactItemResults = new ArrayList<>();
-
-            String searchText = constraint.toString();
-
+        private List<ContactItem> getContacts() {
             List<ContactItem> phoneNumberEntries = new ArrayList<>();
-            Cursor cursor = activity.getContentResolver().query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                null, null, null,
-                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
-            if (cursor != null) {
-                if (cursor.getCount() > 0) {
+
+            try {
+                Cursor cursor = activity.getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null, null, null,
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                    + " ASC");
+                if (cursor != null && cursor.getCount() > 0) {
                     while (cursor.moveToNext()) {
                         if (cursor.getString(cursor.getColumnIndex(
-                            ContactsContract.Contacts.HAS_PHONE_NUMBER)).equals(
-                            "1"))
+                            ContactsContract.Contacts.HAS_PHONE_NUMBER))
+                                  .equals("1"))
                         {
                             String contact = cursor.getString(
                                 cursor.getColumnIndex(
@@ -317,17 +313,32 @@ public class NewConversationListViewAdapter extends BaseAdapter
                                 }
                             }
 
-                            ContactItem contactItem =
-                                new ContactItem(contact, phoneNumber, photoUri,
-                                                showPhoto, false);
+                            ContactItem contactItem = new ContactItem(
+                                contact, phoneNumber, photoUri, showPhoto,
+                                false);
                             phoneNumberEntries.add(contactItem);
                         }
                     }
+                    cursor.close();
+                } else if (cursor != null) {
+                    cursor.close();
                 }
-                cursor.close();
+                return phoneNumberEntries;
+            } catch (SecurityException ignored) {
+                return phoneNumberEntries;
             }
+        }
 
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults results = new FilterResults();
+            List<ContactItem> contactItemResults = new ArrayList<>();
 
+            String searchText = constraint.toString();
+
+            List<ContactItem> phoneNumberEntries = new ArrayList<>();
+
+            phoneNumberEntries.addAll(getContacts());
             if (typedInPhoneNumber != null) {
                 phoneNumberEntries.add(0, new ContactItem(typedInPhoneNumber,
                                                           typedInPhoneNumber,
