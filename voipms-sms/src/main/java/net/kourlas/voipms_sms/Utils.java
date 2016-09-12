@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas and other contributors
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,27 +48,41 @@ import java.util.Locale;
 /**
  * Contains various common utility methods.
  */
+@SuppressWarnings("WeakerAccess")
 public class Utils {
     /**
-     * Gets the name of a contact from the Android contacts provider, given a phone number.
+     * Gets the name of a contact from the Android contacts provider, given a
+     * phone number.
      *
      * @param applicationContext The application context.
      * @param phoneNumber        The phone number of the contact.
-     * @return the name of the contact.
+     * @return The name of the contact.
      */
-    public static String getContactName(Context applicationContext, String phoneNumber) {
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-        Cursor cursor = applicationContext.getContentResolver().query(uri, new String[]{
-                ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
-        if (cursor.moveToFirst()) {
-            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
-            cursor.close();
-            return name;
+    public static String getContactName(Context applicationContext,
+                                        String phoneNumber)
+    {
+        Uri uri = Uri.withAppendedPath(
+            ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+            Uri.encode(phoneNumber));
+        Cursor cursor = applicationContext.getContentResolver().query(
+            uri,
+            new String[] {
+                ContactsContract.PhoneLookup._ID,
+                ContactsContract.PhoneLookup.DISPLAY_NAME
+            },
+            null, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                String name = cursor.getString(cursor.getColumnIndex(
+                    ContactsContract.PhoneLookup.DISPLAY_NAME));
+                cursor.close();
+                return name;
+            } else {
+                cursor.close();
+            }
         }
-        else {
-            cursor.close();
-            return null;
-        }
+
+        return null;
     }
 
     /**
@@ -76,10 +90,14 @@ public class Utils {
      *
      * @param applicationContext The application context.
      * @param phoneNumber        The phone number of the contact.
-     * @return a URI pointing to the contact's photo.
+     * @return A URI pointing to the contact's photo.
      */
-    public static String getContactPhotoUri(Context applicationContext, String phoneNumber) {
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+    public static String getContactPhotoUri(Context applicationContext,
+                                            String phoneNumber)
+    {
+        Uri uri = Uri.withAppendedPath(
+            ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+            Uri.encode(phoneNumber));
         return getContactPhotoUri(applicationContext, uri);
     }
 
@@ -88,20 +106,29 @@ public class Utils {
      *
      * @param applicationContext The application context.
      * @param uri                The URI of the contact.
-     * @return a URI pointing to the contact's photo.
+     * @return A URI pointing to the contact's photo.
      */
-    public static String getContactPhotoUri(Context applicationContext, Uri uri) {
-        Cursor cursor = applicationContext.getContentResolver().query(uri, new String[]{
-                ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI}, null, null, null);
-        if (cursor.moveToFirst()) {
-            String photoUri = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
-            cursor.close();
-            return photoUri;
+    public static String getContactPhotoUri(Context applicationContext,
+                                            Uri uri)
+    {
+        Cursor cursor = applicationContext.getContentResolver().query(
+            uri, new String[] {
+                ContactsContract.PhoneLookup._ID,
+                ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI
+            },
+            null, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                String photoUri = cursor.getString(cursor.getColumnIndex(
+                    ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
+                cursor.close();
+                return photoUri;
+            } else {
+                cursor.close();
+            }
         }
-        else {
-            cursor.close();
-            return null;
-        }
+
+        return null;
     }
 
     /**
@@ -110,9 +137,11 @@ public class Utils {
      * @param applicationContext The application context.
      * @param date               The date to format.
      * @param hideTime           Omits the time in the formatted date if true.
-     * @return the formatted date.
+     * @return The formatted date.
      */
-    public static String getFormattedDate(Context applicationContext, Date date, boolean hideTime) {
+    public static String getFormattedDate(Context applicationContext, Date date,
+                                          boolean hideTime)
+    {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
 
@@ -120,12 +149,14 @@ public class Utils {
         oneMinuteAgo.add(Calendar.MINUTE, -1);
         if (oneMinuteAgo.getTime().before(date)) {
             // Last minute: X seconds ago
-            long seconds = (Calendar.getInstance().getTime().getTime() - calendar.getTime().getTime()) / 1000;
+            long seconds = (Calendar.getInstance().getTime().getTime()
+                            - calendar.getTime().getTime()) / 1000;
             if (seconds < 10) {
-                return applicationContext.getString(R.string.utils_date_just_now);
-            }
-            else {
-                return seconds + " " + applicationContext.getString(R.string.utils_date_seconds_ago);
+                return applicationContext
+                    .getString(R.string.utils_date_just_now);
+            } else {
+                return seconds + " " + applicationContext
+                    .getString(R.string.utils_date_seconds_ago);
             }
         }
 
@@ -133,56 +164,67 @@ public class Utils {
         oneHourAgo.add(Calendar.HOUR_OF_DAY, -1);
         if (oneHourAgo.getTime().before(date)) {
             // Last hour: X minutes ago
-            long minutes = (Calendar.getInstance().getTime().getTime() - calendar.getTime().getTime()) / (1000 * 60);
+            long minutes = (Calendar.getInstance().getTime().getTime()
+                            - calendar.getTime().getTime()) / (1000 * 60);
             if (minutes == 1) {
-                return applicationContext.getString(R.string.utils_date_one_minute_ago);
-            }
-            else {
-                return minutes + " " + applicationContext.getString(R.string.utils_date_minutes_ago);
+                return applicationContext
+                    .getString(R.string.utils_date_one_minute_ago);
+            } else {
+                return minutes + " " + applicationContext
+                    .getString(R.string.utils_date_minutes_ago);
             }
         }
 
         if (compareDateWithoutTime(Calendar.getInstance(), calendar) == 0) {
             // Today: h:mm a
-            DateFormat format = new SimpleDateFormat("h:mm a", Locale.getDefault());
+            DateFormat format = new SimpleDateFormat("h:mm a",
+                                                     Locale.getDefault());
             return format.format(date);
         }
 
-        if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) == calendar.get(
-                Calendar.WEEK_OF_YEAR) && Calendar.getInstance().get(Calendar.YEAR) == calendar.get(Calendar.YEAR)) {
+        if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR)
+            == calendar.get(Calendar.WEEK_OF_YEAR)
+            && Calendar.getInstance().get(Calendar.YEAR)
+               == calendar.get(Calendar.YEAR))
+        {
             if (hideTime) {
                 // This week: EEE
-                DateFormat format = new SimpleDateFormat("EEE", Locale.getDefault());
+                DateFormat format = new SimpleDateFormat("EEE",
+                                                         Locale.getDefault());
                 return format.format(date);
-            }
-            else {
+            } else {
                 // This week: EEE h:mm a
-                DateFormat format = new SimpleDateFormat("EEE h:mm a", Locale.getDefault());
+                DateFormat format = new SimpleDateFormat("EEE h:mm a",
+                                                         Locale.getDefault());
                 return format.format(date);
             }
         }
 
-        if (Calendar.getInstance().get(Calendar.YEAR) == calendar.get(Calendar.YEAR)) {
+        if (Calendar.getInstance().get(Calendar.YEAR)
+            == calendar.get(Calendar.YEAR))
+        {
             if (hideTime) {
                 // This year: MMM d
-                DateFormat format = new SimpleDateFormat("MMM d", Locale.getDefault());
+                DateFormat format = new SimpleDateFormat("MMM d",
+                                                         Locale.getDefault());
                 return format.format(date);
-            }
-            else {
+            } else {
                 // This year: MMM d h:mm a
-                DateFormat format = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault());
+                DateFormat format = new SimpleDateFormat("MMM d, h:mm a",
+                                                         Locale.getDefault());
                 return format.format(date);
             }
         }
 
         if (hideTime) {
             // Any: MMM d, yyyy
-            DateFormat format = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
+            DateFormat format = new SimpleDateFormat("MMM d, yyyy",
+                                                     Locale.getDefault());
             return format.format(date);
-        }
-        else {
+        } else {
             // Any: MMM d, yyyy h:mm a
-            DateFormat format = new SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault());
+            DateFormat format = new SimpleDateFormat("MMM d, yyyy, h:mm a",
+                                                     Locale.getDefault());
             return format.format(date);
         }
     }
@@ -192,13 +234,15 @@ public class Utils {
      *
      * @param c1 The first date to compare.
      * @param c2 The second date to compare.
-     * @return true if the two dates are equivalent (excluding times).
+     * @return True if the two dates are equivalent (excluding times).
      */
     private static int compareDateWithoutTime(Calendar c1, Calendar c2) {
-        if (c1.get(Calendar.YEAR) != c2.get(Calendar.YEAR))
+        if (c1.get(Calendar.YEAR) != c2.get(Calendar.YEAR)) {
             return c1.get(Calendar.YEAR) - c2.get(Calendar.YEAR);
-        if (c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH))
+        }
+        if (c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH)) {
             return c1.get(Calendar.MONTH) - c2.get(Calendar.MONTH);
+        }
         return c1.get(Calendar.DAY_OF_MONTH) - c2.get(Calendar.DAY_OF_MONTH);
     }
 
@@ -210,15 +254,22 @@ public class Utils {
      */
     public static String getFormattedPhoneNumber(String phoneNumber) {
         if (phoneNumber.length() == 10) {
-            MessageFormat phoneNumberFormat = new MessageFormat("({0}) {1}-{2}");
-            String[] phoneNumberArray = new String[]{phoneNumber.substring(0, 3), phoneNumber.substring(3, 6),
-                    phoneNumber.substring(6)};
+            MessageFormat phoneNumberFormat =
+                new MessageFormat("({0}) {1}-{2}");
+            String[] phoneNumberArray = new String[] {
+                phoneNumber.substring(0, 3),
+                phoneNumber.substring(3, 6),
+                phoneNumber.substring(6)
+            };
             phoneNumber = phoneNumberFormat.format(phoneNumberArray);
-        }
-        else if (phoneNumber.length() == 11 && phoneNumber.charAt(0) == '1') {
-            MessageFormat phoneNumberFormat = new MessageFormat("({0}) {1}-{2}");
-            String[] phoneNumberArray = new String[]{phoneNumber.substring(1, 4), phoneNumber.substring(4, 7),
-                    phoneNumber.substring(7)};
+        } else if (phoneNumber.length() == 11 && phoneNumber.charAt(0) == '1') {
+            MessageFormat phoneNumberFormat =
+                new MessageFormat("({0}) {1}-{2}");
+            String[] phoneNumberArray = new String[] {
+                phoneNumber.substring(1, 4),
+                phoneNumber.substring(4, 7),
+                phoneNumber.substring(7)
+            };
             phoneNumber = phoneNumberFormat.format(phoneNumberArray);
         }
 
@@ -228,14 +279,18 @@ public class Utils {
     /**
      * Retrieves a JSON object from the specified URL.
      * <p/>
-     * Note that this is a blocking method; it should not be called from the URI thread.
+     * Note that this is a blocking method; it should not be called from the
+     * URI thread.
      *
      * @param urlString The URL to retrieve the JSON from.
      * @return The JSON object at the specified URL.
-     * @throws IOException   if a connection to the server could not be established.
-     * @throws JSONException if the server did not return valid JSON.
+     * @throws IOException   If a connection to the server could not be
+     *                       established.
+     * @throws JSONException If the server did not return valid JSON.
      */
-    public static JSONObject getJson(String urlString) throws IOException, JSONException {
+    public static JSONObject getJson(String urlString)
+        throws IOException, JSONException
+    {
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setReadTimeout(10000);
@@ -244,7 +299,8 @@ public class Utils {
         connection.setDoInput(true);
         connection.connect();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(connection.getInputStream(), "UTF-8"));
         StringBuilder data = new StringBuilder();
         String newLine = System.getProperty("line.separator");
         String line;
@@ -261,10 +317,13 @@ public class Utils {
      * Checks if the Internet connection is available.
      *
      * @param applicationContext The application context.
-     * @return true if the Internet connection is available, false otherwise.
+     * @return True if the Internet connection is available, false otherwise.
      */
-    public static boolean isNetworkConnectionAvailable(Context applicationContext) {
-        ConnectivityManager connMgr = (ConnectivityManager) applicationContext.getSystemService(
+    public static boolean isNetworkConnectionAvailable(
+        Context applicationContext)
+    {
+        ConnectivityManager connMgr =
+            (ConnectivityManager) applicationContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnected();
@@ -273,7 +332,8 @@ public class Utils {
     /**
      * Applies a circular mask to a view.
      * <p/>
-     * Note that this method only works on Lollipop and above; it will silently fail on older versions.
+     * Note that this method only works on Lollipop and above; it will
+     * silently fail on older versions.
      *
      * @param view The view to apply the mask to.
      */
@@ -296,14 +356,16 @@ public class Utils {
      * @param bitmap The bitmap to apply the mask to.
      */
     public static Bitmap applyCircularMask(Bitmap bitmap) {
-        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                                                  bitmap.getHeight(),
+                                                  Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(output);
         final Paint paint = new Paint();
         final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
         canvas.drawARGB(0, 0, 0, 0);
         canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-                bitmap.getWidth() / 2, paint);
+                          bitmap.getWidth() / 2, paint);
         paint.setAntiAlias(true);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
@@ -313,7 +375,8 @@ public class Utils {
     /**
      * Applies a rectangular rounded corners mask to a view.
      * <p/>
-     * Note that this method only works on Lollipop and above; it will silently fail on older versions.
+     * Note that this method only works on Lollipop and above; it will
+     * silently fail on older versions.
      *
      * @param view The view to apply the mask to.
      */
@@ -323,7 +386,9 @@ public class Utils {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                 @Override
                 public void getOutline(View view, Outline outline) {
-                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 15);
+                    outline
+                        .setRoundRect(0, 0, view.getWidth(), view.getHeight(),
+                                      15);
                 }
             });
             view.setClipToOutline(true);
@@ -337,7 +402,8 @@ public class Utils {
      * @param text    The text of the dialog.
      */
     public static void showInfoDialog(Context context, String text) {
-        showAlertDialog(context, null, text, context.getString(R.string.ok), null, null, null);
+        showAlertDialog(context, null, text, context.getString(R.string.ok),
+                        null, null, null);
     }
 
     /**
@@ -346,16 +412,26 @@ public class Utils {
      * @param context              The source context.
      * @param title                The title of the dialog.
      * @param text                 The text of the dialog.
-     * @param positiveButtonText   The text of the positive button of the dialog.
-     * @param positiveButtonAction The action to be taken when the positive button is clicked.
-     * @param negativeButtonText   The text of the negative button of the dialog.
-     * @param negativeButtonAction The action to be taken when the negative button is clicked.
+     * @param positiveButtonText   The text of the positive button of the
+     *                             dialog.
+     * @param positiveButtonAction The action to be taken when the positive
+     *                             button is clicked.
+     * @param negativeButtonText   The text of the negative button of the
+     *                             dialog.
+     * @param negativeButtonAction The action to be taken when the negative
+     *                             button is clicked.
      */
-    public static void showAlertDialog(Context context, String title, String text, String positiveButtonText,
-                                       DialogInterface.OnClickListener positiveButtonAction, String negativeButtonText,
-                                       DialogInterface.OnClickListener negativeButtonAction) {
+    public static void showAlertDialog(Context context, String title,
+                                       String text, String positiveButtonText,
+                                       DialogInterface.OnClickListener
+                                           positiveButtonAction,
+                                       String negativeButtonText,
+                                       DialogInterface.OnClickListener
+                                           negativeButtonAction)
+    {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.DialogTheme);
+        AlertDialog.Builder builder =
+            new AlertDialog.Builder(context, R.style.DialogTheme);
         builder.setMessage(text);
         builder.setTitle(title);
         builder.setPositiveButton(positiveButtonText, positiveButtonAction);
