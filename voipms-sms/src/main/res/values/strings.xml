@@ -49,6 +49,7 @@
 
     <!-- ConversationQuickReplyActivity -->
     <string name="conversation_quick_reply_reply_to">Reply to</string>
+    <string name="conversation_quick_reply_open_sms">Open VoIP.ms SMS</string>
 
     <!-- ConversationsActivity -->
     <string name="conversations_action_search">Search</string>

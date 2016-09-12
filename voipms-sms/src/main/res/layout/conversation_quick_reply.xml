@@ -120,6 +120,6 @@
         android:drawableLeft="@drawable/ic_launch_white_24dp"
         android:drawablePadding="5dp"
         android:drawableStart="@drawable/ic_launch_white_24dp"
-        android:text="Open VoIP.ms SMS"
+        android:text="@string/conversation_quick_reply_open_sms"
         android:textColor="@android:color/white" />
 </LinearLayout>
