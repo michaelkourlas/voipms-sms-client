@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.activities;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -27,10 +28,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -59,8 +65,12 @@ import java.util.Locale;
 
 public class ConversationActivity
         extends AppCompatActivity
-        implements ActionMode.Callback, View.OnLongClickListener, View.OnClickListener {
+        implements ActionMode.Callback, View.OnLongClickListener,
+                   View.OnClickListener,
+                   ActivityCompat.OnRequestPermissionsResultCallback
+{
     public static final String TAG = "ConversationActivity";
+    private static final int PERM_REQ_CALL = 0;
 
     private final ConversationActivity activity = this;
 
@@ -305,16 +315,76 @@ public class ConversationActivity
         return super.onCreateOptionsMenu(menu);
     }
 
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions,
+                                         grantResults);
+        if (requestCode == PERM_REQ_CALL) {
+            for (int i = 0; i < permissions.length; i++) {
+                if (permissions[i].equals(Manifest.permission.CALL_PHONE)) {
+                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                        callButtonHandler();
+                    } else {
+                        Snackbar snackbar = Snackbar.make(
+                            findViewById(R.id.coordinator_layout),
+                            getString(R.string.conversation_perm_denied_call),
+                            Snackbar.LENGTH_INDEFINITE);
+                        snackbar.setAction(
+                            R.string.settings,
+                            v -> {
+                                Intent intent = new Intent();
+                                intent.setAction(
+                                    Settings
+                                        .ACTION_APPLICATION_DETAILS_SETTINGS);
+                                intent.addFlags(
+                                    Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.addFlags(
+                                    Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                intent.addFlags(
+                                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                                Uri uri = Uri.fromParts(
+                                    "package", activity.getPackageName(), null);
+                                intent.setData(uri);
+                                startActivity(intent);
+                            });
+                        snackbar.show();
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean callButtonHandler() {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + contact));
+
+        if (ContextCompat.checkSelfPermission(this,
+                                              Manifest.permission.CALL_PHONE)
+            != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(
+                this,
+                new String[] {Manifest.permission.CALL_PHONE},
+                PERM_REQ_CALL);
+        } else {
+            try {
+                startActivity(intent);
+            } catch (SecurityException ignored) {
+                // Do nothing.
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             switch (item.getItemId()) {
                 case R.id.call_button:
-                    Intent intent = new Intent(Intent.ACTION_CALL);
-                    intent.setData(Uri.parse("tel:" + contact));
-                    startActivity(intent);
-                    return true;
+                    return callButtonHandler();
                 case R.id.delete_button:
                     Conversation conversation = database.getConversation(preferences.getDid(), contact);
                     if (conversation.getMessages().length == 0) {
