@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,9 @@ import net.kourlas.voipms_sms.activities.NewConversationActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewConversationListViewAdapter extends BaseAdapter implements Filterable, SectionIndexer {
+public class NewConversationListViewAdapter extends BaseAdapter
+    implements Filterable, SectionIndexer
+{
     private static final int ITEM_COUNT = 2;
     private static final int ITEM_PRIMARY = 0;
     private static final int ITEM_SECONDARY = 1;
@@ -89,8 +91,7 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
         ContactItem contactItem = (ContactItem) getItem(position);
         if (contactItem.isPrimary()) {
             return ITEM_PRIMARY;
-        }
-        else {
+        } else {
             return ITEM_SECONDARY;
         }
     }
@@ -98,35 +99,42 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) activity.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
+            Context.LAYOUT_INFLATER_SERVICE);
 
         ContactItem contactItem = (ContactItem) getItem(position);
 
         // Set item layout
         if (contactItem.isPrimary()) {
-            convertView = inflater.inflate(R.layout.new_conversation_item_primary, parent, false);
-        }
-        else {
-            convertView = inflater.inflate(R.layout.new_conversation_item_secondary, parent, false);
+            convertView = inflater.inflate(
+                R.layout.new_conversation_item_primary, parent, false);
+        } else {
+            convertView = inflater.inflate(
+                R.layout.new_conversation_item_secondary, parent, false);
         }
 
         // Add indexes to entries where appropriate
         TextView textView = (TextView) convertView.findViewById(R.id.letter);
         if (contactItem.isPrimary() && !contactItem.isTypedIn()) {
             if (position == 0 || contactItem.getName().charAt(0) !=
-                    ((ContactItem) getItem(position - 1)).getName().charAt(0)) {
-                textView.setText(contactItem.getName().toUpperCase().charAt(0) + "");
+                                 ((ContactItem) getItem(position - 1)).getName()
+                                                                      .charAt(
+                                                                          0))
+            {
+                textView.setText(String.valueOf(
+                    contactItem.getName().toUpperCase().charAt(0)));
             }
         }
 
         if (contactItem.isPrimary()) {
-            QuickContactBadge photo = (QuickContactBadge) convertView.findViewById(R.id.photo);
+            QuickContactBadge photo =
+                (QuickContactBadge) convertView.findViewById(R.id.photo);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 photo.setOutlineProvider(new ViewOutlineProvider() {
                     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                     @Override
                     public void getOutline(View view, Outline outline) {
-                        outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                        outline
+                            .setOval(0, 0, view.getWidth(), view.getHeight());
                     }
                 });
                 photo.setClipToOutline(true);
@@ -138,24 +146,24 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
                 photo.setScaleType(ImageView.ScaleType.CENTER);
                 photo.setBackgroundResource(R.color.primary);
                 photo.setImageResource(R.drawable.ic_dialpad_white_24dp);
-            }
-            else if (contactItem.getPhotoUri() == null) {
+            } else if (contactItem.getPhotoUri() == null) {
                 photo.setImageToDefault();
-            }
-            else {
+            } else {
                 photo.setImageURI(Uri.parse(contactItem.getPhotoUri()));
             }
 
-            TextView contactTextView = (TextView) convertView.findViewById(R.id.contact);
+            TextView contactTextView =
+                (TextView) convertView.findViewById(R.id.contact);
             if (contactItem.isTypedIn()) {
-                contactTextView.setText(activity.getString(R.string.new_conversation_manual_entry));
-            }
-            else {
+                contactTextView.setText(
+                    activity.getString(R.string.new_conversation_manual_entry));
+            } else {
                 contactTextView.setText(contactItem.getName());
             }
         }
 
-        TextView phoneNumberTextView = (TextView) convertView.findViewById(R.id.phone_number);
+        TextView phoneNumberTextView =
+            (TextView) convertView.findViewById(R.id.phone_number);
         phoneNumberTextView.setText(contactItem.getPhoneNumber());
 
         return convertView;
@@ -170,10 +178,15 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
         }
 
         int itemCount = getCount();
-        for (int i = getCount() > 0 && ((ContactItem) getItem(0)).isTypedIn() ? 1 : 0; i < itemCount; i++) {
+        for (int i =
+             getCount() > 0 && ((ContactItem) getItem(0)).isTypedIn() ? 1 : 0;
+             i < itemCount; i++) {
             ContactItem contactItem = (ContactItem) getItem(i);
-            if (!sections.contains(contactItem.getName().toUpperCase().charAt(0) + "")) {
-                sections.add(contactItem.getName().toUpperCase().charAt(0) + "");
+            if (!sections
+                .contains(contactItem.getName().toUpperCase().charAt(0) + ""))
+            {
+                sections
+                    .add(contactItem.getName().toUpperCase().charAt(0) + "");
             }
         }
 
@@ -188,9 +201,12 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
         }
 
         int itemCount = getCount();
-        for (int i = getCount() > 0 && ((ContactItem) getItem(0)).isTypedIn() ? 1 : 0; i < itemCount; i++) {
+        for (int i =
+             getCount() > 0 && ((ContactItem) getItem(0)).isTypedIn() ? 1 : 0;
+             i < itemCount; i++) {
             if (((ContactItem) getItem(i)).getName().toUpperCase().charAt(0) ==
-                    getSections()[sectionIndex].toString().charAt(0)) {
+                getSections()[sectionIndex].toString().charAt(0))
+            {
                 return i;
             }
         }
@@ -204,8 +220,11 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
         }
 
         String[] sections = (String[]) getSections();
-        for (int i = sections.length > 0 && sections[0].equals("") ? 1 : 0; i < sections.length; i++) {
-            if (sections[i].charAt(0) == ((ContactItem) getItem(position)).getName().toUpperCase().charAt(0)) {
+        for (int i = sections.length > 0 && sections[0].equals("") ? 1 : 0;
+             i < sections.length; i++) {
+            if (sections[i].charAt(0) == ((ContactItem) getItem(position))
+                .getName().toUpperCase().charAt(0))
+            {
                 return i;
             }
         }
@@ -216,6 +235,7 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
         return new NewConversationFilter();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class ContactItem {
         private final String name;
         private final String phoneNumber;
@@ -223,7 +243,9 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
         private final boolean typedIn;
         private boolean primary;
 
-        public ContactItem(String name, String phoneNumber, String photoUri, boolean primary, boolean typedIn) {
+        ContactItem(String name, String phoneNumber, String photoUri,
+                           boolean primary, boolean typedIn)
+        {
             this.name = name;
             this.phoneNumber = phoneNumber;
             this.photoUri = photoUri;
@@ -266,44 +288,64 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
             String searchText = constraint.toString();
 
             List<ContactItem> phoneNumberEntries = new ArrayList<>();
-            Cursor cursor = activity.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                    null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
-            if (cursor.getCount() > 0) {
-                while (cursor.moveToNext()) {
-                    if (cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)).equals(
-                            "1")) {
-                        String contact = cursor.getString(cursor.getColumnIndex(
-                                ContactsContract.Contacts.DISPLAY_NAME));
-                        String phoneNumber = cursor.getString(cursor.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        String photoUri = cursor.getString(cursor.getColumnIndex(
-                                ContactsContract.Contacts.PHOTO_URI));
+            Cursor cursor = activity.getContentResolver().query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                null, null, null,
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+            if (cursor != null) {
+                if (cursor.getCount() > 0) {
+                    while (cursor.moveToNext()) {
+                        if (cursor.getString(cursor.getColumnIndex(
+                            ContactsContract.Contacts.HAS_PHONE_NUMBER)).equals(
+                            "1"))
+                        {
+                            String contact = cursor.getString(
+                                cursor.getColumnIndex(
+                                    ContactsContract.Contacts.DISPLAY_NAME));
+                            String phoneNumber = cursor.getString(
+                                cursor.getColumnIndex(
+                                    ContactsContract.CommonDataKinds
+                                        .Phone.NUMBER));
+                            String photoUri = cursor.getString(
+                                cursor.getColumnIndex(
+                                    ContactsContract.Contacts.PHOTO_URI));
 
-                        boolean showPhoto = true;
-                        for (ContactItem contactItem : phoneNumberEntries) {
-                            if (contact.equals(contactItem.getName())) {
-                                showPhoto = false;
+                            boolean showPhoto = true;
+                            for (ContactItem contactItem : phoneNumberEntries) {
+                                if (contact.equals(contactItem.getName())) {
+                                    showPhoto = false;
+                                }
                             }
-                        }
 
-                        ContactItem contactItem = new ContactItem(contact, phoneNumber, photoUri, showPhoto, false);
-                        phoneNumberEntries.add(contactItem);
+                            ContactItem contactItem =
+                                new ContactItem(contact, phoneNumber, photoUri,
+                                                showPhoto, false);
+                            phoneNumberEntries.add(contactItem);
+                        }
                     }
                 }
+                cursor.close();
             }
-            cursor.close();
+
+
             if (typedInPhoneNumber != null) {
-                phoneNumberEntries.add(0, new ContactItem(typedInPhoneNumber, typedInPhoneNumber, null, true,
-                        true));
+                phoneNumberEntries.add(0, new ContactItem(typedInPhoneNumber,
+                                                          typedInPhoneNumber,
+                                                          null, true,
+                                                          true));
             }
 
             for (ContactItem contactItem : phoneNumberEntries) {
-                if (contactItem.getName().toLowerCase().contains(searchText.toLowerCase()) ||
-                        contactItem.getPhoneNumber().toLowerCase().contains(searchText.toLowerCase()) ||
-                        (!searchText.replaceAll("[^0-9]", "").equals("") &&
-                                contactItem.getPhoneNumber().replaceAll("[^0-9]", "").contains(
-                                        searchText.replaceAll("[^0-9]", ""))) ||
-                        contactItem.isTypedIn()) {
+                if (contactItem.getName().toLowerCase()
+                               .contains(searchText.toLowerCase()) ||
+                    contactItem.getPhoneNumber().toLowerCase()
+                               .contains(searchText.toLowerCase()) ||
+                    (!searchText.replaceAll("[^0-9]", "").equals("") &&
+                     contactItem.getPhoneNumber().replaceAll("[^0-9]", "")
+                                .contains(
+                                    searchText.replaceAll("[^0-9]", ""))) ||
+                    contactItem.isTypedIn())
+                {
                     contactItemResults.add(contactItem);
                 }
             }
@@ -311,7 +353,9 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
             for (int i = 0; i < contactItemResults.size(); i++) {
                 boolean found = false;
                 for (int j = 0; j < i; j++) {
-                    if (contactItemResults.get(i).getName().equals(contactItemResults.get(j).getName())) {
+                    if (contactItemResults.get(i).getName().equals(
+                        contactItemResults.get(j).getName()))
+                    {
                         contactItemResults.get(i).setPrimary(false);
                         contactItemResults.get(j).setPrimary(true);
                         found = true;
@@ -332,7 +376,9 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
 
         @SuppressWarnings("unchecked")
         @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
+        protected void publishResults(CharSequence constraint,
+                                      FilterResults results)
+        {
             items.clear();
             if (results.values != null) {
                 items.addAll((List<ContactItem>) results.values);
