@@ -25,7 +25,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TtsSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -138,7 +141,8 @@ public class ConversationsRecyclerViewAdapter
         if (!filterConstraint.equals("")) {
             boolean found = false;
             for (Message message : conversations.get(position).getMessages()) {
-                int index = message.getText().toLowerCase()
+                int index = message.getText()
+                                   .toLowerCase()
                                    .indexOf(filterConstraint.toLowerCase());
                 if (index != -1) {
                     int nonMessageOffset = index;
@@ -203,10 +207,32 @@ public class ConversationsRecyclerViewAdapter
             messageTextView.setTypeface(null, Typeface.NORMAL);
         }
 
+        // Set date line
         TextView dateTextView = conversationViewHolder.getDateTextView();
-        dateTextView.setText(Utils.getFormattedDate(applicationContext,
-                                                    newestMessage.getDate(),
-                                                    true));
+        if (!newestMessage.isDelivered()) {
+            if (!newestMessage.isDeliveryInProgress()) {
+                SpannableStringBuilder dateTextBuilder =
+                    new SpannableStringBuilder();
+                dateTextBuilder.append(applicationContext.getString(
+                    R.string.conversations_message_not_sent));
+                dateTextBuilder.setSpan(
+                    new ForegroundColorSpan(
+                        ContextCompat.getColor(
+                            applicationContext,
+                            android.R.color.holo_red_dark)),
+                    0,
+                    dateTextBuilder.length(),
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                dateTextView.setText(dateTextBuilder);
+            } else {
+                dateTextView.setText(applicationContext.getString(
+                    R.string.conversations_message_sending));
+            }
+        } else {
+            dateTextView.setText(Utils.getFormattedDate(applicationContext,
+                                                        newestMessage.getDate(),
+                                                        true));
+        }
     }
 
     @Override
