@@ -6,3 +6,4 @@
 .gradle/
 build/
 release/
+local.properties
