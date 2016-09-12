@@ -74,8 +74,8 @@ public class Preferences {
         editor.apply();
     }
 
-    public long getSyncInterval() {
-        return Long.parseLong(sharedPreferences.getString(applicationContext.getString(
+    public double getSyncInterval() {
+        return Double.parseDouble(sharedPreferences.getString(applicationContext.getString(
                 R.string.preferences_sync_interval_key), "0"));
     }
 

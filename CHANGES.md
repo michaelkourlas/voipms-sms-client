@@ -1,3 +1,8 @@
+## 0.4.2 ##
+
+* Added support for additional sync intervals
+* Bug fixes
+
 ## 0.4.1 ##
 
 * Automatically set up URL callback for notifications

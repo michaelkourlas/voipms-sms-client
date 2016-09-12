@@ -17,6 +17,13 @@
 
 <resources>
     <string-array name="preferences_sync_interval_entries">
+        <item>Every 5 minutes</item>
+        <item>Every 15 minutes</item>
+        <item>Every 30 minutes</item>
+        <item>Every hour</item>
+        <item>Every 3 hours</item>
+        <item>Every 6 hours</item>
+        <item>Every 12 hours</item>
         <item>Every day</item>
         <item>Every 3 days</item>
         <item>Every 7 days</item>
@@ -24,6 +31,13 @@
         <item>Never</item>
     </string-array>
     <string-array name="preferences_sync_interval_values">
+        <item>0.00347222222</item>
+        <item>0.01041666666</item>
+        <item>0.02083333333</item>
+        <item>0.04166666666</item>
+        <item>0.125</item>
+        <item>0.25</item>
+        <item>0.5</item>
         <item>1</item>
         <item>3</item>
         <item>7</item>

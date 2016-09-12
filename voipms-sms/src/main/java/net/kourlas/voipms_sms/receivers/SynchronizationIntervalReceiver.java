@@ -34,7 +34,7 @@ public class SynchronizationIntervalReceiver extends WakefulBroadcastReceiver {
 
         alarmManager.cancel(pendingIntent);
 
-        long syncInterval = preferences.getSyncInterval() * (24 * 60 * 60 * 1000);
+        long syncInterval = (long) (preferences.getSyncInterval() * (24 * 60 * 60 * 1000));
         if (syncInterval != 0) {
             long nextSyncTime = preferences.getLastCompleteSyncTime() + syncInterval;
 
