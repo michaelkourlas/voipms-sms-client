@@ -428,14 +428,17 @@ public class ConversationsRecyclerViewAdapter
                 notifyItemMoved(index, i);
             }
 
-            for (int i = 0; i < newConversations.size(); i++) {
-                if (conversations.size() <= i
-                    || !newConversations.get(i).equals(conversations.get(i)))
-                {
-                    // Conversation is new
-                    checkedItems.add(i, false);
-                    conversations.add(i, newConversations.get(i));
-                    notifyItemInserted(i);
+            if (newConversations != null) {
+                for (int i = 0; i < newConversations.size(); i++) {
+                    if (conversations.size() <= i
+                        || !newConversations.get(i).equals(
+                            conversations.get(i)))
+                    {
+                        // Conversation is new
+                        checkedItems.add(i, false);
+                        conversations.add(i, newConversations.get(i));
+                        notifyItemInserted(i);
+                    }
                 }
             }
 

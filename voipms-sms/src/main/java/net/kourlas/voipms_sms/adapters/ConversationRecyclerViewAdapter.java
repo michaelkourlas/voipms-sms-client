@@ -482,14 +482,16 @@ public class ConversationRecyclerViewAdapter
                 notifyItemMoved(index, i);
             }
 
-            for (int i = 0; i < newMessages.size(); i++) {
-                if (messages.size() <= i || !newMessages.get(i).equals(
-                    messages.get(i)))
-                {
-                    // Message is new
-                    checkedItems.add(i, false);
-                    messages.add(i, newMessages.get(i));
-                    notifyItemInserted(i);
+            if (newMessages != null) {
+                for (int i = 0; i < newMessages.size(); i++) {
+                    if (messages.size() <= i || !newMessages.get(i).equals(
+                        messages.get(i)))
+                    {
+                        // Message is new
+                        checkedItems.add(i, false);
+                        messages.add(i, newMessages.get(i));
+                        notifyItemInserted(i);
+                    }
                 }
             }
 
