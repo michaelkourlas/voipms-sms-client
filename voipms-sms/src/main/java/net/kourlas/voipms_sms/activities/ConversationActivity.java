@@ -686,10 +686,7 @@ public class ConversationActivity
     }
 
     public void markConversationAsRead() {
-        for (Message message : database.getConversation(preferences.getDid(), contact).getMessages()) {
-            message.setUnread(false);
-            database.insertMessage(message);
-        }
+        database.markConversationAsRead(preferences.getDid(), contact);
     }
 
     public void sendMessage(long databaseId) {
