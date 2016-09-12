@@ -329,6 +329,7 @@ public class ConversationActivity
                     } else {
                         Utils.showPermissionSnackbar(
                             this,
+                            R.id.coordinator_layout,
                             getString(R.string.conversation_perm_denied_call));
                     }
                 }

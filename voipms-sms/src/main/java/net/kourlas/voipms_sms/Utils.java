@@ -460,15 +460,18 @@ public class Utils {
      * application settings page.
      *
      * @param activity The host activity for the snackbar.
+     * @param viewId   The ID of the view to add the snackbar to.
      * @param text     The text to display.
      */
     public static void showPermissionSnackbar(Activity activity,
+                                              int viewId,
                                               String text)
     {
+        final View view = activity.findViewById(viewId);
         Snackbar snackbar = Snackbar.make(
-            activity.findViewById(R.id.coordinator_layout),
+            view,
             text,
-            Snackbar.LENGTH_INDEFINITE);
+            Snackbar.LENGTH_LONG);
         snackbar.setAction(
             R.string.settings,
             v -> {
