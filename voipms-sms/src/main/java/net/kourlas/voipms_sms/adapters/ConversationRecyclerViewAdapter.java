@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms.adapters;
 import android.content.Context;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
@@ -47,10 +48,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ConversationRecyclerViewAdapter
-        extends RecyclerView.Adapter<ConversationRecyclerViewAdapter.MessageViewHolder>
-        implements Filterable {
-    public static final int ITEM_LEFT_PRIMARY = 0;
-    public static final int ITEM_LEFT_SECONDARY = 1;
+    extends
+    RecyclerView.Adapter<ConversationRecyclerViewAdapter.MessageViewHolder>
+    implements Filterable
+{
+    private static final int ITEM_LEFT_PRIMARY = 0;
+    private static final int ITEM_LEFT_SECONDARY = 1;
     private static final int ITEM_RIGHT_PRIMARY = 2;
     private static final int ITEM_RIGHT_SECONDARY = 3;
 
@@ -60,12 +63,15 @@ public class ConversationRecyclerViewAdapter
     private final String contact;
     private final List<Message> messages;
     private final List<Boolean> checkedItems;
-    Preferences preferences;
+    private final Preferences preferences;
+
     private String filterConstraint;
     private String oldFilterConstraint;
 
-    public ConversationRecyclerViewAdapter(ConversationActivity activity, LinearLayoutManager layoutManager,
-                                           String contact) {
+    public ConversationRecyclerViewAdapter(ConversationActivity activity,
+                                           LinearLayoutManager layoutManager,
+                                           String contact)
+    {
         this.activity = activity;
         this.applicationContext = activity.getApplicationContext();
         this.layoutManager = layoutManager;
@@ -79,24 +85,30 @@ public class ConversationRecyclerViewAdapter
     }
 
     @Override
-    public MessageViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public MessageViewHolder onCreateViewHolder(ViewGroup viewGroup,
+                                                int viewType)
+    {
         View itemView = null;
         switch (viewType) {
             case ITEM_LEFT_PRIMARY:
                 itemView = LayoutInflater.from(viewGroup.getContext()).inflate(
-                        R.layout.conversation_item_incoming_primary, viewGroup, false);
+                    R.layout.conversation_item_incoming_primary, viewGroup,
+                    false);
                 break;
             case ITEM_LEFT_SECONDARY:
                 itemView = LayoutInflater.from(viewGroup.getContext()).inflate(
-                        R.layout.conversation_item_incoming_secondary, viewGroup, false);
+                    R.layout.conversation_item_incoming_secondary, viewGroup,
+                    false);
                 break;
             case ITEM_RIGHT_PRIMARY:
                 itemView = LayoutInflater.from(viewGroup.getContext()).inflate(
-                        R.layout.conversation_item_outgoing_primary, viewGroup, false);
+                    R.layout.conversation_item_outgoing_primary, viewGroup,
+                    false);
                 break;
             case ITEM_RIGHT_SECONDARY:
                 itemView = LayoutInflater.from(viewGroup.getContext()).inflate(
-                        R.layout.conversation_item_outgoing_secondary, viewGroup, false);
+                    R.layout.conversation_item_outgoing_secondary, viewGroup,
+                    false);
                 break;
         }
         return new MessageViewHolder(itemView, viewType);
@@ -108,28 +120,30 @@ public class ConversationRecyclerViewAdapter
         int viewType = getItemViewType(i);
 
         if (viewType == ITEM_LEFT_PRIMARY || viewType == ITEM_RIGHT_PRIMARY) {
-            QuickContactBadge contactBadge = messageViewHolder.getContactBadge();
+            QuickContactBadge contactBadge =
+                messageViewHolder.getContactBadge();
             if (viewType == ITEM_LEFT_PRIMARY) {
                 contactBadge.assignContactFromPhone(message.getContact(), true);
-            }
-            else {
+            } else {
                 contactBadge.assignContactFromPhone(message.getDid(), true);
             }
             String photoUri;
             if (viewType == ITEM_LEFT_PRIMARY) {
-                photoUri = Utils.getContactPhotoUri(applicationContext, message.getContact());
+                photoUri = Utils.getContactPhotoUri(applicationContext,
+                                                    message.getContact());
 
-            }
-            else {
-                photoUri = Utils.getContactPhotoUri(applicationContext, ContactsContract.Profile.CONTENT_URI);
+            } else {
+                photoUri = Utils.getContactPhotoUri(applicationContext,
+                                                    ContactsContract.Profile
+                                                        .CONTENT_URI);
                 if (photoUri == null) {
-                    photoUri = Utils.getContactPhotoUri(applicationContext, message.getDid());
+                    photoUri = Utils.getContactPhotoUri(applicationContext,
+                                                        message.getDid());
                 }
             }
             if (photoUri != null) {
                 contactBadge.setImageURI(Uri.parse(photoUri));
-            }
-            else {
+            } else {
                 contactBadge.setImageToDefault();
             }
         }
@@ -137,17 +151,27 @@ public class ConversationRecyclerViewAdapter
         View smsContainer = messageViewHolder.getSmsContainer();
 
         TextView messageText = messageViewHolder.getMessageText();
-        SpannableStringBuilder messageTextBuilder = new SpannableStringBuilder();
+        SpannableStringBuilder messageTextBuilder =
+            new SpannableStringBuilder();
         messageTextBuilder.append(message.getText());
         if (!filterConstraint.equals("")) {
-            int index = message.getText().toLowerCase().indexOf(filterConstraint.toLowerCase());
+            int index = message.getText().toLowerCase()
+                               .indexOf(filterConstraint.toLowerCase());
             if (index != -1) {
-                messageTextBuilder.setSpan(new BackgroundColorSpan(applicationContext.getResources().getColor(
-                                R.color.highlight)), index, index + filterConstraint.length(),
-                        SpannableString.SPAN_INCLUSIVE_EXCLUSIVE);
-                messageTextBuilder.setSpan(new ForegroundColorSpan(applicationContext.getResources().getColor(
-                                R.color.dark_gray)), index, index + filterConstraint.length(),
-                        SpannableString.SPAN_INCLUSIVE_EXCLUSIVE);
+                messageTextBuilder.setSpan(
+                    new BackgroundColorSpan(
+                        ContextCompat.getColor(
+                            applicationContext, R.color.highlight)),
+                    index,
+                    index + filterConstraint.length(),
+                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE);
+                messageTextBuilder.setSpan(
+                    new ForegroundColorSpan(
+                        ContextCompat.getColor(
+                            applicationContext, R.color.dark_gray)),
+                    index,
+                    index + filterConstraint.length(),
+                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE);
             }
         }
         messageText.setText(messageTextBuilder);
@@ -155,49 +179,76 @@ public class ConversationRecyclerViewAdapter
         TextView dateText = messageViewHolder.getDateText();
         if (!message.isDelivered()) {
             if (!message.isDeliveryInProgress()) {
-                SpannableStringBuilder dateTextBuilder = new SpannableStringBuilder();
+                SpannableStringBuilder dateTextBuilder =
+                    new SpannableStringBuilder();
                 if (isItemChecked(i)) {
-                    dateTextBuilder.append(applicationContext.getString(R.string.conversation_message_not_sent_selected));
+                    dateTextBuilder.append(applicationContext.getString(
+                        R.string.conversation_message_not_sent_selected));
+                } else {
+                    dateTextBuilder.append(applicationContext.getString(
+                        R.string.conversation_message_not_sent));
                 }
-                else {
-                    dateTextBuilder.append(applicationContext.getString(R.string.conversation_message_not_sent));
-                }
-                dateTextBuilder.setSpan(new ForegroundColorSpan(
-                                isItemChecked(i) ? applicationContext.getResources().getColor(android.R.color.white) :
-                                        applicationContext.getResources().getColor(android.R.color.holo_red_dark)), 0,
-                        dateTextBuilder.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                dateTextBuilder.setSpan(
+                    new ForegroundColorSpan(
+                        isItemChecked(i) ? ContextCompat.getColor(
+                            applicationContext,
+                            android.R.color.white)
+                                         : ContextCompat.getColor(
+                            applicationContext,
+                            android.R.color.holo_red_dark)),
+                    0,
+                    dateTextBuilder.length(),
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                 dateText.setText(dateTextBuilder);
                 dateText.setVisibility(View.VISIBLE);
-            }
-            else {
-                dateText.setText(applicationContext.getString(R.string.conversation_message_sending));
+            } else {
+                dateText.setText(applicationContext.getString(
+                    R.string.conversation_message_sending));
                 dateText.setVisibility(View.VISIBLE);
             }
-        }
-        else if (i == messages.size() - 1 ||
-                ((viewType == ITEM_LEFT_PRIMARY || viewType == ITEM_LEFT_SECONDARY) &&
-                        getItemViewType(i + 1) != ITEM_LEFT_SECONDARY) ||
-                ((viewType == ITEM_RIGHT_PRIMARY || viewType == ITEM_RIGHT_SECONDARY) &&
-                        getItemViewType(i + 1) != ITEM_RIGHT_SECONDARY)) {
-            dateText.setText(Utils.getFormattedDate(applicationContext, message.getDate(), false));
+        } else if (i == messages.size() - 1 ||
+                   ((viewType == ITEM_LEFT_PRIMARY
+                     || viewType == ITEM_LEFT_SECONDARY) &&
+                    getItemViewType(i + 1) != ITEM_LEFT_SECONDARY) ||
+                   ((viewType == ITEM_RIGHT_PRIMARY
+                     || viewType == ITEM_RIGHT_SECONDARY) &&
+                    getItemViewType(i + 1) != ITEM_RIGHT_SECONDARY))
+        {
+            dateText.setText(Utils.getFormattedDate(applicationContext,
+                                                    message.getDate(), false));
             dateText.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             dateText.setVisibility(View.GONE);
         }
 
         if (viewType == ITEM_LEFT_PRIMARY || viewType == ITEM_LEFT_SECONDARY) {
-            smsContainer.setBackgroundResource(isItemChecked(i) ? android.R.color.holo_blue_dark : R.color.primary);
-        }
-        else {
-            smsContainer.setBackgroundResource(isItemChecked(i) ? android.R.color.holo_blue_dark :
-                    android.R.color.white);
-            messageText.setTextColor(isItemChecked(i) ? applicationContext.getResources().getColor(
-                    android.R.color.white) : applicationContext.getResources().getColor(R.color.dark_gray));
-            messageText.setLinkTextColor(isItemChecked(i) ? applicationContext.getResources().getColor(
-                    android.R.color.white) : applicationContext.getResources().getColor(R.color.dark_gray));
-            dateText.setTextColor(isItemChecked(i) ? applicationContext.getResources().getColor(
-                    R.color.message_translucent_white) : applicationContext.getResources().getColor(
+            smsContainer.setBackgroundResource(
+                isItemChecked(i) ? android.R.color.holo_blue_dark :
+                R.color.primary);
+        } else {
+            smsContainer.setBackgroundResource(
+                isItemChecked(i) ? android.R.color.holo_blue_dark
+                                 : android.R.color.white);
+            messageText.setTextColor(
+                isItemChecked(i) ? ContextCompat.getColor(
+                    applicationContext,
+                    android.R.color.white)
+                                 : ContextCompat.getColor(
+                    applicationContext,
+                    R.color.dark_gray));
+            messageText.setLinkTextColor(
+                isItemChecked(i) ? ContextCompat.getColor(
+                    applicationContext,
+                    android.R.color.white)
+                                 : ContextCompat.getColor(
+                    applicationContext,
+                    R.color.dark_gray));
+            dateText.setTextColor(
+                isItemChecked(i) ? ContextCompat.getColor(
+                    applicationContext,
+                    R.color.message_translucent_white)
+                                 : ContextCompat.getColor(
+                    applicationContext,
                     R.color.message_translucent_dark_grey));
         }
     }
@@ -220,20 +271,23 @@ public class ConversationRecyclerViewAdapter
         }
 
         if (message.getType() == Message.Type.INCOMING) {
-            if (previousMessage == null || previousMessage.getType() == Message.Type.OUTGOING ||
-                    message.getDateInDatabaseFormat() - previousMessage.getDateInDatabaseFormat() > 60) {
+            if (previousMessage == null
+                || previousMessage.getType() == Message.Type.OUTGOING
+                || message.getDateInDatabaseFormat()
+                   - previousMessage.getDateInDatabaseFormat() > 60)
+            {
                 return ITEM_LEFT_PRIMARY;
-            }
-            else {
+            } else {
                 return ITEM_LEFT_SECONDARY;
             }
-        }
-        else {
-            if (previousMessage == null || previousMessage.getType() == Message.Type.INCOMING ||
-                    message.getDateInDatabaseFormat() - previousMessage.getDateInDatabaseFormat() > 60) {
+        } else {
+            if (previousMessage == null
+                || previousMessage.getType() == Message.Type.INCOMING
+                || message.getDateInDatabaseFormat()
+                   - previousMessage.getDateInDatabaseFormat() > 60)
+            {
                 return ITEM_RIGHT_PRIMARY;
-            }
-            else {
+            } else {
                 return ITEM_RIGHT_SECONDARY;
             }
         }
@@ -253,8 +307,7 @@ public class ConversationRecyclerViewAdapter
 
         if (previous && !checked) {
             notifyItemChanged(position);
-        }
-        else if (!previous && checked) {
+        } else if (!previous && checked) {
             notifyItemChanged(position);
         }
     }
@@ -287,7 +340,7 @@ public class ConversationRecyclerViewAdapter
         private final TextView messageText;
         private final TextView dateText;
 
-        public MessageViewHolder(View itemView, int viewType) {
+        MessageViewHolder(View itemView, int viewType) {
             super(itemView);
 
             itemView.setClickable(true);
@@ -295,11 +348,13 @@ public class ConversationRecyclerViewAdapter
             itemView.setLongClickable(true);
             itemView.setOnLongClickListener(activity);
 
-            if (viewType == ITEM_LEFT_PRIMARY || viewType == ITEM_RIGHT_PRIMARY) {
-                contactBadge = (QuickContactBadge) itemView.findViewById(R.id.photo);
+            if (viewType == ITEM_LEFT_PRIMARY
+                || viewType == ITEM_RIGHT_PRIMARY)
+            {
+                contactBadge =
+                    (QuickContactBadge) itemView.findViewById(R.id.photo);
                 Utils.applyCircularMask(contactBadge);
-            }
-            else {
+            } else {
                 contactBadge = null;
             }
             smsContainer = itemView.findViewById(R.id.sms_container);
@@ -308,19 +363,19 @@ public class ConversationRecyclerViewAdapter
             dateText = (TextView) itemView.findViewById(R.id.date);
         }
 
-        public QuickContactBadge getContactBadge() {
+        QuickContactBadge getContactBadge() {
             return contactBadge;
         }
 
-        public View getSmsContainer() {
+        View getSmsContainer() {
             return smsContainer;
         }
 
-        public TextView getMessageText() {
+        TextView getMessageText() {
             return messageText;
         }
 
-        public TextView getDateText() {
+        TextView getDateText() {
             return dateText;
         }
     }
@@ -334,10 +389,14 @@ public class ConversationRecyclerViewAdapter
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
 
-            Message[] smses = Database.getInstance(activity.getApplicationContext()).getConversation(
-                    preferences.getDid(), contact).getMessages();
+            Message[] smses =
+                Database.getInstance(activity.getApplicationContext())
+                        .getConversation(
+                            preferences.getDid(), contact).getMessages();
             for (Message message : smses) {
-                if (message.getText().toLowerCase().contains(filterConstraint.toLowerCase())) {
+                if (message.getText().toLowerCase()
+                           .contains(filterConstraint.toLowerCase()))
+                {
                     messageResults.add(message);
                 }
             }
@@ -351,7 +410,9 @@ public class ConversationRecyclerViewAdapter
 
         @Override
         @SuppressWarnings("unchecked")
-        protected void publishResults(CharSequence constraint, FilterResults results) {
+        protected void publishResults(CharSequence constraint,
+                                      FilterResults results)
+        {
             List<Message> newMessages = (List<Message>) results.values;
 
             List<Message> oldMessages = new LinkedList<>();
@@ -359,8 +420,11 @@ public class ConversationRecyclerViewAdapter
             for (Message oldMessage : oldMessages) {
                 boolean removed = true;
                 for (Message newMessage : newMessages) {
-                    if (oldMessage.getDatabaseId() != null && newMessage.getDatabaseId() != null &&
-                            oldMessage.getDatabaseId().equals(newMessage.getDatabaseId())) {
+                    if (oldMessage.getDatabaseId() != null
+                        && newMessage.getDatabaseId() != null &&
+                        oldMessage.getDatabaseId()
+                                  .equals(newMessage.getDatabaseId()))
+                    {
                         removed = false;
                         break;
                     }
@@ -377,10 +441,14 @@ public class ConversationRecyclerViewAdapter
 
             for (int i = 0; i < messages.size(); i++) {
                 for (Message newMessage : newMessages) {
-                    if (messages.get(i).getDatabaseId() != null && newMessage.getDatabaseId() != null &&
-                            messages.get(i).getDatabaseId().equals(newMessage.getDatabaseId())) {
+                    if (messages.get(i).getDatabaseId() != null
+                        && newMessage.getDatabaseId() != null &&
+                        messages.get(i).getDatabaseId()
+                                .equals(newMessage.getDatabaseId()))
+                    {
                         if (!messages.get(i).equals(newMessage) ||
-                                !oldFilterConstraint.equals(filterConstraint)) {
+                            !oldFilterConstraint.equals(filterConstraint))
+                        {
                             // Message was changed
                             messages.set(i, newMessage);
                             notifyItemChanged(i);
@@ -415,7 +483,9 @@ public class ConversationRecyclerViewAdapter
             }
 
             for (int i = 0; i < newMessages.size(); i++) {
-                if (messages.size() <= i || !newMessages.get(i).equals(messages.get(i))) {
+                if (messages.size() <= i || !newMessages.get(i).equals(
+                    messages.get(i)))
+                {
                     // Message is new
                     checkedItems.add(i, false);
                     messages.add(i, newMessages.get(i));
@@ -423,22 +493,24 @@ public class ConversationRecyclerViewAdapter
                 }
             }
 
-            TextView emptyTextView = (TextView) activity.findViewById(R.id.empty_text);
+            TextView emptyTextView =
+                (TextView) activity.findViewById(R.id.empty_text);
             if (messages.size() == 0) {
                 if (filterConstraint.equals("")) {
-                    emptyTextView.setText(applicationContext.getString(R.string.conversation_no_messages));
+                    emptyTextView.setText(applicationContext.getString(
+                        R.string.conversation_no_messages));
+                } else {
+                    emptyTextView.setText(applicationContext.getString(
+                        R.string.conversation_no_results, filterConstraint));
                 }
-                else {
-                    emptyTextView.setText(applicationContext.getString(R.string.conversation_no_results) + " '" +
-                            filterConstraint + "'");
-                }
-            }
-            else {
+            } else {
                 emptyTextView.setText("");
             }
 
             if (messages.size() > 1) {
-                if (layoutManager.findLastVisibleItemPosition() >= messages.size() - 2) {
+                if (layoutManager.findLastVisibleItemPosition()
+                    >= messages.size() - 2)
+                {
                     layoutManager.scrollToPosition(messages.size() - 1);
                 }
             }

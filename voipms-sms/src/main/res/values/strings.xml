@@ -33,7 +33,7 @@
     <string name="conversation_info_from">From:</string>
     <string name="conversation_info_date">Date:</string>
     <string name="conversation_no_messages">There are no messages in this conversation.</string>
-    <string name="conversation_no_results">No results found for</string>
+    <string name="conversation_no_results">No results found for '%1$s'</string>
     <string name="conversation_text_hint">Send message</string>
     <string name="conversation_message_sending">Sending…</string>
     <string name="conversation_message_not_sent">Not sent. Touch to try again.</string>
