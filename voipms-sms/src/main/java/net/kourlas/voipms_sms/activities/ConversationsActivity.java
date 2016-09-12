@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,15 @@
 
 package net.kourlas.voipms_sms.activities;
 
-import android.*;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -44,10 +37,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 import net.kourlas.voipms_sms.*;
-import net.kourlas.voipms_sms.Manifest;
-import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.adapters.ConversationsRecyclerViewAdapter;
 import net.kourlas.voipms_sms.gcm.Gcm;
 import net.kourlas.voipms_sms.model.Conversation;
@@ -59,10 +49,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConversationsActivity
-        extends AppCompatActivity
-        implements ActionMode.Callback, View.OnClickListener,
-                   View.OnLongClickListener,
-                   ActivityCompat.OnRequestPermissionsResultCallback {
+    extends AppCompatActivity
+    implements ActionMode.Callback, View.OnClickListener,
+               View.OnLongClickListener,
+               ActivityCompat.OnRequestPermissionsResultCallback
+{
     private static final int PERM_REQ_CONTACTS = 0;
 
     private final ConversationsActivity conversationsActivity = this;
@@ -91,7 +82,8 @@ public class ConversationsActivity
         preferences = Preferences.getInstance(getApplicationContext());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.toolbar_elevation));
+        ViewCompat.setElevation(toolbar, getResources()
+            .getDimension(R.dimen.toolbar_elevation));
         setSupportActionBar(toolbar);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -105,28 +97,27 @@ public class ConversationsActivity
         actionMode = null;
         actionModeEnabled = false;
 
-        SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                preFullUpdate();
-            }
-        });
+        SwipeRefreshLayout swipeRefreshLayout =
+            (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout
+            .setOnRefreshListener(this::preFullUpdate);
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
 
-        FloatingActionButton button = (FloatingActionButton) findViewById(R.id.new_button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!preferences.getEmail().equals("") && !preferences.getPassword().equals("") &&
-                        !preferences.getDid().equals("")) {
-                    Intent intent = new Intent(conversationsActivity, NewConversationActivity.class);
-                    startActivity(intent);
-                }
+        FloatingActionButton button =
+            (FloatingActionButton) findViewById(R.id.new_button);
+        button.setOnClickListener(v -> {
+            if (!preferences.getEmail().equals("") && !preferences
+                .getPassword().equals("") &&
+                !preferences.getDid().equals(""))
+            {
+                Intent intent = new Intent(conversationsActivity,
+                                           NewConversationActivity.class);
+                startActivity(intent);
             }
         });
 
-        SynchronizationIntervalReceiver.setupSynchronizationInterval(getApplicationContext());
+        SynchronizationIntervalReceiver
+            .setupSynchronizationInterval(getApplicationContext());
 
         if (ContextCompat.checkSelfPermission(
             this, android.Manifest.permission.READ_CONTACTS)
@@ -140,34 +131,40 @@ public class ConversationsActivity
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        ActivityMonitor.getInstance().setCurrentActivity(this);
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
+    }
 
-        if (!(preferences.getEmail().equals("") || preferences.getPassword().equals("") ||
-                preferences.getDid().equals(""))) {
-            preRecentUpdate();
-
-            if (ContextCompat.checkSelfPermission(
-                this, android.Manifest.permission.READ_CONTACTS)
-                == PackageManager.PERMISSION_GRANTED)
-            {
-                adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent data)
+    {
+        if (requestCode == 1001 && resultCode == RESULT_OK) {
+            try {
+                String purchaseData =
+                    data.getStringExtra("INAPP_PURCHASE_DATA");
+                JSONObject json = new JSONObject(purchaseData);
+                String token = json.getString("purchaseToken");
+                billing.postDonation(token, this);
+            } catch (Exception ignored) {
+                // Do nothing.
             }
         }
-        else {
-            Utils.showAlertDialog(this, null, getString(R.string.conversations_first_run_dialog_text),
-                    getString(R.string.preferences_name), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Intent preferencesIntent = new Intent(conversationsActivity, PreferencesActivity.class);
-                            startActivity(preferencesIntent);
-                        }
-                    }, getString(R.string.help_name), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Intent helpIntent = new Intent(conversationsActivity, HelpActivity.class);
-                            startActivity(helpIntent);
-                        }
-                    });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (actionModeEnabled) {
+            actionMode.finish();
+        } else if (menu != null) {
+            MenuItem searchItem = menu.findItem(R.id.search_button);
+            SearchView searchView = (SearchView) searchItem.getActionView();
+            if (!searchView.isIconified()) {
+                searchItem.collapseActionView();
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 
@@ -178,9 +175,40 @@ public class ConversationsActivity
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
+    public void onResume() {
+        super.onResume();
+        ActivityMonitor.getInstance().setCurrentActivity(this);
+
+        if (!(preferences.getEmail().equals("") || preferences.getPassword()
+                                                              .equals("") ||
+              preferences.getDid().equals("")))
+        {
+            preRecentUpdate();
+
+            if (ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED)
+            {
+                adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+            }
+        } else {
+            Utils.showAlertDialog(this, null, getString(
+                R.string.conversations_first_run_dialog_text),
+                                  getString(R.string.preferences_name),
+                                  (dialog, id) -> {
+                                      Intent preferencesIntent =
+                                          new Intent(conversationsActivity,
+                                                     PreferencesActivity
+                                                         .class);
+                                      startActivity(preferencesIntent);
+                                  }, getString(R.string.help_name),
+                                  (dialog, id) -> {
+                                      Intent helpIntent =
+                                          new Intent(conversationsActivity,
+                                                     HelpActivity.class);
+                                      startActivity(helpIntent);
+                                  });
+        }
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -192,7 +220,8 @@ public class ConversationsActivity
         if (requestCode == PERM_REQ_CONTACTS) {
             for (int i = 0; i < permissions.length; i++) {
                 if (permissions[i].equals(
-                    android.Manifest.permission.READ_CONTACTS)) {
+                    android.Manifest.permission.READ_CONTACTS))
+                {
                     if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                         adapter.notifyItemRangeChanged(0,
                                                        adapter.getItemCount());
@@ -208,35 +237,15 @@ public class ConversationsActivity
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1001 && resultCode == RESULT_OK) {
-            try {
-                String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-                JSONObject json = new JSONObject(purchaseData);
-                String token = json.getString("purchaseToken");
-                billing.postDonation(token, this);
-            } catch (Exception ignored) {
-                // Do nothing.
-            }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (actionModeEnabled) {
-            actionMode.finish();
-        }
-        else if (menu != null) {
-            MenuItem searchItem = menu.findItem(R.id.search_button);
-            SearchView searchView = (SearchView) searchItem.getActionView();
-            if (!searchView.isIconified()) {
-                searchItem.collapseActionView();
-            }
-            else {
-                super.onBackPressed();
-            }
-        }
+    /**
+     * Initiates a partial update of the message database. This update only
+     * retrieves messages dated after the most
+     * recent message.
+     */
+    private void preRecentUpdate() {
+        adapter.refresh();
+        gcm.registerForGcm(conversationsActivity, false, false);
+        database.synchronize(true, false, conversationsActivity);
     }
 
     @Override
@@ -245,7 +254,8 @@ public class ConversationsActivity
         inflater.inflate(R.menu.conversations, menu);
         this.menu = menu;
 
-        SearchView searchView = (SearchView) menu.findItem(R.id.search_button).getActionView();
+        SearchView searchView =
+            (SearchView) menu.findItem(R.id.search_button).getActionView();
         searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -267,7 +277,8 @@ public class ConversationsActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.preferences_button:
-                Intent preferencesIntent = new Intent(this, PreferencesActivity.class);
+                Intent preferencesIntent =
+                    new Intent(this, PreferencesActivity.class);
                 startActivity(preferencesIntent);
                 return true;
             case R.id.help_button:
@@ -312,8 +323,10 @@ public class ConversationsActivity
                     if (adapter.isItemChecked(i)) {
                         Message[] smses = adapter.getItem(i).getMessages();
                         for (Message message : smses) {
-                            message.setUnread(item.getTitle().equals(getResources().getString(
-                                    R.string.conversations_action_mark_unread)));
+                            message.setUnread(
+                                item.getTitle().equals(getResources().getString(
+                                    R.string
+                                        .conversations_action_mark_unread)));
                             database.insertMessage(message);
                         }
                     }
@@ -325,7 +338,8 @@ public class ConversationsActivity
                 List<Long> databaseIds = new ArrayList<>();
                 for (int i = 0; i < adapter.getItemCount(); i++) {
                     if (adapter.isItemChecked(i)) {
-                        for (Message message : adapter.getItem(i).getMessages()) {
+                        for (Message message : adapter.getItem(i)
+                                                      .getMessages()) {
                             if (message.getDatabaseId() != null) {
                                 databaseIds.add(message.getDatabaseId());
                             }
@@ -357,7 +371,76 @@ public class ConversationsActivity
     }
 
     /**
-     * Toggles the item associated with the specified view. Activates and deactivates the action mode depending on the
+     * Deletes the messages with the specified database IDs.
+     *
+     * @param databaseIds The database IDs of the messages to delete.
+     */
+    private void deleteMessages(final Long[] databaseIds) {
+        Utils.showAlertDialog(this, getString(
+            R.string.conversations_delete_confirm_title),
+                              getString(
+                                  R.string
+                                      .conversations_delete_confirm_message),
+                              getString(R.string.delete),
+                              (dialog, which) -> {
+                                  for (long databaseId : databaseIds) {
+                                      Message message = database
+                                          .getMessageWithDatabaseId(
+                                              preferences.getDid(),
+                                              databaseId);
+                                      if (message.getVoipId() == null) {
+                                          // Simply delete messages with
+                                          // no VoIP.ms ID from the
+                                          // database; no request to the
+                                          // VoIP.ms API will be necessary
+                                          database
+                                              .removeMessage(databaseId);
+                                      } else {
+                                          // Otherwise, keep the message
+                                          // in the database but set a
+                                          // deleted flag, so the message's
+                                          // VoIP.ms ID can be accessed
+                                          // later if local deletions are
+                                          // propagated to the VoIP.ms
+                                          // servers
+                                          message.setDeleted(true);
+                                          database.insertMessage(message);
+                                      }
+                                      adapter.refresh();
+                                  }
+                              },
+                              getString(R.string.cancel), null
+                             );
+    }
+
+    /**
+     * Called when any item in the RecyclerView is short-clicked.
+     * <p/>
+     * This method only toggles the selected item (if the action mode is
+     * enabled) or opens the ConversationActivity
+     * for that item (if the action mode is not enabled).
+     *
+     * @param view The item to toggle or open.
+     */
+    @Override
+    public void onClick(View view) {
+        if (actionModeEnabled) {
+            toggleItem(view);
+        } else {
+            Conversation conversation =
+                adapter.getItem(recyclerView.getChildAdapterPosition(view));
+            String contact = conversation.getContact();
+
+            Intent intent = new Intent(this, ConversationActivity.class);
+            intent.putExtra(getString(R.string.conversation_extra_contact),
+                            contact);
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * Toggles the item associated with the specified view. Activates and
+     * deactivates the action mode depending on the
      * checked item count.
      *
      * @param view The specified view.
@@ -381,7 +464,8 @@ public class ConversationsActivity
     }
 
     /**
-     * Switches between "mark as read" and "mark as unread" buttons for the action mode depending on which items in
+     * Switches between "mark as read" and "mark as unread" buttons for the
+     * action mode depending on which items in
      * the RecyclerView are selected.
      */
     private void updateButtons() {
@@ -391,44 +475,20 @@ public class ConversationsActivity
             if (adapter.isItemChecked(i)) {
                 if (adapter.getItem(i).isUnread()) {
                     unread++;
-                }
-                else {
+                } else {
                     read++;
                 }
             }
         }
 
-        MenuItem item = actionMode.getMenu().findItem(R.id.mark_read_unread_button);
+        MenuItem item =
+            actionMode.getMenu().findItem(R.id.mark_read_unread_button);
         if (read > unread) {
             item.setIcon(R.drawable.ic_markunread_white_24dp);
             item.setTitle(R.string.conversations_action_mark_unread);
-        }
-        else {
+        } else {
             item.setIcon(R.drawable.ic_drafts_white_24dp);
             item.setTitle(R.string.conversations_action_mark_read);
-        }
-    }
-
-    /**
-     * Called when any item in the RecyclerView is short-clicked.
-     * <p/>
-     * This method only toggles the selected item (if the action mode is enabled) or opens the ConversationActivity
-     * for that item (if the action mode is not enabled).
-     *
-     * @param view The item to toggle or open.
-     */
-    @Override
-    public void onClick(View view) {
-        if (actionModeEnabled) {
-            toggleItem(view);
-        }
-        else {
-            Conversation conversation = adapter.getItem(recyclerView.getChildAdapterPosition(view));
-            String contact = conversation.getContact();
-
-            Intent intent = new Intent(this, ConversationActivity.class);
-            intent.putExtra(getString(R.string.conversation_extra_contact), contact);
-            startActivity(intent);
         }
     }
 
@@ -447,53 +507,11 @@ public class ConversationsActivity
     }
 
     /**
-     * Deletes the messages with the specified database IDs.
-     *
-     * @param databaseIds The database IDs of the messages to delete.
-     */
-    public void deleteMessages(final Long[] databaseIds) {
-        Utils.showAlertDialog(this, getString(R.string.conversations_delete_confirm_title),
-                getString(R.string.conversations_delete_confirm_message),
-                getString(R.string.delete), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        for (long databaseId : databaseIds) {
-                            Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
-                            if (message.getVoipId() == null) {
-                                // Simply delete messages with no VoIP.ms ID from the database; no request to the
-                                // VoIP.ms API will be necessary
-                                database.removeMessage(databaseId);
-                            }
-                            else {
-                                // Otherwise, keep the message in the database but set a deleted flag, so the message's
-                                // VoIP.ms ID can be accessed later if local deletions are propagated to the VoIP.ms
-                                // servers
-                                message.setDeleted(true);
-                                database.insertMessage(message);
-                            }
-                            adapter.refresh();
-                        }
-                    }
-                },
-                getString(R.string.cancel), null
-        );
-    }
-
-    /**
-     * Initiates a partial update of the message database. This update only retrieves messages dated after the most
-     * recent message.
-     */
-    public void preRecentUpdate() {
-        adapter.refresh();
-        gcm.registerForGcm(conversationsActivity, false, false);
-        database.synchronize(true, false, conversationsActivity);
-    }
-
-    /**
-     * Initiates a full update of the message database. This update follows all synchronization rules set in the
+     * Initiates a full update of the message database. This update follows
+     * all synchronization rules set in the
      * application's settings.
      */
-    public void preFullUpdate() {
+    private void preFullUpdate() {
         adapter.refresh();
         gcm.registerForGcm(conversationsActivity, false, false);
         database.synchronize(false, true, conversationsActivity);
@@ -502,11 +520,14 @@ public class ConversationsActivity
     /**
      * Updates this activity's user interface after a database update.
      * <p/>
-     * Called by the Api class after updating the SMS database if this activity made the update request or, if the
-     * update request was initiated by the GCM service, if this activity is currently visible to the user.
+     * Called by the Api class after updating the SMS database if this
+     * activity made the update request or, if the
+     * update request was initiated by the GCM service, if this activity is
+     * currently visible to the user.
      */
     public void postUpdate() {
-        SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        SwipeRefreshLayout swipeRefreshLayout =
+            (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setRefreshing(false);
 
         adapter.refresh();
