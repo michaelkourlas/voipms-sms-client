@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.2'
+        classpath 'com.android.tools.build:gradle:2.2.0-rc2'
     }
 }
 apply plugin: 'com.android.application'
@@ -14,7 +14,7 @@ repositories {
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    buildToolsVersion "24.0.2"
 
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
@@ -34,13 +34,18 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    dexOptions {
+        preDexLibraries true
+        javaMaxHeapSize "4g"
+    }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.1.1'
-    compile 'com.android.support:design:24.1.1'
+    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:design:24.2.0'
     compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:recyclerview-v7:24.1.1'
-    compile 'com.android.support:support-v4:24.1.1'
+    compile 'com.android.support:recyclerview-v7:24.2.0'
+    compile 'com.android.support:support-v4:24.2.0'
     compile "com.google.android.gms:play-services:9.4.0"
 }
