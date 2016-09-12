@@ -33,7 +33,7 @@
     <string name="conversation_info_from">From:</string>
     <string name="conversation_info_date">Date:</string>
     <string name="conversation_no_messages">There are no messages in this conversation.</string>
-    <string name="conversation_no_results">No results found for '%1$s'</string>
+    <string name="conversation_no_results">No results found for \'%1$s\'</string>
     <string name="conversation_text_hint">Send message</string>
     <string name="conversation_message_sending">Sending…</string>
     <string name="conversation_message_not_sent">Not sent. Touch to try again.</string>
@@ -62,7 +62,7 @@
     <string name="conversations_delete_confirm_title">Delete this conversation?</string>
     <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
     <string name="conversations_no_messages">You have no messages.</string>
-    <string name="conversations_no_results">No results found for '%1$s'</string>
+    <string name="conversations_no_results">No results found for \'%1$s\'</string>
     <string name="conversations_message_you">You:</string>
     <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and an SMS-enabled DID using the Settings option in the application\'s main menu. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings.\n\nYou may also wish to enable push notifications. For more information, see Help.</string>
     <string name="conversations_checked_content_description">Checked</string>
