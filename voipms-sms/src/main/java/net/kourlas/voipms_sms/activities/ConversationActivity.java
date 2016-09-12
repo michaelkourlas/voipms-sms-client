@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas and other contributors
+ * Copyright (C) 2015 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,8 @@ public class ConversationActivity
         preferences = Preferences.getInstance(getApplicationContext());
 
         contact = getIntent().getStringExtra(getString(R.string.conversation_extra_contact));
-        // Remove the leading one from a North American phone number (e.g. +1 (123) 555-4567)
+        // Remove the leading one from a North American phone number
+        // (e.g. +1 (123) 555-4567)
         if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
             contact = contact.substring(1);
         }
