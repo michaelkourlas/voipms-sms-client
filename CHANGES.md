@@ -1,6 +1,7 @@
 ## 0.4.2 ##
 
 * Added support for additional sync intervals
+* Sending/failed to send indicators now visible in conversations view
 * Bug fixes
 
 ## 0.4.1 ##
