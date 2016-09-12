@@ -193,31 +193,13 @@ public class ConversationsActivity
                 if (permissions[i].equals(
                     android.Manifest.permission.READ_CONTACTS)) {
                     if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+                        adapter.notifyItemRangeChanged(0,
+                                                       adapter.getItemCount());
                     } else {
-                        Snackbar snackbar = Snackbar.make(
-                            findViewById(R.id.coordinator_layout),
-                            getString(R.string.conversations_perm_denied_contacts),
-                            Snackbar.LENGTH_INDEFINITE);
-                        snackbar.setAction(
-                            R.string.settings,
-                            v -> {
-                                Intent intent = new Intent();
-                                intent.setAction(
-                                    Settings
-                                        .ACTION_APPLICATION_DETAILS_SETTINGS);
-                                intent.addFlags(
-                                    Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.addFlags(
-                                    Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                intent.addFlags(
-                                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                                Uri uri = Uri.fromParts(
-                                    "package", getPackageName(), null);
-                                intent.setData(uri);
-                                startActivity(intent);
-                            });
-                        snackbar.show();
+                        Utils.showPermissionSnackbar(
+                            this,
+                            getString(
+                                R.string.conversations_perm_denied_contacts));
                     }
                 }
             }

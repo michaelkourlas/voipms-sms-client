@@ -327,29 +327,9 @@ public class ConversationActivity
                     if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                         callButtonHandler();
                     } else {
-                        Snackbar snackbar = Snackbar.make(
-                            findViewById(R.id.coordinator_layout),
-                            getString(R.string.conversation_perm_denied_call),
-                            Snackbar.LENGTH_INDEFINITE);
-                        snackbar.setAction(
-                            R.string.settings,
-                            v -> {
-                                Intent intent = new Intent();
-                                intent.setAction(
-                                    Settings
-                                        .ACTION_APPLICATION_DETAILS_SETTINGS);
-                                intent.addFlags(
-                                    Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.addFlags(
-                                    Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                intent.addFlags(
-                                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                                Uri uri = Uri.fromParts(
-                                    "package", activity.getPackageName(), null);
-                                intent.setData(uri);
-                                startActivity(intent);
-                            });
-                        snackbar.show();
+                        Utils.showPermissionSnackbar(
+                            this,
+                            getString(R.string.conversation_perm_denied_call));
                     }
                 }
             }

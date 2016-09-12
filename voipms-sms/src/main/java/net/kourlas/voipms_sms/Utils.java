@@ -21,7 +21,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.*;
 import android.net.ConnectivityManager;
@@ -29,8 +29,8 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -453,5 +453,40 @@ public class Utils {
         builder.setNegativeButton(negativeButtonText, negativeButtonAction);
         builder.setCancelable(false);
         builder.show();
+    }
+
+    /**
+     * Shows a snackbar requesting a permission with a button linking to the
+     * application settings page.
+     *
+     * @param activity The host activity for the snackbar.
+     * @param text     The text to display.
+     */
+    public static void showPermissionSnackbar(Activity activity,
+                                              String text)
+    {
+        Snackbar snackbar = Snackbar.make(
+            activity.findViewById(R.id.coordinator_layout),
+            text,
+            Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction(
+            R.string.settings,
+            v -> {
+                Intent intent = new Intent();
+                intent.setAction(
+                    Settings
+                        .ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NO_HISTORY);
+                intent.addFlags(
+                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                Uri uri = Uri.fromParts(
+                    "package", activity.getPackageName(), null);
+                intent.setData(uri);
+                activity.startActivity(intent);
+            });
+        snackbar.show();
     }
 }
