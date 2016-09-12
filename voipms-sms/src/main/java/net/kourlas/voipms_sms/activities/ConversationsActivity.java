@@ -17,9 +17,17 @@
 
 package net.kourlas.voipms_sms.activities;
 
+import android.*;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -36,6 +44,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import net.kourlas.voipms_sms.*;
+import net.kourlas.voipms_sms.Manifest;
+import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.adapters.ConversationsRecyclerViewAdapter;
 import net.kourlas.voipms_sms.gcm.Gcm;
 import net.kourlas.voipms_sms.model.Conversation;
@@ -48,7 +58,11 @@ import java.util.List;
 
 public class ConversationsActivity
         extends AppCompatActivity
-        implements ActionMode.Callback, View.OnClickListener, View.OnLongClickListener {
+        implements ActionMode.Callback, View.OnClickListener,
+                   View.OnLongClickListener,
+                   ActivityCompat.OnRequestPermissionsResultCallback {
+    private static final int PERM_REQ_CONTACTS = 0;
+
     private final ConversationsActivity conversationsActivity = this;
 
     private Gcm gcm;
@@ -112,6 +126,16 @@ public class ConversationsActivity
         });
 
         SynchronizationIntervalReceiver.setupSynchronizationInterval(getApplicationContext());
+
+        if (ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.READ_CONTACTS)
+            != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(
+                this,
+                new String[] {android.Manifest.permission.READ_CONTACTS},
+                PERM_REQ_CONTACTS);
+        }
     }
 
     @Override
@@ -122,6 +146,13 @@ public class ConversationsActivity
         if (!(preferences.getEmail().equals("") || preferences.getPassword().equals("") ||
                 preferences.getDid().equals(""))) {
             preRecentUpdate();
+
+            if (ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED)
+            {
+                adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+            }
         }
         else {
             Utils.showAlertDialog(this, null, getString(R.string.conversations_first_run_dialog_text),
@@ -149,6 +180,48 @@ public class ConversationsActivity
     protected void onDestroy() {
         super.onDestroy();
         ActivityMonitor.getInstance().deleteReferenceToActivity(this);
+    }
+
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions,
+                                         grantResults);
+        if (requestCode == PERM_REQ_CONTACTS) {
+            for (int i = 0; i < permissions.length; i++) {
+                if (permissions[i].equals(
+                    android.Manifest.permission.READ_CONTACTS)) {
+                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                        adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+                    } else {
+                        Snackbar snackbar = Snackbar.make(
+                            findViewById(R.id.coordinator_layout),
+                            getString(R.string.conversations_perm_denied_contacts),
+                            Snackbar.LENGTH_INDEFINITE);
+                        snackbar.setAction(
+                            R.string.settings,
+                            v -> {
+                                Intent intent = new Intent();
+                                intent.setAction(
+                                    Settings
+                                        .ACTION_APPLICATION_DETAILS_SETTINGS);
+                                intent.addFlags(
+                                    Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.addFlags(
+                                    Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                intent.addFlags(
+                                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                                Uri uri = Uri.fromParts(
+                                    "package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivity(intent);
+                            });
+                        snackbar.show();
+                    }
+                }
+            }
+        }
     }
 
     @Override
