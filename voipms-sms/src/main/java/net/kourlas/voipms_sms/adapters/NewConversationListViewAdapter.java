@@ -334,7 +334,9 @@ public class NewConversationListViewAdapter extends BaseAdapter implements Filte
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             items.clear();
-            items.addAll((List<ContactItem>) results.values);
+            if (results.values != null) {
+                items.addAll((List<ContactItem>) results.values);
+            }
             notifyDataSetChanged();
         }
     }
