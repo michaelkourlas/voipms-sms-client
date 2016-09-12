@@ -153,7 +153,7 @@ public class ConversationRecyclerViewAdapter
         TextView messageText = messageViewHolder.getMessageText();
         SpannableStringBuilder messageTextBuilder =
             new SpannableStringBuilder();
-        messageTextBuilder.append(message.getText());
+        messageTextBuilder.append(message.getText().trim());
         if (!filterConstraint.equals("")) {
             int index = message.getText().toLowerCase()
                                .indexOf(filterConstraint.toLowerCase());
