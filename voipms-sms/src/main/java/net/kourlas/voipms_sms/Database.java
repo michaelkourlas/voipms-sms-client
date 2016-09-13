@@ -45,7 +45,7 @@ import java.util.*;
  * Provides access to the application's database, which contains the SMS message cache.
  */
 public class Database {
-    public static final String TAG = "Database";
+    private static final String TAG = "Database";
 
     public static final String COLUMN_DATABASE_ID = "DatabaseId";
     public static final String COLUMN_VOIP_ID = "VoipId";
@@ -60,9 +60,10 @@ public class Database {
     public static final String COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress";
 
     private static final String TABLE_MESSAGE = "sms";
-    private static final String[] columns = {COLUMN_DATABASE_ID, COLUMN_VOIP_ID, COLUMN_DATE, COLUMN_TYPE, COLUMN_DID,
-            COLUMN_CONTACT, COLUMN_MESSAGE, COLUMN_UNREAD, COLUMN_DELETED, COLUMN_DELIVERED,
-            COLUMN_DELIVERY_IN_PROGRESS};
+    private static final String[] columns = {
+        COLUMN_DATABASE_ID, COLUMN_VOIP_ID, COLUMN_DATE, COLUMN_TYPE,
+        COLUMN_DID, COLUMN_CONTACT, COLUMN_MESSAGE, COLUMN_UNREAD,
+        COLUMN_DELETED, COLUMN_DELIVERED, COLUMN_DELIVERY_IN_PROGRESS};
 
     private static Database instance = null;
 
@@ -140,6 +141,55 @@ public class Database {
      */
     public synchronized void removeMessage(long databaseId) {
         database.delete(TABLE_MESSAGE, COLUMN_DATABASE_ID + "=" + databaseId, null);
+    }
+
+    /**
+     * Deletes the specified messages from the database by marking entries
+     * with VoIP.ms IDs as deleted and removing entries without such IDs.
+     */
+    public synchronized void deleteMessage(long databaseId) {
+        // First, mark message as deleted
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_DELETED, "1");
+        database.update(TABLE_MESSAGE,
+                        contentValues,
+                        COLUMN_DATABASE_ID + "=" + databaseId + " AND "
+                        + COLUMN_DELETED + "=" + "0",
+                        null);
+        // Next, remove all deleted messages in conversation without a
+        // VoIP.ms ID from the database
+        database.delete(TABLE_MESSAGE,
+                        COLUMN_DATABASE_ID + "=" + databaseId + " AND "
+                        + COLUMN_DELETED + "=" + "1" + " AND "
+                        + COLUMN_VOIP_ID + " IS NULL",
+                        null);
+    }
+
+    /**
+     * Deletes the specified conversation from the database by marking entries
+     * with VoIP.ms IDs as deleted and removing entries without such IDs.
+     *
+     * @param did     The DID.
+     * @param contact The phone number of the contact.
+     */
+    public synchronized void deleteMessages(String did, String contact) {
+        // First, mark all messages in conversation as deleted
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_DELETED, "1");
+        database.update(TABLE_MESSAGE,
+                        contentValues,
+                        COLUMN_CONTACT + "=" + contact + " AND "
+                        + COLUMN_DID + "=" + did + " AND "
+                        + COLUMN_DELETED + "=" + "0",
+                        null);
+        // Next, remove all deleted messages in conversation without a
+        // VoIP.ms ID from the database
+        database.delete(TABLE_MESSAGE,
+                        COLUMN_CONTACT + "=" + contact + " AND "
+                        + COLUMN_DID + "=" + did + " AND "
+                        + COLUMN_DELETED + "=" + "1" + " AND "
+                        + COLUMN_VOIP_ID + " IS NULL",
+                        null);
     }
 
     /**

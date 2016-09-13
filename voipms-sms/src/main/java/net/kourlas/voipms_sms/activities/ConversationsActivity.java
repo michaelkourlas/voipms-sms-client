@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -335,23 +336,7 @@ public class ConversationsActivity
                 mode.finish();
                 return true;
             case R.id.delete_button:
-                List<Long> databaseIds = new ArrayList<>();
-                for (int i = 0; i < adapter.getItemCount(); i++) {
-                    if (adapter.isItemChecked(i)) {
-                        for (Message message : adapter.getItem(i)
-                                                      .getMessages()) {
-                            if (message.getDatabaseId() != null) {
-                                databaseIds.add(message.getDatabaseId());
-                            }
-                        }
-                    }
-                }
-
-                Long[] databaseIdsArray = new Long[databaseIds.size()];
-                databaseIds.toArray(databaseIdsArray);
-                deleteMessages(databaseIdsArray);
-                mode.finish();
-                return true;
+                return deleteButtonHandler(mode);
             default:
                 return false;
         }
@@ -370,47 +355,30 @@ public class ConversationsActivity
         actionModeEnabled = false;
     }
 
-    /**
-     * Deletes the messages with the specified database IDs.
-     *
-     * @param databaseIds The database IDs of the messages to delete.
-     */
-    private void deleteMessages(final Long[] databaseIds) {
-        Utils.showAlertDialog(this, getString(
-            R.string.conversations_delete_confirm_title),
-                              getString(
-                                  R.string
-                                      .conversations_delete_confirm_message),
-                              getString(R.string.delete),
-                              (dialog, which) -> {
-                                  for (long databaseId : databaseIds) {
-                                      Message message = database
-                                          .getMessageWithDatabaseId(
-                                              preferences.getDid(),
-                                              databaseId);
-                                      if (message.getVoipId() == null) {
-                                          // Simply delete messages with
-                                          // no VoIP.ms ID from the
-                                          // database; no request to the
-                                          // VoIP.ms API will be necessary
-                                          database
-                                              .removeMessage(databaseId);
-                                      } else {
-                                          // Otherwise, keep the message
-                                          // in the database but set a
-                                          // deleted flag, so the message's
-                                          // VoIP.ms ID can be accessed
-                                          // later if local deletions are
-                                          // propagated to the VoIP.ms
-                                          // servers
-                                          message.setDeleted(true);
-                                          database.insertMessage(message);
-                                      }
-                                      adapter.refresh();
-                                  }
-                              },
-                              getString(R.string.cancel), null
-                             );
+    private boolean deleteButtonHandler(ActionMode mode) {
+        List<String> contacts = new ArrayList<>();
+        for (int i = 0; i < adapter.getItemCount(); i++) {
+            if (adapter.isItemChecked(i)) {
+                contacts.add(adapter.getItem(i).getContact());
+            }
+        }
+
+        Utils.showAlertDialog(
+            this,
+            getString(R.string.conversations_delete_confirm_title),
+            getString(R.string.conversations_delete_confirm_message),
+            getString(R.string.delete),
+            (dialog, which) -> {
+                for (String contact : contacts) {
+                    database.deleteMessages(preferences.getDid(), contact);
+                }
+                adapter.refresh();
+            },
+            getString(R.string.cancel),
+            null);
+
+        mode.finish();
+        return true;
     }
 
     /**

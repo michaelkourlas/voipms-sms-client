@@ -341,24 +341,7 @@ public class ConversationActivity
                 case R.id.call_button:
                     return callButtonHandler();
                 case R.id.delete_button:
-                    Conversation conversation =
-                        database.getConversation(preferences.getDid(), contact);
-                    if (conversation.getMessages().length == 0) {
-                        NavUtils.navigateUpFromSameTask(this);
-                    } else {
-                        List<Long> databaseIds = new ArrayList<>();
-                        for (int i = 0; i < adapter.getItemCount(); i++) {
-                            if (adapter.getItem(i).getDatabaseId() != null) {
-                                databaseIds
-                                    .add(adapter.getItem(i).getDatabaseId());
-                            }
-                        }
-
-                        Long[] databaseIdsArray = new Long[databaseIds.size()];
-                        databaseIds.toArray(databaseIdsArray);
-                        deleteMessages(databaseIdsArray);
-                    }
-                    return true;
+                    return deleteAllButtonHandler();
             }
         }
 
@@ -378,7 +361,7 @@ public class ConversationActivity
     }
 
     @Override
-    public boolean onActionItemClicked(ActionMode actionMode,
+    public boolean onActionItemClicked(ActionMode mode,
                                        MenuItem menuItem)
     {
         if (menuItem.getItemId() == R.id.resend_button) {
@@ -389,7 +372,7 @@ public class ConversationActivity
                 }
             }
 
-            actionMode.finish();
+            mode.finish();
             return true;
         } else if (menuItem.getItemId() == R.id.info_button) {
             Message message = null;
@@ -439,7 +422,7 @@ public class ConversationActivity
                                       getString(R.string.ok), null, null, null);
             }
 
-            actionMode.finish();
+            mode.finish();
             return true;
         } else if (menuItem.getItemId() == R.id.copy_button) {
             Message message = null;
@@ -458,7 +441,7 @@ public class ConversationActivity
                 clipboard.setPrimaryClip(clip);
             }
 
-            actionMode.finish();
+            mode.finish();
             return true;
         } else if (menuItem.getItemId() == R.id.share_button) {
             Message message = null;
@@ -477,22 +460,10 @@ public class ConversationActivity
                 startActivity(Intent.createChooser(intent, null));
             }
 
-            actionMode.finish();
+            mode.finish();
             return true;
         } else if (menuItem.getItemId() == R.id.delete_button) {
-            List<Long> databaseIds = new ArrayList<>();
-            for (int i = 0; i < adapter.getItemCount(); i++) {
-                if (adapter.isItemChecked(i)) {
-                    databaseIds.add(adapter.getItem(i).getDatabaseId());
-                }
-            }
-
-            Long[] databaseIdsArray = new Long[databaseIds.size()];
-            databaseIds.toArray(databaseIdsArray);
-            deleteMessages(databaseIdsArray);
-
-            actionMode.finish();
-            return true;
+            return deleteButtonHandler(mode);
         } else {
             return false;
         }
@@ -567,6 +538,53 @@ public class ConversationActivity
                 // Do nothing.
             }
         }
+        return true;
+    }
+
+    private boolean deleteButtonHandler(ActionMode mode) {
+        List<Long> databaseIds = new ArrayList<>();
+        for (int i = 0; i < adapter.getItemCount(); i++) {
+            if (adapter.isItemChecked(i)) {
+                databaseIds.add(adapter.getItem(i).getDatabaseId());
+            }
+        }
+
+        Utils.showAlertDialog(
+            this,
+            getString(R.string.conversation_delete_confirm_title),
+            getString(R.string.conversation_delete_confirm_message),
+            getString(R.string.delete),
+            (dialog, which) -> {
+                for (Long databaseId : databaseIds) {
+                    database.deleteMessage(databaseId);
+                }
+                if (database.getConversation(preferences.getDid(), contact)
+                            .getMessages().length == 0)
+                {
+                    NavUtils.navigateUpFromSameTask(this);
+                } else {
+                    adapter.refresh();
+                }
+            },
+            getString(R.string.cancel),
+            null);
+
+        mode.finish();
+        return true;
+    }
+
+    private boolean deleteAllButtonHandler() {
+        Utils.showAlertDialog(
+            this,
+            getString(R.string.conversation_delete_confirm_title),
+            getString(R.string.conversation_delete_confirm_message),
+            getString(R.string.delete),
+            (dialog, which) -> {
+                database.deleteMessages(preferences.getDid(), contact);
+                NavUtils.navigateUpFromSameTask(this);
+            },
+            getString(R.string.cancel),
+            null);
         return true;
     }
 
