@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -40,7 +39,7 @@ import android.view.MenuItem;
 import android.view.View;
 import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.adapters.ConversationsRecyclerViewAdapter;
-import net.kourlas.voipms_sms.gcm.Gcm;
+import net.kourlas.voipms_sms.notifications.PushNotifications;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
@@ -59,7 +58,7 @@ public class ConversationsActivity
 
     private final ConversationsActivity conversationsActivity = this;
 
-    private Gcm gcm;
+    private PushNotifications pushNotifications;
     private Billing billing;
     private Database database;
     private Preferences preferences;
@@ -77,7 +76,8 @@ public class ConversationsActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.conversations);
 
-        gcm = Gcm.getInstance(getApplicationContext());
+        pushNotifications = PushNotifications
+            .getInstance(getApplicationContext());
         billing = Billing.getInstance(getApplicationContext());
         database = Database.getInstance(getApplicationContext());
         preferences = Preferences.getInstance(getApplicationContext());
@@ -245,7 +245,7 @@ public class ConversationsActivity
      */
     private void preRecentUpdate() {
         adapter.refresh();
-        gcm.registerForGcm(conversationsActivity, false, false);
+        pushNotifications.registerForGcm(conversationsActivity, null, false, false);
         database.synchronize(true, false, conversationsActivity);
     }
 
@@ -481,7 +481,7 @@ public class ConversationsActivity
      */
     private void preFullUpdate() {
         adapter.refresh();
-        gcm.registerForGcm(conversationsActivity, false, false);
+        pushNotifications.registerForGcm(conversationsActivity, null, false, false);
         database.synchronize(false, true, conversationsActivity);
     }
 

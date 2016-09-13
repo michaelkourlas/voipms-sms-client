@@ -22,7 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import net.kourlas.voipms_sms.Database;
-import net.kourlas.voipms_sms.Notifications;
+import net.kourlas.voipms_sms.notifications.Notifications;
 import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.model.Message;

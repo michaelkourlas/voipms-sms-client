@@ -67,10 +67,16 @@
 
     <PreferenceCategory android:title="@string/preferences_notifications_category_name">
         <SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="@string/preferences_notifications_enable_key"
             android:summary="@string/preferences_notifications_enable_summary"
             android:title="@string/preferences_notifications_enable_title" />
+        <net.kourlas.voipms_sms.preferences.PushNotificationsPreference
+            android:defaultValue="false"
+            android:dependency="@string/preferences_notifications_enable_key"
+            android:key="@string/preferences_notifications_push_enable_key"
+            android:summary="@string/preferences_notifications_push_enable_summary"
+            android:title="@string/preferences_notifications_push_enable_title" />
         <RingtonePreference
             android:defaultValue="@string/preferences_notifications_sound_default_value"
             android:dependency="@string/preferences_notifications_enable_key"

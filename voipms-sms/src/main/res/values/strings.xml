@@ -148,10 +148,13 @@
     <string name="preferences_sync_propagate_remote_deletions_summary">Delete messages stored locally that were deleted from VoIP.ms</string>
     <!-- Notifications -->
     <string name="preferences_notifications_category_name">Notifications</string>
-    <string name="preferences_notifications_enable_key" translatable="false">sms_notification</string>
+    <string name="preferences_notifications_enable_key" translatable="false">sms_notification_basic</string>
     <string name="preferences_notifications_enable_title">Notifications</string>
-    <string name="preferences_notifications_enable_summary">Enable push notifications using the developer\'s Google Cloud Messaging server</string>
-    <string name="preferences_notifications_enable_dialog_text">To enable notifications, you must first access the SMS settings for your DID on the VoIP.ms portal. Enable the \"SMS URL Callback\" feature and enter the following URL into the neighbouring field:\n\nhttp://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}\n\nNote that the developer\'s server will store your DID to forward callbacks from VoIP.ms to your device. See Help for more details.</string>
+    <string name="preferences_notifications_enable_summary">Show notifications when new messages are retrieved during synchronization</string>
+    <string name="preferences_notifications_push_enable_key" translatable="false">sms_notification</string>
+    <string name="preferences_notifications_push_enable_title">Push notifications</string>
+    <string name="preferences_notifications_push_enable_summary">Enable push notifications using the developer\'s Google Cloud Messaging server</string>
+    <string name="preferences_notifications_push_enable_dialog_text">To enable notifications, you must first access the SMS settings for your DID on the VoIP.ms portal. Enable the \"SMS URL Callback\" feature and enter the following URL into the neighbouring field:\n\nhttp://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}\n\nNote that the developer\'s server will store your DID to forward callbacks from VoIP.ms to your device. See Help for more details.</string>
     <string name="preferences_notifications_sound_key" translatable="false">sms_notification_ringtone</string>
     <string name="preferences_notifications_sound_title">Sound</string>
     <string name="preferences_notifications_sound_default_value" translatable="false">content://settings/system/notification_sound</string>

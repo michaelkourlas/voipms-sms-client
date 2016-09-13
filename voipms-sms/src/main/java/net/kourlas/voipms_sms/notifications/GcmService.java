@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.gcm;
+package net.kourlas.voipms_sms.notifications;
 
 import android.os.Bundle;
 import com.google.android.gms.gcm.GcmListenerService;
@@ -23,20 +23,25 @@ import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.Preferences;
 
 /**
- * Service that processes GCM messages by showing notifications for new SMS messages.
+ * Service that processes GCM messages by showing notifications for new SMS
+ * messages.
  */
 public class GcmService extends GcmListenerService {
     /**
-     * Called when a GCM message is received. If notifications are enabled, this method updates the message database
-     * and shows notifications for any new messages.
+     * Called when a GCM message is received. If notifications are enabled,
+     * this method updates the message database and shows notifications for any
+     * new messages.
      *
      * @param from GCM message sender.
      * @param data GCM message data.
      */
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        if (Preferences.getInstance(getApplicationContext()).getNotificationsEnabled()) {
-            Database.getInstance(getApplicationContext()).synchronize(true, false, null);
+        if (Preferences.getInstance(getApplicationContext())
+                       .getPushNotificationsEnabled())
+        {
+            Database.getInstance(getApplicationContext())
+                    .synchronize(true, false, null);
         }
     }
 }

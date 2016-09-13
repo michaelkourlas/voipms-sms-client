@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.gcm;
+package net.kourlas.voipms_sms.notifications;
 
 import com.google.android.gms.iid.InstanceIDListenerService;
 
@@ -30,6 +30,6 @@ public class GcmIdService extends InstanceIDListenerService {
      */
     @Override
     public void onTokenRefresh() {
-        Gcm.getInstance(getApplicationContext()).registerForGcm(null, false, true);
+        PushNotifications.getInstance(getApplicationContext()).registerForGcm(null, null, false, true);
     }
 }

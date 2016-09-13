@@ -30,7 +30,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import net.kourlas.voipms_sms.*;
-import net.kourlas.voipms_sms.gcm.Gcm;
+import net.kourlas.voipms_sms.notifications.Notifications;
+import net.kourlas.voipms_sms.notifications.PushNotifications;
 import net.kourlas.voipms_sms.preferences.DidPreference;
 import net.kourlas.voipms_sms.preferences.StartDatePreference;
 import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
@@ -87,7 +88,7 @@ public class PreferencesActivity extends AppCompatActivity {
         Database database;
         Preferences preferences;
         Notifications notifications;
-        Gcm gcm;
+        PushNotifications pushNotifications;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -99,7 +100,8 @@ public class PreferencesActivity extends AppCompatActivity {
             database = Database.getInstance(applicationContext);
             preferences = Preferences.getInstance(applicationContext);
             notifications = Notifications.getInstance(applicationContext);
-            gcm = Gcm.getInstance(applicationContext);
+            pushNotifications = PushNotifications
+                .getInstance(applicationContext);
         }
 
         @Override
@@ -135,11 +137,6 @@ public class PreferencesActivity extends AppCompatActivity {
 
                 if (key.equals(getString(R.string.preferences_sync_interval_key))) {
                     SynchronizationIntervalReceiver.setupSynchronizationInterval(applicationContext);
-                }
-
-                // Notifications are not yet enabled, so the check below is the inverse of what one might expect
-                if (key.equals(applicationContext.getString(R.string.preferences_notifications_enable_key)) && preferences.getNotificationsEnabled()) {
-                    notifications.enableNotifications(getActivity());
                 }
             }
         }

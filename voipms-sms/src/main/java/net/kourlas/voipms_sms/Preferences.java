@@ -108,8 +108,15 @@ public class Preferences {
     }
 
     public boolean getNotificationsEnabled() {
+        return sharedPreferences.getBoolean(
+            applicationContext.getString(
+                R.string.preferences_notifications_enable_key),
+            true);
+    }
+
+    public boolean getPushNotificationsEnabled() {
         return sharedPreferences.getBoolean(applicationContext.getString(
-                R.string.preferences_notifications_enable_key), false);
+                R.string.preferences_notifications_push_enable_key), false);
     }
 
     public String getGcmInstanceId() {

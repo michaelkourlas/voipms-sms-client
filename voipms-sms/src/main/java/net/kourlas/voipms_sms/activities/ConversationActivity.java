@@ -49,6 +49,7 @@ import android.widget.*;
 import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.adapters.ConversationRecyclerViewAdapter;
 import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.notifications.Notifications;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -95,7 +96,8 @@ public class ConversationActivity
         database = Database.getInstance(getApplicationContext());
         preferences = Preferences.getInstance(getApplicationContext());
 
-        contact = getIntent().getStringExtra(getString(R.string.conversation_extra_contact));
+        contact = getIntent()
+            .getStringExtra(getString(R.string.conversation_extra_contact));
         if ((contact.length() == 11) && (contact.charAt(0) == '1')) {
             // Remove the leading one from a North American phone number
             // (e.g. +1 (123) 555-4567)

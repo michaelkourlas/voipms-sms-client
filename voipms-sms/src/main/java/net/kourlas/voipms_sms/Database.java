@@ -30,6 +30,7 @@ import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.notifications.Notifications;
 import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
 import org.json.JSONArray;
 import org.json.JSONException;

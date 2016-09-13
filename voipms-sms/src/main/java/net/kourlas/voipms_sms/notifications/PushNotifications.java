@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.gcm;
+package net.kourlas.voipms_sms.notifications;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -28,39 +29,131 @@ import com.google.android.gms.iid.InstanceID;
 import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
+import net.kourlas.voipms_sms.preferences.PushNotificationsPreference;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
 
 /**
- * Handles registration for Google Cloud Messaging, which is necessary for push notifications.
+ * Handles push notification setup. This includes registering for the VoIP.ms
+ * callback and Google Cloud Messaging.
  */
-public class Gcm {
-    private static Gcm instance = null;
+public class PushNotifications {
+    private static PushNotifications instance = null;
     private final Context applicationContext;
     private final Preferences preferences;
 
     /**
-     * Initializes a new instance of the GCM class.
+     * Initializes a new instance of the PushNotifications class.
      *
      * @param applicationContext The application context.
      */
-    private Gcm(Context applicationContext) {
+    private PushNotifications(Context applicationContext) {
         this.applicationContext = applicationContext;
         this.preferences = Preferences.getInstance(applicationContext);
     }
 
     /**
-     * Gets the sole instance of the GCM class. Initializes the instance if it does not already exist.
+     * Gets the sole instance of the PushNotifications class. Initializes the
+     * instance if it does not already exist.
      *
      * @param applicationContext The application context.
-     * @return The sole instance of the GCM class.
+     * @return The sole instance of the PushNotifications class.
      */
-    public static Gcm getInstance(Context applicationContext) {
+    public static PushNotifications getInstance(Context applicationContext) {
         if (instance == null) {
-            instance = new Gcm(applicationContext);
+            instance = new PushNotifications(applicationContext);
         }
         return instance;
+    }
+
+    /**
+     * Enable push notifications by configuring the VoIP.ms URL callback,
+     * registering for GCM and making the appropriate changes to the
+     * application preferences.
+     *
+     * @param activity The source activity.
+     */
+    public void enablePushNotifications(
+        final Activity activity,
+        final PushNotificationsPreference preference)
+    {
+        if (preferences.getEmail().equals("")
+            || preferences.getPassword().equals("")
+            || preferences.getDid().equals(""))
+        {
+            Utils.showInfoDialog(activity, applicationContext.getString(
+                R.string.notifications_callback_username_password_did));
+            return;
+        }
+
+        registerForVoipCallback(activity, preference);
+    }
+
+    private void registerForVoipCallback(
+        final Activity activity,
+        final PushNotificationsPreference preference)
+    {
+        final ProgressDialog progressDialog = new ProgressDialog(activity);
+        progressDialog.setMessage(activity.getString(
+            R.string.notifications_callback_progress));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        new AsyncTask<Boolean, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Boolean... params) {
+                try {
+                    String url =
+                        "https://www.voip.ms/api/v1/rest.php?"
+                        + "api_username=" + URLEncoder.encode(
+                            preferences.getEmail(), "UTF-8") + "&"
+                        + "api_password=" + URLEncoder.encode(
+                            preferences.getPassword(), "UTF-8") + "&"
+                        + "method=setSMS" + "&"
+                        + "did=" + URLEncoder.encode(preferences.getDid(),
+                                                     "UTF-8") + "&"
+                        + "enable=1" + "&"
+                        + "url_callback_enable=1" + "&"
+                        + "url_callback=" + URLEncoder.encode(
+                            "http://voipmssms-kourlas.rhcloud.com/"
+                            + "sms_callback?did={TO}", "UTF-8") + "&"
+                        + "url_callback_retry=0";
+
+                    JSONObject result = Utils.getJson(url);
+                    String status = result.optString("status");
+                    return !(status == null || !status.equals("success"));
+                } catch (Exception ex) {
+                    return false;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                progressDialog.hide();
+
+                DialogInterface.OnClickListener gcmOnClickListener =
+                    (dialog, which) -> registerForGcm(activity, preference,
+                                                      true, true);
+
+                if (!success) {
+                    Utils.showAlertDialog(
+                        activity, null,
+                        applicationContext.getString(
+                            R.string.notifications_callback_fail),
+                        applicationContext.getString(R.string.ok),
+                        gcmOnClickListener, null, null);
+                }
+                else {
+                    Utils.showAlertDialog(
+                        activity, null,
+                        applicationContext.getString(
+                            R.string.notifications_callback_success),
+                        applicationContext.getString(R.string.ok),
+                        gcmOnClickListener, null, null);
+                }
+            }
+        }.execute();
     }
 
     /**
@@ -71,8 +164,13 @@ public class Gcm {
      *                     failure of the process.
      * @param force        If true, retrieves a new registration token even if one is already stored.
      */
-    public void registerForGcm(final Activity activity, final boolean showFeedback, boolean force) {
-        if (!preferences.getNotificationsEnabled()) {
+    public void registerForGcm(
+        final Activity activity,
+        final PushNotificationsPreference preference,
+        final boolean showFeedback,
+        boolean force)
+    {
+        if (!preferences.getPushNotificationsEnabled()) {
             return;
         }
         if (preferences.getDid().equals("")) {
@@ -125,11 +223,16 @@ public class Gcm {
                         if (!success) {
                             Utils.showInfoDialog(activity, applicationContext.getResources().getString(
                                     R.string.notifications_gcm_fail));
+
                         }
                         else {
                             Utils.showInfoDialog(activity, applicationContext.getResources().getString(
                                     R.string.notifications_gcm_success));
                         }
+                    }
+
+                    if (!success && preference != null) {
+                        preference.setChecked(false);
                     }
                 }
             }.execute();

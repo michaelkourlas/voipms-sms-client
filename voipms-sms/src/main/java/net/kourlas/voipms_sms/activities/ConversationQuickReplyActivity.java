@@ -38,6 +38,7 @@ import android.widget.*;
 import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.Api;
 import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.notifications.Notifications;
 
 public class ConversationQuickReplyActivity extends AppCompatActivity {
     private final ConversationQuickReplyActivity activity = this;
@@ -67,7 +68,8 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         }
 
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Integer notificationId = Notifications.getInstance(getApplicationContext()).getNotificationIds().get(contact);
+        Integer notificationId = Notifications
+            .getInstance(getApplicationContext()).getNotificationIds().get(contact);
         if (notificationId != null) {
             manager.cancel(notificationId);
         }
