@@ -1,9 +1,10 @@
 ## 0.4.2 ##
 
 * Added support for additional sync intervals
-* Sending/failed to send indicators now visible in conversations view
+* Phone number of contact always shown in conversation view
+* "Sending" and "Not sent" indicators now visible in conversations view
 * Added PayPal donation link
-* Bug fixes
+* Bug fixes and performance improvements
 
 ## 0.4.1 ##
 
