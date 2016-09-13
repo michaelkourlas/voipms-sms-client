@@ -16,10 +16,10 @@
   -->
 
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/coordinator_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 android:id="@+id/coordinator_layout"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -49,6 +49,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:clipToPadding="false"
                 android:orientation="vertical">
 
                 <android.support.v7.widget.RecyclerView
@@ -56,6 +57,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1.0"
+                    android:paddingBottom="10dp"
                     android:clipToPadding="false"
                     android:divider="@null"
                     android:dividerHeight="0dp"
@@ -65,13 +67,13 @@
                     android:id="@+id/message_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginEnd="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="10dp"
-                    android:focusableInTouchMode="true">
+                    android:layout_marginTop="1dp"
+                    android:background="@color/background"
+                    android:focusableInTouchMode="true"
+                    android:paddingBottom="10dp"
+                    android:paddingEnd="15dp"
+                    android:paddingStart="15dp"
+                    android:paddingTop="10dp">
 
                     <ProgressBar
                         android:id="@+id/progress_bar"
@@ -131,11 +133,7 @@
                         android:padding="10dp"
                         android:textSize="16sp" />
                 </RelativeLayout>
-
             </LinearLayout>
-
         </FrameLayout>
-
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
-

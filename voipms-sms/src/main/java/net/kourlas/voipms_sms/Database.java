@@ -45,8 +45,6 @@ import java.util.*;
  * Provides access to the application's database, which contains the SMS message cache.
  */
 public class Database {
-    private static final String TAG = "Database";
-
     public static final String COLUMN_DATABASE_ID = "DatabaseId";
     public static final String COLUMN_VOIP_ID = "VoipId";
     public static final String COLUMN_DATE = "Date";
@@ -59,6 +57,7 @@ public class Database {
     public static final String COLUMN_DELIVERED = "Delivered";
     public static final String COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress";
 
+    private static final String TAG = "Database";
     private static final String TABLE_MESSAGE = "sms";
     private static final String[] columns = {
         COLUMN_DATABASE_ID, COLUMN_VOIP_ID, COLUMN_DATE, COLUMN_TYPE,
@@ -96,51 +95,36 @@ public class Database {
         return instance;
     }
 
-    /**
-     * Adds a message to the database. If a record with the message's database ID or VoIP.ms ID already exists, that
-     * record is replaced. Otherwise, a new record is created.
-     *
-     * @param message The message to be added to the database.
-     * @return The database ID of the newly added message.
-     */
-    public synchronized long insertMessage(Message message) {
-        ContentValues values = new ContentValues();
-
-        if (message.getDatabaseId() != null) {
-            values.put(COLUMN_DATABASE_ID, message.getDatabaseId());
-        }
-        else if (message.getVoipId() != null) {
-            Long databaseId = getDatabaseIdForVoipId(message.getDid(), message.getVoipId());
-            if (databaseId != null) {
-                values.put(COLUMN_DATABASE_ID, databaseId);
-            }
-        }
-        values.put(COLUMN_VOIP_ID, message.getVoipId());
-        values.put(COLUMN_DATE, message.getDateInDatabaseFormat());
-        values.put(COLUMN_TYPE, message.getTypeInDatabaseFormat());
-        values.put(COLUMN_DID, message.getDid());
-        values.put(COLUMN_CONTACT, message.getContact());
-        values.put(COLUMN_MESSAGE, message.getText());
-        values.put(COLUMN_UNREAD, message.isUnreadInDatabaseFormat());
-        values.put(COLUMN_DELETED, message.isDeletedInDatabaseFormat());
-        values.put(COLUMN_DELIVERED, message.isDeliveredInDatabaseFormat());
-        values.put(COLUMN_DELIVERY_IN_PROGRESS, message.isDeliveryInProgressInDatabaseFormat());
-
-        if (values.getAsLong(COLUMN_DATABASE_ID) != null) {
-            return database.replace(TABLE_MESSAGE, null, values);
-        }
-        else {
-            return database.insert(TABLE_MESSAGE, null, values);
-        }
+    public synchronized void markMessageAsSending(long databaseId) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_DELIVERED, "0");
+        contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "1");
+        database.update(TABLE_MESSAGE,
+                        contentValues,
+                        COLUMN_DATABASE_ID + "=" + databaseId,
+                        null);
     }
 
-    /**
-     * Deletes the message with the specified database ID from the database.
-     *
-     * @param databaseId The database ID.
-     */
-    public synchronized void removeMessage(long databaseId) {
-        database.delete(TABLE_MESSAGE, COLUMN_DATABASE_ID + "=" + databaseId, null);
+    public synchronized void markMessageAsFailedToDeliver(long databaseId) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_DELIVERED, "0");
+        contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "0");
+        database.update(TABLE_MESSAGE,
+                        contentValues,
+                        COLUMN_DATABASE_ID + "=" + databaseId,
+                        null);
+    }
+
+    public synchronized void markConversationAsRead(String did,
+                                                    String contact)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_UNREAD, "0");
+        database.update(TABLE_MESSAGE,
+                        contentValues,
+                        COLUMN_CONTACT + "=" + contact + " AND "
+                        + COLUMN_DID + "=" + did,
+                        null);
     }
 
     /**
@@ -190,6 +174,53 @@ public class Database {
                         + COLUMN_DELETED + "=" + "1" + " AND "
                         + COLUMN_VOIP_ID + " IS NULL",
                         null);
+    }
+
+    /**
+     * Adds a message to the database. If a record with the message's database ID or VoIP.ms ID already exists, that
+     * record is replaced. Otherwise, a new record is created.
+     *
+     * @param message The message to be added to the database.
+     * @return The database ID of the newly added message.
+     */
+    public synchronized long insertMessage(Message message) {
+        ContentValues values = new ContentValues();
+
+        if (message.getDatabaseId() != null) {
+            values.put(COLUMN_DATABASE_ID, message.getDatabaseId());
+        }
+        else if (message.getVoipId() != null) {
+            Long databaseId = getDatabaseIdForVoipId(message.getDid(), message.getVoipId());
+            if (databaseId != null) {
+                values.put(COLUMN_DATABASE_ID, databaseId);
+            }
+        }
+        values.put(COLUMN_VOIP_ID, message.getVoipId());
+        values.put(COLUMN_DATE, message.getDateInDatabaseFormat());
+        values.put(COLUMN_TYPE, message.getTypeInDatabaseFormat());
+        values.put(COLUMN_DID, message.getDid());
+        values.put(COLUMN_CONTACT, message.getContact());
+        values.put(COLUMN_MESSAGE, message.getText());
+        values.put(COLUMN_UNREAD, message.isUnreadInDatabaseFormat());
+        values.put(COLUMN_DELETED, message.isDeletedInDatabaseFormat());
+        values.put(COLUMN_DELIVERED, message.isDeliveredInDatabaseFormat());
+        values.put(COLUMN_DELIVERY_IN_PROGRESS, message.isDeliveryInProgressInDatabaseFormat());
+
+        if (values.getAsLong(COLUMN_DATABASE_ID) != null) {
+            return database.replace(TABLE_MESSAGE, null, values);
+        }
+        else {
+            return database.insert(TABLE_MESSAGE, null, values);
+        }
+    }
+
+    /**
+     * Deletes the message with the specified database ID from the database.
+     *
+     * @param databaseId The database ID.
+     */
+    public synchronized void removeMessage(long databaseId) {
+        database.delete(TABLE_MESSAGE, COLUMN_DATABASE_ID + "=" + databaseId, null);
     }
 
     /**

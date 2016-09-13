@@ -22,6 +22,7 @@
     <color name="translucent_black">#CC000000</color>
     <color name="highlight">#F3F315</color>
     <color name="dark_gray">#656363</color>
+    <color name="background">#F3F3F3</color>
 
     <color name="message_translucent_white">#89FFFFFF</color>
     <color name="message_translucent_dark_grey">#89656363</color>
