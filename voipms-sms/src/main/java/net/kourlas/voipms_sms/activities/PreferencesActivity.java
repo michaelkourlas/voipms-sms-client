@@ -40,8 +40,6 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class PreferencesActivity extends AppCompatActivity {
-    PreferenceFragment fragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,8 +54,9 @@ public class PreferencesActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        fragment = new PreferencesFragment();
-        getFragmentManager().beginTransaction().replace(R.id.preference_fragment_content, fragment).commit();
+        PreferenceFragment fragment = new PreferencesFragment();
+        getFragmentManager().beginTransaction().replace(
+            R.id.preference_fragment_content, fragment).commit();
     }
 
     @Override
@@ -169,9 +168,18 @@ public class PreferencesActivity extends AppCompatActivity {
             // Display selected notification sound as summary text for notification setting
             else if (preference instanceof RingtonePreference) {
                 RingtonePreference ringtonePreference = (RingtonePreference) preference;
-                Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), Uri.parse(Preferences.getInstance(
-                        getActivity().getApplicationContext()).getNotificationSound()));
-                ringtonePreference.setSummary(ringtone.getTitle(getActivity()));
+                String notificationSound =
+                    Preferences.getInstance(
+                        getActivity().getApplicationContext())
+                               .getNotificationSound();
+                if (notificationSound.equals("")) {
+                    ringtonePreference.setSummary("None");
+                } else {
+                    Ringtone ringtone = RingtoneManager.getRingtone(
+                        getActivity(), Uri.parse(notificationSound));
+                    ringtonePreference.setSummary(ringtone.getTitle(
+                        getActivity()));
+                }
             }
             else if (preference instanceof StartDatePreference) {
                 StartDatePreference datePreference = (StartDatePreference) preference;

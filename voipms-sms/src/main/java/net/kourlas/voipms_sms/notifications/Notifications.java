@@ -127,8 +127,11 @@ public class Notifications {
             notificationBuilder.setContentText(mostRecentSms);
             notificationBuilder.setSmallIcon(R.drawable.ic_chat_white_24dp);
             notificationBuilder.setPriority(Notification.PRIORITY_HIGH);
-            notificationBuilder.setSound(Uri.parse(
-                Preferences.getInstance(applicationContext).getNotificationSound()));
+            String notificationSound = Preferences.getInstance(applicationContext).getNotificationSound();
+            if (!notificationSound.equals("")) {
+                notificationBuilder.setSound(Uri.parse(
+                    Preferences.getInstance(applicationContext).getNotificationSound()));
+            }
             notificationBuilder.setLights(0xFFAA0000, 1000, 5000);
             if (Preferences.getInstance(applicationContext).getNotificationVibrateEnabled()) {
                 notificationBuilder.setVibrate(new long[]{0, 250, 250, 250});
