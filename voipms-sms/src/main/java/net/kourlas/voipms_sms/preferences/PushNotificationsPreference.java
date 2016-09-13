@@ -44,8 +44,11 @@ public class PushNotificationsPreference extends SwitchPreference {
     protected void onClick() {
         super.onClick();
 
-        PushNotifications pushNotifications = PushNotifications.getInstance(
-            getContext().getApplicationContext());
-        pushNotifications.enablePushNotifications((Activity) getContext(), this);
+        if (isChecked()) {
+            PushNotifications pushNotifications = PushNotifications.getInstance(
+                getContext().getApplicationContext());
+            pushNotifications.enablePushNotifications((Activity) getContext(),
+                                                      this);
+        }
     }
 }

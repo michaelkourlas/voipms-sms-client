@@ -509,7 +509,7 @@ public class ConversationActivity
             ClipboardManager clipboard =
                 (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             ClipData clip =
-                ClipData.newPlainText("Text message", message.getText());
+                ClipData.newPlainText("Text message", message.getText().trim());
             clipboard.setPrimaryClip(clip);
         }
 
@@ -535,7 +535,7 @@ public class ConversationActivity
             Intent intent = new Intent(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(android.content.Intent.EXTRA_TEXT,
-                            message.getText());
+                            message.getText().trim());
             startActivity(Intent.createChooser(intent, null));
         }
 

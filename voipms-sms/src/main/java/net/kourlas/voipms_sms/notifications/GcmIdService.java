@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@ import com.google.android.gms.iid.InstanceIDListenerService;
  * Service that processes requests for GCM token updates.
  */
 public class GcmIdService extends InstanceIDListenerService {
-
     /**
-     * Called when the current GCM token has been invalidated. This method simply re-registers for GCM, obtaining a new
+     * Called when the current GCM token has been invalidated. This method
+     * simply re-registers for GCM, obtaining a new
      * token in the process.
      */
     @Override
     public void onTokenRefresh() {
-        PushNotifications.getInstance(getApplicationContext()).registerForGcm(null, null, false, true);
+        PushNotifications.getInstance(getApplicationContext())
+                         .registerForGcm(null, null, false, true);
     }
 }

@@ -37,8 +37,10 @@ public class GcmService extends GcmListenerService {
      */
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        if (Preferences.getInstance(getApplicationContext())
-                       .getPushNotificationsEnabled())
+        Preferences preferences = Preferences.getInstance(
+            getApplicationContext());
+        if (preferences.getNotificationsEnabled()
+            && preferences.getPushNotificationsEnabled())
         {
             Database.getInstance(getApplicationContext())
                     .synchronize(true, false, null);
