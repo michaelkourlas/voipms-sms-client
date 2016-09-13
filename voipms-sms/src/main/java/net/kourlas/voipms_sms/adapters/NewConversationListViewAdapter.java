@@ -237,15 +237,17 @@ public class NewConversationListViewAdapter extends BaseAdapter
 
     @SuppressWarnings("WeakerAccess")
     public static class ContactItem {
+        private final long id;
         private final String name;
         private final String phoneNumber;
         private final String photoUri;
         private final boolean typedIn;
         private boolean primary;
 
-        ContactItem(String name, String phoneNumber, String photoUri,
+        ContactItem(long id, String name, String phoneNumber, String photoUri,
                     boolean primary, boolean typedIn)
         {
+            this.id = id;
             this.name = name;
             this.phoneNumber = phoneNumber;
             this.photoUri = photoUri;
@@ -276,6 +278,10 @@ public class NewConversationListViewAdapter extends BaseAdapter
         public boolean isTypedIn() {
             return typedIn;
         }
+
+        public long getId() {
+            return id;
+        }
     }
 
     class NewConversationFilter extends Filter {
@@ -295,6 +301,10 @@ public class NewConversationListViewAdapter extends BaseAdapter
                             ContactsContract.Contacts.HAS_PHONE_NUMBER))
                                   .equals("1"))
                         {
+                            long id = cursor.getLong(
+                                cursor.getColumnIndex(
+                                    ContactsContract.CommonDataKinds.Phone
+                                        .CONTACT_ID));
                             String contact = cursor.getString(
                                 cursor.getColumnIndex(
                                     ContactsContract.Contacts.DISPLAY_NAME));
@@ -308,13 +318,13 @@ public class NewConversationListViewAdapter extends BaseAdapter
 
                             boolean showPhoto = true;
                             for (ContactItem contactItem : phoneNumberEntries) {
-                                if (contact.equals(contactItem.getName())) {
+                                if (id == contactItem.getId()) {
                                     showPhoto = false;
                                 }
                             }
 
                             ContactItem contactItem = new ContactItem(
-                                contact, phoneNumber, photoUri, showPhoto,
+                                id, contact, phoneNumber, photoUri, showPhoto,
                                 false);
                             phoneNumberEntries.add(contactItem);
                         }
@@ -340,7 +350,8 @@ public class NewConversationListViewAdapter extends BaseAdapter
 
             phoneNumberEntries.addAll(getContacts());
             if (typedInPhoneNumber != null) {
-                phoneNumberEntries.add(0, new ContactItem(typedInPhoneNumber,
+                phoneNumberEntries.add(0, new ContactItem(-1,
+                                                          typedInPhoneNumber,
                                                           typedInPhoneNumber,
                                                           null, true,
                                                           true));
