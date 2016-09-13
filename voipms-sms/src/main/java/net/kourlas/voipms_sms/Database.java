@@ -30,6 +30,7 @@ import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
 import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -603,8 +604,10 @@ public class Database {
                 }
             }
 
-            if (success && !forceRecent) {
+            if (!forceRecent) {
                 preferences.setLastCompleteSyncTime(System.currentTimeMillis());
+                SynchronizationIntervalReceiver.setupSynchronizationInterval(
+                    applicationContext);
             }
         }
 

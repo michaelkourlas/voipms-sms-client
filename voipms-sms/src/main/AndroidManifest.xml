@@ -19,6 +19,10 @@
     package="net.kourlas.voipms_sms"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Display contact information -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+
     <!-- Support for "call contact" button -->
     <uses-feature
         android:name="android.hardware.telephony"
@@ -28,16 +32,6 @@
     <!-- Access to VoIP.ms API -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Display contact information -->
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.READ_PROFILE" />
-
-    <!-- Vibration when notification received -->
-    <uses-permission android:name="android.permission.VIBRATE" />
-
-    <!-- Donations -->
-    <uses-permission android:name="com.android.vending.BILLING" />
 
     <!-- Sync scheduling -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -49,6 +43,12 @@
         android:name="net.kourlas.voipms_sms.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
     <uses-permission android:name="net.kourlas.voipms_sms.permission.C2D_MESSAGE" />
+
+    <!-- Vibration when notification received -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Donations -->
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
         android:name="android.support.multidex.MultiDexApplication"
@@ -117,6 +117,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".receivers.SynchronizationIntervalReceiver" />
 
         <service
             android:name=".gcm.GcmService"
