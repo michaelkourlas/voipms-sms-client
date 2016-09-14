@@ -43,7 +43,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Provides access to the application's database, which contains the SMS message cache.
+ * Provides access to the application's database, which contains the SMS
+ * message cache.
  */
 public class Database {
     public static final String COLUMN_DATABASE_ID = "DatabaseId";
@@ -56,14 +57,17 @@ public class Database {
     public static final String COLUMN_UNREAD = "Unread";
     public static final String COLUMN_DELETED = "Deleted";
     public static final String COLUMN_DELIVERED = "Delivered";
-    public static final String COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress";
+    public static final String COLUMN_DELIVERY_IN_PROGRESS =
+        "DeliveryInProgress";
+    public static final String COLUMN_DRAFT = "Draft";
 
     private static final String TAG = "Database";
     private static final String TABLE_MESSAGE = "sms";
     private static final String[] columns = {
         COLUMN_DATABASE_ID, COLUMN_VOIP_ID, COLUMN_DATE, COLUMN_TYPE,
         COLUMN_DID, COLUMN_CONTACT, COLUMN_MESSAGE, COLUMN_UNREAD,
-        COLUMN_DELETED, COLUMN_DELIVERED, COLUMN_DELIVERY_IN_PROGRESS};
+        COLUMN_DELETED, COLUMN_DELIVERED, COLUMN_DELIVERY_IN_PROGRESS,
+        COLUMN_DRAFT};
 
     private static Database instance = null;
 
@@ -84,16 +88,94 @@ public class Database {
     }
 
     /**
-     * Gets the sole instance of the Database class. Initializes the instance if it does not already exist.
+     * Gets the sole instance of the Database class. Initializes the instance
+     * if it does not already exist.
      *
      * @param applicationContext The application context.
      * @return The single instance of the Database class.
      */
-    public synchronized static Database getInstance(Context applicationContext) {
+    public synchronized static Database getInstance(
+        Context applicationContext)
+    {
         if (instance == null) {
             instance = new Database(applicationContext);
         }
         return instance;
+    }
+
+    private Message[] getMessagesFromCursor(Cursor cursor) {
+        List<Message> messages = new ArrayList<>();
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Message message = new Message(
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DATABASE_ID)),
+                cursor.isNull(cursor.getColumnIndexOrThrow(
+                    COLUMN_VOIP_ID)) ? null : cursor.getLong(
+                        cursor.getColumnIndex(COLUMN_VOIP_ID)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DATE)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_TYPE)),
+                cursor.getString(cursor.getColumnIndexOrThrow(
+                    COLUMN_DID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(
+                    COLUMN_CONTACT)),
+                cursor.getString(cursor.getColumnIndexOrThrow(
+                    COLUMN_MESSAGE)).trim(),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_UNREAD)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DELETED)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DELIVERED)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DELIVERY_IN_PROGRESS)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DRAFT)));
+            messages.add(message);
+            cursor.moveToNext();
+        }
+        cursor.moveToFirst();
+        return messages.toArray(new Message[messages.size()]);
+    }
+
+    public synchronized Message[] conversationsFilter(
+        String did,
+        String filterString,
+        String numericFilterString)
+    {
+        filterString = "%" + filterString + "%";
+        String[] params = new String[] {
+            filterString,
+            filterString,
+        };
+
+        String numericFilterStringQueryPart = "";
+        if (!numericFilterString.equals("")) {
+            numericFilterString = "%" + numericFilterString + "%";
+            params = new String[] {
+                filterString,
+                filterString,
+                numericFilterString
+            };
+            numericFilterStringQueryPart = " OR " + COLUMN_CONTACT + " LIKE ? ";
+        }
+
+        final String query =
+            "SELECT * FROM " + TABLE_MESSAGE + " a INNER JOIN (SELECT"
+            + " " + COLUMN_DATABASE_ID + ", " + COLUMN_CONTACT + ", MAX("
+            + COLUMN_DATE + ") " + COLUMN_DATE + " FROM " + TABLE_MESSAGE
+            + " WHERE (" + COLUMN_CONTACT + " LIKE ?" + " OR " + COLUMN_MESSAGE
+            + " LIKE ?" + numericFilterStringQueryPart + ") AND"
+            + " " + COLUMN_DID + " = " + did + " GROUP BY " + COLUMN_CONTACT
+            + ") b on a." + COLUMN_DATABASE_ID + " = b." + COLUMN_DATABASE_ID
+            + " AND a." + COLUMN_DATE + " = b." + COLUMN_DATE + " ORDER BY"
+            + " " + COLUMN_DATE + " DESC";
+        Cursor cursor = database.rawQuery(query, params);
+        Message[] messages = getMessagesFromCursor(cursor);
+        cursor.close();
+        return messages;
     }
 
     public synchronized void markMessageAsSending(long databaseId) {
@@ -121,6 +203,18 @@ public class Database {
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_UNREAD, "0");
+        database.update(TABLE_MESSAGE,
+                        contentValues,
+                        COLUMN_CONTACT + "=" + contact + " AND "
+                        + COLUMN_DID + "=" + did,
+                        null);
+    }
+
+    public synchronized void markConversationAsUnread(String did,
+                                                      String contact)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_UNREAD, "1");
         database.update(TABLE_MESSAGE,
                         contentValues,
                         COLUMN_CONTACT + "=" + contact + " AND "
@@ -177,8 +271,34 @@ public class Database {
                         null);
     }
 
+    public synchronized Message getDraft(String did, String contact) {
+        Cursor cursor = database.query(TABLE_MESSAGE, columns,
+                                       COLUMN_DID + "=" + did + " AND "
+                                       + COLUMN_CONTACT + " = " + contact
+                                       + " AND " + COLUMN_DRAFT + " = 1",
+                                       null, null, null, null);
+        Message[] messages = getMessagesFromCursor(cursor);
+        cursor.close();
+        if (messages.length > 0) {
+            return messages[0];
+        } else {
+            return null;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
     /**
-     * Adds a message to the database. If a record with the message's database ID or VoIP.ms ID already exists, that
+     * Adds a message to the database. If a record with the message's
+     * database ID or VoIP.ms ID already exists, that
      * record is replaced. Otherwise, a new record is created.
      *
      * @param message The message to be added to the database.
@@ -189,9 +309,9 @@ public class Database {
 
         if (message.getDatabaseId() != null) {
             values.put(COLUMN_DATABASE_ID, message.getDatabaseId());
-        }
-        else if (message.getVoipId() != null) {
-            Long databaseId = getDatabaseIdForVoipId(message.getDid(), message.getVoipId());
+        } else if (message.getVoipId() != null) {
+            Long databaseId =
+                getDatabaseIdForVoipId(message.getDid(), message.getVoipId());
             if (databaseId != null) {
                 values.put(COLUMN_DATABASE_ID, databaseId);
             }
@@ -205,12 +325,14 @@ public class Database {
         values.put(COLUMN_UNREAD, message.isUnreadInDatabaseFormat());
         values.put(COLUMN_DELETED, message.isDeletedInDatabaseFormat());
         values.put(COLUMN_DELIVERED, message.isDeliveredInDatabaseFormat());
-        values.put(COLUMN_DELIVERY_IN_PROGRESS, message.isDeliveryInProgressInDatabaseFormat());
+        values.put(COLUMN_DELIVERY_IN_PROGRESS,
+                   message.isDeliveryInProgressInDatabaseFormat());
+        values.put(COLUMN_DRAFT,
+                   message.isDraftInDatabaseFormat());
 
         if (values.getAsLong(COLUMN_DATABASE_ID) != null) {
             return database.replace(TABLE_MESSAGE, null, values);
-        }
-        else {
+        } else {
             return database.insert(TABLE_MESSAGE, null, values);
         }
     }
@@ -221,7 +343,8 @@ public class Database {
      * @param databaseId The database ID.
      */
     public synchronized void removeMessage(long databaseId) {
-        database.delete(TABLE_MESSAGE, COLUMN_DATABASE_ID + "=" + databaseId, null);
+        database
+            .delete(TABLE_MESSAGE, COLUMN_DATABASE_ID + "=" + databaseId, null);
     }
 
     /**
@@ -236,27 +359,19 @@ public class Database {
      *
      * @return The message with the specified database ID.
      */
-    public synchronized Message getMessageWithDatabaseId(String did, long databaseId) {
-        Cursor cursor = database.query(TABLE_MESSAGE, columns, COLUMN_DID + "=" + did + " AND " + COLUMN_DATABASE_ID +
-                " = " + databaseId, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
-                    cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_VOIP_ID)) ? null : cursor.getLong(
-                            cursor.getColumnIndex(COLUMN_VOIP_ID)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
-            cursor.close();
-            return message;
-        }
-        else {
-            cursor.close();
+    public synchronized Message getMessageWithDatabaseId(String did,
+                                                         long databaseId)
+    {
+        Cursor cursor = database.query(TABLE_MESSAGE, columns,
+                                       COLUMN_DID + "=" + did + " AND "
+                                       + COLUMN_DATABASE_ID +
+                                       " = " + databaseId, null, null, null,
+                                       null);
+        Message[] messages = getMessagesFromCursor(cursor);
+        cursor.close();
+        if (messages.length > 0) {
+            return messages[0];
+        } else {
             return null;
         }
     }
@@ -267,26 +382,15 @@ public class Database {
      * @return The message with the specified VoIP.ms ID.
      */
     public synchronized Message getMessageWithVoipId(String did, long voipId) {
-        Cursor cursor = database.query(TABLE_MESSAGE, columns, COLUMN_DID + "=" + did + " AND " + COLUMN_VOIP_ID +
-                " = " + voipId, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
-                    cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_VOIP_ID)) ? null : cursor.getLong(
-                            cursor.getColumnIndex(COLUMN_VOIP_ID)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
-            cursor.close();
-            return message;
-        }
-        else {
-            cursor.close();
+        Cursor cursor = database.query(TABLE_MESSAGE, columns,
+                                       COLUMN_DID + "=" + did + " AND "
+                                       + COLUMN_VOIP_ID +
+                                       " = " + voipId, null, null, null, null);
+        Message[] messages = getMessagesFromCursor(cursor);
+        cursor.close();
+        if (messages.length > 0) {
+            return messages[0];
+        } else {
             return null;
         }
     }
@@ -297,32 +401,11 @@ public class Database {
      * @return All of the messages in the database.
      */
     public synchronized Message[] getMessages() {
-        List<Message> messages = new ArrayList<>();
-
-        Cursor cursor = database.query(TABLE_MESSAGE, columns, null, null, null, null, null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
-                    cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_VOIP_ID)) ? null : cursor.getLong(
-                            cursor.getColumnIndex(COLUMN_VOIP_ID)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
-            messages.add(message);
-            cursor.moveToNext();
-        }
+        Cursor cursor = database.query(TABLE_MESSAGE, columns, null, null,
+                                       null, null, COLUMN_DATE + " DESC");
+        Message[] messages = getMessagesFromCursor(cursor);
         cursor.close();
-
-        Collections.sort(messages);
-
-        Message[] messageArray = new Message[messages.size()];
-        return messages.toArray(messageArray);
+        return messages;
     }
 
     /**
@@ -331,33 +414,14 @@ public class Database {
      * @return All of the messages in the database except for deleted messages.
      */
     public synchronized Message[] getUndeletedMessages(String did) {
-        List<Message> messages = new ArrayList<>();
-
-        Cursor cursor = database.query(TABLE_MESSAGE, columns, COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED +
-                "=" + "0", null, null, null, null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
-                    cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_VOIP_ID)) ? null : cursor.getLong(
-                            cursor.getColumnIndex(COLUMN_VOIP_ID)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
-            messages.add(message);
-            cursor.moveToNext();
-        }
+        Cursor cursor = database.query(TABLE_MESSAGE, columns,
+                                       COLUMN_DID + "=" + did + " AND "
+                                       + COLUMN_DELETED +
+                                       "=" + "0" + " AND " + COLUMN_DRAFT + " = 0", null, null, null,
+                                       COLUMN_DATE + " DESC");
+        Message[] messages = getMessagesFromCursor(cursor);
         cursor.close();
-
-        Collections.sort(messages);
-
-        Message[] messageArray = new Message[messages.size()];
-        return messages.toArray(messageArray);
+        return messages;
     }
 
     /**
@@ -366,76 +430,46 @@ public class Database {
      * @return All of the deleted messages in the database.
      */
     public synchronized Message[] getDeletedMessages(String did) {
-        List<Message> messages = new ArrayList<>();
-
-        Cursor cursor = database.query(TABLE_MESSAGE, columns, COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED +
-                "=" + "1", null, null, null, null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
-                    cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_VOIP_ID)) ? null : cursor.getLong(
-                            cursor.getColumnIndex(COLUMN_VOIP_ID)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
-            messages.add(message);
-            cursor.moveToNext();
-        }
+        Cursor cursor = database.query(TABLE_MESSAGE, columns,
+                                       COLUMN_DID + "=" + did + " AND "
+                                       + COLUMN_DELETED +
+                                       "=" + "1" + " AND " + COLUMN_DRAFT + " = 0", null, null, null,
+                                       COLUMN_DATE + " DESC");
+        Message[] messages = getMessagesFromCursor(cursor);
         cursor.close();
-
-        Collections.sort(messages);
-
-        Message[] messageArray = new Message[messages.size()];
-        return messages.toArray(messageArray);
+        return messages;
     }
 
     /**
-     * Gets all of the messages associated with the specified contact phone number, except for deleted messages.
+     * Gets all of the messages associated with the specified contact phone
+     * number, except for deleted messages.
      *
      * @param contact The contact phone number.
-     * @return All of the messages associated with the specified contact phone number, except for deleted messages.
+     * @return All of the messages associated with the specified contact
+     * phone number, except for deleted messages.
      */
-    public synchronized Conversation getConversation(String did, String contact) {
-        List<Message> messages = new ArrayList<>();
-
-        Cursor cursor = database.query(TABLE_MESSAGE, columns, COLUMN_CONTACT + "=" + contact + " AND " + COLUMN_DID +
-                "=" + did + " AND " + COLUMN_DELETED + "=" + "0", null, null, null, null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
-                    cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_VOIP_ID)) ? null : cursor.getLong(
-                            cursor.getColumnIndex(COLUMN_VOIP_ID)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELETED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERY_IN_PROGRESS)));
-            messages.add(message);
-            cursor.moveToNext();
-        }
+    public synchronized Conversation getConversation(String did,
+                                                     String contact)
+    {
+        Cursor cursor = database.query(TABLE_MESSAGE, columns,
+                                       COLUMN_CONTACT + "=" + contact + " AND "
+                                       + COLUMN_DID +
+                                       "=" + did + " AND " + COLUMN_DELETED
+                                       + "=" + "0" + " AND " + COLUMN_DRAFT + " = 0", null, null, null,
+                                       COLUMN_DATE + " DESC");
+        Message[] messages = getMessagesFromCursor(cursor);
         cursor.close();
-
-        Message[] messageArray = new Message[messages.size()];
-        messages.toArray(messageArray);
-        return new Conversation(messageArray);
+        return new Conversation(messages);
     }
 
     /**
-     * Gets all of the conversations in the database with the specified DID. Conversations will not include deleted
+     * Gets all of the conversations in the database with the specified DID.
+     * Conversations will not include deleted
      * messages.
      *
      * @param did The DID.
-     * @return All of the conversations in the database with the specified DID. Deleted messages will not be included.
+     * @return All of the conversations in the database with the specified
+     * DID. Deleted messages will not be included.
      */
     public synchronized Conversation[] getConversations(String did) {
         Message[] messages = getUndeletedMessages(did);
@@ -451,53 +485,71 @@ public class Database {
             }
 
             if (conversation == null) {
-                conversation = new Conversation(new Message[]{message});
+                conversation = new Conversation(new Message[] {message});
                 conversations.add(conversation);
-            }
-            else {
+            } else {
                 conversation.addSms(message);
             }
         }
         Collections.sort(conversations);
 
-        Conversation[] conversationArray = new Conversation[conversations.size()];
+        Conversation[] conversationArray =
+            new Conversation[conversations.size()];
         return conversations.toArray(conversationArray);
     }
 
     /**
-     * Synchronize database with VoIP.ms. This may include any of the following, depending on synchronization settings:
-     * <li> retrieving all messages from VoIP.ms, or only those messages dated after the most recent message stored
+     * Synchronize database with VoIP.ms. This may include any of the
+     * following, depending on synchronization settings:
+     * <li> retrieving all messages from VoIP.ms, or only those messages
+     * dated after the most recent message stored
      * locally;
      * <li> retrieving messages from VoIP.ms that were deleted locally;
      * <li> deleting messages from VoIP.ms that were deleted locally; and
      * <li> deleting messages stored locally that were deleted from VoIP.ms.
      *
-     * @param forceRecent    Retrieve only recent messages (and do nothing else) if true, regardless of synchronization
+     * @param forceRecent    Retrieve only recent messages (and do nothing
+     *                       else) if true, regardless of synchronization
      *                       settings.
      * @param showErrors     Shows error messages if true.
      * @param sourceActivity The calling activity.
      */
     @SuppressWarnings("SimplifiableConditionalExpression")
-    public synchronized void synchronize(boolean forceRecent, boolean showErrors, Activity sourceActivity) {
-        boolean retrieveOnlyRecentMessages = forceRecent ? true : preferences.getRetrieveOnlyRecentMessages();
-        boolean retrieveDeletedMessages = forceRecent ? false : preferences.getRetrieveDeletedMessages();
-        boolean propagateLocalDeletions = forceRecent ? false : preferences.getPropagateLocalDeletions();
-        boolean propagateRemoteDeletions = forceRecent ? false : preferences.getPropagateRemoteDeletions();
+    public synchronized void synchronize(boolean forceRecent,
+                                         boolean showErrors,
+                                         Activity sourceActivity)
+    {
+        boolean retrieveOnlyRecentMessages =
+            forceRecent ? true : preferences.getRetrieveOnlyRecentMessages();
+        boolean retrieveDeletedMessages =
+            forceRecent ? false : preferences.getRetrieveDeletedMessages();
+        boolean propagateLocalDeletions =
+            forceRecent ? false : preferences.getPropagateLocalDeletions();
+        boolean propagateRemoteDeletions =
+            forceRecent ? false : preferences.getPropagateRemoteDeletions();
 
-        SynchronizeDatabaseTask task = new SynchronizeDatabaseTask(applicationContext, forceRecent,
-                retrieveDeletedMessages, propagateRemoteDeletions, showErrors, sourceActivity);
+        SynchronizeDatabaseTask task =
+            new SynchronizeDatabaseTask(applicationContext, forceRecent,
+                                        retrieveDeletedMessages,
+                                        propagateRemoteDeletions, showErrors,
+                                        sourceActivity);
 
-        if (preferences.getEmail().equals("") || preferences.getPassword().equals("") ||
-                preferences.getDid().equals("")) {
-            // Do not show an error; this method should never be called unless the email, password and DID are set
+        if (preferences.getEmail().equals("") || preferences.getPassword()
+                                                            .equals("") ||
+            preferences.getDid().equals(""))
+        {
+            // Do not show an error; this method should never be called
+            // unless the email, password and DID are set
             task.cleanup(false, forceRecent);
             return;
         }
 
         if (!Utils.isNetworkConnectionAvailable(applicationContext)) {
             if (showErrors) {
-                Toast.makeText(applicationContext, applicationContext.getString(R.string.database_sync_error_network),
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(applicationContext, applicationContext
+                                   .getString(R.string
+                                                  .database_sync_error_network),
+                               Toast.LENGTH_SHORT).show();
             }
             task.cleanup(false, forceRecent);
             return;
@@ -507,29 +559,39 @@ public class Database {
             String did = preferences.getDid();
             Message[] messages = getUndeletedMessages(did);
 
-            List<SynchronizeDatabaseTask.RequestObject> requests = new LinkedList<>();
+            List<SynchronizeDatabaseTask.RequestObject> requests =
+                new LinkedList<>();
 
             // Propagate local deletions if applicable
             if (propagateLocalDeletions) {
-                for (Message message : getDeletedMessages(preferences.getDid())) {
+                for (Message message : getDeletedMessages(
+                    preferences.getDid())) {
                     if (message.getVoipId() != null) {
                         String url = "https://www.voip.ms/api/v1/rest.php?" +
-                                "api_username=" + URLEncoder.encode(preferences.getEmail(), "UTF-8") + "&" +
-                                "api_password=" + URLEncoder.encode(preferences.getPassword(), "UTF-8") + "&" +
-                                "method=deleteSMS" + "&" +
-                                "id=" + message.getVoipId();
-                        requests.add(new SynchronizeDatabaseTask.RequestObject(url,
-                                SynchronizeDatabaseTask.RequestObject.RequestType.DELETION));
+                                     "api_username=" + URLEncoder
+                                         .encode(preferences.getEmail(),
+                                                 "UTF-8") + "&" +
+                                     "api_password=" + URLEncoder
+                                         .encode(preferences.getPassword(),
+                                                 "UTF-8") + "&" +
+                                     "method=deleteSMS" + "&" +
+                                     "id=" + message.getVoipId();
+                        requests
+                            .add(new SynchronizeDatabaseTask.RequestObject(url,
+                                                                           SynchronizeDatabaseTask.RequestObject.RequestType.DELETION));
                     }
                 }
             }
 
-            // Get number of days between now and the message retrieval start date or when the most recent
+            // Get number of days between now and the message retrieval start
+            // date or when the most recent
             // message was received, as appropriate
             Date then = (messages.length == 0 || !retrieveOnlyRecentMessages) ?
-                    preferences.getStartDate() : messages[0].getDate();
+                        preferences.getStartDate() : messages[0].getDate();
             // Use EDT because the VoIP.ms API only works with EDT
-            Calendar thenCalendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"), Locale.US);
+            Calendar thenCalendar = Calendar
+                .getInstance(TimeZone.getTimeZone("America/New_York"),
+                             Locale.US);
             thenCalendar.setTime(then);
             thenCalendar.set(Calendar.HOUR_OF_DAY, 0);
             thenCalendar.set(Calendar.MINUTE, 0);
@@ -539,7 +601,9 @@ public class Database {
 
             Date now = new Date();
             // Use EDT because the VoIP.ms API only works with EDT
-            Calendar nowCalendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"), Locale.US);
+            Calendar nowCalendar = Calendar
+                .getInstance(TimeZone.getTimeZone("America/New_York"),
+                             Locale.US);
             nowCalendar.setTime(now);
             nowCalendar.set(Calendar.HOUR_OF_DAY, 0);
             nowCalendar.set(Calendar.MINUTE, 0);
@@ -548,9 +612,11 @@ public class Database {
             now = nowCalendar.getTime();
 
             long millisecondsDifference = now.getTime() - then.getTime();
-            long daysDifference = (long) Math.ceil(millisecondsDifference / (1000f * 60f * 60f * 24f));
+            long daysDifference = (long) Math
+                .ceil(millisecondsDifference / (1000f * 60f * 60f * 24f));
 
-            // Split this number into 90 day periods (approximately the maximum supported by the VoIP.ms API)
+            // Split this number into 90 day periods (approximately the
+            // maximum supported by the VoIP.ms API)
             int periods = (int) Math.ceil(daysDifference / 90f);
             if (periods == 0) {
                 periods = 1;
@@ -558,7 +624,9 @@ public class Database {
             Date[] dates = new Date[periods + 1];
             dates[0] = then;
             for (int i = 1; i < dates.length - 1; i++) {
-                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"), Locale.US);
+                Calendar calendar = Calendar
+                    .getInstance(TimeZone.getTimeZone("America/New_York"),
+                                 Locale.US);
                 calendar.setTime(dates[i - 1]);
                 calendar.add(Calendar.DAY_OF_YEAR, 90);
                 dates[i] = calendar.getTime();
@@ -566,21 +634,33 @@ public class Database {
             dates[dates.length - 1] = now;
 
             // Create VoIP.ms API urls for each of these periods
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            SimpleDateFormat sdf =
+                new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
             for (int i = 0; i < dates.length - 1; i++) {
                 String url = "https://www.voip.ms/api/v1/rest.php?" +
-                        "api_username=" + URLEncoder.encode(preferences.getEmail(), "UTF-8") + "&" +
-                        "api_password=" + URLEncoder.encode(preferences.getPassword(), "UTF-8") + "&" +
-                        "method=getSMS" + "&" +
-                        "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
-                        "limit=" + URLEncoder.encode("1000000", "UTF-8") + "&" +
-                        "from=" + URLEncoder.encode(sdf.format(dates[i]), "UTF-8") + "&" +
-                        "to=" + URLEncoder.encode(sdf.format(dates[i + 1]), "UTF-8") + "&" +
-                        "timezone=-5"; // -5 corresponds to EDT
+                             "api_username=" + URLEncoder
+                                 .encode(preferences.getEmail(), "UTF-8") + "&"
+                             +
+                             "api_password=" + URLEncoder
+                                 .encode(preferences.getPassword(), "UTF-8")
+                             + "&" +
+                             "method=getSMS" + "&" +
+                             "did=" + URLEncoder
+                                 .encode(preferences.getDid(), "UTF-8") + "&" +
+                             "limit=" + URLEncoder.encode("1000000", "UTF-8")
+                             + "&" +
+                             "from=" + URLEncoder
+                                 .encode(sdf.format(dates[i]), "UTF-8") + "&" +
+                             "to=" + URLEncoder
+                                 .encode(sdf.format(dates[i + 1]), "UTF-8")
+                             + "&" +
+                             "timezone=-5"; // -5 corresponds to EDT
                 requests.add(new SynchronizeDatabaseTask.RequestObject(url,
-                        SynchronizeDatabaseTask.RequestObject.RequestType.MESSAGE_RETRIEVAL, dates[i],
-                        dates[i + 1]));
+                                                                       SynchronizeDatabaseTask.RequestObject.RequestType.MESSAGE_RETRIEVAL,
+                                                                       dates[i],
+                                                                       dates[i
+                                                                             + 1]));
             }
 
             task.start(requests);
@@ -591,16 +671,20 @@ public class Database {
     }
 
     /**
-     * Gets the database ID for the row in the database with the specified VoIP.ms ID.
+     * Gets the database ID for the row in the database with the specified
+     * VoIP.ms ID.
      *
      * @param voipId The VoIP.ms ID.
      * @return The database ID.
      */
     private synchronized Long getDatabaseIdForVoipId(String did, long voipId) {
-        Cursor cursor = database.query(TABLE_MESSAGE, columns, COLUMN_DID + "=" + did + " AND " + COLUMN_VOIP_ID +
-                "=" + voipId, null, null, null, null);
+        Cursor cursor = database.query(TABLE_MESSAGE, columns,
+                                       COLUMN_DID + "=" + did + " AND "
+                                       + COLUMN_VOIP_ID +
+                                       "=" + voipId, null, null, null, null);
         if (cursor.moveToFirst()) {
-            return cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID));
+            return cursor
+                .getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID));
         }
         cursor.close();
         return null;
@@ -623,18 +707,31 @@ public class Database {
         /**
          * Initializes a new instance of the SynchronizeDatabaseTask class.
          *
-         * @param forceRecent              Retrieve only recent messages (and do nothing else) if true, regardless of
-         *                                 synchronization settings. This value isn't actually used; it's merely stored
-         *                                 to be used during the cleanup routine.
-         * @param retrieveDeletedMessages  Retrieves messages that were deleted locally from the VoIP.ms servers if
+         * @param forceRecent              Retrieve only recent messages (and
+         *                                 do nothing else) if true,
+         *                                 regardless of
+         *                                 synchronization settings. This
+         *                                 value isn't actually used; it's
+         *                                 merely stored
+         *                                 to be used during the cleanup
+         *                                 routine.
+         * @param retrieveDeletedMessages  Retrieves messages that were
+         *                                 deleted locally from the VoIP.ms
+         *                                 servers if
          *                                 true.
-         * @param propagateRemoteDeletions Deletes local copies of messages if they were deleted from the VoIP.ms
+         * @param propagateRemoteDeletions Deletes local copies of messages
+         *                                 if they were deleted from the VoIP.ms
          *                                 servers if true.
          * @param showErrors               Shows error messages if true.
          * @param sourceActivity           The calling activity.
          */
-        public SynchronizeDatabaseTask(Context applicationContext, boolean forceRecent, boolean retrieveDeletedMessages,
-                                       boolean propagateRemoteDeletions, boolean showErrors, Activity sourceActivity) {
+        public SynchronizeDatabaseTask(Context applicationContext,
+                                       boolean forceRecent,
+                                       boolean retrieveDeletedMessages,
+                                       boolean propagateRemoteDeletions,
+                                       boolean showErrors,
+                                       Activity sourceActivity)
+        {
             this.applicationContext = applicationContext;
             this.database = Database.getInstance(applicationContext);
             this.preferences = Preferences.getInstance(applicationContext);
@@ -651,7 +748,8 @@ public class Database {
         /**
          * Starts the database update.
          *
-         * @param requests The VoIP.ms API request objects to use to facilitate the database update.
+         * @param requests The VoIP.ms API request objects to use to
+         *                 facilitate the database update.
          */
         public void start(List<RequestObject> requests) {
             this.requests = requests;
@@ -661,7 +759,8 @@ public class Database {
         /**
          * Continues the database update.
          *
-         * @param i The index of the VoIP.ms API request object to use for the next part of the update.
+         * @param i The index of the VoIP.ms API request object to use for
+         *          the next part of the update.
          */
         private void start(int i) {
             new CustomAsyncTask().execute(i);
@@ -673,16 +772,23 @@ public class Database {
         public void cleanup(boolean success, boolean forceRecent) {
             if (sourceActivity instanceof ConversationsActivity) {
                 ((ConversationsActivity) sourceActivity).postUpdate();
-            }
-            else if (sourceActivity instanceof ConversationActivity) {
+            } else if (sourceActivity instanceof ConversationActivity) {
                 ((ConversationActivity) sourceActivity).postUpdate();
-            }
-            else if (sourceActivity == null) {
-                if (ActivityMonitor.getInstance().getCurrentActivity() instanceof ConversationsActivity) {
-                    ((ConversationsActivity) ActivityMonitor.getInstance().getCurrentActivity()).postUpdate();
-                }
-                else if (ActivityMonitor.getInstance().getCurrentActivity() instanceof ConversationActivity) {
-                    ((ConversationActivity) ActivityMonitor.getInstance().getCurrentActivity()).postUpdate();
+            } else if (sourceActivity == null) {
+                if (ActivityMonitor.getInstance()
+                                   .getCurrentActivity() instanceof
+                    ConversationsActivity)
+                {
+                    ((ConversationsActivity) ActivityMonitor.getInstance()
+                                                            .getCurrentActivity())
+                        .postUpdate();
+                } else if (ActivityMonitor.getInstance()
+                                          .getCurrentActivity() instanceof
+                    ConversationActivity)
+                {
+                    ((ConversationActivity) ActivityMonitor.getInstance()
+                                                           .getCurrentActivity())
+                        .postUpdate();
                 }
             }
 
@@ -706,7 +812,9 @@ public class Database {
                 this.endDate = null;
             }
 
-            public RequestObject(String url, RequestType requestType, Date startDate, Date endDate) {
+            public RequestObject(String url, RequestType requestType,
+                                 Date startDate, Date endDate)
+            {
                 this.url = url;
                 this.requestType = requestType;
                 this.startDate = startDate;
@@ -738,7 +846,9 @@ public class Database {
         /**
          * Custom AsyncTask for use with database updating.
          */
-        private class CustomAsyncTask extends AsyncTask<Integer, String, Boolean> {
+        private class CustomAsyncTask
+            extends AsyncTask<Integer, String, Boolean>
+        {
             private RequestObject request;
 
             @Override
@@ -750,13 +860,15 @@ public class Database {
                 } catch (JSONException ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
                     if (showErrors) {
-                        publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
+                        publishProgress(applicationContext.getString(
+                            R.string.database_sync_error_api_parse));
                     }
                     return false;
                 } catch (Exception ex) {
                     Log.w(TAG, Log.getStackTraceString(ex));
                     if (showErrors) {
-                        publishProgress(applicationContext.getString(R.string.database_sync_error_api_request));
+                        publishProgress(applicationContext.getString(
+                            R.string.database_sync_error_api_request));
                     }
                     return false;
                 }
@@ -765,7 +877,8 @@ public class Database {
                 String status = resultJson.optString("status");
                 if (status == null) {
                     if (showErrors) {
-                        publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
+                        publishProgress(applicationContext.getString(
+                            R.string.database_sync_error_api_parse));
                     }
                     return false;
                 }
@@ -773,12 +886,14 @@ public class Database {
                     if (!status.equals("no_sms")) {
                         if (showErrors) {
                             publishProgress(applicationContext.getString(
-                                    R.string.database_sync_error_api_error).replace("{error}", status));
+                                R.string.database_sync_error_api_error).replace(
+                                "{error}", status));
                         }
                         return false;
                     }
 
-                    // Continue the database update by calling the next URL; otherwise, if the database update is
+                    // Continue the database update by calling the next URL;
+                    // otherwise, if the database update is
                     // complete, clean up
                     int current = requests.indexOf(request);
                     if (current != requests.size() - 1) {
@@ -788,8 +903,11 @@ public class Database {
                     return true;
                 }
 
-                if (request.getRequestType() == RequestObject.RequestType.DELETION) {
-                    // Continue the database update by calling the next URL; otherwise, if the database update is
+                if (request.getRequestType()
+                    == RequestObject.RequestType.DELETION)
+                {
+                    // Continue the database update by calling the next URL;
+                    // otherwise, if the database update is
                     // complete, clean up
                     int current = requests.indexOf(request);
                     if (current != requests.size() - 1) {
@@ -804,17 +922,23 @@ public class Database {
                 JSONArray rawMessages = resultJson.optJSONArray("sms");
                 if (rawMessages == null) {
                     if (showErrors) {
-                        publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
+                        publishProgress(applicationContext.getString(
+                            R.string.database_sync_error_api_parse));
                     }
                     return false;
                 }
                 for (int i = 0; i < rawMessages.length(); i++) {
                     JSONObject rawSms = rawMessages.optJSONObject(i);
-                    if (rawSms == null || rawSms.optString("id") == null || rawSms.optString("date") == null ||
-                            rawSms.optString("type") == null || rawSms.optString("did") == null ||
-                            rawSms.optString("contact") == null || rawSms.optString("message") == null) {
+                    if (rawSms == null || rawSms.optString("id") == null
+                        || rawSms.optString("date") == null ||
+                        rawSms.optString("type") == null
+                        || rawSms.optString("did") == null ||
+                        rawSms.optString("contact") == null
+                        || rawSms.optString("message") == null)
+                    {
                         if (showErrors) {
-                            publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
+                            publishProgress(applicationContext.getString(
+                                R.string.database_sync_error_api_parse));
                         }
                         return false;
                     }
@@ -826,12 +950,14 @@ public class Database {
                     String contact = rawSms.optString("contact");
                     String message = rawSms.optString("message");
                     try {
-                        Message sms = new Message(id, date, type, did, contact, message);
+                        Message sms =
+                            new Message(id, date, type, did, contact, message);
                         serverMessages.add(sms);
                     } catch (ParseException ex) {
                         Log.w(TAG, Log.getStackTraceString(ex));
                         if (showErrors) {
-                            publishProgress(applicationContext.getString(R.string.database_sync_error_api_parse));
+                            publishProgress(applicationContext.getString(
+                                R.string.database_sync_error_api_parse));
                         }
                         return false;
                     }
@@ -840,21 +966,22 @@ public class Database {
                 // Add new messages from the server
                 List<Message> newMessages = new ArrayList<>();
                 for (Message serverMessage : serverMessages) {
-                    Message localMessage = database.getMessageWithVoipId(preferences.getDid(),
-                            serverMessage.getVoipId());
+                    Message localMessage =
+                        database.getMessageWithVoipId(preferences.getDid(),
+                                                      serverMessage
+                                                          .getVoipId());
                     if (localMessage != null) {
                         if (localMessage.isDeleted()) {
                             if (retrieveDeletedMessages) {
-                                serverMessage.setUnread(localMessage.isUnread());
+                                serverMessage
+                                    .setUnread(localMessage.isUnread());
                                 database.insertMessage(serverMessage);
                             }
-                        }
-                        else {
+                        } else {
                             serverMessage.setUnread(localMessage.isUnread());
                             database.insertMessage(serverMessage);
                         }
-                    }
-                    else {
+                    } else {
                         database.insertMessage(serverMessage);
                         newMessages.add(serverMessage);
                     }
@@ -862,7 +989,8 @@ public class Database {
 
                 // Delete old messages stored locally, if applicable
                 if (propagateRemoteDeletions) {
-                    Message[] localMessages = database.getUndeletedMessages(preferences.getDid());
+                    Message[] localMessages =
+                        database.getUndeletedMessages(preferences.getDid());
                     for (Message localMessage : localMessages) {
                         if (localMessage.getVoipId() == null) {
                             continue;
@@ -870,8 +998,10 @@ public class Database {
 
                         boolean match = false;
                         for (Message serverMessage : serverMessages) {
-                            if (serverMessage.getVoipId() != null && localMessage.getVoipId().equals(
-                                    serverMessage.getVoipId())) {
+                            if (serverMessage.getVoipId() != null
+                                && localMessage.getVoipId().equals(
+                                serverMessage.getVoipId()))
+                            {
                                 match = true;
                                 break;
                             }
@@ -880,14 +1010,19 @@ public class Database {
                         if (!match) {
                             Date startDate = request.getStartDate();
                             Date endDate = request.getEndDate();
-                            endDate.setTime(endDate.getTime() + (1000l * 60l * 60l * 24l));
+                            endDate.setTime(
+                                endDate.getTime() + (1000l * 60l * 60l * 24l));
 
-                            if ((localMessage.getDate().getTime() == startDate.getTime() ||
-                                    localMessage.getDate().after(startDate)) &&
-                                    (localMessage.getDate().getTime() == endDate.getTime() ||
-                                            localMessage.getDate().before(endDate))) {
+                            if ((localMessage.getDate().getTime() == startDate
+                                .getTime() ||
+                                 localMessage.getDate().after(startDate)) &&
+                                (localMessage.getDate().getTime() == endDate
+                                    .getTime() ||
+                                 localMessage.getDate().before(endDate)))
+                            {
                                 if (localMessage.getDatabaseId() != null) {
-                                    database.removeMessage(localMessage.getDatabaseId());
+                                    database.removeMessage(
+                                        localMessage.getDatabaseId());
                                 }
                             }
                         }
@@ -899,7 +1034,8 @@ public class Database {
                 for (Message newMessage : newMessages) {
                     newContacts.add(newMessage.getContact());
                 }
-                Notifications.getInstance(applicationContext).showNotifications(new LinkedList<>(newContacts));
+                Notifications.getInstance(applicationContext)
+                             .showNotifications(new LinkedList<>(newContacts));
 
                 int current = requests.indexOf(request);
                 if (current != requests.size() - 1) {
@@ -919,12 +1055,14 @@ public class Database {
             /**
              * Shows a toast to the user.
              *
-             * @param message The message to show. This must be a String array with a single element containing the
+             * @param message The message to show. This must be a String
+             *                array with a single element containing the
              *                message.
              */
             @Override
             protected void onProgressUpdate(String... message) {
-                Toast.makeText(applicationContext, message[0], Toast.LENGTH_SHORT).show();
+                Toast.makeText(applicationContext, message[0],
+                               Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -934,19 +1072,22 @@ public class Database {
      */
     private class DatabaseHelper extends SQLiteOpenHelper {
         private static final String DATABASE_NAME = "sms.db";
-        private static final int DATABASE_VERSION = 7;
-        private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_MESSAGE + "(" +
-                COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-                COLUMN_VOIP_ID + " INTEGER," +
-                COLUMN_DATE + " INTEGER NOT NULL," +
-                COLUMN_TYPE + " INTEGER NOT NULL," +
-                COLUMN_DID + " TEXT NOT NULL," +
-                COLUMN_CONTACT + " TEXT NOT NULL, " +
-                COLUMN_MESSAGE + " TEXT NOT NULL," +
-                COLUMN_UNREAD + " INTEGER NOT NULL," +
-                COLUMN_DELETED + " INTEGER NOT NULL," +
-                COLUMN_DELIVERED + " INTEGER NOT NULL," +
-                COLUMN_DELIVERY_IN_PROGRESS + " INTEGER NOT NULL)";
+        private static final int DATABASE_VERSION = 8;
+        private static final String DATABASE_CREATE =
+            "CREATE TABLE " + TABLE_MESSAGE + "(" +
+            COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+            +
+            COLUMN_VOIP_ID + " INTEGER," +
+            COLUMN_DATE + " INTEGER NOT NULL," +
+            COLUMN_TYPE + " INTEGER NOT NULL," +
+            COLUMN_DID + " TEXT NOT NULL," +
+            COLUMN_CONTACT + " TEXT NOT NULL, " +
+            COLUMN_MESSAGE + " TEXT NOT NULL," +
+            COLUMN_UNREAD + " INTEGER NOT NULL," +
+            COLUMN_DELETED + " INTEGER NOT NULL," +
+            COLUMN_DELIVERED + " INTEGER NOT NULL," +
+            COLUMN_DELIVERY_IN_PROGRESS + " INTEGER NOT NULL," +
+            COLUMN_DRAFT + " INTEGER NOT NULL)";
 
         /**
          * Initializes a new instance of the DatabaseHelper class.
@@ -968,58 +1109,103 @@ public class Database {
         }
 
         /**
-         * Upgrades the messages table within an SQLite database upon a version change.
+         * Upgrades the messages table within an SQLite database upon a
+         * version change.
          *
          * @param db         The SQLite database.
          * @param oldVersion The old version of the database.
          * @param newVersion The new version of the database.
          */
         @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        public void onUpgrade(SQLiteDatabase db, int oldVersion,
+                              int newVersion)
+        {
             if (oldVersion <= 5) {
-                // For version 5 and below, the database was nothing more than a cache so it can simply be dropped
-                db.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGE);
+                // For version 5 and below, the database was nothing more
+                // than a cache so it can simply be dropped
+                db.execSQL("DROP TABLE IF EXISTS sms");
                 onCreate(db);
-            }
-            else {
-                // After version 5, the database must be converted; it cannot be simply dropped
-                if (oldVersion == 6) {
-                    // In version 6, dates from VoIP.ms were parsed as if they did not have daylight savings time when
-                    // they actually did; the code below re-parses the dates properly
+            } else {
+                // After version 5, the database must be converted; it cannot
+                // be simply dropped
+                if (oldVersion <= 6) {
+                    // In version 6, dates from VoIP.ms were parsed as if
+                    // they did not have daylight savings time when
+                    // they actually did; the code below re-parses the dates
+                    // properly
                     try {
                         String table = "sms";
-                        String[] columns = {"DatabaseId", "VoipId", "Date", "Type", "Did", "Contact", "Text", "Unread",
-                                "Deleted", "Delivered", "DeliveryInProgress"};
-                        Cursor cursor = db.query(table, columns, null, null, null, null, null);
+                        String[] columns =
+                            {"DatabaseId", "VoipId", "Date", "Type", "Did",
+                             "Contact", "Text", "Unread",
+                             "Deleted", "Delivered", "DeliveryInProgress"};
+                        Cursor cursor =
+                            db.query(table, columns, null, null, null, null,
+                                     null);
                         cursor.moveToFirst();
                         while (!cursor.isAfterLast()) {
-                            Message message = new Message(cursor.getLong(cursor.getColumnIndexOrThrow(columns[0])),
-                                    cursor.isNull(cursor.getColumnIndexOrThrow(columns[1])) ? null : cursor.getLong(
-                                            cursor.getColumnIndex(columns[1])),
-                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[2])),
-                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[3])),
-                                    cursor.getString(cursor.getColumnIndexOrThrow(columns[4])),
-                                    cursor.getString(cursor.getColumnIndexOrThrow(columns[5])),
-                                    cursor.getString(cursor.getColumnIndexOrThrow(columns[6])),
-                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[7])),
-                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[8])),
-                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[9])),
-                                    cursor.getLong(cursor.getColumnIndexOrThrow(columns[10])));
+                            Message message = new Message(cursor.getLong(
+                                cursor.getColumnIndexOrThrow(columns[0])),
+                                                          cursor.isNull(cursor
+                                                                            .getColumnIndexOrThrow(
+                                                                                columns[1])) ?
+                                                          null : cursor.getLong(
+                                                              cursor
+                                                                  .getColumnIndex(
+                                                                      columns[1])),
+                                                          cursor.getLong(cursor
+                                                                             .getColumnIndexOrThrow(
+                                                                                 columns[2])),
+                                                          cursor.getLong(cursor
+                                                                             .getColumnIndexOrThrow(
+                                                                                 columns[3])),
+                                                          cursor.getString(
+                                                              cursor
+                                                                  .getColumnIndexOrThrow(
+                                                                      columns[4])),
+                                                          cursor.getString(
+                                                              cursor
+                                                                  .getColumnIndexOrThrow(
+                                                                      columns[5])),
+                                                          cursor.getString(
+                                                              cursor
+                                                                  .getColumnIndexOrThrow(
+                                                                      columns[6])),
+                                                          cursor.getLong(cursor
+                                                                             .getColumnIndexOrThrow(
+                                                                                 columns[7])),
+                                                          cursor.getLong(cursor
+                                                                             .getColumnIndexOrThrow(
+                                                                                 columns[8])),
+                                                          cursor.getLong(cursor
+                                                                             .getColumnIndexOrThrow(
+                                                                                 columns[9])),
+                                                          cursor.getLong(cursor
+                                                                             .getColumnIndexOrThrow(
+                                                                                 columns[10])), 0);
 
-                            // Incorrect date has an hour removed outside of daylight savings time
+                            // Incorrect date has an hour removed outside of
+                            // daylight savings time
                             Date date = message.getDate();
 
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                            SimpleDateFormat sdf =
+                                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                                                     Locale.US);
                             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                            // Incorrect date converted to UTC with an hour removed outside of daylight savings time
+                            // Incorrect date converted to UTC with an hour
+                            // removed outside of daylight savings time
                             String dateString = sdf.format(date);
 
-                            // Incorrect date string is parsed as if it were EST/EDT; it is now four hours ahead of EST/EDT
+                            // Incorrect date string is parsed as if it were
+                            // EST/EDT; it is now four hours ahead of EST/EDT
                             // at all times
-                            sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+                            sdf.setTimeZone(
+                                TimeZone.getTimeZone("America/New_York"));
                             date = sdf.parse(dateString);
 
-                            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"), Locale.US);
+                            Calendar calendar = Calendar.getInstance(
+                                TimeZone.getTimeZone("America/New_York"),
+                                Locale.US);
                             calendar.setTime(date);
                             calendar.add(Calendar.HOUR_OF_DAY, -4);
                             // Date is now stored correctly
@@ -1028,24 +1214,36 @@ public class Database {
                             ContentValues values = new ContentValues();
                             values.put(columns[0], message.getDatabaseId());
                             values.put(columns[1], message.getVoipId());
-                            values.put(columns[2], message.getDateInDatabaseFormat());
-                            values.put(columns[3], message.getTypeInDatabaseFormat());
+                            values.put(columns[2],
+                                       message.getDateInDatabaseFormat());
+                            values.put(columns[3],
+                                       message.getTypeInDatabaseFormat());
                             values.put(columns[4], message.getDid());
                             values.put(columns[5], message.getContact());
                             values.put(columns[6], message.getText());
-                            values.put(columns[7], message.isUnreadInDatabaseFormat());
-                            values.put(columns[8], message.isDeletedInDatabaseFormat());
-                            values.put(columns[9], message.isDeliveredInDatabaseFormat());
-                            values.put(columns[10], message.isDeliveryInProgressInDatabaseFormat());
+                            values.put(columns[7],
+                                       message.isUnreadInDatabaseFormat());
+                            values.put(columns[8],
+                                       message.isDeletedInDatabaseFormat());
+                            values.put(columns[9],
+                                       message.isDeliveredInDatabaseFormat());
+                            values.put(columns[10], message
+                                .isDeliveryInProgressInDatabaseFormat());
 
                             db.replace(table, null, values);
                             cursor.moveToNext();
                         }
                         cursor.close();
                     } catch (ParseException ex) {
-                        // This should never happen since the same SimpleDateFormat that formats the date parses it
+                        // This should never happen since the same
+                        // SimpleDateFormat that formats the date parses it
                         throw new Error(ex);
                     }
+                }
+
+                if (oldVersion <= 7) {
+                    db.execSQL("ALTER TABLE sms ADD Draft INTEGER NOT NULL"
+                               + " DEFAULT(0)");
                 }
             }
         }

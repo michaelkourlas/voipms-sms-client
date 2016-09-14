@@ -28,7 +28,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.TtsSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,11 +38,9 @@ import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.Utils;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
-import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,12 +51,13 @@ public class ConversationsRecyclerViewAdapter
     implements Filterable
 {
     private final Context applicationContext;
+    private final Database database;
     private final Preferences preferences;
     private final LinearLayoutManager layoutManager;
 
     private final ConversationsActivity activity;
 
-    private final List<Conversation> conversations;
+    private final List<Message> messages;
     private final List<Boolean> checkedItems;
     private String filterConstraint;
     private String oldFilterConstraint;
@@ -67,12 +66,13 @@ public class ConversationsRecyclerViewAdapter
                                             LinearLayoutManager layoutManager)
     {
         this.applicationContext = activity.getApplicationContext();
+        this.database = Database.getInstance(applicationContext);
         this.preferences = Preferences.getInstance(applicationContext);
         this.layoutManager = layoutManager;
 
         this.activity = activity;
 
-        this.conversations = new ArrayList<>();
+        this.messages = new ArrayList<>();
         this.filterConstraint = "";
         this.oldFilterConstraint = "";
         this.checkedItems = new ArrayList<>();
@@ -92,17 +92,17 @@ public class ConversationsRecyclerViewAdapter
     public void onBindViewHolder(ConversationViewHolder conversationViewHolder,
                                  int position)
     {
-        Message newestMessage = conversations.get(position).getMostRecentSms();
+        Message message = messages.get(position);
 
         ViewSwitcher viewSwitcher = conversationViewHolder.getViewSwitcher();
         viewSwitcher.setDisplayedChild(isItemChecked(position) ? 1 : 0);
 
         QuickContactBadge contactBadge =
             conversationViewHolder.getContactBadge();
-        contactBadge.assignContactFromPhone(newestMessage.getContact(), true);
+        contactBadge.assignContactFromPhone(message.getContact(), true);
 
         String photoUri = Utils.getContactPhotoUri(applicationContext,
-                                                   newestMessage.getContact());
+                                                   message.getContact());
         if (photoUri != null) {
             contactBadge.setImageURI(Uri.parse(photoUri));
         } else {
@@ -111,14 +111,14 @@ public class ConversationsRecyclerViewAdapter
 
         TextView contactTextView = conversationViewHolder.getContactTextView();
         String contactName = Utils.getContactName(applicationContext,
-                                                  newestMessage.getContact());
+                                                  message.getContact());
         SpannableStringBuilder contactTextBuilder =
             new SpannableStringBuilder();
         if (contactName != null) {
             contactTextBuilder.append(contactName);
         } else {
             contactTextBuilder.append(
-                Utils.getFormattedPhoneNumber(newestMessage.getContact()));
+                Utils.getFormattedPhoneNumber(message.getContact()));
         }
         if (!filterConstraint.equals("")) {
             int index = contactTextBuilder.toString().toLowerCase().indexOf(
@@ -138,68 +138,55 @@ public class ConversationsRecyclerViewAdapter
             conversationViewHolder.getMessageTextView();
         SpannableStringBuilder messageTextBuilder =
             new SpannableStringBuilder();
-        if (!filterConstraint.equals("")) {
-            boolean found = false;
-            for (Message message : conversations.get(position).getMessages()) {
-                int index = message.getText()
-                                   .toLowerCase()
-                                   .indexOf(filterConstraint.toLowerCase());
-                if (index != -1) {
-                    int nonMessageOffset = index;
-                    if (newestMessage.getType() == Message.Type.OUTGOING) {
-                        messageTextBuilder.insert(
-                            0, applicationContext.getString(
-                                R.string.conversations_message_you) + " ");
-                        nonMessageOffset += 5;
-                    }
 
-                    int substringOffset = index - 20;
-                    if (substringOffset > 0) {
-                        messageTextBuilder.append("...");
-                        nonMessageOffset += 3;
-
-                        while (message.getText().charAt(substringOffset) != ' '
-                               && substringOffset < index - 1) {
-                            substringOffset += 1;
-                        }
-                        substringOffset += 1;
-                    } else {
-                        substringOffset = 0;
-                    }
-
-                    messageTextBuilder.append(message.getText()
-                                                     .substring(
-                                                         substringOffset));
-                    messageTextBuilder.setSpan(
-                        new BackgroundColorSpan(
-                            ContextCompat.getColor(applicationContext,
-                                                   R.color.highlight)),
-                        nonMessageOffset - substringOffset,
-                        nonMessageOffset - substringOffset
-                        + filterConstraint.length(),
-                        SpannableString.SPAN_INCLUSIVE_EXCLUSIVE);
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                if (newestMessage.getType() == Message.Type.OUTGOING) {
-                    messageTextBuilder.insert(0, applicationContext.getString(
+        int index = message.getText()
+                           .toLowerCase()
+                           .indexOf(filterConstraint.toLowerCase());
+        if (!filterConstraint.equals("") && index != -1) {
+            int nonMessageOffset = index;
+            if (message.getType() == Message.Type.OUTGOING) {
+                messageTextBuilder.insert(
+                    0, applicationContext.getString(
                         R.string.conversations_message_you) + " ");
+                nonMessageOffset += 5;
+            }
+
+            int substringOffset = index - 20;
+            if (substringOffset > 0) {
+                messageTextBuilder.append("...");
+                nonMessageOffset += 3;
+
+                while (message.getText().charAt(substringOffset) != ' '
+                       && substringOffset < index - 1) {
+                    substringOffset += 1;
                 }
-                messageTextBuilder.append(newestMessage.getText());
+                substringOffset += 1;
+            } else {
+                substringOffset = 0;
             }
+
+            messageTextBuilder.append(message.getText()
+                                             .substring(
+                                                 substringOffset));
+            messageTextBuilder.setSpan(
+                new BackgroundColorSpan(
+                    ContextCompat.getColor(applicationContext,
+                                           R.color.highlight)),
+                nonMessageOffset - substringOffset,
+                nonMessageOffset - substringOffset
+                + filterConstraint.length(),
+                SpannableString.SPAN_INCLUSIVE_EXCLUSIVE);
         } else {
-            if (newestMessage.getType() == Message.Type.OUTGOING) {
-                messageTextBuilder.insert(0, applicationContext.getString(
-                    R.string.conversations_message_you) + " ");
+            if (message.getType() == Message.Type.OUTGOING) {
+                messageTextBuilder.append(applicationContext.getString(
+                    R.string.conversations_message_you));
+                messageTextBuilder.append(" ");
             }
-            messageTextBuilder.append(newestMessage.getText());
+            messageTextBuilder.append(message.getText());
         }
         messageTextView.setText(messageTextBuilder);
 
-        if (newestMessage.isUnread()) {
+        if (message.isUnread()) {
             contactTextView.setTypeface(null, Typeface.BOLD);
             messageTextView.setTypeface(null, Typeface.BOLD);
         } else {
@@ -209,8 +196,19 @@ public class ConversationsRecyclerViewAdapter
 
         // Set date line
         TextView dateTextView = conversationViewHolder.getDateTextView();
-        if (!newestMessage.isDelivered()) {
-            if (!newestMessage.isDeliveryInProgress()) {
+        if (message.isDraft()) {
+            SpannableStringBuilder dateTextBuilder =
+                new SpannableStringBuilder();
+            dateTextBuilder.append(applicationContext.getString(
+                R.string.conversations_message_draft));
+            dateTextBuilder.setSpan(
+                new StyleSpan(Typeface.ITALIC),
+                0,
+                dateTextBuilder.length(),
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            dateTextView.setText(dateTextBuilder);
+        } else if (!message.isDelivered()) {
+            if (!message.isDeliveryInProgress()) {
                 SpannableStringBuilder dateTextBuilder =
                     new SpannableStringBuilder();
                 dateTextBuilder.append(applicationContext.getString(
@@ -230,14 +228,14 @@ public class ConversationsRecyclerViewAdapter
             }
         } else {
             dateTextView.setText(Utils.getFormattedDate(applicationContext,
-                                                        newestMessage.getDate(),
+                                                        message.getDate(),
                                                         true));
         }
     }
 
     @Override
     public int getItemCount() {
-        return conversations.size();
+        return messages.size();
     }
 
     @Override
@@ -245,8 +243,8 @@ public class ConversationsRecyclerViewAdapter
         return new ConversationsFilter();
     }
 
-    public Conversation getItem(int position) {
-        return conversations.get(position);
+    public Message getItem(int position) {
+        return messages.get(position);
     }
 
     public boolean isItemChecked(int position) {
@@ -339,64 +337,40 @@ public class ConversationsRecyclerViewAdapter
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults results = new FilterResults();
-            List<Conversation> conversationResults = new ArrayList<>();
 
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
+            String numberFilterConstraint = filterConstraint.replaceAll(
+                "[^0-9]", "");
 
-            Conversation[] conversations =
-                Database.getInstance(applicationContext)
-                        .getConversations(preferences.getDid());
-            for (Conversation conversation : conversations) {
-                String contactName = Utils.getContactName(
-                    applicationContext, conversation.getContact());
+            Message[] messages = database.conversationsFilter(
+                preferences.getDid(), filterConstraint,
+                numberFilterConstraint);
 
-                String text = "";
-                Message[] allSms = conversation.getMessages();
-                for (Message message : allSms) {
-                    text += message.getText() + " ";
-                }
-
-                if ((contactName != null
-                     && contactName.toLowerCase().contains(
-                         filterConstraint.toLowerCase()))
-                    || text.toLowerCase().contains(
-                        filterConstraint.toLowerCase())
-                    || (!filterConstraint.replaceAll("[^0-9]", "").equals("")
-                        && conversation.getContact()
-                                       .replaceAll("[^0-9]", "")
-                                       .contains(filterConstraint.replaceAll(
-                                           "[^0-9]", ""))))
-                {
-                    conversationResults.add(conversation);
-                }
-            }
-
-            results.count = conversationResults.size();
-            results.values = conversationResults;
+            results.count = messages.length;
+            results.values = messages;
 
             return results;
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         protected void publishResults(CharSequence constraint,
                                       FilterResults results)
         {
             int position = layoutManager.findFirstVisibleItemPosition();
+            Message[] newMessages = (Message[]) results.values;
+            if (newMessages == null) {
+                newMessages = new Message[0];
+            }
 
-            List<Conversation> newConversations =
-                (List<Conversation>) results.values;
-
-            List<Conversation> oldConversations = new LinkedList<>();
-            oldConversations.addAll(conversations);
-            for (Conversation oldConversation : oldConversations) {
+            // Remove old messages from the adapter
+            List<Message> oldMessages = new LinkedList<>();
+            oldMessages.addAll(messages);
+            for (Message oldMessage : oldMessages) {
                 boolean removed = true;
-                for (Conversation newConversation : newConversations) {
-                    if (oldConversation.getContact()
-                                       .equals(newConversation.getContact())
-                        && oldConversation.getDid()
-                                           .equals(newConversation.getDid()))
+                for (Message newMessage : newMessages) {
+                    if (oldMessage.getContact().equals(newMessage.getContact())
+                        && oldMessage.getDid().equals(newMessage.getDid()))
                     {
                         removed = false;
                         break;
@@ -404,43 +378,42 @@ public class ConversationsRecyclerViewAdapter
                 }
 
                 if (removed) {
-                    // Conversation was removed
-                    int index = conversations.indexOf(oldConversation);
+                    // Message was removed
+                    int index = messages.indexOf(oldMessage);
                     checkedItems.remove(index);
-                    conversations.remove(index);
+                    messages.remove(index);
                     notifyItemRemoved(index);
                 }
             }
 
-            for (int i = 0; i < conversations.size(); i++) {
-                for (Conversation newConversation : newConversations) {
-                    if (conversations.get(i).getContact()
-                                     .equals(newConversation.getContact()) &&
-                        conversations.get(i).getDid()
-                                     .equals(newConversation.getDid()))
+            // Update changed messages in the adapter
+            for (int i = 0; i < messages.size(); i++) {
+                for (Message newMessage : newMessages) {
+                    if (messages.get(i).getContact()
+                                .equals(newMessage.getContact())
+                        && messages.get(i).getDid()
+                                   .equals(newMessage.getDid()))
                     {
-                        if (!conversations.get(i).equals(newConversation) ||
-                            !oldFilterConstraint.equals(filterConstraint))
+                        if (!messages.get(i).equals(newMessage)
+                            || !oldFilterConstraint.equals(filterConstraint))
                         {
-                            // Conversation was changed
-                            conversations.set(i, newConversation);
+                            // Message was changed
+                            messages.set(i, newMessage);
                             notifyItemChanged(i);
                         }
                     }
                 }
             }
 
-            List<Conversation> sortedConversations = new LinkedList<>();
-            sortedConversations.addAll(conversations);
-            Collections.sort(sortedConversations);
-            for (int i = 0; i < sortedConversations.size(); i++) {
-                if (sortedConversations.get(i) == conversations.get(i)) {
+            // Update moved messages in the adapter
+            for (int i = 0; i < messages.size(); i++) {
+                if (messages.get(i) == messages.get(i)) {
                     continue;
                 }
 
                 int index = -1;
-                for (int j = 0; j < conversations.size(); j++) {
-                    if (conversations.get(j) == sortedConversations.get(i)) {
+                for (int j = 0; j < messages.size(); j++) {
+                    if (messages.get(j) == messages.get(i)) {
                         index = j;
                         break;
                     }
@@ -449,28 +422,26 @@ public class ConversationsRecyclerViewAdapter
                 // Conversation was moved
                 checkedItems.add(i, checkedItems.get(index));
                 checkedItems.remove(index + 1);
-                conversations.add(i, conversations.get(index));
-                conversations.remove(index + 1);
+                messages.add(i, messages.get(index));
+                messages.remove(index + 1);
                 notifyItemMoved(index, i);
             }
 
-            if (newConversations != null) {
-                for (int i = 0; i < newConversations.size(); i++) {
-                    if (conversations.size() <= i
-                        || !newConversations.get(i).equals(
-                            conversations.get(i)))
-                    {
-                        // Conversation is new
-                        checkedItems.add(i, false);
-                        conversations.add(i, newConversations.get(i));
-                        notifyItemInserted(i);
-                    }
+            for (int i = 0; i < newMessages.length; i++) {
+                if (messages.size() <= i
+                    || !newMessages[i].equals(
+                    messages.get(i)))
+                {
+                    // Conversation is new
+                    checkedItems.add(i, false);
+                    messages.add(i, newMessages[i]);
+                    notifyItemInserted(i);
                 }
             }
 
             TextView emptyTextView =
                 (TextView) activity.findViewById(R.id.empty_text);
-            if (conversations.size() == 0) {
+            if (messages.size() == 0) {
                 if (filterConstraint.equals("")) {
                     emptyTextView.setText(applicationContext.getString(
                         R.string.conversations_no_messages));

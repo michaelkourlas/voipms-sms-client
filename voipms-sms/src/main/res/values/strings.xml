@@ -68,6 +68,7 @@
     <string name="conversations_message_you">You:</string>
     <string name="conversations_message_sending">Sending…</string>
     <string name="conversations_message_not_sent">Not sent.</string>
+    <string name="conversations_message_draft">Draft</string>
     <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and an SMS-enabled DID using the Settings option in the application\'s main menu. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings.\n\nYou may also wish to enable push notifications. For more information, see Help.</string>
     <string name="conversations_checked_content_description">Checked</string>
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>

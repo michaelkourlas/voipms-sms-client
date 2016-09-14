@@ -85,6 +85,14 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         }
 
         final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
+        Message draftMessage = database.getDraft(preferences.getDid(), contact);
+        if (draftMessage != null) {
+            ViewSwitcher viewSwitcher =
+                (ViewSwitcher) findViewById(R.id.view_switcher);
+            viewSwitcher.setDisplayedChild(1);
+            messageText.setText(draftMessage.getText());
+            messageText.requestFocus();
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             messageText.setOutlineProvider(new ViewOutlineProvider() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -112,6 +120,27 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
                 }
                 else if (viewSwitcher.getDisplayedChild() == 0) {
                     viewSwitcher.setDisplayedChild(1);
+                }
+
+                Message previousDraftMessage = database.getDraft(
+                    preferences.getDid(), contact);
+                String newDraftMessageString = s.toString();
+                if (newDraftMessageString.equals("")) {
+                    if (previousDraftMessage != null) {
+                        database.removeMessage(
+                            previousDraftMessage.getDatabaseId());
+                    }
+                } else {
+                    if (previousDraftMessage != null) {
+                        previousDraftMessage.setText(newDraftMessageString);
+                        database.insertMessage(previousDraftMessage);
+                    } else {
+                        Message newDraftMessage = new Message(
+                            preferences.getDid(), contact,
+                            newDraftMessageString);
+                        newDraftMessage.setDraft(true);
+                        database.insertMessage(newDraftMessage);
+                    }
                 }
             }
         });

@@ -67,7 +67,7 @@ public class Message implements Comparable<Message> {
     /**
      * The text of the message.
      */
-    private final String text;
+    private String text;
     private final long uniqueObjectIdentifier;
     /**
      * Whether or not the message is unread.
@@ -85,6 +85,8 @@ public class Message implements Comparable<Message> {
      * Whether or not the message is currently in the process of being delivered.
      */
     private boolean isDeliveryInProgress;
+
+    private boolean isDraft;
 
     /**
      * Initializes a new instance of the Message class. This constructor is intended for use when creating a Message
@@ -104,7 +106,7 @@ public class Message implements Comparable<Message> {
      *                             true, 0 for false).
      */
     public Message(long databaseId, Long voipId, long date, long type, String did, String contact, String text,
-                   long isUnread, long isDeleted, long isDelivered, long isDeliveryInProgress) {
+                   long isUnread, long isDeleted, long isDelivered, long isDeliveryInProgress, long isDraft) {
         this.databaseId = databaseId;
 
         this.voipId = voipId;
@@ -147,6 +149,11 @@ public class Message implements Comparable<Message> {
             throw new IllegalArgumentException("isDeliveryInProgress must be 0 or 1.");
         }
         this.isDeliveryInProgress = isDeliveryInProgress == 1;
+
+        if (isDraft != 0 && isDraft != 1) {
+            throw new IllegalArgumentException("isDraft must be 0 or 1.");
+        }
+        this.isDraft = isDraft == 1;
 
         this.uniqueObjectIdentifier = uniqueObjectIdentifierCount++;
     }
@@ -198,6 +205,8 @@ public class Message implements Comparable<Message> {
 
         this.isDeliveryInProgress = false;
 
+        this.isDraft = false;
+
         this.uniqueObjectIdentifier = uniqueObjectIdentifierCount++;
     }
 
@@ -237,6 +246,8 @@ public class Message implements Comparable<Message> {
         this.isDelivered = true;
 
         this.isDeliveryInProgress = true;
+
+        this.isDraft = false;
 
         this.uniqueObjectIdentifier = uniqueObjectIdentifierCount++;
     }
@@ -365,10 +376,6 @@ public class Message implements Comparable<Message> {
         return isDeleted;
     }
 
-    public void setDeleted(boolean isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
     public int isDeletedInDatabaseFormat() {
         return isDeleted ? 1 : 0;
     }
@@ -397,6 +404,14 @@ public class Message implements Comparable<Message> {
         return isDeliveryInProgress ? 1 : 0;
     }
 
+    public boolean isDraft() {
+        return isDraft;
+    }
+
+    public int isDraftInDatabaseFormat() {
+        return isDraft ? 1 : 0;
+    }
+
     /**
      * Returns whether or not the message is identical to another object.
      *
@@ -418,7 +433,7 @@ public class Message implements Comparable<Message> {
             return databaseIdEquals && voipIdEquals && date.equals(other.date) && type == other.type &&
                     did.equals(other.did) && contact.equals(other.contact) && text.equals(other.text) &&
                     isUnread == other.isUnread && isDeleted == other.isDeleted && isDelivered == other.isDelivered &&
-                    isDeliveryInProgress == other.isDeliveryInProgress;
+                    isDeliveryInProgress == other.isDeliveryInProgress && isDraft == other.isDraft;
         }
         else {
             return super.equals(o);
@@ -486,11 +501,20 @@ public class Message implements Comparable<Message> {
             jsonObject.put(Database.COLUMN_DELETED, isDeletedInDatabaseFormat());
             jsonObject.put(Database.COLUMN_DELIVERED, isDeliveredInDatabaseFormat());
             jsonObject.put(Database.COLUMN_DELIVERY_IN_PROGRESS, isDeliveryInProgressInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_DRAFT, isDraftInDatabaseFormat());
             return jsonObject;
         } catch (JSONException ex) {
             // This should never happen
             throw new Error();
         }
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setDraft(boolean draft) {
+        this.isDraft = draft;
     }
 
     /**

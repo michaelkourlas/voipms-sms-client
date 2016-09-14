@@ -1,5 +1,6 @@
 ## 0.4.2 ##
 
+* Added support for message drafts
 * Added support for additional sync intervals
 * Phone number of contact always shown in conversation view
 * "Sending" and "Not sent" indicators now visible in conversations view

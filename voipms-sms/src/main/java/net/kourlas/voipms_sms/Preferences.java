@@ -26,6 +26,7 @@ import java.util.Date;
 /**
  * Provides access to the application's preferences.
  */
+@SuppressWarnings("WeakerAccess")
 public class Preferences {
     private static Preferences instance;
 
@@ -34,7 +35,8 @@ public class Preferences {
 
     private Preferences(Context applicationContext) {
         this.applicationContext = applicationContext;
-        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext);
+        this.sharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(applicationContext);
     }
 
     public static Preferences getInstance(Context applicationContext) {
@@ -45,66 +47,82 @@ public class Preferences {
     }
 
     public String getEmail() {
-        return sharedPreferences.getString(applicationContext.getString(R.string.preferences_account_email_key), "");
+        return sharedPreferences.getString(applicationContext.getString(
+            R.string.preferences_account_email_key), "");
     }
 
     public String getPassword() {
-        return sharedPreferences.getString(applicationContext.getString(R.string.preferences_account_password_key), "");
+        return sharedPreferences.getString(applicationContext.getString(
+            R.string.preferences_account_password_key), "");
     }
 
     public String getDid() {
-        return sharedPreferences.getString(applicationContext.getString(R.string.preferences_account_did_key), "");
+        return sharedPreferences.getString(
+            applicationContext.getString(R.string.preferences_account_did_key),
+            "");
     }
 
     public void setDid(String did) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(applicationContext.getString(R.string.preferences_account_did_key), did);
+        editor.putString(
+            applicationContext.getString(R.string.preferences_account_did_key),
+            did);
         editor.apply();
     }
 
     public Date getStartDate() {
-        long milliseconds = sharedPreferences.getLong(applicationContext.getString(
+        long milliseconds =
+            sharedPreferences.getLong(applicationContext.getString(
                 R.string.preferences_sync_start_date_key), Long.MIN_VALUE);
-        return milliseconds != Long.MIN_VALUE ? new Date(milliseconds) : new Date();
+        return milliseconds != Long.MIN_VALUE ? new Date(milliseconds) :
+               new Date();
     }
 
     public void setStartDate(Date date) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putLong(applicationContext.getString(R.string.preferences_sync_start_date_key), date.getTime());
+        editor.putLong(applicationContext
+                           .getString(R.string.preferences_sync_start_date_key),
+                       date.getTime());
         editor.apply();
     }
 
     public double getSyncInterval() {
-        return Double.parseDouble(sharedPreferences.getString(applicationContext.getString(
+        return Double.parseDouble(
+            sharedPreferences.getString(applicationContext.getString(
                 R.string.preferences_sync_interval_key), "0"));
     }
 
     public long getLastCompleteSyncTime() {
         return sharedPreferences.getLong(applicationContext.getString(
-                R.string.preferences_sync_last_complete_time_key), 0);
+            R.string.preferences_sync_last_complete_time_key), 0);
     }
 
     public void setLastCompleteSyncTime(long lastCompleteSyncTime) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putLong(applicationContext.getString(R.string.preferences_sync_last_complete_time_key),
-                lastCompleteSyncTime);
+        editor.putLong(applicationContext.getString(
+            R.string.preferences_sync_last_complete_time_key),
+                       lastCompleteSyncTime);
         editor.apply();
     }
 
     public boolean getRetrieveOnlyRecentMessages() {
-        return sharedPreferences.getBoolean(applicationContext.getString(R.string.preferences_sync_retrieve_only_recent_messages_key), true);
+        return sharedPreferences.getBoolean(applicationContext.getString(
+            R.string.preferences_sync_retrieve_only_recent_messages_key), true);
     }
 
     public boolean getRetrieveDeletedMessages() {
-        return sharedPreferences.getBoolean(applicationContext.getString(R.string.preferences_sync_retrieve_deleted_messages_key), false);
+        return sharedPreferences.getBoolean(applicationContext.getString(
+            R.string.preferences_sync_retrieve_deleted_messages_key), false);
     }
 
     public boolean getPropagateLocalDeletions() {
-        return sharedPreferences.getBoolean(applicationContext.getString(R.string.preferences_sync_propagate_local_deletions_key), true);
+        return sharedPreferences.getBoolean(applicationContext.getString(
+            R.string.preferences_sync_propagate_local_deletions_key), true);
     }
 
     public boolean getPropagateRemoteDeletions() {
-        return sharedPreferences.getBoolean(applicationContext.getString(R.string.preferences_sync_propagate_remote_deletions_key), false);
+        return sharedPreferences.getBoolean(applicationContext.getString(
+            R.string.preferences_sync_propagate_remote_deletions_key), false);
     }
 
     public boolean getNotificationsEnabled() {
@@ -116,37 +134,45 @@ public class Preferences {
 
     public boolean getPushNotificationsEnabled() {
         return sharedPreferences.getBoolean(applicationContext.getString(
-                R.string.preferences_notifications_push_enable_key), false);
+            R.string.preferences_notifications_push_enable_key), false);
     }
 
     public String getGcmInstanceId() {
-        return sharedPreferences.getString(applicationContext.getString(R.string.preferences_gcm_instance_id_key), "");
+        return sharedPreferences.getString(applicationContext.getString(
+            R.string.preferences_gcm_instance_id_key), "");
     }
 
     public void setGcmInstanceId(String instanceId) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(applicationContext.getString(R.string.preferences_gcm_instance_id_key), instanceId);
+        editor.putString(applicationContext.getString(
+            R.string.preferences_gcm_instance_id_key), instanceId);
         editor.apply();
     }
 
     public String getGcmToken() {
-        return sharedPreferences.getString(applicationContext.getString(R.string.preferences_gcm_token_key), "");
+        return sharedPreferences.getString(
+            applicationContext.getString(R.string.preferences_gcm_token_key),
+            "");
     }
 
     public void setGcmToken(String gcmToken) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(applicationContext.getString(R.string.preferences_gcm_token_key), gcmToken);
+        editor.putString(
+            applicationContext.getString(R.string.preferences_gcm_token_key),
+            gcmToken);
         editor.apply();
     }
 
     public String getNotificationSound() {
-        return sharedPreferences.getString(applicationContext.getString(R.string.preferences_notifications_sound_key),
-                applicationContext.getResources().getString(
-                        R.string.preferences_notifications_sound_default_value));
+        return sharedPreferences.getString(applicationContext.getString(
+            R.string.preferences_notifications_sound_key),
+                                           applicationContext.getResources()
+                                                             .getString(
+                                                                 R.string.preferences_notifications_sound_default_value));
     }
 
     public boolean getNotificationVibrateEnabled() {
         return sharedPreferences.getBoolean(applicationContext.getString(
-                R.string.preferences_notifications_vibrate_key), true);
+            R.string.preferences_notifications_vibrate_key), true);
     }
 }

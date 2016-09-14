@@ -101,7 +101,8 @@ public class EditDatabaseActivity extends AppCompatActivity {
                                     messageJsonObject.getLong(Database.COLUMN_UNREAD),
                                     messageJsonObject.getLong(Database.COLUMN_DELETED),
                                     messageJsonObject.getLong(Database.COLUMN_DELIVERED),
-                                    messageJsonObject.getLong(Database.COLUMN_DELIVERY_IN_PROGRESS));
+                                    messageJsonObject.getLong(Database.COLUMN_DELIVERY_IN_PROGRESS),
+                                    messageJsonObject.getLong(Database.COLUMN_DRAFT));
                             messages.add(message);
                         }
                     } catch (Exception ex) {

@@ -147,6 +147,14 @@ public class ConversationActivity
         // Set up message text box
         final EditText messageText =
             (EditText) findViewById(R.id.message_edit_text);
+        Message draftMessage = database.getDraft(preferences.getDid(), contact);
+        if (draftMessage != null) {
+            ViewSwitcher viewSwitcher =
+                (ViewSwitcher) findViewById(R.id.view_switcher);
+            viewSwitcher.setDisplayedChild(1);
+            messageText.setText(draftMessage.getText());
+            messageText.requestFocus();
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             messageText.setOutlineProvider(new ViewOutlineProvider() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -183,6 +191,27 @@ public class ConversationActivity
                     viewSwitcher.setDisplayedChild(0);
                 } else if (viewSwitcher.getDisplayedChild() == 0) {
                     viewSwitcher.setDisplayedChild(1);
+                }
+
+                Message previousDraftMessage = database.getDraft(
+                    preferences.getDid(), contact);
+                String newDraftMessageString = s.toString();
+                if (newDraftMessageString.equals("")) {
+                    if (previousDraftMessage != null) {
+                        database.removeMessage(
+                            previousDraftMessage.getDatabaseId());
+                    }
+                } else {
+                    if (previousDraftMessage != null) {
+                        previousDraftMessage.setText(newDraftMessageString);
+                        database.insertMessage(previousDraftMessage);
+                    } else {
+                        Message newDraftMessage = new Message(
+                            preferences.getDid(), contact,
+                            newDraftMessageString);
+                        newDraftMessage.setDraft(true);
+                        database.insertMessage(newDraftMessage);
+                    }
                 }
             }
         });
@@ -509,7 +538,7 @@ public class ConversationActivity
             ClipboardManager clipboard =
                 (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             ClipData clip =
-                ClipData.newPlainText("Text message", message.getText().trim());
+                ClipData.newPlainText("Text message", message.getText());
             clipboard.setPrimaryClip(clip);
         }
 
@@ -535,7 +564,7 @@ public class ConversationActivity
             Intent intent = new Intent(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(android.content.Intent.EXTRA_TEXT,
-                            message.getText().trim());
+                            message.getText());
             startActivity(Intent.createChooser(intent, null));
         }
 

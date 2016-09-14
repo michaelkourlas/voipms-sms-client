@@ -40,7 +40,6 @@ import android.view.View;
 import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.adapters.ConversationsRecyclerViewAdapter;
 import net.kourlas.voipms_sms.notifications.PushNotifications;
-import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
 import org.json.JSONObject;
@@ -322,13 +321,17 @@ public class ConversationsActivity
             case R.id.mark_read_unread_button:
                 for (int i = 0; i < adapter.getItemCount(); i++) {
                     if (adapter.isItemChecked(i)) {
-                        Message[] smses = adapter.getItem(i).getMessages();
-                        for (Message message : smses) {
-                            message.setUnread(
-                                item.getTitle().equals(getResources().getString(
-                                    R.string
-                                        .conversations_action_mark_unread)));
-                            database.insertMessage(message);
+                        Message message = adapter.getItem(i);
+                        if (item.getTitle().equals(getResources().getString(
+                            R.string.conversations_action_mark_unread)))
+                        {
+                            database.markConversationAsUnread(
+                                preferences.getDid(),
+                                message.getContact());
+                        } else {
+                            database.markConversationAsRead(
+                                preferences.getDid(),
+                                message.getContact());
                         }
                     }
                 }
@@ -395,9 +398,9 @@ public class ConversationsActivity
         if (actionModeEnabled) {
             toggleItem(view);
         } else {
-            Conversation conversation =
+            Message message =
                 adapter.getItem(recyclerView.getChildAdapterPosition(view));
-            String contact = conversation.getContact();
+            String contact = message.getContact();
 
             Intent intent = new Intent(this, ConversationActivity.class);
             intent.putExtra(getString(R.string.conversation_extra_contact),
