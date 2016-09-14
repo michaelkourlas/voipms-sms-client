@@ -64,6 +64,7 @@ public class ConversationRecyclerViewAdapter
     private final List<Message> messages;
     private final List<Boolean> checkedItems;
     private final Preferences preferences;
+    private final Database database;
 
     private String filterConstraint;
     private String oldFilterConstraint;
@@ -76,6 +77,7 @@ public class ConversationRecyclerViewAdapter
         this.applicationContext = activity.getApplicationContext();
         this.layoutManager = layoutManager;
         this.preferences = Preferences.getInstance(applicationContext);
+        this.database = Database.getInstance(applicationContext);
 
         this.contact = contact;
         this.messages = new ArrayList<>();
@@ -384,36 +386,24 @@ public class ConversationRecyclerViewAdapter
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults results = new FilterResults();
-            List<Message> messageResults = new ArrayList<>();
 
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
 
-            Message[] smses =
-                Database.getInstance(activity.getApplicationContext())
-                        .getConversation(
-                            preferences.getDid(), contact).getMessages();
-            for (Message message : smses) {
-                if (message.getText().toLowerCase()
-                           .contains(filterConstraint.toLowerCase()))
-                {
-                    messageResults.add(message);
-                }
-            }
-            Collections.reverse(messageResults);
+            Message[] messages = database.conversationFilter(
+                preferences.getDid(), contact, filterConstraint);
 
-            results.count = messageResults.size();
-            results.values = messageResults;
+            results.count = messages.length;
+            results.values = messages;
 
             return results;
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         protected void publishResults(CharSequence constraint,
                                       FilterResults results)
         {
-            List<Message> newMessages = (List<Message>) results.values;
+            Message[] newMessages = (Message[]) results.values;
 
             List<Message> oldMessages = new LinkedList<>();
             oldMessages.addAll(messages);
@@ -483,13 +473,13 @@ public class ConversationRecyclerViewAdapter
             }
 
             if (newMessages != null) {
-                for (int i = 0; i < newMessages.size(); i++) {
-                    if (messages.size() <= i || !newMessages.get(i).equals(
+                for (int i = 0; i < newMessages.length; i++) {
+                    if (messages.size() <= i || !newMessages[i].equals(
                         messages.get(i)))
                     {
                         // Message is new
                         checkedItems.add(i, false);
-                        messages.add(i, newMessages.get(i));
+                        messages.add(i, newMessages[i]);
                         notifyItemInserted(i);
                     }
                 }

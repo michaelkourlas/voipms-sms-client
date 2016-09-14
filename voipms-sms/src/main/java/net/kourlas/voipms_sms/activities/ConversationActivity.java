@@ -737,7 +737,7 @@ public class ConversationActivity
         } else {
             // Otherwise, mark the message as failed to deliver and refresh
             // the adapter
-            database.markMessageAsFailedToDeliver(databaseId);
+            database.markMessageAsFailedToSend(databaseId);
             adapter.refresh();
         }
 

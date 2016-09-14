@@ -178,6 +178,30 @@ public class Database {
         return messages;
     }
 
+    public synchronized Message[] conversationFilter(
+        String did,
+        String contact,
+        String filterString)
+    {
+        filterString = "%" + filterString + "%";
+        String[] params = new String[] {
+            filterString,
+            filterString,
+        };
+
+        Cursor cursor = database.query(
+            TABLE_MESSAGE,
+            columns,
+            "(" + COLUMN_CONTACT + " LIKE ?" + " OR " + COLUMN_MESSAGE
+            + " LIKE ?) AND " + COLUMN_DID  + " = " + did + " AND"
+            + " " + COLUMN_CONTACT + " = " + contact,
+            params, null, null,
+            COLUMN_DATE + " ASC");
+        Message[] messages = getMessagesFromCursor(cursor);
+        cursor.close();
+        return messages;
+    }
+
     public synchronized void markMessageAsSending(long databaseId) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_DELIVERED, "0");
@@ -188,7 +212,7 @@ public class Database {
                         null);
     }
 
-    public synchronized void markMessageAsFailedToDeliver(long databaseId) {
+    public synchronized void markMessageAsFailedToSend(long databaseId) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_DELIVERED, "0");
         contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "0");
