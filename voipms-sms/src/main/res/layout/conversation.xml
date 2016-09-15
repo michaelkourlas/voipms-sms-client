@@ -115,23 +115,37 @@
                             android:src="@drawable/ic_send_white_18dp" />
                     </ViewSwitcher>
 
-                    <EditText
-                        android:id="@+id/message_edit_text"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:orientation="vertical"
                         android:layout_gravity="center_vertical"
                         android:layout_toEndOf="@id/progress_bar"
                         android:layout_toLeftOf="@id/view_switcher"
                         android:layout_toRightOf="@id/progress_bar"
-                        android:layout_toStartOf="@id/view_switcher"
-                        android:background="@android:color/white"
-                        android:gravity="start"
-                        android:hint="@string/conversation_text_hint"
-                        android:inputType="textMultiLine|textCapSentences|textAutoCorrect"
-                        android:isScrollContainer="true"
-                        android:maxLines="4"
-                        android:padding="10dp"
-                        android:textSize="16sp" />
+                        android:layout_toStartOf="@id/view_switcher">
+
+                        <EditText
+                            android:id="@+id/message_edit_text"
+                            android:padding="10dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@android:color/white"
+                            android:gravity="start"
+                            android:hint="@string/conversation_text_hint"
+                            android:inputType="textMultiLine|textCapSentences|textAutoCorrect"
+                            android:isScrollContainer="true"
+                            android:maxLines="4"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/chars_remaining_text"
+                            android:layout_width="match_parent"
+                            android:gravity="end"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:visibility="gone"/>
+                    </LinearLayout>
                 </RelativeLayout>
             </LinearLayout>
         </FrameLayout>

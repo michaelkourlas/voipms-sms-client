@@ -88,35 +88,24 @@ public class Notifications {
             return;
         }
 
-        List<String> completedContacts = new ArrayList<>();
-        Map<String, String> shortTexts = new HashMap<>();
-        Map<String, String> longTexts = new HashMap<>();
-        Message[] messages = database.getUnreadMessages(preferences.getDid(),
-                                                        contacts);
-        for (Message message : messages) {
-            String contact = message.getContact();
+        for (String contact : contacts) {
             Activity currentActivity = ActivityMonitor.getInstance()
                                                       .getCurrentActivity();
-            if (!contacts.contains(contact)
-                || completedContacts.contains(contact)
-                || (currentActivity instanceof ConversationActivity
-                    && ((ConversationActivity) currentActivity).getContact()
-                                                               .equals(
-                                                                   contact)))
+            // Do not show notifications for a contact when that contact's
+            // conversation view is open
+            if (currentActivity instanceof ConversationActivity
+                && ((ConversationActivity) currentActivity).getContact()
+                                                           .equals(
+                                                               contact))
             {
                 continue;
             }
 
-            if (message.getType() == Message.Type.OUTGOING) {
-                if (shortTexts.get(contact) != null)
-                {
-                    showNotification(contact, shortTexts.get(contact),
-                                     longTexts.get(contact));
-                    shortTexts.remove(contact);
-                    longTexts.remove(contact);
-                    completedContacts.add(contact);
-                }
-            } else {
+            Map<String, String> shortTexts = new HashMap<>();
+            Map<String, String> longTexts = new HashMap<>();
+            Message[] messages = database.getUnreadMessages(
+                preferences.getDid(), contact);
+            for (Message message : messages) {
                 if (shortTexts.get(contact) != null) {
                     longTexts.put(contact, message.getText() + "\n"
                                            + longTexts.get(contact));
@@ -125,10 +114,10 @@ public class Notifications {
                     longTexts.put(contact, message.getText());
                 }
             }
-        }
-        for (Map.Entry<String, String> entry : shortTexts.entrySet()) {
-            showNotification(entry.getKey(), entry.getValue(),
-                             longTexts.get(entry.getKey()));
+            for (Map.Entry<String, String> entry : shortTexts.entrySet()) {
+                showNotification(entry.getKey(), entry.getValue(),
+                                 longTexts.get(entry.getKey()));
+            }
         }
     }
 

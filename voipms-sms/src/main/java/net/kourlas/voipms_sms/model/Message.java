@@ -174,6 +174,11 @@ public class Message implements Comparable<Message> {
             throw new IllegalArgumentException("isDraft must be 0 or 1.");
         }
         this.isDraft = isDraft == 1;
+
+        // Remove trailing newline found in messages retrieved from VoIP.ms
+        if (this.type == Type.INCOMING && text.endsWith("\n")) {
+            this.text = text.substring(0, text.length() - 1);
+        }
     }
 
     /**
@@ -385,7 +390,8 @@ public class Message implements Comparable<Message> {
      * @return Whether or not the message is unread.
      */
     public boolean isUnread() {
-        return isUnread;
+        // Outgoing messages must be read
+        return isUnread && type == Type.INCOMING;
     }
 
     /**
@@ -403,7 +409,8 @@ public class Message implements Comparable<Message> {
      * @return Whether or not the message is unread in database format.
      */
     public int isUnreadInDatabaseFormat() {
-        return isUnread ? 1 : 0;
+        // Outgoing messages must be read
+        return isUnread && type == Type.INCOMING ? 1 : 0;
     }
 
     /**
@@ -533,7 +540,7 @@ public class Message implements Comparable<Message> {
                    && did.equals(other.did)
                    && contact.equals(other.contact)
                    && text.equals(other.text)
-                   && isUnread == other.isUnread
+                   && isUnread() == other.isUnread()
                    && isDeleted == other.isDeleted
                    && isDelivered == other.isDelivered
                    && isDeliveryInProgress == other.isDeliveryInProgress
@@ -595,20 +602,6 @@ public class Message implements Comparable<Message> {
             }
         }
 
-        int contactCompare = this.contact.compareTo(another.contact);
-        if (contactCompare > 0) {
-            return 1;
-        } else if (contactCompare < 0) {
-            return -1;
-        }
-
-        int textCompare = this.text.compareTo(another.text);
-        if (textCompare > 0) {
-            return 1;
-        } else if (textCompare < 0) {
-            return -1;
-        }
-
         if (this.databaseId != null && another.databaseId != null) {
             if (this.databaseId > another.databaseId) {
                 return 1;
@@ -663,12 +656,12 @@ public class Message implements Comparable<Message> {
      */
     public enum Type {
         /**
+         * Represents an outgoing message (a message coming from the DID).
+         */
+        OUTGOING,
+        /**
          * Represents an incoming message (a message addressed to the DID).
          */
         INCOMING,
-        /**
-         * Represents an outgoing message (a message coming from the DID).
-         */
-        OUTGOING
     }
 }

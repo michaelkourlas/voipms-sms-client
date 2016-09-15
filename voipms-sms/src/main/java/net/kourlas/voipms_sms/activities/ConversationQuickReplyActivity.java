@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,14 +84,6 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         }
 
         final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        Message draftMessage = database.getDraftMessageForConversation(preferences.getDid(), contact);
-        if (draftMessage != null) {
-            ViewSwitcher viewSwitcher =
-                (ViewSwitcher) findViewById(R.id.view_switcher);
-            viewSwitcher.setDisplayedChild(1);
-            messageText.setText(draftMessage.getText());
-            messageText.requestFocus();
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             messageText.setOutlineProvider(new ViewOutlineProvider() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -113,34 +105,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.view_switcher);
-                if (s.toString().equals("") && viewSwitcher.getDisplayedChild() == 1) {
-                    viewSwitcher.setDisplayedChild(0);
-                }
-                else if (viewSwitcher.getDisplayedChild() == 0) {
-                    viewSwitcher.setDisplayedChild(1);
-                }
-
-                Message previousDraftMessage = database.getDraftMessageForConversation(
-                    preferences.getDid(), contact);
-                String newDraftMessageString = s.toString();
-                if (newDraftMessageString.equals("")) {
-                    if (previousDraftMessage != null) {
-                        database.removeMessage(
-                            previousDraftMessage.getDatabaseId());
-                    }
-                } else {
-                    if (previousDraftMessage != null) {
-                        previousDraftMessage.setText(newDraftMessageString);
-                        database.insertMessage(previousDraftMessage);
-                    } else {
-                        Message newDraftMessage = new Message(
-                            preferences.getDid(), contact,
-                            newDraftMessageString);
-                        newDraftMessage.setDraft(true);
-                        database.insertMessage(newDraftMessage);
-                    }
-                }
+                onMessageTextChange(s.toString());
             }
         });
 
@@ -160,26 +125,18 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
 
         final ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
         Utils.applyCircularMask(sendButton);
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                preSendMessage();
-            }
-        });
+        sendButton.setOnClickListener(v -> preSendMessage());
 
         Button openAppButton = (Button) findViewById(R.id.open_app_button);
-        openAppButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
+        openAppButton.setOnClickListener(v -> {
+            finish();
 
-                Intent intent = new Intent(activity, ConversationActivity.class);
-                intent.putExtra(getString(R.string.conversation_extra_contact), contact);
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-                stackBuilder.addParentStack(ConversationActivity.class);
-                stackBuilder.addNextIntent(intent);
-                stackBuilder.startActivities();
-            }
+            Intent intent = new Intent(activity, ConversationActivity.class);
+            intent.putExtra(getString(R.string.conversation_extra_contact), contact);
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+            stackBuilder.addParentStack(ConversationActivity.class);
+            stackBuilder.addNextIntent(intent);
+            stackBuilder.startActivities();
         });
         messageText.requestFocus();
     }
@@ -188,6 +145,14 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         ActivityMonitor.getInstance().setCurrentActivity(this);
+
+        final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
+        Message draftMessage = database.getDraftMessageForConversation(preferences.getDid(), contact);
+        if (draftMessage != null) {
+            messageText.setText(draftMessage.getText());
+            messageText.requestFocus();
+            messageText.setSelection(messageText.getText().length());
+        }
     }
 
     @Override
@@ -242,15 +207,74 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
     }
 
     public void postSendMessage(boolean success, long databaseId) {
+        database.markConversationAsRead(preferences.getDid(), contact);
         if (success) {
             database.removeMessage(databaseId);
             database.synchronize(true, false, null);
         }
         else {
-            Message message = database.getMessageWithDatabaseId(databaseId);
-            message.setDelivered(false);
-            message.setDeliveryInProgress(false);
-            database.insertMessage(message);
+            database.markMessageAsFailedToSend(databaseId);
+        }
+    }
+
+    /**
+     * Called when the message text box text changes.
+     *
+     * @param str The new text.
+     */
+    private void onMessageTextChange(String str) {
+        ViewSwitcher viewSwitcher =
+            (ViewSwitcher) findViewById(R.id.view_switcher);
+        if (str.equals("")
+            && viewSwitcher.getDisplayedChild() == 1)
+        {
+            viewSwitcher.setDisplayedChild(0);
+        } else if (viewSwitcher.getDisplayedChild() == 0) {
+            viewSwitcher.setDisplayedChild(1);
+        }
+
+        Message previousDraftMessage =
+            database.getDraftMessageForConversation(
+                preferences.getDid(), contact);
+        if (str.equals("")) {
+            if (previousDraftMessage != null) {
+                database.removeMessage(
+                    previousDraftMessage.getDatabaseId());
+            }
+        } else {
+            if (previousDraftMessage != null) {
+                previousDraftMessage.setText(str);
+                database.insertMessage(previousDraftMessage);
+            } else {
+                Message newDraftMessage = new Message(
+                    preferences.getDid(), contact,
+                    str);
+                newDraftMessage.setDraft(true);
+                database.insertMessage(newDraftMessage);
+            }
+        }
+
+        TextView charsRemainingTextView = (TextView)
+            findViewById(R.id.chars_remaining_text);
+        if (str.length() >= 150 && str.length() <= 160) {
+            charsRemainingTextView.setVisibility(View.VISIBLE);
+            charsRemainingTextView.setText(String.valueOf(160 - str.length()));
+        } else if (str.length() > 160) {
+            charsRemainingTextView.setVisibility(View.VISIBLE);
+            int charsRemaining;
+            if (str.length() % 153 == 0) {
+                charsRemaining = 0;
+            } else {
+                charsRemaining = 153 - (str.length() % 153);
+            }
+            charsRemainingTextView.setText(
+                getString(
+                    R.string.conversation_char_rem,
+                    String.valueOf(charsRemaining),
+                    String.valueOf((int) Math.ceil(str.length() / 153d))));
+        } else {
+            charsRemainingTextView.setVisibility(View.GONE);
+
         }
     }
 }

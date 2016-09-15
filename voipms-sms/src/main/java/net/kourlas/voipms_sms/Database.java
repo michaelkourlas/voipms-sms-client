@@ -329,50 +329,58 @@ public class Database {
     }
 
     /**
-     * Gets all unread messages that are not deleted or drafts for the
-     * specified conversations. The returned list is sorted.
+     * Gets all non-deleted, non-draft unread messages that chronologically
+     * follow the most recent outgoing message. The resulting array is sorted
+     * by date, from most recent to least recent.
      *
-     * @param did      The DID.
-     * @param contacts The specified contacts.
-     * @return All unread messages that are not deleted or drafts for the
-     * specified conversation.
+     * @param did     The currently selected DID.
+     * @param contact The contact associated with the conversation.
+     * @return All non-deleted, non-draft unread messages that chronologically
+     *         follow the most recent outgoing message. The resulting array is
+     *         sorted by date, from most recent to least recent.
      */
-    public synchronized Message[] getUnreadMessages(String did,
-                                                    List<String> contacts)
+    public synchronized Message[] getUnreadMessages(String did, String contact)
     {
-        // Limit query to specified contacts
-        String contactsQuery = " AND (";
-        if (contacts.size() >= 1) {
-            contactsQuery += COLUMN_CONTACT + "=" + contacts.get(0);
-        }
-        for (int i = 1; i < contacts.size(); i++) {
-            contactsQuery += " OR " + COLUMN_CONTACT + "=" + contacts.get(i);
-        }
-        contactsQuery += ")";
-        if (contactsQuery.equals(" AND ()")) {
-            contactsQuery = "";
-        }
-
+        // Retrieve the most recent outgoing message
         Cursor cursor = database.query(
             TABLE_MESSAGE,
+            new String[] {
+                "COALESCE(MAX(" + COLUMN_DATE + "), 0) AS " + COLUMN_DATE,
+            },
+            COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED + "=0 AND "
+            + COLUMN_DRAFT + "=0 AND " + COLUMN_TYPE + "=0 AND "
+            + COLUMN_CONTACT + "=" + contact,
+            null, null, null, null);
+        cursor.moveToFirst();
+        long date = 0;
+        if (!cursor.isAfterLast()) {
+            date = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE));
+        }
+        cursor.close();
+
+        // Retrieve all non-deleted, non-draft unread messages with a date
+        // equal to or after the most recent outgoing message
+        cursor = database.query(
+            TABLE_MESSAGE,
             columns,
-            COLUMN_DID + "=" + did + " AND " + COLUMN_UNREAD + "=1 AND "
-            + COLUMN_DELETED + "=0 AND " + COLUMN_DRAFT + "=0" + contactsQuery,
+            COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED + "=0" + " AND "
+            + COLUMN_DRAFT + "=0 AND " + COLUMN_TYPE + "=1 AND "
+            + COLUMN_DATE + ">=" + date + " AND " + COLUMN_CONTACT + "="
+            + contact + " AND " + COLUMN_UNREAD + "=1",
             null, null, null,
             COLUMN_DATE + " DESC");
         List<Message> messages = getMessageListFromCursor(cursor);
-        cursor.close();
 
         Collections.sort(messages);
         return messages.toArray(new Message[messages.size()]);
     }
 
     /**
-     * Gets all of the messages in the database. The returned list is sorted
-     * by database ID.
+     * Gets all of the messages in the database. The resulting array is sorted
+     * by database ID in descending order.
      *
-     * @return All of the messages in the database. The returned list is sorted
-     * by database ID.
+     * @return All of the messages in the database. The resulting array is
+     * sorted by database ID in descending order.
      */
     public synchronized Message[] getAllMessages() {
         Cursor cursor = database.query(TABLE_MESSAGE, columns, null, null,
@@ -433,7 +441,8 @@ public class Database {
     }
 
     /**
-     * Marks the specified conversation as unread.
+     * Marks the specified conversation as unread. Note that only incoming
+     * messages are marked as unread.
      *
      * @param did     The DID associated with the specified conversation.
      * @param contact The contact associated with the specified conversation.
@@ -446,7 +455,7 @@ public class Database {
         database.update(TABLE_MESSAGE,
                         contentValues,
                         COLUMN_CONTACT + "=" + contact + " AND "
-                        + COLUMN_DID + "=" + did,
+                        + COLUMN_DID + "=" + did + " AND " + COLUMN_TYPE + "=1",
                         null);
     }
 
@@ -882,7 +891,7 @@ public class Database {
                 cursor.getString(cursor.getColumnIndexOrThrow(
                     COLUMN_CONTACT)),
                 cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_MESSAGE)).trim(),
+                    COLUMN_MESSAGE)),
                 cursor.getLong(cursor.getColumnIndexOrThrow(
                     COLUMN_UNREAD)),
                 cursor.getLong(cursor.getColumnIndexOrThrow(

@@ -46,6 +46,7 @@
     <string name="conversation_extra_message_text" translatable="false">messageText</string>
     <string name="conversation_extra_focus" translatable="false">focus</string>
     <string name="conversation_perm_denied_call">Phone permission required to make calls</string>
+    <string name="conversation_char_rem">%1$s / %2$s</string>
 
     <!-- ConversationQuickReplyActivity -->
     <string name="conversation_quick_reply_reply_to">Reply to</string>

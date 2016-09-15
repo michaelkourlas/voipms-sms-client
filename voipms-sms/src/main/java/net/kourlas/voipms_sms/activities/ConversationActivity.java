@@ -147,15 +147,6 @@ public class ConversationActivity
         // Set up message text box
         final EditText messageText =
             (EditText) findViewById(R.id.message_edit_text);
-        Message draftMessage = database.getDraftMessageForConversation(
-            preferences.getDid(), contact);
-        if (draftMessage != null) {
-            ViewSwitcher viewSwitcher =
-                (ViewSwitcher) findViewById(R.id.view_switcher);
-            viewSwitcher.setDisplayedChild(1);
-            messageText.setText(draftMessage.getText());
-            messageText.requestFocus();
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             messageText.setOutlineProvider(new ViewOutlineProvider() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -184,37 +175,7 @@ public class ConversationActivity
 
             @Override
             public void afterTextChanged(Editable s) {
-                ViewSwitcher viewSwitcher =
-                    (ViewSwitcher) findViewById(R.id.view_switcher);
-                if (s.toString().equals("")
-                    && viewSwitcher.getDisplayedChild() == 1)
-                {
-                    viewSwitcher.setDisplayedChild(0);
-                } else if (viewSwitcher.getDisplayedChild() == 0) {
-                    viewSwitcher.setDisplayedChild(1);
-                }
-
-                Message previousDraftMessage =
-                    database.getDraftMessageForConversation(
-                        preferences.getDid(), contact);
-                String newDraftMessageString = s.toString();
-                if (newDraftMessageString.equals("")) {
-                    if (previousDraftMessage != null) {
-                        database.removeMessage(
-                            previousDraftMessage.getDatabaseId());
-                    }
-                } else {
-                    if (previousDraftMessage != null) {
-                        previousDraftMessage.setText(newDraftMessageString);
-                        database.insertMessage(previousDraftMessage);
-                    } else {
-                        Message newDraftMessage = new Message(
-                            preferences.getDid(), contact,
-                            newDraftMessageString);
-                        newDraftMessage.setDraft(true);
-                        database.insertMessage(newDraftMessage);
-                    }
-                }
+                onMessageTextChange(s.toString());
             }
         });
         messageText.setOnFocusChangeListener((v, hasFocus) -> {
@@ -226,6 +187,7 @@ public class ConversationActivity
             getString(R.string.conversation_extra_message_text));
         if (intentMessageText != null) {
             messageText.setText(intentMessageText);
+            messageText.setSelection(messageText.getText().length());
         }
         boolean intentFocus = getIntent().getBooleanExtra(
             getString(R.string.conversation_extra_focus), false);
@@ -256,6 +218,16 @@ public class ConversationActivity
     protected void onResume() {
         super.onResume();
         ActivityMonitor.getInstance().setCurrentActivity(this);
+
+        final EditText messageText =
+            (EditText) findViewById(R.id.message_edit_text);
+        Message draftMessage = database.getDraftMessageForConversation(
+            preferences.getDid(), contact);
+        if (draftMessage != null) {
+            messageText.setText(draftMessage.getText());
+            messageText.requestFocus();
+            messageText.setSelection(messageText.getText().length());
+        }
 
         // Remove any open notifications related to this conversation
         Integer id = Notifications.getInstance(getApplicationContext())
@@ -696,28 +668,38 @@ public class ConversationActivity
         EditText messageEditText =
             (EditText) findViewById(R.id.message_edit_text);
         String messageText = messageEditText.getText().toString();
-        // Split up the message to be sent into 160-character chunks and add
-        // them to the database
-        while (true) {
-            if (messageText.length() > 160) {
-                long databaseId =
-                    database.insertMessage(new Message(preferences.getDid(),
-                                                       contact,
-                                                       messageText.substring(
-                                                           0, 160)));
-                messageText = messageText.substring(160);
-                adapter.refresh();
-                preSendMessage(databaseId);
-            } else {
-                long databaseId =
-                    database.insertMessage(new Message(
-                        preferences.getDid(),
-                        contact,
-                        messageText));
-                adapter.refresh();
-                preSendMessage(databaseId);
-                break;
+        // Split up the message to be sent into 153-character chunks
+        // (if character count greater than 160) and add them to the database
+        if (messageText.length() > 160) {
+            while (true) {
+                if (messageText.length() > 153) {
+                    long databaseId =
+                        database.insertMessage(new Message(
+                            preferences.getDid(),
+                            contact,
+                            messageText.substring(0, 153)));
+                    messageText = messageText.substring(153);
+                    adapter.refresh();
+                    preSendMessage(databaseId);
+                } else {
+                    long databaseId =
+                        database.insertMessage(new Message(
+                            preferences.getDid(),
+                            contact,
+                            messageText));
+                    adapter.refresh();
+                    preSendMessage(databaseId);
+                    break;
+                }
             }
+        } else {
+            long databaseId =
+                database.insertMessage(new Message(
+                    preferences.getDid(),
+                    contact,
+                    messageText));
+            adapter.refresh();
+            preSendMessage(databaseId);
         }
 
         // Clear the message text box
@@ -737,6 +719,7 @@ public class ConversationActivity
      * Called after this activity sends a message.
      */
     public void postSendMessage(boolean success, long databaseId) {
+        database.markConversationAsRead(preferences.getDid(), contact);
         if (success) {
             // Since the message in our database does not have all of the
             // information we need (the VoIP.ms ID, the precise date of sending)
@@ -754,6 +737,67 @@ public class ConversationActivity
         // Scroll to the bottom of the adapter so that the message is in view
         if (adapter.getItemCount() > 0) {
             layoutManager.scrollToPosition(adapter.getItemCount() - 1);
+        }
+    }
+
+    /**
+     * Called when the message text box text changes.
+     *
+     * @param str The new text.
+     */
+    private void onMessageTextChange(String str) {
+        ViewSwitcher viewSwitcher =
+            (ViewSwitcher) findViewById(R.id.view_switcher);
+        if (str.equals("")
+            && viewSwitcher.getDisplayedChild() == 1)
+        {
+            viewSwitcher.setDisplayedChild(0);
+        } else if (viewSwitcher.getDisplayedChild() == 0) {
+            viewSwitcher.setDisplayedChild(1);
+        }
+
+        Message previousDraftMessage =
+            database.getDraftMessageForConversation(
+                preferences.getDid(), contact);
+        if (str.equals("")) {
+            if (previousDraftMessage != null) {
+                database.removeMessage(
+                    previousDraftMessage.getDatabaseId());
+            }
+        } else {
+            if (previousDraftMessage != null) {
+                previousDraftMessage.setText(str);
+                database.insertMessage(previousDraftMessage);
+            } else {
+                Message newDraftMessage = new Message(
+                    preferences.getDid(), contact,
+                    str);
+                newDraftMessage.setDraft(true);
+                database.insertMessage(newDraftMessage);
+            }
+        }
+
+        TextView charsRemainingTextView = (TextView)
+            findViewById(R.id.chars_remaining_text);
+        if (str.length() >= 150 && str.length() <= 160) {
+            charsRemainingTextView.setVisibility(View.VISIBLE);
+            charsRemainingTextView.setText(String.valueOf(160 - str.length()));
+        } else if (str.length() > 160) {
+            charsRemainingTextView.setVisibility(View.VISIBLE);
+            int charsRemaining;
+            if (str.length() % 153 == 0) {
+                charsRemaining = 0;
+            } else {
+                charsRemaining = 153 - (str.length() % 153);
+            }
+            charsRemainingTextView.setText(
+                getString(
+                    R.string.conversation_char_rem,
+                    String.valueOf(charsRemaining),
+                    String.valueOf((int) Math.ceil(str.length() / 153d))));
+        } else {
+            charsRemainingTextView.setVisibility(View.GONE);
+
         }
     }
 
