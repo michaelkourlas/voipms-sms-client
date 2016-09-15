@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
+import net.kourlas.voipms_sms.activities.ConversationQuickReplyActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
 import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.notifications.Notifications;
@@ -43,8 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Provides access to the application's database, which contains the SMS
- * message cache.
+ * Provides access to the application's database.
  */
 public class Database {
     public static final String COLUMN_DATABASE_ID = "DatabaseId";
@@ -103,6 +103,7 @@ public class Database {
         return instance;
     }
 
+
     /**
      * Adds a message to the database. If a record with the message's database
      * ID or VoIP.ms ID already exists, that record is replaced. Otherwise, a
@@ -114,15 +115,17 @@ public class Database {
     public synchronized long insertMessage(Message message) {
         ContentValues values = new ContentValues();
 
+        // Replace records with database ID or VoIP.ms ID
         if (message.getDatabaseId() != null) {
             values.put(COLUMN_DATABASE_ID, message.getDatabaseId());
         } else if (message.getVoipId() != null) {
-            Long databaseId =
-                getDatabaseIdForVoipId(message.getDid(), message.getVoipId());
+            Long databaseId = getDatabaseIdForVoipId(message.getDid(),
+                                                     message.getVoipId());
             if (databaseId != null) {
                 values.put(COLUMN_DATABASE_ID, databaseId);
             }
         }
+
         values.put(COLUMN_VOIP_ID, message.getVoipId());
         values.put(COLUMN_DATE, message.getDateInDatabaseFormat());
         values.put(COLUMN_TYPE, message.getTypeInDatabaseFormat());
@@ -149,34 +152,12 @@ public class Database {
      *
      * @return The message with the specified database ID.
      */
-    public synchronized Message getMessageWithDatabaseId(String did,
-                                                         long databaseId)
+    public synchronized Message getMessageWithDatabaseId(long databaseId)
     {
         Cursor cursor = database.query(
             TABLE_MESSAGE,
             columns,
-            COLUMN_DID + "=" + did + " AND " + COLUMN_DATABASE_ID + "="
-            + databaseId,
-            null, null, null, null);
-        Message[] messages = getMessageArrayFromCursor(cursor);
-        cursor.close();
-        if (messages.length > 0) {
-            return messages[0];
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Gets the message with the specified VoIP.ms ID from the database.
-     *
-     * @return The message with the specified VoIP.ms ID.
-     */
-    public synchronized Message getMessageWithVoipId(String did, long voipId) {
-        Cursor cursor = database.query(
-            TABLE_MESSAGE,
-            columns,
-            COLUMN_DID + "=" + did + " AND " + COLUMN_VOIP_ID + "=" + voipId,
+            COLUMN_DATABASE_ID + "=" + databaseId,
             null, null, null, null);
         Message[] messages = getMessageArrayFromCursor(cursor);
         cursor.close();
@@ -197,11 +178,12 @@ public class Database {
     public synchronized Message getDraftMessageForConversation(
         String did, String contact)
     {
-        Cursor cursor = database.query(TABLE_MESSAGE, columns,
-                                       COLUMN_DID + "=" + did + " AND "
-                                       + COLUMN_CONTACT + " = " + contact
-                                       + " AND " + COLUMN_DRAFT + " = 1",
-                                       null, null, null, null);
+        Cursor cursor = database.query(
+            TABLE_MESSAGE,
+            columns,
+            COLUMN_DID + "=" + did + " AND " + COLUMN_CONTACT + "=" + contact
+            + " AND " + COLUMN_DRAFT + "=1",
+            null, null, null, null);
         Message[] messages = getMessageArrayFromCursor(cursor);
         cursor.close();
         if (messages.length > 0) {
@@ -213,24 +195,24 @@ public class Database {
 
     /**
      * For each conversation, return at most one message that is the latest
-     * message of the conversation and is undeleted. The returned list is
-     * sorted.
+     * message of the conversation, is not deleted, and matches the filter
+     * constraint. The returned list is sorted.
      *
-     * @param did                 The DID.
-     * @param filterConstraint        The filter string.
-     * @return At most one message per conversation that is the latest
-     *         message of the conversation and matches one of the filter
-     *         constraints. The returned list is sorted.
+     * @param did              The DID.
+     * @param filterConstraint The filter constraint.
+     * @return At most one message per conversation that is the latest message
+     * of the conversation, is not deleted, and matches one the filter
+     * constraint. The returned list is sorted.
      */
     public synchronized Message[] getFilteredMessagesForConversations(
         String did,
         String filterConstraint)
     {
+        // Process filter constraints for use in SQL query
         String filterString = "%" + filterConstraint + "%";
         String[] params = new String[] {
             filterString
         };
-
         String numberFilterConstraint = filterConstraint.replaceAll(
             "[^0-9]", "");
         String numericFilterStringQuery = "";
@@ -243,6 +225,7 @@ public class Database {
             numericFilterStringQuery = " OR " + COLUMN_CONTACT + " LIKE ? ";
         }
 
+        // First get messages filtered on contact phone number and text
         String query =
             "SELECT * FROM " + TABLE_MESSAGE + " a INNER JOIN (SELECT "
             + COLUMN_DATABASE_ID + ", " + COLUMN_CONTACT + ", MAX("
@@ -251,11 +234,14 @@ public class Database {
             + numericFilterStringQuery + ") AND " + COLUMN_DID + "=" + did
             + " AND " + COLUMN_DELETED + "=0 GROUP BY " + COLUMN_CONTACT
             + ") b on a." + COLUMN_DATABASE_ID + " = b." + COLUMN_DATABASE_ID
-            + " AND a." + COLUMN_DATE + " = b." + COLUMN_DATE;
+            + " AND a." + COLUMN_DATE + " = b." + COLUMN_DATE + " ORDER BY "
+            + COLUMN_DATE + " DESC";
         Cursor cursor = database.rawQuery(query, params);
         List<Message> messages = getMessageListFromCursor(cursor);
         cursor.close();
 
+        // Then get messages filtered on contact name and add them to the list
+        // of messages if there isn't already a better match
         query =
             "SELECT * FROM " + TABLE_MESSAGE + " a INNER JOIN (SELECT "
             + COLUMN_DATABASE_ID + ", " + COLUMN_CONTACT + ", MAX("
@@ -263,13 +249,17 @@ public class Database {
             + " WHERE " + COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED
             + "=0 GROUP BY" + " " + COLUMN_CONTACT + ") b on a."
             + COLUMN_DATABASE_ID + " = b." + COLUMN_DATABASE_ID + " AND a."
-            + COLUMN_DATE + " = b." + COLUMN_DATE;
+            + COLUMN_DATE + " = b." + COLUMN_DATE + " ORDER BY " + COLUMN_DATE
+            + " DESC";
         cursor = database.rawQuery(query, null);
         List<Message> contactNameMessages = getMessageListFromCursor(cursor);
         cursor.close();
-        loop: for (Message contactNameMessage : contactNameMessages) {
+        loop:
+        for (Message contactNameMessage : contactNameMessages) {
             for (Message message : messages) {
-                if (message.getContact().equals(contactNameMessage.getContact())) {
+                if (message.getContact()
+                           .equals(contactNameMessage.getContact()))
+                {
                     continue loop;
                 }
             }
@@ -300,34 +290,36 @@ public class Database {
     }
 
     /**
-     * For a conversation, return all undeleted and non-draft messages that
-     * match the filter constraint. The returned list is sorted in reverse
-     * order.
+     * For a conversation, return all messages that are not deleted or drafts
+     * and that match the filter constraint. The returned list is sorted in
+     * reverse order.
      *
-     * @param did          The DID.
-     * @param filterString The filter string.
-     * @return All messages that match the filter constraint for the specified
-     *         conversation. The returned list is sorted in reverse order.
+     * @param did              The DID.
+     * @param contact          The specified contact.
+     * @param filterConstraint The filter constraint.
+     * @return All messages that are not deleted or drafts and that match
+     * the filter constraint for the specified conversation. The
+     * returned list is sorted in reverse order.
      */
     public synchronized Message[] getFilteredMessagesForConversation(
         String did,
         String contact,
-        String filterString)
+        String filterConstraint)
     {
-        filterString = "%" + filterString + "%";
+        // Process filter constraint for use in SQL query
+        String filterString = "%" + filterConstraint + "%";
         String[] params = new String[] {
-            filterString,
-            filterString,
+            filterString
         };
 
         Cursor cursor = database.query(
             TABLE_MESSAGE,
             columns,
-            "(" + COLUMN_CONTACT + " LIKE ?" + " OR " + COLUMN_MESSAGE
-            + " LIKE ?) AND " + COLUMN_DID  + "=" + did + " AND"
-            + " " + COLUMN_CONTACT + "=" + contact + " AND"
-            + " " + COLUMN_DELETED + "=0" + " AND " + COLUMN_DRAFT + "=0",
-            params, null, null, null);
+            COLUMN_MESSAGE + " LIKE ? AND " + COLUMN_DID + "=" + did + " AND "
+            + COLUMN_CONTACT + "=" + contact + " AND " + COLUMN_DELETED
+            + "=0 AND " + COLUMN_DRAFT + "=0",
+            params, null, null,
+            COLUMN_DATE + " ASC");
         List<Message> messages = getMessageListFromCursor(cursor);
         cursor.close();
 
@@ -338,14 +330,17 @@ public class Database {
 
     /**
      * Gets all unread messages that are not deleted or drafts for the
-     * specified contacts.
+     * specified conversations. The returned list is sorted.
      *
      * @param did      The DID.
      * @param contacts The specified contacts.
-     * @return All unread messages that are not deleted or drafts.
+     * @return All unread messages that are not deleted or drafts for the
+     * specified conversation.
      */
     public synchronized Message[] getUnreadMessages(String did,
-                                                    List<String> contacts) {
+                                                    List<String> contacts)
+    {
+        // Limit query to specified contacts
         String contactsQuery = " AND (";
         if (contacts.size() >= 1) {
             contactsQuery += COLUMN_CONTACT + "=" + contacts.get(0);
@@ -362,23 +357,27 @@ public class Database {
             TABLE_MESSAGE,
             columns,
             COLUMN_DID + "=" + did + " AND " + COLUMN_UNREAD + "=1 AND "
-            + COLUMN_DELETED + "=0 AND " + COLUMN_DRAFT + "=0"
-            + contactsQuery,
+            + COLUMN_DELETED + "=0 AND " + COLUMN_DRAFT + "=0" + contactsQuery,
             null, null, null,
             COLUMN_DATE + " DESC");
-        Message[] messages = getMessageArrayFromCursor(cursor);
+        List<Message> messages = getMessageListFromCursor(cursor);
         cursor.close();
-        return messages;
+
+        Collections.sort(messages);
+        return messages.toArray(new Message[messages.size()]);
     }
 
     /**
-     * Gets all of the messages in the database.
+     * Gets all of the messages in the database. The returned list is sorted
+     * by database ID.
      *
-     * @return All of the messages in the database.
+     * @return All of the messages in the database. The returned list is sorted
+     * by database ID.
      */
     public synchronized Message[] getAllMessages() {
         Cursor cursor = database.query(TABLE_MESSAGE, columns, null, null,
-                                       null, null, COLUMN_DATE + " DESC");
+                                       null, null, COLUMN_DATABASE_ID
+                                                   + " DESC");
         Message[] messages = getMessageArrayFromCursor(cursor);
         cursor.close();
         return messages;
@@ -462,13 +461,13 @@ public class Database {
         database.update(TABLE_MESSAGE,
                         contentValues,
                         COLUMN_DATABASE_ID + "=" + databaseId + " AND "
-                        + COLUMN_DELETED + "=" + "0",
+                        + COLUMN_DELETED + "=0",
                         null);
         // Next, remove all deleted messages in conversation without a
         // VoIP.ms ID from the database
         database.delete(TABLE_MESSAGE,
                         COLUMN_DATABASE_ID + "=" + databaseId + " AND "
-                        + COLUMN_DELETED + "=" + "1" + " AND "
+                        + COLUMN_DELETED + "=1 AND "
                         + COLUMN_VOIP_ID + " IS NULL",
                         null);
     }
@@ -527,7 +526,7 @@ public class Database {
      * @param did     The DID associated with the specified conversation.
      * @param contact The contact associated with the specified conversation.
      * @return True if the specified conversation has any undeleted messages,
-     *         including draft messages.
+     * including draft messages.
      */
     public synchronized boolean conversationHasMessages(String did,
                                                         String contact)
@@ -546,6 +545,304 @@ public class Database {
     }
 
     /**
+     * Sends the SMS message with the specified database ID using the VoIP.ms
+     * API.
+     *
+     * @param sourceActivity The source activity of the send request.
+     * @param databaseId     The database ID of the message to send.
+     */
+    public void sendMessage(Activity sourceActivity, long databaseId) {
+        Message message = getMessageWithDatabaseId(databaseId);
+        SendMessageTask task = new SendMessageTask(
+            sourceActivity.getApplicationContext(), message,
+            sourceActivity);
+
+        if (preferences.getEmail().equals("")
+            || preferences.getPassword().equals("")
+            || preferences.getDid().equals(""))
+        {
+            // Do not show an error; this method should never be called
+            // unless the email, password and DID are set
+            task.cleanup(false);
+            return;
+        }
+
+        // Do not send message if a network connection is not available
+        if (!Utils.isNetworkConnectionAvailable(applicationContext)) {
+            Toast.makeText(applicationContext,
+                           applicationContext.getString(
+                               R.string.conversation_send_error_network),
+                           Toast.LENGTH_SHORT).show();
+            task.cleanup(false);
+            return;
+        }
+
+        try {
+            String voipUrl = "https://www.voip.ms/api/v1/rest.php?"
+                             + "api_username=" + URLEncoder.encode(
+                preferences.getEmail(), "UTF-8") + "&"
+                             + "api_password=" + URLEncoder.encode(
+                preferences.getPassword(), "UTF-8") + "&"
+                             + "method=sendSMS" + "&"
+                             + "did=" + URLEncoder.encode(
+                preferences.getDid(), "UTF-8") + "&"
+                             + "dst=" + URLEncoder.encode(
+                message.getContact(), "UTF-8") + "&"
+                             + "message=" + URLEncoder.encode(
+                message.getText(), "UTF-8");
+            task.start(voipUrl);
+        } catch (UnsupportedEncodingException ex) {
+            // This should never happen since the encoding (UTF-8) is hardcoded
+            throw new Error(ex);
+        }
+    }
+
+    /**
+     * Synchronize database with VoIP.ms. This may include any of the
+     * following, depending on synchronization settings:
+     * <li> retrieving all messages from VoIP.ms, or only those messages
+     * dated after the most recent message stored
+     * locally;
+     * <li> retrieving messages from VoIP.ms that were deleted locally;
+     * <li> deleting messages from VoIP.ms that were deleted locally; and
+     * <li> deleting messages stored locally that were deleted from VoIP.ms.
+     *
+     * @param forceRecent    Retrieve only recent messages (and do nothing
+     *                       else) if true, regardless of synchronization
+     *                       settings.
+     * @param showErrors     Shows error messages if true.
+     * @param sourceActivity The calling activity.
+     */
+    public synchronized void synchronize(boolean forceRecent,
+                                         boolean showErrors,
+                                         Activity sourceActivity)
+    {
+        boolean retrieveOnlyRecentMessages =
+            forceRecent || preferences.getRetrieveOnlyRecentMessages();
+        boolean retrieveDeletedMessages =
+            !forceRecent && preferences.getRetrieveDeletedMessages();
+        boolean propagateLocalDeletions =
+            !forceRecent && preferences.getPropagateLocalDeletions();
+        boolean propagateRemoteDeletions =
+            !forceRecent && preferences.getPropagateRemoteDeletions();
+
+        SynchronizeDatabaseTask task =
+            new SynchronizeDatabaseTask(applicationContext, forceRecent,
+                                        retrieveDeletedMessages,
+                                        propagateRemoteDeletions, showErrors,
+                                        sourceActivity);
+
+        if (preferences.getEmail().equals("") || preferences.getPassword()
+                                                            .equals("") ||
+            preferences.getDid().equals(""))
+        {
+            // Do not show an error; this method should never be called
+            // unless the email, password and DID are set
+            task.cleanup(false, forceRecent);
+            return;
+        }
+
+        // Do not synchronize if a network connection is not available
+        if (!Utils.isNetworkConnectionAvailable(applicationContext)) {
+            if (showErrors) {
+                Toast.makeText(applicationContext,
+                               applicationContext.getString(
+                                   R.string.database_sync_error_network),
+                               Toast.LENGTH_SHORT).show();
+            }
+            task.cleanup(false, forceRecent);
+            return;
+        }
+
+        try {
+            String did = preferences.getDid();
+            Message[] messages = getUndeletedMessages(did);
+
+            List<SynchronizeDatabaseTask.RequestObject> requests =
+                new LinkedList<>();
+
+            // Propagate local deletions if applicable
+            if (propagateLocalDeletions) {
+                for (Message message : getDeletedMessages(
+                    preferences.getDid())) {
+                    if (message.getVoipId() != null) {
+                        String url =
+                            "https://www.voip.ms/api/v1/rest.php?" +
+                            "api_username=" + URLEncoder.encode(
+                                preferences.getEmail(), "UTF-8") + "&" +
+                            "api_password=" + URLEncoder.encode(
+                                preferences.getPassword(), "UTF-8") + "&" +
+                            "method=deleteSMS" + "&" +
+                            "id=" + message.getVoipId();
+                        requests.add(
+                            new SynchronizeDatabaseTask.RequestObject(
+                                url, SynchronizeDatabaseTask.RequestObject
+                                .RequestType.DELETION));
+                    }
+                }
+            }
+
+            // Get number of days between now and the message retrieval start
+            // date or when the most recent message was received, as appropriate
+            Date then = (messages.length == 0 || !retrieveOnlyRecentMessages) ?
+                        preferences.getStartDate() : messages[0].getDate();
+            // Use EDT because the VoIP.ms API only works with EDT
+            Calendar thenCalendar = Calendar.getInstance(
+                TimeZone.getTimeZone("America/New_York"), Locale.US);
+            thenCalendar.setTime(then);
+            thenCalendar.set(Calendar.HOUR_OF_DAY, 0);
+            thenCalendar.set(Calendar.MINUTE, 0);
+            thenCalendar.set(Calendar.SECOND, 0);
+            thenCalendar.set(Calendar.MILLISECOND, 0);
+            then = thenCalendar.getTime();
+
+            Date now = new Date();
+            // Use EDT because the VoIP.ms API only works with EDT
+            Calendar nowCalendar = Calendar.getInstance(
+                TimeZone.getTimeZone("America/New_York"), Locale.US);
+            nowCalendar.setTime(now);
+            nowCalendar.set(Calendar.HOUR_OF_DAY, 0);
+            nowCalendar.set(Calendar.MINUTE, 0);
+            nowCalendar.set(Calendar.SECOND, 0);
+            nowCalendar.set(Calendar.MILLISECOND, 0);
+            now = nowCalendar.getTime();
+
+            long millisecondsDifference = now.getTime() - then.getTime();
+            long daysDifference = (long) Math.ceil(millisecondsDifference
+                                                   / (1000f * 60f * 60f * 24f));
+
+            // Split this number into 90 day periods (approximately the
+            // maximum supported by the VoIP.ms API)
+            int periods = (int) Math.ceil(daysDifference / 90f);
+            if (periods == 0) {
+                periods = 1;
+            }
+            Date[] dates = new Date[periods + 1];
+            dates[0] = then;
+            for (int i = 1; i < dates.length - 1; i++) {
+                Calendar calendar = Calendar.getInstance(
+                    TimeZone.getTimeZone("America/New_York"), Locale.US);
+                calendar.setTime(dates[i - 1]);
+                calendar.add(Calendar.DAY_OF_YEAR, 90);
+                dates[i] = calendar.getTime();
+            }
+            dates[dates.length - 1] = now;
+
+            // Create VoIP.ms API urls for each of these periods
+            SimpleDateFormat sdf =
+                new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+            for (int i = 0; i < dates.length - 1; i++) {
+                String url =
+                    "https://www.voip.ms/api/v1/rest.php?"
+                    + "api_username=" + URLEncoder.encode(
+                        preferences.getEmail(), "UTF-8") + "&"
+                    + "api_password=" + URLEncoder.encode(
+                        preferences.getPassword(), "UTF-8") + "&"
+                    + "method=getSMS" + "&"
+                    + "did=" + URLEncoder.encode(preferences.getDid(),
+                                                 "UTF-8") + "&"
+                    + "limit=" + URLEncoder.encode("1000000", "UTF-8") + "&"
+                    + "from=" + URLEncoder.encode(sdf.format(dates[i]),
+                                                "UTF-8") + "&"
+                    + "to=" + URLEncoder.encode(sdf.format(dates[i + 1]),
+                                                "UTF-8") + "&"
+                    + "timezone=-5"; // -5 corresponds to EDT
+                requests.add(new SynchronizeDatabaseTask.RequestObject(
+                    url,
+                    SynchronizeDatabaseTask.RequestObject.RequestType
+                        .MESSAGE_RETRIEVAL,
+                    dates[i],
+                    dates[i + 1]));
+            }
+
+            task.start(requests);
+        } catch (UnsupportedEncodingException ex) {
+            // This should never happen since the encoding (UTF-8) is hardcoded
+            throw new Error(ex);
+        }
+    }
+
+    /**
+     * Gets the database ID for the row in the database with the specified
+     * VoIP.ms ID.
+     *
+     * @param voipId The VoIP.ms ID.
+     * @return The database ID.
+     */
+    private synchronized Long getDatabaseIdForVoipId(String did, long voipId) {
+        Cursor cursor = database.query(
+            TABLE_MESSAGE,
+            columns,
+            COLUMN_DID + "=" + did + " AND " + COLUMN_VOIP_ID + "=" + voipId,
+            null, null, null, null);
+        if (cursor.moveToFirst()) {
+            return cursor.getLong(cursor.getColumnIndexOrThrow(
+                COLUMN_DATABASE_ID));
+        }
+        cursor.close();
+        return null;
+    }
+
+    /**
+     * Gets the message with the specified VoIP.ms ID from the database.
+     *
+     * @return The message with the specified VoIP.ms ID.
+     */
+    private synchronized Message getMessageWithVoipId(String did,
+                                                      long voipId)
+    {
+        Cursor cursor = database.query(
+            TABLE_MESSAGE,
+            columns,
+            COLUMN_DID + "=" + did + " AND " + COLUMN_VOIP_ID + "=" + voipId,
+            null, null, null, null);
+        Message[] messages = getMessageArrayFromCursor(cursor);
+        cursor.close();
+        if (messages.length > 0) {
+            return messages[0];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Gets all of the messages in the database except for deleted and draft
+     * messages.
+     *
+     * @return All of the messages in the database except for deleted
+     * messages.
+     */
+    private synchronized Message[] getUndeletedMessages(String did) {
+        Cursor cursor = database.query(
+            TABLE_MESSAGE, columns,
+            COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED + "=0 AND "
+            + COLUMN_DRAFT + " = 0",
+            null, null, null,
+            COLUMN_DATE + " DESC");
+        Message[] messages = getMessageArrayFromCursor(cursor);
+        cursor.close();
+        return messages;
+    }
+
+    /**
+     * Gets all of the deleted and non-draft messages in the database.
+     *
+     * @return All of the deleted and non-draft messages in the database.
+     */
+    private synchronized Message[] getDeletedMessages(String did) {
+        Cursor cursor = database.query(TABLE_MESSAGE, columns,
+                                       COLUMN_DID + "=" + did + " AND "
+                                       + COLUMN_DELETED +
+                                       "=" + "1" + " AND " + COLUMN_DRAFT
+                                       + " = 0", null, null, null,
+                                       COLUMN_DATE + " DESC");
+        Message[] messages = getMessageArrayFromCursor(cursor);
+        cursor.close();
+        return messages;
+    }
+
+    /**
      * Retrieves all of the messages that can be accessed by the specified
      * cursor.
      *
@@ -557,7 +854,6 @@ public class Database {
         List<Message> messages = getMessageListFromCursor(cursor);
         return messages.toArray(new Message[messages.size()]);
     }
-
 
     /**
      * Retrieves all of the messages that can be accessed by the specified
@@ -604,265 +900,92 @@ public class Database {
         return messages;
     }
 
+    private static class SendMessageTask {
+        private final Context applicationContext;
 
+        private final Message message;
+        private final Activity sourceActivity;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Gets all of the messages in the database except for deleted messages.
-     *
-     * @return All of the messages in the database except for deleted messages.
-     */
-    public synchronized Message[] getUndeletedMessages(String did) {
-        Cursor cursor = database.query(TABLE_MESSAGE, columns,
-                                       COLUMN_DID + "=" + did + " AND "
-                                       + COLUMN_DELETED +
-                                       "=" + "0" + " AND " + COLUMN_DRAFT + " = 0", null, null, null,
-                                       COLUMN_DATE + " DESC");
-        Message[] messages = getMessageArrayFromCursor(cursor);
-        cursor.close();
-        return messages;
-    }
-
-    /**
-     * Gets all of the deleted messages in the database.
-     *
-     * @return All of the deleted messages in the database.
-     */
-    public synchronized Message[] getDeletedMessages(String did) {
-        Cursor cursor = database.query(TABLE_MESSAGE, columns,
-                                       COLUMN_DID + "=" + did + " AND "
-                                       + COLUMN_DELETED +
-                                       "=" + "1" + " AND " + COLUMN_DRAFT + " = 0", null, null, null,
-                                       COLUMN_DATE + " DESC");
-        Message[] messages = getMessageArrayFromCursor(cursor);
-        cursor.close();
-        return messages;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Synchronize database with VoIP.ms. This may include any of the
-     * following, depending on synchronization settings:
-     * <li> retrieving all messages from VoIP.ms, or only those messages
-     * dated after the most recent message stored
-     * locally;
-     * <li> retrieving messages from VoIP.ms that were deleted locally;
-     * <li> deleting messages from VoIP.ms that were deleted locally; and
-     * <li> deleting messages stored locally that were deleted from VoIP.ms.
-     *
-     * @param forceRecent    Retrieve only recent messages (and do nothing
-     *                       else) if true, regardless of synchronization
-     *                       settings.
-     * @param showErrors     Shows error messages if true.
-     * @param sourceActivity The calling activity.
-     */
-    @SuppressWarnings("SimplifiableConditionalExpression")
-    public synchronized void synchronize(boolean forceRecent,
-                                         boolean showErrors,
-                                         Activity sourceActivity)
-    {
-        boolean retrieveOnlyRecentMessages =
-            forceRecent ? true : preferences.getRetrieveOnlyRecentMessages();
-        boolean retrieveDeletedMessages =
-            forceRecent ? false : preferences.getRetrieveDeletedMessages();
-        boolean propagateLocalDeletions =
-            forceRecent ? false : preferences.getPropagateLocalDeletions();
-        boolean propagateRemoteDeletions =
-            forceRecent ? false : preferences.getPropagateRemoteDeletions();
-
-        SynchronizeDatabaseTask task =
-            new SynchronizeDatabaseTask(applicationContext, forceRecent,
-                                        retrieveDeletedMessages,
-                                        propagateRemoteDeletions, showErrors,
-                                        sourceActivity);
-
-        if (preferences.getEmail().equals("") || preferences.getPassword()
-                                                            .equals("") ||
-            preferences.getDid().equals(""))
+        SendMessageTask(Context applicationContext, Message message,
+                        Activity sourceActivity)
         {
-            // Do not show an error; this method should never be called
-            // unless the email, password and DID are set
-            task.cleanup(false, forceRecent);
-            return;
+            this.applicationContext = applicationContext;
+
+            this.message = message;
+            this.sourceActivity = sourceActivity;
         }
 
-        if (!Utils.isNetworkConnectionAvailable(applicationContext)) {
-            if (showErrors) {
-                Toast.makeText(applicationContext, applicationContext
-                                   .getString(R.string
-                                                  .database_sync_error_network),
+        void start(String voipUrl) {
+            new SendMessageAsyncTask().execute(voipUrl);
+        }
+
+        void cleanup(boolean success) {
+            if (sourceActivity instanceof ConversationActivity) {
+                ((ConversationActivity) sourceActivity)
+                    .postSendMessage(success, message.getDatabaseId());
+            } else if (sourceActivity instanceof
+                ConversationQuickReplyActivity)
+            {
+                ((ConversationQuickReplyActivity) sourceActivity)
+                    .postSendMessage(success, message.getDatabaseId());
+            }
+        }
+
+        private class SendMessageAsyncTask
+            extends AsyncTask<String, String, Boolean>
+        {
+            @Override
+            protected Boolean doInBackground(String... params) {
+                JSONObject resultJson;
+                try {
+                    resultJson = Utils.getJson(params[0]);
+                } catch (JSONException ex) {
+                    Log.w(TAG, Log.getStackTraceString(ex));
+                    publishProgress(applicationContext.getString(
+                        R.string.conversation_send_error_api_parse));
+                    return false;
+                } catch (Exception ex) {
+                    Log.w(TAG, Log.getStackTraceString(ex));
+                    publishProgress(applicationContext.getString(
+                        R.string.conversation_send_error_api_request));
+                    return false;
+                }
+
+                String status = resultJson.optString("status");
+                if (status == null) {
+                    publishProgress(applicationContext.getString(
+                        R.string.conversation_send_error_api_parse));
+                    return false;
+                }
+                if (!status.equals("success")) {
+                    publishProgress(applicationContext.getString(
+                        R.string.conversation_send_error_api_error)
+                                                      .replace("{error}",
+                                                               status));
+                    return false;
+                }
+
+                return true;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                cleanup(success);
+            }
+
+            /**
+             * Shows a toast to the user.
+             *
+             * @param message The message to show. This must be a String
+             *                array with a single element containing the
+             *                message.
+             */
+            @Override
+            protected void onProgressUpdate(String... message) {
+                Toast.makeText(applicationContext, message[0],
                                Toast.LENGTH_SHORT).show();
             }
-            task.cleanup(false, forceRecent);
-            return;
         }
-
-        try {
-            String did = preferences.getDid();
-            Message[] messages = getUndeletedMessages(did);
-
-            List<SynchronizeDatabaseTask.RequestObject> requests =
-                new LinkedList<>();
-
-            // Propagate local deletions if applicable
-            if (propagateLocalDeletions) {
-                for (Message message : getDeletedMessages(
-                    preferences.getDid())) {
-                    if (message.getVoipId() != null) {
-                        String url = "https://www.voip.ms/api/v1/rest.php?" +
-                                     "api_username=" + URLEncoder
-                                         .encode(preferences.getEmail(),
-                                                 "UTF-8") + "&" +
-                                     "api_password=" + URLEncoder
-                                         .encode(preferences.getPassword(),
-                                                 "UTF-8") + "&" +
-                                     "method=deleteSMS" + "&" +
-                                     "id=" + message.getVoipId();
-                        requests
-                            .add(new SynchronizeDatabaseTask.RequestObject(url,
-                                                                           SynchronizeDatabaseTask.RequestObject.RequestType.DELETION));
-                    }
-                }
-            }
-
-            // Get number of days between now and the message retrieval start
-            // date or when the most recent
-            // message was received, as appropriate
-            Date then = (messages.length == 0 || !retrieveOnlyRecentMessages) ?
-                        preferences.getStartDate() : messages[0].getDate();
-            // Use EDT because the VoIP.ms API only works with EDT
-            Calendar thenCalendar = Calendar
-                .getInstance(TimeZone.getTimeZone("America/New_York"),
-                             Locale.US);
-            thenCalendar.setTime(then);
-            thenCalendar.set(Calendar.HOUR_OF_DAY, 0);
-            thenCalendar.set(Calendar.MINUTE, 0);
-            thenCalendar.set(Calendar.SECOND, 0);
-            thenCalendar.set(Calendar.MILLISECOND, 0);
-            then = thenCalendar.getTime();
-
-            Date now = new Date();
-            // Use EDT because the VoIP.ms API only works with EDT
-            Calendar nowCalendar = Calendar
-                .getInstance(TimeZone.getTimeZone("America/New_York"),
-                             Locale.US);
-            nowCalendar.setTime(now);
-            nowCalendar.set(Calendar.HOUR_OF_DAY, 0);
-            nowCalendar.set(Calendar.MINUTE, 0);
-            nowCalendar.set(Calendar.SECOND, 0);
-            nowCalendar.set(Calendar.MILLISECOND, 0);
-            now = nowCalendar.getTime();
-
-            long millisecondsDifference = now.getTime() - then.getTime();
-            long daysDifference = (long) Math
-                .ceil(millisecondsDifference / (1000f * 60f * 60f * 24f));
-
-            // Split this number into 90 day periods (approximately the
-            // maximum supported by the VoIP.ms API)
-            int periods = (int) Math.ceil(daysDifference / 90f);
-            if (periods == 0) {
-                periods = 1;
-            }
-            Date[] dates = new Date[periods + 1];
-            dates[0] = then;
-            for (int i = 1; i < dates.length - 1; i++) {
-                Calendar calendar = Calendar
-                    .getInstance(TimeZone.getTimeZone("America/New_York"),
-                                 Locale.US);
-                calendar.setTime(dates[i - 1]);
-                calendar.add(Calendar.DAY_OF_YEAR, 90);
-                dates[i] = calendar.getTime();
-            }
-            dates[dates.length - 1] = now;
-
-            // Create VoIP.ms API urls for each of these periods
-            SimpleDateFormat sdf =
-                new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-            for (int i = 0; i < dates.length - 1; i++) {
-                String url = "https://www.voip.ms/api/v1/rest.php?" +
-                             "api_username=" + URLEncoder
-                                 .encode(preferences.getEmail(), "UTF-8") + "&"
-                             +
-                             "api_password=" + URLEncoder
-                                 .encode(preferences.getPassword(), "UTF-8")
-                             + "&" +
-                             "method=getSMS" + "&" +
-                             "did=" + URLEncoder
-                                 .encode(preferences.getDid(), "UTF-8") + "&" +
-                             "limit=" + URLEncoder.encode("1000000", "UTF-8")
-                             + "&" +
-                             "from=" + URLEncoder
-                                 .encode(sdf.format(dates[i]), "UTF-8") + "&" +
-                             "to=" + URLEncoder
-                                 .encode(sdf.format(dates[i + 1]), "UTF-8")
-                             + "&" +
-                             "timezone=-5"; // -5 corresponds to EDT
-                requests.add(new SynchronizeDatabaseTask.RequestObject(url,
-                                                                       SynchronizeDatabaseTask.RequestObject.RequestType.MESSAGE_RETRIEVAL,
-                                                                       dates[i],
-                                                                       dates[i
-                                                                             + 1]));
-            }
-
-            task.start(requests);
-        } catch (UnsupportedEncodingException ex) {
-            // This should never happen since the encoding (UTF-8) is hardcoded
-            throw new Error(ex);
-        }
-    }
-
-    /**
-     * Gets the database ID for the row in the database with the specified
-     * VoIP.ms ID.
-     *
-     * @param voipId The VoIP.ms ID.
-     * @return The database ID.
-     */
-    private synchronized Long getDatabaseIdForVoipId(String did, long voipId) {
-        Cursor cursor = database.query(TABLE_MESSAGE, columns,
-                                       COLUMN_DID + "=" + did + " AND "
-                                       + COLUMN_VOIP_ID +
-                                       "=" + voipId, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            return cursor
-                .getLong(cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID));
-        }
-        cursor.close();
-        return null;
     }
 
     /**
@@ -1357,7 +1480,8 @@ public class Database {
                                                                                  columns[9])),
                                                           cursor.getLong(cursor
                                                                              .getColumnIndexOrThrow(
-                                                                                 columns[10])), 0);
+                                                                                 columns[10])),
+                                                          0);
 
                             // Incorrect date has an hour removed outside of
                             // daylight savings time

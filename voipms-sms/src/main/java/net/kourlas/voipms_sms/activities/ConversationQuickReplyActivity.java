@@ -36,7 +36,6 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.widget.*;
 import net.kourlas.voipms_sms.*;
-import net.kourlas.voipms_sms.Api;
 import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.notifications.Notifications;
 
@@ -229,12 +228,12 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
                 long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
                         messageText.substring(0, 160)));
                 messageText = messageText.substring(160);
-                Api.sendMessage(this, databaseId);
+                database.sendMessage(this, databaseId);
             }
             else {
                 long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
                         messageText.substring(0, messageText.length())));
-                Api.sendMessage(this, databaseId);
+                database.sendMessage(this, databaseId);
                 break;
             }
         }
@@ -248,7 +247,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
             database.synchronize(true, false, null);
         }
         else {
-            Message message = database.getMessageWithDatabaseId(preferences.getDid(), databaseId);
+            Message message = database.getMessageWithDatabaseId(databaseId);
             message.setDelivered(false);
             message.setDeliveryInProgress(false);
             database.insertMessage(message);

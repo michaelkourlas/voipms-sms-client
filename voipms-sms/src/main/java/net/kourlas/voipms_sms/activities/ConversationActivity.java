@@ -464,7 +464,7 @@ public class ConversationActivity
         // Resends all checked items
         for (int i = 0; i < adapter.getItemCount(); i++) {
             if (adapter.isItemChecked(i)) {
-                Api.sendMessage(this, adapter.getItem(i).getDatabaseId());
+                database.sendMessage(this, adapter.getItem(i).getDatabaseId());
                 break;
             }
         }
@@ -730,7 +730,7 @@ public class ConversationActivity
     private void preSendMessage(long databaseId) {
         database.markMessageAsSending(databaseId);
         adapter.refresh();
-        Api.sendMessage(this, databaseId);
+        database.sendMessage(this, databaseId);
     }
 
     /**
