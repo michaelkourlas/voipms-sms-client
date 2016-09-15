@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package net.kourlas.voipms_sms.model;
 
 import android.support.annotation.NonNull;
 import net.kourlas.voipms_sms.Database;
+import net.kourlas.voipms_sms.Utils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -66,44 +67,63 @@ public class Message implements Comparable<Message> {
      * The text of the message.
      */
     private String text;
+
     /**
      * Whether or not the message is unread.
      */
     private boolean isUnread;
+
     /**
      * Whether or not the message is deleted.
      */
     private boolean isDeleted;
+
     /**
      * Whether or not the message has been delivered.
      */
     private boolean isDelivered;
+
     /**
-     * Whether or not the message is currently in the process of being delivered.
+     * Whether or not the message is currently in the process of being
+     * delivered.
      */
     private boolean isDeliveryInProgress;
 
+    /**
+     * Whether or not the message is a draft.
+     */
     private boolean isDraft;
 
     /**
-     * Initializes a new instance of the Message class. This constructor is intended for use when creating a Message
-     * object using information from the application database.
+     * Initializes a new instance of the Message class. This constructor is
+     * intended for use when creating a Message object using information from
+     * the application database.
      *
      * @param databaseId           The database ID of the message.
      * @param voipId               The ID assigned to the message by VoIP.ms.
      * @param date                 The UNIX timestamp of the message.
-     * @param type                 The type of the message (1 for incoming, 0 for outgoing).
+     * @param type                 The type of the message (1 for incoming,
+     *                             0 for outgoing).
      * @param did                  The DID associated with the message.
      * @param contact              The contact associated with the message.
      * @param text                 The text of the message.
-     * @param isUnread             Whether or not the message is unread (1 for true, 0 for false).
-     * @param isDeleted            Whether or not the message has been deleted locally (1 for true, 0 for false).
-     * @param isDelivered          Whether or not the message has been delivered (1 for true, 0 for false).
-     * @param isDeliveryInProgress Whether or not the message is currently in the process of being delivered (1 for
+     * @param isUnread             Whether or not the message is unread (1 for
      *                             true, 0 for false).
+     * @param isDeleted            Whether or not the message has been deleted
+     *                             locally (1 for true, 0 for false).
+     * @param isDelivered          Whether or not the message has been
+     *                             delivered (1 for true, 0 for false).
+     * @param isDeliveryInProgress Whether or not the message is currently in
+     *                             the process of being delivered (1 for
+     *                             true, 0 for false).
+     * @param isDraft              Whether or not the message is a draft
+     *                             (1 for true, 0 for false).
      */
-    public Message(long databaseId, Long voipId, long date, long type, String did, String contact, String text,
-                   long isUnread, long isDeleted, long isDelivered, long isDeliveryInProgress, long isDraft) {
+    public Message(long databaseId, Long voipId, long date, long type,
+                   String did, String contact, String text, long isUnread,
+                   long isDeleted, long isDelivered, long isDeliveryInProgress,
+                   long isDraft)
+    {
         this.databaseId = databaseId;
 
         this.voipId = voipId;
@@ -115,13 +135,15 @@ public class Message implements Comparable<Message> {
         }
         this.type = type == 1 ? Type.INCOMING : Type.OUTGOING;
 
-        if (!did.replaceAll("[^0-9]", "").equals(did)) {
-            throw new IllegalArgumentException("did must consist only of numbers.");
+        if (!Utils.getDigitsOfString(did).equals(did)) {
+            throw new IllegalArgumentException("did must consist only of"
+                                               + " numbers.");
         }
         this.did = did;
 
-        if (!contact.replaceAll("[^0-9]", "").equals(contact)) {
-            throw new IllegalArgumentException("contact must consist only of numbers.");
+        if (!Utils.getDigitsOfString(contact).equals(contact)) {
+            throw new IllegalArgumentException("contact must consist only of"
+                                               + " numbers.");
         }
         this.contact = contact;
 
@@ -143,7 +165,8 @@ public class Message implements Comparable<Message> {
         this.isDelivered = isDelivered == 1;
 
         if (isDeliveryInProgress != 0 && isDeliveryInProgress != 1) {
-            throw new IllegalArgumentException("isDeliveryInProgress must be 0 or 1.");
+            throw new IllegalArgumentException("isDeliveryInProgress must be"
+                                               + " 0 or 1.");
         }
         this.isDeliveryInProgress = isDeliveryInProgress == 1;
 
@@ -154,8 +177,9 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Initializes a new instance of the Message class. This constructor is intended for use when creating a Message
-     * object using information from the VoIP.ms API.
+     * Initializes a new instance of the Message class. This constructor is
+     * intended for use when creating a Message object using information from
+     * the VoIP.ms API.
      *
      * @param voipId  The ID assigned to the message by VoIP.ms.
      * @param date    The UNIX timestamp of the message.
@@ -164,9 +188,12 @@ public class Message implements Comparable<Message> {
      * @param contact The contact associated with the message.
      * @param text    The text of the message.
      */
-    public Message(String voipId, String date, String type, String did, String contact, String text)
-            throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+    public Message(String voipId, String date, String type, String did,
+                   String contact, String text)
+        throws ParseException
+    {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                                                    Locale.US);
         sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 
         this.databaseId = null;
@@ -180,13 +207,15 @@ public class Message implements Comparable<Message> {
         }
         this.type = type.equals("1") ? Type.INCOMING : Type.OUTGOING;
 
-        if (!did.replaceAll("[^0-9]", "").equals(did)) {
-            throw new IllegalArgumentException("did must consist only of numbers.");
+        if (!Utils.getDigitsOfString(did).equals(did)) {
+            throw new IllegalArgumentException("did must consist only of"
+                                               + " numbers.");
         }
         this.did = did;
 
-        if (!contact.replaceAll("[^0-9]", "").equals(contact)) {
-            throw new IllegalArgumentException("contact must consist only of numbers.");
+        if (!Utils.getDigitsOfString(contact).equals(contact)) {
+            throw new IllegalArgumentException("contact must consist only of"
+                                               + " numbers.");
         }
         this.contact = contact;
 
@@ -204,8 +233,9 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Initializes a new instance of the Message class. This constructor is intended for use when creating a new Message
-     * object that will be sent to another contact using the VoIP.ms API.
+     * Initializes a new instance of the Message class. This constructor is
+     * intended for use when creating a new Message object that will be sent to
+     * another contact using the VoIP.ms API.
      *
      * @param did     The DID associated with the message.
      * @param contact The contact associated with the message.
@@ -220,13 +250,15 @@ public class Message implements Comparable<Message> {
 
         this.type = Type.OUTGOING;
 
-        if (!did.replaceAll("[^0-9]", "").equals(did)) {
-            throw new IllegalArgumentException("did must consist only of numbers.");
+        if (!Utils.getDigitsOfString(did).equals(did)) {
+            throw new IllegalArgumentException("did must consist only of"
+                                               + " numbers.");
         }
         this.did = did;
 
-        if (!contact.replaceAll("[^0-9]", "").equals(contact)) {
-            throw new IllegalArgumentException("contact must consist only of numbers.");
+        if (!Utils.getDigitsOfString(contact).equals(contact)) {
+            throw new IllegalArgumentException("contact must consist only of"
+                                               + " numbers.");
         }
         this.contact = contact;
 
@@ -244,8 +276,9 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Gets the database ID of the message. This value may be null if no ID has been yet been assigned to the message
-     * (i.e. if the message has not yet been inserted into the database).
+     * Gets the database ID of the message. This value may be null if no ID has
+     * been yet been assigned to the message (i.e. if the message has not yet
+     * been inserted into the database).
      *
      * @return The database ID of the message.
      */
@@ -254,8 +287,9 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Gets the ID assigned to the message by VoIP.ms. This value may be null if no ID has yet been assigned to the
-     * message (i.e. if the message has not yet been sent).
+     * Gets the ID assigned to the message by VoIP.ms. This value may be null
+     * if no ID has yet been assigned to the  message (i.e. if the message has
+     * not yet been sent).
      *
      * @return The ID assigned to the message by VoIP.ms.
      */
@@ -337,6 +371,15 @@ public class Message implements Comparable<Message> {
     }
 
     /**
+     * Sets the text of the message.
+     *
+     * @param text The text of the message.
+     */
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    /**
      * Gets whether or not the message is unread.
      *
      * @return Whether or not the message is unread.
@@ -363,42 +406,102 @@ public class Message implements Comparable<Message> {
         return isUnread ? 1 : 0;
     }
 
+    /**
+     * Gets whether or not the message is deleted.
+     *
+     * @return Whether or not the message is deleted.
+     */
     public boolean isDeleted() {
         return isDeleted;
     }
 
+    /**
+     * Gets whether or not the message is deleted in database format.
+     *
+     * @return Whether or not the message is deleted in database format.
+     */
     public int isDeletedInDatabaseFormat() {
         return isDeleted ? 1 : 0;
     }
 
+    /**
+     * Gets whether or not the message has been delivered.
+     *
+     * @return Whether or not the message has been delivered.
+     */
     public boolean isDelivered() {
         return isDelivered;
     }
 
+    /**
+     * Sets whether or not the message has been delivered.
+     *
+     * @param isDelivered Whether or not the message has been delivered.
+     */
     public void setDelivered(boolean isDelivered) {
         this.isDelivered = isDelivered;
     }
 
+    /**
+     * Gets whether or not the message has been delivered in database format.
+     *
+     * @return Whether or not the message has been delivered in databse format.
+     */
     public int isDeliveredInDatabaseFormat() {
         return isDelivered ? 1 : 0;
     }
 
+    /**
+     * Gets whether or not the message is being delivered.
+     *
+     * @return Whether or not the message is being delivered.
+     */
     public boolean isDeliveryInProgress() {
         return isDeliveryInProgress;
     }
 
+    /**
+     * Sets whether or not the message is being delivered.
+     *
+     * @param isDeliveryInProgress Whether or not the message is being
+     *                             delivered.
+     */
     public void setDeliveryInProgress(boolean isDeliveryInProgress) {
         this.isDeliveryInProgress = isDeliveryInProgress;
     }
 
+    /**
+     * Gets whether or not the message is being delivered in database format.
+     *
+     * @return Whether or not the message is being delivered in database format.
+     */
     public int isDeliveryInProgressInDatabaseFormat() {
         return isDeliveryInProgress ? 1 : 0;
     }
 
+    /**
+     * Gets whether or not the message is a draft.
+     *
+     * @return Whether or not the message is a draft.
+     */
     public boolean isDraft() {
         return isDraft;
     }
 
+    /**
+     * Sets whether or not the message is a draft.
+     *
+     * @param isDraft Whether or not the message is a draft.
+     */
+    public void setDraft(boolean isDraft) {
+        this.isDraft = isDraft;
+    }
+
+    /**
+     * Gets whether or not the message is a draft in database format.
+     *
+     * @return Whether or not the message is a draft in database format.
+     */
     public int isDraftInDatabaseFormat() {
         return isDraft ? 1 : 0;
     }
@@ -417,31 +520,65 @@ public class Message implements Comparable<Message> {
             }
 
             Message other = (Message) o;
-            boolean databaseIdEquals = (databaseId == null && other.databaseId == null) ||
-                    (databaseId != null && other.databaseId != null && databaseId.equals(other.databaseId));
+            boolean databaseIdEquals =
+                (databaseId == null && other.databaseId == null) ||
+                (databaseId != null && other.databaseId != null && databaseId
+                    .equals(other.databaseId));
             boolean voipIdEquals = (voipId == null && other.voipId == null) ||
-                    (voipId != null && other.voipId != null && voipId.equals(other.voipId));
-            return databaseIdEquals && voipIdEquals && date.equals(other.date) && type == other.type &&
-                    did.equals(other.did) && contact.equals(other.contact) && text.equals(other.text) &&
-                    isUnread == other.isUnread && isDeleted == other.isDeleted && isDelivered == other.isDelivered &&
-                    isDeliveryInProgress == other.isDeliveryInProgress && isDraft == other.isDraft;
-        }
-        else {
+                                   (voipId != null && other.voipId != null
+                                    && voipId.equals(other.voipId));
+            return databaseIdEquals && voipIdEquals
+                   && date.equals(other.date)
+                   && type == other.type
+                   && did.equals(other.did)
+                   && contact.equals(other.contact)
+                   && text.equals(other.text)
+                   && isUnread == other.isUnread
+                   && isDeleted == other.isDeleted
+                   && isDelivered == other.isDelivered
+                   && isDeliveryInProgress == other.isDeliveryInProgress
+                   && isDraft == other.isDraft;
+        } else {
             return super.equals(o);
         }
     }
 
-    public boolean equalsConversation(Message m) {
-        return this.contact.equals(m.contact) && this.did.equals(m.did);
+    /**
+     * Returns true if this message and the specified message are part of the
+     * same conversation.
+     *
+     * @param another The other message.
+     * @return True if this message and the specified message are part of the
+     * same conversation.
+     */
+    public boolean equalsConversation(Message another) {
+        return this.contact.equals(another.contact)
+               && this.did.equals(another.did);
     }
 
-    public boolean equalsDatabaseId(Message m) {
+    /**
+     * Returns true if this message and the specified message have the same
+     * database ID.
+     *
+     * @param another The other message.
+     * @return True if this message and the specified message have the same
+     * database ID.
+     */
+    public boolean equalsDatabaseId(Message another) {
         return this.getDatabaseId() != null
-        && m.getDatabaseId() != null &&
-        this.getDatabaseId()
-                  .equals(m.getDatabaseId());
+               && another.getDatabaseId() != null &&
+               this.getDatabaseId()
+                   .equals(another.getDatabaseId());
     }
 
+    /**
+     * Compares this message to another message. Compares according to ideal
+     * sorting order for the conversations view.
+     *
+     * @param another The other message.
+     * @return -1, 1, or 0 if this message is less than, greater than, or
+     *         equal to the other message.
+     */
     @Override
     public int compareTo(@NonNull Message another) {
         if (this.isDraft && !another.isDraft) {
@@ -507,23 +644,18 @@ public class Message implements Comparable<Message> {
             jsonObject.put(Database.COLUMN_CONTACT, getContact());
             jsonObject.put(Database.COLUMN_MESSAGE, getText());
             jsonObject.put(Database.COLUMN_UNREAD, isUnreadInDatabaseFormat());
-            jsonObject.put(Database.COLUMN_DELETED, isDeletedInDatabaseFormat());
-            jsonObject.put(Database.COLUMN_DELIVERED, isDeliveredInDatabaseFormat());
-            jsonObject.put(Database.COLUMN_DELIVERY_IN_PROGRESS, isDeliveryInProgressInDatabaseFormat());
+            jsonObject
+                .put(Database.COLUMN_DELETED, isDeletedInDatabaseFormat());
+            jsonObject
+                .put(Database.COLUMN_DELIVERED, isDeliveredInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_DELIVERY_IN_PROGRESS,
+                           isDeliveryInProgressInDatabaseFormat());
             jsonObject.put(Database.COLUMN_DRAFT, isDraftInDatabaseFormat());
             return jsonObject;
         } catch (JSONException ex) {
             // This should never happen
             throw new Error();
         }
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public void setDraft(boolean draft) {
-        this.isDraft = draft;
     }
 
     /**

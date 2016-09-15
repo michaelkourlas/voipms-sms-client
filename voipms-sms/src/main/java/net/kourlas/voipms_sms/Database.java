@@ -213,8 +213,8 @@ public class Database {
         String[] params = new String[] {
             filterString
         };
-        String numberFilterConstraint = filterConstraint.replaceAll(
-            "[^0-9]", "");
+        String numberFilterConstraint = Utils.getDigitsOfString(
+            filterConstraint);
         String numericFilterStringQuery = "";
         if (!numberFilterConstraint.equals("")) {
             String numericFilterString = "%" + numberFilterConstraint + "%";

@@ -492,4 +492,21 @@ public class Utils {
             });
         snackbar.show();
     }
+
+    /**
+     * Returns a string consisting only of the digits in the specified string.
+     *
+     * @param str The specified string.
+     * @return A string consisting only of the digits in the specified string.
+     */
+    public static String getDigitsOfString(String str) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (Character.isDigit(c)) {
+                stringBuilder.append(c);
+            }
+        }
+        return stringBuilder.toString();
+    }
 }

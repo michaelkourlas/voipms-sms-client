@@ -338,8 +338,6 @@ public class ConversationsRecyclerViewAdapter
 
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
-            String numberFilterConstraint = filterConstraint.replaceAll(
-                "[^0-9]", "");
 
             Message[] messages = database.getFilteredMessagesForConversations(
                 preferences.getDid(), filterConstraint.toLowerCase());
