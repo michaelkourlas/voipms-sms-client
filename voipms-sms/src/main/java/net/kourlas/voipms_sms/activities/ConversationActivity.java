@@ -147,7 +147,8 @@ public class ConversationActivity
         // Set up message text box
         final EditText messageText =
             (EditText) findViewById(R.id.message_edit_text);
-        Message draftMessage = database.getDraft(preferences.getDid(), contact);
+        Message draftMessage = database.getDraftMessageForConversation(
+            preferences.getDid(), contact);
         if (draftMessage != null) {
             ViewSwitcher viewSwitcher =
                 (ViewSwitcher) findViewById(R.id.view_switcher);
@@ -193,8 +194,9 @@ public class ConversationActivity
                     viewSwitcher.setDisplayedChild(1);
                 }
 
-                Message previousDraftMessage = database.getDraft(
-                    preferences.getDid(), contact);
+                Message previousDraftMessage =
+                    database.getDraftMessageForConversation(
+                        preferences.getDid(), contact);
                 String newDraftMessageString = s.toString();
                 if (newDraftMessageString.equals("")) {
                     if (previousDraftMessage != null) {
@@ -384,7 +386,15 @@ public class ConversationActivity
             getString(R.string.delete),
             (dialog, which) -> {
                 database.deleteMessages(preferences.getDid(), contact);
-                NavUtils.navigateUpFromSameTask(this);
+
+                // Go back to the previous activity if no messages remain
+                if (!database.conversationHasMessages(preferences.getDid(),
+                                                      contact))
+                {
+                    NavUtils.navigateUpFromSameTask(this);
+                } else {
+                    adapter.refresh();
+                }
             },
             getString(R.string.cancel),
             null);
@@ -597,8 +607,8 @@ public class ConversationActivity
                 }
 
                 // Go back to the previous activity if no messages remain
-                if (database.getConversation(preferences.getDid(), contact)
-                            .getMessages().length == 0)
+                if (!database.conversationHasMessages(preferences.getDid(),
+                                                      contact))
                 {
                     NavUtils.navigateUpFromSameTask(this);
                 } else {

@@ -30,6 +30,7 @@ import net.kourlas.voipms_sms.model.Message;
 public class MarkAsReadReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        Database database = Database.getInstance(context.getApplicationContext());
         Preferences preferences = Preferences.getInstance(context.getApplicationContext());
         String contact = intent.getExtras().getString(context.getString(R.string.conversation_extra_contact));
 
@@ -41,10 +42,6 @@ public class MarkAsReadReceiver extends BroadcastReceiver {
             manager.cancel(notificationId);
         }
 
-        for (Message message : Database.getInstance(context.getApplicationContext()).getConversation(
-                preferences.getDid(), contact).getMessages()) {
-            message.setUnread(false);
-            Database.getInstance(context.getApplicationContext()).insertMessage(message);
-        }
+        database.markConversationAsRead(preferences.getDid(), contact);
     }
 }

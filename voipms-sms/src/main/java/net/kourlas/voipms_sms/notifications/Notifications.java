@@ -30,18 +30,16 @@ import net.kourlas.voipms_sms.*;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationQuickReplyActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
-import net.kourlas.voipms_sms.model.Conversation;
 import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.receivers.MarkAsReadReceiver;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Notifications {
     private static Notifications instance = null;
 
     private final Context applicationContext;
+    private final Database database;
     private final Preferences preferences;
 
     private final Map<String, Integer> notificationIds;
@@ -49,6 +47,7 @@ public class Notifications {
 
     private Notifications(Context context) {
         this.applicationContext = context.getApplicationContext();
+        this.database = Database.getInstance(applicationContext);
         this.preferences = Preferences.getInstance(applicationContext);
 
         this.notificationIds = new HashMap<>();
@@ -71,6 +70,11 @@ public class Notifications {
         return notificationIds;
     }
 
+    /**
+     * Show notifications for new messages for the specified conversations.
+     *
+     * @param contacts A list of contacts.
+     */
     public void showNotifications(List<String> contacts) {
         // Only show notifications if notifications are enabled
         if (!preferences.getNotificationsEnabled()) {
@@ -84,126 +88,167 @@ public class Notifications {
             return;
         }
 
-        Conversation[] conversations = Database
-            .getInstance(applicationContext).getConversations(
-                preferences.getDid());
-        for (Conversation conversation : conversations) {
-            if (!conversation.isUnread() || !contacts.contains(conversation.getContact()) ||
-                (ActivityMonitor.getInstance().getCurrentActivity() instanceof ConversationActivity &&
-                 ((ConversationActivity)
-                      ActivityMonitor.getInstance().getCurrentActivity()).getContact().equals(
-                     conversation.getContact()))) {
+        List<String> completedContacts = new ArrayList<>();
+        Map<String, String> shortTexts = new HashMap<>();
+        Map<String, String> longTexts = new HashMap<>();
+        Message[] messages = database.getUnreadMessages(preferences.getDid(),
+                                                        contacts);
+        for (Message message : messages) {
+            String contact = message.getContact();
+            Activity currentActivity = ActivityMonitor.getInstance()
+                                                      .getCurrentActivity();
+            if (!contacts.contains(contact)
+                || completedContacts.contains(contact)
+                || (currentActivity instanceof ConversationActivity
+                    && ((ConversationActivity) currentActivity).getContact()
+                                                               .equals(
+                                                                   contact)))
+            {
                 continue;
             }
 
-            String smsContact = Utils.getContactName(applicationContext, conversation.getContact());
-            if (smsContact == null) {
-                smsContact = Utils.getFormattedPhoneNumber(conversation.getContact());
-            }
-
-            String allSmses = "";
-            String mostRecentSms = "";
-            boolean initial = true;
-            for (Message message : conversation.getMessages()) {
-                if (message.getType() == Message.Type.INCOMING && message.isUnread()) {
-                    if (initial) {
-                        allSmses = message.getText();
-                        mostRecentSms = message.getText();
-                        initial = false;
-                    }
-                    else {
-                        allSmses = message.getText() + "\n" + allSmses;
-                    }
+            if (message.getType() == Message.Type.OUTGOING) {
+                if (shortTexts.get(contact) != null)
+                {
+                    showNotification(contact, shortTexts.get(contact),
+                                     longTexts.get(contact));
+                    shortTexts.remove(contact);
+                    longTexts.remove(contact);
+                    completedContacts.add(contact);
                 }
-                else {
-                    break;
+            } else {
+                if (shortTexts.get(contact) != null) {
+                    longTexts.put(contact, message.getText() + "\n"
+                                           + longTexts.get(contact));
+                } else {
+                    shortTexts.put(contact, message.getText());
+                    longTexts.put(contact, message.getText());
                 }
             }
-
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
-                applicationContext);
-
-            notificationBuilder.setContentTitle(smsContact);
-            notificationBuilder.setContentText(mostRecentSms);
-            notificationBuilder.setSmallIcon(R.drawable.ic_chat_white_24dp);
-            notificationBuilder.setPriority(Notification.PRIORITY_HIGH);
-            String notificationSound = Preferences.getInstance(applicationContext).getNotificationSound();
-            if (!notificationSound.equals("")) {
-                notificationBuilder.setSound(Uri.parse(
-                    Preferences.getInstance(applicationContext).getNotificationSound()));
-            }
-            notificationBuilder.setLights(0xFFAA0000, 1000, 5000);
-            if (Preferences.getInstance(applicationContext).getNotificationVibrateEnabled()) {
-                notificationBuilder.setVibrate(new long[]{0, 250, 250, 250});
-            }
-            else {
-                notificationBuilder.setVibrate(new long[]{0});
-            }
-            notificationBuilder.setColor(0xFFAA0000);
-            notificationBuilder.setAutoCancel(true);
-            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(allSmses));
-
-            Bitmap largeIconBitmap;
-            try {
-                largeIconBitmap = MediaStore.Images.Media.getBitmap(applicationContext.getContentResolver(),
-                                                                    Uri.parse(Utils.getContactPhotoUri(applicationContext, conversation.getContact())));
-                largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap, 256, 256, false);
-                largeIconBitmap = Utils.applyCircularMask(largeIconBitmap);
-                notificationBuilder.setLargeIcon(largeIconBitmap);
-            } catch (Exception ignored) {
-
-            }
-
-            Intent intent = new Intent(applicationContext, ConversationActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra(applicationContext.getString(R.string.conversation_extra_contact),
-                            conversation.getContact());
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(applicationContext);
-            stackBuilder.addParentStack(ConversationActivity.class);
-            stackBuilder.addNextIntent(intent);
-            notificationBuilder.setContentIntent(stackBuilder.getPendingIntent(0,
-                                                                               PendingIntent.FLAG_CANCEL_CURRENT));
-
-            Intent replyIntent = new Intent(applicationContext, ConversationQuickReplyActivity.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                replyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-            }
-            else {
-                //noinspection deprecation
-                replyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-            }
-            replyIntent.putExtra(applicationContext.getString(R.string.conversation_extra_contact),
-                                 conversation.getContact());
-            PendingIntent replyPendingIntent = PendingIntent.getActivity(applicationContext, 0, replyIntent,
-                                                                         PendingIntent.FLAG_CANCEL_CURRENT);
-            NotificationCompat.Action.Builder replyAction = new NotificationCompat.Action.Builder(
-                R.drawable.ic_reply_white_24dp,
-                applicationContext.getString(R.string.notifications_button_reply),
-                replyPendingIntent);
-            notificationBuilder.addAction(replyAction.build());
-
-            Intent markAsReadIntent = new Intent(applicationContext, MarkAsReadReceiver.class);
-            markAsReadIntent.putExtra(applicationContext.getString(R.string.conversation_extra_contact),
-                                      conversation.getContact());
-            PendingIntent markAsReadPendingIntent = PendingIntent.getBroadcast(applicationContext, 0,
-                                                                               markAsReadIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            NotificationCompat.Action.Builder markAsReadAction = new NotificationCompat.Action.Builder(
-                R.drawable.ic_drafts_white_24dp,
-                applicationContext.getString(R.string.notifications_button_mark_read),
-                markAsReadPendingIntent);
-            notificationBuilder.addAction(markAsReadAction.build());
-
-            int id;
-            if (notificationIds.get(conversation.getContact()) != null) {
-                id = notificationIds.get(conversation.getContact());
-            }
-            else {
-                id = notificationIdCount++;
-                notificationIds.put(conversation.getContact(), id);
-            }
-            NotificationManager notificationManager = (NotificationManager)
-                applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(id, notificationBuilder.build());
+        }
+        for (Map.Entry<String, String> entry : shortTexts.entrySet()) {
+            showNotification(entry.getKey(), entry.getValue(),
+                             longTexts.get(entry.getKey()));
         }
     }
+
+
+    /**
+     * Shows a notification with the specified details.
+     *
+     * @param contact   The contact that the notification is from.
+     * @param shortText The short form of the message text.
+     * @param longText  The long form of the message text.
+     */
+    private void showNotification(String contact,
+                                  String shortText,
+                                  String longText) {
+
+        String title = Utils.getContactName(applicationContext,
+                                            contact);
+        if (title == null) {
+            title = Utils.getFormattedPhoneNumber(contact);
+        }
+        NotificationCompat.Builder notification =
+            new NotificationCompat.Builder(applicationContext);
+        notification.setContentTitle(title);
+        notification.setContentText(shortText);
+        notification.setSmallIcon(R.drawable.ic_chat_white_24dp);
+        notification.setPriority(Notification.PRIORITY_HIGH);
+        String notificationSound = Preferences.getInstance(
+            applicationContext).getNotificationSound();
+        if (!notificationSound.equals("")) {
+            notification.setSound(Uri.parse(Preferences.getInstance(
+                applicationContext).getNotificationSound()));
+        }
+        notification.setLights(0xFFAA0000, 1000, 5000);
+        if (Preferences.getInstance(applicationContext)
+                       .getNotificationVibrateEnabled())
+        {
+            notification.setVibrate(new long[]{0, 250, 250, 250});
+        }
+        else {
+            notification.setVibrate(new long[]{0});
+        }
+        notification.setColor(0xFFAA0000);
+        notification.setAutoCancel(true);
+        notification.setStyle(new NotificationCompat.BigTextStyle()
+                                  .bigText(longText));
+
+        Bitmap largeIconBitmap;
+        try {
+            largeIconBitmap = MediaStore.Images.Media.getBitmap(
+                applicationContext.getContentResolver(), Uri.parse(
+                    Utils.getContactPhotoUri(applicationContext, contact)));
+            largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap,
+                                                        256, 256, false);
+            largeIconBitmap = Utils.applyCircularMask(largeIconBitmap);
+            notification.setLargeIcon(largeIconBitmap);
+        } catch (Exception ignored) {
+            // Do nothing.
+        }
+
+        Intent intent = new Intent(applicationContext,
+                                   ConversationActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(applicationContext.getString(
+            R.string.conversation_extra_contact),
+                        contact);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(
+            applicationContext);
+        stackBuilder.addParentStack(ConversationActivity.class);
+        stackBuilder.addNextIntent(intent);
+        notification.setContentIntent(stackBuilder.getPendingIntent(
+            0,PendingIntent.FLAG_CANCEL_CURRENT));
+
+        Intent replyIntent = new Intent(applicationContext,
+                                        ConversationQuickReplyActivity.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            replyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        }
+        else {
+            //noinspection deprecation
+            replyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        }
+        replyIntent.putExtra(applicationContext.getString(
+            R.string.conversation_extra_contact), contact);
+        PendingIntent replyPendingIntent = PendingIntent.getActivity(
+            applicationContext, 0, replyIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT);
+        NotificationCompat.Action.Builder replyAction =
+            new NotificationCompat.Action.Builder(
+                R.drawable.ic_reply_white_24dp,
+                applicationContext.getString(
+                    R.string.notifications_button_reply),
+                replyPendingIntent);
+        notification.addAction(replyAction.build());
+
+        Intent markAsReadIntent = new Intent(applicationContext,
+                                             MarkAsReadReceiver.class);
+        markAsReadIntent.putExtra(applicationContext.getString(
+            R.string.conversation_extra_contact), contact);
+        PendingIntent markAsReadPendingIntent = PendingIntent.getBroadcast(
+            applicationContext, 0, markAsReadIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT);
+        NotificationCompat.Action.Builder markAsReadAction =
+            new NotificationCompat.Action.Builder(
+                R.drawable.ic_drafts_white_24dp,
+                applicationContext.getString(
+                    R.string.notifications_button_mark_read),
+                markAsReadPendingIntent);
+        notification.addAction(markAsReadAction.build());
+
+        int id;
+        if (notificationIds.get(contact) != null) {
+            id = notificationIds.get(contact);
+        }
+        else {
+            id = notificationIdCount++;
+            notificationIds.put(contact, id);
+        }
+        NotificationManager notificationManager = (NotificationManager)
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(id, notification.build());
+    }
+
 }

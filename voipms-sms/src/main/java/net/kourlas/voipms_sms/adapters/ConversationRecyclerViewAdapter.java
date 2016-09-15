@@ -42,10 +42,7 @@ import net.kourlas.voipms_sms.Utils;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.model.Message;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ConversationRecyclerViewAdapter
     extends
@@ -390,8 +387,8 @@ public class ConversationRecyclerViewAdapter
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
 
-            Message[] messages = database.conversationFilter(
-                preferences.getDid(), contact, filterConstraint);
+            Message[] messages = database.getFilteredMessagesForConversation(
+                preferences.getDid(), contact, filterConstraint.toLowerCase());
 
             results.count = messages.length;
             results.values = messages;
@@ -403,17 +400,18 @@ public class ConversationRecyclerViewAdapter
         protected void publishResults(CharSequence constraint,
                                       FilterResults results)
         {
-            Message[] newMessages = (Message[]) results.values;
+            List<Message> newMessages = Collections.emptyList();
+            if (results.values != null) {
+                newMessages = Arrays.asList((Message[]) results.values);
+            }
 
-            List<Message> oldMessages = new LinkedList<>();
+            // Remove old messages from the adapter
+            List<Message> oldMessages = new ArrayList<>();
             oldMessages.addAll(messages);
             for (Message oldMessage : oldMessages) {
                 boolean removed = true;
                 for (Message newMessage : newMessages) {
-                    if (oldMessage.getDatabaseId() != null
-                        && newMessage.getDatabaseId() != null &&
-                        oldMessage.getDatabaseId()
-                                  .equals(newMessage.getDatabaseId()))
+                    if (oldMessage.equalsDatabaseId(newMessage))
                     {
                         removed = false;
                         break;
@@ -429,25 +427,29 @@ public class ConversationRecyclerViewAdapter
                 }
             }
 
+            // Update changed messages in the adapter
+            List<Message> newConversationMessages = new ArrayList<>();
+            newConversationMessages.addAll(newMessages);
             for (int i = 0; i < messages.size(); i++) {
                 for (Message newMessage : newMessages) {
-                    if (messages.get(i).getDatabaseId() != null
-                        && newMessage.getDatabaseId() != null &&
-                        messages.get(i).getDatabaseId()
-                                .equals(newMessage.getDatabaseId()))
+                    if (messages.get(i).equalsDatabaseId(newMessage))
                     {
-                        if (!messages.get(i).equals(newMessage) ||
-                            !oldFilterConstraint.equals(filterConstraint))
-                        {
-                            // Message was changed
+                        // Message was changed (or the filter constraint has
+                        // changed and we want a change animation for all
+                        // messages)
+                        if (!messages.get(i).equals(newMessage)
+                            || !oldFilterConstraint.equals(filterConstraint)) {
                             messages.set(i, newMessage);
                             notifyItemChanged(i);
                         }
+                        newConversationMessages.remove(newMessage);
                     }
                 }
             }
+            newMessages = newConversationMessages;
 
-            List<Message> sortedMessages = new LinkedList<>();
+            // Update moved messages in the adapter
+            List<Message> sortedMessages = new ArrayList<>();
             sortedMessages.addAll(messages);
             Collections.sort(sortedMessages);
             Collections.reverse(sortedMessages);
@@ -472,16 +474,21 @@ public class ConversationRecyclerViewAdapter
                 notifyItemMoved(index, i);
             }
 
-            if (newMessages != null) {
-                for (int i = 0; i < newMessages.length; i++) {
-                    if (messages.size() <= i || !newMessages[i].equals(
-                        messages.get(i)))
-                    {
-                        // Message is new
-                        checkedItems.add(i, false);
-                        messages.add(i, newMessages[i]);
-                        notifyItemInserted(i);
+            // Add new messages to the adapter
+            for (Message newMessage : newMessages) {
+                if (messages.size() >= 1) {
+                    int i = 0;
+                    while (i < messages.size()
+                           && newMessage.compareTo(messages.get(i)) < 0) {
+                        i++;
                     }
+                    checkedItems.add(i, false);
+                    messages.add(i, newMessage);
+                    notifyItemInserted(i);
+                } else {
+                    checkedItems.add(0, false);
+                    messages.add(0, newMessage);
+                    notifyItemInserted(0);
                 }
             }
 

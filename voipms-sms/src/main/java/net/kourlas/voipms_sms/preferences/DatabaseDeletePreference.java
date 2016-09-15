@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.preferences;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.Preference;
-import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.R;
@@ -48,7 +47,7 @@ public class DatabaseDeletePreference extends Preference {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Database.getInstance(getContext().getApplicationContext()).deleteAllMessages();
+                        Database.getInstance(getContext().getApplicationContext()).removeAllMessages();
                     }
                 },
                 getContext().getString(R.string.cancel), null);

@@ -32,8 +32,6 @@ import java.util.TimeZone;
  * Represents a single SMS message.
  */
 public class Message implements Comparable<Message> {
-    private static long uniqueObjectIdentifierCount = 0;
-
     /**
      * The database ID of the message.
      */
@@ -68,7 +66,6 @@ public class Message implements Comparable<Message> {
      * The text of the message.
      */
     private String text;
-    private final long uniqueObjectIdentifier;
     /**
      * Whether or not the message is unread.
      */
@@ -154,8 +151,6 @@ public class Message implements Comparable<Message> {
             throw new IllegalArgumentException("isDraft must be 0 or 1.");
         }
         this.isDraft = isDraft == 1;
-
-        this.uniqueObjectIdentifier = uniqueObjectIdentifierCount++;
     }
 
     /**
@@ -206,8 +201,6 @@ public class Message implements Comparable<Message> {
         this.isDeliveryInProgress = false;
 
         this.isDraft = false;
-
-        this.uniqueObjectIdentifier = uniqueObjectIdentifierCount++;
     }
 
     /**
@@ -248,8 +241,6 @@ public class Message implements Comparable<Message> {
         this.isDeliveryInProgress = true;
 
         this.isDraft = false;
-
-        this.uniqueObjectIdentifier = uniqueObjectIdentifierCount++;
     }
 
     /**
@@ -440,42 +431,60 @@ public class Message implements Comparable<Message> {
         }
     }
 
-    /**
-     * Compares this message to another message.
-     *
-     * @param another The other message.
-     * @return 1 will be returned if this message's date is before the other message's date, and -1 will be returned if
-     * this message's date is after the other message's date.
-     * <p/>
-     * If the dates of the messages are identical, 1 will be returned if this message's text is alphabetically after
-     * the other message's date, and -1 will be returned if this message's text is alphabetically before the other
-     * message's date.
-     * <p/>
-     * If the texts of the messages are identical, 1 or -1 will be returned depending on the values of the objects'
-     * unique internal identifiers. These identifiers are generated at runtime and are constant for the duration of the
-     * application's execution, though they will not necessarily be constant between executions. They ensure that for
-     * the duration of the application's execution, messages will always have a deterministic sorting order.
-     */
+    public boolean equalsConversation(Message m) {
+        return this.contact.equals(m.contact) && this.did.equals(m.did);
+    }
+
+    public boolean equalsDatabaseId(Message m) {
+        return this.getDatabaseId() != null
+        && m.getDatabaseId() != null &&
+        this.getDatabaseId()
+                  .equals(m.getDatabaseId());
+    }
+
     @Override
     public int compareTo(@NonNull Message another) {
-        if (this.date.before(another.date)) {
+        if (this.isDraft && !another.isDraft) {
+            return -1;
+        } else if (!this.isDraft && another.isDraft) {
             return 1;
         }
-        else if (this.date.after(another.date)) {
+
+        if (!this.isDraft) {
+            if (this.date.getTime() > another.date.getTime()) {
+                return -1;
+            } else if (this.date.getTime() < another.date.getTime()) {
+                return 1;
+            }
+        }
+
+        int contactCompare = this.contact.compareTo(another.contact);
+        if (contactCompare > 0) {
+            return 1;
+        } else if (contactCompare < 0) {
             return -1;
         }
 
         int textCompare = this.text.compareTo(another.text);
-        if (textCompare == 1 || textCompare == -1) {
-            return textCompare;
-        }
-
-        if (this.uniqueObjectIdentifier > another.uniqueObjectIdentifier) {
+        if (textCompare > 0) {
             return 1;
-        }
-        else {
+        } else if (textCompare < 0) {
             return -1;
         }
+
+        if (this.databaseId != null && another.databaseId != null) {
+            if (this.databaseId > another.databaseId) {
+                return 1;
+            } else if (this.databaseId < another.databaseId) {
+                return -1;
+            }
+        } else if (this.databaseId == null && another.databaseId != null) {
+            return -1;
+        } else if (this.databaseId != null) {
+            return 1;
+        }
+
+        return 0;
     }
 
     /**

@@ -55,7 +55,7 @@ public class EditDatabaseActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        Message[] messages = database.getMessages();
+        Message[] messages = database.getAllMessages();
         JSONArray messagesJsonArray = new JSONArray();
         for (Message message : messages) {
             messagesJsonArray.put(message.toJSON());
@@ -110,7 +110,7 @@ public class EditDatabaseActivity extends AppCompatActivity {
                         return false;
                     }
 
-                    database.deleteAllMessages();
+                    database.removeAllMessages();
                     for (Message message : messages) {
                         database.insertMessage(message);
                     }

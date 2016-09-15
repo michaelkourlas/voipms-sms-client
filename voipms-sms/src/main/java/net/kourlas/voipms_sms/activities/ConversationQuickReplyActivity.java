@@ -85,7 +85,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         }
 
         final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        Message draftMessage = database.getDraft(preferences.getDid(), contact);
+        Message draftMessage = database.getDraftMessageForConversation(preferences.getDid(), contact);
         if (draftMessage != null) {
             ViewSwitcher viewSwitcher =
                 (ViewSwitcher) findViewById(R.id.view_switcher);
@@ -122,7 +122,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
                     viewSwitcher.setDisplayedChild(1);
                 }
 
-                Message previousDraftMessage = database.getDraft(
+                Message previousDraftMessage = database.getDraftMessageForConversation(
                     preferences.getDid(), contact);
                 String newDraftMessageString = s.toString();
                 if (newDraftMessageString.equals("")) {
