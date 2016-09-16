@@ -182,8 +182,12 @@ public class PreferencesActivity extends AppCompatActivity {
                 } else {
                     Ringtone ringtone = RingtoneManager.getRingtone(
                         getActivity(), Uri.parse(notificationSound));
-                    ringtonePreference.setSummary(ringtone.getTitle(
-                        getActivity()));
+                    if (ringtone != null) {
+                        ringtonePreference.setSummary(ringtone.getTitle(
+                            getActivity()));
+                    } else {
+                        ringtonePreference.setSummary("Unknown ringtone");
+                    }
                 }
             } else if (preference instanceof StartDatePreference) {
                 StartDatePreference datePreference =
