@@ -71,8 +71,8 @@
 
 <h3>Synchronization interval</h3>
 
-<p>You can configure the application to perform synchronizations automatically. Since it's not necessary to
-    synchronize that often, the smallest interval is one day.</p>
+<p>You can configure the application to perform synchronizations automatically.
+    Smaller intervals consume more battery life.</p>
 
 <h3>Message retrieval start date</h3>
 
@@ -97,7 +97,8 @@
 
 <h3>Propagate local deletions</h3>
 
-<p>Normally, synchronization< does not delete messages stored on the VoIP.ms servers that were deleted locally. You
+<p>Normally, synchronization does not delete messages stored on the VoIP.ms
+    servers that were deleted locally. You
     can choose to do this by enabling this option.</p>
 
 <h3>Propagate remote deletions</h3>
@@ -111,7 +112,10 @@
 
 <h2 id="notifications">Notifications</h2>
 
-<p>This application supports push notifications using Google Cloud Messaging. To enable push notifications:</p>
+<h3>Push notifications</h3>
+
+<p>This application also supports push notifications using Google Cloud
+    Messaging. To enable push notifications:</p>
 <ul>
     <li>make sure your device is connected to the Internet, then enable notifications in Settings; and</li>
     <li>access the SMS settings for your DID on the VoIP.ms portal and enable the 'SMS URL Callback' feature,
@@ -128,6 +132,14 @@
 
 <p>To protect your privacy, the server <strong>only</strong> links DIDs with GCM registration IDs and tells your
     device when to sync with the VoIP.ms servers. It does not process or store the text of individual SMSes.</p>
+
+<h3>Regular notifications</h3>
+
+<p>If you'd rather not enable push notifications for whatever reason, the
+    application can also simply display notifications whenever a new message is
+    received during synchronization with the VoIP.ms servers. This can be a
+    reasonable substitute for push notifications if automatic synchronization is
+    enabled, though obviously this solution consumes more battery life.</p>
 
 <h2 id="database">Database</h2>
 
