@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
-import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
-import net.kourlas.voipms_sms.Utils;
+import net.kourlas.voipms_sms.preferences.Preferences;
 import net.kourlas.voipms_sms.preferences.PushNotificationsPreference;
+import net.kourlas.voipms_sms.utils.Utils;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
@@ -143,8 +143,7 @@ public class PushNotifications {
                             R.string.notifications_callback_fail),
                         applicationContext.getString(R.string.ok),
                         gcmOnClickListener, null, null);
-                }
-                else {
+                } else {
                     Utils.showAlertDialog(
                         activity, null,
                         applicationContext.getString(
@@ -157,12 +156,15 @@ public class PushNotifications {
     }
 
     /**
-     * Registers for Google Cloud Messaging. Sends the registration token to the application servers.
+     * Registers for Google Cloud Messaging. Sends the registration token to
+     * the application servers.
      *
      * @param activity     The activity that initiated the registration.
-     * @param showFeedback If true, shows a dialog at the end of the registration process indicating the success or
+     * @param showFeedback If true, shows a dialog at the end of the
+     *                     registration process indicating the success or
      *                     failure of the process.
-     * @param force        If true, retrieves a new registration token even if one is already stored.
+     * @param force        If true, retrieves a new registration token even
+     *                     if one is already stored.
      */
     public void registerForGcm(
         final Activity activity,
@@ -174,7 +176,8 @@ public class PushNotifications {
             return;
         }
         if (preferences.getDid().equals("")) {
-            // Do not show an error; this method should never be called unless a DID is set
+            // Do not show an error; this method should never be called
+            // unless a DID is set
             return;
         }
         if (!checkPlayServices(activity, showFeedback)) {
@@ -183,25 +186,35 @@ public class PushNotifications {
 
         final ProgressDialog progressDialog = new ProgressDialog(activity);
         if (showFeedback) {
-            progressDialog.setMessage(applicationContext.getString(R.string.notifications_gcm_progress));
+            progressDialog.setMessage(applicationContext.getString(
+                R.string.notifications_gcm_progress));
             progressDialog.setCancelable(false);
             progressDialog.show();
         }
 
-        final InstanceID instanceIdObj = InstanceID.getInstance(applicationContext);
+        final InstanceID instanceIdObj =
+            InstanceID.getInstance(applicationContext);
         final String instanceId = instanceIdObj.getId();
-        if (preferences.getGcmToken().equals("") || !instanceId.equals(preferences.getGcmInstanceId()) || force) {
+        if (preferences.getGcmToken().equals("") || !instanceId
+            .equals(preferences.getGcmInstanceId()) || force)
+        {
             new AsyncTask<Boolean, Void, Boolean>() {
                 @Override
                 protected Boolean doInBackground(Boolean... params) {
                     try {
-                        String token = instanceIdObj.getToken(applicationContext.getString(R.string.notifications_gcm_sender_id),
-                                GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+                        String token = instanceIdObj.getToken(applicationContext
+                                                                  .getString(
+                                                                      R.string.notifications_gcm_sender_id),
+                                                              GoogleCloudMessaging.INSTANCE_ID_SCOPE,
+                                                              null);
 
-                        String registrationBackendUrl = "https://voipmssms-kourlas.rhcloud.com/register?" +
-                                "did=" + URLEncoder.encode(preferences.getDid(), "UTF-8") + "&" +
-                                "reg_id=" + URLEncoder.encode(token, "UTF-8");
-                        JSONObject result = Utils.getJson(registrationBackendUrl);
+                        String registrationBackendUrl =
+                            "https://voipmssms-kourlas.rhcloud.com/register?" +
+                            "did=" + URLEncoder
+                                .encode(preferences.getDid(), "UTF-8") + "&" +
+                            "reg_id=" + URLEncoder.encode(token, "UTF-8");
+                        JSONObject result =
+                            Utils.getJson(registrationBackendUrl);
                         String status = result.optString("status");
                         if (status == null || !status.equals("success")) {
                             return false;
@@ -221,12 +234,13 @@ public class PushNotifications {
                     if (showFeedback) {
                         progressDialog.hide();
                         if (!success) {
-                            Utils.showInfoDialog(activity, applicationContext.getResources().getString(
+                            Utils.showInfoDialog(activity, applicationContext
+                                .getResources().getString(
                                     R.string.notifications_gcm_fail));
 
-                        }
-                        else {
-                            Utils.showInfoDialog(activity, applicationContext.getResources().getString(
+                        } else {
+                            Utils.showInfoDialog(activity, applicationContext
+                                .getResources().getString(
                                     R.string.notifications_gcm_success));
                         }
                     }
@@ -236,9 +250,11 @@ public class PushNotifications {
                     }
                 }
             }.execute();
-        }
-        else if (showFeedback) {
-            Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.notifications_gcm_success));
+        } else if (showFeedback) {
+            Utils.showInfoDialog(activity, applicationContext.getResources()
+                                                             .getString(
+                                                                 R.string
+                                                                     .notifications_gcm_success));
         }
     }
 
@@ -246,19 +262,29 @@ public class PushNotifications {
      * Returns true if Google Play Services is set up properly on the device.
      *
      * @param activity     The activity that initiated the check.
-     * @param showFeedback If true, shows a dialog at the end of the check indicating the success or failure of the
+     * @param showFeedback If true, shows a dialog at the end of the check
+     *                     indicating the success or failure of the
      *                     process.
      * @return True if Google Play Services is set up properly on the device.
      */
     private boolean checkPlayServices(Activity activity, boolean showFeedback) {
-        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(applicationContext);
+        int resultCode = GoogleApiAvailability.getInstance()
+                                              .isGooglePlayServicesAvailable(
+                                                  applicationContext);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (showFeedback) {
-                if (GoogleApiAvailability.getInstance().isUserResolvableError(resultCode)) {
-                    GoogleApiAvailability.getInstance().getErrorDialog(activity, resultCode, 0).show();
-                }
-                else {
-                    Utils.showInfoDialog(activity, applicationContext.getResources().getString(R.string.notifications_gcm_play_services));
+                if (GoogleApiAvailability.getInstance()
+                                         .isUserResolvableError(resultCode))
+                {
+                    GoogleApiAvailability.getInstance()
+                                         .getErrorDialog(activity, resultCode,
+                                                         0).show();
+                } else {
+                    Utils.showInfoDialog(activity,
+                                         applicationContext.getResources()
+                                                           .getString(
+                                                               R.string
+                                                                   .notifications_gcm_play_services));
                 }
             }
             return false;

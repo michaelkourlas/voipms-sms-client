@@ -33,14 +33,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import net.kourlas.voipms_sms.Database;
-import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
-import net.kourlas.voipms_sms.Utils;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
+import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.preferences.Preferences;
+import net.kourlas.voipms_sms.utils.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ConversationsRecyclerViewAdapter
     extends
@@ -236,17 +238,16 @@ public class ConversationsRecyclerViewAdapter
         return messages.size();
     }
 
-    @Override
-    public Filter getFilter() {
-        return new ConversationsFilter();
+    public boolean isItemChecked(int position) {
+        return checkedItems.get(position);
     }
 
     public Message getItem(int position) {
         return messages.get(position);
     }
 
-    public boolean isItemChecked(int position) {
-        return checkedItems.get(position);
+    public void toggleItemChecked(int position) {
+        setItemChecked(position, !isItemChecked(position));
     }
 
     public void setItemChecked(int position, boolean checked) {
@@ -258,10 +259,6 @@ public class ConversationsRecyclerViewAdapter
         } else if (!previous && checked) {
             notifyItemChanged(position);
         }
-    }
-
-    public void toggleItemChecked(int position) {
-        setItemChecked(position, !isItemChecked(position));
     }
 
     public int getCheckedItemCount() {
@@ -276,6 +273,11 @@ public class ConversationsRecyclerViewAdapter
 
     public void refresh() {
         getFilter().filter(filterConstraint);
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new ConversationsFilter();
     }
 
     public void refresh(String newFilterConstraint) {
@@ -339,15 +341,17 @@ public class ConversationsRecyclerViewAdapter
             oldFilterConstraint = filterConstraint;
             filterConstraint = constraint.toString().trim();
 
-            Message[] messages = database.getFilteredMessagesForConversations(
-                preferences.getDid(), filterConstraint.toLowerCase());
+            List<Message> messages =
+                database.getMostRecentFilteredMessageForAllConversations(
+                    preferences.getDid(), filterConstraint.toLowerCase());
 
-            results.count = messages.length;
+            results.count = messages.size();
             results.values = messages;
 
             return results;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected void publishResults(CharSequence constraint,
                                       FilterResults results)
@@ -356,7 +360,7 @@ public class ConversationsRecyclerViewAdapter
 
             List<Message> newMessages = Collections.emptyList();
             if (results.values != null) {
-                newMessages = Arrays.asList((Message[]) results.values);
+                newMessages = (List<Message>) results.values;
             }
 
             // Remove old messages from the adapter
@@ -365,8 +369,7 @@ public class ConversationsRecyclerViewAdapter
             for (Message oldMessage : oldMessages) {
                 boolean removed = true;
                 for (Message newMessage : newMessages) {
-                    if (oldMessage.equalsConversation(newMessage))
-                    {
+                    if (oldMessage.equalsConversation(newMessage)) {
                         removed = false;
                         break;
                     }
@@ -386,13 +389,13 @@ public class ConversationsRecyclerViewAdapter
             newConversationMessages.addAll(newMessages);
             for (int i = 0; i < messages.size(); i++) {
                 for (Message newMessage : newMessages) {
-                    if (messages.get(i).equalsConversation(newMessage))
-                    {
+                    if (messages.get(i).equalsConversation(newMessage)) {
                         // Message was changed (or the filter constraint has
                         // changed and we want a change animation for all
                         // messages)
                         if (!messages.get(i).equals(newMessage)
-                            || !oldFilterConstraint.equals(filterConstraint)) {
+                            || !oldFilterConstraint.equals(filterConstraint))
+                        {
                             messages.set(i, newMessage);
                             notifyItemChanged(i);
                         }

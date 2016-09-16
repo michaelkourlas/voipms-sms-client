@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,11 @@
 package net.kourlas.voipms_sms.preferences;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.preference.Preference;
 import android.util.AttributeSet;
-import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.R;
-import net.kourlas.voipms_sms.Utils;
+import net.kourlas.voipms_sms.db.Database;
+import net.kourlas.voipms_sms.utils.Utils;
 
 @SuppressWarnings("unused")
 public class DatabaseDeletePreference extends Preference {
@@ -35,21 +34,25 @@ public class DatabaseDeletePreference extends Preference {
         super(context, attrs);
     }
 
-    public DatabaseDeletePreference(Context context, AttributeSet attrs, int defStyleAttr) {
+    public DatabaseDeletePreference(Context context, AttributeSet attrs,
+                                    int defStyleAttr)
+    {
         super(context, attrs, defStyleAttr);
     }
 
     @Override
     protected void onClick() {
-        Utils.showAlertDialog(getContext(), getContext().getString(R.string.preferences_database_delete_confirm_title),
-                getContext().getString(R.string.preferences_database_delete_confirm_message),
-                getContext().getApplicationContext().getString(R.string.delete),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Database.getInstance(getContext().getApplicationContext()).removeAllMessages();
-                    }
-                },
-                getContext().getString(R.string.cancel), null);
+        Utils.showAlertDialog(getContext(), getContext()
+                                  .getString(R.string
+                                                 .preferences_database_delete_confirm_title),
+                              getContext().getString(
+                                  R.string
+                                      .preferences_database_delete_confirm_message),
+                              getContext().getApplicationContext()
+                                          .getString(R.string.delete),
+                              (dialog, which) -> Database.getInstance(
+                                  getContext().getApplicationContext())
+                                                         .removeAllMessages(),
+                              getContext().getString(R.string.cancel), null);
     }
 }

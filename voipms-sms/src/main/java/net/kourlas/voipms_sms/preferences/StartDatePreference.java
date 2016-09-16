@@ -22,13 +22,14 @@ import android.content.Context;
 import android.preference.Preference;
 import android.util.AttributeSet;
 import android.widget.DatePicker;
-import net.kourlas.voipms_sms.Preferences;
 
 import java.util.Calendar;
 
 @SuppressWarnings("unused")
-public class StartDatePreference extends Preference implements DatePickerDialog.OnDateSetListener {
-    Preferences preferences;
+public class StartDatePreference extends Preference
+    implements DatePickerDialog.OnDateSetListener
+{
+    private Preferences preferences;
 
     public StartDatePreference(Context context) {
         super(context);
@@ -40,7 +41,9 @@ public class StartDatePreference extends Preference implements DatePickerDialog.
         preferences = Preferences.getInstance(context);
     }
 
-    public StartDatePreference(Context context, AttributeSet attrs, int defStyleAttr) {
+    public StartDatePreference(Context context, AttributeSet attrs,
+                               int defStyleAttr)
+    {
         super(context, attrs, defStyleAttr);
         preferences = Preferences.getInstance(context);
     }
@@ -49,12 +52,15 @@ public class StartDatePreference extends Preference implements DatePickerDialog.
     protected void onClick() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(preferences.getStartDate());
-        new DatePickerDialog(getContext(), this, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)).show();
+        new DatePickerDialog(getContext(), this, calendar.get(Calendar.YEAR),
+                             calendar.get(Calendar.MONTH),
+                             calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     @Override
-    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+    public void onDateSet(DatePicker view, int year, int monthOfYear,
+                          int dayOfMonth)
+    {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, monthOfYear, dayOfMonth);
         preferences.setStartDate(calendar.getTime());

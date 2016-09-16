@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms;
+package net.kourlas.voipms_sms.db;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -27,12 +27,16 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
+import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.activities.ActivityMonitor;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationQuickReplyActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
 import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.notifications.Notifications;
+import net.kourlas.voipms_sms.preferences.Preferences;
 import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
+import net.kourlas.voipms_sms.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,7 +107,6 @@ public class Database {
         return instance;
     }
 
-
     /**
      * Adds a message to the database. If a record with the message's database
      * ID or VoIP.ms ID already exists, that record is replaced. Otherwise, a
@@ -115,7 +118,8 @@ public class Database {
     public synchronized long insertMessage(Message message) {
         ContentValues values = new ContentValues();
 
-        // Replace records with database ID or VoIP.ms ID
+        // Replace records with a defined database ID or VoIP.ms ID instead of
+        // inserting new ones
         if (message.getDatabaseId() != null) {
             values.put(COLUMN_DATABASE_ID, message.getDatabaseId());
         } else if (message.getVoipId() != null) {
@@ -148,63 +152,111 @@ public class Database {
     }
 
     /**
-     * Gets the message with the specified database ID from the database.
+     * Gets the database ID for the row in the database with the specified
+     * VoIP.ms ID.
      *
-     * @return The message with the specified database ID.
+     * @param did    The currently selected DID.
+     * @param voipId The VoIP.ms ID.
+     * @return The database ID.
      */
-    public synchronized Message getMessageWithDatabaseId(long databaseId)
+    private synchronized Long getDatabaseIdForVoipId(String did, long voipId) {
+        Cursor cursor = database.query(
+            TABLE_MESSAGE,
+            columns,
+            COLUMN_DID + "=" + did + " AND "
+            + COLUMN_VOIP_ID + "=" + voipId,
+            null, null, null, null);
+        if (cursor.moveToFirst()) {
+            return cursor.getLong(cursor.getColumnIndexOrThrow(
+                COLUMN_DATABASE_ID));
+        }
+        cursor.close();
+        return null;
+    }
+
+    /**
+     * Gets the message with the specified VoIP.ms ID from the database.
+     *
+     * @param did    The currently selected DID.
+     * @param voipId The VoIP.ms ID.
+     * @return The message with the specified VoIP.ms ID.
+     */
+    private synchronized Message getMessageWithVoipId(String did,
+                                                      long voipId)
     {
         Cursor cursor = database.query(
             TABLE_MESSAGE,
             columns,
-            COLUMN_DATABASE_ID + "=" + databaseId,
+            COLUMN_DID + "=" + did + " AND "
+            + COLUMN_VOIP_ID + "=" + voipId,
             null, null, null, null);
-        Message[] messages = getMessageArrayFromCursor(cursor);
+        List<Message> messages = getMessageListFromCursor(cursor);
         cursor.close();
-        if (messages.length > 0) {
-            return messages[0];
+        if (messages.size() > 0) {
+            return messages.get(0);
         } else {
             return null;
         }
     }
 
     /**
-     * Gets the draft message associated with the specified conversation.
+     * Retrieves all of the messages that can be accessed by the specified
+     * cursor. This function consumes the cursor.
      *
-     * @param did     The DID associated with the specified conversation.
-     * @param contact The contact associated with the specified conversation.
-     * @return The draft message associated with the specified conversation.
+     * @param cursor The cursor from which to retrieve the messages.
+     * @return The messages that could be accessed by the specified cursor.
      */
-    public synchronized Message getDraftMessageForConversation(
-        String did, String contact)
-    {
-        Cursor cursor = database.query(
-            TABLE_MESSAGE,
-            columns,
-            COLUMN_DID + "=" + did + " AND " + COLUMN_CONTACT + "=" + contact
-            + " AND " + COLUMN_DRAFT + "=1",
-            null, null, null, null);
-        Message[] messages = getMessageArrayFromCursor(cursor);
-        cursor.close();
-        if (messages.length > 0) {
-            return messages[0];
-        } else {
-            return null;
+    @NonNull
+    private List<Message> getMessageListFromCursor(Cursor cursor) {
+        List<Message> messages = new ArrayList<>();
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Message message = new Message(
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DATABASE_ID)),
+                cursor.isNull(cursor.getColumnIndexOrThrow(
+                    COLUMN_VOIP_ID)) ? null : cursor.getLong(
+                    cursor.getColumnIndex(COLUMN_VOIP_ID)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DATE)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_TYPE)),
+                cursor.getString(cursor.getColumnIndexOrThrow(
+                    COLUMN_DID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(
+                    COLUMN_CONTACT)),
+                cursor.getString(cursor.getColumnIndexOrThrow(
+                    COLUMN_MESSAGE)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_UNREAD)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DELETED)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DELIVERED)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DELIVERY_IN_PROGRESS)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(
+                    COLUMN_DRAFT)));
+            messages.add(message);
+            cursor.moveToNext();
         }
+        cursor.close();
+        return messages;
     }
 
     /**
-     * For each conversation, return at most one message that is the latest
-     * message of the conversation, is not deleted, and matches the filter
-     * constraint. The returned list is sorted.
+     * Gets the most recent non-deleted message in each conversation that
+     * matches a specified filter constraint. The resulting list is sorted
+     * by date, from most recent to least recent.
      *
-     * @param did              The DID.
+     * @param did              The currently selected DID.
      * @param filterConstraint The filter constraint.
-     * @return At most one message per conversation that is the latest message
-     * of the conversation, is not deleted, and matches one the filter
-     * constraint. The returned list is sorted.
+     * @return The most recent non-deleted message in each conversation that
+     * matches a specified filter constraint. The resulting list is
+     * sorted by date, from most recent to least recent.
      */
-    public synchronized Message[] getFilteredMessagesForConversations(
+    public synchronized List<Message>
+    getMostRecentFilteredMessageForAllConversations(
         String did,
         String filterConstraint)
     {
@@ -225,31 +277,40 @@ public class Database {
             numericFilterStringQuery = " OR " + COLUMN_CONTACT + " LIKE ? ";
         }
 
-        // First get messages filtered on contact phone number and text
+        // First, retrieve the most recent message for each conversation,
+        // filtering only on the contact phone number and message text
         String query =
-            "SELECT * FROM " + TABLE_MESSAGE + " a INNER JOIN (SELECT "
-            + COLUMN_DATABASE_ID + ", " + COLUMN_CONTACT + ", MAX("
-            + COLUMN_DATE + ") " + COLUMN_DATE + " FROM " + TABLE_MESSAGE
-            + " WHERE (" + COLUMN_MESSAGE + " LIKE ? COLLATE UTF8_GENERAL_CI "
+            "SELECT * FROM " + TABLE_MESSAGE + " a "
+            + "INNER JOIN (SELECT " + COLUMN_DATABASE_ID + ", "
+            + COLUMN_CONTACT + ", MAX(" + COLUMN_DATE + ") AS " + COLUMN_DATE
+            + " FROM " + TABLE_MESSAGE
+            + " WHERE (" + COLUMN_MESSAGE + " LIKE ? COLLATE UTF8_GENERAL_CI"
             + numericFilterStringQuery + ") AND " + COLUMN_DID + "=" + did
-            + " AND " + COLUMN_DELETED + "=0 GROUP BY " + COLUMN_CONTACT
-            + ") b on a." + COLUMN_DATABASE_ID + " = b." + COLUMN_DATABASE_ID
-            + " AND a." + COLUMN_DATE + " = b." + COLUMN_DATE + " ORDER BY "
-            + COLUMN_DATE + " DESC";
+            + " AND " + COLUMN_DELETED + "=0 "
+            + "GROUP BY " + COLUMN_CONTACT + ") b on a."
+            + COLUMN_DATABASE_ID + " = b." + COLUMN_DATABASE_ID
+            + " AND a." + COLUMN_DATE + " = b." + COLUMN_DATE
+            + " ORDER BY " + COLUMN_DATE + " DESC, " + COLUMN_DATABASE_ID
+            + " DESC";
         Cursor cursor = database.rawQuery(query, params);
         List<Message> messages = getMessageListFromCursor(cursor);
         cursor.close();
 
-        // Then get messages filtered on contact name and add them to the list
-        // of messages if there isn't already a better match
+        // Then, retrieve the most recent message for each conversation without
+        // filtering; if any conversation present in the second list is not
+        // present in the first list, filter the message in the second list on
+        // contact name and add it to the first list if there is a match
         query =
-            "SELECT * FROM " + TABLE_MESSAGE + " a INNER JOIN (SELECT "
-            + COLUMN_DATABASE_ID + ", " + COLUMN_CONTACT + ", MAX("
-            + COLUMN_DATE + ") " + COLUMN_DATE + " FROM " + TABLE_MESSAGE
+            "SELECT * FROM " + TABLE_MESSAGE + " a "
+            + "INNER JOIN (SELECT " + COLUMN_DATABASE_ID + ", "
+            + COLUMN_CONTACT + ", MAX(" + COLUMN_DATE + ") AS " + COLUMN_DATE
+            + " FROM " + TABLE_MESSAGE
             + " WHERE " + COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED
-            + "=0 GROUP BY" + " " + COLUMN_CONTACT + ") b on a."
+            + "=0"
+            + " GROUP BY" + " " + COLUMN_CONTACT + ") b on a."
             + COLUMN_DATABASE_ID + " = b." + COLUMN_DATABASE_ID + " AND a."
-            + COLUMN_DATE + " = b." + COLUMN_DATE + " ORDER BY " + COLUMN_DATE
+            + COLUMN_DATE + " = b." + COLUMN_DATE
+            + " ORDER BY " + COLUMN_DATE + " DESC, " + COLUMN_DATABASE_ID
             + " DESC";
         cursor = database.rawQuery(query, null);
         List<Message> contactNameMessages = getMessageListFromCursor(cursor);
@@ -273,35 +334,64 @@ public class Database {
             }
         }
 
-        // If there is a draft message, that should be returned regardless of
-        // the date
+        // If any message has a draft message that meets the filter constraint,
+        // use that message instead
         for (int i = 0; i < messages.size(); i++) {
-            if (!messages.get(i).isDraft()) {
+            Message message = messages.get(i);
+            if (!message.isDraft()) {
                 Message draftMessage = getDraftMessageForConversation(
-                    messages.get(i).getDid(), messages.get(i).getContact());
-                if (draftMessage != null) {
+                    message.getDid(), message.getContact());
+                if (draftMessage != null
+                    && draftMessage.getText().toLowerCase()
+                                   .contains(filterConstraint))
+                {
                     messages.set(i, draftMessage);
                 }
             }
         }
 
-        Collections.sort(messages);
-        return messages.toArray(new Message[messages.size()]);
+        return messages;
     }
 
     /**
-     * For a conversation, return all messages that are not deleted or drafts
-     * and that match the filter constraint. The returned list is sorted in
-     * reverse order.
+     * Gets the draft message associated with the specified conversation.
      *
-     * @param did              The DID.
-     * @param contact          The specified contact.
-     * @param filterConstraint The filter constraint.
-     * @return All messages that are not deleted or drafts and that match
-     * the filter constraint for the specified conversation. The
-     * returned list is sorted in reverse order.
+     * @param did     The currently selected DID.
+     * @param contact The contact associated with the conversation.
+     * @return The draft message associated with the specified conversation.
      */
-    public synchronized Message[] getFilteredMessagesForConversation(
+    public synchronized Message getDraftMessageForConversation(
+        String did, String contact)
+    {
+        Cursor cursor = database.query(
+            TABLE_MESSAGE,
+            columns,
+            COLUMN_DID + "=" + did + " AND "
+            + COLUMN_CONTACT + "=" + contact + " AND "
+            + COLUMN_DRAFT + "=1",
+            null, null, null, null);
+        List<Message> messages = getMessageListFromCursor(cursor);
+        cursor.close();
+        if (messages.size() > 0) {
+            return messages.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Gets all non-deleted, non-draft messages in a specified conversation
+     * that match a specified filter constraint. The resulting list is sorted
+     * by date, from least recent to most recent.
+     *
+     * @param did              The currently selected DID.
+     * @param contact          The contact associated with the conversation.
+     * @param filterConstraint The filter constraint.
+     * @return All non-deleted, non-draft messages in a specified conversation
+     * that match a specified filter constraint. The resulting list is
+     * sorted by date, from least recent to most recent.
+     */
+    public synchronized List<Message> getFilteredMessagesForConversation(
         String did,
         String contact,
         String filterConstraint)
@@ -315,41 +405,43 @@ public class Database {
         Cursor cursor = database.query(
             TABLE_MESSAGE,
             columns,
-            COLUMN_MESSAGE + " LIKE ? AND " + COLUMN_DID + "=" + did + " AND "
-            + COLUMN_CONTACT + "=" + contact + " AND " + COLUMN_DELETED
-            + "=0 AND " + COLUMN_DRAFT + "=0",
-            params, null, null,
-            COLUMN_DATE + " ASC");
-        List<Message> messages = getMessageListFromCursor(cursor);
-        cursor.close();
-
-        Collections.sort(messages);
-        Collections.reverse(messages);
-        return messages.toArray(new Message[messages.size()]);
+            COLUMN_DID + "=" + did + " AND "
+            + COLUMN_CONTACT + "=" + contact + " AND "
+            + COLUMN_DELETED + "=0 AND "
+            + COLUMN_DRAFT + "=0 AND "
+            + COLUMN_MESSAGE + " LIKE ?",
+            params,
+            null, null,
+            COLUMN_DATE + " ASC, " + COLUMN_DATABASE_ID + " ASC");
+        return getMessageListFromCursor(cursor);
     }
 
     /**
      * Gets all non-deleted, non-draft unread messages that chronologically
-     * follow the most recent outgoing message. The resulting array is sorted
-     * by date, from most recent to least recent.
+     * follow the most recent outgoing message for a particular conversation.
+     * The resulting list is sorted by date, from most recent to least recent.
      *
      * @param did     The currently selected DID.
      * @param contact The contact associated with the conversation.
      * @return All non-deleted, non-draft unread messages that chronologically
-     *         follow the most recent outgoing message. The resulting array is
-     *         sorted by date, from most recent to least recent.
+     * follow the most recent outgoing message for a particular
+     * conversation. The resulting list is sorted by date, from most
+     * recent to least recent.
      */
-    public synchronized Message[] getUnreadMessages(String did, String contact)
+    public synchronized List<Message> getUnreadMessages(String did,
+                                                        String contact)
     {
         // Retrieve the most recent outgoing message
         Cursor cursor = database.query(
             TABLE_MESSAGE,
             new String[] {
                 "COALESCE(MAX(" + COLUMN_DATE + "), 0) AS " + COLUMN_DATE,
-            },
-            COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED + "=0 AND "
-            + COLUMN_DRAFT + "=0 AND " + COLUMN_TYPE + "=0 AND "
-            + COLUMN_CONTACT + "=" + contact,
+                },
+            COLUMN_DID + "=" + did + " AND "
+            + COLUMN_CONTACT + "=" + contact + " AND "
+            + COLUMN_DELETED + "=0 AND "
+            + COLUMN_DRAFT + "=0 AND "
+            + COLUMN_TYPE + "=0",
             null, null, null, null);
         cursor.moveToFirst();
         long date = 0;
@@ -363,32 +455,32 @@ public class Database {
         cursor = database.query(
             TABLE_MESSAGE,
             columns,
-            COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED + "=0" + " AND "
-            + COLUMN_DRAFT + "=0 AND " + COLUMN_TYPE + "=1 AND "
-            + COLUMN_DATE + ">=" + date + " AND " + COLUMN_CONTACT + "="
-            + contact + " AND " + COLUMN_UNREAD + "=1",
+            COLUMN_DID + "=" + did + " AND "
+            + COLUMN_CONTACT + "=" + contact + " AND "
+            + COLUMN_DELETED + "=0" + " AND "
+            + COLUMN_DRAFT + "=0 AND "
+            + COLUMN_TYPE + "=1 AND "
+            + COLUMN_DATE + ">=" + date + " AND "
+            + COLUMN_UNREAD + "=1",
             null, null, null,
-            COLUMN_DATE + " DESC");
-        List<Message> messages = getMessageListFromCursor(cursor);
-
-        Collections.sort(messages);
-        return messages.toArray(new Message[messages.size()]);
+            COLUMN_DATE + " DESC, " + COLUMN_DATABASE_ID + " DESC");
+        return getMessageListFromCursor(cursor);
     }
 
     /**
-     * Gets all of the messages in the database. The resulting array is sorted
+     * Gets all of the messages in the database. The resulting list is sorted
      * by database ID in descending order.
      *
-     * @return All of the messages in the database. The resulting array is
+     * @return All of the messages in the database. The resulting list is
      * sorted by database ID in descending order.
      */
-    public synchronized Message[] getAllMessages() {
-        Cursor cursor = database.query(TABLE_MESSAGE, columns, null, null,
-                                       null, null, COLUMN_DATABASE_ID
-                                                   + " DESC");
-        Message[] messages = getMessageArrayFromCursor(cursor);
-        cursor.close();
-        return messages;
+    public synchronized List<Message> getAllMessages() {
+        Cursor cursor = database.query(
+            TABLE_MESSAGE,
+            columns,
+            null, null, null, null,
+            COLUMN_DATABASE_ID + " DESC");
+        return getMessageListFromCursor(cursor);
     }
 
     /**
@@ -401,14 +493,16 @@ public class Database {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_DELIVERED, "0");
         contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "1");
-        database.update(TABLE_MESSAGE,
-                        contentValues,
-                        COLUMN_DATABASE_ID + "=" + databaseId,
-                        null);
+        database.update(
+            TABLE_MESSAGE,
+            contentValues,
+            COLUMN_DATABASE_ID + "=" + databaseId,
+            null);
     }
 
     /**
-     * Marks the message with the specified database ID as failed to send.
+     * Marks the message with the specified database ID as having failed to
+     * be sent.
      *
      * @param databaseId The database ID.
      */
@@ -416,64 +510,68 @@ public class Database {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_DELIVERED, "0");
         contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "0");
-        database.update(TABLE_MESSAGE,
-                        contentValues,
-                        COLUMN_DATABASE_ID + "=" + databaseId,
-                        null);
+        database.update(
+            TABLE_MESSAGE,
+            contentValues,
+            COLUMN_DATABASE_ID + "=" + databaseId,
+            null);
     }
 
     /**
      * Marks the specified conversation as read.
      *
-     * @param did     The DID associated with the specified conversation.
-     * @param contact The contact associated with the specified conversation.
+     * @param did     The currently selected DID.
+     * @param contact The contact associated with the conversation.
      */
     public synchronized void markConversationAsRead(String did,
                                                     String contact)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_UNREAD, "0");
-        database.update(TABLE_MESSAGE,
-                        contentValues,
-                        COLUMN_CONTACT + "=" + contact + " AND "
-                        + COLUMN_DID + "=" + did,
-                        null);
+        database.update(
+            TABLE_MESSAGE,
+            contentValues,
+            COLUMN_CONTACT + "=" + contact + " AND "
+            + COLUMN_DID + "=" + did,
+            null);
     }
 
     /**
      * Marks the specified conversation as unread. Note that only incoming
      * messages are marked as unread.
      *
-     * @param did     The DID associated with the specified conversation.
-     * @param contact The contact associated with the specified conversation.
+     * @param did     The currently selected DID.
+     * @param contact The contact associated with the conversation.
      */
     public synchronized void markConversationAsUnread(String did,
                                                       String contact)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_UNREAD, "1");
-        database.update(TABLE_MESSAGE,
-                        contentValues,
-                        COLUMN_CONTACT + "=" + contact + " AND "
-                        + COLUMN_DID + "=" + did + " AND " + COLUMN_TYPE + "=1",
-                        null);
+        database.update(
+            TABLE_MESSAGE,
+            contentValues,
+            COLUMN_CONTACT + "=" + contact + " AND "
+            + COLUMN_DID + "=" + did + " AND "
+            + COLUMN_TYPE + "=1",
+            null);
     }
 
     /**
-     * Deletes the specified messages from the database by marking entries
-     * with VoIP.ms IDs as deleted and removing entries without such IDs.
+     * Deletes the specified message from the database by marking the message
+     * as deleted if it has a VoIP.ms ID and removing it if it does not.
      */
     public synchronized void deleteMessage(long databaseId) {
         // First, mark message as deleted
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_DELETED, "1");
-        database.update(TABLE_MESSAGE,
-                        contentValues,
-                        COLUMN_DATABASE_ID + "=" + databaseId + " AND "
-                        + COLUMN_DELETED + "=0",
-                        null);
-        // Next, remove all deleted messages in conversation without a
-        // VoIP.ms ID from the database
+        database.update(
+            TABLE_MESSAGE,
+            contentValues,
+            COLUMN_DATABASE_ID + "=" + databaseId + " AND "
+            + COLUMN_DELETED + "=0",
+            null);
+        // Next, remove message from database if it does not have a VoIP.ms ID
         database.delete(TABLE_MESSAGE,
                         COLUMN_DATABASE_ID + "=" + databaseId + " AND "
                         + COLUMN_DELETED + "=1 AND "
@@ -486,29 +584,31 @@ public class Database {
      * with VoIP.ms IDs as deleted and removing entries without such IDs.
      * This method does not delete draft messages.
      *
-     * @param did     The DID.
-     * @param contact The phone number of the contact.
+     * @param did     The currently selected DID.
+     * @param contact The contact associated with the conversation.
      */
     public synchronized void deleteMessages(String did, String contact) {
         // First, mark all messages in conversation as deleted
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_DELETED, "1");
-        database.update(TABLE_MESSAGE,
-                        contentValues,
-                        COLUMN_CONTACT + "=" + contact + " AND "
-                        + COLUMN_DID + "=" + did + " AND "
-                        + COLUMN_DELETED + "=0 AND "
-                        + COLUMN_DRAFT + "=0",
-                        null);
+        database.update(
+            TABLE_MESSAGE,
+            contentValues,
+            COLUMN_CONTACT + "=" + contact + " AND "
+            + COLUMN_DID + "=" + did + " AND "
+            + COLUMN_DELETED + "=0 AND "
+            + COLUMN_DRAFT + "=0",
+            null);
         // Next, remove all deleted messages in conversation without a
         // VoIP.ms ID from the database
-        database.delete(TABLE_MESSAGE,
-                        COLUMN_CONTACT + "=" + contact + " AND "
-                        + COLUMN_DID + "=" + did + " AND "
-                        + COLUMN_DELETED + "=1 AND "
-                        + COLUMN_DRAFT + "=0 AND "
-                        + COLUMN_VOIP_ID + " IS NULL",
-                        null);
+        database.delete(
+            TABLE_MESSAGE,
+            COLUMN_CONTACT + "=" + contact + " AND "
+            + COLUMN_DID + "=" + did + " AND "
+            + COLUMN_DELETED + "=1 AND "
+            + COLUMN_DRAFT + "=0 AND "
+            + COLUMN_VOIP_ID + " IS NULL",
+            null);
     }
 
     /**
@@ -517,25 +617,27 @@ public class Database {
      * @param databaseId The database ID.
      */
     public synchronized void removeMessage(long databaseId) {
-        database.delete(TABLE_MESSAGE,
-                        COLUMN_DATABASE_ID + "=" + databaseId, null);
+        database.delete(
+            TABLE_MESSAGE,
+            COLUMN_DATABASE_ID + "=" + databaseId,
+            null);
     }
 
     /**
      * Deletes all messages from the database.
      */
     public synchronized void removeAllMessages() {
-        database.delete(TABLE_MESSAGE, null, null);
+        database.delete(
+            TABLE_MESSAGE,
+            null, null);
     }
 
     /**
-     * Returns true if the specified conversation has any undeleted messages,
-     * including draft messages.
+     * Returns true if the specified conversation has any non-deleted messages.
      *
-     * @param did     The DID associated with the specified conversation.
-     * @param contact The contact associated with the specified conversation.
-     * @return True if the specified conversation has any undeleted messages,
-     * including draft messages.
+     * @param did     The currently selected DID.
+     * @param contact The contact associated with the conversation.
+     * @return True if the specified conversation has any non-deleted messages.
      */
     public synchronized boolean conversationHasMessages(String did,
                                                         String contact)
@@ -543,10 +645,10 @@ public class Database {
         Cursor cursor = database.query(
             TABLE_MESSAGE,
             columns,
-            COLUMN_DID + "=" + did + " AND " + COLUMN_CONTACT + "=" + contact
-            + " AND " + COLUMN_DELETED + "=0",
+            COLUMN_DID + "=" + did + " AND "
+            + COLUMN_CONTACT + "=" + contact + " AND "
+            + COLUMN_DELETED + "=0",
             null, null, null, null);
-
         cursor.moveToFirst();
         boolean hasMessages = !cursor.isAfterLast();
         cursor.close();
@@ -560,11 +662,17 @@ public class Database {
      * @param sourceActivity The source activity of the send request.
      * @param databaseId     The database ID of the message to send.
      */
-    public void sendMessage(Activity sourceActivity, long databaseId) {
+    public synchronized void sendMessage(Activity sourceActivity,
+                                         long databaseId)
+    {
         Message message = getMessageWithDatabaseId(databaseId);
         SendMessageTask task = new SendMessageTask(
             sourceActivity.getApplicationContext(), message,
             sourceActivity);
+
+        if (message == null) {
+            throw new IllegalArgumentException("Database ID is invalid");
+        }
 
         if (preferences.getEmail().equals("")
             || preferences.getPassword().equals("")
@@ -607,6 +715,27 @@ public class Database {
     }
 
     /**
+     * Gets the message with the specified database ID from the database.
+     *
+     * @return The message with the specified database ID.
+     */
+    private synchronized Message getMessageWithDatabaseId(long databaseId)
+    {
+        Cursor cursor = database.query(
+            TABLE_MESSAGE,
+            columns,
+            COLUMN_DATABASE_ID + "=" + databaseId,
+            null, null, null, null);
+        List<Message> messages = getMessageListFromCursor(cursor);
+        cursor.close();
+        if (messages.size() > 0) {
+            return messages.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Synchronize database with VoIP.ms. This may include any of the
      * following, depending on synchronization settings:
      * <li> retrieving all messages from VoIP.ms, or only those messages
@@ -616,11 +745,11 @@ public class Database {
      * <li> deleting messages from VoIP.ms that were deleted locally; and
      * <li> deleting messages stored locally that were deleted from VoIP.ms.
      *
-     * @param forceRecent    Retrieve only recent messages (and do nothing
-     *                       else) if true, regardless of synchronization
+     * @param forceRecent    Retrieve only recent messages and do nothing
+     *                       else if true, regardless of synchronization
      *                       settings.
      * @param showErrors     Shows error messages if true.
-     * @param sourceActivity The calling activity.
+     * @param sourceActivity The source activity of the send request.
      */
     public synchronized void synchronize(boolean forceRecent,
                                          boolean showErrors,
@@ -647,7 +776,7 @@ public class Database {
         {
             // Do not show an error; this method should never be called
             // unless the email, password and DID are set
-            task.cleanup(false, forceRecent);
+            task.cleanup(forceRecent);
             return;
         }
 
@@ -659,20 +788,20 @@ public class Database {
                                    R.string.database_sync_error_network),
                                Toast.LENGTH_SHORT).show();
             }
-            task.cleanup(false, forceRecent);
+            task.cleanup(forceRecent);
             return;
         }
 
         try {
             String did = preferences.getDid();
-            Message[] messages = getUndeletedMessages(did);
+            List<Message> messages = getNonDeletedAndNonDraftMessages(did);
 
             List<SynchronizeDatabaseTask.RequestObject> requests =
                 new LinkedList<>();
 
             // Propagate local deletions if applicable
             if (propagateLocalDeletions) {
-                for (Message message : getDeletedMessages(
+                for (Message message : getDeletedAndNonDraftMessages(
                     preferences.getDid())) {
                     if (message.getVoipId() != null) {
                         String url =
@@ -693,8 +822,8 @@ public class Database {
 
             // Get number of days between now and the message retrieval start
             // date or when the most recent message was received, as appropriate
-            Date then = (messages.length == 0 || !retrieveOnlyRecentMessages) ?
-                        preferences.getStartDate() : messages[0].getDate();
+            Date then = (messages.size() == 0 || !retrieveOnlyRecentMessages) ?
+                        preferences.getStartDate() : messages.get(0).getDate();
             // Use EDT because the VoIP.ms API only works with EDT
             Calendar thenCalendar = Calendar.getInstance(
                 TimeZone.getTimeZone("America/New_York"), Locale.US);
@@ -753,7 +882,7 @@ public class Database {
                                                  "UTF-8") + "&"
                     + "limit=" + URLEncoder.encode("1000000", "UTF-8") + "&"
                     + "from=" + URLEncoder.encode(sdf.format(dates[i]),
-                                                "UTF-8") + "&"
+                                                  "UTF-8") + "&"
                     + "to=" + URLEncoder.encode(sdf.format(dates[i + 1]),
                                                 "UTF-8") + "&"
                     + "timezone=-5"; // -5 corresponds to EDT
@@ -773,148 +902,62 @@ public class Database {
     }
 
     /**
-     * Gets the database ID for the row in the database with the specified
-     * VoIP.ms ID.
-     *
-     * @param voipId The VoIP.ms ID.
-     * @return The database ID.
-     */
-    private synchronized Long getDatabaseIdForVoipId(String did, long voipId) {
-        Cursor cursor = database.query(
-            TABLE_MESSAGE,
-            columns,
-            COLUMN_DID + "=" + did + " AND " + COLUMN_VOIP_ID + "=" + voipId,
-            null, null, null, null);
-        if (cursor.moveToFirst()) {
-            return cursor.getLong(cursor.getColumnIndexOrThrow(
-                COLUMN_DATABASE_ID));
-        }
-        cursor.close();
-        return null;
-    }
-
-    /**
-     * Gets the message with the specified VoIP.ms ID from the database.
-     *
-     * @return The message with the specified VoIP.ms ID.
-     */
-    private synchronized Message getMessageWithVoipId(String did,
-                                                      long voipId)
-    {
-        Cursor cursor = database.query(
-            TABLE_MESSAGE,
-            columns,
-            COLUMN_DID + "=" + did + " AND " + COLUMN_VOIP_ID + "=" + voipId,
-            null, null, null, null);
-        Message[] messages = getMessageArrayFromCursor(cursor);
-        cursor.close();
-        if (messages.length > 0) {
-            return messages[0];
-        } else {
-            return null;
-        }
-    }
-
-    /**
      * Gets all of the messages in the database except for deleted and draft
      * messages.
      *
-     * @return All of the messages in the database except for deleted
+     * @param did The currently selected DID.
+     * @return All of the messages in the database except for deleted and draft
      * messages.
      */
-    private synchronized Message[] getUndeletedMessages(String did) {
+    private synchronized List<Message> getNonDeletedAndNonDraftMessages(
+        String did)
+    {
         Cursor cursor = database.query(
             TABLE_MESSAGE, columns,
-            COLUMN_DID + "=" + did + " AND " + COLUMN_DELETED + "=0 AND "
+            COLUMN_DID + "=" + did + " AND "
+            + COLUMN_DELETED + "=0 AND "
             + COLUMN_DRAFT + " = 0",
             null, null, null,
             COLUMN_DATE + " DESC");
-        Message[] messages = getMessageArrayFromCursor(cursor);
-        cursor.close();
-        return messages;
+        return getMessageListFromCursor(cursor);
     }
 
     /**
      * Gets all of the deleted and non-draft messages in the database.
      *
+     * @param did The currently selected DID.
      * @return All of the deleted and non-draft messages in the database.
      */
-    private synchronized Message[] getDeletedMessages(String did) {
-        Cursor cursor = database.query(TABLE_MESSAGE, columns,
-                                       COLUMN_DID + "=" + did + " AND "
-                                       + COLUMN_DELETED +
-                                       "=" + "1" + " AND " + COLUMN_DRAFT
-                                       + " = 0", null, null, null,
-                                       COLUMN_DATE + " DESC");
-        Message[] messages = getMessageArrayFromCursor(cursor);
-        cursor.close();
-        return messages;
+    private synchronized List<Message> getDeletedAndNonDraftMessages(
+        String did)
+    {
+        Cursor cursor = database.query(
+            TABLE_MESSAGE,
+            columns,
+            COLUMN_DID + "=" + did + " AND "
+            + COLUMN_DELETED + "=1 AND"
+            + COLUMN_DRAFT + "=0",
+            null, null, null, null);
+        return getMessageListFromCursor(cursor);
     }
 
     /**
-     * Retrieves all of the messages that can be accessed by the specified
-     * cursor.
-     *
-     * @param cursor The cursor to retrieve the messages from.
-     * @return The messages that could be accessed by the specified cursor.
+     * Wrapper class for sending a message using the VoIP.ms API.
      */
-    @NonNull
-    private Message[] getMessageArrayFromCursor(Cursor cursor) {
-        List<Message> messages = getMessageListFromCursor(cursor);
-        return messages.toArray(new Message[messages.size()]);
-    }
-
-    /**
-     * Retrieves all of the messages that can be accessed by the specified
-     * cursor.
-     *
-     * @param cursor The cursor to retrieve the messages from.
-     * @return The messages that could be accessed by the specified cursor.
-     */
-    @NonNull
-    private List<Message> getMessageListFromCursor(Cursor cursor) {
-        List<Message> messages = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Message message = new Message(
-                cursor.getLong(cursor.getColumnIndexOrThrow(
-                    COLUMN_DATABASE_ID)),
-                cursor.isNull(cursor.getColumnIndexOrThrow(
-                    COLUMN_VOIP_ID)) ? null : cursor.getLong(
-                    cursor.getColumnIndex(COLUMN_VOIP_ID)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(
-                    COLUMN_DATE)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(
-                    COLUMN_TYPE)),
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_DID)),
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_CONTACT)),
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_MESSAGE)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(
-                    COLUMN_UNREAD)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(
-                    COLUMN_DELETED)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(
-                    COLUMN_DELIVERED)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(
-                    COLUMN_DELIVERY_IN_PROGRESS)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(
-                    COLUMN_DRAFT)));
-            messages.add(message);
-            cursor.moveToNext();
-        }
-        cursor.moveToFirst();
-        return messages;
-    }
-
     private static class SendMessageTask {
         private final Context applicationContext;
 
         private final Message message;
         private final Activity sourceActivity;
 
+        /**
+         * Initializes a new instance of the SendMessageTask class.
+         *
+         * @param applicationContext The application context.
+         * @param message            The message to send.
+         * @param sourceActivity     The activity that originated the send
+         *                           request.
+         */
         SendMessageTask(Context applicationContext, Message message,
                         Activity sourceActivity)
         {
@@ -924,10 +967,20 @@ public class Database {
             this.sourceActivity = sourceActivity;
         }
 
+        /**
+         * Sends the message using the specified VoIP.ms API URL.
+         *
+         * @param voipUrl The VoIP.ms API URL.
+         */
         void start(String voipUrl) {
             new SendMessageAsyncTask().execute(voipUrl);
         }
 
+        /**
+         * Cleans up after the message was sent.
+         *
+         * @param success Whether the message was sucessfully sent.
+         */
         void cleanup(boolean success) {
             if (sourceActivity instanceof ConversationActivity) {
                 ((ConversationActivity) sourceActivity)
@@ -940,6 +993,9 @@ public class Database {
             }
         }
 
+        /**
+         * Custom AsyncTask used to send a message using the VoIP.ms API.
+         */
         private class SendMessageAsyncTask
             extends AsyncTask<String, String, Boolean>
         {
@@ -1004,10 +1060,12 @@ public class Database {
         private final Context applicationContext;
         private final Database database;
         private final Preferences preferences;
+
         private final boolean forceRecent;
         private final boolean retrieveDeletedMessages;
         private final boolean propagateRemoteDeletions;
         private final boolean showErrors;
+
         private final Activity sourceActivity;
         private List<RequestObject> requests;
 
@@ -1032,12 +1090,12 @@ public class Database {
          * @param showErrors               Shows error messages if true.
          * @param sourceActivity           The calling activity.
          */
-        public SynchronizeDatabaseTask(Context applicationContext,
-                                       boolean forceRecent,
-                                       boolean retrieveDeletedMessages,
-                                       boolean propagateRemoteDeletions,
-                                       boolean showErrors,
-                                       Activity sourceActivity)
+        SynchronizeDatabaseTask(Context applicationContext,
+                                boolean forceRecent,
+                                boolean retrieveDeletedMessages,
+                                boolean propagateRemoteDeletions,
+                                boolean showErrors,
+                                Activity sourceActivity)
         {
             this.applicationContext = applicationContext;
             this.database = Database.getInstance(applicationContext);
@@ -1076,26 +1134,18 @@ public class Database {
         /**
          * Cleans up after the database update.
          */
-        public void cleanup(boolean success, boolean forceRecent) {
+        void cleanup(boolean forceRecent) {
             if (sourceActivity instanceof ConversationsActivity) {
                 ((ConversationsActivity) sourceActivity).postUpdate();
             } else if (sourceActivity instanceof ConversationActivity) {
                 ((ConversationActivity) sourceActivity).postUpdate();
             } else if (sourceActivity == null) {
-                if (ActivityMonitor.getInstance()
-                                   .getCurrentActivity() instanceof
-                    ConversationsActivity)
-                {
-                    ((ConversationsActivity) ActivityMonitor.getInstance()
-                                                            .getCurrentActivity())
-                        .postUpdate();
-                } else if (ActivityMonitor.getInstance()
-                                          .getCurrentActivity() instanceof
-                    ConversationActivity)
-                {
-                    ((ConversationActivity) ActivityMonitor.getInstance()
-                                                           .getCurrentActivity())
-                        .postUpdate();
+                Activity currentActivity = ActivityMonitor.getInstance()
+                                                          .getCurrentActivity();
+                if (currentActivity instanceof ConversationsActivity) {
+                    ((ConversationsActivity) currentActivity).postUpdate();
+                } else if (currentActivity instanceof ConversationActivity) {
+                    ((ConversationActivity) currentActivity).postUpdate();
                 }
             }
 
@@ -1106,21 +1156,25 @@ public class Database {
             }
         }
 
+        /**
+         * Represents a single VoIP.ms API request in the context of database
+         * synchronization.
+         */
         private static class RequestObject {
             private String url;
             private RequestType requestType;
             private Date startDate;
             private Date endDate;
 
-            public RequestObject(String url, RequestType requestType) {
+            RequestObject(String url, RequestType requestType) {
                 this.url = url;
                 this.requestType = requestType;
                 this.startDate = null;
                 this.endDate = null;
             }
 
-            public RequestObject(String url, RequestType requestType,
-                                 Date startDate, Date endDate)
+            RequestObject(String url, RequestType requestType,
+                          Date startDate, Date endDate)
             {
                 this.url = url;
                 this.requestType = requestType;
@@ -1128,23 +1182,23 @@ public class Database {
                 this.endDate = endDate;
             }
 
-            public String getUrl() {
+            String getUrl() {
                 return url;
             }
 
-            public RequestType getRequestType() {
+            RequestType getRequestType() {
                 return requestType;
             }
 
-            public Date getStartDate() {
+            Date getStartDate() {
                 return startDate;
             }
 
-            public Date getEndDate() {
+            Date getEndDate() {
                 return endDate;
             }
 
-            public enum RequestType {
+            enum RequestType {
                 MESSAGE_RETRIEVAL,
                 DELETION
             }
@@ -1236,11 +1290,12 @@ public class Database {
                 }
                 for (int i = 0; i < rawMessages.length(); i++) {
                     JSONObject rawSms = rawMessages.optJSONObject(i);
-                    if (rawSms == null || rawSms.optString("id") == null
-                        || rawSms.optString("date") == null ||
-                        rawSms.optString("type") == null
-                        || rawSms.optString("did") == null ||
-                        rawSms.optString("contact") == null
+                    if (rawSms == null
+                        || rawSms.optString("id") == null
+                        || rawSms.optString("date") == null
+                        || rawSms.optString("type") == null
+                        || rawSms.optString("did") == null
+                        || rawSms.optString("contact") == null
                         || rawSms.optString("message") == null)
                     {
                         if (showErrors) {
@@ -1280,8 +1335,8 @@ public class Database {
                     if (localMessage != null) {
                         if (localMessage.isDeleted()) {
                             if (retrieveDeletedMessages) {
-                                serverMessage
-                                    .setUnread(localMessage.isUnread());
+                                serverMessage.setUnread(
+                                    localMessage.isUnread());
                                 database.insertMessage(serverMessage);
                             }
                         } else {
@@ -1296,8 +1351,9 @@ public class Database {
 
                 // Delete old messages stored locally, if applicable
                 if (propagateRemoteDeletions) {
-                    Message[] localMessages =
-                        database.getUndeletedMessages(preferences.getDid());
+                    List<Message> localMessages =
+                        database.getNonDeletedAndNonDraftMessages(
+                            preferences.getDid());
                     for (Message localMessage : localMessages) {
                         if (localMessage.getVoipId() == null) {
                             continue;
@@ -1318,14 +1374,14 @@ public class Database {
                             Date startDate = request.getStartDate();
                             Date endDate = request.getEndDate();
                             endDate.setTime(
-                                endDate.getTime() + (1000l * 60l * 60l * 24l));
+                                endDate.getTime() + (1000L * 60L * 60L * 24L));
 
                             if ((localMessage.getDate().getTime() == startDate
-                                .getTime() ||
-                                 localMessage.getDate().after(startDate)) &&
-                                (localMessage.getDate().getTime() == endDate
-                                    .getTime() ||
-                                 localMessage.getDate().before(endDate)))
+                                .getTime()
+                                 || localMessage.getDate().after(startDate))
+                                && (localMessage.getDate().getTime() == endDate
+                                .getTime()
+                                    || localMessage.getDate().before(endDate)))
                             {
                                 if (localMessage.getDatabaseId() != null) {
                                     database.removeMessage(
@@ -1355,7 +1411,7 @@ public class Database {
             @Override
             protected void onPostExecute(Boolean success) {
                 if (success != null) {
-                    cleanup(success, forceRecent);
+                    cleanup(forceRecent);
                 }
             }
 
@@ -1401,7 +1457,7 @@ public class Database {
          *
          * @param context The context to be used by SQLiteOpenHelper.
          */
-        public DatabaseHelper(Context context) {
+        DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
@@ -1451,46 +1507,36 @@ public class Database {
                                      null);
                         cursor.moveToFirst();
                         while (!cursor.isAfterLast()) {
-                            Message message = new Message(cursor.getLong(
-                                cursor.getColumnIndexOrThrow(columns[0])),
-                                                          cursor.isNull(cursor
-                                                                            .getColumnIndexOrThrow(
-                                                                                columns[1])) ?
-                                                          null : cursor.getLong(
-                                                              cursor
-                                                                  .getColumnIndex(
-                                                                      columns[1])),
-                                                          cursor.getLong(cursor
-                                                                             .getColumnIndexOrThrow(
-                                                                                 columns[2])),
-                                                          cursor.getLong(cursor
-                                                                             .getColumnIndexOrThrow(
-                                                                                 columns[3])),
-                                                          cursor.getString(
-                                                              cursor
-                                                                  .getColumnIndexOrThrow(
-                                                                      columns[4])),
-                                                          cursor.getString(
-                                                              cursor
-                                                                  .getColumnIndexOrThrow(
-                                                                      columns[5])),
-                                                          cursor.getString(
-                                                              cursor
-                                                                  .getColumnIndexOrThrow(
-                                                                      columns[6])),
-                                                          cursor.getLong(cursor
-                                                                             .getColumnIndexOrThrow(
-                                                                                 columns[7])),
-                                                          cursor.getLong(cursor
-                                                                             .getColumnIndexOrThrow(
-                                                                                 columns[8])),
-                                                          cursor.getLong(cursor
-                                                                             .getColumnIndexOrThrow(
-                                                                                 columns[9])),
-                                                          cursor.getLong(cursor
-                                                                             .getColumnIndexOrThrow(
-                                                                                 columns[10])),
-                                                          0);
+                            Message message = new Message(
+                                cursor.getLong(
+                                    cursor.getColumnIndexOrThrow(columns[0])),
+                                cursor.isNull(cursor.getColumnIndexOrThrow(
+                                    columns[1])) ?
+                                null : cursor.getLong(
+                                    cursor.getColumnIndex(
+                                        columns[1])),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(
+                                    columns[2])),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(
+                                    columns[3])),
+                                cursor.getString(
+                                    cursor.getColumnIndexOrThrow(
+                                        columns[4])),
+                                cursor.getString(
+                                    cursor.getColumnIndexOrThrow(
+                                        columns[5])),
+                                cursor.getString(
+                                    cursor.getColumnIndexOrThrow(
+                                        columns[6])),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(
+                                    columns[7])),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(
+                                    columns[8])),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(
+                                    columns[9])),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(
+                                    columns[10])),
+                                0);
 
                             // Incorrect date has an hour removed outside of
                             // daylight savings time

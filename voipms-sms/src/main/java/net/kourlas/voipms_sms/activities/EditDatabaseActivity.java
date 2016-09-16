@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
-import net.kourlas.voipms_sms.Database;
 import net.kourlas.voipms_sms.R;
-import net.kourlas.voipms_sms.Utils;
+import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EditDatabaseActivity extends AppCompatActivity {
-    Database database;
+    private Database database;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,8 @@ public class EditDatabaseActivity extends AppCompatActivity {
         database = Database.getInstance(getApplicationContext());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.toolbar_elevation));
+        ViewCompat.setElevation(toolbar, getResources()
+            .getDimension(R.dimen.toolbar_elevation));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -55,7 +56,7 @@ public class EditDatabaseActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        Message[] messages = database.getAllMessages();
+        List<Message> messages = database.getAllMessages();
         JSONArray messagesJsonArray = new JSONArray();
         for (Message message : messages) {
             messagesJsonArray.put(message.toJSON());
@@ -66,7 +67,8 @@ public class EditDatabaseActivity extends AppCompatActivity {
             EditText editText = (EditText) findViewById(R.id.database_text);
             editText.setText(databaseString);
         } catch (Exception ex) {
-            Utils.showInfoDialog(this, getString(R.string.preferences_database_edit_failure_load));
+            Utils.showInfoDialog(this, getString(
+                R.string.preferences_database_edit_failure_load));
             finish();
         }
     }
@@ -87,26 +89,66 @@ public class EditDatabaseActivity extends AppCompatActivity {
                 case R.id.save_button:
                     List<Message> messages = new ArrayList<>();
                     try {
-                        EditText editText = (EditText) findViewById(R.id.database_text);
-                        JSONArray databaseJsonArray = new JSONArray(editText.getText().toString());
+                        EditText editText =
+                            (EditText) findViewById(R.id.database_text);
+                        JSONArray databaseJsonArray =
+                            new JSONArray(editText.getText().toString());
                         for (int i = 0; i < databaseJsonArray.length(); i++) {
-                            JSONObject messageJsonObject = databaseJsonArray.getJSONObject(i);
-                            Message message = new Message(messageJsonObject.optLong(Database.COLUMN_DATABASE_ID),
-                                    messageJsonObject.optLong(Database.COLUMN_VOIP_ID),
-                                    messageJsonObject.getLong(Database.COLUMN_DATE),
-                                    messageJsonObject.getLong(Database.COLUMN_TYPE),
-                                    messageJsonObject.getString(Database.COLUMN_DID),
-                                    messageJsonObject.getString(Database.COLUMN_CONTACT),
-                                    messageJsonObject.getString(Database.COLUMN_MESSAGE),
-                                    messageJsonObject.getLong(Database.COLUMN_UNREAD),
-                                    messageJsonObject.getLong(Database.COLUMN_DELETED),
-                                    messageJsonObject.getLong(Database.COLUMN_DELIVERED),
-                                    messageJsonObject.getLong(Database.COLUMN_DELIVERY_IN_PROGRESS),
-                                    messageJsonObject.getLong(Database.COLUMN_DRAFT));
+                            JSONObject messageJsonObject =
+                                databaseJsonArray.getJSONObject(i);
+                            Message message = new Message(messageJsonObject
+                                                              .optLong(
+                                                                  Database
+                                                                      .COLUMN_DATABASE_ID),
+                                                          messageJsonObject
+                                                              .optLong(
+                                                                  Database
+                                                                      .COLUMN_VOIP_ID),
+                                                          messageJsonObject
+                                                              .getLong(
+                                                                  Database
+                                                                      .COLUMN_DATE),
+                                                          messageJsonObject
+                                                              .getLong(
+                                                                  Database
+                                                                      .COLUMN_TYPE),
+                                                          messageJsonObject
+                                                              .getString(
+                                                                  Database
+                                                                      .COLUMN_DID),
+                                                          messageJsonObject
+                                                              .getString(
+                                                                  Database
+                                                                      .COLUMN_CONTACT),
+                                                          messageJsonObject
+                                                              .getString(
+                                                                  Database
+                                                                      .COLUMN_MESSAGE),
+                                                          messageJsonObject
+                                                              .getLong(
+                                                                  Database
+                                                                      .COLUMN_UNREAD),
+                                                          messageJsonObject
+                                                              .getLong(
+                                                                  Database
+                                                                      .COLUMN_DELETED),
+                                                          messageJsonObject
+                                                              .getLong(
+                                                                  Database
+                                                                      .COLUMN_DELIVERED),
+                                                          messageJsonObject
+                                                              .getLong(
+                                                                  Database
+                                                                      .COLUMN_DELIVERY_IN_PROGRESS),
+                                                          messageJsonObject
+                                                              .getLong(
+                                                                  Database
+                                                                      .COLUMN_DRAFT));
                             messages.add(message);
                         }
                     } catch (Exception ex) {
-                        Utils.showInfoDialog(this, getString(R.string.preferences_database_edit_failure_save));
+                        Utils.showInfoDialog(this, getString(
+                            R.string.preferences_database_edit_failure_save));
                         return false;
                     }
 

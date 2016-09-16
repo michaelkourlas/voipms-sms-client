@@ -33,13 +33,16 @@ public class DatabaseEditPreference extends Preference {
         super(context, attrs);
     }
 
-    public DatabaseEditPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+    public DatabaseEditPreference(Context context, AttributeSet attrs,
+                                  int defStyleAttr)
+    {
         super(context, attrs, defStyleAttr);
     }
 
     @Override
     protected void onClick() {
-        Intent preferencesIntent = new Intent(getContext(), EditDatabaseActivity.class);
+        Intent preferencesIntent =
+            new Intent(getContext(), EditDatabaseActivity.class);
         getContext().startActivity(preferencesIntent);
     }
 }

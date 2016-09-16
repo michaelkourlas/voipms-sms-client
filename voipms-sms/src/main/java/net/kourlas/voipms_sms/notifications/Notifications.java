@@ -17,7 +17,10 @@
 
 package net.kourlas.voipms_sms.notifications;
 
-import android.app.*;
+import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -26,14 +29,20 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import net.kourlas.voipms_sms.*;
+import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.activities.ActivityMonitor;
 import net.kourlas.voipms_sms.activities.ConversationActivity;
 import net.kourlas.voipms_sms.activities.ConversationQuickReplyActivity;
 import net.kourlas.voipms_sms.activities.ConversationsActivity;
+import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.preferences.Preferences;
 import net.kourlas.voipms_sms.receivers.MarkAsReadReceiver;
+import net.kourlas.voipms_sms.utils.Utils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Notifications {
     private static Notifications instance = null;
@@ -103,7 +112,7 @@ public class Notifications {
 
             Map<String, String> shortTexts = new HashMap<>();
             Map<String, String> longTexts = new HashMap<>();
-            Message[] messages = database.getUnreadMessages(
+            List<Message> messages = database.getUnreadMessages(
                 preferences.getDid(), contact);
             for (Message message : messages) {
                 if (shortTexts.get(contact) != null) {
@@ -131,7 +140,8 @@ public class Notifications {
      */
     private void showNotification(String contact,
                                   String shortText,
-                                  String longText) {
+                                  String longText)
+    {
 
         String title = Utils.getContactName(applicationContext,
                                             contact);
@@ -154,10 +164,9 @@ public class Notifications {
         if (Preferences.getInstance(applicationContext)
                        .getNotificationVibrateEnabled())
         {
-            notification.setVibrate(new long[]{0, 250, 250, 250});
-        }
-        else {
-            notification.setVibrate(new long[]{0});
+            notification.setVibrate(new long[] {0, 250, 250, 250});
+        } else {
+            notification.setVibrate(new long[] {0});
         }
         notification.setColor(0xFFAA0000);
         notification.setAutoCancel(true);
@@ -188,14 +197,13 @@ public class Notifications {
         stackBuilder.addParentStack(ConversationActivity.class);
         stackBuilder.addNextIntent(intent);
         notification.setContentIntent(stackBuilder.getPendingIntent(
-            0,PendingIntent.FLAG_CANCEL_CURRENT));
+            0, PendingIntent.FLAG_CANCEL_CURRENT));
 
         Intent replyIntent = new Intent(applicationContext,
                                         ConversationQuickReplyActivity.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             replyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        }
-        else {
+        } else {
             //noinspection deprecation
             replyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         }
@@ -230,8 +238,7 @@ public class Notifications {
         int id;
         if (notificationIds.get(contact) != null) {
             id = notificationIds.get(contact);
-        }
-        else {
+        } else {
             id = notificationIdCount++;
             notificationIds.put(contact, id);
         }

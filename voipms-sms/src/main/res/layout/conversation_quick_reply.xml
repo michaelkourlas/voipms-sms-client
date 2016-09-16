@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015 Michael Kourlas
+  ~ Copyright (C) 2015-2016 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/translucent_black"
-    android:orientation="vertical">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/translucent_black"
+              android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -97,16 +97,15 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_gravity="center_vertical"
             android:layout_toEndOf="@id/progress_bar"
             android:layout_toLeftOf="@id/view_switcher"
             android:layout_toRightOf="@id/progress_bar"
-            android:layout_toStartOf="@id/view_switcher">
+            android:layout_toStartOf="@id/view_switcher"
+            android:orientation="vertical">
 
             <EditText
                 android:id="@+id/message_edit_text"
-                android:padding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/white"
@@ -115,16 +114,17 @@
                 android:inputType="textMultiLine|textCapSentences|textAutoCorrect"
                 android:isScrollContainer="true"
                 android:maxLines="4"
+                android:padding="10dp"
                 android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/chars_remaining_text"
-                android:textColor="@android:color/white"
                 android:layout_width="match_parent"
-                android:gravity="end"
                 android:layout_height="wrap_content"
+                android:gravity="end"
+                android:textColor="@android:color/white"
                 android:textSize="12sp"
-                android:visibility="gone"/>
+                android:visibility="gone" />
         </LinearLayout>
     </RelativeLayout>
 

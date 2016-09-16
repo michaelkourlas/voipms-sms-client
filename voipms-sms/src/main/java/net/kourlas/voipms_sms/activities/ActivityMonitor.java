@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms;
+package net.kourlas.voipms_sms.activities;
 
 import android.app.Activity;
 
@@ -38,11 +38,11 @@ public class ActivityMonitor {
         return currentActivity;
     }
 
-    public void setCurrentActivity(Activity currentActivity) {
+    void setCurrentActivity(Activity currentActivity) {
         this.currentActivity = currentActivity;
     }
 
-    public void deleteReferenceToActivity(Activity activity) {
+    void deleteReferenceToActivity(Activity activity) {
         if (activity.equals(currentActivity)) {
             currentActivity = null;
         }

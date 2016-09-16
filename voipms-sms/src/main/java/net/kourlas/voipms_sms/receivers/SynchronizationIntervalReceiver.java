@@ -24,8 +24,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
-import net.kourlas.voipms_sms.Database;
-import net.kourlas.voipms_sms.Preferences;
+import net.kourlas.voipms_sms.db.Database;
+import net.kourlas.voipms_sms.preferences.Preferences;
 
 public class SynchronizationIntervalReceiver extends WakefulBroadcastReceiver {
     private static final String TAG = "SyncIntervalReceiver";

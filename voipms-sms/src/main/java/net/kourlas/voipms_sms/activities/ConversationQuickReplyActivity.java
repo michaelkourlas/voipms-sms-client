@@ -35,9 +35,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.widget.*;
-import net.kourlas.voipms_sms.*;
+import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.notifications.Notifications;
+import net.kourlas.voipms_sms.preferences.Preferences;
+import net.kourlas.voipms_sms.utils.Utils;
 
 public class ConversationQuickReplyActivity extends AppCompatActivity {
     private final ConversationQuickReplyActivity activity = this;
@@ -55,7 +58,8 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         database = Database.getInstance(getApplicationContext());
         preferences = Preferences.getInstance(getApplicationContext());
 
-        contact = getIntent().getExtras().getString(getString(R.string.conversation_extra_contact));
+        contact = getIntent().getExtras().getString(
+            getString(R.string.conversation_extra_contact));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -66,41 +70,53 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
             actionBar.setDisplayShowTitleEnabled(false);
         }
 
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager manager = (NotificationManager) getSystemService(
+            Context.NOTIFICATION_SERVICE);
         Integer notificationId = Notifications
-            .getInstance(getApplicationContext()).getNotificationIds().get(contact);
+            .getInstance(getApplicationContext()).getNotificationIds()
+            .get(contact);
         if (notificationId != null) {
             manager.cancel(notificationId);
         }
 
         TextView replyToText = (TextView) findViewById(R.id.reply_to_edit_text);
-        String contactName = Utils.getContactName(getApplicationContext(), contact);
+        String contactName =
+            Utils.getContactName(getApplicationContext(), contact);
         if (contactName == null) {
-            replyToText.setText(getString(R.string.conversation_quick_reply_reply_to) + " " +
-                    Utils.getFormattedPhoneNumber(contact));
-        }
-        else {
-            replyToText.setText(getString(R.string.conversation_quick_reply_reply_to) + " " + contactName);
+            replyToText.setText(
+                getString(R.string.conversation_quick_reply_reply_to,
+                          Utils.getFormattedPhoneNumber(contact)));
+        } else {
+            replyToText.setText(
+                getString(R.string.conversation_quick_reply_reply_to,
+                          contactName));
         }
 
-        final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
+        final EditText messageText =
+            (EditText) findViewById(R.id.message_edit_text);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             messageText.setOutlineProvider(new ViewOutlineProvider() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                 @Override
                 public void getOutline(View view, Outline outline) {
-                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 15);
+                    outline
+                        .setRoundRect(0, 0, view.getWidth(), view.getHeight(),
+                                      15);
                 }
             });
             messageText.setClipToOutline(true);
         }
         messageText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(CharSequence s, int start, int count,
+                                          int after)
+            {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(CharSequence s, int start, int before,
+                                      int count)
+            {
             }
 
             @Override
@@ -118,12 +134,12 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
             Preferences.getInstance(getApplicationContext()).getDid());
         if (photoUri != null) {
             photo.setImageURI(Uri.parse(photoUri));
-        }
-        else {
+        } else {
             photo.setImageToDefault();
         }
 
-        final ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
+        final ImageButton sendButton =
+            (ImageButton) findViewById(R.id.send_button);
         Utils.applyCircularMask(sendButton);
         sendButton.setOnClickListener(v -> preSendMessage());
 
@@ -132,34 +148,15 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
             finish();
 
             Intent intent = new Intent(activity, ConversationActivity.class);
-            intent.putExtra(getString(R.string.conversation_extra_contact), contact);
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+            intent.putExtra(getString(R.string.conversation_extra_contact),
+                            contact);
+            TaskStackBuilder stackBuilder =
+                TaskStackBuilder.create(getApplicationContext());
             stackBuilder.addParentStack(ConversationActivity.class);
             stackBuilder.addNextIntent(intent);
             stackBuilder.startActivities();
         });
         messageText.requestFocus();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        ActivityMonitor.getInstance().setCurrentActivity(this);
-
-        final EditText messageText = (EditText) findViewById(R.id.message_edit_text);
-        Message draftMessage = database.getDraftMessageForConversation(preferences.getDid(), contact);
-        if (draftMessage != null) {
-            messageText.setText(draftMessage.getText());
-            messageText.requestFocus();
-            messageText.setSelection(messageText.getText().length());
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
-        finish();
     }
 
     @Override
@@ -173,48 +170,6 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         super.onDestroy();
         ActivityMonitor.getInstance().deleteReferenceToActivity(this);
         finish();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void preSendMessage() {
-        EditText messageEditText = (EditText) findViewById(R.id.message_edit_text);
-        String messageText = messageEditText.getText().toString();
-        while (true) {
-            if (messageText.length() > 160) {
-                long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
-                        messageText.substring(0, 160)));
-                messageText = messageText.substring(160);
-                database.sendMessage(this, databaseId);
-            }
-            else {
-                long databaseId = database.insertMessage(new Message(preferences.getDid(), contact,
-                        messageText.substring(0, messageText.length())));
-                database.sendMessage(this, databaseId);
-                break;
-            }
-        }
-        messageEditText.setText("");
-        finish();
-    }
-
-    public void postSendMessage(boolean success, long databaseId) {
-        database.markConversationAsRead(preferences.getDid(), contact);
-        if (success) {
-            database.removeMessage(databaseId);
-            database.synchronize(true, false, null);
-        }
-        else {
-            database.markMessageAsFailedToSend(databaseId);
-        }
     }
 
     /**
@@ -275,6 +230,74 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         } else {
             charsRemainingTextView.setVisibility(View.GONE);
 
+        }
+    }
+
+    private void preSendMessage() {
+        EditText messageEditText =
+            (EditText) findViewById(R.id.message_edit_text);
+        String messageText = messageEditText.getText().toString();
+        while (true) {
+            if (messageText.length() > 160) {
+                long databaseId = database
+                    .insertMessage(new Message(preferences.getDid(), contact,
+                                               messageText.substring(0, 160)));
+                messageText = messageText.substring(160);
+                database.sendMessage(this, databaseId);
+            } else {
+                long databaseId = database
+                    .insertMessage(new Message(preferences.getDid(), contact,
+                                               messageText.substring(0,
+                                                                     messageText
+                                                                         .length())));
+                database.sendMessage(this, databaseId);
+                break;
+            }
+        }
+        messageEditText.setText("");
+        finish();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
+        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ActivityMonitor.getInstance().setCurrentActivity(this);
+
+        final EditText messageText =
+            (EditText) findViewById(R.id.message_edit_text);
+        Message draftMessage = database
+            .getDraftMessageForConversation(preferences.getDid(), contact);
+        if (draftMessage != null) {
+            messageText.setText(draftMessage.getText());
+            messageText.requestFocus();
+            messageText.setSelection(messageText.getText().length());
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void postSendMessage(boolean success, long databaseId) {
+        database.markConversationAsRead(preferences.getDid(), contact);
+        if (success) {
+            database.removeMessage(databaseId);
+            database.synchronize(true, false, null);
+        } else {
+            database.markMessageAsFailedToSend(databaseId);
         }
     }
 }

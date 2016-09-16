@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms;
+package net.kourlas.voipms_sms.preferences;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import net.kourlas.voipms_sms.R;
 
 import java.util.Date;
 
@@ -168,7 +169,8 @@ public class Preferences {
             R.string.preferences_notifications_sound_key),
                                            applicationContext.getResources()
                                                              .getString(
-                                                                 R.string.preferences_notifications_sound_default_value));
+                                                                 R.string
+                                                                     .preferences_notifications_sound_default_value));
     }
 
     public boolean getNotificationVibrateEnabled() {

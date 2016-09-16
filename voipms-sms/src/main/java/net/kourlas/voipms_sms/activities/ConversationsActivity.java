@@ -37,11 +37,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import net.kourlas.voipms_sms.*;
+import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.adapters.ConversationsRecyclerViewAdapter;
-import net.kourlas.voipms_sms.notifications.PushNotifications;
+import net.kourlas.voipms_sms.billing.Billing;
+import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.notifications.PushNotifications;
+import net.kourlas.voipms_sms.preferences.Preferences;
 import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
+import net.kourlas.voipms_sms.utils.Utils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -244,7 +248,8 @@ public class ConversationsActivity
      */
     private void preRecentUpdate() {
         adapter.refresh();
-        pushNotifications.registerForGcm(conversationsActivity, null, false, false);
+        pushNotifications
+            .registerForGcm(conversationsActivity, null, false, false);
         database.synchronize(true, false, conversationsActivity);
     }
 
@@ -484,7 +489,8 @@ public class ConversationsActivity
      */
     private void preFullUpdate() {
         adapter.refresh();
-        pushNotifications.registerForGcm(conversationsActivity, null, false, false);
+        pushNotifications
+            .registerForGcm(conversationsActivity, null, false, false);
         database.synchronize(false, true, conversationsActivity);
     }
 

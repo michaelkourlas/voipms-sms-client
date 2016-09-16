@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms;
+package net.kourlas.voipms_sms.utils;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -34,6 +34,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import net.kourlas.voipms_sms.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 

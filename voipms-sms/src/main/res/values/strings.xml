@@ -49,7 +49,7 @@
     <string name="conversation_char_rem">%1$s / %2$s</string>
 
     <!-- ConversationQuickReplyActivity -->
-    <string name="conversation_quick_reply_reply_to">Reply to</string>
+    <string name="conversation_quick_reply_reply_to">Reply to %1$s</string>
     <string name="conversation_quick_reply_open_sms">Open VoIP.ms SMS</string>
 
     <!-- ConversationsActivity -->

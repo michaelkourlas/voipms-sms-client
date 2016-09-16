@@ -46,10 +46,13 @@ import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
-import net.kourlas.voipms_sms.*;
+import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.adapters.ConversationRecyclerViewAdapter;
+import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.model.Message;
 import net.kourlas.voipms_sms.notifications.Notifications;
+import net.kourlas.voipms_sms.preferences.Preferences;
+import net.kourlas.voipms_sms.utils.Utils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -215,48 +218,129 @@ public class ConversationActivity
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        ActivityMonitor.getInstance().setCurrentActivity(this);
-
-        final EditText messageText =
-            (EditText) findViewById(R.id.message_edit_text);
-        Message draftMessage = database.getDraftMessageForConversation(
-            preferences.getDid(), contact);
-        if (draftMessage != null) {
-            messageText.setText(draftMessage.getText());
-            messageText.requestFocus();
-            messageText.setSelection(messageText.getText().length());
-        }
-
-        // Remove any open notifications related to this conversation
-        Integer id = Notifications.getInstance(getApplicationContext())
-                                  .getNotificationIds().get(contact);
-        if (id != null) {
-            NotificationManager notificationManager = (NotificationManager)
-                getApplicationContext().getSystemService(
-                    Context.NOTIFICATION_SERVICE);
-            notificationManager.cancel(id);
-        }
-
-        postUpdate();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 
+    /**
+     * Called when the message text box text changes.
+     *
+     * @param str The new text.
+     */
+    private void onMessageTextChange(String str) {
+        ViewSwitcher viewSwitcher =
+            (ViewSwitcher) findViewById(R.id.view_switcher);
+        if (str.equals("")
+            && viewSwitcher.getDisplayedChild() == 1)
+        {
+            viewSwitcher.setDisplayedChild(0);
+        } else if (viewSwitcher.getDisplayedChild() == 0) {
+            viewSwitcher.setDisplayedChild(1);
+        }
+
+        Message previousDraftMessage =
+            database.getDraftMessageForConversation(
+                preferences.getDid(), contact);
+        if (str.equals("")) {
+            if (previousDraftMessage != null) {
+                database.removeMessage(
+                    previousDraftMessage.getDatabaseId());
+            }
+        } else {
+            if (previousDraftMessage != null) {
+                previousDraftMessage.setText(str);
+                database.insertMessage(previousDraftMessage);
+            } else {
+                Message newDraftMessage = new Message(
+                    preferences.getDid(), contact,
+                    str);
+                newDraftMessage.setDraft(true);
+                database.insertMessage(newDraftMessage);
+            }
+        }
+
+        TextView charsRemainingTextView = (TextView)
+            findViewById(R.id.chars_remaining_text);
+        if (str.length() >= 150 && str.length() <= 160) {
+            charsRemainingTextView.setVisibility(View.VISIBLE);
+            charsRemainingTextView.setText(String.valueOf(160 - str.length()));
+        } else if (str.length() > 160) {
+            charsRemainingTextView.setVisibility(View.VISIBLE);
+            int charsRemaining;
+            if (str.length() % 153 == 0) {
+                charsRemaining = 0;
+            } else {
+                charsRemaining = 153 - (str.length() % 153);
+            }
+            charsRemainingTextView.setText(
+                getString(
+                    R.string.conversation_char_rem,
+                    String.valueOf(charsRemaining),
+                    String.valueOf((int) Math.ceil(str.length() / 153d))));
+        } else {
+            charsRemainingTextView.setVisibility(View.GONE);
+
+        }
+    }
+
+    /**
+     * Called after the user clicks the send message button.
+     */
+    private void preSendMessage() {
+        EditText messageEditText =
+            (EditText) findViewById(R.id.message_edit_text);
+        String messageText = messageEditText.getText().toString();
+        // Split up the message to be sent into 153-character chunks
+        // (if character count greater than 160) and add them to the database
+        if (messageText.length() > 160) {
+            while (true) {
+                if (messageText.length() > 153) {
+                    long databaseId =
+                        database.insertMessage(new Message(
+                            preferences.getDid(),
+                            contact,
+                            messageText.substring(0, 153)));
+                    messageText = messageText.substring(153);
+                    adapter.refresh();
+                    preSendMessage(databaseId);
+                } else {
+                    long databaseId =
+                        database.insertMessage(new Message(
+                            preferences.getDid(),
+                            contact,
+                            messageText));
+                    adapter.refresh();
+                    preSendMessage(databaseId);
+                    break;
+                }
+            }
+        } else {
+            long databaseId =
+                database.insertMessage(new Message(
+                    preferences.getDid(),
+                    contact,
+                    messageText));
+            adapter.refresh();
+            preSendMessage(databaseId);
+        }
+
+        // Clear the message text box
+        messageEditText.setText("");
+    }
+
     ///
     /// Options menu
     ///
+
+    /**
+     * Called after the message to be sent has been added to the database.
+     */
+    private void preSendMessage(long databaseId) {
+        database.markMessageAsSending(databaseId);
+        adapter.refresh();
+        database.sendMessage(this, databaseId);
+    }
 
     /**
      * Creates the standard options menu.
@@ -345,6 +429,10 @@ public class ConversationActivity
         return true;
     }
 
+    ///
+    /// Action mode menu
+    ///
+
     /**
      * Handler for the delete all messages button.
      */
@@ -373,10 +461,6 @@ public class ConversationActivity
 
         return true;
     }
-
-    ///
-    /// Action mode menu
-    ///
 
     /**
      * Creates the action mode menu.
@@ -554,6 +638,10 @@ public class ConversationActivity
         return true;
     }
 
+    ///
+    /// Behavioural handlers
+    ///
+
     /**
      * Handler for the delete button.
      */
@@ -594,10 +682,6 @@ public class ConversationActivity
         return true;
     }
 
-    ///
-    /// Behavioural handlers
-    ///
-
     /**
      * Facilitates special back button behaviour, such as when the search
      * box is visible or when the action mode is enabled.
@@ -620,37 +704,43 @@ public class ConversationActivity
         }
     }
 
-    /**
-     * Facilitates special click behaviour, such as when the action mode is
-     * enabled or if a message is clicked that has previously failed to send.
-     */
     @Override
-    public void onClick(View view) {
-        if (actionModeEnabled) {
-            // Check or uncheck item when action mode is enabled
-            toggleItem(view);
-        } else {
-            // Resend message if has not yet been sent, but only if
-            Message message =
-                adapter.getItem(recyclerView.getChildAdapterPosition(view));
-            if (!message.isDelivered() && !message.isDeliveryInProgress()) {
-                preSendMessage(message.getDatabaseId());
-            }
-        }
-    }
-
-    /**
-     * Facilitates special double-click behaviour, such as toggling an item.
-     */
-    @Override
-    public boolean onLongClick(View view) {
-        toggleItem(view);
-        return true;
+    protected void onPause() {
+        super.onPause();
+        ActivityMonitor.getInstance().deleteReferenceToActivity(this);
     }
 
     ///
     /// Miscellaneous handlers
     ///
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ActivityMonitor.getInstance().setCurrentActivity(this);
+
+        final EditText messageText =
+            (EditText) findViewById(R.id.message_edit_text);
+        Message draftMessage = database.getDraftMessageForConversation(
+            preferences.getDid(), contact);
+        if (draftMessage != null) {
+            messageText.setText(draftMessage.getText());
+            messageText.requestFocus();
+            messageText.setSelection(messageText.getText().length());
+        }
+
+        // Remove any open notifications related to this conversation
+        Integer id = Notifications.getInstance(getApplicationContext())
+                                  .getNotificationIds().get(contact);
+        if (id != null) {
+            NotificationManager notificationManager = (NotificationManager)
+                getApplicationContext().getSystemService(
+                    Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(id);
+        }
+
+        postUpdate();
+    }
 
     /**
      * Called after this activity loads or after a database update if this
@@ -659,146 +749,6 @@ public class ConversationActivity
     public void postUpdate() {
         database.markConversationAsRead(preferences.getDid(), contact);
         adapter.refresh();
-    }
-
-    /**
-     * Called after the user clicks the send message button.
-     */
-    private void preSendMessage() {
-        EditText messageEditText =
-            (EditText) findViewById(R.id.message_edit_text);
-        String messageText = messageEditText.getText().toString();
-        // Split up the message to be sent into 153-character chunks
-        // (if character count greater than 160) and add them to the database
-        if (messageText.length() > 160) {
-            while (true) {
-                if (messageText.length() > 153) {
-                    long databaseId =
-                        database.insertMessage(new Message(
-                            preferences.getDid(),
-                            contact,
-                            messageText.substring(0, 153)));
-                    messageText = messageText.substring(153);
-                    adapter.refresh();
-                    preSendMessage(databaseId);
-                } else {
-                    long databaseId =
-                        database.insertMessage(new Message(
-                            preferences.getDid(),
-                            contact,
-                            messageText));
-                    adapter.refresh();
-                    preSendMessage(databaseId);
-                    break;
-                }
-            }
-        } else {
-            long databaseId =
-                database.insertMessage(new Message(
-                    preferences.getDid(),
-                    contact,
-                    messageText));
-            adapter.refresh();
-            preSendMessage(databaseId);
-        }
-
-        // Clear the message text box
-        messageEditText.setText("");
-    }
-
-    /**
-     * Called after the message to be sent has been added to the database.
-     */
-    private void preSendMessage(long databaseId) {
-        database.markMessageAsSending(databaseId);
-        adapter.refresh();
-        database.sendMessage(this, databaseId);
-    }
-
-    /**
-     * Called after this activity sends a message.
-     */
-    public void postSendMessage(boolean success, long databaseId) {
-        database.markConversationAsRead(preferences.getDid(), contact);
-        if (success) {
-            // Since the message in our database does not have all of the
-            // information we need (the VoIP.ms ID, the precise date of sending)
-            // we delete it and retrieve the sent message from VoIP.ms; the
-            // adapter refresh will occur as part of the DB sync
-            database.removeMessage(databaseId);
-            database.synchronize(true, true, this);
-        } else {
-            // Otherwise, mark the message as failed to deliver and refresh
-            // the adapter
-            database.markMessageAsFailedToSend(databaseId);
-            adapter.refresh();
-        }
-
-        // Scroll to the bottom of the adapter so that the message is in view
-        if (adapter.getItemCount() > 0) {
-            layoutManager.scrollToPosition(adapter.getItemCount() - 1);
-        }
-    }
-
-    /**
-     * Called when the message text box text changes.
-     *
-     * @param str The new text.
-     */
-    private void onMessageTextChange(String str) {
-        ViewSwitcher viewSwitcher =
-            (ViewSwitcher) findViewById(R.id.view_switcher);
-        if (str.equals("")
-            && viewSwitcher.getDisplayedChild() == 1)
-        {
-            viewSwitcher.setDisplayedChild(0);
-        } else if (viewSwitcher.getDisplayedChild() == 0) {
-            viewSwitcher.setDisplayedChild(1);
-        }
-
-        Message previousDraftMessage =
-            database.getDraftMessageForConversation(
-                preferences.getDid(), contact);
-        if (str.equals("")) {
-            if (previousDraftMessage != null) {
-                database.removeMessage(
-                    previousDraftMessage.getDatabaseId());
-            }
-        } else {
-            if (previousDraftMessage != null) {
-                previousDraftMessage.setText(str);
-                database.insertMessage(previousDraftMessage);
-            } else {
-                Message newDraftMessage = new Message(
-                    preferences.getDid(), contact,
-                    str);
-                newDraftMessage.setDraft(true);
-                database.insertMessage(newDraftMessage);
-            }
-        }
-
-        TextView charsRemainingTextView = (TextView)
-            findViewById(R.id.chars_remaining_text);
-        if (str.length() >= 150 && str.length() <= 160) {
-            charsRemainingTextView.setVisibility(View.VISIBLE);
-            charsRemainingTextView.setText(String.valueOf(160 - str.length()));
-        } else if (str.length() > 160) {
-            charsRemainingTextView.setVisibility(View.VISIBLE);
-            int charsRemaining;
-            if (str.length() % 153 == 0) {
-                charsRemaining = 0;
-            } else {
-                charsRemaining = 153 - (str.length() % 153);
-            }
-            charsRemainingTextView.setText(
-                getString(
-                    R.string.conversation_char_rem,
-                    String.valueOf(charsRemaining),
-                    String.valueOf((int) Math.ceil(str.length() / 153d))));
-        } else {
-            charsRemainingTextView.setVisibility(View.GONE);
-
-        }
     }
 
     /**
@@ -831,9 +781,24 @@ public class ConversationActivity
         }
     }
 
-    ///
-    /// Miscellaneous helper methods
-    ///
+    /**
+     * Facilitates special click behaviour, such as when the action mode is
+     * enabled or if a message is clicked that has previously failed to send.
+     */
+    @Override
+    public void onClick(View view) {
+        if (actionModeEnabled) {
+            // Check or uncheck item when action mode is enabled
+            toggleItem(view);
+        } else {
+            // Resend message if has not yet been sent, but only if
+            Message message =
+                adapter.getItem(recyclerView.getChildAdapterPosition(view));
+            if (!message.isDelivered() && !message.isDeliveryInProgress()) {
+                preSendMessage(message.getDatabaseId());
+            }
+        }
+    }
 
     /**
      * Toggles the specified view.
@@ -902,6 +867,44 @@ public class ConversationActivity
             infoAction.setVisible(true);
             copyAction.setVisible(true);
             shareAction.setVisible(true);
+        }
+    }
+
+    ///
+    /// Miscellaneous helper methods
+    ///
+
+    /**
+     * Facilitates special double-click behaviour, such as toggling an item.
+     */
+    @Override
+    public boolean onLongClick(View view) {
+        toggleItem(view);
+        return true;
+    }
+
+    /**
+     * Called after this activity sends a message.
+     */
+    public void postSendMessage(boolean success, long databaseId) {
+        database.markConversationAsRead(preferences.getDid(), contact);
+        if (success) {
+            // Since the message in our database does not have all of the
+            // information we need (the VoIP.ms ID, the precise date of sending)
+            // we delete it and retrieve the sent message from VoIP.ms; the
+            // adapter refresh will occur as part of the DB sync
+            database.removeMessage(databaseId);
+            database.synchronize(true, true, this);
+        } else {
+            // Otherwise, mark the message as failed to deliver and refresh
+            // the adapter
+            database.markMessageAsFailedToSend(databaseId);
+            adapter.refresh();
+        }
+
+        // Scroll to the bottom of the adapter so that the message is in view
+        if (adapter.getItemCount() > 0) {
+            layoutManager.scrollToPosition(adapter.getItemCount() - 1);
         }
     }
 }

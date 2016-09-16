@@ -18,8 +18,8 @@
 package net.kourlas.voipms_sms.model;
 
 import android.support.annotation.NonNull;
-import net.kourlas.voipms_sms.Database;
-import net.kourlas.voipms_sms.Utils;
+import net.kourlas.voipms_sms.db.Database;
+import net.kourlas.voipms_sms.utils.Utils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,27 +42,22 @@ public class Message implements Comparable<Message> {
      * The ID assigned to the message by VoIP.ms.
      */
     private final Long voipId;
-
-    /**
-     * The date of the message.
-     */
-    private Date date;
-
     /**
      * The type of the message (incoming or outgoing).
      */
     private final Type type;
-
     /**
      * The DID associated with the message.
      */
     private final String did;
-
     /**
      * The contact associated with the message.
      */
     private final String contact;
-
+    /**
+     * The date of the message.
+     */
+    private Date date;
     /**
      * The text of the message.
      */
@@ -281,29 +276,6 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Gets the database ID of the message. This value may be null if no ID has
-     * been yet been assigned to the message (i.e. if the message has not yet
-     * been inserted into the database).
-     *
-     * @return The database ID of the message.
-     */
-    public Long getDatabaseId() {
-        return databaseId;
-    }
-
-    /**
-     * Gets the ID assigned to the message by VoIP.ms. This value may be null
-     * if no ID has yet been assigned to the  message (i.e. if the message has
-     * not yet been sent).
-     *
-     * @return The ID assigned to the message by VoIP.ms.
-     */
-    public Long getVoipId() {
-        return voipId;
-
-    }
-
-    /**
      * Gets the date of the message.
      *
      * @return The date of the message.
@@ -322,21 +294,240 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Gets the date of the message in database format.
-     *
-     * @return The date of the message in database format.
-     */
-    public long getDateInDatabaseFormat() {
-        return date.getTime() / 1000;
-    }
-
-    /**
      * Gets the type of the message (incoming or outgoing).
      *
      * @return The type of the message (incoming or outgoing).
      */
     public Type getType() {
         return type;
+    }
+
+    /**
+     * Gets whether or not the message is deleted.
+     *
+     * @return Whether or not the message is deleted.
+     */
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    /**
+     * Gets whether or not the message has been delivered.
+     *
+     * @return Whether or not the message has been delivered.
+     */
+    public boolean isDelivered() {
+        return isDelivered;
+    }
+
+    /**
+     * Gets whether or not the message is being delivered.
+     *
+     * @return Whether or not the message is being delivered.
+     */
+    public boolean isDeliveryInProgress() {
+        return isDeliveryInProgress;
+    }
+
+    /**
+     * Gets whether or not the message is a draft.
+     *
+     * @return Whether or not the message is a draft.
+     */
+    public boolean isDraft() {
+        return isDraft;
+    }
+
+    /**
+     * Sets whether or not the message is a draft.
+     *
+     * @param isDraft Whether or not the message is a draft.
+     */
+    public void setDraft(boolean isDraft) {
+        this.isDraft = isDraft;
+    }
+
+    /**
+     * Returns whether or not the message is identical to another object.
+     *
+     * @param o The other object.
+     * @return Whether or not the message is identical to another object.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Message) {
+            if (this == o) {
+                return true;
+            }
+
+            Message other = (Message) o;
+            boolean databaseIdEquals =
+                (databaseId == null && other.databaseId == null) ||
+                (databaseId != null && other.databaseId != null && databaseId
+                    .equals(other.databaseId));
+            boolean voipIdEquals = (voipId == null && other.voipId == null) ||
+                                   (voipId != null && other.voipId != null
+                                    && voipId.equals(other.voipId));
+            return databaseIdEquals && voipIdEquals
+                   && date.equals(other.date)
+                   && type == other.type
+                   && did.equals(other.did)
+                   && contact.equals(other.contact)
+                   && text.equals(other.text)
+                   && isUnread() == other.isUnread()
+                   && isDeleted == other.isDeleted
+                   && isDelivered == other.isDelivered
+                   && isDeliveryInProgress == other.isDeliveryInProgress
+                   && isDraft == other.isDraft;
+        } else {
+            return super.equals(o);
+        }
+    }
+
+    /**
+     * Gets whether or not the message is unread.
+     *
+     * @return Whether or not the message is unread.
+     */
+    public boolean isUnread() {
+        // Outgoing messages must be read
+        return isUnread && type == Type.INCOMING;
+    }
+
+    /**
+     * Sets whether or not the message is unread.
+     *
+     * @param unread Whether or not the message is unread.
+     */
+    public void setUnread(boolean unread) {
+        isUnread = unread;
+    }
+
+    /**
+     * Returns true if this message and the specified message are part of the
+     * same conversation.
+     *
+     * @param another The other message.
+     * @return True if this message and the specified message are part of the
+     * same conversation.
+     */
+    public boolean equalsConversation(Message another) {
+        return this.contact.equals(another.contact)
+               && this.did.equals(another.did);
+    }
+
+    /**
+     * Returns true if this message and the specified message have the same
+     * database ID.
+     *
+     * @param another The other message.
+     * @return True if this message and the specified message have the same
+     * database ID.
+     */
+    public boolean equalsDatabaseId(Message another) {
+        return this.getDatabaseId() != null
+               && another.getDatabaseId() != null &&
+               this.getDatabaseId()
+                   .equals(another.getDatabaseId());
+    }
+
+    /**
+     * Gets the database ID of the message. This value may be null if no ID has
+     * been yet been assigned to the message (i.e. if the message has not yet
+     * been inserted into the database).
+     *
+     * @return The database ID of the message.
+     */
+    public Long getDatabaseId() {
+        return databaseId;
+    }
+
+    /**
+     * Compares this message to another message. Compares according to ideal
+     * sorting order for the conversations view.
+     *
+     * @param another The other message.
+     * @return -1, 1, or 0 if this message is less than, greater than, or
+     * equal to the other message.
+     */
+    @Override
+    public int compareTo(@NonNull Message another) {
+        if (this.isDraft && !another.isDraft) {
+            return -1;
+        } else if (!this.isDraft && another.isDraft) {
+            return 1;
+        }
+
+        if (this.date.getTime() > another.date.getTime()) {
+            return -1;
+        } else if (this.date.getTime() < another.date.getTime()) {
+            return 1;
+        }
+
+        if (this.databaseId != null && another.databaseId != null) {
+            if (this.databaseId > another.databaseId) {
+                return -1;
+            } else if (this.databaseId < another.databaseId) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Returns a JSON version of this message.
+     *
+     * @return A JSON version of this message.
+     */
+    public JSONObject toJSON() {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            if (databaseId != null) {
+                jsonObject.put(Database.COLUMN_DATABASE_ID, getDatabaseId());
+            }
+            if (voipId != null) {
+                jsonObject.put(Database.COLUMN_VOIP_ID, getVoipId());
+            }
+            jsonObject.put(Database.COLUMN_DATE, getDateInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_TYPE, getTypeInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_DID, getDid());
+            jsonObject.put(Database.COLUMN_CONTACT, getContact());
+            jsonObject.put(Database.COLUMN_MESSAGE, getText());
+            jsonObject.put(Database.COLUMN_UNREAD, isUnreadInDatabaseFormat());
+            jsonObject
+                .put(Database.COLUMN_DELETED, isDeletedInDatabaseFormat());
+            jsonObject
+                .put(Database.COLUMN_DELIVERED, isDeliveredInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_DELIVERY_IN_PROGRESS,
+                           isDeliveryInProgressInDatabaseFormat());
+            jsonObject.put(Database.COLUMN_DRAFT, isDraftInDatabaseFormat());
+            return jsonObject;
+        } catch (JSONException ex) {
+            // This should never happen
+            throw new Error();
+        }
+    }
+
+    /**
+     * Gets the ID assigned to the message by VoIP.ms. This value may be null
+     * if no ID has yet been assigned to the  message (i.e. if the message has
+     * not yet been sent).
+     *
+     * @return The ID assigned to the message by VoIP.ms.
+     */
+    public Long getVoipId() {
+        return voipId;
+
+    }
+
+    /**
+     * Gets the date of the message in database format.
+     *
+     * @return The date of the message in database format.
+     */
+    public long getDateInDatabaseFormat() {
+        return date.getTime() / 1000;
     }
 
     /**
@@ -385,41 +576,13 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Gets whether or not the message is unread.
-     *
-     * @return Whether or not the message is unread.
-     */
-    public boolean isUnread() {
-        // Outgoing messages must be read
-        return isUnread && type == Type.INCOMING;
-    }
-
-    /**
-     * Sets whether or not the message is unread.
-     *
-     * @param unread Whether or not the message is unread.
-     */
-    public void setUnread(boolean unread) {
-        isUnread = unread;
-    }
-
-    /**
      * Gets whether or not the message is unread in database format.
      *
      * @return Whether or not the message is unread in database format.
      */
     public int isUnreadInDatabaseFormat() {
         // Outgoing messages must be read
-        return isUnread && type == Type.INCOMING ? 1 : 0;
-    }
-
-    /**
-     * Gets whether or not the message is deleted.
-     *
-     * @return Whether or not the message is deleted.
-     */
-    public boolean isDeleted() {
-        return isDeleted;
+        return (isUnread && type == Type.INCOMING) ? 1 : 0;
     }
 
     /**
@@ -432,49 +595,12 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Gets whether or not the message has been delivered.
-     *
-     * @return Whether or not the message has been delivered.
-     */
-    public boolean isDelivered() {
-        return isDelivered;
-    }
-
-    /**
-     * Sets whether or not the message has been delivered.
-     *
-     * @param isDelivered Whether or not the message has been delivered.
-     */
-    public void setDelivered(boolean isDelivered) {
-        this.isDelivered = isDelivered;
-    }
-
-    /**
      * Gets whether or not the message has been delivered in database format.
      *
      * @return Whether or not the message has been delivered in databse format.
      */
     public int isDeliveredInDatabaseFormat() {
         return isDelivered ? 1 : 0;
-    }
-
-    /**
-     * Gets whether or not the message is being delivered.
-     *
-     * @return Whether or not the message is being delivered.
-     */
-    public boolean isDeliveryInProgress() {
-        return isDeliveryInProgress;
-    }
-
-    /**
-     * Sets whether or not the message is being delivered.
-     *
-     * @param isDeliveryInProgress Whether or not the message is being
-     *                             delivered.
-     */
-    public void setDeliveryInProgress(boolean isDeliveryInProgress) {
-        this.isDeliveryInProgress = isDeliveryInProgress;
     }
 
     /**
@@ -487,168 +613,12 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Gets whether or not the message is a draft.
-     *
-     * @return Whether or not the message is a draft.
-     */
-    public boolean isDraft() {
-        return isDraft;
-    }
-
-    /**
-     * Sets whether or not the message is a draft.
-     *
-     * @param isDraft Whether or not the message is a draft.
-     */
-    public void setDraft(boolean isDraft) {
-        this.isDraft = isDraft;
-    }
-
-    /**
      * Gets whether or not the message is a draft in database format.
      *
      * @return Whether or not the message is a draft in database format.
      */
     public int isDraftInDatabaseFormat() {
         return isDraft ? 1 : 0;
-    }
-
-    /**
-     * Returns whether or not the message is identical to another object.
-     *
-     * @param o The other object.
-     * @return Whether or not the message is identical to another object.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof Message) {
-            if (this == o) {
-                return true;
-            }
-
-            Message other = (Message) o;
-            boolean databaseIdEquals =
-                (databaseId == null && other.databaseId == null) ||
-                (databaseId != null && other.databaseId != null && databaseId
-                    .equals(other.databaseId));
-            boolean voipIdEquals = (voipId == null && other.voipId == null) ||
-                                   (voipId != null && other.voipId != null
-                                    && voipId.equals(other.voipId));
-            return databaseIdEquals && voipIdEquals
-                   && date.equals(other.date)
-                   && type == other.type
-                   && did.equals(other.did)
-                   && contact.equals(other.contact)
-                   && text.equals(other.text)
-                   && isUnread() == other.isUnread()
-                   && isDeleted == other.isDeleted
-                   && isDelivered == other.isDelivered
-                   && isDeliveryInProgress == other.isDeliveryInProgress
-                   && isDraft == other.isDraft;
-        } else {
-            return super.equals(o);
-        }
-    }
-
-    /**
-     * Returns true if this message and the specified message are part of the
-     * same conversation.
-     *
-     * @param another The other message.
-     * @return True if this message and the specified message are part of the
-     * same conversation.
-     */
-    public boolean equalsConversation(Message another) {
-        return this.contact.equals(another.contact)
-               && this.did.equals(another.did);
-    }
-
-    /**
-     * Returns true if this message and the specified message have the same
-     * database ID.
-     *
-     * @param another The other message.
-     * @return True if this message and the specified message have the same
-     * database ID.
-     */
-    public boolean equalsDatabaseId(Message another) {
-        return this.getDatabaseId() != null
-               && another.getDatabaseId() != null &&
-               this.getDatabaseId()
-                   .equals(another.getDatabaseId());
-    }
-
-    /**
-     * Compares this message to another message. Compares according to ideal
-     * sorting order for the conversations view.
-     *
-     * @param another The other message.
-     * @return -1, 1, or 0 if this message is less than, greater than, or
-     *         equal to the other message.
-     */
-    @Override
-    public int compareTo(@NonNull Message another) {
-        if (this.isDraft && !another.isDraft) {
-            return -1;
-        } else if (!this.isDraft && another.isDraft) {
-            return 1;
-        }
-
-        if (!this.isDraft) {
-            if (this.date.getTime() > another.date.getTime()) {
-                return -1;
-            } else if (this.date.getTime() < another.date.getTime()) {
-                return 1;
-            }
-        }
-
-        if (this.databaseId != null && another.databaseId != null) {
-            if (this.databaseId > another.databaseId) {
-                return 1;
-            } else if (this.databaseId < another.databaseId) {
-                return -1;
-            }
-        } else if (this.databaseId == null && another.databaseId != null) {
-            return -1;
-        } else if (this.databaseId != null) {
-            return 1;
-        }
-
-        return 0;
-    }
-
-    /**
-     * Returns a JSON version of this message.
-     *
-     * @return A JSON version of this message.
-     */
-    public JSONObject toJSON() {
-        try {
-            JSONObject jsonObject = new JSONObject();
-            if (databaseId != null) {
-                jsonObject.put(Database.COLUMN_DATABASE_ID, getDatabaseId());
-            }
-            if (voipId != null) {
-                jsonObject.put(Database.COLUMN_VOIP_ID, getVoipId());
-            }
-            jsonObject.put(Database.COLUMN_DATE, getDateInDatabaseFormat());
-            jsonObject.put(Database.COLUMN_TYPE, getTypeInDatabaseFormat());
-            jsonObject.put(Database.COLUMN_DID, getDid());
-            jsonObject.put(Database.COLUMN_CONTACT, getContact());
-            jsonObject.put(Database.COLUMN_MESSAGE, getText());
-            jsonObject.put(Database.COLUMN_UNREAD, isUnreadInDatabaseFormat());
-            jsonObject
-                .put(Database.COLUMN_DELETED, isDeletedInDatabaseFormat());
-            jsonObject
-                .put(Database.COLUMN_DELIVERED, isDeliveredInDatabaseFormat());
-            jsonObject.put(Database.COLUMN_DELIVERY_IN_PROGRESS,
-                           isDeliveryInProgressInDatabaseFormat());
-            jsonObject.put(Database.COLUMN_DRAFT, isDraftInDatabaseFormat());
-            return jsonObject;
-        } catch (JSONException ex) {
-            // This should never happen
-            throw new Error();
-        }
     }
 
     /**

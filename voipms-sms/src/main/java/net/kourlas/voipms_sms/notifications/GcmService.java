@@ -19,8 +19,8 @@ package net.kourlas.voipms_sms.notifications;
 
 import android.os.Bundle;
 import com.google.android.gms.gcm.GcmListenerService;
-import net.kourlas.voipms_sms.Database;
-import net.kourlas.voipms_sms.Preferences;
+import net.kourlas.voipms_sms.db.Database;
+import net.kourlas.voipms_sms.preferences.Preferences;
 
 /**
  * Service that processes GCM messages by showing notifications for new SMS

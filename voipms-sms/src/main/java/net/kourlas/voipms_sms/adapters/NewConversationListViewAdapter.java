@@ -58,19 +58,8 @@ public class NewConversationListViewAdapter extends BaseAdapter
         getFilter().filter(newFilterConstraint);
     }
 
-    @Override
-    public int getCount() {
-        return items.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return items.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
+    public Filter getFilter() {
+        return new NewConversationFilter();
     }
 
     public void showTypedInItem(String phoneNumber) {
@@ -80,12 +69,6 @@ public class NewConversationListViewAdapter extends BaseAdapter
     public void hideTypedInItem() {
         typedInPhoneNumber = null;
     }
-
-    @Override
-    public int getViewTypeCount() {
-        return ITEM_COUNT;
-    }
-
     @Override
     public int getItemViewType(int position) {
         ContactItem contactItem = (ContactItem) getItem(position);
@@ -95,6 +78,202 @@ public class NewConversationListViewAdapter extends BaseAdapter
             return ITEM_SECONDARY;
         }
     }
+
+    @Override
+    public int getCount() {
+        return items.size();
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return ITEM_COUNT;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class ContactItem {
+        private final long id;
+        private final String name;
+        private final String phoneNumber;
+        private final String photoUri;
+        private final boolean typedIn;
+        private boolean primary;
+
+        ContactItem(long id, String name, String phoneNumber, String photoUri,
+                    boolean primary, boolean typedIn)
+        {
+            this.id = id;
+            this.name = name;
+            this.phoneNumber = phoneNumber;
+            this.photoUri = photoUri;
+            this.primary = primary;
+            this.typedIn = typedIn;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getPhoneNumber() {
+            return phoneNumber;
+        }
+
+        public String getPhotoUri() {
+            return photoUri;
+        }
+
+        public boolean isPrimary() {
+            return primary;
+        }
+
+        public void setPrimary(boolean primary) {
+            this.primary = primary;
+        }
+
+        public boolean isTypedIn() {
+            return typedIn;
+        }
+
+        public long getId() {
+            return id;
+        }
+    }
+
+    class NewConversationFilter extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults results = new FilterResults();
+            List<ContactItem> contactItemResults = new ArrayList<>();
+
+            String searchText = constraint.toString();
+
+            List<ContactItem> phoneNumberEntries = new ArrayList<>();
+
+            phoneNumberEntries.addAll(getContacts());
+            if (typedInPhoneNumber != null) {
+                phoneNumberEntries.add(0, new ContactItem(-1,
+                                                          typedInPhoneNumber,
+                                                          typedInPhoneNumber,
+                                                          null, true,
+                                                          true));
+            }
+
+            for (ContactItem contactItem : phoneNumberEntries) {
+                if (contactItem.getName().toLowerCase()
+                               .contains(searchText.toLowerCase()) ||
+                    contactItem.getPhoneNumber().toLowerCase()
+                               .contains(searchText.toLowerCase()) ||
+                    (!searchText.replaceAll("[^0-9]", "").equals("") &&
+                     contactItem.getPhoneNumber().replaceAll("[^0-9]", "")
+                                .contains(
+                                    searchText.replaceAll("[^0-9]", ""))) ||
+                    contactItem.isTypedIn())
+                {
+                    contactItemResults.add(contactItem);
+                }
+            }
+
+            for (int i = 0; i < contactItemResults.size(); i++) {
+                boolean found = false;
+                for (int j = 0; j < i; j++) {
+                    if (contactItemResults.get(i).getName().equals(
+                        contactItemResults.get(j).getName()))
+                    {
+                        contactItemResults.get(i).setPrimary(false);
+                        contactItemResults.get(j).setPrimary(true);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    contactItemResults.get(i).setPrimary(true);
+                }
+            }
+
+            results.count = contactItemResults.size();
+            results.values = contactItemResults;
+
+            return results;
+        }
+
+        private List<ContactItem> getContacts() {
+            List<ContactItem> phoneNumberEntries = new ArrayList<>();
+
+            try {
+                Cursor cursor = activity.getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null, null, null,
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                    + " ASC");
+                if (cursor != null && cursor.getCount() > 0) {
+                    while (cursor.moveToNext()) {
+                        if (cursor.getString(cursor.getColumnIndex(
+                            ContactsContract.Contacts.HAS_PHONE_NUMBER))
+                                  .equals("1"))
+                        {
+                            long id = cursor.getLong(
+                                cursor.getColumnIndex(
+                                    ContactsContract.CommonDataKinds.Phone
+                                        .CONTACT_ID));
+                            String contact = cursor.getString(
+                                cursor.getColumnIndex(
+                                    ContactsContract.Contacts.DISPLAY_NAME));
+                            String phoneNumber = cursor.getString(
+                                cursor.getColumnIndex(
+                                    ContactsContract.CommonDataKinds
+                                        .Phone.NUMBER));
+                            String photoUri = cursor.getString(
+                                cursor.getColumnIndex(
+                                    ContactsContract.Contacts.PHOTO_URI));
+
+                            boolean showPhoto = true;
+                            for (ContactItem contactItem : phoneNumberEntries) {
+                                if (id == contactItem.getId()) {
+                                    showPhoto = false;
+                                }
+                            }
+
+                            ContactItem contactItem = new ContactItem(
+                                id, contact, phoneNumber, photoUri, showPhoto,
+                                false);
+                            phoneNumberEntries.add(contactItem);
+                        }
+                    }
+                    cursor.close();
+                } else if (cursor != null) {
+                    cursor.close();
+                }
+                return phoneNumberEntries;
+            } catch (SecurityException ignored) {
+                return phoneNumberEntries;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint,
+                                      FilterResults results)
+        {
+            items.clear();
+            if (results.values != null) {
+                items.addAll((List<ContactItem>) results.values);
+            }
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return items.get(position);
+    }
+
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -231,181 +410,5 @@ public class NewConversationListViewAdapter extends BaseAdapter
         return 0;
     }
 
-    public Filter getFilter() {
-        return new NewConversationFilter();
-    }
 
-    @SuppressWarnings("WeakerAccess")
-    public static class ContactItem {
-        private final long id;
-        private final String name;
-        private final String phoneNumber;
-        private final String photoUri;
-        private final boolean typedIn;
-        private boolean primary;
-
-        ContactItem(long id, String name, String phoneNumber, String photoUri,
-                    boolean primary, boolean typedIn)
-        {
-            this.id = id;
-            this.name = name;
-            this.phoneNumber = phoneNumber;
-            this.photoUri = photoUri;
-            this.primary = primary;
-            this.typedIn = typedIn;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getPhoneNumber() {
-            return phoneNumber;
-        }
-
-        public String getPhotoUri() {
-            return photoUri;
-        }
-
-        public boolean isPrimary() {
-            return primary;
-        }
-
-        public void setPrimary(boolean primary) {
-            this.primary = primary;
-        }
-
-        public boolean isTypedIn() {
-            return typedIn;
-        }
-
-        public long getId() {
-            return id;
-        }
-    }
-
-    class NewConversationFilter extends Filter {
-
-        private List<ContactItem> getContacts() {
-            List<ContactItem> phoneNumberEntries = new ArrayList<>();
-
-            try {
-                Cursor cursor = activity.getContentResolver().query(
-                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                    null, null, null,
-                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-                    + " ASC");
-                if (cursor != null && cursor.getCount() > 0) {
-                    while (cursor.moveToNext()) {
-                        if (cursor.getString(cursor.getColumnIndex(
-                            ContactsContract.Contacts.HAS_PHONE_NUMBER))
-                                  .equals("1"))
-                        {
-                            long id = cursor.getLong(
-                                cursor.getColumnIndex(
-                                    ContactsContract.CommonDataKinds.Phone
-                                        .CONTACT_ID));
-                            String contact = cursor.getString(
-                                cursor.getColumnIndex(
-                                    ContactsContract.Contacts.DISPLAY_NAME));
-                            String phoneNumber = cursor.getString(
-                                cursor.getColumnIndex(
-                                    ContactsContract.CommonDataKinds
-                                        .Phone.NUMBER));
-                            String photoUri = cursor.getString(
-                                cursor.getColumnIndex(
-                                    ContactsContract.Contacts.PHOTO_URI));
-
-                            boolean showPhoto = true;
-                            for (ContactItem contactItem : phoneNumberEntries) {
-                                if (id == contactItem.getId()) {
-                                    showPhoto = false;
-                                }
-                            }
-
-                            ContactItem contactItem = new ContactItem(
-                                id, contact, phoneNumber, photoUri, showPhoto,
-                                false);
-                            phoneNumberEntries.add(contactItem);
-                        }
-                    }
-                    cursor.close();
-                } else if (cursor != null) {
-                    cursor.close();
-                }
-                return phoneNumberEntries;
-            } catch (SecurityException ignored) {
-                return phoneNumberEntries;
-            }
-        }
-
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            FilterResults results = new FilterResults();
-            List<ContactItem> contactItemResults = new ArrayList<>();
-
-            String searchText = constraint.toString();
-
-            List<ContactItem> phoneNumberEntries = new ArrayList<>();
-
-            phoneNumberEntries.addAll(getContacts());
-            if (typedInPhoneNumber != null) {
-                phoneNumberEntries.add(0, new ContactItem(-1,
-                                                          typedInPhoneNumber,
-                                                          typedInPhoneNumber,
-                                                          null, true,
-                                                          true));
-            }
-
-            for (ContactItem contactItem : phoneNumberEntries) {
-                if (contactItem.getName().toLowerCase()
-                               .contains(searchText.toLowerCase()) ||
-                    contactItem.getPhoneNumber().toLowerCase()
-                               .contains(searchText.toLowerCase()) ||
-                    (!searchText.replaceAll("[^0-9]", "").equals("") &&
-                     contactItem.getPhoneNumber().replaceAll("[^0-9]", "")
-                                .contains(
-                                    searchText.replaceAll("[^0-9]", ""))) ||
-                    contactItem.isTypedIn())
-                {
-                    contactItemResults.add(contactItem);
-                }
-            }
-
-            for (int i = 0; i < contactItemResults.size(); i++) {
-                boolean found = false;
-                for (int j = 0; j < i; j++) {
-                    if (contactItemResults.get(i).getName().equals(
-                        contactItemResults.get(j).getName()))
-                    {
-                        contactItemResults.get(i).setPrimary(false);
-                        contactItemResults.get(j).setPrimary(true);
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    contactItemResults.get(i).setPrimary(true);
-                }
-            }
-
-            results.count = contactItemResults.size();
-            results.values = contactItemResults;
-
-            return results;
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        protected void publishResults(CharSequence constraint,
-                                      FilterResults results)
-        {
-            items.clear();
-            if (results.values != null) {
-                items.addAll((List<ContactItem>) results.values);
-            }
-            notifyDataSetChanged();
-        }
-    }
 }

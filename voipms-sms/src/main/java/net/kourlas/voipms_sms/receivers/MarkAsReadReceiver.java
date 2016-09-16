@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015 Michael Kourlas
+ * Copyright (C) 2015-2016 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,28 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import net.kourlas.voipms_sms.Database;
-import net.kourlas.voipms_sms.notifications.Notifications;
-import net.kourlas.voipms_sms.Preferences;
 import net.kourlas.voipms_sms.R;
-import net.kourlas.voipms_sms.model.Message;
+import net.kourlas.voipms_sms.db.Database;
+import net.kourlas.voipms_sms.notifications.Notifications;
+import net.kourlas.voipms_sms.preferences.Preferences;
 
 public class MarkAsReadReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Database database = Database.getInstance(context.getApplicationContext());
-        Preferences preferences = Preferences.getInstance(context.getApplicationContext());
-        String contact = intent.getExtras().getString(context.getString(R.string.conversation_extra_contact));
+        Database database =
+            Database.getInstance(context.getApplicationContext());
+        Preferences preferences =
+            Preferences.getInstance(context.getApplicationContext());
+        String contact = intent.getExtras().getString(
+            context.getString(R.string.conversation_extra_contact));
 
-        NotificationManager manager = (NotificationManager) context.getApplicationContext().getSystemService(
-                Context.NOTIFICATION_SERVICE);
-        Integer notificationId = Notifications.getInstance(context.getApplicationContext()).getNotificationIds().get(
+        NotificationManager manager =
+            (NotificationManager) context.getApplicationContext()
+                                         .getSystemService(
+                                             Context.NOTIFICATION_SERVICE);
+        Integer notificationId =
+            Notifications.getInstance(context.getApplicationContext())
+                         .getNotificationIds().get(
                 contact);
         if (notificationId != null) {
             manager.cancel(notificationId);
