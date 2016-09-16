@@ -935,7 +935,7 @@ public class Database {
             TABLE_MESSAGE,
             columns,
             COLUMN_DID + "=" + did + " AND "
-            + COLUMN_DELETED + "=1 AND"
+            + COLUMN_DELETED + "=1 AND "
             + COLUMN_DRAFT + "=0",
             null, null, null, null);
         return getMessageListFromCursor(cursor);
