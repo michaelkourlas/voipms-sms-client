@@ -26,6 +26,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -73,6 +74,8 @@ public class ConversationsActivity
 
     private ActionMode actionMode;
     private boolean actionModeEnabled;
+
+    private AlertDialog firstRunDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -176,6 +179,10 @@ public class ConversationsActivity
     protected void onPause() {
         super.onPause();
         ActivityMonitor.getInstance().deleteReferenceToActivity(this);
+
+        if (firstRunDialog != null) {
+            firstRunDialog.dismiss();
+        }
     }
 
     @Override
@@ -196,22 +203,24 @@ public class ConversationsActivity
                 adapter.notifyItemRangeChanged(0, adapter.getItemCount());
             }
         } else {
-            Utils.showAlertDialog(this, null, getString(
-                R.string.conversations_first_run_dialog_text),
-                                  getString(R.string.preferences_name),
-                                  (dialog, id) -> {
-                                      Intent preferencesIntent =
-                                          new Intent(conversationsActivity,
-                                                     PreferencesActivity
-                                                         .class);
-                                      startActivity(preferencesIntent);
-                                  }, getString(R.string.help_name),
-                                  (dialog, id) -> {
-                                      Intent helpIntent =
-                                          new Intent(conversationsActivity,
-                                                     HelpActivity.class);
-                                      startActivity(helpIntent);
-                                  });
+            firstRunDialog = Utils.showAlertDialog(
+                this, null,
+                getString(
+                    R.string.conversations_first_run_dialog_text),
+                getString(R.string.preferences_name),
+                (dialog, id) -> {
+                    Intent preferencesIntent =
+                        new Intent(conversationsActivity,
+                                   PreferencesActivity
+                                       .class);
+                    startActivity(preferencesIntent);
+                }, getString(R.string.help_name),
+                (dialog, id) -> {
+                    Intent helpIntent =
+                        new Intent(conversationsActivity,
+                                   HelpActivity.class);
+                    startActivity(helpIntent);
+                });
         }
     }
 

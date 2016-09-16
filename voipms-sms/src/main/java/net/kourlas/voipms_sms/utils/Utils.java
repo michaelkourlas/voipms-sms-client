@@ -437,13 +437,14 @@ public class Utils {
      * @param negativeButtonAction The action to be taken when the negative
      *                             button is clicked.
      */
-    public static void showAlertDialog(Context context, String title,
-                                       String text, String positiveButtonText,
-                                       DialogInterface.OnClickListener
-                                           positiveButtonAction,
-                                       String negativeButtonText,
-                                       DialogInterface.OnClickListener
-                                           negativeButtonAction)
+    public static AlertDialog showAlertDialog(
+        Context context,
+        String title,
+        String text,
+        String positiveButtonText,
+        DialogInterface.OnClickListener positiveButtonAction,
+        String negativeButtonText,
+        DialogInterface.OnClickListener negativeButtonAction)
     {
 
         AlertDialog.Builder builder =
@@ -453,7 +454,7 @@ public class Utils {
         builder.setPositiveButton(positiveButtonText, positiveButtonAction);
         builder.setNegativeButton(negativeButtonText, negativeButtonAction);
         builder.setCancelable(false);
-        builder.show();
+        return builder.show();
     }
 
     /**

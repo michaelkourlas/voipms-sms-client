@@ -15,7 +15,6 @@ repositories {
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.2"
-
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
         minSdkVersion 16
@@ -29,12 +28,10 @@ android {
 
         multiDexEnabled true
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     dexOptions {
         preDexLibraries true
         javaMaxHeapSize "4g"
@@ -47,5 +44,5 @@ dependencies {
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support:recyclerview-v7:24.2.0'
     compile 'com.android.support:support-v4:24.2.0'
-    compile "com.google.android.gms:play-services:9.4.0"
+    compile 'com.google.android.gms:play-services:9.4.0'
 }
