@@ -40,9 +40,6 @@
     <!-- Vibration when notification received -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Donations -->
-    <uses-permission android:name="com.android.vending.BILLING" />
-
     <application
         android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
