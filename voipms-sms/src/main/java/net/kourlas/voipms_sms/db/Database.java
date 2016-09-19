@@ -284,7 +284,7 @@ public class Database {
             + "INNER JOIN (SELECT " + COLUMN_DATABASE_ID + ", "
             + COLUMN_CONTACT + ", MAX(" + COLUMN_DATE + ") AS " + COLUMN_DATE
             + " FROM " + TABLE_MESSAGE
-            + " WHERE (" + COLUMN_MESSAGE + " LIKE ? COLLATE UTF8_GENERAL_CI"
+            + " WHERE (" + COLUMN_MESSAGE + " LIKE ? COLLATE NOCASE"
             + numericFilterStringQuery + ") AND " + COLUMN_DID + "=" + did
             + " AND " + COLUMN_DELETED + "=0 "
             + "GROUP BY " + COLUMN_CONTACT + ") b on a."

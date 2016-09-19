@@ -17,37 +17,26 @@
 
 package net.kourlas.voipms_sms.preferences;
 
-import android.app.Activity;
 import android.content.Context;
+import android.preference.SwitchPreference;
 import android.util.AttributeSet;
-import net.kourlas.voipms_sms.notifications.PushNotifications;
 
-@SuppressWarnings("unused")
-public class PushNotificationsPreference extends CustomSwitchPreference {
-
-    public PushNotificationsPreference(Context context, AttributeSet attrs,
-                                       int defStyleAttr)
+/**
+ * Custom switch preference created to work around bug documented in
+ * https://code.google.com/p/android/issues/detail?id=26194
+ */
+public class CustomSwitchPreference extends SwitchPreference {
+    public CustomSwitchPreference(Context context, AttributeSet attrs,
+                                  int defStyleAttr)
     {
         super(context, attrs, defStyleAttr);
     }
 
-    public PushNotificationsPreference(Context context, AttributeSet attrs) {
+    public CustomSwitchPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public PushNotificationsPreference(Context context) {
+    public CustomSwitchPreference(Context context) {
         super(context);
-    }
-
-    @Override
-    protected void onClick() {
-        super.onClick();
-
-        if (isChecked()) {
-            PushNotifications pushNotifications = PushNotifications.getInstance(
-                getContext().getApplicationContext());
-            pushNotifications.enablePushNotifications((Activity) getContext(),
-                                                      this);
-        }
     }
 }
