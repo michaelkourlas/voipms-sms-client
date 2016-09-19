@@ -137,43 +137,11 @@
 
 <h2 id="notifications">Notifications</h2>
 
-<h3>Push notifications</h3>
+<p>The application can display notifications whenever a new message is
+    received during synchronization with the VoIP.ms servers.</p>
 
-<p>This application also supports push notifications using Google Cloud
-    Messaging. To enable push notifications:</p>
-<ul>
-    <li>make sure your device is connected to the Internet, then enable
-        notifications in Settings; and
-    </li>
-    <li>access the SMS settings for your DID on the VoIP.ms portal and enable
-        the 'SMS URL Callback' feature, entering the following URL into the
-        neighbouring field: <a
-                href="http://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}">http://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}</a>
-    </li>
-</ul>
-<p>You can make changes to VoIP.ms DID settings <a
-        href="https://voip.ms/m/managedid.php">here</a>.</p>
-
-<p>The application will attempt to configure the URL callback feature for you
-    automatically when you enable notifications; this second step is only
-    necessary if the automatic configuration fails.</p>
-
-<p>When push notifications are enabled, the application stores your DID and GCM
-    registration ID on a server run by the developer. When your DID receives a
-    text message, VoIP.ms will send a callback to the server. The server will
-    then forward the callback to your device using Google Cloud Messaging.</p>
-
-<p>To protect your privacy, the server <strong>only</strong> links DIDs with
-    GCM registration IDs and tells your device when to sync with the VoIP.ms
-    servers. It does not process or store the text of individual SMSes.</p>
-
-<h3>Regular notifications</h3>
-
-<p>If you'd rather not enable push notifications for whatever reason, the
-    application can also simply display notifications whenever a new message is
-    received during synchronization with the VoIP.ms servers. This can be a
-    reasonable substitute for push notifications if automatic synchronization is
-    enabled, though obviously this solution consumes more battery life.</p>
+<p>Unfortunately, the F-Droid version of the application does not support push
+    notifications as they require support for Google Cloud Messaging.</p>
 
 <h2 id="database">Database</h2>
 
@@ -194,18 +162,8 @@
 
 <h1 id="donations">Donations</h1>
 
-<p>If you'd like, you can make a donation to the developer using Google's
-    in-app purchase feature in $0.99 CAD increments (or the equivalent in your
-    local currency) using the Donate option in the application's main menu.</p>
-
-<p>The in-app purchase is consumed immediately after you make the donation, so
-    you can donate as many times as you'd like! :)</p>
-
-<p>If you'd rather donate via PayPal, please click <a
-        href="https://paypal.me/kourlas">here</a>.</p>
-
-<p><strong>Note</strong>: Making a donation does not unlock any additional
-    features.</p>
+<p>If you'd like, you can make a donation to the developer using PayPal by
+    clicking <a href="https://paypal.me/kourlas">here</a>.</p>
 
 <h1 id="reporting_bugs">Reporting Bugs</h1>
 

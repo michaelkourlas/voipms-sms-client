@@ -133,37 +133,6 @@ public class Preferences {
             true);
     }
 
-    public boolean getPushNotificationsEnabled() {
-        return sharedPreferences.getBoolean(applicationContext.getString(
-            R.string.preferences_notifications_push_enable_key), false);
-    }
-
-    public String getGcmInstanceId() {
-        return sharedPreferences.getString(applicationContext.getString(
-            R.string.preferences_gcm_instance_id_key), "");
-    }
-
-    public void setGcmInstanceId(String instanceId) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(applicationContext.getString(
-            R.string.preferences_gcm_instance_id_key), instanceId);
-        editor.apply();
-    }
-
-    public String getGcmToken() {
-        return sharedPreferences.getString(
-            applicationContext.getString(R.string.preferences_gcm_token_key),
-            "");
-    }
-
-    public void setGcmToken(String gcmToken) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(
-            applicationContext.getString(R.string.preferences_gcm_token_key),
-            gcmToken);
-        editor.apply();
-    }
-
     public String getNotificationSound() {
         return sharedPreferences.getString(applicationContext.getString(
             R.string.preferences_notifications_sound_key),

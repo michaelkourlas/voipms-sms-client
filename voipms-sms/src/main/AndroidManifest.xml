@@ -37,13 +37,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!-- GCM -->
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <permission
-        android:name="net.kourlas.voipms_sms.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-    <uses-permission android:name="net.kourlas.voipms_sms.permission.C2D_MESSAGE" />
-
     <!-- Vibration when notification received -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -53,7 +46,6 @@
     <application
         android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
-        android:backupAgent=".backup.BackupAgent"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -105,36 +97,11 @@
             android:parentActivityName=".activities.ConversationsActivity" />
 
         <receiver android:name=".receivers.MarkAsReadReceiver" />
-        <receiver
-            android:name="com.google.android.gms.gcm.GcmReceiver"
-            android:exported="true"
-            android:permission="com.google.android.c2dm.permission.SEND" >
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-                <category android:name="net.kourlas.voipms_sms.gcm" />
-            </intent-filter>
-        </receiver>
         <receiver android:name=".receivers.BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
         <receiver android:name=".receivers.SynchronizationIntervalReceiver" />
-
-        <service
-            android:name=".notifications.GcmService"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-            </intent-filter>
-        </service>
-        <service
-            android:name=".notifications.GcmIdService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID"/>
-            </intent-filter>
-        </service>
     </application>
 </manifest>

@@ -31,8 +31,6 @@ import android.support.v7.widget.Toolbar;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.notifications.Notifications;
-import net.kourlas.voipms_sms.notifications.PushNotifications;
-import net.kourlas.voipms_sms.preferences.CustomSwitchPreference;
 import net.kourlas.voipms_sms.preferences.DidPreference;
 import net.kourlas.voipms_sms.preferences.Preferences;
 import net.kourlas.voipms_sms.preferences.StartDatePreference;
@@ -92,7 +90,6 @@ public class PreferencesActivity extends AppCompatActivity {
         Database database;
         Preferences preferences;
         Notifications notifications;
-        PushNotifications pushNotifications;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -106,8 +103,6 @@ public class PreferencesActivity extends AppCompatActivity {
             database = Database.getInstance(applicationContext);
             preferences = Preferences.getInstance(applicationContext);
             notifications = Notifications.getInstance(applicationContext);
-            pushNotifications = PushNotifications
-                .getInstance(applicationContext);
         }
 
         @Override
@@ -138,19 +133,6 @@ public class PreferencesActivity extends AppCompatActivity {
             }
 
             if (preference.getKey().equals(getString(
-                R.string.preferences_notifications_push_enable_key)))
-            {
-                preference.setOnPreferenceChangeListener(
-                    (preference1, newValue) -> {
-                        if ((boolean) newValue) {
-                            pushNotifications.enablePushNotifications(
-                                getActivity(),
-                                (CustomSwitchPreference) preference);
-                        }
-                        return true;
-                    });
-
-            } else if (preference.getKey().equals(getString(
                 R.string.preferences_sync_interval_key)))
             {
                 preference.setOnPreferenceChangeListener(

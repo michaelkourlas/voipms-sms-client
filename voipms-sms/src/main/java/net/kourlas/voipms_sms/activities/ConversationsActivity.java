@@ -40,14 +40,11 @@ import android.view.MenuItem;
 import android.view.View;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.adapters.ConversationsRecyclerViewAdapter;
-import net.kourlas.voipms_sms.billing.Billing;
 import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.model.Message;
-import net.kourlas.voipms_sms.notifications.PushNotifications;
 import net.kourlas.voipms_sms.preferences.Preferences;
 import net.kourlas.voipms_sms.receivers.SynchronizationIntervalReceiver;
 import net.kourlas.voipms_sms.utils.Utils;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,8 +59,6 @@ public class ConversationsActivity
 
     private final ConversationsActivity conversationsActivity = this;
 
-    private PushNotifications pushNotifications;
-    private Billing billing;
     private Database database;
     private Preferences preferences;
 
@@ -82,9 +77,6 @@ public class ConversationsActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.conversations);
 
-        pushNotifications = PushNotifications
-            .getInstance(getApplicationContext());
-        billing = Billing.getInstance(getApplicationContext());
         database = Database.getInstance(getApplicationContext());
         preferences = Preferences.getInstance(getApplicationContext());
 
@@ -141,23 +133,6 @@ public class ConversationsActivity
     protected void onDestroy() {
         super.onDestroy();
         ActivityMonitor.getInstance().deleteReferenceToActivity(this);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode,
-                                    Intent data)
-    {
-        if (requestCode == 1001 && resultCode == RESULT_OK) {
-            try {
-                String purchaseData =
-                    data.getStringExtra("INAPP_PURCHASE_DATA");
-                JSONObject json = new JSONObject(purchaseData);
-                String token = json.getString("purchaseToken");
-                billing.postDonation(token, this);
-            } catch (Exception ignored) {
-                // Do nothing.
-            }
-        }
     }
 
     @Override
@@ -257,8 +232,6 @@ public class ConversationsActivity
      */
     private void preRecentUpdate() {
         adapter.refresh();
-        pushNotifications
-            .registerForGcm(conversationsActivity, null, false, false);
         database.synchronize(true, false, conversationsActivity);
     }
 
@@ -304,7 +277,8 @@ public class ConversationsActivity
                 startActivity(creditsIntent);
                 return true;
             case R.id.donate_button:
-                billing.preDonation(this);
+                Utils.showInfoDialog(this, getString(
+                    R.string.conversations_donate_fdroid));
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -498,8 +472,6 @@ public class ConversationsActivity
      */
     private void preFullUpdate() {
         adapter.refresh();
-        pushNotifications
-            .registerForGcm(conversationsActivity, null, false, false);
         database.synchronize(false, true, conversationsActivity);
     }
 

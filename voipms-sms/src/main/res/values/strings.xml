@@ -73,6 +73,7 @@
     <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and an SMS-enabled DID using the Settings option in the application\'s main menu. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings.\n\nYou may also wish to enable push notifications. For more information, see Help.</string>
     <string name="conversations_checked_content_description">Checked</string>
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>
+    <string name="conversations_donate_fdroid">You can donate to the developer by sending a PayPal payment to michael@kourlas.net. Thank you!</string>
 
     <!-- NewConversationActivity -->
     <string name="new_conversation_action_keyboard">Show keyboard</string>
@@ -99,15 +100,6 @@
     <string name="database_sync_error_api_error">Database synchronization failed. The VoIP.ms API returned an error: {error}. (103)</string>
 
     <!-- Notifications -->
-    <string name="notifications_callback_username_password_did">To enable notifications, your VoIP.ms portal email address, API password, and an SMS-enabled DID must be set. (404)</string>
-    <string name="notifications_callback_progress">Configuring VoIP.ms URL callback…</string>
-    <string name="notifications_callback_success">VoIP.ms URL callback configured successfully. (406)</string>
-    <string name="notifications_callback_fail">Failed to configure VoIP.ms URL callback. You must complete this step manually in order to use notifications. (405)\n\nTo configure the URL callback, you must access the SMS settings for your DID on the VoIP.ms portal. Enable the \"SMS URL Callback\" feature and enter the following URL into the neighbouring field:\n\nhttp://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}</string>
-    <string name="notifications_gcm_progress">Registering for Google Cloud Messaging…</string>
-    <string name="notifications_gcm_success">Google Cloud Messaging registration succeeded. (400)</string>
-    <string name="notifications_gcm_play_services">This device does not support Google Play Services. (401)</string>
-    <string name="notifications_gcm_fail">Google Cloud Messaging registration failed. Please try again later. (403)</string>
-    <string name="notifications_gcm_sender_id" translatable="false">626231576786</string>
     <string name="notifications_button_reply">Reply</string>
     <string name="notifications_button_mark_read">Mark Read</string>
 
@@ -153,10 +145,6 @@
     <string name="preferences_notifications_enable_key" translatable="false">sms_notification_basic</string>
     <string name="preferences_notifications_enable_title">Notifications</string>
     <string name="preferences_notifications_enable_summary">Show notifications when new messages are retrieved during synchronization</string>
-    <string name="preferences_notifications_push_enable_key" translatable="false">sms_notification</string>
-    <string name="preferences_notifications_push_enable_title">Push notifications</string>
-    <string name="preferences_notifications_push_enable_summary">Enable push notifications using the developer\'s Google Cloud Messaging server</string>
-    <string name="preferences_notifications_push_enable_dialog_text">To enable notifications, you must first access the SMS settings for your DID on the VoIP.ms portal. Enable the \"SMS URL Callback\" feature and enter the following URL into the neighbouring field:\n\nhttp://voipmssms-kourlas.rhcloud.com/sms_callback?did={TO}\n\nNote that the developer\'s server will store your DID to forward callbacks from VoIP.ms to your device. See Help for more details.</string>
     <string name="preferences_notifications_sound_key" translatable="false">sms_notification_ringtone</string>
     <string name="preferences_notifications_sound_title">Sound</string>
     <string name="preferences_notifications_sound_default_value" translatable="false">content://settings/system/notification_sound</string>
@@ -175,8 +163,6 @@
     <string name="preferences_database_delete_confirm_message">This action cannot be undone.</string>
     <!-- Uncategorized -->
     <string name="preferences_dids_key" translatable="false">dids</string>
-    <string name="preferences_gcm_instance_id_key" translatable="false">instance_id</string>
-    <string name="preferences_gcm_token_key" translatable="false">registration_id</string>
     <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>
 
     <!-- Utils -->
