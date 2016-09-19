@@ -1,3 +1,7 @@
+## 0.4.3 ##
+
+* Bug fixes
+
 ## 0.4.2 ##
 
 * Added support for message drafts
