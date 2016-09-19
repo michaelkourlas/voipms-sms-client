@@ -71,7 +71,7 @@
             android:key="@string/preferences_notifications_enable_key"
             android:summary="@string/preferences_notifications_enable_summary"
             android:title="@string/preferences_notifications_enable_title" />
-        <net.kourlas.voipms_sms.preferences.PushNotificationsPreference
+        <net.kourlas.voipms_sms.preferences.CustomSwitchPreference
             android:defaultValue="false"
             android:dependency="@string/preferences_notifications_enable_key"
             android:key="@string/preferences_notifications_push_enable_key"

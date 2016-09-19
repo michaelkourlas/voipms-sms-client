@@ -27,8 +27,8 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import net.kourlas.voipms_sms.R;
+import net.kourlas.voipms_sms.preferences.CustomSwitchPreference;
 import net.kourlas.voipms_sms.preferences.Preferences;
-import net.kourlas.voipms_sms.preferences.PushNotificationsPreference;
 import net.kourlas.voipms_sms.utils.Utils;
 import org.json.JSONObject;
 
@@ -76,7 +76,7 @@ public class PushNotifications {
      */
     public void enablePushNotifications(
         final Activity activity,
-        final PushNotificationsPreference preference)
+        final CustomSwitchPreference preference)
     {
         if (preferences.getEmail().equals("")
             || preferences.getPassword().equals("")
@@ -92,7 +92,7 @@ public class PushNotifications {
 
     private void registerForVoipCallback(
         final Activity activity,
-        final PushNotificationsPreference preference)
+        final CustomSwitchPreference preference)
     {
         final ProgressDialog progressDialog = new ProgressDialog(activity);
         progressDialog.setMessage(activity.getString(
@@ -168,7 +168,7 @@ public class PushNotifications {
      */
     public void registerForGcm(
         final Activity activity,
-        final PushNotificationsPreference preference,
+        final CustomSwitchPreference preference,
         final boolean showFeedback,
         boolean force)
     {

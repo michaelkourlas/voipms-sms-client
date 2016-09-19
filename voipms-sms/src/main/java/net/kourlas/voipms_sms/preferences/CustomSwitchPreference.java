@@ -25,6 +25,7 @@ import android.util.AttributeSet;
  * Custom switch preference created to work around bug documented in
  * https://code.google.com/p/android/issues/detail?id=26194
  */
+@SuppressWarnings("WeakerAccess")
 public class CustomSwitchPreference extends SwitchPreference {
     public CustomSwitchPreference(Context context, AttributeSet attrs,
                                   int defStyleAttr)

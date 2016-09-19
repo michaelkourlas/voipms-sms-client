@@ -24,7 +24,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.*;
-import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +32,7 @@ import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.notifications.Notifications;
 import net.kourlas.voipms_sms.notifications.PushNotifications;
+import net.kourlas.voipms_sms.preferences.CustomSwitchPreference;
 import net.kourlas.voipms_sms.preferences.DidPreference;
 import net.kourlas.voipms_sms.preferences.Preferences;
 import net.kourlas.voipms_sms.preferences.StartDatePreference;
@@ -111,17 +111,10 @@ public class PreferencesActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
-                                             @NonNull Preference preference)
-        {
-            return super.onPreferenceTreeClick(preferenceScreen, preference);
-        }
-
-        @Override
         public void onResume() {
             super.onResume();
 
-            // Update summary text for all preferences
+            // Update summary text and handlers for all preferences
             for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); ++i)
             {
                 Preference preference = getPreferenceScreen().getPreference(i);
@@ -130,12 +123,43 @@ public class PreferencesActivity extends AppCompatActivity {
                         (PreferenceGroup) preference;
                     for (int j = 0; j < preferenceGroup.getPreferenceCount();
                          ++j) {
-                        updateSummaryTextForPreference(
-                            preferenceGroup.getPreference(j));
+                        Preference subPreference =
+                            preferenceGroup.getPreference(j);
+                        updateHandlersForPreference(subPreference);
+                        updateSummaryTextForPreference(subPreference);
                     }
-                } else {
-                    updateSummaryTextForPreference(preference);
                 }
+            }
+        }
+
+        private void updateHandlersForPreference(Preference preference) {
+            if (preference.getKey() == null) {
+                return;
+            }
+
+            if (preference.getKey().equals(getString(
+                R.string.preferences_notifications_push_enable_key)))
+            {
+                preference.setOnPreferenceChangeListener(
+                    (preference1, newValue) -> {
+                        if ((boolean) newValue) {
+                            pushNotifications.enablePushNotifications(
+                                getActivity(),
+                                (CustomSwitchPreference) preference);
+                        }
+                        return true;
+                    });
+
+            } else if (preference.getKey().equals(getString(
+                R.string.preferences_sync_interval_key)))
+            {
+                preference.setOnPreferenceChangeListener(
+                    (preference12, newValue) -> {
+                        SynchronizationIntervalReceiver
+                            .setupSynchronizationInterval(
+                                applicationContext);
+                        return true;
+                    });
             }
         }
 
@@ -207,13 +231,6 @@ public class PreferencesActivity extends AppCompatActivity {
             if (isAdded()) {
                 // Update summary text for changed preference
                 updateSummaryTextForPreference(findPreference(key));
-
-                if (key
-                    .equals(getString(R.string.preferences_sync_interval_key)))
-                {
-                    SynchronizationIntervalReceiver
-                        .setupSynchronizationInterval(applicationContext);
-                }
             }
         }
     }
