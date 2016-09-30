@@ -258,7 +258,7 @@ public class ConversationsActivity
     private void preRecentUpdate() {
         adapter.refresh();
         pushNotifications
-            .registerForGcm(conversationsActivity, null, false, false);
+            .registerForFcm(conversationsActivity, null, false, false);
         database.synchronize(true, false, conversationsActivity);
     }
 
@@ -499,7 +499,7 @@ public class ConversationsActivity
     private void preFullUpdate() {
         adapter.refresh();
         pushNotifications
-            .registerForGcm(conversationsActivity, null, false, false);
+            .registerForFcm(conversationsActivity, null, false, false);
         database.synchronize(false, true, conversationsActivity);
     }
 

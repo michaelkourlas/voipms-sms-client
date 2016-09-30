@@ -24,8 +24,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.android.gms.iid.InstanceID;
+import com.google.firebase.iid.FirebaseInstanceId;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.preferences.CustomSwitchPreference;
 import net.kourlas.voipms_sms.preferences.Preferences;
@@ -36,7 +35,7 @@ import java.net.URLEncoder;
 
 /**
  * Handles push notification setup. This includes registering for the VoIP.ms
- * callback and Google Cloud Messaging.
+ * callback and Firebase Cloud Messaging.
  */
 public class PushNotifications {
     private static PushNotifications instance = null;
@@ -69,7 +68,7 @@ public class PushNotifications {
 
     /**
      * Enable push notifications by configuring the VoIP.ms URL callback,
-     * registering for GCM and making the appropriate changes to the
+     * registering for FCM and making the appropriate changes to the
      * application preferences.
      *
      * @param activity The source activity.
@@ -132,8 +131,8 @@ public class PushNotifications {
             protected void onPostExecute(Boolean success) {
                 progressDialog.hide();
 
-                DialogInterface.OnClickListener gcmOnClickListener =
-                    (dialog, which) -> registerForGcm(activity, preference,
+                DialogInterface.OnClickListener fcmOnClickListener =
+                    (dialog, which) -> registerForFcm(activity, preference,
                                                       true, true);
 
                 if (!success) {
@@ -142,31 +141,33 @@ public class PushNotifications {
                         applicationContext.getString(
                             R.string.notifications_callback_fail),
                         applicationContext.getString(R.string.ok),
-                        gcmOnClickListener, null, null);
+                        fcmOnClickListener, null, null);
                 } else {
                     Utils.showAlertDialog(
                         activity, null,
                         applicationContext.getString(
                             R.string.notifications_callback_success),
                         applicationContext.getString(R.string.ok),
-                        gcmOnClickListener, null, null);
+                        fcmOnClickListener, null, null);
                 }
             }
         }.execute();
     }
 
     /**
-     * Registers for Google Cloud Messaging. Sends the registration token to
+     * Registers for Firebase Cloud Messaging. Sends the registration token to
      * the application servers.
      *
-     * @param activity     The activity that initiated the registration.
+     * @param activity     The activity that initiated the registration, if any.
+     * @param preference   The switch preference that initiated the
+     *                     registration, if any.
      * @param showFeedback If true, shows a dialog at the end of the
      *                     registration process indicating the success or
      *                     failure of the process.
      * @param force        If true, retrieves a new registration token even
      *                     if one is already stored.
      */
-    public void registerForGcm(
+    public void registerForFcm(
         final Activity activity,
         final CustomSwitchPreference preference,
         final boolean showFeedback,
@@ -184,30 +185,23 @@ public class PushNotifications {
             return;
         }
 
-        final ProgressDialog progressDialog = new ProgressDialog(activity);
+        final ProgressDialog progressDialog;
         if (showFeedback) {
+            progressDialog = new ProgressDialog(activity);
             progressDialog.setMessage(applicationContext.getString(
-                R.string.notifications_gcm_progress));
+                R.string.notifications_fcm_progress));
             progressDialog.setCancelable(false);
             progressDialog.show();
+        } else {
+            progressDialog = null;
         }
-
-        final InstanceID instanceIdObj =
-            InstanceID.getInstance(applicationContext);
-        final String instanceId = instanceIdObj.getId();
-        if (preferences.getGcmToken().equals("") || !instanceId
-            .equals(preferences.getGcmInstanceId()) || force)
-        {
+        if (preferences.getGcmToken().equals("") || force) {
             new AsyncTask<Boolean, Void, Boolean>() {
                 @Override
                 protected Boolean doInBackground(Boolean... params) {
                     try {
-                        String token = instanceIdObj.getToken(applicationContext
-                                                                  .getString(
-                                                                      R.string.notifications_gcm_sender_id),
-                                                              GoogleCloudMessaging.INSTANCE_ID_SCOPE,
-                                                              null);
-
+                        String token = FirebaseInstanceId.getInstance()
+                                                         .getToken();
                         String registrationBackendUrl =
                             "https://voipmssms-kourlas.rhcloud.com/register?" +
                             "did=" + URLEncoder
@@ -219,10 +213,7 @@ public class PushNotifications {
                         if (status == null || !status.equals("success")) {
                             return false;
                         }
-
-                        preferences.setGcmInstanceId(instanceId);
                         preferences.setGcmToken(token);
-
                         return true;
                     } catch (Exception ex) {
                         return false;
@@ -236,12 +227,12 @@ public class PushNotifications {
                         if (!success) {
                             Utils.showInfoDialog(activity, applicationContext
                                 .getResources().getString(
-                                    R.string.notifications_gcm_fail));
+                                    R.string.notifications_fcm_fail));
 
                         } else {
                             Utils.showInfoDialog(activity, applicationContext
                                 .getResources().getString(
-                                    R.string.notifications_gcm_success));
+                                    R.string.notifications_fcm_success));
                         }
                     }
 
@@ -254,7 +245,7 @@ public class PushNotifications {
             Utils.showInfoDialog(activity, applicationContext.getResources()
                                                              .getString(
                                                                  R.string
-                                                                     .notifications_gcm_success));
+                                                                     .notifications_fcm_success));
         }
     }
 
@@ -284,7 +275,7 @@ public class PushNotifications {
                                          applicationContext.getResources()
                                                            .getString(
                                                                R.string
-                                                                   .notifications_gcm_play_services));
+                                                                   .notifications_fcm_play_services));
                 }
             }
             return false;

@@ -17,26 +17,26 @@
 
 package net.kourlas.voipms_sms.notifications;
 
-import android.os.Bundle;
-import com.google.android.gms.gcm.GcmListenerService;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.preferences.Preferences;
 
 /**
- * Service that processes GCM messages by showing notifications for new SMS
+ * Service that processes FCM messages by showing notifications for new SMS
  * messages.
  */
-public class GcmService extends GcmListenerService {
+public class FcmListenerService extends FirebaseMessagingService {
     /**
-     * Called when a GCM message is received. If notifications are enabled,
+     * Called when a FCM message is received. If notifications are enabled,
      * this method updates the message database and shows notifications for any
      * new messages.
      *
-     * @param from GCM message sender.
-     * @param data GCM message data.
+     * @param message The received message.
      */
     @Override
-    public void onMessageReceived(String from, Bundle data) {
+    public void onMessageReceived(RemoteMessage message) {
+        super.onMessageReceived(message);
         Preferences preferences = Preferences.getInstance(
             getApplicationContext());
         if (preferences.getNotificationsEnabled()

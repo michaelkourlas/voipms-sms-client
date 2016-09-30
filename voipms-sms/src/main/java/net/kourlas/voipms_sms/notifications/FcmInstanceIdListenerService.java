@@ -17,20 +17,19 @@
 
 package net.kourlas.voipms_sms.notifications;
 
-import com.google.android.gms.iid.InstanceIDListenerService;
+import com.google.firebase.iid.FirebaseInstanceIdService;
 
 /**
- * Service that processes requests for GCM token updates.
+ * Service that processes requests for FCM token updates.
  */
-public class GcmIdService extends InstanceIDListenerService {
+public class FcmInstanceIdListenerService extends FirebaseInstanceIdService {
     /**
-     * Called when the current GCM token has been invalidated. This method
-     * simply re-registers for GCM, obtaining a new
-     * token in the process.
+     * Called when the current FCM token has been created or invalidated. This
+     * method simply registers or re-registers for FCM.
      */
     @Override
     public void onTokenRefresh() {
         PushNotifications.getInstance(getApplicationContext())
-                         .registerForGcm(null, null, false, true);
+                         .registerForFcm(null, null, false, true);
     }
 }
