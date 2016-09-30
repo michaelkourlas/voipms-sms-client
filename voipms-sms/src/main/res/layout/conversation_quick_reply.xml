@@ -111,7 +111,7 @@
                 android:background="@android:color/white"
                 android:gravity="start"
                 android:hint="@string/conversation_text_hint"
-                android:inputType="textMultiLine|textCapSentences|textAutoCorrect"
+                android:inputType="textMultiLine|textCapSentences|textAutoCorrect|textShortMessage"
                 android:isScrollContainer="true"
                 android:maxLines="4"
                 android:padding="10dp"
