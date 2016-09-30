@@ -1,5 +1,6 @@
 ## 0.4.4 ##
 
+* Add phone number type to new conversation view
 * Add emoji button to message keyboard
 * Migration from Google Cloud Messaging to Firebase Cloud Messaging
 
