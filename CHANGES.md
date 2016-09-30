@@ -1,3 +1,7 @@
+## 0.4.4 ##
+
+* Migration from Google Cloud Messaging to Firebase Cloud Messaging
+
 ## 0.4.3 ##
 
 * Bug fixes
