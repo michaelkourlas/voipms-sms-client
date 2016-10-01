@@ -42,6 +42,6 @@ public class BackupAgent extends android.app.backup.BackupAgent {
     @Override
     public void onRestoreFinished() {
         super.onRestoreFinished();
-        Preferences.getInstance(getApplicationContext()).setGcmToken("");
+        Preferences.getInstance(getApplicationContext()).setFcmToken("");
     }
 }

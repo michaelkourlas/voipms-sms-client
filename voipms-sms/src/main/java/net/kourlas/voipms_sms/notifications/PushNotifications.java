@@ -195,7 +195,7 @@ public class PushNotifications {
         } else {
             progressDialog = null;
         }
-        if (preferences.getGcmToken().equals("") || force) {
+        if (preferences.getFcmToken().equals("") || force) {
             new AsyncTask<Boolean, Void, Boolean>() {
                 @Override
                 protected Boolean doInBackground(Boolean... params) {
@@ -213,7 +213,7 @@ public class PushNotifications {
                         if (status == null || !status.equals("success")) {
                             return false;
                         }
-                        preferences.setGcmToken(token);
+                        preferences.setFcmToken(token);
                         return true;
                     } catch (Exception ex) {
                         return false;

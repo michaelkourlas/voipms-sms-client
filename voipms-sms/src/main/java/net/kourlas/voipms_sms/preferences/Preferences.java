@@ -138,13 +138,13 @@ public class Preferences {
             R.string.preferences_notifications_push_enable_key), false);
     }
 
-    public String getGcmToken() {
+    public String getFcmToken() {
         return sharedPreferences.getString(
             applicationContext.getString(R.string.preferences_fcm_token_key),
             "");
     }
 
-    public void setGcmToken(String gcmToken) {
+    public void setFcmToken(String gcmToken) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(
             applicationContext.getString(R.string.preferences_fcm_token_key),
