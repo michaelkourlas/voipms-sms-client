@@ -14,13 +14,13 @@ repositories {
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.2"
+    buildToolsVersion "24.0.3"
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
         minSdkVersion 16
         targetSdkVersion 24
-        versionCode 110
-        versionName "0.4.3-fdroid"
+        versionCode 111
+        versionName "0.4.4-fdroid"
 
         jackOptions {
             enabled true
@@ -39,9 +39,11 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:design:24.2.1'
     compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:recyclerview-v7:24.2.0'
-    compile 'com.android.support:support-v4:24.2.0'
+    compile 'com.android.support:recyclerview-v7:24.2.1'
+    compile 'com.android.support:support-v4:24.2.1'
 }
+
+apply plugin: 'com.google.gms.google-services'

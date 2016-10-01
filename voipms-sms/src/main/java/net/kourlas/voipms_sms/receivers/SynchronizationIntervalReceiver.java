@@ -19,15 +19,15 @@ package net.kourlas.voipms_sms.receivers;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.preferences.Preferences;
 
-public class SynchronizationIntervalReceiver extends WakefulBroadcastReceiver {
+public class SynchronizationIntervalReceiver extends BroadcastReceiver {
     private static final String TAG = "SyncIntervalReceiver";
 
     public static void setupSynchronizationInterval(

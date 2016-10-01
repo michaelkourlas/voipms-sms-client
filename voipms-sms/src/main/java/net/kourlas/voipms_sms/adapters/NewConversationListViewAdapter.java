@@ -31,6 +31,7 @@ import android.view.ViewOutlineProvider;
 import android.widget.*;
 import net.kourlas.voipms_sms.R;
 import net.kourlas.voipms_sms.activities.NewConversationActivity;
+import net.kourlas.voipms_sms.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,13 +81,13 @@ public class NewConversationListViewAdapter extends BaseAdapter
     }
 
     @Override
-    public int getCount() {
-        return items.size();
+    public int getViewTypeCount() {
+        return ITEM_COUNT;
     }
 
     @Override
-    public int getViewTypeCount() {
-        return ITEM_COUNT;
+    public int getCount() {
+        return items.size();
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -94,16 +95,19 @@ public class NewConversationListViewAdapter extends BaseAdapter
         private final long id;
         private final String name;
         private final String phoneNumber;
+        private final String phoneNumberType;
         private final String photoUri;
         private final boolean typedIn;
         private boolean primary;
 
-        ContactItem(long id, String name, String phoneNumber, String photoUri,
+        ContactItem(long id, String name, String phoneNumber,
+                    String phoneNumberType, String photoUri,
                     boolean primary, boolean typedIn)
         {
             this.id = id;
             this.name = name;
             this.phoneNumber = phoneNumber;
+            this.phoneNumberType = phoneNumberType;
             this.photoUri = photoUri;
             this.primary = primary;
             this.typedIn = typedIn;
@@ -115,6 +119,10 @@ public class NewConversationListViewAdapter extends BaseAdapter
 
         public String getPhoneNumber() {
             return phoneNumber;
+        }
+
+        public String getPhoneNumberType() {
+            return phoneNumberType;
         }
 
         public String getPhotoUri() {
@@ -154,7 +162,7 @@ public class NewConversationListViewAdapter extends BaseAdapter
                 phoneNumberEntries.add(0, new ContactItem(-1,
                                                           typedInPhoneNumber,
                                                           typedInPhoneNumber,
-                                                          null, true,
+                                                          "", null, true,
                                                           true));
             }
 
@@ -223,6 +231,12 @@ public class NewConversationListViewAdapter extends BaseAdapter
                                 cursor.getColumnIndex(
                                     ContactsContract.CommonDataKinds
                                         .Phone.NUMBER));
+                            String phoneNumberType =
+                                Utils.getPhoneNumberType(
+                                    cursor.getInt(
+                                        cursor.getColumnIndex(
+                                            ContactsContract.CommonDataKinds
+                                                .Phone.TYPE)));
                             String photoUri = cursor.getString(
                                 cursor.getColumnIndex(
                                     ContactsContract.Contacts.PHOTO_URI));
@@ -235,8 +249,8 @@ public class NewConversationListViewAdapter extends BaseAdapter
                             }
 
                             ContactItem contactItem = new ContactItem(
-                                id, contact, phoneNumber, photoUri, showPhoto,
-                                false);
+                                id, contact, phoneNumber, phoneNumberType,
+                                photoUri, showPhoto, false);
                             phoneNumberEntries.add(contactItem);
                         }
                     }
@@ -262,6 +276,7 @@ public class NewConversationListViewAdapter extends BaseAdapter
             notifyDataSetChanged();
         }
     }
+
 
     @Override
     public Object getItem(int position) {
@@ -344,6 +359,10 @@ public class NewConversationListViewAdapter extends BaseAdapter
         TextView phoneNumberTextView =
             (TextView) convertView.findViewById(R.id.phone_number);
         phoneNumberTextView.setText(contactItem.getPhoneNumber());
+
+        TextView phoneNumberTypeTextView =
+            (TextView) convertView.findViewById(R.id.phone_number_type);
+        phoneNumberTypeTextView.setText(contactItem.getPhoneNumberType());
 
         return convertView;
     }

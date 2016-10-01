@@ -511,4 +511,35 @@ public class Utils {
         }
         return stringBuilder.toString();
     }
+
+    /**
+     * Returns the string representation of the specified phone number type.
+     *
+     * @param type The specified phone number type.
+     * @return The string representation of the specified phone number type.
+     */
+    public static String getPhoneNumberType(int type) {
+        switch (type) {
+            case ContactsContract.CommonDataKinds.Phone.TYPE_HOME:
+                return "Home";
+            case ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE:
+                return "Mobile";
+            case ContactsContract.CommonDataKinds.Phone.TYPE_WORK:
+                return "Work";
+            case ContactsContract.CommonDataKinds.Phone.TYPE_FAX_HOME:
+                return "Home Fax";
+            case ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK:
+                return "Work Fax";
+            case ContactsContract.CommonDataKinds.Phone.TYPE_MAIN:
+                return "Main";
+            case ContactsContract.CommonDataKinds.Phone.TYPE_OTHER:
+                return "Other";
+            case ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM:
+                return "Custom";
+            case ContactsContract.CommonDataKinds.Phone.TYPE_PAGER:
+                return "Pager";
+            default:
+                return "";
+        }
+    }
 }
