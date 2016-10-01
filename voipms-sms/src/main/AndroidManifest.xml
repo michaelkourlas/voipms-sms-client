@@ -35,7 +35,6 @@
 
     <!-- Sync scheduling -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Vibration when notification received -->
     <uses-permission android:name="android.permission.VIBRATE" />
