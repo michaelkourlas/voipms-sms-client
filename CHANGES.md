@@ -1,3 +1,7 @@
+## 0.4.5 ##
+
+* Bug fixes
+
 ## 0.4.4 ##
 
 * Add phone number type to new conversation view

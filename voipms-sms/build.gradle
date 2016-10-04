@@ -19,8 +19,8 @@ android {
         applicationId "net.kourlas.voipms_sms"
         minSdkVersion 16
         targetSdkVersion 24
-        versionCode 111
-        versionName "0.4.4"
+        versionCode 112
+        versionName "0.4.5"
 
         jackOptions {
             enabled true
