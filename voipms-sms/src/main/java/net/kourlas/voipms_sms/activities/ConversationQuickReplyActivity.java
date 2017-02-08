@@ -295,7 +295,7 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         database.markConversationAsRead(preferences.getDid(), contact);
         if (success) {
             database.removeMessage(databaseId);
-            database.synchronize(true, false, null, null);
+            database.synchronize(null, false, true, null);
         } else {
             database.markMessageAsFailedToSend(databaseId);
         }

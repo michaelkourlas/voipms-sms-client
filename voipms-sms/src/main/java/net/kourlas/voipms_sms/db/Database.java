@@ -743,17 +743,19 @@ public class Database {
      * <li> retrieving messages from VoIP.ms that were deleted locally;
      * <li> deleting messages from VoIP.ms that were deleted locally; and
      * <li> deleting messages stored locally that were deleted from VoIP.ms.
-     *  @param forceRecent   Retrieve only recent messages and do nothing
+     *
+     * @param sourceActivity The source activity of the send request.
+     * @param showErrors     Shows error messages if true.
+     * @param forceRecent    Retrieve only recent messages and do nothing
      *                       else if true, regardless of synchronization
      *                       settings.
-     * @param showErrors     Shows error messages if true.
-     * @param sourceActivity The source activity of the send request.
      * @param wakeLock       The wake lock associated with the synchronization
-     *                       request, if one exists.
+     *                       if it was triggered by a broadcast receiver,
+     *                       otherwise null.
      */
-    public synchronized void synchronize(boolean forceRecent,
+    public synchronized void synchronize(Activity sourceActivity,
                                          boolean showErrors,
-                                         Activity sourceActivity,
+                                         boolean forceRecent,
                                          PowerManager.WakeLock wakeLock)
     {
         boolean retrieveOnlyRecentMessages =

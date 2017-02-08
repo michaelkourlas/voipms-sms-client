@@ -894,7 +894,7 @@ public class ConversationActivity
             // we delete it and retrieve the sent message from VoIP.ms; the
             // adapter refresh will occur as part of the DB sync
             database.removeMessage(databaseId);
-            database.synchronize(true, true, this, null);
+            database.synchronize(this, true, true, null);
         } else {
             // Otherwise, mark the message as failed to deliver and refresh
             // the adapter

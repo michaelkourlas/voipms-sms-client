@@ -56,7 +56,7 @@ public class SynchronizationIntervalReceiver extends BroadcastReceiver {
                       "Synchronizing database: nextSyncTime = "
                       + nextSyncTime + " but now = " + now);
                 Database.getInstance(applicationContext).synchronize(
-                    false, false, null, null);
+                    null, false, false, null);
                 return;
             }
 
@@ -86,7 +86,7 @@ public class SynchronizationIntervalReceiver extends BroadcastReceiver {
         wakeLock.acquire();
 
         Database.getInstance(context.getApplicationContext()).synchronize(
-            false, false, null, wakeLock);
+            null, false, false, wakeLock);
 
         // Wake lock is released as part of database synchronization
     }

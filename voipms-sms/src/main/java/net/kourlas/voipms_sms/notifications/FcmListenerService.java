@@ -43,7 +43,7 @@ public class FcmListenerService extends FirebaseMessagingService {
             && preferences.getPushNotificationsEnabled())
         {
             Database.getInstance(getApplicationContext())
-                    .synchronize(true, false, null, null);
+                    .synchronize(null, false, true, null);
         }
     }
 }
