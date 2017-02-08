@@ -83,6 +83,8 @@ public class PushNotifications {
         {
             Utils.showInfoDialog(activity, applicationContext.getString(
                 R.string.notifications_callback_username_password_did));
+            preference.setChecked(false);
+            preferences.setPushNotificationsEnabled(false);
             return;
         }
 
@@ -182,6 +184,11 @@ public class PushNotifications {
             return;
         }
         if (!checkPlayServices(activity, showFeedback)) {
+            // Prevent continuous Google Play Services checks
+            if (preference != null) {
+                preference.setChecked(false);
+            }
+            preferences.setPushNotificationsEnabled(false);
             return;
         }
 
@@ -236,8 +243,11 @@ public class PushNotifications {
                         }
                     }
 
-                    if (!success && preference != null) {
-                        preference.setChecked(false);
+                    if (!success) {
+                        if (preference != null) {
+                            preference.setChecked(false);
+                        }
+                        preferences.setPushNotificationsEnabled(false);
                     }
                 }
             }.execute();

@@ -138,6 +138,13 @@ public class Preferences {
             R.string.preferences_notifications_push_enable_key), false);
     }
 
+    public void setPushNotificationsEnabled(boolean enabled) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(applicationContext.getString(
+            R.string.preferences_notifications_push_enable_key), enabled);
+        editor.apply();
+    }
+
     public String getFcmToken() {
         return sharedPreferences.getString(
             applicationContext.getString(R.string.preferences_fcm_token_key),
