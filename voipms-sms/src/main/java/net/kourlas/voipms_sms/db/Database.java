@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -742,16 +743,18 @@ public class Database {
      * <li> retrieving messages from VoIP.ms that were deleted locally;
      * <li> deleting messages from VoIP.ms that were deleted locally; and
      * <li> deleting messages stored locally that were deleted from VoIP.ms.
-     *
-     * @param forceRecent    Retrieve only recent messages and do nothing
+     *  @param forceRecent   Retrieve only recent messages and do nothing
      *                       else if true, regardless of synchronization
      *                       settings.
      * @param showErrors     Shows error messages if true.
      * @param sourceActivity The source activity of the send request.
+     * @param wakeLock       The wake lock associated with the synchronization
+     *                       request, if one exists.
      */
     public synchronized void synchronize(boolean forceRecent,
                                          boolean showErrors,
-                                         Activity sourceActivity)
+                                         Activity sourceActivity,
+                                         PowerManager.WakeLock wakeLock)
     {
         boolean retrieveOnlyRecentMessages =
             forceRecent || preferences.getRetrieveOnlyRecentMessages();
@@ -766,7 +769,7 @@ public class Database {
             new SynchronizeDatabaseTask(applicationContext, forceRecent,
                                         retrieveDeletedMessages,
                                         propagateRemoteDeletions, showErrors,
-                                        sourceActivity);
+                                        sourceActivity, wakeLock);
 
         if (preferences.getEmail().equals("") || preferences.getPassword()
                                                             .equals("") ||
@@ -775,6 +778,9 @@ public class Database {
             // Do not show an error; this method should never be called
             // unless the email, password and DID are set
             task.cleanup(forceRecent);
+            if (wakeLock != null) {
+                wakeLock.release();
+            }
             return;
         }
 
@@ -787,6 +793,9 @@ public class Database {
                                Toast.LENGTH_SHORT).show();
             }
             task.cleanup(forceRecent);
+            if (wakeLock != null) {
+                wakeLock.release();
+            }
             return;
         }
 
@@ -1064,6 +1073,8 @@ public class Database {
         private final boolean propagateRemoteDeletions;
         private final boolean showErrors;
 
+        private final PowerManager.WakeLock wakeLock;
+
         private final Activity sourceActivity;
         private List<RequestObject> requests;
 
@@ -1093,7 +1104,8 @@ public class Database {
                                 boolean retrieveDeletedMessages,
                                 boolean propagateRemoteDeletions,
                                 boolean showErrors,
-                                Activity sourceActivity)
+                                Activity sourceActivity,
+                                PowerManager.WakeLock wakeLock)
         {
             this.applicationContext = applicationContext;
             this.database = Database.getInstance(applicationContext);
@@ -1106,6 +1118,7 @@ public class Database {
             this.propagateRemoteDeletions = propagateRemoteDeletions;
             this.showErrors = showErrors;
             this.sourceActivity = sourceActivity;
+            this.wakeLock = wakeLock;
         }
 
         /**
@@ -1410,6 +1423,9 @@ public class Database {
             protected void onPostExecute(Boolean success) {
                 if (success != null) {
                     cleanup(forceRecent);
+                }
+                if (wakeLock != null) {
+                    wakeLock.release();
                 }
             }
 

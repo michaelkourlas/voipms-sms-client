@@ -259,7 +259,7 @@ public class ConversationsActivity
         adapter.refresh();
         pushNotifications
             .registerForFcm(conversationsActivity, null, false, false);
-        database.synchronize(true, false, conversationsActivity);
+        database.synchronize(true, false, conversationsActivity, null);
     }
 
     @Override
@@ -500,7 +500,7 @@ public class ConversationsActivity
         adapter.refresh();
         pushNotifications
             .registerForFcm(conversationsActivity, null, false, false);
-        database.synchronize(false, true, conversationsActivity);
+        database.synchronize(false, true, conversationsActivity, null);
     }
 
     /**

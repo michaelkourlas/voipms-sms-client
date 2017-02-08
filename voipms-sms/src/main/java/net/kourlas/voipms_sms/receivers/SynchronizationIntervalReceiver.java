@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.PowerManager;
 import android.util.Log;
 import net.kourlas.voipms_sms.db.Database;
 import net.kourlas.voipms_sms.preferences.Preferences;
@@ -55,7 +56,7 @@ public class SynchronizationIntervalReceiver extends BroadcastReceiver {
                       "Synchronizing database: nextSyncTime = "
                       + nextSyncTime + " but now = " + now);
                 Database.getInstance(applicationContext).synchronize(
-                    false, false, null);
+                    false, false, null, null);
                 return;
             }
 
@@ -76,7 +77,17 @@ public class SynchronizationIntervalReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.v(TAG, "Received broadcast");
+
+        // Get wake lock
+        PowerManager powerManager = (PowerManager) context.getSystemService(
+            Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK, TAG + "WakeLock");
+        wakeLock.acquire();
+
         Database.getInstance(context.getApplicationContext()).synchronize(
-            false, false, null);
+            false, false, null, wakeLock);
+
+        // Wake lock is released as part of database synchronization
     }
 }

@@ -20,13 +20,27 @@ package net.kourlas.voipms_sms.receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
 
 public class BootReceiver extends BroadcastReceiver {
+    private static final String TAG = "BootReceiver";
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            // Get wake lock
+            PowerManager powerManager = (PowerManager) context.getSystemService(
+                Context.POWER_SERVICE);
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, TAG + "WakeLock");
+            wakeLock.acquire();
+
+            // Set up synchronization interval
             SynchronizationIntervalReceiver
                 .setupSynchronizationInterval(context.getApplicationContext());
+
+            // Release wake lock
+            wakeLock.release();
         }
     }
 }
