@@ -29,6 +29,8 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -110,26 +112,35 @@ public class NewConversationActivity extends AppCompatActivity {
 
         final ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(newConversationListViewAdapter);
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-            ContactItem contactItem =
-                (ContactItem) newConversationListViewAdapter
-                    .getItem(position);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position,
+                                    long id)
+            {
+                ContactItem contactItem =
+                    (ContactItem) newConversationListViewAdapter
+                        .getItem(position);
 
-            String phoneNumber =
-                contactItem.getPhoneNumber().replaceAll("[^0-9]", "");
+                String phoneNumber =
+                    contactItem.getPhoneNumber().replaceAll("[^0-9]", "");
 
-            Intent intent1 = new Intent(newConversationActivity,
-                                        ConversationActivity.class);
-            intent1.putExtra(getString(R.string.conversation_extra_contact),
-                             phoneNumber);
-            if (messageText != null) {
-                intent1.putExtra(
-                    getString(R.string.conversation_extra_message_text),
-                    messageText);
+                Intent intent1 = new Intent(newConversationActivity,
+                                            ConversationActivity.class);
+                intent1.putExtra(NewConversationActivity.this.getString(
+                    R.string.conversation_extra_contact),
+                                 phoneNumber);
+                if (messageText != null) {
+                    intent1.putExtra(
+                        NewConversationActivity.this.getString(
+                            R.string.conversation_extra_message_text),
+                        messageText);
+                }
+                intent1.putExtra(NewConversationActivity.this.getString(
+                    R.string.conversation_extra_focus),
+                                 true);
+                NewConversationActivity.this.startActivity(intent1);
             }
-            intent1.putExtra(getString(R.string.conversation_extra_focus),
-                             true);
-            startActivity(intent1);
         });
         listView.setFastScrollEnabled(true);
 

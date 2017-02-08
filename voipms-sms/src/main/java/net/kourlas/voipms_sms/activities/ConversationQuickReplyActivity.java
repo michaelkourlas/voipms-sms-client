@@ -141,20 +141,31 @@ public class ConversationQuickReplyActivity extends AppCompatActivity {
         final ImageButton sendButton =
             (ImageButton) findViewById(R.id.send_button);
         Utils.applyCircularMask(sendButton);
-        sendButton.setOnClickListener(v -> preSendMessage());
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConversationQuickReplyActivity.this.preSendMessage();
+            }
+        });
 
         Button openAppButton = (Button) findViewById(R.id.open_app_button);
-        openAppButton.setOnClickListener(v -> {
-            finish();
+        openAppButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConversationQuickReplyActivity.this.finish();
 
-            Intent intent = new Intent(activity, ConversationActivity.class);
-            intent.putExtra(getString(R.string.conversation_extra_contact),
-                            contact);
-            TaskStackBuilder stackBuilder =
-                TaskStackBuilder.create(getApplicationContext());
-            stackBuilder.addParentStack(ConversationActivity.class);
-            stackBuilder.addNextIntent(intent);
-            stackBuilder.startActivities();
+                Intent intent =
+                    new Intent(activity, ConversationActivity.class);
+                intent.putExtra(ConversationQuickReplyActivity.this.getString(
+                    R.string.conversation_extra_contact),
+                                contact);
+                TaskStackBuilder stackBuilder =
+                    TaskStackBuilder.create(ConversationQuickReplyActivity.this
+                                                .getApplicationContext());
+                stackBuilder.addParentStack(ConversationActivity.class);
+                stackBuilder.addNextIntent(intent);
+                stackBuilder.startActivities();
+            }
         });
         messageText.requestFocus();
     }

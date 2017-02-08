@@ -18,6 +18,7 @@
 package net.kourlas.voipms_sms.preferences;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.preference.Preference;
 import android.util.AttributeSet;
 import net.kourlas.voipms_sms.R;
@@ -50,9 +51,18 @@ public class DatabaseDeletePreference extends Preference {
                                       .preferences_database_delete_confirm_message),
                               getContext().getApplicationContext()
                                           .getString(R.string.delete),
-                              (dialog, which) -> Database.getInstance(
-                                  getContext().getApplicationContext())
-                                                         .removeAllMessages(),
+                              new DialogInterface.OnClickListener() {
+                                  @Override
+                                  public void onClick(DialogInterface dialog,
+                                                      int which)
+                                  {
+                                      Database.getInstance(
+                                          DatabaseDeletePreference.this
+                                              .getContext()
+                                              .getApplicationContext())
+                                              .removeAllMessages();
+                                  }
+                              },
                               getContext().getString(R.string.cancel), null);
     }
 }

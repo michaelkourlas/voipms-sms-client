@@ -20,10 +20,7 @@ package net.kourlas.voipms_sms.activities;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.NotificationManager;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.Outline;
 import android.net.Uri;
@@ -181,9 +178,12 @@ public class ConversationActivity
                 onMessageTextChange(s.toString());
             }
         });
-        messageText.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                adapter.refresh();
+        messageText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    adapter.refresh();
+                }
             }
         });
         String intentMessageText = getIntent().getStringExtra(
@@ -214,7 +214,12 @@ public class ConversationActivity
         final ImageButton sendButton =
             (ImageButton) findViewById(R.id.send_button);
         Utils.applyCircularMask(sendButton);
-        sendButton.setOnClickListener(v -> preSendMessage());
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConversationActivity.this.preSendMessage();
+            }
+        });
     }
 
     @Override
@@ -444,16 +449,20 @@ public class ConversationActivity
             getString(R.string.conversation_delete_confirm_title),
             getString(R.string.conversation_delete_confirm_message),
             getString(R.string.delete),
-            (dialog, which) -> {
-                database.deleteMessages(preferences.getDid(), contact);
+            new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    database.deleteMessages(preferences.getDid(), contact);
 
-                // Go back to the previous activity if no messages remain
-                if (!database.conversationHasMessages(preferences.getDid(),
-                                                      contact))
-                {
-                    NavUtils.navigateUpFromSameTask(this);
-                } else {
-                    adapter.refresh();
+                    // Go back to the previous activity if no messages remain
+                    if (!database.conversationHasMessages(preferences.getDid(),
+                                                          contact))
+                    {
+                        NavUtils
+                            .navigateUpFromSameTask(ConversationActivity.this);
+                    } else {
+                        adapter.refresh();
+                    }
                 }
             },
             getString(R.string.cancel),
@@ -647,7 +656,7 @@ public class ConversationActivity
      */
     private boolean onDeleteButtonClick(ActionMode mode) {
         // Get the database IDs of the messages that are checked
-        List<Long> databaseIds = new ArrayList<>();
+        final List<Long> databaseIds = new ArrayList<>();
         for (int i = 0; i < adapter.getItemCount(); i++) {
             if (adapter.isItemChecked(i)) {
                 databaseIds.add(adapter.getItem(i).getDatabaseId());
@@ -660,19 +669,23 @@ public class ConversationActivity
             getString(R.string.conversation_delete_confirm_title),
             getString(R.string.conversation_delete_confirm_message),
             getString(R.string.delete),
-            (dialog, which) -> {
-                // Delete each message
-                for (Long databaseId : databaseIds) {
-                    database.deleteMessage(databaseId);
-                }
+            new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Delete each message
+                    for (Long databaseId : databaseIds) {
+                        database.deleteMessage(databaseId);
+                    }
 
-                // Go back to the previous activity if no messages remain
-                if (!database.conversationHasMessages(preferences.getDid(),
-                                                      contact))
-                {
-                    NavUtils.navigateUpFromSameTask(this);
-                } else {
-                    adapter.refresh();
+                    // Go back to the previous activity if no messages remain
+                    if (!database.conversationHasMessages(preferences.getDid(),
+                                                          contact))
+                    {
+                        NavUtils
+                            .navigateUpFromSameTask(ConversationActivity.this);
+                    } else {
+                        adapter.refresh();
+                    }
                 }
             },
             getString(R.string.cancel),
@@ -782,6 +795,15 @@ public class ConversationActivity
     }
 
     /**
+     * Facilitates special double-click behaviour, such as toggling an item.
+     */
+    @Override
+    public boolean onLongClick(View view) {
+        toggleItem(view);
+        return true;
+    }
+
+    /**
      * Facilitates special click behaviour, such as when the action mode is
      * enabled or if a message is clicked that has previously failed to send.
      */
@@ -797,6 +819,31 @@ public class ConversationActivity
             if (!message.isDelivered() && !message.isDeliveryInProgress()) {
                 preSendMessage(message.getDatabaseId());
             }
+        }
+    }
+
+    /**
+     * Called after this activity sends a message.
+     */
+    public void postSendMessage(boolean success, long databaseId) {
+        database.markConversationAsRead(preferences.getDid(), contact);
+        if (success) {
+            // Since the message in our database does not have all of the
+            // information we need (the VoIP.ms ID, the precise date of sending)
+            // we delete it and retrieve the sent message from VoIP.ms; the
+            // adapter refresh will occur as part of the DB sync
+            database.removeMessage(databaseId);
+            database.synchronize(this, true, true, null);
+        } else {
+            // Otherwise, mark the message as failed to deliver and refresh
+            // the adapter
+            database.markMessageAsFailedToSend(databaseId);
+            adapter.refresh();
+        }
+
+        // Scroll to the bottom of the adapter so that the message is in view
+        if (adapter.getItemCount() > 0) {
+            layoutManager.scrollToPosition(adapter.getItemCount() - 1);
         }
     }
 
@@ -874,37 +921,5 @@ public class ConversationActivity
     /// Miscellaneous helper methods
     ///
 
-    /**
-     * Facilitates special double-click behaviour, such as toggling an item.
-     */
-    @Override
-    public boolean onLongClick(View view) {
-        toggleItem(view);
-        return true;
-    }
 
-    /**
-     * Called after this activity sends a message.
-     */
-    public void postSendMessage(boolean success, long databaseId) {
-        database.markConversationAsRead(preferences.getDid(), contact);
-        if (success) {
-            // Since the message in our database does not have all of the
-            // information we need (the VoIP.ms ID, the precise date of sending)
-            // we delete it and retrieve the sent message from VoIP.ms; the
-            // adapter refresh will occur as part of the DB sync
-            database.removeMessage(databaseId);
-            database.synchronize(this, true, true, null);
-        } else {
-            // Otherwise, mark the message as failed to deliver and refresh
-            // the adapter
-            database.markMessageAsFailedToSend(databaseId);
-            adapter.refresh();
-        }
-
-        // Scroll to the bottom of the adapter so that the message is in view
-        if (adapter.getItemCount() > 0) {
-            layoutManager.scrollToPosition(adapter.getItemCount() - 1);
-        }
-    }
 }

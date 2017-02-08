@@ -465,7 +465,7 @@ public class Utils {
      * @param viewId   The ID of the view to add the snackbar to.
      * @param text     The text to display.
      */
-    public static void showPermissionSnackbar(Activity activity,
+    public static void showPermissionSnackbar(final Activity activity,
                                               int viewId,
                                               String text)
     {
@@ -476,21 +476,24 @@ public class Utils {
             Snackbar.LENGTH_LONG);
         snackbar.setAction(
             R.string.settings,
-            v -> {
-                Intent intent = new Intent();
-                intent.setAction(
-                    Settings
-                        .ACTION_APPLICATION_DETAILS_SETTINGS);
-                intent.addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.addFlags(
-                    Intent.FLAG_ACTIVITY_NO_HISTORY);
-                intent.addFlags(
-                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                Uri uri = Uri.fromParts(
-                    "package", activity.getPackageName(), null);
-                intent.setData(uri);
-                activity.startActivity(intent);
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setAction(
+                        Settings
+                            .ACTION_APPLICATION_DETAILS_SETTINGS);
+                    intent.addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(
+                        Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    intent.addFlags(
+                        Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    Uri uri = Uri.fromParts(
+                        "package", activity.getPackageName(), null);
+                    intent.setData(uri);
+                    activity.startActivity(intent);
+                }
             });
         snackbar.show();
     }

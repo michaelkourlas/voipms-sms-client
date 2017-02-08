@@ -19,6 +19,7 @@ package net.kourlas.voipms_sms.preferences;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.preference.Preference;
 import android.support.v7.app.AlertDialog;
@@ -126,9 +127,18 @@ public class DidPreference extends Preference {
             builder.setTitle(getContext().getString(
                 R.string.preferences_account_did_dialog_title));
             builder.setItems(dids,
-                             (dialog, which) -> Preferences
-                                 .getInstance(getContext())
-                                 .setDid(dids[which].replaceAll("[^0-9]", "")));
+                             new DialogInterface.OnClickListener() {
+                                 @Override
+                                 public void onClick(DialogInterface dialog,
+                                                     int which)
+                                 {
+                                     Preferences
+                                         .getInstance(
+                                             DidPreference.this.getContext())
+                                         .setDid(dids[which]
+                                                     .replaceAll("[^0-9]", ""));
+                                 }
+                             });
             builder.show();
         } else {
             Utils.showInfoDialog(getContext(), message);

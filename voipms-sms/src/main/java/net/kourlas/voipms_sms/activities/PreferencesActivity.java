@@ -132,7 +132,7 @@ public class PreferencesActivity extends AppCompatActivity {
             }
         }
 
-        private void updateHandlersForPreference(Preference preference) {
+        private void updateHandlersForPreference(final Preference preference) {
             if (preference.getKey() == null) {
                 return;
             }
@@ -141,24 +141,36 @@ public class PreferencesActivity extends AppCompatActivity {
                 R.string.preferences_notifications_push_enable_key)))
             {
                 preference.setOnPreferenceChangeListener(
-                    (preference1, newValue) -> {
-                        if ((boolean) newValue) {
-                            pushNotifications.enablePushNotifications(
-                                getActivity(),
-                                (CustomSwitchPreference) preference);
+                    new Preference.OnPreferenceChangeListener() {
+                        @Override
+                        public boolean onPreferenceChange(Preference
+                                                              preference1,
+                                                          Object newValue)
+                        {
+                            if ((boolean) newValue) {
+                                pushNotifications.enablePushNotifications(
+                                    PreferencesFragment.this.getActivity(),
+                                    (CustomSwitchPreference) preference);
+                            }
+                            return true;
                         }
-                        return true;
                     });
 
             } else if (preference.getKey().equals(getString(
                 R.string.preferences_sync_interval_key)))
             {
                 preference.setOnPreferenceChangeListener(
-                    (preference12, newValue) -> {
-                        SynchronizationIntervalReceiver
-                            .setupSynchronizationInterval(
-                                applicationContext);
-                        return true;
+                    new Preference.OnPreferenceChangeListener() {
+                        @Override
+                        public boolean onPreferenceChange(Preference
+                                                              preference12,
+                                                          Object newValue)
+                        {
+                            SynchronizationIntervalReceiver
+                                .setupSynchronizationInterval(
+                                    applicationContext);
+                            return true;
+                        }
                     });
             }
         }

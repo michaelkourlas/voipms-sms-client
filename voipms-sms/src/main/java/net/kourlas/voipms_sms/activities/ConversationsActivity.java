@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -107,19 +108,27 @@ public class ConversationsActivity
         SwipeRefreshLayout swipeRefreshLayout =
             (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout
-            .setOnRefreshListener(this::preFullUpdate);
+            .setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    ConversationsActivity.this.preFullUpdate();
+                }
+            });
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
 
         FloatingActionButton button =
             (FloatingActionButton) findViewById(R.id.new_button);
-        button.setOnClickListener(v -> {
-            if (!preferences.getEmail().equals("") && !preferences
-                .getPassword().equals("") &&
-                !preferences.getDid().equals(""))
-            {
-                Intent intent = new Intent(conversationsActivity,
-                                           NewConversationActivity.class);
-                startActivity(intent);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!preferences.getEmail().equals("") && !preferences
+                    .getPassword().equals("") &&
+                    !preferences.getDid().equals(""))
+                {
+                    Intent intent = new Intent(conversationsActivity,
+                                               NewConversationActivity.class);
+                    ConversationsActivity.this.startActivity(intent);
+                }
             }
         });
 
@@ -141,6 +150,18 @@ public class ConversationsActivity
     protected void onDestroy() {
         super.onDestroy();
         ActivityMonitor.getInstance().deleteReferenceToActivity(this);
+    }
+
+    /**
+     * Initiates a full update of the message database. This update follows
+     * all synchronization rules set in the
+     * application's settings.
+     */
+    private void preFullUpdate() {
+        adapter.refresh();
+        pushNotifications
+            .registerForFcm(conversationsActivity, null, false, false);
+        database.synchronize(conversationsActivity, true, false, null);
     }
 
     @Override
@@ -208,18 +229,25 @@ public class ConversationsActivity
                 getString(
                     R.string.conversations_first_run_dialog_text),
                 getString(R.string.preferences_name),
-                (dialog, id) -> {
-                    Intent preferencesIntent =
-                        new Intent(conversationsActivity,
-                                   PreferencesActivity
-                                       .class);
-                    startActivity(preferencesIntent);
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        Intent preferencesIntent =
+                            new Intent(conversationsActivity,
+                                       PreferencesActivity
+                                           .class);
+                        ConversationsActivity.this
+                            .startActivity(preferencesIntent);
+                    }
                 }, getString(R.string.help_name),
-                (dialog, id) -> {
-                    Intent helpIntent =
-                        new Intent(conversationsActivity,
-                                   HelpActivity.class);
-                    startActivity(helpIntent);
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        Intent helpIntent =
+                            new Intent(conversationsActivity,
+                                       HelpActivity.class);
+                        ConversationsActivity.this.startActivity(helpIntent);
+                    }
                 });
         }
     }
@@ -373,7 +401,7 @@ public class ConversationsActivity
     }
 
     private boolean deleteButtonHandler(ActionMode mode) {
-        List<String> contacts = new ArrayList<>();
+        final List<String> contacts = new ArrayList<>();
         for (int i = 0; i < adapter.getItemCount(); i++) {
             if (adapter.isItemChecked(i)) {
                 contacts.add(adapter.getItem(i).getContact());
@@ -385,11 +413,14 @@ public class ConversationsActivity
             getString(R.string.conversations_delete_confirm_title),
             getString(R.string.conversations_delete_confirm_message),
             getString(R.string.delete),
-            (dialog, which) -> {
-                for (String contact : contacts) {
-                    database.deleteMessages(preferences.getDid(), contact);
+            new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    for (String contact : contacts) {
+                        database.deleteMessages(preferences.getDid(), contact);
+                    }
+                    adapter.refresh();
                 }
-                adapter.refresh();
             },
             getString(R.string.cancel),
             null);
@@ -424,6 +455,20 @@ public class ConversationsActivity
     }
 
     /**
+     * Called when any item in the RecyclerView is long-clicked.
+     * <p/>
+     * This method only toggles the selected item.
+     *
+     * @param view The item to toggle.
+     * @return Always returns true.
+     */
+    @Override
+    public boolean onLongClick(View view) {
+        toggleItem(view);
+        return true;
+    }
+
+    /**
      * Toggles the item associated with the specified view. Activates and
      * deactivates the action mode depending on the
      * checked item count.
@@ -446,6 +491,22 @@ public class ConversationsActivity
             actionModeEnabled = true;
         }
         updateButtons();
+    }
+
+    /**
+     * Updates this activity's user interface after a database update.
+     * <p/>
+     * Called by the Api class after updating the SMS database if this
+     * activity made the update request or, if the
+     * update request was initiated by the GCM service, if this activity is
+     * currently visible to the user.
+     */
+    public void postUpdate() {
+        SwipeRefreshLayout swipeRefreshLayout =
+            (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setRefreshing(false);
+
+        adapter.refresh();
     }
 
     /**
@@ -477,45 +538,5 @@ public class ConversationsActivity
         }
     }
 
-    /**
-     * Called when any item in the RecyclerView is long-clicked.
-     * <p/>
-     * This method only toggles the selected item.
-     *
-     * @param view The item to toggle.
-     * @return Always returns true.
-     */
-    @Override
-    public boolean onLongClick(View view) {
-        toggleItem(view);
-        return true;
-    }
 
-    /**
-     * Initiates a full update of the message database. This update follows
-     * all synchronization rules set in the
-     * application's settings.
-     */
-    private void preFullUpdate() {
-        adapter.refresh();
-        pushNotifications
-            .registerForFcm(conversationsActivity, null, false, false);
-        database.synchronize(conversationsActivity, true, false, null);
-    }
-
-    /**
-     * Updates this activity's user interface after a database update.
-     * <p/>
-     * Called by the Api class after updating the SMS database if this
-     * activity made the update request or, if the
-     * update request was initiated by the GCM service, if this activity is
-     * currently visible to the user.
-     */
-    public void postUpdate() {
-        SwipeRefreshLayout swipeRefreshLayout =
-            (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setRefreshing(false);
-
-        adapter.refresh();
-    }
 }

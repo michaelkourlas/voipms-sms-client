@@ -134,8 +134,13 @@ public class PushNotifications {
                 progressDialog.hide();
 
                 DialogInterface.OnClickListener fcmOnClickListener =
-                    (dialog, which) -> registerForFcm(activity, preference,
-                                                      true, true);
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            registerForFcm(activity, preference,
+                                           true, true);
+                        }
+                    };
 
                 if (!success) {
                     Utils.showAlertDialog(
