@@ -1,5 +1,6 @@
 # JetBrains
 .idea/
+*.iml
 
 # Android
 *.apk
