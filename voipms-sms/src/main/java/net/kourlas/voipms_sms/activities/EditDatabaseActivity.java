@@ -111,7 +111,7 @@ public class EditDatabaseActivity extends AppCompatActivity {
                                                           messageJsonObject
                                                               .getLong(
                                                                   Database
-                                                                      .COLUMN_TYPE),
+                                                                      .COLUMN_INCOMING),
                                                           messageJsonObject
                                                               .getString(
                                                                   Database

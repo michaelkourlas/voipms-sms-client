@@ -261,9 +261,9 @@ public class ConversationRecyclerViewAdapter
             previousMessage = messages.get(position - 1);
         }
 
-        if (message.getType() == Message.Type.INCOMING) {
+        if (message.isIncoming()) {
             if (previousMessage == null
-                || previousMessage.getType() == Message.Type.OUTGOING
+                || previousMessage.isOutgoing()
                 || message.getDateInDatabaseFormat()
                    - previousMessage.getDateInDatabaseFormat() > 60)
             {
@@ -273,7 +273,7 @@ public class ConversationRecyclerViewAdapter
             }
         } else {
             if (previousMessage == null
-                || previousMessage.getType() == Message.Type.INCOMING
+                || previousMessage.isIncoming()
                 || message.getDateInDatabaseFormat()
                    - previousMessage.getDateInDatabaseFormat() > 60)
             {

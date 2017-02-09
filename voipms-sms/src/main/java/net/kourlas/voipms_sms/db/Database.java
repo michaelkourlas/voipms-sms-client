@@ -55,7 +55,7 @@ public class Database {
     public static final String COLUMN_DATABASE_ID = "DatabaseId";
     public static final String COLUMN_VOIP_ID = "VoipId";
     public static final String COLUMN_DATE = "Date";
-    public static final String COLUMN_TYPE = "Type";
+    public static final String COLUMN_INCOMING = "Type";
     public static final String COLUMN_DID = "Did";
     public static final String COLUMN_CONTACT = "Contact";
     public static final String COLUMN_MESSAGE = "Text";
@@ -69,7 +69,7 @@ public class Database {
     private static final String TAG = "Database";
     private static final String TABLE_MESSAGE = "sms";
     private static final String[] columns = {
-        COLUMN_DATABASE_ID, COLUMN_VOIP_ID, COLUMN_DATE, COLUMN_TYPE,
+        COLUMN_DATABASE_ID, COLUMN_VOIP_ID, COLUMN_DATE, COLUMN_INCOMING,
         COLUMN_DID, COLUMN_CONTACT, COLUMN_MESSAGE, COLUMN_UNREAD,
         COLUMN_DELETED, COLUMN_DELIVERED, COLUMN_DELIVERY_IN_PROGRESS,
         COLUMN_DRAFT};
@@ -133,7 +133,7 @@ public class Database {
 
         values.put(COLUMN_VOIP_ID, message.getVoipId());
         values.put(COLUMN_DATE, message.getDateInDatabaseFormat());
-        values.put(COLUMN_TYPE, message.getTypeInDatabaseFormat());
+        values.put(COLUMN_INCOMING, message.isIncomingInDatabaseFormat());
         values.put(COLUMN_DID, message.getDid());
         values.put(COLUMN_CONTACT, message.getContact());
         values.put(COLUMN_MESSAGE, message.getText());
@@ -222,7 +222,7 @@ public class Database {
                 cursor.getLong(cursor.getColumnIndexOrThrow(
                     COLUMN_DATE)),
                 cursor.getLong(cursor.getColumnIndexOrThrow(
-                    COLUMN_TYPE)),
+                    COLUMN_INCOMING)),
                 cursor.getString(cursor.getColumnIndexOrThrow(
                     COLUMN_DID)),
                 cursor.getString(cursor.getColumnIndexOrThrow(
@@ -441,7 +441,7 @@ public class Database {
             + COLUMN_CONTACT + "=" + contact + " AND "
             + COLUMN_DELETED + "=0 AND "
             + COLUMN_DRAFT + "=0 AND "
-            + COLUMN_TYPE + "=0",
+            + COLUMN_INCOMING + "=0",
             null, null, null, null);
         cursor.moveToFirst();
         long date = 0;
@@ -459,7 +459,7 @@ public class Database {
             + COLUMN_CONTACT + "=" + contact + " AND "
             + COLUMN_DELETED + "=0" + " AND "
             + COLUMN_DRAFT + "=0 AND "
-            + COLUMN_TYPE + "=1 AND "
+            + COLUMN_INCOMING + "=1 AND "
             + COLUMN_DATE + ">=" + date + " AND "
             + COLUMN_UNREAD + "=1",
             null, null, null,
@@ -553,7 +553,7 @@ public class Database {
             contentValues,
             COLUMN_CONTACT + "=" + contact + " AND "
             + COLUMN_DID + "=" + did + " AND "
-            + COLUMN_TYPE + "=1",
+            + COLUMN_INCOMING + "=1",
             null);
     }
 
@@ -1458,7 +1458,7 @@ public class Database {
             +
             COLUMN_VOIP_ID + " INTEGER," +
             COLUMN_DATE + " INTEGER NOT NULL," +
-            COLUMN_TYPE + " INTEGER NOT NULL," +
+            COLUMN_INCOMING + " INTEGER NOT NULL," +
             COLUMN_DID + " TEXT NOT NULL," +
             COLUMN_CONTACT + " TEXT NOT NULL, " +
             COLUMN_MESSAGE + " TEXT NOT NULL," +
@@ -1587,7 +1587,7 @@ public class Database {
                             values.put(columns[2],
                                        message.getDateInDatabaseFormat());
                             values.put(columns[3],
-                                       message.getTypeInDatabaseFormat());
+                                       message.isIncomingInDatabaseFormat());
                             values.put(columns[4], message.getDid());
                             values.put(columns[5], message.getContact());
                             values.put(columns[6], message.getText());

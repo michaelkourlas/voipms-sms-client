@@ -556,7 +556,7 @@ public class ConversationActivity
             DateFormat dateFormat = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             String dialogText = "";
-            if (message.getType() == Message.Type.INCOMING) {
+            if (message.isIncoming()) {
                 if (message.getVoipId() != null) {
                     dialogText += getString(R.string.conversation_info_id) + " "
                                   + message.getVoipId() + "\n";
@@ -804,50 +804,6 @@ public class ConversationActivity
     }
 
     /**
-     * Facilitates special click behaviour, such as when the action mode is
-     * enabled or if a message is clicked that has previously failed to send.
-     */
-    @Override
-    public void onClick(View view) {
-        if (actionModeEnabled) {
-            // Check or uncheck item when action mode is enabled
-            toggleItem(view);
-        } else {
-            // Resend message if has not yet been sent, but only if
-            Message message =
-                adapter.getItem(recyclerView.getChildAdapterPosition(view));
-            if (!message.isDelivered() && !message.isDeliveryInProgress()) {
-                preSendMessage(message.getDatabaseId());
-            }
-        }
-    }
-
-    /**
-     * Called after this activity sends a message.
-     */
-    public void postSendMessage(boolean success, long databaseId) {
-        database.markConversationAsRead(preferences.getDid(), contact);
-        if (success) {
-            // Since the message in our database does not have all of the
-            // information we need (the VoIP.ms ID, the precise date of sending)
-            // we delete it and retrieve the sent message from VoIP.ms; the
-            // adapter refresh will occur as part of the DB sync
-            database.removeMessage(databaseId);
-            database.synchronize(this, true, true, null);
-        } else {
-            // Otherwise, mark the message as failed to deliver and refresh
-            // the adapter
-            database.markMessageAsFailedToSend(databaseId);
-            adapter.refresh();
-        }
-
-        // Scroll to the bottom of the adapter so that the message is in view
-        if (adapter.getItemCount() > 0) {
-            layoutManager.scrollToPosition(adapter.getItemCount() - 1);
-        }
-    }
-
-    /**
      * Toggles the specified view.
      *
      * @param view The view to toggle.
@@ -873,6 +829,25 @@ public class ConversationActivity
         // If the action mode is enabled, update the visible buttons to match
         // the number of checked items
         updateButtons();
+    }
+
+    /**
+     * Facilitates special click behaviour, such as when the action mode is
+     * enabled or if a message is clicked that has previously failed to send.
+     */
+    @Override
+    public void onClick(View view) {
+        if (actionModeEnabled) {
+            // Check or uncheck item when action mode is enabled
+            toggleItem(view);
+        } else {
+            // Resend message if has not yet been sent, but only if
+            Message message =
+                adapter.getItem(recyclerView.getChildAdapterPosition(view));
+            if (!message.isDelivered() && !message.isDeliveryInProgress()) {
+                preSendMessage(message.getDatabaseId());
+            }
+        }
     }
 
     /**
@@ -916,6 +891,33 @@ public class ConversationActivity
             shareAction.setVisible(true);
         }
     }
+
+    /**
+     * Called after this activity sends a message.
+     */
+    public void postSendMessage(boolean success, long databaseId) {
+        database.markConversationAsRead(preferences.getDid(), contact);
+        if (success) {
+            // Since the message in our database does not have all of the
+            // information we need (the VoIP.ms ID, the precise date of sending)
+            // we delete it and retrieve the sent message from VoIP.ms; the
+            // adapter refresh will occur as part of the DB sync
+            database.removeMessage(databaseId);
+            database.synchronize(this, true, true, null);
+        } else {
+            // Otherwise, mark the message as failed to deliver and refresh
+            // the adapter
+            database.markMessageAsFailedToSend(databaseId);
+            adapter.refresh();
+        }
+
+        // Scroll to the bottom of the adapter so that the message is in view
+        if (adapter.getItemCount() > 0) {
+            layoutManager.scrollToPosition(adapter.getItemCount() - 1);
+        }
+    }
+
+
 
     ///
     /// Miscellaneous helper methods

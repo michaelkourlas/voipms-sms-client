@@ -144,7 +144,7 @@ public class ConversationsRecyclerViewAdapter
                            .indexOf(filterConstraint.toLowerCase());
         if (!filterConstraint.equals("") && index != -1) {
             int nonMessageOffset = index;
-            if (message.getType() == Message.Type.OUTGOING) {
+            if (message.isOutgoing()) {
                 messageTextBuilder.insert(
                     0, applicationContext.getString(
                         R.string.conversations_message_you) + " ");
@@ -177,7 +177,7 @@ public class ConversationsRecyclerViewAdapter
                 + filterConstraint.length(),
                 SpannableString.SPAN_INCLUSIVE_EXCLUSIVE);
         } else {
-            if (message.getType() == Message.Type.OUTGOING) {
+            if (message.isOutgoing()) {
                 messageTextBuilder.append(applicationContext.getString(
                     R.string.conversations_message_you));
                 messageTextBuilder.append(" ");
