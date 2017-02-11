@@ -42,6 +42,9 @@
     <!-- Donations -->
     <uses-permission android:name="com.android.vending.BILLING" />
 
+    <!-- Ringtones -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"

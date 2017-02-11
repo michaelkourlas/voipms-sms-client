@@ -175,6 +175,7 @@
     <string name="preferences_dids_key" translatable="false">dids</string>
     <string name="preferences_fcm_token_key" translatable="false">registration_id</string>
     <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>
+    <string name="preferences_perm_denied_external_storage">External storage permission required to select certain ringtones</string>
 
     <!-- Utils -->
     <string name="utils_date_just_now">Just now</string>

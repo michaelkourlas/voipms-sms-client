@@ -17,13 +17,17 @@
 
 package net.kourlas.voipms_sms.activities;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.*;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +47,8 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class PreferencesActivity extends AppCompatActivity {
+    private static final int PERM_REQ_EXTERNAL_STORAGE = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,7 +92,8 @@ public class PreferencesActivity extends AppCompatActivity {
      */
     public static class PreferencesFragment
         extends PreferenceFragment
-        implements SharedPreferences.OnSharedPreferenceChangeListener
+        implements SharedPreferences.OnSharedPreferenceChangeListener,
+                   ActivityCompat.OnRequestPermissionsResultCallback
     {
         Context applicationContext;
         Database database;
@@ -108,12 +115,61 @@ public class PreferencesActivity extends AppCompatActivity {
             notifications = Notifications.getInstance(applicationContext);
             pushNotifications = PushNotifications
                 .getInstance(applicationContext);
+
+            ActivityCompat.requestPermissions(
+                getActivity(),
+                new String[] {Manifest.permission.READ_EXTERNAL_STORAGE},
+                PERM_REQ_EXTERNAL_STORAGE);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(
+            SharedPreferences sharedPreferences, String key)
+        {
+            // This check shouldn't be necessary, but it apparently is...
+            if (isAdded()) {
+                // Update summary text for changed preference
+                updateSummaryTextForPreference(findPreference(key));
+            }
+        }
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode,
+                                               @NonNull String permissions[],
+                                               @NonNull int[] grantResults)
+        {
+            super.onRequestPermissionsResult(requestCode, permissions,
+                                             grantResults);
+            if (requestCode == PERM_REQ_EXTERNAL_STORAGE) {
+                for (int i = 0; i < permissions.length; i++) {
+                    if (permissions[i].equals(
+                        Manifest.permission.READ_EXTERNAL_STORAGE))
+                    {
+                        if (grantResults[i]
+                            != PackageManager.PERMISSION_GRANTED)
+                        {
+                            Utils.showPermissionSnackbar(
+                                getActivity(),
+                                R.id.new_button,
+                                getString(
+                                    R.string
+                                        .preferences_perm_denied_external_storage));
+                        } else {
+                            updateSummaryAndHandlers();
+                        }
+                    }
+                }
+            }
         }
 
         @Override
         public void onResume() {
             super.onResume();
 
+            updateSummaryAndHandlers();
+        }
+
+        private void updateSummaryAndHandlers() {
             // Update summary text and handlers for all preferences
             for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); ++i)
             {
@@ -216,13 +272,20 @@ public class PreferencesActivity extends AppCompatActivity {
                 if (notificationSound.equals("")) {
                     ringtonePreference.setSummary("None");
                 } else {
-                    Ringtone ringtone = RingtoneManager.getRingtone(
-                        getActivity(), Uri.parse(notificationSound));
-                    if (ringtone != null) {
-                        ringtonePreference.setSummary(ringtone.getTitle(
-                            getActivity()));
-                    } else {
-                        ringtonePreference.setSummary("Unknown ringtone");
+                    try {
+                        Ringtone ringtone = RingtoneManager.getRingtone(
+                            getActivity(), Uri.parse(notificationSound));
+
+                        if (ringtone != null) {
+                            ringtonePreference.setSummary(ringtone.getTitle(
+                                getActivity()));
+                        } else {
+                            ringtonePreference.setSummary("Unknown ringtone");
+                        }
+                    } catch (SecurityException ex) {
+                        ringtonePreference.setSummary(
+                            "Unknown ringtone (external storage permission"
+                            + " denied)");
                     }
                 }
             } else if (preference instanceof StartDatePreference) {
@@ -232,17 +295,6 @@ public class PreferencesActivity extends AppCompatActivity {
                     new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 datePreference
                     .setSummary(sdf.format(preferences.getStartDate()));
-            }
-        }
-
-        @Override
-        public void onSharedPreferenceChanged(
-            SharedPreferences sharedPreferences, String key)
-        {
-            // This check shouldn't be necessary, but it apparently is...
-            if (isAdded()) {
-                // Update summary text for changed preference
-                updateSummaryTextForPreference(findPreference(key));
             }
         }
     }
