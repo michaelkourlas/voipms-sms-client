@@ -291,6 +291,9 @@ public class ConversationActivity
         EditText messageEditText =
             (EditText) findViewById(R.id.message_edit_text);
         String messageText = messageEditText.getText().toString();
+        if (messageText.length() == 0) {
+            return;
+        }
         // Split up the message to be sent into 153-character chunks
         // (if character count greater than 160) and add them to the database
         if (messageText.length() > 160) {
