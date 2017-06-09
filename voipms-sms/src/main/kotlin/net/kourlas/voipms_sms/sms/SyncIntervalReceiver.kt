@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.sms
 import android.content.Context
 import android.content.Intent
 import android.support.v4.content.WakefulBroadcastReceiver
-import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 
 /**
@@ -36,21 +35,17 @@ class SyncIntervalReceiver : WakefulBroadcastReceiver() {
      * @param intent The specified intent.
      */
     override fun onReceive(context: Context?, intent: Intent?) {
-        try {
-            if (context != null && intent != null
-                && intent.action == context.getString(
-                R.string.sync_interval_action)) {
-                val forceRecent = intent.extras.get(
-                    context.getString(R.string.sync_interval_force_recent))
-                                      as Boolean?
-                                  ?: throw Exception("Force recent missing")
+        if (context != null && intent != null
+            && intent.action == context.getString(
+            R.string.sync_interval_action)) {
+            val forceRecent = intent.extras.get(
+                context.getString(R.string.sync_interval_force_recent))
+                                  as Boolean?
+                              ?: throw Exception("Force recent missing")
 
-                val syncIntent = SyncService.getIntent(context,
-                                                       forceRecent)
-                startWakefulService(context, syncIntent)
-            }
-        } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            val syncIntent = SyncService.getIntent(context,
+                                                   forceRecent)
+            startWakefulService(context, syncIntent)
         }
     }
 

@@ -21,7 +21,6 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.support.v4.app.RemoteInput
-import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getEmail
@@ -100,16 +99,11 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
                         messages.add(OutgoingMessage(newDatabaseId, did,
                                                      contact, messageText))
                     } catch (e: Exception) {
-                        FirebaseCrash.report(e)
                         error = applicationContext.getString(
                             R.string.send_message_error_database)
                         for ((newDatabaseId) in messages) {
-                            try {
-                                Database.getInstance(applicationContext)
-                                    .removeMessage(newDatabaseId)
-                            } catch (e: Exception) {
-                                FirebaseCrash.report(e)
-                            }
+                            Database.getInstance(applicationContext)
+                                .removeMessage(newDatabaseId)
                         }
                         return ConversationId(did, contact)
                     }
@@ -132,7 +126,6 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
 
             return ConversationId(did, contact)
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
             error = applicationContext.getString(
                 R.string.send_message_error_unknown)
         }
@@ -249,12 +242,10 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
                 R.string.send_message_error_api_request)
             return null
         } catch (e: JSONException) {
-            FirebaseCrash.report(e)
             error = applicationContext.getString(
                 R.string.send_message_error_api_parse)
             return null
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
             error = applicationContext.getString(
                 R.string.send_message_error_unknown)
             return null

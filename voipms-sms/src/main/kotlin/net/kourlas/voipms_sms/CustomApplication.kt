@@ -25,7 +25,6 @@ import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.conversations.ConversationsArchivedActivity
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.lang.ref.WeakReference
 
 /**
@@ -74,9 +73,6 @@ class CustomApplication : MultiDexApplication(),
 
         // Register for activity lifecycle callbacks
         registerActivityLifecycleCallbacks(this)
-
-        // Subscribe to topics for current DIDs
-        subscribeToDidTopics(applicationContext)
     }
 
     override fun onActivityCreated(activity: Activity?,

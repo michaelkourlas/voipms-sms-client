@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.sms
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.isAccountActive
@@ -31,32 +30,28 @@ import net.kourlas.voipms_sms.preferences.isAccountActive
  */
 class MarkReadService : IntentService(MarkReadService::class.java.name) {
     override fun onHandleIntent(intent: Intent?) {
-        try {
-            // Terminate quietly if intent does not exist or does not contain
-            // the mark as read action
-            if (intent == null || intent.action != applicationContext.getString(
-                R.string.mark_read_action)) {
-                return
-            }
-
-            // Terminate quietly if account inactive
-            if (!isAccountActive(applicationContext)) {
-                return
-            }
-
-            // Retrieve the DID and contact from the intent
-            val conversationId = getIntentData(intent)
-
-            // Mark the conversation as read
-            Database.getInstance(applicationContext).markConversationRead(
-                conversationId)
-
-            // Cancel existing notification
-            Notifications.getInstance(application).cancelNotification(
-                conversationId)
-        } catch (e: Exception) {
-            FirebaseCrash.report(e)
+        // Terminate quietly if intent does not exist or does not contain
+        // the mark as read action
+        if (intent == null || intent.action != applicationContext.getString(
+            R.string.mark_read_action)) {
+            return
         }
+
+        // Terminate quietly if account inactive
+        if (!isAccountActive(applicationContext)) {
+            return
+        }
+
+        // Retrieve the DID and contact from the intent
+        val conversationId = getIntentData(intent)
+
+        // Mark the conversation as read
+        Database.getInstance(applicationContext).markConversationRead(
+            conversationId)
+
+        // Cancel existing notification
+        Notifications.getInstance(application).cancelNotification(
+            conversationId)
     }
 
     /**

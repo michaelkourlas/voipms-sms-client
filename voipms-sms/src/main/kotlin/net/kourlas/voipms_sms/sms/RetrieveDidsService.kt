@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.sms
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
@@ -64,27 +63,25 @@ class RetrieveDidsService : IntentService(
     fun handleRetrieveDids(intent: Intent?): Set<String>? {
         // Retrieve DIDs from VoIP.ms API
         var dids: Set<String>? = null
-        try {
-            // Terminate quietly if intent does not exist or does not contain
-            // the send SMS action
-            if (intent == null || intent.action != applicationContext.getString(
-                R.string.retrieve_dids_action)) {
-                return dids
-            }
 
-            // Terminate quietly if email and password are undefined
-            if (getEmail(applicationContext) == ""
-                || getPassword(applicationContext) == "") {
-                return dids
-            }
-
-            val response = getApiResponse()
-            if (response != null) {
-                dids = getDidsFromResponse(response)
-            }
-        } catch (e: Exception) {
-            FirebaseCrash.report(e)
+        // Terminate quietly if intent does not exist or does not contain
+        // the send SMS action
+        if (intent == null || intent.action != applicationContext.getString(
+            R.string.retrieve_dids_action)) {
+            return dids
         }
+
+        // Terminate quietly if email and password are undefined
+        if (getEmail(applicationContext) == ""
+            || getPassword(applicationContext) == "") {
+            return dids
+        }
+
+        val response = getApiResponse()
+        if (response != null) {
+            dids = getDidsFromResponse(response)
+        }
+
         return dids
     }
 
@@ -112,12 +109,10 @@ class RetrieveDidsService : IntentService(
                 R.string.preferences_account_dids_error_api_request)
             return null
         } catch (e: JSONException) {
-            FirebaseCrash.report(e)
             error = applicationContext.getString(
                 R.string.preferences_account_dids_error_api_parse)
             return null
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
             error = applicationContext.getString(
                 R.string.preferences_account_dids_error_unknown)
             return null

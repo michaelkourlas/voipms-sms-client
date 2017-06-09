@@ -24,7 +24,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.support.v4.content.WakefulBroadcastReceiver.completeWakefulIntent
-import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
@@ -111,7 +110,6 @@ class SyncService : IntentService(SyncService::class.java.name) {
                 setupInterval(applicationContext)
             }
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
             error = applicationContext.getString(
                 R.string.sync_error_unknown)
         }
@@ -320,11 +318,9 @@ class SyncService : IntentService(SyncService::class.java.name) {
                 R.string.sync_error_api_request)
             return null
         } catch (e: JSONException) {
-            FirebaseCrash.report(e)
             error = applicationContext.getString(R.string.sync_error_api_parse)
             return null
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
             error = applicationContext.getString(R.string.sync_error_unknown)
             return null
         }

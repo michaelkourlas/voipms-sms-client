@@ -28,13 +28,13 @@ import android.preference.*
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
-import com.google.android.gms.common.GoogleApiAvailability
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.notifications.NotificationsRegistrationService
-import net.kourlas.voipms_sms.sms.AppIndexingService
 import net.kourlas.voipms_sms.sms.RetrieveDidsService
 import net.kourlas.voipms_sms.sms.SyncService
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
+import net.kourlas.voipms_sms.utils.showInfoDialog
+import net.kourlas.voipms_sms.utils.showPermissionSnackbar
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -50,13 +50,6 @@ class PreferencesFragment : PreferenceFragment(),
     val syncIntervalPreferenceChangeListener =
         Preference.OnPreferenceChangeListener { _, _ ->
             SyncService.setupInterval(activity.applicationContext)
-            true
-        }
-    val notificationsPreferenceChangeListener =
-        Preference.OnPreferenceChangeListener { _, newValue ->
-            if (newValue as Boolean) {
-                enablePushNotifications()
-            }
             true
         }
 
@@ -136,13 +129,6 @@ class PreferencesFragment : PreferenceFragment(),
             setPositiveButton(context.getString(R.string.ok),
                               { _, _ ->
                                   setDids(context, selectedDids)
-                                  if (selectedDids.isNotEmpty() &&
-                                      getNotificationsEnabled(context)) {
-                                      // Re-register for push notifications when
-                                      // DIDs change
-                                      enablePushNotifications()
-                                  }
-                                  AppIndexingService.replaceIndex(context)
                               })
             setNegativeButton(context.getString(R.string.cancel),
                               null)
@@ -279,43 +265,6 @@ class PreferencesFragment : PreferenceFragment(),
     }
 
     /**
-     * Enables push notifications by showing a progress dialog and starting
-     * the push notifications registration service.
-     */
-    fun enablePushNotifications() {
-        GoogleApiAvailability
-            .getInstance()
-            .makeGooglePlayServicesAvailable(activity)
-            .addOnSuccessListener success@ {
-                // Check if account is active and silently quit if not
-                if (!isAccountActive(activity)) {
-                    return@success
-                }
-
-                // Show progress dialog
-                val progressDialog = ProgressDialog(activity)
-                with(progressDialog) {
-                    setMessage(context.getString(
-                        R.string.push_notifications_progress))
-                    setCancelable(false)
-                    show()
-                }
-                this.progressDialog = progressDialog
-
-                // Subscribe to DID topics
-                subscribeToDidTopics(activity)
-
-                // Start push notifications registration service
-                activity.startService(NotificationsRegistrationService
-                                          .getIntent(activity))
-            }
-            .addOnFailureListener {
-                showInfoDialog(activity, getString(
-                    R.string.push_notifications_fail_google_play))
-            }
-    }
-
-    /**
      * Updates the summary text and handlers for all preferences.
      */
     private fun updateSummaryAndHandlers() {
@@ -409,10 +358,6 @@ class PreferencesFragment : PreferenceFragment(),
             R.string.preferences_sync_interval_key)) {
             preference.onPreferenceChangeListener =
                 syncIntervalPreferenceChangeListener
-        } else if (preference.key == getString(
-            R.string.preferences_notifications_enable_key)) {
-            preference.onPreferenceChangeListener =
-                notificationsPreferenceChangeListener
         }
     }
 

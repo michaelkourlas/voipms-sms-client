@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.preferences
 import android.content.Context
 import android.preference.PreferenceManager
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.util.*
 
 fun getConnectTimeout(context: Context): Int {
@@ -148,7 +147,6 @@ fun isAccountActive(context: Context): Boolean {
 fun setDids(context: Context, dids: Set<String>) {
     setStringSetPreference(context, context.getString(
         R.string.preferences_account_dids_key), dids)
-    subscribeToDidTopics(context)
 }
 
 

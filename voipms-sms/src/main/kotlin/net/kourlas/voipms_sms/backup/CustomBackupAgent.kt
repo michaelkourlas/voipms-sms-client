@@ -21,11 +21,9 @@ import android.app.backup.BackupAgent
 import android.app.backup.BackupDataInput
 import android.app.backup.BackupDataOutput
 import android.os.ParcelFileDescriptor
-import net.kourlas.voipms_sms.utils.subscribeToDidTopics
-
 
 /**
- * Custom backup agent that does nothing except register for FCM DID topics.
+ * Custom backup agent that does nothing.
  */
 class CustomBackupAgent : BackupAgent() {
     override fun onBackup(oldState: ParcelFileDescriptor,
@@ -41,8 +39,5 @@ class CustomBackupAgent : BackupAgent() {
 
     override fun onRestoreFinished() {
         super.onRestoreFinished()
-
-        // Subscribe to topics for current DIDs
-        subscribeToDidTopics(applicationContext)
     }
 }
