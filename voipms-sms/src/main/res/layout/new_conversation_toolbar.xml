@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2016 Michael Kourlas
+  ~ Copyright (C) 2015-2017 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
   -->
 
 <android.support.v7.widget.SearchView xmlns:android="http://schemas.android.com/apk/res/android"
-                                      xmlns:app="http://schemas.android.com/apk/res-auto"
-                                      android:id="@+id/search_view"
-                                      android:layout_width="match_parent"
-                                      android:layout_height="wrap_content"
-                                      android:inputType="textPersonName"
-                                      app:iconifiedByDefault="false"
-                                      app:queryHint="@string/new_conversation_text_hint" />
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/search_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:inputType="textPersonName"
+    app:iconifiedByDefault="false"
+    app:queryHint="@string/new_conversation_text_hint" />

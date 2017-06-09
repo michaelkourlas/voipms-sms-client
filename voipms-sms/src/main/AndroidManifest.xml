@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2016 Michael Kourlas
+  ~ Copyright (C) 2015-2017 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,9 +15,12 @@
   ~ limitations under the License.
   -->
 
+<!--suppress XmlUnusedNamespaceDeclaration -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="net.kourlas.voipms_sms">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="net.kourlas.voipms_sms">
+
+    <!-- PERMISSIONS -->
 
     <!-- Display contact information -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -39,43 +42,65 @@
     <!-- Vibration when notification received -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Donations -->
-    <uses-permission android:name="com.android.vending.BILLING" />
-
-    <!-- Ringtones -->
+    <!-- Ringtones and database -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-        android:name="android.support.multidex.MultiDexApplication"
+        android:name=".CustomApplication"
         android:allowBackup="true"
-        android:backupAgent=".backup.BackupAgent"
+        android:backupAgent=".backup.CustomBackupAgent"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:supportsRtl="false"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity
-            android:name=".activities.ConversationsActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTop">
 
+        <!-- ACTIVITIES -->
+
+        <activity
+            android:name=".conversations.ConversationsActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ConversationActivity"
-            android:parentActivityName=".activities.ConversationsActivity" />
+            android:name=".conversations.ConversationsArchivedActivity"
+            android:parentActivityName=".conversations.ConversationsActivity" />
         <activity
-            android:name=".activities.ConversationQuickReplyActivity"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
-            android:theme="@style/TranslucentTheme" />
+            android:name=".conversation.ConversationActivity"
+            android:parentActivityName=".conversations.ConversationsActivity">
+            <intent-filter
+                android:autoVerify="true"
+                tools:targetApi="m">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="conversation"
+                    android:scheme="voipmssms" />
+            </intent-filter>
+            <intent-filter
+                android:autoVerify="true"
+                tools:targetApi="m">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="message"
+                    android:scheme="voipmssms" />
+            </intent-filter>
+        </activity>
         <activity
-            android:name=".activities.NewConversationActivity"
+            android:name=".newconversation.NewConversationActivity"
             android:noHistory="true"
-            android:parentActivityName=".activities.ConversationsActivity">
+            android:parentActivityName=".conversations.ConversationsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -83,47 +108,48 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.PreferencesActivity"
+            android:name=".preferences.PreferencesActivity"
             android:label="@string/preferences_name"
-            android:parentActivityName=".activities.ConversationsActivity" />
-        <activity
-            android:name=".activities.EditDatabaseActivity"
-            android:label="Edit Database"
-            android:parentActivityName=".activities.PreferencesActivity" />
-        <activity
-            android:name=".activities.HelpActivity"
-            android:label="@string/help_name"
-            android:parentActivityName=".activities.ConversationsActivity" />
-        <activity
-            android:name=".activities.CreditsActivity"
-            android:label="@string/credits_name"
-            android:parentActivityName=".activities.ConversationsActivity" />
+            android:parentActivityName=".conversations.ConversationsActivity" />
 
-        <receiver android:name=".receivers.MarkAsReadReceiver" />
-        <receiver android:name=".receivers.BootReceiver">
+        <!-- BROADCAST RECEIVERS -->
+
+        <receiver android:name=".sms.SyncBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.SynchronizationIntervalReceiver" />
+        <receiver android:name=".sms.SyncIntervalReceiver" />
+
+        <!-- SERVICES -->
 
         <service
             android:name=".notifications.FcmListenerService"
-            android:exported="false">
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <service
-            android:name=".notifications.FcmInstanceIdListenerService"
-            android:exported="false">
+            android:name=".notifications.FcmInstanceIdService"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+        <service android:name=".notifications.NotificationsRegistrationService" />
+        <service
+            android:name=".sms.AppIndexingService"
+            android:exported="true"
+            android:permission="com.google.android.gms.permission.APPINDEXING">
+            <intent-filter>
+                <action android:name="com.google.firebase.appindexing.UPDATE_INDEX" />
+            </intent-filter>
+        </service>
+        <service android:name=".sms.MarkReadService" />
+        <service android:name=".sms.RetrieveDidsService" />
+        <service android:name=".sms.SendMessageService" />
+        <service android:name=".sms.SyncService" />
     </application>
 </manifest>

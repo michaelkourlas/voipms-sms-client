@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2016 Michael Kourlas
+  ~ Copyright (C) 2015-2017 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
   -->
 
 <resources>
-
     <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
@@ -32,42 +31,34 @@
         <!-- Force ActionMode to appear over ActionBar -->
         <item name="windowActionModeOverlay">true</item>
 
+        <item name="android:dialogTheme">@style/DialogTheme</item>
+        <item name="dialogTheme">@style/DialogTheme</item>
+
+        <item name="android:alertDialogTheme">@style/DialogTheme</item>
         <item name="alertDialogTheme">@style/DialogTheme</item>
     </style>
 
-    <!-- Style UI elements for dialogs -->
+    <style name="ScrollerTheme" parent="@android:style/TextAppearance">
+        <item name="android:textSize">@dimen/headline</item>
+        <item name="android:textColor">@android:color/primary_text_dark</item>
+    </style>
+
     <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog">
-        <item name="android:textColor">@android:color/black</item>
         <item name="colorAccent">@color/accent</item>
+
         <item name="android:windowMinWidthMajor">
             @android:dimen/dialog_min_width_major
         </item>
-        <item name="windowMinWidthMajor">@android:dimen/dialog_min_width_major
+        <item name="windowMinWidthMajor">
+            @android:dimen/dialog_min_width_major
         </item>
+
         <item name="android:windowMinWidthMinor">
             @android:dimen/dialog_min_width_minor
         </item>
-        <item name="windowMinWidthMinor">@android:dimen/dialog_min_width_minor
+        <item name="windowMinWidthMinor">
+            @android:dimen/dialog_min_width_minor
         </item>
-    </style>
-
-    <style name="TranslucentTheme" parent="AppTheme">
-        <item name="colorPrimaryDark">@color/translucent_black</item>
-
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">
-            @android:style/Animation.Translucent
-        </item>
-
-        <item name="android:actionBarStyle">@style/TranslucentActionBar</item>
-        <item name="actionBarStyle">@style/TranslucentActionBar</item>
-    </style>
-
-    <style name="TranslucentActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid">
-        <item name="android:background">@color/translucent_black</item>
-        <item name="background">@color/translucent_black</item>
     </style>
 
     <style name="ToolbarTitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">

@@ -3,11 +3,11 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.3'
     }
 }
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
 
 repositories {
     jcenter()
@@ -21,7 +21,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 25
         versionCode 114
-        versionName "0.4.7"
+        versionName "0.5.0"
         multiDexEnabled true
     }
     compileOptions {
@@ -33,20 +33,25 @@ android {
         javaMaxHeapSize "4g"
     }
     sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
+        main.java.srcDirs += "src/main/kotlin"
     }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.1.1'
-    compile 'com.android.support:design:25.1.1'
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:recyclerview-v7:25.1.1'
-    compile 'com.android.support:support-v4:25.1.1'
-    compile 'com.google.android.gms:play-services:10.0.1'
-    compile 'com.google.firebase:firebase-core:10.0.1'
-    compile 'com.google.firebase:firebase-messaging:10.0.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    compile "com.android.support:appcompat-v7:25.3.1"
+    compile "com.android.support:design:25.3.1"
+    compile "com.android.support:multidex:1.0.1"
+    compile "com.android.support:recyclerview-v7:25.3.1"
+    compile "com.android.support:support-v4:25.3.1"
+
+    compile "com.google.firebase:firebase-appindexing:10.2.1"
+    compile "com.google.firebase:firebase-core:10.2.1"
+    compile "com.google.firebase:firebase-crash:10.2.1"
+    compile "com.google.firebase:firebase-messaging:10.2.1"
+
+    compile 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
 }
 
-apply plugin: 'com.google.gms.google-services'
+apply plugin: "com.google.gms.google-services"

@@ -1,6 +1,18 @@
-## 0.4.7 ##
+## 0.5.0 ##
 
-* Bug fixes
+* Partial re-write
+* Language change from Java to Kotlin
+* Multiple DID support
+* Conversation archival support
+* Notification inline reply support
+* Android Wear support
+* Firebase app indexing support
+* Support for changing connection and read timeouts
+* Simplified push notification system
+* Firebase app indexing support
+* Miscellaneous UI improvements
+* Bug fixes and performance improvements
+* Removal of some synchronization features
 
 ## 0.4.6 ##
 

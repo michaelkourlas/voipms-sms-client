@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ VoIP.ms SMS
+  ~ Copyright (C) 2015-2017 Michael Kourlas
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="horizontal"
+    android:padding="@dimen/margin">
+
+    <LinearLayout
+        android:layout_width="@dimen/contact_badge"
+        android:layout_height="@dimen/contact_badge"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/margin"
+        android:layout_marginRight="@dimen/margin"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/letter"
+            android:layout_width="@dimen/contact_badge"
+            android:layout_height="@dimen/contact_badge"
+            android:gravity="center"
+            android:textColor="@color/primary"
+            android:textSize="@dimen/subheading"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <QuickContactBadge
+            android:id="@+id/photo"
+            android:layout_width="@dimen/contact_badge"
+            android:layout_height="@dimen/contact_badge"
+            android:layout_gravity="center_vertical"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/photo_letter"
+            android:layout_width="@dimen/contact_badge"
+            android:layout_height="@dimen/contact_badge"
+            android:gravity="center"
+            android:textColor="@color/contact_badge_letter_white"
+            android:textSize="@dimen/headline" />
+
+    </FrameLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/margin"
+        android:layout_marginStart="@dimen/margin"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/contact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="@dimen/subheading" />
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/phone_number"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="@dimen/text" />
+
+            <TextView
+                android:id="@+id/phone_number_type"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_toEndOf="@+id/phone_number"
+                android:layout_toRightOf="@+id/phone_number"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:maxLines="1"
+                android:textSize="@dimen/text" />
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>

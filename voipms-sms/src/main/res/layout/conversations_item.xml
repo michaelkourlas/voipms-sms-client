@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2016 Michael Kourlas
+  ~ Copyright (C) 2015-2017 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,23 +16,37 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="?attr/selectableItemBackground"
-              android:orientation="horizontal"
-              android:padding="16dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="horizontal"
+    android:padding="@dimen/margin">
 
     <ViewSwitcher
         android:id="@+id/view_switcher"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="@dimen/contact_badge"
+        android:layout_height="@dimen/contact_badge"
         android:layout_gravity="center_vertical">
 
-        <QuickContactBadge
-            android:id="@+id/photo"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop" />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <QuickContactBadge
+                android:id="@+id/photo"
+                android:layout_width="@dimen/contact_badge"
+                android:layout_height="@dimen/contact_badge"
+                android:layout_gravity="center_vertical"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/photo_letter"
+                android:layout_width="@dimen/contact_badge"
+                android:layout_height="@dimen/contact_badge"
+                android:gravity="center"
+                android:textColor="@color/contact_badge_letter_white"
+                android:textSize="@dimen/headline" />
+        </FrameLayout>
 
         <ImageView
             android:id="@+id/conversations_photo_checked"
@@ -41,38 +55,61 @@
             android:background="@color/primary"
             android:contentDescription="@string/conversations_checked_content_description"
             android:scaleType="center"
-            android:src="@drawable/ic_check_white_36dp" />
+            android:src="@drawable/ic_check_white_24dp" />
     </ViewSwitcher>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_marginLeft="15dp"
-                  android:layout_marginStart="15dp"
-                  android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin"
+        android:layout_marginStart="@dimen/margin"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/contact"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:singleLine="true"
-            android:textSize="16sp" />
+            android:maxLines="1"
+            android:textSize="@dimen/subheading" />
 
         <TextView
             android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:singleLine="true"
-            android:textSize="14sp" />
+            android:maxLines="1"
+            android:textSize="@dimen/text" />
 
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textSize="14sp" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="@dimen/text" />
+
+            <TextView
+                android:id="@+id/did"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/date"
+                android:layout_toRightOf="@+id/date"
+                android:gravity="end"
+                android:maxLines="1"
+                android:textSize="@dimen/text" />
+        </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

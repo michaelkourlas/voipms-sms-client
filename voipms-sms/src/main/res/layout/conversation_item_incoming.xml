@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ VoIP.ms SMS
+  ~ Copyright (C) 2015-2017 Michael Kourlas
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="0dp"
+    android:layout_marginEnd="@dimen/margin"
+    android:layout_marginLeft="@dimen/margin"
+    android:layout_marginRight="@dimen/margin"
+    android:layout_marginStart="@dimen/margin"
+    android:layout_marginTop="@dimen/conversation_item_margin_top_primary"
+    android:descendantFocusability="blocksDescendants">
+
+    <FrameLayout
+        android:id="@+id/photo_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_gravity="bottom"
+        android:layout_marginEnd="@dimen/margin"
+        android:layout_marginRight="@dimen/margin">
+
+        <QuickContactBadge
+            android:id="@+id/photo"
+            android:layout_width="@dimen/contact_badge"
+            android:layout_height="@dimen/contact_badge"
+            android:layout_gravity="center_vertical"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/photo_letter"
+            android:layout_width="@dimen/contact_badge"
+            android:layout_height="@dimen/contact_badge"
+            android:gravity="center"
+            android:textColor="@color/contact_badge_letter_white"
+            android:textSize="@dimen/headline" />
+    </FrameLayout>
+
+    <View
+        android:id="@+id/placeholder"
+        android:layout_width="@dimen/contact_badge"
+        android:layout_height="@dimen/contact_badge"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="@dimen/margin"
+        android:layout_marginStart="@dimen/margin" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/photo_layout"
+        android:layout_toLeftOf="@id/placeholder"
+        android:layout_toRightOf="@id/photo_layout"
+        android:layout_toStartOf="@id/placeholder">
+
+        <LinearLayout
+            android:id="@+id/sms_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/primary"
+            android:minHeight="@dimen/contact_badge"
+            android:orientation="vertical"
+            android:padding="@dimen/sms_container_margin"
+            tools:ignore="UselessParent">
+
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="all"
+                android:textColor="@android:color/white"
+                android:textColorLink="@android:color/white"
+                android:textSize="@dimen/subheading" />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/conversation_text_spacing"
+                android:textColor="@color/message_translucent_white"
+                android:textSize="@dimen/caption" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
