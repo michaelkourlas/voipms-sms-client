@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2016 Michael Kourlas
+  ~ Copyright (C) 2015-2017 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/search_button"
         android:icon="@drawable/ic_search_white_24dp"
@@ -24,12 +24,24 @@
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
     <item
+        android:id="@+id/archived_button"
+        android:title="@string/conversations_action_archived"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/preferences_button"
         android:title="@string/conversations_action_settings"
         app:showAsAction="never" />
     <item
         android:id="@+id/help_button"
         android:title="@string/conversations_action_help"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/privacy_button"
+        android:title="@string/conversations_action_privacy"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/license_button"
+        android:title="@string/conversations_action_license"
         app:showAsAction="never" />
     <item
         android:id="@+id/credits_button"

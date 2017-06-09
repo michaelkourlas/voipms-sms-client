@@ -1,9 +1,11 @@
 # JetBrains
 .idea/
+*.iml
 
 # Android
 *.apk
 .gradle/
+captures/
 build/
 release/
 local.properties

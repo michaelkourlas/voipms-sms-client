@@ -3,47 +3,55 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.0-rc2'
+        classpath 'com.android.tools.build:gradle:2.3.3'
     }
 }
-apply plugin: 'com.android.application'
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
 
 repositories {
     jcenter()
 }
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.3"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
         minSdkVersion 16
-        targetSdkVersion 24
-        versionCode 113
-        versionName "0.4.6-fdroid"
-
-        jackOptions {
-            enabled true
-        }
-
+        targetSdkVersion 25
+        versionCode 114
+        versionName "0.5.0"
         multiDexEnabled true
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
     dexOptions {
         preDexLibraries true
         javaMaxHeapSize "4g"
     }
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+    }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:design:24.2.1'
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:recyclerview-v7:24.2.1'
-    compile 'com.android.support:support-v4:24.2.1'
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    compile "com.android.support:appcompat-v7:25.3.1"
+    compile "com.android.support:design:25.3.1"
+    compile "com.android.support:multidex:1.0.1"
+    compile "com.android.support:recyclerview-v7:25.3.1"
+    compile "com.android.support:support-v4:25.3.1"
+
+    compile "com.google.firebase:firebase-appindexing:10.2.1"
+    compile "com.google.firebase:firebase-core:10.2.1"
+    compile "com.google.firebase:firebase-crash:10.2.1"
+    compile "com.google.firebase:firebase-messaging:10.2.1"
+
+    compile 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
 }
 
-apply plugin: 'com.google.gms.google-services'
+apply plugin: "com.google.gms.google-services"

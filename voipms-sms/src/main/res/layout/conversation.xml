@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2016 Michael Kourlas
+  ~ Copyright (C) 2015-2017 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
   -->
 
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                 android:id="@+id/coordinator_layout"
-                                                 android:layout_width="match_parent"
-                                                 android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coordinator_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,124 +30,103 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:layout_gravity="top"
             android:background="@color/primary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:titleTextAppearance="@style/ToolbarTitle" />
 
-        <FrameLayout
+        <RelativeLayout
+            android:id="@+id/conversation_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
             <TextView
                 android:id="@+id/empty_text"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_height="match_parent"
                 android:gravity="center" />
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:orientation="vertical">
+                android:layout_alignBottom="@id/empty_text"
+                android:layout_alignTop="@id/empty_text">
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/list"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1.0"
+                    android:layout_height="match_parent"
                     android:clipToPadding="false"
                     android:divider="@null"
                     android:dividerHeight="0dp"
-                    android:paddingBottom="10dp"
-                    android:scrollbars="vertical" />
+                    android:paddingBottom="@dimen/margin" />
 
-                <RelativeLayout
-                    android:id="@+id/message_section"
-                    android:layout_width="match_parent"
+                <com.futuremind.recyclerviewfastscroll.FastScroller
+                    android:id="@+id/fastscroll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:orientation="vertical"
+                    app:fastscroll__bubbleColor="@color/primary"
+                    app:fastscroll__bubbleTextAppearance="@style/ScrollerTheme"
+                    app:fastscroll__handleColor="@color/primary" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/message_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@android:color/white"
+            android:focusableInTouchMode="true"
+            android:padding="@dimen/margin">
+
+            <EditText
+                android:id="@+id/message_edit_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:hint="@string/conversation_text_hint"
+                android:inputType="textMultiLine|textCapSentences|textAutoCorrect|textShortMessage"
+                android:isScrollContainer="true"
+                android:maxLines="@integer/message_text_height"
+                android:textSize="@dimen/subheading" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="@dimen/button_margin"
+                android:layout_marginStart="@dimen/button_margin"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/chars_remaining_text"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:background="@color/background"
-                    android:focusableInTouchMode="true"
-                    android:paddingBottom="10dp"
-                    android:paddingEnd="15dp"
-                    android:paddingStart="15dp"
-                    android:paddingTop="10dp">
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
+                    android:textSize="@dimen/caption"
+                    android:visibility="gone" />
 
-                    <ProgressBar
-                        android:id="@+id/progress_bar"
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginRight="10dp"
-                        android:indeterminateOnly="true"
-                        android:visibility="invisible" />
-
-                    <ViewSwitcher
-                        android:id="@+id/view_switcher"
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentRight="true"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginStart="10dp"
-                        android:inAnimation="@android:anim/fade_in"
-                        android:outAnimation="@android:anim/fade_out">
-
-                        <QuickContactBadge
-                            android:id="@+id/photo"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop" />
-
-                        <ImageButton
-                            android:id="@+id/send_button"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@drawable/button"
-                            android:contentDescription="@string/conversation_action_send"
-                            android:scaleType="center"
-                            android:src="@drawable/ic_send_white_18dp" />
-                    </ViewSwitcher>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_toEndOf="@id/progress_bar"
-                        android:layout_toLeftOf="@id/view_switcher"
-                        android:layout_toRightOf="@id/progress_bar"
-                        android:layout_toStartOf="@id/view_switcher"
-                        android:orientation="vertical">
-
-                        <EditText
-                            android:id="@+id/message_edit_text"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@android:color/white"
-                            android:gravity="start"
-                            android:hint="@string/conversation_text_hint"
-                            android:inputType="textMultiLine|textCapSentences|textAutoCorrect|textShortMessage"
-                            android:isScrollContainer="true"
-                            android:maxLines="4"
-                            android:padding="10dp"
-                            android:textSize="16sp" />
-
-                        <TextView
-                            android:id="@+id/chars_remaining_text"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="end"
-                            android:textSize="12sp"
-                            android:visibility="gone" />
-                    </LinearLayout>
-                </RelativeLayout>
+                <ImageButton
+                    android:id="@+id/send_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/conversation_button_send"
+                    android:contentDescription="@string/conversation_action_send"
+                    android:padding="@dimen/button_margin"
+                    android:src="@drawable/ic_send_white_24dp"
+                    android:tint="@color/primary" />
             </LinearLayout>
-        </FrameLayout>
+        </LinearLayout>
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

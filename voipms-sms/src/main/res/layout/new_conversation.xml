@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2016 Michael Kourlas
+  ~ Copyright (C) 2015-2017 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -30,10 +30,38 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:titleTextAppearance="@style/ToolbarTitle" />
 
-    <ListView
-        android:id="@+id/list"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:divider="@null"
-        android:dividerHeight="0dp" />
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/empty_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:divider="@null"
+                android:dividerHeight="0dp" />
+
+            <com.futuremind.recyclerviewfastscroll.FastScroller
+                android:id="@+id/fastscroll"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:orientation="vertical"
+                app:fastscroll__bubbleColor="@color/primary"
+                app:fastscroll__bubbleTextAppearance="@style/ScrollerTheme"
+                app:fastscroll__handleColor="@color/primary" />
+        </RelativeLayout>
+    </FrameLayout>
 </LinearLayout>

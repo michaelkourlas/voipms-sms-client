@@ -2,34 +2,43 @@
 
 ## Overview ##
 
-VoIP.ms SMS is an Android application that sends and receives SMS messages 
-using a VoIP.ms account.
+VoIP.ms SMS is an Android messaging app for VoIP.ms that seeks to replicate the
+aesthetic of [Android Messages](https://play.google.com/store/apps/details?id=com.google.android.apps.messaging).
+
+## Rationale ##
+
+A number of people use VoIP.ms as a cheaper alternative to subscribing to a
+voice plan for their mobile devices.
+
+Unfortunately, this can make sending text messages rather difficult, as the
+[VoIP.ms SMS Message Center](https://voip.ms/m/sms.php) is clearly built as a 
+diagnostic tool for use in desktop browsers, not as an easy way to send and
+receive messages on a mobile device. 
+
+VoIP.ms does provide a [mobile version](https://sms.voip.ms/) of this interface 
+with an improved UI, but it still lacks important features that are only 
+possible with a dedicated app.
 
 ## Features ##
 
-Many people use VoIP.ms as an alternative to a voice plan on mobile devices. 
-Unfortunately, this can make texting rather difficult, as the VoIP.ms SMS 
-Message Center is built for desktop browsers and is difficult to navigate and 
-use on a mobile device. While VoIP.ms does provide a [mobile version](https://sms.voip.ms/) 
-of this interface, they do not provide a dedicated mobile application, 
-depriving users of important features like push notifications and contacts
-synchronization.
-
-VoIP.ms SMS is an Android application that fixes this problem by allowing you 
-to send and receive SMS messages using your VoIP.ms account. The application's 
-features include:
-
-* The ability to send, receive, and delete texts;
-* Conversation-based organization (all texts to and from a particular phone 
-  number are grouped together);
-* Synchronization with device contacts, including the contact's name and photo; 
-  and
-* Push notifications when new texts are received using [VoIP.ms SMS Server](https://github.com/michaelkourlas/voipms-sms-server).
+* Clean material design aesthetic based on that of Android Messages, Google's 
+  standard messaging app for Android
+* Push notifications
+* Synchronization with device contacts
+* Message search
+* Comprehensive support for synchronization with VoIP.ms
+* Completely free
 
 ## Installation ##
 
-The application is available from the [Google Play Store](https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms) 
-and from the [Releases section](https://github.com/michaelkourlas/voipms-sms-client/releases) 
+The application is available on the [Google Play Store](https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms).
+
+The standard version of the application uses closed-source Firebase libraries 
+to support push notifications and facilitate crash reporting and analytics, 
+among other purposes. A version of the application that is completely open 
+source is available from [F-Droid](https://f-droid.org/repository/browse/?fdid=net.kourlas.voipms_sms).
+
+Both versions are available from the [Releases section](https://github.com/michaelkourlas/voipms-sms-client/releases) 
 of the GitHub repository.
 
 ## License ##

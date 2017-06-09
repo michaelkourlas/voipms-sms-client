@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2016 Michael Kourlas
+  ~ Copyright (C) 2015-2017 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,11 +16,102 @@
   -->
 
 <resources>
+    <!-- PREFERENCES -->
+
+    <!-- Account -->
+    <string name="preferences_account_category_name">Account</string>
+    <string name="preferences_account_email_key" translatable="false">api_email</string>
+    <string name="preferences_account_email_title">Email address</string>
+    <string name="preferences_account_password_key" translatable="false">api_password</string>
+    <string name="preferences_account_password_title">API password</string>
+    <string name="preferences_account_password_placeholder" translatable="false">********</string>
+    <string name="preferences_account_did_key" translatable="false">did</string>
+    <string name="preferences_account_dids_key" translatable="false">dids</string>
+    <string name="preferences_account_dids_title">DIDs (phone numbers)</string>
+    <string name="preferences_account_dids_status">Retrieving DIDs…</string>
+    <string name="preferences_account_dids_dialog_title">Select DIDs</string>
+    <string name="preferences_account_dids_error_network">Failed to retrieve DIDs. No network connection is available.</string>
+    <string name="preferences_account_dids_error_api_request">Failed to retrieve DIDs. A request to the VoIP.ms API failed.</string>
+    <string name="preferences_account_dids_error_api_parse">Failed to retrieve DIDs. The VoIP.ms API response could not be parsed.</string>
+    <string name="preferences_account_dids_error_api_error">Failed to retrieve DIDs. The VoIP.ms API returned the following error: {error}.</string>
+    <string name="preferences_account_dids_error_email">You must set your VoIP.ms portal email address and API password before selecting a DID.</string>
+    <string name="preferences_account_dids_error_password">You must set your VoIP.ms portal email address and API password before selecting a DID.</string>
+    <string name="preferences_account_dids_error_no_dids">There are no DIDs in your VoIP.ms account.</string>
+    <string name="preferences_account_dids_error_unknown">Failed to retrieve DIDs. An unknown error occurred.</string>
+
+    <!-- Synchronization -->
+    <string name="preferences_sync_interval_key" translatable="false">sync_interval</string>
+    <string name="preferences_sync_interval_title">Synchronization interval</string>
+    <string name="preferences_sync_interval_default_value" translatable="false">0</string>
+    <string name="preferences_sync_start_date_key" translatable="false">start_date</string>
+    <string name="preferences_sync_start_date_title">Synchronization start date</string>
+    <string name="preferences_sync_retrieve_only_recent_messages_key" translatable="false">sync_retrieve_only_recent_messages</string>
+    <string name="preferences_sync_retrieve_only_recent_messages_title">Retrieve only recent messages</string>
+    <string name="preferences_sync_retrieve_only_recent_messages_summary">Retrieve only messages from VoIP.ms dated after the date of the most recent message stored locally</string>
+    <string name="preferences_sync_retrieve_only_recent_messages_default_value" translatable="false">false</string>
+    <string name="preferences_sync_retrieve_deleted_messages_key" translatable="false">sync_retrieve_deleted_messages</string>
+    <string name="preferences_sync_retrieve_deleted_messages_title">Retrieve deleted messages</string>
+    <string name="preferences_sync_retrieve_deleted_messages_summary">Retrieve messages from VoIP.ms that were deleted locally</string>
+    <string name="preferences_sync_retrieve_deleted_messages_default_value" translatable="false">false</string>
+
+    <!-- Notifications -->
+    <string name="preferences_notifications_category_name">Notifications</string>
+    <string name="preferences_notifications_enable_key" translatable="false">sms_notification_basic</string>
+    <string name="preferences_notifications_enable_title">Notifications</string>
+    <string name="preferences_notifications_enable_summary">Show notifications when new messages are received</string>
+    <string name="preferences_notifications_enable_default_value" translatable="false">true</string>
+    <string name="preferences_notifications_sound_key" translatable="false">sms_notification_ringtone</string>
+    <string name="preferences_notifications_sound_title">Sound</string>
+    <string name="preferences_notifications_sound_default_value" translatable="false">content://settings/system/notification_sound</string>
+    <string name="preferences_notifications_vibrate_key" translatable="false">sms_notification_vibrate</string>
+    <string name="preferences_notifications_vibrate_title">Vibrate</string>
+    <string name="preferences_notifications_vibrate_default_value" translatable="false">true</string>
+
+    <!-- Network -->
+    <string name="preferences_network_category_name">Network</string>
+    <string name="preferences_network_connect_timeout_key" translatable="false">connect_timeout</string>
+    <string name="preferences_network_connect_timeout_title">Connect timeout</string>
+    <string name="preferences_network_connect_timeout_default_value" translatable="false">15</string>
+    <string name="preferences_network_read_timeout_key" translatable="false">read_timeout</string>
+    <string name="preferences_network_read_timeout_title">Read timeout</string>
+    <string name="preferences_network_read_timeout_default_value" translatable="false">15</string>
+
+    <!-- Database -->
+    <string name="preferences_database_category_name">Database</string>
+    <string name="preferences_database_import_title">Import database</string>
+    <string name="preferences_database_import_summary">Import raw SQLite database from a file</string>
+    <string name="preferences_database_import_confirm_title">Import database?</string>
+    <string name="preferences_database_import_confirm_text">Database will be imported from \'%1$s\'</string>
+    <string name="preferences_database_import_fail">Failed to import database</string>
+    <string name="preferences_database_export_title">Export database</string>
+    <string name="preferences_database_export_summary">Export raw SQLite database to a file</string>
+    <string name="preferences_database_export_confirm_title">Export database?</string>
+    <string name="preferences_database_export_confirm_text">Database will be exported to \'%1$s\'</string>
+    <string name="preferences_database_export_fail">Failed to export database</string>
+    <string name="preferences_database_clean_up_title">Clean up database</string>
+    <string name="preferences_database_clean_up_summary">Remove outdated information from database</string>
+    <string name="preferences_database_clean_up_deleted_messages">Metadata associated with deleted messages</string>
+    <string name="preferences_database_clean_up_removed_dids">Messages and metadata associated with removed DIDs</string>
+    <string name="preferences_database_delete_title">Delete database</string>
+    <string name="preferences_database_delete_summary">Delete all messages and associated metadata</string>
+    <string name="preferences_database_delete_confirm_title">Delete database?</string>
+    <string name="preferences_database_delete_confirm_message">This action cannot be undone.</string>
+
+    <!-- Uncategorized -->
+    <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>
+    <string name="preferences_perm_denied_external_storage">External storage permission required to select certain ringtones and to import or export database</string>
+    <string name="preferences_setup_completed_for_version_key" translatable="false">setup_completed_for_version</string>
+    <string name="preferences_setup_completed_for_version_default_value" translatable="false">0</string>
+
+    <!-- ACTIVITIES -->
+
     <!-- ConversationActivity -->
     <string name="conversation_action_call">Make a call</string>
     <string name="conversation_action_resend">Resend</string>
     <string name="conversation_action_search">Search</string>
     <string name="conversation_action_delete">Delete</string>
+    <string name="conversation_action_archive">Archive</string>
+    <string name="conversation_action_unarchive">Unarchive</string>
     <string name="conversation_action_send">Send</string>
     <string name="conversation_action_copy">Copy text</string>
     <string name="conversation_action_share">Share</string>
@@ -28,39 +119,44 @@
     <string name="conversation_delete_confirm_title">Delete messages?</string>
     <string name="conversation_delete_confirm_message">This action cannot be undone.</string>
     <string name="conversation_info_title">Message details</string>
-    <string name="conversation_info_id">ID:</string>
-    <string name="conversation_info_to">To:</string>
-    <string name="conversation_info_from">From:</string>
-    <string name="conversation_info_date">Date:</string>
+    <string name="conversation_info_id">ID: %1$d</string>
+    <string name="conversation_info_to">To: %1$s</string>
+    <string name="conversation_info_from">From: %1$s</string>
+    <string name="conversation_info_date">Date: %1$s</string>
     <string name="conversation_no_messages">There are no messages in this conversation.</string>
     <string name="conversation_no_results">No results found for \'%1$s\'</string>
     <string name="conversation_text_hint">Send message</string>
     <string name="conversation_message_sending">Sending…</string>
     <string name="conversation_message_not_sent">Not sent. Touch to try again.</string>
     <string name="conversation_message_not_sent_selected">Resend or delete</string>
-    <string name="conversation_send_error_network">Failed to send message. No network connection is available. (300)</string>
-    <string name="conversation_send_error_api_request">Failed to send message. A request to the VoIP.ms API failed. (301)</string>
-    <string name="conversation_send_error_api_parse">Failed to send message. The VoIP.ms API response could not be parsed. (302)</string>
-    <string name="conversation_send_error_api_error">Failed to send message. The VoIP.ms API returned an error: {error}. (303)</string>
-    <string name="conversation_extra_contact" translatable="false">contact</string>
     <string name="conversation_extra_message_text" translatable="false">messageText</string>
     <string name="conversation_extra_focus" translatable="false">focus</string>
     <string name="conversation_perm_denied_call">Phone permission required to make calls</string>
-    <string name="conversation_char_rem">%1$s / %2$s</string>
+    <string name="conversation_char_rem">%1$d / %2$d</string>
 
-    <!-- ConversationQuickReplyActivity -->
-    <string name="conversation_quick_reply_reply_to">Reply to %1$s</string>
-    <string name="conversation_quick_reply_open_sms">Open VoIP.ms SMS</string>
+    <!-- NewConversationActivity -->
+    <string name="new_conversation_action_keyboard">Show keyboard</string>
+    <string name="new_conversation_action_dialpad">Show dialpad</string>
+    <string name="new_conversation_text_hint">To…</string>
+    <string name="new_conversation_manual_entry">Manual entry</string>
+    <string name="new_conversation_no_contacts">You have no contacts with phone numbers.</string>
+    <string name="new_conversation_no_results">No results found for \'%1$s\'</string>
+    <string name="new_conversation_multiple">Multiple</string>
 
     <!-- ConversationsActivity -->
     <string name="conversations_action_search">Search</string>
+    <string name="conversations_action_archived">Archived</string>
     <string name="conversations_action_settings">Settings</string>
     <string name="conversations_action_help">Help</string>
+    <string name="conversations_action_privacy">Privacy</string>
+    <string name="conversations_action_license">License</string>
     <string name="conversations_action_credits">Credits</string>
     <string name="conversations_action_donate">Donate</string>
-    <string name="conversations_action_delete">Delete</string>
+    <string name="conversations_action_archive">Archive</string>
+    <string name="conversations_action_unarchive">Unarchive</string>
     <string name="conversations_action_mark_read">Mark read</string>
     <string name="conversations_action_mark_unread">Mark unread</string>
+    <string name="conversations_action_delete">Delete</string>
     <string name="conversations_action_add">Add</string>
     <string name="conversations_delete_confirm_title">Delete this conversation?</string>
     <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
@@ -70,111 +166,110 @@
     <string name="conversations_message_sending">Sending…</string>
     <string name="conversations_message_not_sent">Not sent.</string>
     <string name="conversations_message_draft">Draft</string>
-    <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and an SMS-enabled DID using the Settings option in the application\'s main menu. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings.\n\nYou may also wish to enable push notifications. For more information, see Help.</string>
+    <string name="conversations_first_run_dialog_title">Important</string>
+    <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and one or more SMS-enabled DIDs using the Settings option in the application\'s main menu. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings.\n\nYou may also wish to enable push notifications for new messages. For more information, see Help.</string>
     <string name="conversations_checked_content_description">Checked</string>
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>
-    <string name="conversations_donate_fdroid">You can donate to the developer by sending a PayPal payment to michael@kourlas.net. Thank you!</string>
 
-    <!-- NewConversationActivity -->
-    <string name="new_conversation_action_keyboard">Show keyboard</string>
-    <string name="new_conversation_action_dialpad">Show dialpad</string>
-    <string name="new_conversation_text_hint">To</string>
-    <string name="new_conversation_manual_entry">Manual entry</string>
+    <!-- ConversationsArchivedActivity -->
+    <string name="conversations_archived_name">Archived</string>
+    <string name="conversations_archived_no_messages">You have no archived messages.</string>
 
-    <!-- HelpActivity -->
-    <string name="help_name">Help</string>
-    <string name="help_url" translatable="false">file:///android_asset/help.html</string>
+    <!-- ConversationActivity -->
+    <string name="conversation_did" translatable="false">did</string>
+    <string name="conversation_contact" translatable="false">contact</string>
 
-    <!-- CreditsActivity -->
-    <string name="credits_name">Credits</string>
-    <string name="credits_url" translatable="false">file:///android_asset/credits.html</string>
+    <!-- PreferencesActivity -->
+    <string name="preferences_name">Settings</string>
 
-    <!-- Billing -->
-    <string name="billing_pid_donation" translatable="false">donation</string>
-    <string name="billing_failure">Failed to open the in-app purchase dialog. Please try again later. (500)</string>
+    <!-- SERVICES -->
 
-    <!-- Database -->
-    <string name="database_sync_error_network">Database synchronization failed. No network connection is available. (100)</string>
-    <string name="database_sync_error_api_request">Database synchronization failed. A request to the VoIP.ms API failed. (101)</string>
-    <string name="database_sync_error_api_parse">Database synchronization failed. The VoIP.ms API response could not be parsed. (102)</string>
-    <string name="database_sync_error_api_error">Database synchronization failed. The VoIP.ms API returned an error: {error}. (103)</string>
+    <!-- MarkReadService -->
+    <string name="mark_read_action" translatable="false">mark_read_action</string>
+    <string name="mark_read_did" translatable="false">mark_read_did</string>
+    <string name="mark_read_contact" translatable="false">mark_read_contact</string>
+
+    <!-- PushNotificationsRegistrationService -->
+    <string name="push_notifications_reg_action" translatable="false">push_notifications_reg_action</string>
+    <string name="push_notifications_progress">Registering for notifications…</string>
+    <string name="push_notifications_fail_register">Failed to register for notifications for the following DIDs: {dids}. You must complete this step manually in order to use notifications.\n\nTo configure the URL callback, you must access the SMS settings for each of your DIDs on the VoIP.ms portal. For each DID, enable the \"SMS URL Callback\" feature and enter the following URL into the neighbouring field:\n\nhttps://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}</string>
+    <string name="push_notifications_fail_google_play">Failed to register for notifications because Google Play Services is not available.</string>
+    <string name="push_notifications_fail_unknown">Failed to register for notifications due to an unknown error.</string>
+
+    <!-- RetrieveDidsService -->
+    <string name="retrieve_dids_action" translatable="false">retrieve_dids_action</string>
+
+    <!-- SendMessageService -->
+    <string name="send_message_action" translatable="false">send_message_action</string>
+    <string name="send_message_did" translatable="false">send_message_did</string>
+    <string name="send_message_contact" translatable="false">send_message_contact</string>
+    <string name="send_message_text" translatable="false">send_message_text</string>
+    <string name="send_message_database_id" translatable="false">send_message_database_id</string>
+    <string name="send_message_error_network">Failed to send message. No network connection is available.</string>
+    <string name="send_message_error_api_request">Failed to send message. A request to the VoIP.ms API failed.</string>
+    <string name="send_message_error_api_parse">Failed to send message. The VoIP.ms API response could not be parsed.</string>
+    <string name="send_message_error_api_error">Failed to send message. The VoIP.ms API returned an error: {error}.</string>
+    <string name="send_message_error_database">Failed to send message. An unknown database error occurred.</string>
+    <string name="send_message_error_unknown">Failed to send message. An unknown error occurred.</string>
+
+    <!-- SyncService -->
+    <string name="sync_action" translatable="false">sync_action</string>
+    <string name="sync_force_recent" translatable="false">sync_force_recent</string>
+    <string name="sync_error_network">Synchronization with VoIP.ms failed. No network connection is available.</string>
+    <string name="sync_error_api_request">Synchronization with VoIP.ms failed. A request to the VoIP.ms API failed.</string>
+    <string name="sync_error_api_parse">Synchronization with VoIP.ms failed. The VoIP.ms API response could not be parsed.</string>
+    <string name="sync_error_unknown">Synchronization with VoIP.ms failed. An unknown error occurred.</string>
+
+    <!-- BROADCAST RECEIVERS -->
+
+    <!-- SyncIntervalReceiver -->
+    <string name="sync_interval_action" translatable="false">sync_interval_action</string>
+    <string name="sync_interval_force_recent" translatable="false">sync_interval_force_recent</string>
+
+    <!-- Sending message receiver -->
+    <string name="sending_message_action" translatable="false">sending_message_action_{did}_{contact}</string>
+
+    <!-- Sent message receiver -->
+    <string name="sent_message_action" translatable="false">sent_message_action_{did}_{contact}</string>
+    <string name="sent_message_error" translatable="false">sent_message_error</string>
+
+    <!-- Sync complete receiver -->
+    <string name="sync_complete_action" translatable="false">sync_complete_action</string>
+    <string name="sync_complete_error" translatable="false">sync_complete_error</string>
+
+    <!-- Push notifications registration complete receiver -->
+    <string name="push_notifications_reg_complete_action" translatable="false">push_notifications_reg_complete_action</string>
+    <string name="push_notifications_reg_complete_voip_ms_api_callback_failed_dids" translatable="false">voip_ms_api_callback_failed_dids</string>
+
+    <!-- DID retrieval complete receiver -->
+    <string name="retrieve_dids_complete_action" translatable="false">retrieve_dids_complete_action</string>
+    <string name="retrieve_dids_complete_dids" translatable="false">retrieve_dids_complete_dids</string>
+    <string name="retrieve_dids_complete_error" translatable="false">retrieve_dids_complete_error</string>
+
+    <!-- SINGLETONS -->
 
     <!-- Notifications -->
+    <string name="notifications_current_user">Me</string>
+    <string name="notifications_group_key" translatable="false">group</string>
+    <string name="notifications_reply_key" translatable="false">notification_reply</string>
     <string name="notifications_button_reply">Reply</string>
     <string name="notifications_button_mark_read">Mark Read</string>
 
-    <!-- Preferences -->
-    <string name="preferences_name">Settings</string>
-    <!-- Account -->
-    <string name="preferences_account_category_name">Account</string>
-    <string name="preferences_account_email_key" translatable="false">api_email</string>
-    <string name="preferences_account_email_title">Email address</string>
-    <string name="preferences_account_password_key" translatable="false">api_password</string>
-    <string name="preferences_account_password_title">API password</string>
-    <string name="preferences_account_password_placeholder" translatable="false">********</string>
-    <string name="preferences_account_did_key" translatable="false">did</string>
-    <string name="preferences_account_did_title">DID (phone number)</string>
-    <string name="preferences_account_did_status">Retrieving DIDs…</string>
-    <string name="preferences_account_did_dialog_title">Select DID</string>
-    <string name="preferences_account_did_error_network">Failed to retrieve DIDs. No network connection is available. (200)</string>
-    <string name="preferences_account_did_error_api_request">Failed to retrieve DIDs. A request to the VoIP.ms API failed. (201)</string>
-    <string name="preferences_account_did_error_api_parse">Failed to retrieve DIDs. The VoIP.ms API response could not be parsed. (202)</string>
-    <string name="preferences_account_did_error_api_error">Failed to retrieve DIDs. The VoIP.ms API returned the following error: {error}. (203)</string>
-    <string name="preferences_account_did_error_email">You must set your VoIP.ms portal email address and API password before selecting a DID. (204)</string>
-    <string name="preferences_account_did_error_password">You must set your VoIP.ms portal email address and API password before selecting a DID. (205)</string>
-    <string name="preferences_account_did_error_no_dids">There are no DIDs in your VoIP.ms account. (206)</string>
-    <!-- Synchronization -->
-    <string name="preferences_sync_interval_key" translatable="false">sync_interval</string>
-    <string name="preferences_sync_interval_title">Synchronization interval</string>
-    <string name="preferences_sync_start_date_key" translatable="false">start_date</string>
-    <string name="preferences_sync_start_date_title">Message retrieval start date</string>
-    <string name="preferences_sync_retrieve_only_recent_messages_key" translatable="false">sync_retrieve_only_recent_messages</string>
-    <string name="preferences_sync_retrieve_only_recent_messages_title">Retrieve only recent messages</string>
-    <string name="preferences_sync_retrieve_only_recent_messages_summary">Retrieve only messages from VoIP.ms dated after the most recent message stored locally</string>
-    <string name="preferences_sync_retrieve_deleted_messages_key" translatable="false">sync_retrieve_deleted_messages</string>
-    <string name="preferences_sync_retrieve_deleted_messages_title">Retrieve deleted messages</string>
-    <string name="preferences_sync_retrieve_deleted_messages_summary">Retrieve messages from VoIP.ms that were deleted locally</string>
-    <string name="preferences_sync_propagate_local_deletions_key" translatable="false">sync_propagate_local_deletions</string>
-    <string name="preferences_sync_propagate_local_deletions_title">Propagate local deletions</string>
-    <string name="preferences_sync_propagate_local_deletions_summary">Delete messages from VoIP.ms that were deleted locally</string>
-    <string name="preferences_sync_propagate_remote_deletions_key" translatable="false">sync_propagate_remote_deletions</string>
-    <string name="preferences_sync_propagate_remote_deletions_title">Propagate remote deletions</string>
-    <string name="preferences_sync_propagate_remote_deletions_summary">Delete messages stored locally that were deleted from VoIP.ms</string>
-    <!-- Notifications -->
-    <string name="preferences_notifications_category_name">Notifications</string>
-    <string name="preferences_notifications_enable_key" translatable="false">sms_notification_basic</string>
-    <string name="preferences_notifications_enable_title">Notifications</string>
-    <string name="preferences_notifications_enable_summary">Show notifications when new messages are retrieved during synchronization</string>
-    <string name="preferences_notifications_sound_key" translatable="false">sms_notification_ringtone</string>
-    <string name="preferences_notifications_sound_title">Sound</string>
-    <string name="preferences_notifications_sound_default_value" translatable="false">content://settings/system/notification_sound</string>
-    <string name="preferences_notifications_vibrate_key" translatable="false">sms_notification_vibrate</string>
-    <string name="preferences_notifications_vibrate_title">Vibrate</string>
-    <!-- Reset -->
-    <string name="preferences_database_category_name">Database</string>
-    <string name="preferences_database_edit_title">Edit message database</string>
-    <string name="preferences_database_edit_summary">Manually edit message database in JSON format</string>
-    <string name="preferences_database_edit_save">Save</string>
-    <string name="preferences_database_edit_failure_load">Failed to load database.</string>
-    <string name="preferences_database_edit_failure_save">Failed to save database. Are you sure the text box contains valid JSON?</string>
-    <string name="preferences_database_delete_title">Delete message database</string>
-    <string name="preferences_database_delete_summary">Delete all messages in database</string>
-    <string name="preferences_database_delete_confirm_title">Delete local copy of SMS database?</string>
-    <string name="preferences_database_delete_confirm_message">This action cannot be undone.</string>
-    <!-- Uncategorized -->
-    <string name="preferences_dids_key" translatable="false">dids</string>
-    <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>
-
-    <!-- Utils -->
+    <!-- UTILS -->
     <string name="utils_date_just_now">Just now</string>
     <string name="utils_date_seconds_ago">seconds ago</string>
     <string name="utils_date_one_minute_ago">1 minute ago</string>
     <string name="utils_date_minutes_ago">minutes ago</string>
 
-    <!-- Uncategorized -->
+    <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="settings">Settings</string>
+    <string name="help_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md</string>
+    <string name="privacy_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/PRIVACY.md</string>
+    <string name="license_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE.md</string>
+    <string name="credits_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE.md</string>
+    <string name="donate_url">https://paypal.me/kourlas</string>
 </resources>
