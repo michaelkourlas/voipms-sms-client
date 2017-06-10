@@ -56,6 +56,10 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
                 R.string.sent_message_action)
                 .replace("{did}", conversationId.did)
                 .replace("{contact}", conversationId.contact))
+        if (error != null) {
+            sentMessageBroadcastIntent.putExtra(applicationContext.getString(
+                R.string.sent_message_error), error)
+        }
         applicationContext.sendBroadcast(sentMessageBroadcastIntent)
     }
 
