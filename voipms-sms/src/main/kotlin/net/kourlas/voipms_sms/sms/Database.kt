@@ -406,6 +406,7 @@ class Database private constructor(private val context: Context) {
                     messages.add(contactNameMessage)
                 }
             }
+            messages.sort()
 
             // Replace messages with any applicable draft messages
             val draftMessages = getMessagesDraftFiltered(dids, filterConstraint)
