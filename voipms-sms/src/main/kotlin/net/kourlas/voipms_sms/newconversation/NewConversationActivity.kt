@@ -198,7 +198,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         val contactItem = adapter[recyclerView.getChildAdapterPosition(v)]
 
-        if (contactItem is NewConversationRecyclerViewAdapter.ContactItem) {
+        if (contactItem is NewConversationRecyclerViewAdapter.Companion.ContactItem) {
             // If the selected contact has multiple phone numbers, allow the
             // user to select one of the numbers
             if (contactItem.secondaryPhoneNumbers.isNotEmpty()) {
@@ -228,7 +228,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 startConversationActivity(contactItem.primaryPhoneNumber)
             }
         } else if (contactItem
-            is NewConversationRecyclerViewAdapter.TypedInContactItem) {
+            is NewConversationRecyclerViewAdapter.Companion.TypedInContactItem) {
             startConversationActivity(contactItem.primaryPhoneNumber)
         } else {
             throw Exception("Unrecognized contact item type")

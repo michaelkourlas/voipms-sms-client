@@ -134,8 +134,7 @@ class RetrieveDidsService : IntentService(
             val status = response.getString("status")
             if (status != "success") {
                 error = getString(
-                    R.string.preferences_account_dids_error_api_error)
-                    .replace("{error}", status)
+                    R.string.preferences_account_dids_error_api_error, status)
                 return null
             }
 

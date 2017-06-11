@@ -149,21 +149,24 @@ fun setDids(context: Context, dids: Set<String>) {
         R.string.preferences_account_dids_key), dids)
 }
 
-
 fun setLastCompleteSyncTime(context: Context, lastCompleteSyncTime: Long) {
-    return setLongPreference(context, context.getString(
+    setLongPreference(context, context.getString(
         R.string.preferences_sync_last_complete_time_key), lastCompleteSyncTime)
 }
 
 fun setSetupCompletedForVersion(context: Context, version: Long) {
-    return setLongPreference(
-        context,
-        context.getString(R.string.preferences_setup_completed_for_version_key),
-        version)
+    if (getLongPreference(context, context.getString(
+        R.string.preferences_setup_completed_for_version_key), 0) < version) {
+        setLongPreference(
+            context,
+            context.getString(
+                R.string.preferences_setup_completed_for_version_key),
+            version)
+    }
 }
 
 fun setStartDate(context: Context, date: Date) {
-    return setLongPreference(context, context.getString(
+    setLongPreference(context, context.getString(
         R.string.preferences_sync_start_date_key), date.time)
 }
 

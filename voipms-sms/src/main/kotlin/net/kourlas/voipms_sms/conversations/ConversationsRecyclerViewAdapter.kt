@@ -35,6 +35,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.demo.demo
+import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
@@ -325,34 +327,47 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
                 prevConstraint = currConstraint
                 currConstraint = constraint.toString().trim { it <= ' ' }
 
-                resultsObject.messages.addAll(Database.getInstance(activity)
-                                                  .getMessagesMostRecentFiltered(
-                                                      getDids(activity),
-                                                      currConstraint.toLowerCase())
-                                                  .toMutableList())
-                if (activity is ConversationsArchivedActivity) {
-                    val iterator = resultsObject.messages.iterator()
-                    while (iterator.hasNext()) {
-                        val message = iterator.next()
-                        if (!Database.getInstance(activity)
-                            .isConversationArchived(message.conversationId)) {
-                            iterator.remove()
+                if (!demo) {
+                    resultsObject.messages.addAll(
+                        Database.getInstance(activity)
+                            .getMessagesMostRecentFiltered(
+                                getDids(activity), currConstraint.toLowerCase())
+                            .toMutableList())
+                    if (activity is ConversationsArchivedActivity) {
+                        val iterator = resultsObject.messages.iterator()
+                        while (iterator.hasNext()) {
+                            val message = iterator.next()
+                            if (!Database.getInstance(activity)
+                                .isConversationArchived(
+                                    message.conversationId)) {
+                                iterator.remove()
+                            }
+                        }
+                    } else {
+                        val iterator = resultsObject.messages.iterator()
+                        while (iterator.hasNext()) {
+                            val message = iterator.next()
+                            if (Database.getInstance(activity)
+                                .isConversationArchived(
+                                    message.conversationId)) {
+                                iterator.remove()
+                            }
                         }
                     }
                 } else {
-                    val iterator = resultsObject.messages.iterator()
-                    while (iterator.hasNext()) {
-                        val message = iterator.next()
-                        if (Database.getInstance(activity)
-                            .isConversationArchived(message.conversationId)) {
-                            iterator.remove()
-                        }
-                    }
+                    resultsObject.messages.addAll(
+                        getConversationsDemoMessages())
                 }
 
                 for (message in resultsObject.messages) {
-                    val contactName = getContactName(activity, message.contact,
-                                                     contactNameCache)
+                    val contactName = if (!demo) {
+                        getContactName(activity,
+                                       message.contact,
+                                       contactNameCache)
+                    } else {
+                        net.kourlas.voipms_sms.demo.getContactName(
+                            message.contact)
+                    }
                     if (contactName != null) {
                         resultsObject.contactNames[message.contact] =
                             contactName

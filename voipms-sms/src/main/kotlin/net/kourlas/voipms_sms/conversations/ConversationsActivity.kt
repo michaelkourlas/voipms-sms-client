@@ -37,20 +37,14 @@ import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import net.kourlas.voipms_sms.BuildConfig
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.newconversation.NewConversationActivity
-import net.kourlas.voipms_sms.preferences.PreferencesActivity
-import net.kourlas.voipms_sms.preferences.getSetupCompletedForVersion
-import net.kourlas.voipms_sms.preferences.isAccountActive
-import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
+import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.SyncService
-import net.kourlas.voipms_sms.utils.runOnNewThread
-import net.kourlas.voipms_sms.utils.showAlertDialog
-import net.kourlas.voipms_sms.utils.showPermissionSnackbar
-import net.kourlas.voipms_sms.utils.showSnackbar
+import net.kourlas.voipms_sms.utils.*
 
 /**
  * Activity that contains a generic list of conversations.
@@ -163,6 +157,9 @@ open class ConversationsActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
 
+        // Track number of activities
+        (application as CustomApplication).conversationsActivityIncrementCount()
+
         // Register dynamic receivers for this activity
         registerReceiver(syncCompleteReceiver,
                          IntentFilter(getString(R.string.sync_complete_action)))
@@ -173,11 +170,9 @@ open class ConversationsActivity : AppCompatActivity(),
             return
         }
 
-        // Perform special setup for this version
-        if (getSetupCompletedForVersion(this) < BuildConfig.VERSION_CODE) {
-            setSetupCompletedForVersion(
-                this@ConversationsActivity,
-                BuildConfig.VERSION_CODE.toLong())
+        // Perform special setup for version 114
+        if (getSetupCompletedForVersion(this) < 114) {
+            setSetupCompletedForVersion(this@ConversationsActivity, 114)
         }
 
         // Refresh and perform limited synchronization
@@ -222,6 +217,10 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Unregister all dynamic receivers for this activity
         unregisterReceiver(syncCompleteReceiver)
+        unregisterReceiver(pushNotificationsRegistrationCompleteReceiver)
+
+        // Track number of activities
+        (application as CustomApplication).conversationsActivityDecrementCount()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -342,11 +341,10 @@ open class ConversationsActivity : AppCompatActivity(),
                         .markConversationArchived(it.conversationId)
                 }
             runOnUiThread {
+                mode.finish()
                 adapter.refresh()
             }
         }
-
-        mode.finish()
         return true
     }
 
@@ -367,11 +365,10 @@ open class ConversationsActivity : AppCompatActivity(),
                         .markConversationRead(it.conversationId)
                 }
             runOnUiThread {
+                mode.finish()
                 adapter.refresh()
             }
         }
-
-        mode.finish()
         return true
     }
 
@@ -392,11 +389,10 @@ open class ConversationsActivity : AppCompatActivity(),
                         .markConversationUnread(it.conversationId)
                 }
             runOnUiThread {
+                mode.finish()
                 adapter.refresh()
             }
         }
-
-        mode.finish()
         return true
     }
 
@@ -424,13 +420,12 @@ open class ConversationsActivity : AppCompatActivity(),
                             .deleteMessages(message.conversationId)
                     }
                     runOnUiThread {
+                        mode.finish()
                         adapter.refresh()
                     }
                 }).start()
             },
             getString(R.string.cancel), null)
-
-        mode.finish()
         return true
     }
 

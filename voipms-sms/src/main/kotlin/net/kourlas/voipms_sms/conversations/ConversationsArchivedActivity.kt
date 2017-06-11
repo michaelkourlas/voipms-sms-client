@@ -97,11 +97,10 @@ class ConversationsArchivedActivity : ConversationsActivity() {
                         .markConversationUnarchived(it.message.conversationId)
                 }
             runOnUiThread {
+                mode.finish()
                 adapter.refresh()
             }
         }
-
-        mode.finish()
         return true
     }
 }

@@ -36,6 +36,8 @@ import android.widget.QuickContactBadge
 import android.widget.TextView
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.demo.demo
+import net.kourlas.voipms_sms.demo.getConversationDemoMessages
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
@@ -49,8 +51,6 @@ import net.kourlas.voipms_sms.utils.*
  * @param layoutManager The layout manager used by the recycler view.
  * @param conversationId The conversation ID of the conversation displayed by
  * the activity, consisting of the DID and contact.
- * @param didName The name associated with the DID.
- * @param didBitmap The photo associated with the DID.
  * @param contactName The name associated with the contact.
  * @param contactBitmap The photo associated with the contact.
  */
@@ -59,8 +59,6 @@ class ConversationRecyclerViewAdapter(
     private val recyclerView: RecyclerView,
     private val layoutManager: LinearLayoutManager,
     private val conversationId: ConversationId,
-    private val didName: String?,
-    private val didBitmap: Bitmap?,
     private val contactName: String?,
     private val contactBitmap: Bitmap?) :
     RecyclerView.Adapter<ConversationRecyclerViewAdapter.MessageViewHolder>(),
@@ -93,7 +91,7 @@ class ConversationRecyclerViewAdapter(
             }
             else -> throw Exception("Unknown view type $viewType")
         }
-        return MessageViewHolder(itemView)
+        return MessageViewHolder(itemView, viewType)
     }
 
     override fun onBindViewHolder(holder: MessageViewHolder,
@@ -139,11 +137,12 @@ class ConversationRecyclerViewAdapter(
         val message = messageItem.message
 
         val contactBadge = holder.contactBadge
-        if (isFirstMessageInGroup(position)) {
-            holder.contactBadge.visibility = View.VISIBLE
-            holder.contactBadgeLetterText.visibility = View.VISIBLE
+        val contactBadgeLetterText = holder.contactBadgeLetterText
+        if (contactBadge != null && contactBadgeLetterText != null) {
+            if (isFirstMessageInGroup(position)) {
+                holder.contactBadge.visibility = View.VISIBLE
+                holder.contactBadgeLetterText.visibility = View.VISIBLE
 
-            if (message.isIncoming) {
                 contactBadge.assignContactFromPhone(message.contact, true)
                 if (contactBitmap != null) {
                     // Show bitmap for contact with bitmap
@@ -163,28 +162,9 @@ class ConversationRecyclerViewAdapter(
                         message.contact)
                 }
             } else {
-                contactBadge.assignContactFromPhone(message.did, true)
-                if (didBitmap != null) {
-                    // Show bitmap for contact with bitmap
-                    holder.contactBadge.setBackgroundResource(0)
-                    contactBadge.setImageBitmap(didBitmap)
-                    holder.contactBadgeLetterText.text = ""
-                } else {
-                    // Show material design color and first letter for contact
-                    // without bitmap
-                    holder.contactBadge.setBackgroundColor(
-                        getMaterialDesignColour(
-                            message.did))
-                    holder.contactBadge.setImageResource(
-                        android.R.color.transparent)
-                    holder.contactBadgeLetterText.text = getContactInitial(
-                        didName,
-                        message.did)
-                }
+                holder.contactBadge.visibility = View.INVISIBLE
+                holder.contactBadgeLetterText.visibility = View.INVISIBLE
             }
-        } else {
-            holder.contactBadge.visibility = View.INVISIBLE
-            holder.contactBadgeLetterText.visibility = View.INVISIBLE
         }
     }
 
@@ -370,10 +350,14 @@ class ConversationRecyclerViewAdapter(
                 currConstraint = constraint.toString().trim { it <= ' ' }
 
                 // Get filtered messages
-                val messages = Database.getInstance(activity)
-                    .getMessagesConversationFiltered(
-                        conversationId,
-                        currConstraint.toLowerCase())
+                val messages = if (!demo) {
+                    Database.getInstance(activity)
+                        .getMessagesConversationFiltered(
+                            conversationId,
+                            currConstraint.toLowerCase())
+                } else {
+                    getConversationDemoMessages()
+                }
 
                 // Return filtered messages
                 val results = Filter.FilterResults()
@@ -589,12 +573,20 @@ class ConversationRecyclerViewAdapter(
      * @param itemView The primary view of the message item.
      */
     inner class MessageViewHolder internal constructor(
-        itemView: View) : RecyclerView.ViewHolder(itemView) {
+        itemView: View, viewType: Int) : RecyclerView.ViewHolder(itemView) {
         // All configurable views on a message item
-        internal val contactBadge: QuickContactBadge =
-            itemView.findViewById(R.id.photo) as QuickContactBadge
-        internal val contactBadgeLetterText: TextView =
-            itemView.findViewById(R.id.photo_letter) as TextView
+        internal val contactBadge: QuickContactBadge? =
+            if (viewType == R.layout.conversation_item_incoming) {
+                itemView.findViewById(R.id.photo) as QuickContactBadge
+            } else {
+                null
+            }
+        internal val contactBadgeLetterText: TextView? =
+            if (viewType == R.layout.conversation_item_incoming) {
+                itemView.findViewById(R.id.photo_letter) as TextView
+            } else {
+                null
+            }
         internal val smsContainer: View =
             itemView.findViewById(R.id.sms_container)
         internal val messageText: TextView =
@@ -613,9 +605,11 @@ class ConversationRecyclerViewAdapter(
 
             // Apply circular mask to and remove overlay from contact badge
             // to match Android Messages aesthetic
-            applyCircularMask(contactBadge)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                contactBadge.setOverlay(null)
+            if (contactBadge != null) {
+                applyCircularMask(contactBadge)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    contactBadge.setOverlay(null)
+                }
             }
         }
     }

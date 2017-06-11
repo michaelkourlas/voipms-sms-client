@@ -49,7 +49,7 @@ class Message(val databaseId: Long, val voipId: Long?, date: Long,
     Comparable<Message> {
     // Used to construct a draft message
     constructor(did: String, contact: String, text: String) :
-        this(0, 0, 0, 0, did, contact, text, 0, 0, 0, true)
+        this(0, 0, Date().time / 1000, 0, did, contact, text, 0, 0, 0, true)
 
     init {
         validatePhoneNumber(did)
@@ -146,7 +146,6 @@ class Message(val databaseId: Long, val voipId: Long?, date: Long,
 
         return 0
     }
-
 
     override fun compareTo(other: Message): Int {
         if (this.date.time > other.date.time) {
