@@ -17,24 +17,24 @@
 
 package net.kourlas.voipms_sms.preferences
 
-import android.Manifest
 import android.app.ProgressDialog
 import android.content.*
-import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.preference.*
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
+import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.NotificationsRegistrationService
 import net.kourlas.voipms_sms.sms.AppIndexingService
 import net.kourlas.voipms_sms.sms.RetrieveDidsService
 import net.kourlas.voipms_sms.sms.SyncService
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
+import net.kourlas.voipms_sms.utils.showInfoDialog
+import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -42,8 +42,7 @@ import java.util.*
  * Fragment used to display the app's preferences.
  */
 class PreferencesFragment : PreferenceFragment(),
-    SharedPreferences.OnSharedPreferenceChangeListener,
-    ActivityCompat.OnRequestPermissionsResultCallback {
+    SharedPreferences.OnSharedPreferenceChangeListener {
     var progressDialog: ProgressDialog? = null
 
     // Preference change handlers
@@ -64,7 +63,7 @@ class PreferencesFragment : PreferenceFragment(),
     val pushNotificationsRegistrationCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                progressDialog?.hide()
+                progressDialog?.dismiss()
 
                 // Show error if one occurred
                 val failedDids = intent?.getStringArrayListExtra(getString(
@@ -76,16 +75,19 @@ class PreferencesFragment : PreferenceFragment(),
                 } else if (!failedDids.isEmpty()) {
                     // Some DIDs failed registration
                     showInfoDialog(activity, getString(
-                        R.string
-                            .push_notifications_fail_register)
-                        .replace("{dids}", failedDids.joinToString(", ")))
+                        R.string.push_notifications_fail_register),
+                                   failedDids.joinToString(", "))
                 }
+
+                // Regardless of whether an error occurred, mark setup as
+                // complete
+                setSetupCompletedForVersion(activity, 114)
             }
         }
     val didRetrievalCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                progressDialog?.hide()
+                progressDialog?.dismiss()
 
                 // Show error if one occurred
                 val dids = intent?.getStringArrayListExtra(
@@ -165,21 +167,7 @@ class PreferencesFragment : PreferenceFragment(),
     override fun onResume() {
         super.onResume()
 
-        if (ContextCompat.checkSelfPermission(
-            activity,
-            Manifest.permission.READ_EXTERNAL_STORAGE)
-            == PackageManager.PERMISSION_GRANTED) {
-            // If we have the external storage permission, we can just go
-            // ahead and update the summary text and handlers
-            updateSummaryAndHandlers()
-        } else {
-            // Ask for external storage permission (required to display
-            // information associated with ringtones on external storage)
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                PermissionIndex.EXTERNAL_STORAGE.ordinal)
-        }
+        updateSummaryAndHandlers()
 
         // Register dynamic receivers for this fragment
         activity.registerReceiver(
@@ -216,34 +204,6 @@ class PreferencesFragment : PreferenceFragment(),
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions,
-                                         grantResults)
-        if (requestCode == PermissionIndex.EXTERNAL_STORAGE.ordinal) {
-            permissions.indices
-                .filter {
-                    permissions[it] == Manifest.permission
-                        .READ_EXTERNAL_STORAGE
-                }
-                .forEach {
-                    if (grantResults[it] != PackageManager.PERMISSION_GRANTED) {
-                        // Show snackbar if permission denied
-                        showPermissionSnackbar(
-                            activity,
-                            R.id.new_button,
-                            getString(
-                                R.string
-                                    .preferences_perm_denied_external_storage))
-                    } else {
-                        // Otherwise, continue updating summary and handlers
-                        updateSummaryAndHandlers()
-                    }
-                }
-        }
-    }
-
     fun retrieveDids() {
         // Verify email and password are set
         if (getEmail(activity) == "") {
@@ -272,6 +232,7 @@ class PreferencesFragment : PreferenceFragment(),
             setCancelable(false)
             show()
         }
+        this.progressDialog?.dismiss()
         this.progressDialog = progressDialog
 
         // Pass control to RetrieveDidsService
@@ -283,42 +244,45 @@ class PreferencesFragment : PreferenceFragment(),
      * the push notifications registration service.
      */
     fun enablePushNotifications() {
-        GoogleApiAvailability
-            .getInstance()
-            .makeGooglePlayServicesAvailable(activity)
-            .addOnSuccessListener success@ {
-                // Check if account is active and silently quit if not
-                if (!isAccountActive(activity)) {
-                    return@success
-                }
+        // Check if account is active and silently quit if not
+        if (!isAccountActive(activity)) {
+            setSetupCompletedForVersion(activity, 114)
+            return
+        }
 
-                // Show progress dialog
-                val progressDialog = ProgressDialog(activity)
-                with(progressDialog) {
-                    setMessage(context.getString(
-                        R.string.push_notifications_progress))
-                    setCancelable(false)
-                    show()
-                }
-                this.progressDialog = progressDialog
+        // Check if Google Play Services is available
+        if (GoogleApiAvailability.getInstance()
+            .isGooglePlayServicesAvailable(
+                activity) != ConnectionResult.SUCCESS) {
+            showInfoDialog(activity, getString(
+                R.string.push_notifications_fail_google_play))
+            setSetupCompletedForVersion(activity, 114)
+            return
+        }
 
-                // Subscribe to DID topics
-                subscribeToDidTopics(activity)
+        // Show progress dialog
+        val progressDialog = ProgressDialog(activity)
+        with(progressDialog) {
+            setMessage(context.getString(
+                R.string.push_notifications_progress))
+            setCancelable(false)
+            show()
+        }
+        this.progressDialog?.dismiss()
+        this.progressDialog = progressDialog
 
-                // Start push notifications registration service
-                activity.startService(NotificationsRegistrationService
-                                          .getIntent(activity))
-            }
-            .addOnFailureListener {
-                showInfoDialog(activity, getString(
-                    R.string.push_notifications_fail_google_play))
-            }
+        // Subscribe to DID topics
+        subscribeToDidTopics(activity)
+
+        // Start push notifications registration service
+        activity.startService(NotificationsRegistrationService
+                                  .getIntent(activity))
     }
 
     /**
      * Updates the summary text and handlers for all preferences.
      */
-    private fun updateSummaryAndHandlers() {
+    fun updateSummaryAndHandlers() {
         for (i in 0..preferenceScreen.preferenceCount - 1) {
             val preference = preferenceScreen.getPreference(i)
             if (preference is PreferenceGroup) {
@@ -413,15 +377,6 @@ class PreferencesFragment : PreferenceFragment(),
             R.string.preferences_notifications_enable_key)) {
             preference.onPreferenceChangeListener =
                 notificationsPreferenceChangeListener
-        }
-    }
-
-    companion object {
-        /**
-         * Used to disambiguate between different permission requests.
-         */
-        private enum class PermissionIndex {
-            EXTERNAL_STORAGE
         }
     }
 }

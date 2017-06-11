@@ -28,6 +28,8 @@ import android.view.ViewGroup
 import android.widget.*
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.demo.demo
+import net.kourlas.voipms_sms.demo.getNewConversationContacts
 import net.kourlas.voipms_sms.utils.*
 
 /**
@@ -375,6 +377,11 @@ class NewConversationRecyclerViewAdapter(
      * Loads all contacts from the Android contacts provider.
      */
     fun loadAllContactItems() {
+        if (demo) {
+            allContactItems.addAll(getNewConversationContacts())
+            return
+        }
+
         try {
             val cursor = activity.contentResolver.query(
                 ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -437,36 +444,6 @@ class NewConversationRecyclerViewAdapter(
     }
 
     /**
-     * Represents a contact item.
-     */
-    abstract inner class BaseContactItem(val primaryPhoneNumber: String)
-
-    /**
-     * Represents the contact item for a typed in phone number.
-     */
-    inner class TypedInContactItem(phoneNumber: String) :
-        BaseContactItem(phoneNumber)
-
-    /**
-     * Represents the contact item for a standard contact.
-     *
-     * @param id The ID of the contact from the Android contacts provider.
-     * @param name The name of the contact.
-     * @param primaryPhoneNumber The contact's primary phone number.
-     * @param secondaryPhoneNumbers Any additional contact phone numbers.
-     * @param phoneNumberType The type of the phone number if there is only one
-     * phone number, or "Multiple" otherwise.
-     * @param bitmap The photo of the contact.
-     */
-    inner class ContactItem(val id: Long,
-                            val name: String,
-                            primaryPhoneNumber: String,
-                            val secondaryPhoneNumbers: MutableList<String>,
-                            var phoneNumberType: String,
-                            val bitmap: Bitmap?) :
-        BaseContactItem(primaryPhoneNumber)
-
-    /**
      * A container for the views associated with a contact item.
      *
      * @param itemView The primary view of the contact item.
@@ -499,5 +476,37 @@ class NewConversationRecyclerViewAdapter(
                 contactBadge.setOverlay(null)
             }
         }
+    }
+
+    companion object {
+        /**
+         * Represents a contact item.
+         */
+        abstract class BaseContactItem(val primaryPhoneNumber: String)
+
+        /**
+         * Represents the contact item for a typed in phone number.
+         */
+        class TypedInContactItem(phoneNumber: String) :
+            BaseContactItem(phoneNumber)
+
+        /**
+         * Represents the contact item for a standard contact.
+         *
+         * @param id The ID of the contact from the Android contacts provider.
+         * @param name The name of the contact.
+         * @param primaryPhoneNumber The contact's primary phone number.
+         * @param secondaryPhoneNumbers Any additional contact phone numbers.
+         * @param phoneNumberType The type of the phone number if there is only one
+         * phone number, or "Multiple" otherwise.
+         * @param bitmap The photo of the contact.
+         */
+        class ContactItem(val id: Long,
+                          val name: String,
+                          primaryPhoneNumber: String,
+                          val secondaryPhoneNumbers: MutableList<String>,
+                          var phoneNumberType: String,
+                          val bitmap: Bitmap?) :
+            BaseContactItem(primaryPhoneNumber)
     }
 }

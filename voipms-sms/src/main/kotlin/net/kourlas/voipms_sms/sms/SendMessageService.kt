@@ -53,9 +53,8 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
         // (or that an attempt to send them has been made)
         val sentMessageBroadcastIntent = Intent(
             applicationContext.getString(
-                R.string.sent_message_action)
-                .replace("{did}", conversationId.did)
-                .replace("{contact}", conversationId.contact))
+                R.string.sent_message_action,
+                conversationId.did, conversationId.contact))
         if (error != null) {
             sentMessageBroadcastIntent.putExtra(applicationContext.getString(
                 R.string.sent_message_error), error)
@@ -124,9 +123,7 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
             // sent
             val sendingMessageBroadcastIntent = Intent(
                 applicationContext.getString(
-                    R.string.sending_message_action)
-                    .replace("{did}", did)
-                    .replace("{contact}", contact))
+                    R.string.sending_message_action, did, contact))
             applicationContext.sendBroadcast(sendingMessageBroadcastIntent)
 
             // Send each message using the VoIP.ms API
@@ -273,8 +270,7 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
         }
         if (status != "success") {
             error = applicationContext.getString(
-                R.string.send_message_error_api_error).replace(
-                "{error}", status)
+                R.string.send_message_error_api_error, status)
             return null
         }
         val voipId = response.optLong("sms")

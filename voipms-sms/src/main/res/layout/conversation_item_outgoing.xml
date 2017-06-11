@@ -37,39 +37,13 @@
         android:layout_marginLeft="@dimen/margin"
         android:layout_marginStart="@dimen/margin" />
 
-    <FrameLayout
-        android:id="@+id/photo_layout"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_gravity="bottom"
-        android:layout_marginLeft="@dimen/margin"
-        android:layout_marginStart="@dimen/margin">
-
-        <QuickContactBadge
-            android:id="@+id/photo"
-            android:layout_width="@dimen/contact_badge"
-            android:layout_height="@dimen/contact_badge"
-            android:layout_gravity="center_vertical"
-            android:scaleType="centerCrop" />
-
-        <TextView
-            android:id="@+id/photo_letter"
-            android:layout_width="@dimen/contact_badge"
-            android:layout_height="@dimen/contact_badge"
-            android:gravity="center"
-            android:textColor="@color/contact_badge_letter_white"
-            android:textSize="@dimen/headline" />
-    </FrameLayout>
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_toEndOf="@id/placeholder"
-        android:layout_toLeftOf="@id/photo_layout"
-        android:layout_toRightOf="@id/placeholder"
-        android:layout_toStartOf="@id/photo_layout">
+        android:layout_toRightOf="@id/placeholder">
 
         <LinearLayout
             android:id="@+id/sms_container"

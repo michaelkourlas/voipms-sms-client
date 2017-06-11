@@ -32,6 +32,7 @@ import android.support.v4.app.TaskStackBuilder
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
+import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.preferences.getNotificationSound
 import net.kourlas.voipms_sms.preferences.getNotificationVibrateEnabled
 import net.kourlas.voipms_sms.preferences.getNotificationsEnabled
@@ -89,6 +90,10 @@ class Notifications private constructor(
             }
     }
 
+    fun showDemoNotification(message: Message) {
+        showNotification(listOf(message))
+    }
+
     /**
      * Shows a notification with the specified messages.
      *
@@ -104,7 +109,11 @@ class Notifications private constructor(
         val conversationId = messages[0].conversationId
         val did = conversationId.did
         val contact = conversationId.contact
-        var contactName = getContactName(context, contact)
+        var contactName = if (!demo) {
+            getContactName(context, contact)
+        } else {
+            net.kourlas.voipms_sms.demo.getContactName(contact)
+        }
         if (contactName == null) {
             contactName = getFormattedPhoneNumber(contact)
         }
@@ -151,7 +160,7 @@ class Notifications private constructor(
                                                            contact)
             replyPendingIntent = PendingIntent.getService(
                 context, (did + contact).hashCode(),
-                replyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                replyIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         } else {
             // Inline reply is not supported, so just show the conversation
             // activity
@@ -162,11 +171,15 @@ class Notifications private constructor(
                 R.string.conversation_contact), contact)
             replyIntent.putExtra(context.getString(
                 R.string.conversation_extra_focus), true)
-            val stackBuilder = TaskStackBuilder.create(context)
-            stackBuilder.addNextIntentWithParentStack(replyIntent)
-            replyPendingIntent = stackBuilder.getPendingIntent(
-                (did + contact).hashCode(),
-                PendingIntent.FLAG_UPDATE_CURRENT)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                replyIntent.flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+            } else {
+                @Suppress("DEPRECATION")
+                replyIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
+            }
+            replyPendingIntent = PendingIntent.getActivity(
+                context, (did + contact + "reply").hashCode(),
+                replyIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         }
         val remoteInput = RemoteInput.Builder(context.getString(
             R.string.notifications_reply_key))
@@ -184,7 +197,7 @@ class Notifications private constructor(
         val markReadIntent = MarkReadService.getIntent(context, did, contact)
         val markReadPendingIntent = PendingIntent.getService(
             context, (did + contact).hashCode(),
-            markReadIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            markReadIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         val markReadAction = NotificationCompat.Action.Builder(
             R.drawable.ic_drafts_white_24dp,
             context.getString(R.string.notifications_button_mark_read),
@@ -201,7 +214,7 @@ class Notifications private constructor(
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addNextIntentWithParentStack(intent)
         notification.setContentIntent(stackBuilder.getPendingIntent(
-            (did + contact).hashCode(), PendingIntent.FLAG_UPDATE_CURRENT))
+            (did + contact).hashCode(), PendingIntent.FLAG_CANCEL_CURRENT))
 
         // Notification ID
         val id: Int

@@ -42,9 +42,12 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.futuremind.recyclerviewfastscroll.FastScroller
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.conversations.ConversationsArchivedActivity
+import net.kourlas.voipms_sms.demo.demo
+import net.kourlas.voipms_sms.demo.getDemoNotification
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
@@ -76,12 +79,24 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     // Additional metadata associated with the DID and contact, including the
     // name and photo of the person associated with the DID or contact
-    private var didName: String? = null
-    private var didBitmap: Bitmap? = null
     private var contactName: String? = null
     private var contactBitmap: Bitmap? = null
 
     // Broadcast receivers
+    val syncCompleteReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val error = intent?.getStringExtra(getString(
+                    R.string.sync_complete_error))
+                if (error != null) {
+                    // Show error in snackbar if one occurred
+                    showSnackbar(this@ConversationActivity,
+                                 R.id.coordinator_layout, error)
+                }
+
+                adapter.refresh()
+            }
+        }
     private val sendingMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             // Refresh adapter to show message being sent
@@ -122,6 +137,11 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         setupRecyclerView()
         setupMessageText()
         setupSendButton()
+
+        if (demo) {
+            Notifications.getInstance(application).showDemoNotification(
+                getDemoNotification())
+        }
     }
 
     /**
@@ -166,9 +186,11 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         }
 
         // Get DID and contact name and photo for use in recycler view adapter
-        didName = getContactName(this, did)
-        didBitmap = getContactPhotoBitmap(this, did)
-        contactName = getContactName(this, contact)
+        contactName = if (!demo) {
+            getContactName(this, contact)
+        } else {
+            net.kourlas.voipms_sms.demo.getContactName(contact)
+        }
         contactBitmap = getContactPhotoBitmap(this, contact)
     }
 
@@ -183,7 +205,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         setSupportActionBar(toolbar)
         val actionBar = supportActionBar ?:
                         throw Exception("Action bar cannot be null")
-        val contactName = getContactName(this, contact)
         // Show phone number under contact name if there is a contact name;
         // otherwise just show phone number
         if (contactName != null) {
@@ -210,8 +231,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         adapter = ConversationRecyclerViewAdapter(this, recyclerView,
                                                   layoutManager,
                                                   conversationId,
-                                                  didName,
-                                                  didBitmap,
                                                   contactName,
                                                   contactBitmap)
         recyclerView.setHasFixedSize(true)
@@ -343,16 +362,14 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         super.onResume()
 
         // Register all dynamic receivers for this activity
+        registerReceiver(syncCompleteReceiver,
+                         IntentFilter(getString(R.string.sync_complete_action)))
         registerReceiver(sendingMessageReceiver,
                          IntentFilter(applicationContext.getString(
-                             R.string.sending_message_action)
-                                          .replace("{did}", did)
-                                          .replace("{contact}", contact)))
+                             R.string.sending_message_action, did, contact)))
         registerReceiver(sentMessageReceiver,
                          IntentFilter(applicationContext.getString(
-                             R.string.sent_message_action)
-                                          .replace("{did}", did)
-                                          .replace("{contact}", contact)))
+                             R.string.sent_message_action, did, contact)))
 
         // Load draft message
         val messageText = findViewById(R.id.message_edit_text) as EditText
@@ -371,14 +388,23 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         Database.getInstance(applicationContext).markConversationRead(
             conversationId)
         adapter.refresh()
+
+        // Track number of activities
+        (application as CustomApplication).conversationActivityIncrementCount(
+            conversationId)
     }
 
     override fun onPause() {
         super.onPause()
 
         // Unregister all dynamic receivers for this activity
+        unregisterReceiver(syncCompleteReceiver)
         unregisterReceiver(sendingMessageReceiver)
         unregisterReceiver(sentMessageReceiver)
+
+        // Track number of activities
+        (application as CustomApplication).conversationActivityDecrementCount(
+            conversationId)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -737,13 +763,12 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                     } else {
                         runOnUiThread {
                             adapter.refresh()
+                            mode.finish()
                         }
                     }
                 }
             },
             getString(R.string.cancel), null)
-
-        mode.finish()
         return true
     }
 

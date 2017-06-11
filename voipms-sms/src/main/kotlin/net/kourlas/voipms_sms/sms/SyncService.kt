@@ -298,8 +298,10 @@ class SyncService : IntentService(SyncService::class.java.name) {
         }
 
         // Show notifications for new messages
-        Notifications.getInstance(application).showNotifications(
-            newConversationIds)
+        if (newConversationIds.isNotEmpty()) {
+            Notifications.getInstance(application).showNotifications(
+                newConversationIds)
+        }
 
         return true
     }

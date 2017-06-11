@@ -38,8 +38,9 @@ import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import net.kourlas.voipms_sms.BuildConfig
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.newconversation.NewConversationActivity
@@ -90,7 +91,7 @@ open class ConversationsActivity : AppCompatActivity(),
     val pushNotificationsRegistrationCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                progressDialog?.hide()
+                progressDialog?.dismiss()
 
                 val failedDids = intent?.getStringArrayListExtra(getString(
                     R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids))
@@ -101,16 +102,13 @@ open class ConversationsActivity : AppCompatActivity(),
                 } else if (!failedDids.isEmpty()) {
                     // Some DIDs failed registration
                     showInfoDialog(this@ConversationsActivity, getString(
-                        R.string
-                            .push_notifications_fail_register)
-                        .replace("{dids}", failedDids.joinToString(", ")))
+                        R.string.push_notifications_fail_register,
+                        failedDids.joinToString(", ")))
                 }
 
                 // Regardless of whether an error occurred, mark setup as
                 // complete
-                setSetupCompletedForVersion(
-                    this@ConversationsActivity,
-                    BuildConfig.VERSION_CODE.toLong())
+                setSetupCompletedForVersion(this@ConversationsActivity, 114)
             }
         }
 
@@ -187,6 +185,9 @@ open class ConversationsActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
 
+        // Track number of activities
+        (application as CustomApplication).conversationsActivityIncrementCount()
+
         // Register dynamic receivers for this activity
         registerReceiver(syncCompleteReceiver,
                          IntentFilter(getString(R.string.sync_complete_action)))
@@ -200,9 +201,9 @@ open class ConversationsActivity : AppCompatActivity(),
             return
         }
 
-        // Perform special setup for this version
-        if (getSetupCompletedForVersion(this) < BuildConfig.VERSION_CODE) {
-            onSetupIncompleteForVersion()
+        // Perform special setup for version 114
+        if (getSetupCompletedForVersion(this) < 114) {
+            onSetupIncompleteForVersion114()
         }
 
         // Refresh and perform limited synchronization
@@ -248,6 +249,9 @@ open class ConversationsActivity : AppCompatActivity(),
         // Unregister all dynamic receivers for this activity
         unregisterReceiver(syncCompleteReceiver)
         unregisterReceiver(pushNotificationsRegistrationCompleteReceiver)
+
+        // Track number of activities
+        (application as CustomApplication).conversationsActivityDecrementCount()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -368,11 +372,10 @@ open class ConversationsActivity : AppCompatActivity(),
                         .markConversationArchived(it.conversationId)
                 }
             runOnUiThread {
+                mode.finish()
                 adapter.refresh()
             }
         }
-
-        mode.finish()
         return true
     }
 
@@ -393,11 +396,10 @@ open class ConversationsActivity : AppCompatActivity(),
                         .markConversationRead(it.conversationId)
                 }
             runOnUiThread {
+                mode.finish()
                 adapter.refresh()
             }
         }
-
-        mode.finish()
         return true
     }
 
@@ -418,11 +420,10 @@ open class ConversationsActivity : AppCompatActivity(),
                         .markConversationUnread(it.conversationId)
                 }
             runOnUiThread {
+                mode.finish()
                 adapter.refresh()
             }
         }
-
-        mode.finish()
         return true
     }
 
@@ -450,13 +451,12 @@ open class ConversationsActivity : AppCompatActivity(),
                             .deleteMessages(message.conversationId)
                     }
                     runOnUiThread {
+                        mode.finish()
                         adapter.refresh()
                     }
                 }).start()
             },
             getString(R.string.cancel), null)
-
-        mode.finish()
         return true
     }
 
@@ -595,44 +595,40 @@ open class ConversationsActivity : AppCompatActivity(),
      * Enables push notifications after an upgrade by showing a progress dialog
      * and starting the push notifications registration service.
      */
-    fun onSetupIncompleteForVersion() {
-        GoogleApiAvailability
-            .getInstance()
-            .makeGooglePlayServicesAvailable(this)
-            .addOnSuccessListener success@ {
-                // Check if account is active and notifications are enabled
-                // and silently quit if not
-                if (!isAccountActive(this) || !getNotificationsEnabled(this)) {
-                    setSetupCompletedForVersion(
-                        this@ConversationsActivity,
-                        BuildConfig.VERSION_CODE.toLong())
-                    return@success
-                }
+    fun onSetupIncompleteForVersion114() {
+        // Check if account is active and notifications are enabled
+        // and silently quit if not
+        if (!isAccountActive(this) || !getNotificationsEnabled(this)) {
+            setSetupCompletedForVersion(this@ConversationsActivity, 114)
+            return
+        }
 
-                // Show progress dialog
-                val progressDialog = ProgressDialog(this)
-                with(progressDialog) {
-                    setMessage(context.getString(
-                        R.string.push_notifications_progress))
-                    setCancelable(false)
-                    show()
-                }
-                this.progressDialog = progressDialog
+        // Check if Google Play Services is available
+        if (GoogleApiAvailability.getInstance()
+            .isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
+            showInfoDialog(this, getString(
+                R.string.push_notifications_fail_google_play))
+            setSetupCompletedForVersion(this@ConversationsActivity, 114)
+            return
+        }
 
-                // Subscribe to DID topics
-                subscribeToDidTopics(this)
+        // Show progress dialog
+        val progressDialog = ProgressDialog(this)
+        with(progressDialog) {
+            setMessage(context.getString(
+                R.string.push_notifications_progress))
+            setCancelable(false)
+            show()
+        }
+        this.progressDialog?.dismiss()
+        this.progressDialog = progressDialog
 
-                // Start push notifications registration service
-                startService(NotificationsRegistrationService
-                                 .getIntent(this))
-            }
-            .addOnFailureListener {
-                showInfoDialog(this, getString(
-                    R.string.push_notifications_fail_google_play))
-                setSetupCompletedForVersion(
-                    this@ConversationsActivity,
-                    BuildConfig.VERSION_CODE.toLong())
-            }
+        // Subscribe to DID topics
+        subscribeToDidTopics(this)
+
+        // Start push notifications registration service
+        startService(NotificationsRegistrationService
+                         .getIntent(this))
     }
 
     companion object {

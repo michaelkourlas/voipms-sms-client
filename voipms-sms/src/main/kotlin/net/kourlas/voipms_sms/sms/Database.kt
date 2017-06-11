@@ -424,6 +424,7 @@ class Database private constructor(private val context: Context) {
                     messages.add(0, draftMessage)
                 }
             }
+            messages.sort()
 
             return messages
         }
@@ -1303,9 +1304,17 @@ class Database private constructor(private val context: Context) {
                     columns[4]))
                 val contact = cursor.getString(cursor.getColumnIndexOrThrow(
                     columns[5]))
-                val message = cursor.getString(cursor.getColumnIndexOrThrow(
+                val text = cursor.getString(cursor.getColumnIndexOrThrow(
                     columns[6]))
-                insertMessageDraft(ConversationId(did, contact), message)
+
+                if (text != "") {
+                    val values = ContentValues()
+                    values.put(COLUMN_DID, did)
+                    values.put(COLUMN_CONTACT, contact)
+                    values.put(COLUMN_MESSAGE, text)
+                    db.replaceOrThrow(TABLE_DRAFT, null, values)
+                }
+
                 cursor.moveToNext()
             }
             cursor.close()
