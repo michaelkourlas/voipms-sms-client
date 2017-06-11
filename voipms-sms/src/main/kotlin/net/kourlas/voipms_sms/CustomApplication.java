@@ -24,8 +24,6 @@ import net.kourlas.voipms_sms.sms.ConversationId;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.kourlas.voipms_sms.utils.FcmKt.subscribeToDidTopics;
-
 /**
  * Custom application implementation that keeps track of visible activities.
  * <p>
@@ -70,13 +68,5 @@ public class CustomApplication extends Application {
             count = 0;
         }
         conversationActivitiesVisible.put(conversationId, count - 1);
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        // Subscribe to topics for current DIDs
-        subscribeToDidTopics(getApplicationContext());
     }
 }

@@ -189,13 +189,6 @@
     <string name="mark_read_did" translatable="false">mark_read_did</string>
     <string name="mark_read_contact" translatable="false">mark_read_contact</string>
 
-    <!-- PushNotificationsRegistrationService -->
-    <string name="push_notifications_reg_action" translatable="false">push_notifications_reg_action</string>
-    <string name="push_notifications_progress">Registering for notifications…</string>
-    <string name="push_notifications_fail_register">Failed to register for notifications for the following DIDs: %1$s. You must complete this step manually in order to use notifications.\n\nTo configure the URL callback, you must access the SMS settings for each of your DIDs on the VoIP.ms portal. For each DID, enable the \"SMS URL Callback\" feature and enter the following URL into the neighbouring field:\n\nhttps://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}</string>
-    <string name="push_notifications_fail_google_play">Failed to register for notifications because Google Play Services is not available or out of date.</string>
-    <string name="push_notifications_fail_unknown">Failed to register for notifications due to an unknown error.</string>
-
     <!-- RetrieveDidsService -->
     <string name="retrieve_dids_action" translatable="false">retrieve_dids_action</string>
 
@@ -236,10 +229,6 @@
     <!-- Sync complete receiver -->
     <string name="sync_complete_action" translatable="false">sync_complete_action</string>
     <string name="sync_complete_error" translatable="false">sync_complete_error</string>
-
-    <!-- Push notifications registration complete receiver -->
-    <string name="push_notifications_reg_complete_action" translatable="false">push_notifications_reg_complete_action</string>
-    <string name="push_notifications_reg_complete_voip_ms_api_callback_failed_dids" translatable="false">voip_ms_api_callback_failed_dids</string>
 
     <!-- DID retrieval complete receiver -->
     <string name="retrieve_dids_complete_action" translatable="false">retrieve_dids_complete_action</string>

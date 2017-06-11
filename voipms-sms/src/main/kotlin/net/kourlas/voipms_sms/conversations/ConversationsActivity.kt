@@ -41,10 +41,16 @@ import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.newconversation.NewConversationActivity
-import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.preferences.PreferencesActivity
+import net.kourlas.voipms_sms.preferences.getSetupCompletedForVersion
+import net.kourlas.voipms_sms.preferences.isAccountActive
+import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.SyncService
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.runOnNewThread
+import net.kourlas.voipms_sms.utils.showAlertDialog
+import net.kourlas.voipms_sms.utils.showPermissionSnackbar
+import net.kourlas.voipms_sms.utils.showSnackbar
 
 /**
  * Activity that contains a generic list of conversations.
@@ -217,7 +223,6 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Unregister all dynamic receivers for this activity
         unregisterReceiver(syncCompleteReceiver)
-        unregisterReceiver(pushNotificationsRegistrationCompleteReceiver)
 
         // Track number of activities
         (application as CustomApplication).conversationsActivityDecrementCount()

@@ -30,7 +30,6 @@ import net.kourlas.voipms_sms.sms.SyncService
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
 import net.kourlas.voipms_sms.utils.showInfoDialog
-import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -128,10 +127,6 @@ class PreferencesFragment : PreferenceFragment(),
 
         // Register dynamic receivers for this fragment
         activity.registerReceiver(
-            pushNotificationsRegistrationCompleteReceiver,
-            IntentFilter(getString(
-                R.string.push_notifications_reg_complete_action)))
-        activity.registerReceiver(
             didRetrievalCompleteReceiver,
             IntentFilter(getString(R.string.retrieve_dids_complete_action)))
     }
@@ -140,8 +135,6 @@ class PreferencesFragment : PreferenceFragment(),
         super.onPause()
 
         // Unregister dynamic receivers for this fragment
-        activity.unregisterReceiver(
-            pushNotificationsRegistrationCompleteReceiver)
         activity.unregisterReceiver(
             didRetrievalCompleteReceiver)
     }
