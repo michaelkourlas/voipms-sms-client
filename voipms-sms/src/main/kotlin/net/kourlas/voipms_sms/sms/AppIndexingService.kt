@@ -74,7 +74,7 @@ class AppIndexingService : IntentService(AppIndexingService::class.java.name) {
                 .map {
                     indexables.subList(
                         it,
-                        if (indexables.size > max) max - 1
+                        if (indexables.size > it + max) it + max - 1
                         else indexables.size - 1)
                 }
                 .forEach {
