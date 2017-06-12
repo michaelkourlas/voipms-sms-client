@@ -80,10 +80,13 @@ open class ConversationsActivity : AppCompatActivity(),
                                  R.id.coordinator_layout, error)
                 }
 
-                // Turn off refresh icon
-                val swipeRefreshLayout = findViewById(
-                    R.id.swipe_refresh_layout) as SwipeRefreshLayout
-                swipeRefreshLayout.isRefreshing = false
+                if (intent?.getBooleanExtra(getString(
+                    R.string.sync_complete_full), false) == true) {
+                    // Turn off refresh icon
+                    val swipeRefreshLayout = findViewById(
+                        R.id.swipe_refresh_layout) as SwipeRefreshLayout
+                    swipeRefreshLayout.isRefreshing = false
+                }
 
                 adapter.refresh()
             }

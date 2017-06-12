@@ -56,6 +56,11 @@ class SyncService : IntentService(SyncService::class.java.name) {
                 R.string.sync_complete_action))
         syncCompleteBroadcastIntent.putExtra(getString(
             R.string.sync_complete_error), error)
+        if (intent?.extras?.get(getString(
+            R.string.sync_force_recent)) != true) {
+            syncCompleteBroadcastIntent.putExtra(getString(
+                R.string.sync_complete_full), true)
+        }
         applicationContext.sendBroadcast(syncCompleteBroadcastIntent)
 
         // This service is sometimes triggered by a wakeful broadcast

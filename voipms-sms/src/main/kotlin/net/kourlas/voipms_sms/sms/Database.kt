@@ -104,10 +104,7 @@ class Database private constructor(private val context: Context) {
                 val values = ContentValues()
                 values.put(COLUMN_VOIP_ID, message.voipId)
                 values.put(COLUMN_DID, did)
-                database.update(TABLE_DELETED, values,
-                                "$COLUMN_VOIP_ID = ${message.voipId}" +
-                                " AND $COLUMN_DID = ${message.did}",
-                                null)
+                database.replaceOrThrow(TABLE_DELETED, null, values)
             }
 
             // Remove messages from database
@@ -351,82 +348,85 @@ class Database private constructor(private val context: Context) {
                                        " OR $COLUMN_DID LIKE ?"
         }
 
-        var didsQuery = "("
-        for (did in dids) {
-            didsQuery += "$COLUMN_DID=$did OR "
-        }
-        didsQuery = didsQuery.substring(0, didsQuery.length - 4) + ")"
-
         synchronized(this) {
-            // First, retrieve the most recent message for each conversation,
-            // filtering only on the DID phone number, contact phone number and
-            // message text
-            var query = "SELECT * FROM $TABLE_MESSAGE a INNER JOIN" +
+            val allMessages = mutableListOf<Message>()
+            for (did in dids) {
+                // First, retrieve the most recent message for each
+                // conversation, filtering only on the DID phone number,
+                // contact phone number and message text
+                var query = "SELECT * FROM $TABLE_MESSAGE a INNER JOIN" +
+                            " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT," +
+                            " MAX($COLUMN_DATE)" +
+                            " AS $COLUMN_DATE FROM $TABLE_MESSAGE" +
+                            " WHERE ($COLUMN_MESSAGE LIKE ?" +
+                            " COLLATE NOCASE $numericFilterStringQuery)" +
+                            " AND $COLUMN_DID=$did GROUP BY $COLUMN_CONTACT)" +
+                            " b on a.$COLUMN_DATABASE_ID" +
+                            " = b.$COLUMN_DATABASE_ID" +
+                            " AND a.$COLUMN_DATE = b.$COLUMN_DATE" +
+                            " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID" +
+                            " DESC"
+                var cursor = database.rawQuery(query, params)
+                val messages = getMessagesCursor(cursor)
+
+                // Then, retrieve the most recent message for each conversation
+                // without filtering; if any conversation present in the second
+                // list is not present in the first list, filter the message in
+                // the second list on contact name and add it to the first list
+                // if there is a match
+                query = "SELECT * FROM $TABLE_MESSAGE a INNER JOIN" +
                         " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT," +
                         " MAX($COLUMN_DATE)" +
                         " AS $COLUMN_DATE FROM $TABLE_MESSAGE" +
-                        " WHERE ($COLUMN_MESSAGE LIKE ?" +
-                        " COLLATE NOCASE $numericFilterStringQuery)" +
-                        " AND $didsQuery GROUP BY $COLUMN_CONTACT)" +
+                        " WHERE $COLUMN_DID=$did GROUP BY $COLUMN_CONTACT)" +
                         " b on a.$COLUMN_DATABASE_ID = b.$COLUMN_DATABASE_ID" +
                         " AND a.$COLUMN_DATE = b.$COLUMN_DATE" +
                         " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID DESC"
-            var cursor = database.rawQuery(query, params)
-            val messages = getMessagesCursor(cursor)
+                cursor = database.rawQuery(query, null)
+                val contactNameMessages = getMessagesCursor(cursor)
+                cursor.close()
+                loop@ for (contactNameMessage in contactNameMessages) {
+                    @Suppress("LoopToCallChain")
+                    for (message in messages) {
+                        if (message.contact == contactNameMessage.contact) {
+                            continue@loop
+                        }
+                    }
 
-            // Then, retrieve the most recent message for each conversation
-            // without filtering; if any conversation present in the second
-            // list is not present in the first list, filter the message in
-            // the second list on contact name and add it to the first list
-            // if there is a match
-            query = "SELECT * FROM $TABLE_MESSAGE a INNER JOIN" +
-                    " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT," +
-                    " MAX($COLUMN_DATE)" +
-                    " AS $COLUMN_DATE FROM $TABLE_MESSAGE" +
-                    " WHERE $didsQuery GROUP BY $COLUMN_CONTACT)" +
-                    " b on a.$COLUMN_DATABASE_ID = b.$COLUMN_DATABASE_ID" +
-                    " AND a.$COLUMN_DATE = b.$COLUMN_DATE" +
-                    " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID DESC"
-            cursor = database.rawQuery(query, null)
-            val contactNameMessages = getMessagesCursor(cursor)
-            cursor.close()
-            loop@ for (contactNameMessage in contactNameMessages) {
-                @Suppress("LoopToCallChain")
-                for (message in messages) {
-                    if (message.contact == contactNameMessage.contact) {
-                        continue@loop
+                    val contactName = getContactName(context,
+                                                     contactNameMessage.contact,
+                                                     contactNameCache)
+                    if (contactName != null && contactName.toLowerCase()
+                        .contains(filterConstraint)) {
+                        messages.add(contactNameMessage)
                     }
                 }
+                messages.sort()
 
-                val contactName = getContactName(context,
-                                                 contactNameMessage.contact,
-                                                 contactNameCache)
-                if (contactName != null && contactName.toLowerCase()
-                    .contains(filterConstraint)) {
-                    messages.add(contactNameMessage)
-                }
-            }
-            messages.sort()
-
-            // Replace messages with any applicable draft messages
-            val draftMessages = getMessagesDraftFiltered(dids, filterConstraint)
-            for (draftMessage in draftMessages) {
-                var messageAdded = false
-                for (i in 0..messages.size - 1) {
-                    if (messages[i].contact == draftMessage.contact) {
-                        messages.removeAt(i)
-                        messages.add(i, draftMessage)
-                        messageAdded = true
-                        break
+                // Replace messages with any applicable draft messages
+                val draftMessages = getMessagesDraftFiltered(dids,
+                                                             filterConstraint)
+                for (draftMessage in draftMessages) {
+                    var messageAdded = false
+                    for (i in 0..messages.size - 1) {
+                        if (messages[i].contact == draftMessage.contact) {
+                            messages.removeAt(i)
+                            messages.add(i, draftMessage)
+                            messageAdded = true
+                            break
+                        }
+                    }
+                    if (!messageAdded) {
+                        messages.add(0, draftMessage)
                     }
                 }
-                if (!messageAdded) {
-                    messages.add(0, draftMessage)
-                }
-            }
-            messages.sort()
+                messages.sort()
 
-            return messages
+                allMessages.addAll(messages)
+            }
+
+            allMessages.sort()
+            return allMessages
         }
     }
 

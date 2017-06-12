@@ -1,3 +1,7 @@
+## 0.5.1 ##
+
+* Bug fixes
+
 ## 0.5.0 ##
 
 * Partial re-write
