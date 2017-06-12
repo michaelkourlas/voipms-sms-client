@@ -229,6 +229,7 @@
     <!-- Sync complete receiver -->
     <string name="sync_complete_action" translatable="false">sync_complete_action</string>
     <string name="sync_complete_error" translatable="false">sync_complete_error</string>
+    <string name="sync_complete_full" translatable="false">sync_complete_full</string>
 
     <!-- DID retrieval complete receiver -->
     <string name="retrieve_dids_complete_action" translatable="false">retrieve_dids_complete_action</string>
