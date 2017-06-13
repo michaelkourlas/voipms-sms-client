@@ -68,7 +68,7 @@ class AppIndexingService : IntentService(AppIndexingService::class.java.name) {
          *
          * @param indexables The specified indexables.
          */
-        fun updateIndex(indexables: List<Indexable>) {
+        private fun updateIndex(indexables: List<Indexable>) {
             val max = Indexable.MAX_INDEXABLES_TO_BE_UPDATED_IN_ONE_CALL
             (0..indexables.size - 1 step max)
                 .map {
@@ -129,9 +129,9 @@ class AppIndexingService : IntentService(AppIndexingService::class.java.name) {
          * @param contactNameCache The contact and DID names cache.
          * @param contactPhotoUriCache The contact and DID photo URIs cache.
          */
-        fun getContactBuilder(context: Context, message: Message,
-                              contactNameCache: MutableMap<String, String>,
-                              contactPhotoUriCache: MutableMap<String, String>): PersonBuilder {
+        private fun getContactBuilder(context: Context, message: Message,
+                                      contactNameCache: MutableMap<String, String>,
+                                      contactPhotoUriCache: MutableMap<String, String>): PersonBuilder {
             val contactBuilder = Indexables.personBuilder()
                 .setTelephone(message.contact)
                 .setUrl(message.conversationUrl)
@@ -161,9 +161,9 @@ class AppIndexingService : IntentService(AppIndexingService::class.java.name) {
          * @param contactNameCache The contact and DID names cache.
          * @param contactPhotoUriCache The contact and DID photo URIs cache.
          */
-        fun getDidBuilder(context: Context, message: Message,
-                          contactNameCache: MutableMap<String, String>,
-                          contactPhotoUriCache: MutableMap<String, String>): PersonBuilder {
+        private fun getDidBuilder(context: Context, message: Message,
+                                  contactNameCache: MutableMap<String, String>,
+                                  contactPhotoUriCache: MutableMap<String, String>): PersonBuilder {
             val didBuilder = Indexables.personBuilder()
                 .setTelephone(message.did)
                 .setUrl(message.conversationUrl)

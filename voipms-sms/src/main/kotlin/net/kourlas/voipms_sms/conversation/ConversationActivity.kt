@@ -778,13 +778,15 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             toggleItem(view.parent.parent as View)
         } else {
             // Resend message if has not yet been sent
-            val messageItem =
-                adapter[recyclerView.getChildAdapterPosition(
-                    view.parent.parent as View)]
-            val message = messageItem.message
-            if (!message.isDelivered && !message.isDeliveryInProgress) {
-                startService(SendMessageService.getIntent(this, conversationId,
-                                                          message.databaseId))
+            val position = recyclerView.getChildAdapterPosition(
+                view.parent.parent as View)
+            if (position != RecyclerView.NO_POSITION) {
+                val messageItem = adapter[position]
+                val message = messageItem.message
+                if (!message.isDelivered && !message.isDeliveryInProgress) {
+                    startService(SendMessageService.getIntent(
+                        this, conversationId, message.databaseId))
+                }
             }
         }
     }
@@ -846,7 +848,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private fun toggleItem(view: View) {
         // Inform the adapter that the item should be checked
         val position = recyclerView.getChildAdapterPosition(view)
-        adapter[position].toggle(position)
+        if (position != RecyclerView.NO_POSITION) {
+            adapter[position].toggle(position)
+        }
 
         // Turn on or off the action mode depending on how many items are
         // checked

@@ -31,10 +31,7 @@ import net.kourlas.voipms_sms.notifications.NotificationsRegistrationService
 import net.kourlas.voipms_sms.sms.AppIndexingService
 import net.kourlas.voipms_sms.sms.RetrieveDidsService
 import net.kourlas.voipms_sms.sms.SyncService
-import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
-import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
-import net.kourlas.voipms_sms.utils.showInfoDialog
-import net.kourlas.voipms_sms.utils.subscribeToDidTopics
+import net.kourlas.voipms_sms.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -144,7 +141,9 @@ class PreferencesFragment : PreferenceFragment(),
                                       // DIDs change
                                       enablePushNotifications()
                                   }
-                                  AppIndexingService.replaceIndex(context)
+                                  runOnNewThread {
+                                      AppIndexingService.replaceIndex(context)
+                                  }
                               })
             setNegativeButton(context.getString(R.string.cancel),
                               null)

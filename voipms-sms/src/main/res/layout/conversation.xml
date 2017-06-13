@@ -82,8 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             android:background="@android:color/white"
-            android:focusableInTouchMode="true"
-            android:padding="@dimen/margin">
+            android:focusableInTouchMode="true">
 
             <EditText
                 android:id="@+id/message_edit_text"
@@ -97,14 +96,19 @@
                 android:inputType="textMultiLine|textCapSentences|textAutoCorrect|textShortMessage"
                 android:isScrollContainer="true"
                 android:maxLines="@integer/message_text_height"
+                android:padding="@dimen/margin"
                 android:textSize="@dimen/subheading" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
+                android:layout_marginBottom="@dimen/margin"
+                android:layout_marginEnd="@dimen/margin"
                 android:layout_marginLeft="@dimen/button_margin"
+                android:layout_marginRight="@dimen/margin"
                 android:layout_marginStart="@dimen/button_margin"
+                android:layout_marginTop="@dimen/margin"
                 android:orientation="vertical">
 
                 <TextView

@@ -25,6 +25,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.google.firebase.appindexing.FirebaseAppIndex
 import net.kourlas.voipms_sms.utils.getContactName
 import net.kourlas.voipms_sms.utils.getDigitsOfString
+import net.kourlas.voipms_sms.utils.runOnNewThread
 import java.io.File
 
 import java.text.SimpleDateFormat
@@ -101,10 +102,9 @@ class Database private constructor(private val context: Context) {
                 FirebaseAppIndex.getInstance().remove(message.messageUrl)
 
                 // Add VoIP.ms IDs from messages to database
-                val values = ContentValues()
-                values.put(COLUMN_VOIP_ID, message.voipId)
-                values.put(COLUMN_DID, did)
-                database.replaceOrThrow(TABLE_DELETED, null, values)
+                if (message.voipId != null) {
+                    insertVoipIdDeleted(did, message.voipId)
+                }
             }
 
             // Remove messages from database
@@ -403,26 +403,26 @@ class Database private constructor(private val context: Context) {
                 }
                 messages.sort()
 
-                // Replace messages with any applicable draft messages
-                val draftMessages = getMessagesDraftFiltered(dids,
-                                                             filterConstraint)
-                for (draftMessage in draftMessages) {
-                    var messageAdded = false
-                    for (i in 0..messages.size - 1) {
-                        if (messages[i].contact == draftMessage.contact) {
-                            messages.removeAt(i)
-                            messages.add(i, draftMessage)
-                            messageAdded = true
-                            break
-                        }
-                    }
-                    if (!messageAdded) {
-                        messages.add(0, draftMessage)
+                allMessages.addAll(messages)
+            }
+
+            // Replace messages with any applicable draft messages
+            val draftMessages = getMessagesDraftFiltered(dids,
+                                                         filterConstraint)
+            for (draftMessage in draftMessages) {
+                var messageAdded = false
+                for (i in 0..allMessages.size - 1) {
+                    if (allMessages[i].contact == draftMessage.contact
+                        && allMessages[i].did == draftMessage.did) {
+                        allMessages.removeAt(i)
+                        allMessages.add(i, draftMessage)
+                        messageAdded = true
+                        break
                     }
                 }
-                messages.sort()
-
-                allMessages.addAll(messages)
+                if (!messageAdded) {
+                    allMessages.add(0, draftMessage)
+                }
             }
 
             allMessages.sort()
@@ -493,7 +493,9 @@ class Database private constructor(private val context: Context) {
                     // Try refreshing database
                     database = databaseHelper.writableDatabase
 
-                    AppIndexingService.replaceIndex(context)
+                    runOnNewThread {
+                        AppIndexingService.replaceIndex(context)
+                    }
                 } catch (e: Exception) {
                     backupPath.copyTo(dbPath, overwrite = true)
                     throw e
@@ -543,9 +545,11 @@ class Database private constructor(private val context: Context) {
 
             val message = getMessageDatabaseId(databaseId)
             if (message != null) {
-                FirebaseAppIndex.getInstance().update(
-                    AppIndexingService.getMessageBuilder(context,
-                                                         message).build())
+                runOnNewThread {
+                    FirebaseAppIndex.getInstance().update(
+                        AppIndexingService.getMessageBuilder(context,
+                                                             message).build())
+                }
             }
 
             return databaseId
@@ -642,9 +646,11 @@ class Database private constructor(private val context: Context) {
 
             val message = getMessageDatabaseId(newId)
             if (message != null) {
-                FirebaseAppIndex.getInstance().update(
-                    AppIndexingService.getMessageBuilder(context,
-                                                         message).build())
+                runOnNewThread {
+                    FirebaseAppIndex.getInstance().update(
+                        AppIndexingService.getMessageBuilder(context,
+                                                             message).build())
+                }
             }
 
             return true
