@@ -95,10 +95,9 @@ class Database private constructor(private val context: Context) {
         synchronized(this) {
             for (message in messages) {
                 // Add VoIP.ms IDs from messages to database
-                val values = ContentValues()
-                values.put(COLUMN_VOIP_ID, message.voipId)
-                values.put(COLUMN_DID, did)
-                database.replaceOrThrow(TABLE_DELETED, null, values)
+                if (message.voipId != null) {
+                    insertVoipIdDeleted(did, message.voipId)
+                }
             }
 
             // Remove messages from database
@@ -395,26 +394,26 @@ class Database private constructor(private val context: Context) {
                 }
                 messages.sort()
 
-                // Replace messages with any applicable draft messages
-                val draftMessages = getMessagesDraftFiltered(dids,
-                                                             filterConstraint)
-                for (draftMessage in draftMessages) {
-                    var messageAdded = false
-                    for (i in 0..messages.size - 1) {
-                        if (messages[i].contact == draftMessage.contact) {
-                            messages.removeAt(i)
-                            messages.add(i, draftMessage)
-                            messageAdded = true
-                            break
-                        }
-                    }
-                    if (!messageAdded) {
-                        messages.add(0, draftMessage)
+                allMessages.addAll(messages)
+            }
+
+            // Replace messages with any applicable draft messages
+            val draftMessages = getMessagesDraftFiltered(dids,
+                                                         filterConstraint)
+            for (draftMessage in draftMessages) {
+                var messageAdded = false
+                for (i in 0..allMessages.size - 1) {
+                    if (allMessages[i].contact == draftMessage.contact
+                        && allMessages[i].did == draftMessage.did) {
+                        allMessages.removeAt(i)
+                        allMessages.add(i, draftMessage)
+                        messageAdded = true
+                        break
                     }
                 }
-                messages.sort()
-
-                allMessages.addAll(messages)
+                if (!messageAdded) {
+                    allMessages.add(0, draftMessage)
+                }
             }
 
             allMessages.sort()

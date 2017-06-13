@@ -61,7 +61,7 @@ fun getContactName(context: Context, phoneNumber: String,
             }
         }
         return null
-    } catch (ex: SecurityException) {
+    } catch (e: Exception) {
         return null
     }
 
@@ -77,21 +77,25 @@ fun getContactName(context: Context, phoneNumber: String,
  */
 fun getContactPhotoBitmap(context: Context, phoneNumber: String,
                           contactBitmapCache: MutableMap<String, Bitmap>? = null): Bitmap? {
-    if (contactBitmapCache != null && phoneNumber in contactBitmapCache) {
-        return contactBitmapCache[phoneNumber]
-    }
-
-    val photoUri = getContactPhotoUri(context, phoneNumber)
-    if (photoUri != null) {
-        val bitmap = getBitmapFromUri(context, Uri.parse(photoUri))
-        if (bitmap != null) {
-            if (contactBitmapCache != null) {
-                contactBitmapCache[phoneNumber] = bitmap
-            }
-            return bitmap
+    try {
+        if (contactBitmapCache != null && phoneNumber in contactBitmapCache) {
+            return contactBitmapCache[phoneNumber]
         }
+
+        val photoUri = getContactPhotoUri(context, phoneNumber)
+        if (photoUri != null) {
+            val bitmap = getBitmapFromUri(context, Uri.parse(photoUri))
+            if (bitmap != null) {
+                if (contactBitmapCache != null) {
+                    contactBitmapCache[phoneNumber] = bitmap
+                }
+                return bitmap
+            }
+        }
+        return null
+    } catch (e: Exception) {
+        return null
     }
-    return null
 }
 
 /**
@@ -104,21 +108,25 @@ fun getContactPhotoBitmap(context: Context, phoneNumber: String,
  */
 fun getContactPhotoUri(context: Context, phoneNumber: String,
                        contactPhotoUriCache: MutableMap<String, String>? = null): String? {
-    if (contactPhotoUriCache != null && phoneNumber in contactPhotoUriCache) {
-        return contactPhotoUriCache[phoneNumber]
-    }
-
-    val uri = Uri.withAppendedPath(
-        ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-        Uri.encode(phoneNumber))
-    val photoUri = getContactPhotoUri(context, uri)
-    if (photoUri != null) {
-        if (contactPhotoUriCache != null) {
-            contactPhotoUriCache[phoneNumber] = photoUri
+    try {
+        if (contactPhotoUriCache != null && phoneNumber in contactPhotoUriCache) {
+            return contactPhotoUriCache[phoneNumber]
         }
-        return photoUri
+
+        val uri = Uri.withAppendedPath(
+            ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+            Uri.encode(phoneNumber))
+        val photoUri = getContactPhotoUri(context, uri)
+        if (photoUri != null) {
+            if (contactPhotoUriCache != null) {
+                contactPhotoUriCache[phoneNumber] = photoUri
+            }
+            return photoUri
+        }
+        return null
+    } catch (e: Exception) {
+        return null
     }
-    return null
 }
 
 /**
@@ -153,7 +161,7 @@ fun getContactPhotoUri(context: Context, uri: Uri,
             }
         }
         return null
-    } catch (ex: SecurityException) {
+    } catch (e: Exception) {
         return null
     }
 }
@@ -165,8 +173,12 @@ fun getContactPhotoUri(context: Context, uri: Uri,
  * @param uri The specified URI.
  */
 fun getBitmapFromUri(context: Context, uri: Uri): Bitmap? {
-    val inputStream = context.contentResolver.openInputStream(uri)
-    return BitmapFactory.decodeStream(inputStream)
+    try {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        return BitmapFactory.decodeStream(inputStream)
+    } catch (e: Exception) {
+        return null
+    }
 }
 
 /**

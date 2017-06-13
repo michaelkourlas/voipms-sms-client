@@ -27,9 +27,7 @@ import android.support.v7.app.AlertDialog
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.sms.RetrieveDidsService
 import net.kourlas.voipms_sms.sms.SyncService
-import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
-import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
-import net.kourlas.voipms_sms.utils.showInfoDialog
+import net.kourlas.voipms_sms.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
 

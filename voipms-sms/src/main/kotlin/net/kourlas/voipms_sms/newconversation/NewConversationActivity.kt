@@ -196,8 +196,12 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onClick(v: View?) {
-        val contactItem = adapter[recyclerView.getChildAdapterPosition(v)]
+        val position = recyclerView.getChildAdapterPosition(v)
+        if (position == RecyclerView.NO_POSITION) {
+            return
+        }
 
+        val contactItem = adapter[position]
         if (contactItem is NewConversationRecyclerViewAdapter.Companion.ContactItem) {
             // If the selected contact has multiple phone numbers, allow the
             // user to select one of the numbers

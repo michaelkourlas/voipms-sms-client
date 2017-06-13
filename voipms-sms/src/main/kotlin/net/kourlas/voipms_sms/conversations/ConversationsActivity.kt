@@ -443,9 +443,12 @@ open class ConversationsActivity : AppCompatActivity(),
             toggleItem(view)
         } else {
             // Open the conversation activity for the selected conversation
-            val conversationItem =
-                adapter[recyclerView.getChildAdapterPosition(view)]
+            val position = recyclerView.getChildAdapterPosition(view)
+            if (position == RecyclerView.NO_POSITION) {
+                return
+            }
 
+            val conversationItem = adapter[position]
             val intent = Intent(this, ConversationActivity::class.java)
             intent.putExtra(getString(R.string.conversation_did),
                             conversationItem.message.did)
@@ -516,7 +519,9 @@ open class ConversationsActivity : AppCompatActivity(),
     private fun toggleItem(view: View) {
         // Inform the adapter that the item should be checked
         val index = recyclerView.getChildAdapterPosition(view)
-        adapter[index].toggle(index)
+        if (index != RecyclerView.NO_POSITION) {
+            adapter[index].toggle(index)
+        }
 
         // Turn on or off the action mode depending on how many items are
         // checked
