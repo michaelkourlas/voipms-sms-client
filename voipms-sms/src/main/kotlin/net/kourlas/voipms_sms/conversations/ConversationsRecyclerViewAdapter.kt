@@ -247,9 +247,14 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
      * @param position The position of the view in the adapter.
      */
     fun updateViewHolderDidText(holder: ConversationViewHolder, position: Int) {
-        val conversationItem = conversationItems[position]
-        holder.didTextView.text = getFormattedPhoneNumber(
-            conversationItem.message.did)
+        if (getDids(activity).count() <= 1) {
+            holder.didTextView.visibility = View.GONE
+        } else {
+            holder.didTextView.visibility = View.VISIBLE
+            val conversationItem = conversationItems[position]
+            holder.didTextView.text = getFormattedPhoneNumber(
+                conversationItem.message.did)
+        }
     }
 
     /**
