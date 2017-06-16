@@ -205,20 +205,22 @@
     <string name="send_message_contact" translatable="false">send_message_contact</string>
     <string name="send_message_text" translatable="false">send_message_text</string>
     <string name="send_message_database_id" translatable="false">send_message_database_id</string>
-    <string name="send_message_error_network">Failed to send message. No network connection is available.</string>
-    <string name="send_message_error_api_request">Failed to send message. A request to the VoIP.ms API failed.</string>
-    <string name="send_message_error_api_parse">Failed to send message. The VoIP.ms API response could not be parsed.</string>
-    <string name="send_message_error_api_error">Failed to send message. The VoIP.ms API returned an error: %1$s.</string>
-    <string name="send_message_error_database">Failed to send message. An unknown database error occurred.</string>
-    <string name="send_message_error_unknown">Failed to send message. An unknown error occurred.</string>
+    <string name="send_message_error_network">Failed to send message: no network connection available</string>
+    <string name="send_message_error_api_request">Failed to send message: request to VoIP.ms API failed</string>
+    <string name="send_message_error_api_parse">Failed to send message: VoIP.ms API response could not be parsed</string>
+    <string name="send_message_error_api_error">Failed to send message: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="send_message_error_database">Failed to send message: unknown database error</string>
+    <string name="send_message_error_unknown">Failed to send message: unknown error</string>
 
     <!-- SyncService -->
     <string name="sync_action" translatable="false">sync_action</string>
     <string name="sync_force_recent" translatable="false">sync_force_recent</string>
-    <string name="sync_error_network">Synchronization with VoIP.ms failed. No network connection is available.</string>
-    <string name="sync_error_api_request">Synchronization with VoIP.ms failed. A request to the VoIP.ms API failed.</string>
-    <string name="sync_error_api_parse">Synchronization with VoIP.ms failed. The VoIP.ms API response could not be parsed.</string>
-    <string name="sync_error_unknown">Synchronization with VoIP.ms failed. An unknown error occurred.</string>
+    <string name="sync_error_network">Synchronization failed: no network connection available</string>
+    <string name="sync_error_api_request">Synchronization failed: request to VoIP.ms API failed</string>
+    <string name="sync_error_api_parse">Synchronization failed: VoIP.ms API response could not be parsed</string>
+    <string name="sync_error_api_error">Synchronization failed: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="sync_error_database">Synchronization failed: unknown database error</string>
+    <string name="sync_error_unknown">Synchronization failed: unknown error</string>
 
     <!-- BROADCAST RECEIVERS -->
 
