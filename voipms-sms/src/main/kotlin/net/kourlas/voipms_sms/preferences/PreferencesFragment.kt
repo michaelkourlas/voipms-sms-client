@@ -204,6 +204,10 @@ class PreferencesFragment : PreferenceFragment(),
     }
 
     fun retrieveDids() {
+        if (activity == null) {
+            return
+        }
+
         // Verify email and password are set
         if (getEmail(activity) == "") {
             showInfoDialog(activity, activity.getString(
