@@ -190,7 +190,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             // (e.g. +1 (123) 555-4567)
             contact = contact.substring(1)
         }
-
         // Get DID and contact name and photo for use in recycler view adapter
         contactName = if (!demo) {
             getContactName(this, contact)
@@ -418,6 +417,11 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         val inflater = menuInflater
         inflater.inflate(R.menu.conversation, menu)
         this.menu = menu
+
+        // Replace DID menu item with DID
+        val didMenuItem = menu.findItem(R.id.did_button)
+        didMenuItem.title = getString(R.string.conversation_action_did,
+                                      getFormattedPhoneNumber(did))
 
         // Hide the call button on devices without telephony support
         if (!packageManager

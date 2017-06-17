@@ -108,6 +108,7 @@
     <!-- ConversationActivity -->
     <string name="conversation_action_call">Make a call</string>
     <string name="conversation_action_resend">Resend</string>
+    <string name="conversation_action_did">DID: %1$s</string>
     <string name="conversation_action_search">Search</string>
     <string name="conversation_action_delete">Delete</string>
     <string name="conversation_action_archive">Archive</string>
