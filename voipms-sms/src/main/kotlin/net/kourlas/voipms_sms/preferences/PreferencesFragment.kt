@@ -323,10 +323,14 @@ class PreferencesFragment : PreferenceFragment(),
                 R.string.preferences_network_connect_timeout_key)
                        || preference.key == getString(
                 R.string.preferences_network_read_timeout_key)) {
-                if (preference.text.toInt() == 0) {
+                try {
+                    if (preference.text.toInt() == 0) {
+                        preference.summary = "Infinite"
+                    } else {
+                        preference.summary = preference.text + " seconds"
+                    }
+                } catch (e: NumberFormatException) {
                     preference.summary = "Infinite"
-                } else {
-                    preference.summary = preference.text + " seconds"
                 }
             } else {
                 preference.summary = preference.text
