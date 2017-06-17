@@ -394,16 +394,10 @@ class ConversationRecyclerViewAdapter(
                 prevConstraint = currConstraint
                 currConstraint = constraint.toString().trim { it <= ' ' }
 
-                // Get new messages from results list
-                val newMessages: List<Message>
-                if (results.values != null) {
-                    // The Android results interface uses type Any, so we have
-                    // no choice but to use an unchecked cast
-                    @Suppress("UNCHECKED_CAST")
-                    newMessages = results.values as List<Message>
-                } else {
-                    newMessages = emptyList()
-                }
+                // The Android results interface uses type Any, so we have
+                // no choice but to use an unchecked cast
+                @Suppress("UNCHECKED_CAST")
+                val newMessages = results.values as List<Message>
 
                 // Create copy of current messages
                 val oldMessages = mutableListOf<Message>()
