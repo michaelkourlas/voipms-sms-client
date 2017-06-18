@@ -34,7 +34,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
@@ -407,7 +406,6 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
                     results.values = resultsObject
                     return results
                 } catch (e: Exception) {
-                    FirebaseCrash.report(e)
                     return Filter.FilterResults()
                 }
             }

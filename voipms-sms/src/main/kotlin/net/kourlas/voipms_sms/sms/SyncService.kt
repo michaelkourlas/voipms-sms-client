@@ -280,7 +280,6 @@ class SyncService : IntentService(SyncService::class.java.name) {
                         rawSms.getString("message"))
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
-                    FirebaseCrash.report(e)
                     error = applicationContext.getString(
                         R.string.sync_error_api_parse)
                     return false
@@ -303,7 +302,6 @@ class SyncService : IntentService(SyncService::class.java.name) {
                     newConversationIds.add(ConversationId(did, contact))
                 }
             } catch (e: Exception) {
-                FirebaseCrash.report(e)
                 error = applicationContext.getString(
                     R.string.sync_error_database)
                 return false

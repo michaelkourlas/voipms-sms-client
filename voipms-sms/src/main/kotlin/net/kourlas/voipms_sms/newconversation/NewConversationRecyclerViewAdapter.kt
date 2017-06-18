@@ -27,7 +27,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
-import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getNewConversationContacts
@@ -253,7 +252,6 @@ class NewConversationRecyclerViewAdapter(
                     results.values = filteredContactItems
                     return results
                 } catch (e: Exception) {
-                    FirebaseCrash.report(e)
                     return Filter.FilterResults()
                 }
             }
