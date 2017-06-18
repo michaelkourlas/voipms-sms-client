@@ -355,12 +355,14 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         val messageEditText = findViewById(R.id.message_edit_text) as EditText
         val messageText = messageEditText.text.toString()
 
-        // Send the message to the SendMessageService
-        startService(SendMessageService.getIntent(this, did, contact,
-                                                  messageText))
+        if (messageText.trim() != "") {
+            // Send the message to the SendMessageService
+            startService(SendMessageService.getIntent(this, did, contact,
+                                                      messageText))
 
-        // Clear the message text box
-        messageEditText.setText("")
+            // Clear the message text box
+            messageEditText.setText("")
+        }
     }
 
     override fun onResume() {
