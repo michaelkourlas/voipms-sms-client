@@ -256,7 +256,12 @@ class SyncService : IntentService(SyncService::class.java.name) {
         }
 
         if (status != "no_sms") {
-            val rawMessages = response.optJSONArray("sms") ?: return true
+            val rawMessages = response.optJSONArray("sms")
+            if (rawMessages == null) {
+                error = applicationContext.getString(
+                    R.string.sync_error_api_parse)
+                return false
+            }
             for (i in 0..rawMessages.length() - 1) {
                 val rawSms = rawMessages.optJSONObject(i)
                 if (rawSms == null) {
