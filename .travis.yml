@@ -3,13 +3,13 @@ jdk:
   - oraclejdk8
 android:
   components:
-    - tools
-    - platform-tools
-    - tools
-
-    - build-tools-25.0.2
-
-    - android-25
-
-    - extra-google-m2repository
-    - extra-android-m2repository
+  - tools
+  - platform-tools
+  - tools
+  - build-tools-25.0.2
+  - android-25
+  - extra-google-m2repository
+  - extra-android-m2repository
+before_install:
+- openssl aes-256-cbc -K $encrypted_24a2f6c6a4d7_key -iv $encrypted_24a2f6c6a4d7_iv
+  -in google-services.json.enc -out google-services.json -d
