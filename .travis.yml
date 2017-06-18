@@ -13,5 +13,3 @@ android:
 before_install:
 - openssl aes-256-cbc -K $encrypted_cd6f32ab44b3_key -iv $encrypted_cd6f32ab44b3_iv
   -in google-services.json.enc -out voipms-sms/google-services.json -d
-- openssl aes-256-cbc -K $encrypted_24a2f6c6a4d7_key -iv $encrypted_24a2f6c6a4d7_iv
-  -in voipms-sms/google-services.json.enc -out voipms-sms/google-services.json -d
