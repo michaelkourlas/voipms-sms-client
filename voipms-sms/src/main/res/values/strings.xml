@@ -108,6 +108,7 @@
     <!-- ConversationActivity -->
     <string name="conversation_action_call">Make a call</string>
     <string name="conversation_action_resend">Resend</string>
+    <string name="conversation_action_did">DID: %1$s</string>
     <string name="conversation_action_search">Search</string>
     <string name="conversation_action_delete">Delete</string>
     <string name="conversation_action_archive">Archive</string>
@@ -142,6 +143,7 @@
     <string name="new_conversation_no_contacts">You have no contacts with phone numbers.</string>
     <string name="new_conversation_no_results">No results found for \'%1$s\'</string>
     <string name="new_conversation_multiple">Multiple</string>
+    <string name="new_conversation_error_refresh">New conversation view refresh failed; please restart the app</string>
 
     <!-- ConversationsActivity -->
     <string name="conversations_action_search">Search</string>
@@ -170,6 +172,7 @@
     <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and one or more SMS-enabled DIDs using the Settings option in the application\'s main menu. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings and then perform a full synchronization by swiping down in the conversations view.\n\nFor more information, see Help.</string>
     <string name="conversations_checked_content_description">Checked</string>
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>
+    <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>
 
     <!-- ConversationsArchivedActivity -->
     <string name="conversations_archived_name">Archived</string>
@@ -178,6 +181,7 @@
     <!-- ConversationActivity -->
     <string name="conversation_did" translatable="false">did</string>
     <string name="conversation_contact" translatable="false">contact</string>
+    <string name="conversation_error_refresh">Conversation view refresh failed; please restart the app</string>
 
     <!-- PreferencesActivity -->
     <string name="preferences_name">Settings</string>
@@ -198,20 +202,22 @@
     <string name="send_message_contact" translatable="false">send_message_contact</string>
     <string name="send_message_text" translatable="false">send_message_text</string>
     <string name="send_message_database_id" translatable="false">send_message_database_id</string>
-    <string name="send_message_error_network">Failed to send message. No network connection is available.</string>
-    <string name="send_message_error_api_request">Failed to send message. A request to the VoIP.ms API failed.</string>
-    <string name="send_message_error_api_parse">Failed to send message. The VoIP.ms API response could not be parsed.</string>
-    <string name="send_message_error_api_error">Failed to send message. The VoIP.ms API returned an error: %1$s.</string>
-    <string name="send_message_error_database">Failed to send message. An unknown database error occurred.</string>
-    <string name="send_message_error_unknown">Failed to send message. An unknown error occurred.</string>
+    <string name="send_message_error_network">Failed to send message: no network connection available</string>
+    <string name="send_message_error_api_request">Failed to send message: request to VoIP.ms API failed</string>
+    <string name="send_message_error_api_parse">Failed to send message: VoIP.ms API response could not be parsed</string>
+    <string name="send_message_error_api_error">Failed to send message: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="send_message_error_database">Failed to send message: unknown database error</string>
+    <string name="send_message_error_unknown">Failed to send message: unknown error</string>
 
     <!-- SyncService -->
     <string name="sync_action" translatable="false">sync_action</string>
     <string name="sync_force_recent" translatable="false">sync_force_recent</string>
-    <string name="sync_error_network">Synchronization with VoIP.ms failed. No network connection is available.</string>
-    <string name="sync_error_api_request">Synchronization with VoIP.ms failed. A request to the VoIP.ms API failed.</string>
-    <string name="sync_error_api_parse">Synchronization with VoIP.ms failed. The VoIP.ms API response could not be parsed.</string>
-    <string name="sync_error_unknown">Synchronization with VoIP.ms failed. An unknown error occurred.</string>
+    <string name="sync_error_network">Synchronization failed: no network connection available</string>
+    <string name="sync_error_api_request">Synchronization failed: request to VoIP.ms API failed</string>
+    <string name="sync_error_api_parse">Synchronization failed: VoIP.ms API response could not be parsed</string>
+    <string name="sync_error_api_error">Synchronization failed: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="sync_error_database">Synchronization failed: unknown database error</string>
+    <string name="sync_error_unknown">Synchronization failed: unknown error</string>
 
     <!-- BROADCAST RECEIVERS -->
 

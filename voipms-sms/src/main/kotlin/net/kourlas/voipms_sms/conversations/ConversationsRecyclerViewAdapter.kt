@@ -34,6 +34,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
@@ -247,9 +248,14 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
      * @param position The position of the view in the adapter.
      */
     fun updateViewHolderDidText(holder: ConversationViewHolder, position: Int) {
-        val conversationItem = conversationItems[position]
-        holder.didTextView.text = getFormattedPhoneNumber(
-            conversationItem.message.did)
+        if (getDids(activity).count() <= 1) {
+            holder.didTextView.visibility = View.GONE
+        } else {
+            holder.didTextView.visibility = View.VISIBLE
+            val conversationItem = conversationItems[position]
+            holder.didTextView.text = getFormattedPhoneNumber(
+                conversationItem.message.did)
+        }
     }
 
     /**
@@ -318,20 +324,24 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
 
     override fun getFilter(): Filter {
         return object : Filter() {
-            override fun performFiltering(
-                constraint: CharSequence): Filter.FilterResults {
-
+            /**
+             * Perform filtering using the specified filter constraint.
+             *
+             * @param constraint The specified constraint.
+             * @return The filtered objects.
+             */
+            fun doFiltering(constraint: CharSequence):
+                ConversationsRecyclerViewAdapter<T>.ConversationsFilter {
                 val resultsObject = ConversationsFilter()
-
-                // Process new filter string
-                prevConstraint = currConstraint
-                currConstraint = constraint.toString().trim { it <= ' ' }
 
                 if (!demo) {
                     resultsObject.messages.addAll(
                         Database.getInstance(activity)
                             .getMessagesMostRecentFiltered(
-                                getDids(activity), currConstraint.toLowerCase())
+                                getDids(activity),
+                                constraint.toString()
+                                    .trim { it <= ' ' }
+                                    .toLowerCase())
                             .toMutableList())
                     if (activity is ConversationsArchivedActivity) {
                         val iterator = resultsObject.messages.iterator()
@@ -382,17 +392,43 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
                     }
                 }
 
-                // Return filtered messages
-                val results = Filter.FilterResults()
-                results.count = resultsObject.messages.size
-                results.values = resultsObject
-                return results
+                return resultsObject
+            }
+
+            override fun performFiltering(
+                constraint: CharSequence): Filter.FilterResults {
+
+                try {
+                    val resultsObject = doFiltering(constraint)
+
+                    // Return filtered messages
+                    val results = Filter.FilterResults()
+                    results.count = resultsObject.messages.size
+                    results.values = resultsObject
+                    return results
+                } catch (e: Exception) {
+                    FirebaseCrash.report(e)
+                    return Filter.FilterResults()
+                }
             }
 
             override fun publishResults(constraint: CharSequence,
-                                        results: Filter.FilterResults) {
+                                        results: Filter.FilterResults?) {
+                if (results == null || results.values == null) {
+                    showSnackbar(activity, R.id.coordinator_layout,
+                                 activity.getString(
+                                     R.string.conversations_error_refresh))
+                    return
+                }
+
+                // Process new filter string
+                prevConstraint = currConstraint
+                currConstraint = constraint.toString().trim { it <= ' ' }
+
                 val position = layoutManager.findFirstVisibleItemPosition()
 
+                // The Android results interface uses type Any, so we
+                // have no choice but to use an unchecked cast
                 @Suppress("UNCHECKED_CAST")
                 val resultsObject = results.values
                     as ConversationsRecyclerViewAdapter<T>.ConversationsFilter

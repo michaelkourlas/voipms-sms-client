@@ -248,7 +248,8 @@ class SyncService : IntentService(SyncService::class.java.name) {
         val incomingMessages = ArrayList<IncomingMessage>()
         val status = response.optString("status")
         if (status != "success" && status != "no_sms") {
-            error = applicationContext.getString(R.string.sync_error_api_parse)
+            error = applicationContext.getString(R.string.sync_error_api_error,
+                                                 status)
             return false
         }
 
@@ -259,7 +260,6 @@ class SyncService : IntentService(SyncService::class.java.name) {
                     R.string.sync_error_api_parse)
                 return false
             }
-
             for (i in 0..rawMessages.length() - 1) {
                 val rawSms = rawMessages.optJSONObject(i)
                 if (rawSms == null) {
@@ -267,11 +267,12 @@ class SyncService : IntentService(SyncService::class.java.name) {
                         R.string.sync_error_api_parse)
                     return false
                 }
-                try {
-                    val rawDate = rawSms.getString("date")
-                    val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-                    sdf.timeZone = TimeZone.getTimeZone("America/New_York")
 
+                val rawDate = rawSms.getString("date")
+                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                sdf.timeZone = TimeZone.getTimeZone("America/New_York")
+
+                try {
                     val incomingMessage = IncomingMessage(
                         rawSms.getString("id").toLong(), sdf.parse(rawDate),
                         toBoolean(rawSms.getString("type")),
@@ -279,6 +280,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
                         rawSms.getString("message"))
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
+                    FirebaseCrash.report(e)
                     error = applicationContext.getString(
                         R.string.sync_error_api_parse)
                     return false
@@ -290,13 +292,21 @@ class SyncService : IntentService(SyncService::class.java.name) {
         // Add new messages from the server
         val newConversationIds = mutableSetOf<ConversationId>()
         for ((voipId, date, isIncoming, did, contact, text) in incomingMessages) {
-            if (Database.getInstance(applicationContext)
-                .insertMessageVoipMsApi(voipId, date, isIncoming,
-                                        ConversationId(did, contact), text,
-                                        retrieveDeletedMessages)) {
-                Database.getInstance(applicationContext)
-                    .markConversationUnarchived(ConversationId(did, contact))
-                newConversationIds.add(ConversationId(did, contact))
+            try {
+                if (Database.getInstance(applicationContext)
+                    .insertMessageVoipMsApi(voipId, date, isIncoming,
+                                            ConversationId(did, contact), text,
+                                            retrieveDeletedMessages)) {
+                    Database.getInstance(applicationContext)
+                        .markConversationUnarchived(ConversationId(did,
+                                                                   contact))
+                    newConversationIds.add(ConversationId(did, contact))
+                }
+            } catch (e: Exception) {
+                FirebaseCrash.report(e)
+                error = applicationContext.getString(
+                    R.string.sync_error_database)
+                return false
             }
         }
 

@@ -49,6 +49,7 @@ import net.kourlas.voipms_sms.conversations.ConversationsArchivedActivity
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getDemoNotification
 import net.kourlas.voipms_sms.notifications.Notifications
+import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
@@ -132,6 +133,10 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
+        if (getDids(applicationContext).isEmpty()) {
+            finish()
+        }
+
         setupDidAndContact(intent ?: throw Exception("Intent cannot be null"))
         setupToolbar()
         setupRecyclerView()
@@ -175,6 +180,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         } else {
             // Standard intent
             did = intent.getStringExtra(getString(R.string.conversation_did))
+                  ?: getDids(applicationContext).first()
             contact = intent.getStringExtra(getString(
                 R.string.conversation_contact))
         }
@@ -184,7 +190,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             // (e.g. +1 (123) 555-4567)
             contact = contact.substring(1)
         }
-
         // Get DID and contact name and photo for use in recycler view adapter
         contactName = if (!demo) {
             getContactName(this, contact)
@@ -412,6 +417,11 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         val inflater = menuInflater
         inflater.inflate(R.menu.conversation, menu)
         this.menu = menu
+
+        // Replace DID menu item with DID
+        val didMenuItem = menu.findItem(R.id.did_button)
+        didMenuItem.title = getString(R.string.conversation_action_did,
+                                      getFormattedPhoneNumber(did))
 
         // Hide the call button on devices without telephony support
         if (!packageManager

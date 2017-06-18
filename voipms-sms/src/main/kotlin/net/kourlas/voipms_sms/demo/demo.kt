@@ -103,10 +103,6 @@ fun getNewConversationContacts(): List<NewConversationRecyclerViewAdapter
         mutableListOf<String>(),
         "Mobile", null))
     contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
-        2, "Monica Alexander", "5145553495",
-        mutableListOf("5145553496"),
-        "Multiple", null))
-    contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
         3, "Jennifer Morris", "6135556019",
         mutableListOf<String>(),
         "Work", null))
@@ -114,6 +110,10 @@ fun getNewConversationContacts(): List<NewConversationRecyclerViewAdapter
         4, "Martin Wheeler", "6135551242",
         mutableListOf<String>(),
         "Home", null))
+    contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
+        2, "Monica Alexander", "5145553495",
+        mutableListOf("5145553496"),
+        "Multiple", null))
     return contactItems
 }
 

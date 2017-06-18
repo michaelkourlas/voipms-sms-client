@@ -27,6 +27,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
+import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getNewConversationContacts
@@ -202,12 +203,14 @@ class NewConversationRecyclerViewAdapter(
 
     override fun getFilter(): Filter {
         return object : Filter() {
-            override fun performFiltering(
-                constraint: CharSequence): FilterResults {
+            /**
+             * Perform filtering using the specified filter constraint.
+             *
+             * @param constraint The specified constraint.
+             * @return The filtered objects.
+             */
+            fun doFiltering(constraint: CharSequence): List<BaseContactItem> {
                 val filteredContactItems = mutableListOf<BaseContactItem>()
-
-                // Process new filter string
-                currConstraint = constraint.toString().trim { it <= ' ' }
 
                 // If there is a typed in phone number, always include it in
                 // the filtered list
@@ -217,6 +220,7 @@ class NewConversationRecyclerViewAdapter(
                 }
 
                 // Perform actual filtering
+                val currConstraint = constraint.toString().trim { it <= ' ' }
                 for (contactItem in allContactItems) {
                     if (contactItem is ContactItem) {
                         val match =
@@ -234,25 +238,42 @@ class NewConversationRecyclerViewAdapter(
                     }
                 }
 
-                // Return the filtered results
-                val results = Filter.FilterResults()
-                results.count = filteredContactItems.size
-                results.values = filteredContactItems
-                return results
+                return filteredContactItems
+            }
+
+            override fun performFiltering(
+                constraint: CharSequence): FilterResults {
+
+                try {
+                    val filteredContactItems = doFiltering(constraint)
+
+                    // Return the filtered results
+                    val results = Filter.FilterResults()
+                    results.count = filteredContactItems.size
+                    results.values = filteredContactItems
+                    return results
+                } catch (e: Exception) {
+                    FirebaseCrash.report(e)
+                    return Filter.FilterResults()
+                }
             }
 
             override fun publishResults(constraint: CharSequence,
-                                        results: FilterResults) {
-                // Get new messages from results list
-                val newContactItems: List<BaseContactItem>
-                if (results.values != null) {
-                    // The Android results interface uses type Any, so we have
-                    // no choice but to use an unchecked cast
-                    @Suppress("UNCHECKED_CAST")
-                    newContactItems = results.values as List<BaseContactItem>
-                } else {
-                    newContactItems = emptyList()
+                                        results: Filter.FilterResults?) {
+                if (results == null || results.values == null) {
+                    showSnackbar(activity, R.id.coordinator_layout,
+                                 activity.getString(
+                                     R.string.new_conversation_error_refresh))
+                    return
                 }
+
+                // Process new filter string
+                currConstraint = constraint.toString().trim { it <= ' ' }
+
+                // The Android results interface uses type Any, so we
+                // have no choice but to use an unchecked cast)
+                @Suppress("UNCHECKED_CAST")
+                val newContactItems = results.values as List<BaseContactItem>
 
                 // Create copy of current contacts
                 val oldContactItems = mutableListOf<BaseContactItem>()

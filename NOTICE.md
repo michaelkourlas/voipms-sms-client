@@ -5,8 +5,9 @@ Copyright (C) 2015-2017 Michael Kourlas
 
 The following components are provided under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0):
 
-* [recycler-fast-scroll](https://github.com/FutureMind/recycler-fast-scroll) from [FutureMind](https://github.com/FutureMind).
-* [material-design-icons](https://github.com/google/material-design-icons) from [Google](https://github.com/google).
+* [recycler-fast-scroll](https://github.com/FutureMind/recycler-fast-scroll) from [FutureMind](https://github.com/FutureMind)
+* [material-design-icons](https://github.com/google/material-design-icons) from [Google](https://github.com/google)
+* [Bitmap loading code](https://developer.android.com/topic/performance/graphics/load-bitmap.html) from [Google](http://www.google.com)
 
 The text of the Apache License 2.0 can be found in the LICENSE.md file.
 

@@ -68,13 +68,23 @@ fun applyCircularMask(bitmap: Bitmap): Bitmap {
  */
 fun applyCircularMask(view: View) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        view.outlineProvider = object : ViewOutlineProvider() {
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-            override fun getOutline(view: View, outline: Outline) {
-                outline.setOval(0, 0, view.width, view.height)
-            }
-        }
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+        view.outlineProvider = getOvalViewOutlineProvider()
         view.clipToOutline = true
+    }
+}
+
+/**
+ * Gets a view outline provider for ovals.
+ *
+ * @return A a view outline provider for ovals.
+ */
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+private fun getOvalViewOutlineProvider(): ViewOutlineProvider {
+    return object : ViewOutlineProvider() {
+        override fun getOutline(view: View, outline: Outline) {
+            outline.setOval(0, 0, view.width, view.height)
+        }
     }
 }
 
@@ -88,15 +98,24 @@ fun applyCircularMask(view: View) {
  */
 fun applyRoundedCornersMask(view: View) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        view.outlineProvider = object : ViewOutlineProvider() {
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-            override fun getOutline(view: View, outline: Outline) {
-                outline
-                    .setRoundRect(0, 0, view.width, view.height,
-                                  15f)
-            }
-        }
+        view.outlineProvider = getRoundRectViewOutlineProvider()
         view.clipToOutline = true
+    }
+}
+
+/**
+ * Gets a view outline provider for rounded rectangles.
+ *
+ * @return A a view outline provider for rounded rectangles.
+ */
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider {
+    return object : ViewOutlineProvider() {
+        override fun getOutline(view: View, outline: Outline) {
+            outline
+                .setRoundRect(0, 0, view.width, view.height,
+                              15f)
+        }
     }
 }
 

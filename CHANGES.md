@@ -1,3 +1,8 @@
+## 0.5.3 ##
+
+* Add DID to conversation view
+* Bug fixes
+
 ## 0.5.2 ##
 
 * Bug fixes

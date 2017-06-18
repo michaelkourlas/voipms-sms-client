@@ -35,6 +35,7 @@ import android.widget.Filterable
 import android.widget.QuickContactBadge
 import android.widget.TextView
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
+import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationDemoMessages
@@ -342,42 +343,61 @@ class ConversationRecyclerViewAdapter(
 
     override fun getFilter(): Filter {
         return object : Filter() {
-            override fun performFiltering(
-                constraint: CharSequence): Filter.FilterResults {
-
-                // Process new filter string
-                prevConstraint = currConstraint
-                currConstraint = constraint.toString().trim { it <= ' ' }
-
+            /**
+             * Perform filtering using the specified filter constraint.
+             *
+             * @param constraint The specified constraint.
+             * @return The filtered objects.
+             */
+            fun doFiltering(constraint: CharSequence): List<Message> {
                 // Get filtered messages
                 val messages = if (!demo) {
                     Database.getInstance(activity)
                         .getMessagesConversationFiltered(
                             conversationId,
-                            currConstraint.toLowerCase())
+                            constraint.toString()
+                                .trim { it <= ' ' }
+                                .toLowerCase())
                 } else {
                     getConversationDemoMessages()
                 }
 
-                // Return filtered messages
-                val results = Filter.FilterResults()
-                results.count = messages.size
-                results.values = messages
-                return results
+                return messages
+            }
+
+            override fun performFiltering(
+                constraint: CharSequence): Filter.FilterResults {
+                try {
+                    val messages = doFiltering(constraint)
+
+                    // Return filtered messages
+                    val results = Filter.FilterResults()
+                    results.count = messages.size
+                    results.values = messages
+                    return results
+                } catch (e: Exception) {
+                    FirebaseCrash.report(e)
+                    return Filter.FilterResults()
+                }
             }
 
             override fun publishResults(constraint: CharSequence,
-                                        results: Filter.FilterResults) {
-                // Get new messages from results list
-                val newMessages: List<Message>
-                if (results.values != null) {
-                    // The Android results interface uses type Any, so we have
-                    // no choice but to use an unchecked cast
-                    @Suppress("UNCHECKED_CAST")
-                    newMessages = results.values as List<Message>
-                } else {
-                    newMessages = emptyList()
+                                        results: Filter.FilterResults?) {
+                if (results == null || results.values == null) {
+                    showSnackbar(activity, R.id.coordinator_layout,
+                                 activity.getString(
+                                     R.string.new_conversation_error_refresh))
+                    return
                 }
+
+                // Process new filter string
+                prevConstraint = currConstraint
+                currConstraint = constraint.toString().trim { it <= ' ' }
+
+                // The Android results interface uses type Any, so we have
+                // no choice but to use an unchecked cast
+                @Suppress("UNCHECKED_CAST")
+                val newMessages = results.values as List<Message>
 
                 // Create copy of current messages
                 val oldMessages = mutableListOf<Message>()

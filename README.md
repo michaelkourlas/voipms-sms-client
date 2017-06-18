@@ -1,5 +1,7 @@
 # VoIP.ms SMS #
 
+[![Build Status](https://travis-ci.org/michaelkourlas/voipms-sms-client.svg?branch=master)](https://travis-ci.org/michaelkourlas/voipms-sms-client)
+
 ## Overview ##
 
 VoIP.ms SMS is an Android messaging app for VoIP.ms that seeks to replicate the

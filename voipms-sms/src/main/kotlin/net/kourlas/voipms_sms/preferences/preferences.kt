@@ -27,7 +27,8 @@ fun getConnectTimeout(context: Context): Int {
         context,
         context.getString(R.string.preferences_network_connect_timeout_key),
         context.getString(
-            R.string.preferences_network_connect_timeout_default_value)).toInt()
+            R.string.preferences_network_connect_timeout_default_value))
+               .toIntOrNull() ?: 0
 }
 
 fun getDids(context: Context): Set<String> {
@@ -136,7 +137,8 @@ fun getReadTimeout(context: Context): Int {
         context,
         context.getString(R.string.preferences_network_read_timeout_key),
         context.getString(
-            R.string.preferences_network_read_timeout_default_value)).toInt()
+            R.string.preferences_network_read_timeout_default_value))
+               .toIntOrNull() ?: 0
 }
 
 fun isAccountActive(context: Context): Boolean {
