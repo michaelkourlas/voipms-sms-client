@@ -8,7 +8,6 @@ android:
   - tools
   - build-tools-25.0.2
   - android-25
-  - extra-google-m2repository
   - extra-android-m2repository
 before_install:
 - openssl aes-256-cbc -K $encrypted_cd6f32ab44b3_key -iv $encrypted_cd6f32ab44b3_iv
