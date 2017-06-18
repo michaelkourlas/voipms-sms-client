@@ -22,6 +22,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.ContactsContract
+import net.kourlas.voipms_sms.R
 
 
 /**
@@ -168,17 +169,67 @@ fun getContactPhotoUri(context: Context, uri: Uri,
 
 /**
  * Retrieves a bitmap from the specified URI using the specified context.
+ * Ensures that the bitmap is roughly the same size as the contact photo badge
+ * control.
+ *
+ * Adapted from https://developer.android.com/topic/performance/graphics/load-bitmap.html
  *
  * @param context The specified context.
  * @param uri The specified URI.
  */
 fun getBitmapFromUri(context: Context, uri: Uri): Bitmap? {
     try {
-        val inputStream = context.contentResolver.openInputStream(uri)
-        return BitmapFactory.decodeStream(inputStream)
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri),
+                                   null, options)
+
+        val size = context.resources.getDimensionPixelSize(
+            R.dimen.contact_badge)
+        options.inJustDecodeBounds = false
+        options.inSampleSize = calculateInSampleSize(options, size, size)
+        return BitmapFactory.decodeStream(
+            context.contentResolver.openInputStream(uri), null, options)
     } catch (e: Exception) {
         return null
     }
+}
+
+/**
+ * Calculates the inSampleSize required to ensure that the bitmap whose raw
+ * dimensions are contained in the specified options is decoded at roughly
+ * the specified width and height.
+ *
+ * Adapted from https://developer.android.com/topic/performance/graphics/load-bitmap.html
+ *
+ * @param options The options containing the bitmap's raw width and height.
+ * @param reqWidth The specified width.
+ * @param reqHeight The specified height.
+ * @return The inSampleSize required to ensure that the bitmap whose raw
+ * dimensions are contained in the specified options is decoded at roughly
+ * the specified width and height.
+ */
+fun calculateInSampleSize(options: BitmapFactory.Options,
+                          reqWidth: Int, reqHeight: Int): Int {
+    // Raw height and width of image
+    val height = options.outHeight
+    val width = options.outWidth
+    var inSampleSize = 1
+
+    if (height > reqHeight || width > reqWidth) {
+        val halfHeight = height / 2
+        val halfWidth = width / 2
+
+        // Calculate the largest inSampleSize value that is a power of 2 and
+        // keeps both height and width larger than the requested height and
+        // width
+        while (halfHeight / inSampleSize >= reqHeight
+               && halfWidth / inSampleSize >= reqWidth) {
+            inSampleSize *= 2
+        }
+    }
+
+    return inSampleSize
 }
 
 /**
