@@ -237,13 +237,16 @@ fun calculateInSampleSize(options: BitmapFactory.Options,
  * number. If a name is provided, the first letter of the name is used.
  * Otherwise, the first number in the phone number is used.
  *
+ * If the first letter or number does not exist, the ellipsis character is
+ * used.
+ *
  * @param name The specified name.
  * @param phoneNumber The specified phone number.
  */
 fun getContactInitial(name: String?, phoneNumber: String): String {
     if (name == null || name == phoneNumber) {
-        return getDigitsOfString(phoneNumber)[0].toString()
+        return getDigitsOfString(phoneNumber).getOrNull(0)?.toString() ?: "…"
     } else {
-        return name.toUpperCase()[0].toString()
+        return name.toUpperCase().getOrNull(0)?.toString() ?: "…"
     }
 }
