@@ -39,6 +39,13 @@ class DatabaseImportPreference : Preference {
                 defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     override fun onClick() {
+        val importPath = Database.getInstance(context).getImportPath()
+        if (importPath == null) {
+            showInfoDialog(context, context.getString(
+                R.string.preferences_database_external_storage_unavailable))
+            return
+        }
+
         // Prompt the user before importing the database
         showAlertDialog(
             context,
@@ -46,11 +53,11 @@ class DatabaseImportPreference : Preference {
                 R.string.preferences_database_import_confirm_title),
             context.getString(
                 R.string.preferences_database_import_confirm_text,
-                Database.getInstance(context).getImportPath().absolutePath),
+                importPath.absolutePath),
             context.getString(R.string.ok),
             DialogInterface.OnClickListener { _, _ ->
                 try {
-                    Database.getInstance(context).import()
+                    Database.getInstance(context).import(importPath)
                 } catch (e: Exception) {
                     showInfoDialog(context, context.getString(
                         R.string.preferences_database_import_fail),

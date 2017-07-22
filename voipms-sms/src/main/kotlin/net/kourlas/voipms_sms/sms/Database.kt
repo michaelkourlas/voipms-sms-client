@@ -145,8 +145,10 @@ class Database private constructor(private val context: Context) {
 
     /**
      * Exports the database to the database import and export file path.
+     *
+     * @param exportPath The export path.
      */
-    fun export() {
+    fun export(exportPath: File) {
         synchronized(this) {
             try {
                 // Close database to persist it to disk
@@ -154,7 +156,6 @@ class Database private constructor(private val context: Context) {
 
                 // Export database
                 val dbPath = context.getDatabasePath(Database.DATABASE_NAME)
-                val exportPath = getExportPath()
                 dbPath.copyTo(exportPath, overwrite = true)
             } finally {
                 // Refresh database
@@ -167,17 +168,17 @@ class Database private constructor(private val context: Context) {
     /**
      * Gets the database import and export file path.
      */
-    fun getImportPath(): File {
-        return File(context.getExternalFilesDir(null).absolutePath +
-                    "/backup_import.db")
+    fun getImportPath(): File? {
+        val dir = context.getExternalFilesDir(null) ?: return null
+        return File(dir.absolutePath + "/backup_import.db")
     }
 
     /**
      * Gets the database import and export file path.
      */
-    fun getExportPath(): File {
-        return File(context.getExternalFilesDir(null).absolutePath +
-                    "/backup_export.db")
+    fun getExportPath(): File? {
+        val dir = context.getExternalFilesDir(null) ?: return null
+        return File(dir.absolutePath + "/backup_export.db")
     }
 
     /**
@@ -474,8 +475,10 @@ class Database private constructor(private val context: Context) {
 
     /**
      * Imports the database from the database import and export file path.
+     *
+     * @param importPath The import path.
      */
-    fun import() {
+    fun import(importPath: File) {
         synchronized(this) {
             val dbPath = context.getDatabasePath(Database.DATABASE_NAME)
             val backupPath = File("${dbPath.absolutePath}.backup")
@@ -487,7 +490,6 @@ class Database private constructor(private val context: Context) {
                 // Try importing database, but restore from backup on failure
                 dbPath.copyTo(backupPath, overwrite = true)
                 try {
-                    val importPath = getImportPath()
                     importPath.copyTo(dbPath, overwrite = true)
 
                     // Try refreshing database

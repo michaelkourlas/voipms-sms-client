@@ -81,12 +81,12 @@
     <string name="preferences_database_import_title">Import database</string>
     <string name="preferences_database_import_summary">Import raw SQLite database from a file</string>
     <string name="preferences_database_import_confirm_title">Import database?</string>
-    <string name="preferences_database_import_confirm_text">Database will be imported from \'%1$s\'</string>
+    <string name="preferences_database_import_confirm_text">Database will be imported from \'%1$s\'.</string>
     <string name="preferences_database_import_fail">Failed to import database</string>
     <string name="preferences_database_export_title">Export database</string>
     <string name="preferences_database_export_summary">Export raw SQLite database to a file</string>
     <string name="preferences_database_export_confirm_title">Export database?</string>
-    <string name="preferences_database_export_confirm_text">Database will be exported to \'%1$s\'</string>
+    <string name="preferences_database_export_confirm_text">Database will be exported to \'%1$s\'.</string>
     <string name="preferences_database_export_fail">Failed to export database</string>
     <string name="preferences_database_clean_up_title">Clean up database</string>
     <string name="preferences_database_clean_up_summary">Remove outdated information from database</string>
@@ -96,6 +96,7 @@
     <string name="preferences_database_delete_summary">Delete all messages and associated metadata</string>
     <string name="preferences_database_delete_confirm_title">Delete database?</string>
     <string name="preferences_database_delete_confirm_message">This action cannot be undone.</string>
+    <string name="preferences_database_external_storage_unavailable">External storage unavailable.</string>
 
     <!-- Uncategorized -->
     <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>

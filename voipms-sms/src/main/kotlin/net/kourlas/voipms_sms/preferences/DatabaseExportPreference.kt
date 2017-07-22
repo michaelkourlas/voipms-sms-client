@@ -39,6 +39,13 @@ class DatabaseExportPreference : Preference {
                 defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     override fun onClick() {
+        val exportPath = Database.getInstance(context).getExportPath()
+        if (exportPath == null) {
+            showInfoDialog(context, context.getString(
+                R.string.preferences_database_external_storage_unavailable))
+            return
+        }
+
         // Prompt the user before exporting the database
         showAlertDialog(
             context,
@@ -46,11 +53,11 @@ class DatabaseExportPreference : Preference {
                 R.string.preferences_database_export_confirm_title),
             context.getString(
                 R.string.preferences_database_export_confirm_text,
-                Database.getInstance(context).getExportPath().absolutePath),
+                exportPath.absolutePath),
             context.getString(R.string.ok),
             DialogInterface.OnClickListener { _, _ ->
                 try {
-                    Database.getInstance(context).export()
+                    Database.getInstance(context).export(exportPath)
                 } catch (e: Exception) {
                     showInfoDialog(context, context.getString(
                         R.string.preferences_database_export_fail),
