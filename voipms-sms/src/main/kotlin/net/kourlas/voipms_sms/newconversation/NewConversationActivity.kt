@@ -259,7 +259,10 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         // If the user has multiple DIDs, allow the user to select the one
         // they want to use with the conversation
         val dids = getDids(this).toList()
-        if (dids.size > 1) {
+        if (dids.isEmpty()) {
+            // Silently fail if no DID set
+            return
+        } else if (dids.size > 1) {
             var selectedIndex: Int = 0
             AlertDialog.Builder(this, R.style.DialogTheme).apply {
                 setTitle("Select DID")
