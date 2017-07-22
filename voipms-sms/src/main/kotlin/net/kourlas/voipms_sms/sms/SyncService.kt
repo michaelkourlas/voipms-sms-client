@@ -179,7 +179,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
         var daysRemaining = daysDifference
         val periods = mutableListOf<Pair<Date, Date>>()
         while (daysRemaining > 90L) {
-            val last = if (periods.isEmpty()) now else periods.last().second
+            val last = if (periods.isEmpty()) then else periods.last().second
             val calendar = Calendar.getInstance(
                 TimeZone.getTimeZone("America/New_York"), Locale.US)
             calendar.time = last
