@@ -423,7 +423,7 @@ class NewConversationRecyclerViewAdapter(
                         val phoneNumber = cursor.getString(
                             cursor.getColumnIndex(
                                 ContactsContract.CommonDataKinds
-                                    .Phone.NUMBER))
+                                    .Phone.NUMBER)) ?: continue
                         val phoneNumberType = getPhoneNumberType(
                             cursor.getInt(
                                 cursor.getColumnIndex(
