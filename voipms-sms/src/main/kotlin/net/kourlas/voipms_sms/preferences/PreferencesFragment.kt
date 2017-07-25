@@ -117,8 +117,8 @@ class PreferencesFragment : PreferenceFragment(),
         val formattedDids = dids.map(::getFormattedPhoneNumber).toTypedArray()
         val activeDids = dids.map { getDids(activity).contains(it) }
             .toBooleanArray()
-        val selectedDids = mutableSetOf<String>()
-        selectedDids.addAll(getDids(activity))
+        val selectedDids = dids.filter { getDids(activity).contains(it) }
+            .toMutableSet()
 
         // Show dialog to allow user to select DIDs
         AlertDialog.Builder(activity, R.style.DialogTheme).apply {
