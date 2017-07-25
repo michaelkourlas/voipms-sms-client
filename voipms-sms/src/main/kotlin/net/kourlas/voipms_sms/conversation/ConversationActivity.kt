@@ -42,6 +42,7 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.futuremind.recyclerviewfastscroll.FastScroller
+import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
@@ -166,23 +167,38 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 val message = Database.getInstance(this)
                                   .getMessageDatabaseId(
                                       uri.getQueryParameter("id").toLong())
-                              ?: throw Exception("Invalid URI $data")
-                did = message.did
-                contact = message.contact
+                if (message == null) {
+                    FirebaseCrash.report(Exception("Invalid URI: '$data'"))
+                    finish()
+                    return
+                } else {
+                    did = message.did
+                    contact = message.contact
+                }
             } else if (uri.getQueryParameter("did") != null
                        && uri.getQueryParameter("contact") != null) {
                 // Firebase conversation index URL
                 did = uri.getQueryParameter("did")
                 contact = uri.getQueryParameter("contact")
             } else {
-                throw Exception("Invalid URI $data")
+                FirebaseCrash.report(Exception("Invalid URI: '$data'"))
+                finish()
+                return
             }
         } else {
             // Standard intent
-            did = intent.getStringExtra(getString(R.string.conversation_did))
-                  ?: getDids(applicationContext).first()
-            contact = intent.getStringExtra(getString(
+            val d = intent.getStringExtra(getString(R.string.conversation_did))
+            val c = intent.getStringExtra(getString(
                 R.string.conversation_contact))
+            if (d == null || c == null) {
+                FirebaseCrash.report(Exception("No DID or contact specified:" +
+                                               " did: '$d', contact: '$c'"))
+                finish()
+                return
+            } else {
+                did = d
+                contact = c
+            }
         }
 
         if (contact.length == 11 && contact[0] == '1') {
