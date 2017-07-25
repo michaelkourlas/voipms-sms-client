@@ -250,8 +250,9 @@ open class ConversationsActivity : AppCompatActivity(),
         firstRunDialog?.dismiss()
 
         // Unregister all dynamic receivers for this activity
-        unregisterReceiver(syncCompleteReceiver)
-        unregisterReceiver(pushNotificationsRegistrationCompleteReceiver)
+        safeUnregisterReceiver(this, syncCompleteReceiver)
+        safeUnregisterReceiver(this,
+                               pushNotificationsRegistrationCompleteReceiver)
 
         // Track number of activities
         (application as CustomApplication).conversationsActivityDecrementCount()

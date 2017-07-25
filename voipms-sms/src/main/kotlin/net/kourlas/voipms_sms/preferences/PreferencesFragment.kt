@@ -182,9 +182,11 @@ class PreferencesFragment : PreferenceFragment(),
         super.onPause()
 
         // Unregister dynamic receivers for this fragment
-        activity.unregisterReceiver(
+        safeUnregisterReceiver(
+            activity,
             pushNotificationsRegistrationCompleteReceiver)
-        activity.unregisterReceiver(
+        safeUnregisterReceiver(
+            activity,
             didRetrievalCompleteReceiver)
     }
 

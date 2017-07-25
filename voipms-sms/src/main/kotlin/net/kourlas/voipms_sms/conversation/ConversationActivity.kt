@@ -421,9 +421,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         super.onPause()
 
         // Unregister all dynamic receivers for this activity
-        unregisterReceiver(syncCompleteReceiver)
-        unregisterReceiver(sendingMessageReceiver)
-        unregisterReceiver(sentMessageReceiver)
+        safeUnregisterReceiver(this, syncCompleteReceiver)
+        safeUnregisterReceiver(this, sendingMessageReceiver)
+        safeUnregisterReceiver(this, sentMessageReceiver)
 
         // Track number of activities
         (application as CustomApplication).conversationActivityDecrementCount(
