@@ -68,19 +68,17 @@ fun getFormattedPhoneNumber(phoneNumber: String): String {
  * @param type The specified phone number type.
  * @return The string representation of the specified phone number type.
  */
-fun getPhoneNumberType(type: Int): String {
-    when (type) {
-        ContactsContract.CommonDataKinds.Phone.TYPE_HOME -> return "Home"
-        ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE -> return "Mobile"
-        ContactsContract.CommonDataKinds.Phone.TYPE_WORK -> return "Work"
-        ContactsContract.CommonDataKinds.Phone.TYPE_FAX_HOME -> return "Home Fax"
-        ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK -> return "Work Fax"
-        ContactsContract.CommonDataKinds.Phone.TYPE_MAIN -> return "Main"
-        ContactsContract.CommonDataKinds.Phone.TYPE_OTHER -> return "Other"
-        ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM -> return "Custom"
-        ContactsContract.CommonDataKinds.Phone.TYPE_PAGER -> return "Pager"
-        else -> return ""
-    }
+fun getPhoneNumberType(type: Int): String = when (type) {
+    ContactsContract.CommonDataKinds.Phone.TYPE_HOME -> "Home"
+    ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE -> "Mobile"
+    ContactsContract.CommonDataKinds.Phone.TYPE_WORK -> "Work"
+    ContactsContract.CommonDataKinds.Phone.TYPE_FAX_HOME -> "Home Fax"
+    ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK -> "Work Fax"
+    ContactsContract.CommonDataKinds.Phone.TYPE_MAIN -> "Main"
+    ContactsContract.CommonDataKinds.Phone.TYPE_OTHER -> "Other"
+    ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM -> "Custom"
+    ContactsContract.CommonDataKinds.Phone.TYPE_PAGER -> "Pager"
+    else -> ""
 }
 
 /**

@@ -37,6 +37,7 @@ class DidsPreference : Preference {
 
     // Additional constructors required for use by PreferencesFragment
     constructor(context: Context) : super(context)
+
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?,
                 defStyleAttr: Int) : super(context, attrs, defStyleAttr)
@@ -46,8 +47,7 @@ class DidsPreference : Preference {
                 defStyleRes: Int) : super(context, attrs, defStyleAttr,
                                           defStyleRes)
 
-    override fun onClick() {
+    override fun onClick() =
         // Implementation is in PreferencesFragment
         fragment.retrieveDids()
-    }
 }

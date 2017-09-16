@@ -43,7 +43,7 @@ import java.util.*
  * Service used to synchronize the database with VoIP.ms.
  */
 class SyncService : IntentService(SyncService::class.java.name) {
-    var error: String? = null
+    private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
         // Perform synchronization
@@ -68,7 +68,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
         completeWakefulIntent(intent)
     }
 
-    fun handleSync(intent: Intent?) {
+    private fun handleSync(intent: Intent?) {
         try {
             // Terminate quietly if intent does not exist or does not contain
             // the send SMS action
@@ -130,7 +130,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
      * message retrieval start date.
      * @return A list of retrieval requests.
      */
-    fun createRetrievalRequests(
+    private fun createRetrievalRequests(
         retrieveOnlyRecentMessages: Boolean): List<RetrievalRequest> {
         val retrievalRequests = mutableListOf<RetrievalRequest>()
 
@@ -224,15 +224,13 @@ class SyncService : IntentService(SyncService::class.java.name) {
      * @param retrieveDeletedMessages If true, messages are retrieved from
      * VoIP.ms even after being deleted locally.
      */
-    fun processRequests(retrievalRequests: List<RetrievalRequest>,
-                        retrieveDeletedMessages: Boolean) {
-        retrievalRequests
-            .map {
-                processRetrievalRequest(it, retrieveDeletedMessages)
-            }
-            .filterNot { it }
-            .forEach { return }
-    }
+    private fun processRequests(retrievalRequests: List<RetrievalRequest>,
+                                retrieveDeletedMessages: Boolean) = retrievalRequests
+        .map {
+            processRetrievalRequest(it, retrieveDeletedMessages)
+        }
+        .filterNot { it }
+        .forEach { return }
 
     /**
      * Processes the specified retrieval request using the VoIP.ms API.
@@ -242,8 +240,8 @@ class SyncService : IntentService(SyncService::class.java.name) {
      * VoIP.ms even after being deleted locally.
      * @return True if the retrieval request was successfully processed.
      */
-    fun processRetrievalRequest(request: RetrievalRequest,
-                                retrieveDeletedMessages: Boolean): Boolean {
+    private fun processRetrievalRequest(request: RetrievalRequest,
+                                        retrieveDeletedMessages: Boolean): Boolean {
         val response = sendRequestWithVoipMsApi(request.url) ?: return false
 
         // Extract messages from the VoIP.ms API response
@@ -262,7 +260,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
                     R.string.sync_error_api_parse)
                 return false
             }
-            for (i in 0..rawMessages.length() - 1) {
+            for (i in 0 until rawMessages.length()) {
                 val rawSms = rawMessages.optJSONObject(i)
                 if (rawSms == null) {
                     error = applicationContext.getString(
@@ -328,7 +326,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
      * @param url The specified url.
      * @return The response received.
      */
-    fun sendRequestWithVoipMsApi(url: String): JSONObject? {
+    private fun sendRequestWithVoipMsApi(url: String): JSONObject? {
         val response: JSONObject
         try {
             response = getJson(applicationContext, url)
@@ -376,7 +374,8 @@ class SyncService : IntentService(SyncService::class.java.name) {
      * @param url The specified URL.
      * @param period The specified period.
      */
-    data class RetrievalRequest(val url: String, val period: Pair<Date, Date>)
+    data class RetrievalRequest(val url: String,
+                                private val period: Pair<Date, Date>)
 
     companion object {
         /**

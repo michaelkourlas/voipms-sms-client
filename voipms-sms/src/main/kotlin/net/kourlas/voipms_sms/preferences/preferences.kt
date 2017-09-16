@@ -23,99 +23,94 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.util.*
 
-fun getConnectTimeout(context: Context): Int {
-    return getStringPreference(
+fun getConnectTimeout(context: Context): Int =
+    getStringPreference(
         context,
         context.getString(R.string.preferences_network_connect_timeout_key),
         context.getString(
             R.string.preferences_network_connect_timeout_default_value))
-               .toIntOrNull() ?: 0
-}
+        .toIntOrNull() ?: 0
 
 fun getDids(context: Context): Set<String> {
     val did = getStringPreference(context, context.getString(
         R.string.preferences_account_did_key), "")
-    val default: Set<String>
-    if (did != "") {
-        default = setOf(did)
+    val default: Set<String> = if (did != "") {
+        setOf(did)
     } else {
-        default = emptySet()
+        emptySet()
     }
     return getStringSetPreference(context, context.getString(
         R.string.preferences_account_dids_key), default)
 }
 
-fun getEmail(context: Context): String {
-    return getStringPreference(context, context.getString(
-        R.string.preferences_account_email_key), "")
-}
+fun getEmail(context: Context): String =
+    getStringPreference(context,
+                        context.getString(
+                            R.string.preferences_account_email_key),
+                        "")
 
-fun getLastCompleteSyncTime(context: Context): Long {
-    return getLongPreference(context, context.getString(
-        R.string.preferences_sync_last_complete_time_key), 0)
-}
+fun getLastCompleteSyncTime(context: Context): Long =
+    getLongPreference(context,
+                      context.getString(
+                          R.string.preferences_sync_last_complete_time_key),
+                      0)
 
-fun getNotificationsEnabled(context: Context): Boolean {
-    return getBooleanPreference(
+fun getNotificationsEnabled(context: Context): Boolean =
+    getBooleanPreference(
         context,
         context.getString(R.string.preferences_notifications_enable_key),
         context.getString(
             R.string.preferences_notifications_enable_default_value)
             .toBoolean())
-}
 
-fun getNotificationVibrateEnabled(context: Context): Boolean {
-    return getBooleanPreference(
+fun getNotificationVibrateEnabled(context: Context): Boolean =
+    getBooleanPreference(
         context,
         context.getString(
             R.string.preferences_notifications_vibrate_key),
         context.getString(
             R.string.preferences_notifications_vibrate_default_value)
             .toBoolean())
-}
 
-fun getNotificationSound(context: Context): String {
-    return getStringPreference(
+fun getNotificationSound(context: Context): String =
+    getStringPreference(
         context,
         context.getString(
             R.string.preferences_notifications_sound_key),
         context.getString(
             R.string.preferences_notifications_sound_default_value))
-}
 
-fun getPassword(context: Context): String {
-    return getStringPreference(context, context.getString(
-        R.string.preferences_account_password_key), "")
-}
+fun getPassword(context: Context): String =
+    getStringPreference(context,
+                        context.getString(
+                            R.string.preferences_account_password_key),
+                        "")
 
-fun getRetrieveDeletedMessages(context: Context): Boolean {
-    return getBooleanPreference(
+fun getRetrieveDeletedMessages(context: Context): Boolean =
+    getBooleanPreference(
         context,
         context.getString(
             R.string.preferences_sync_retrieve_deleted_messages_key),
         context.getString(
             R.string.preferences_sync_retrieve_deleted_messages_default_value)
             .toBoolean())
-}
 
-fun getRetrieveOnlyRecentMessages(context: Context): Boolean {
-    return getBooleanPreference(
+fun getRetrieveOnlyRecentMessages(context: Context): Boolean =
+    getBooleanPreference(
         context,
         context.getString(
             R.string.preferences_sync_retrieve_only_recent_messages_key),
         context.getString(
             R.string.preferences_sync_retrieve_only_recent_messages_default_value)
             .toBoolean())
-}
 
-fun getSetupCompletedForVersion(context: Context): Long {
-    return getLongPreference(
+fun getSetupCompletedForVersion(context: Context): Long =
+    getLongPreference(
         context,
         context.getString(R.string.preferences_setup_completed_for_version_key),
         context.getString(
             R.string.preferences_setup_completed_for_version_default_value)
             .toLong())
-}
 
 fun getStartDate(context: Context): Date {
     val milliseconds = getLongPreference(context, context.getString(
@@ -127,25 +122,26 @@ fun getStartDate(context: Context): Date {
     }
 }
 
-fun getSyncInterval(context: Context): Double {
-    return getStringPreference(context, context.getString(
-        R.string.preferences_sync_interval_key), "0").toDouble()
-}
+fun getSyncInterval(context: Context): Double =
+    getStringPreference(context,
+                        context.getString(
+                            R.string.preferences_sync_interval_key),
+                        "0").toDouble()
 
 
-fun getReadTimeout(context: Context): Int {
-    return getStringPreference(
+fun getReadTimeout(context: Context): Int =
+    getStringPreference(
         context,
         context.getString(R.string.preferences_network_read_timeout_key),
         context.getString(
             R.string.preferences_network_read_timeout_default_value))
-               .toIntOrNull() ?: 0
-}
+        .toIntOrNull() ?: 0
 
-fun isAccountActive(context: Context): Boolean {
-    return getEmail(context) != "" && getPassword(context) != ""
-           && getDids(context).isNotEmpty()
-}
+fun isAccountActive(context: Context): Boolean =
+    getEmail(
+        context) != "" && getPassword(context) != ""
+    && getDids(
+        context).isNotEmpty()
 
 fun setDids(context: Context, dids: Set<String>) {
     setStringSetPreference(context, context.getString(
@@ -153,10 +149,11 @@ fun setDids(context: Context, dids: Set<String>) {
     subscribeToDidTopics(context)
 }
 
-fun setLastCompleteSyncTime(context: Context, lastCompleteSyncTime: Long) {
-    setLongPreference(context, context.getString(
+fun setLastCompleteSyncTime(context: Context,
+                            lastCompleteSyncTime: Long) =
+    setLongPreference(
+        context, context.getString(
         R.string.preferences_sync_last_complete_time_key), lastCompleteSyncTime)
-}
 
 fun setSetupCompletedForVersion(context: Context, version: Long) {
     if (getLongPreference(context, context.getString(
@@ -169,10 +166,11 @@ fun setSetupCompletedForVersion(context: Context, version: Long) {
     }
 }
 
-fun setStartDate(context: Context, date: Date) {
-    setLongPreference(context, context.getString(
-        R.string.preferences_sync_start_date_key), date.time)
-}
+fun setStartDate(context: Context, date: Date) =
+    setLongPreference(context,
+                      context.getString(
+                          R.string.preferences_sync_start_date_key),
+                      date.time)
 
 private fun getBooleanPreference(context: Context, key: String,
                                  default: Boolean): Boolean {

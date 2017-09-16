@@ -85,7 +85,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private var contactBitmap: Bitmap? = null
 
     // Broadcast receivers
-    val syncCompleteReceiver =
+    private val syncCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val error = intent?.getStringExtra(getString(
@@ -100,10 +100,10 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             }
         }
     private val sendingMessageReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
+        override fun onReceive(context: Context?,
+                               intent: Intent?) =
             // Refresh adapter to show message being sent
             adapter.refresh()
-        }
     }
     private val sentMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -144,6 +144,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         setupMessageText()
         setupSendButton()
 
+        @Suppress("ConstantConditionIf")
         if (demo) {
             Notifications.getInstance(application).showDemoNotification(
                 getDemoNotification())
@@ -156,7 +157,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      *
      * @param intent The intent that this activity was launched with.
      */
-    fun setupDidAndContact(intent: Intent) {
+    private fun setupDidAndContact(intent: Intent) {
         val action = intent.action
         val data = intent.dataString
         if (Intent.ACTION_VIEW == action && data != null) {
@@ -165,8 +166,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             if (uri.getQueryParameter("id") != null) {
                 // Firebase message index URL
                 val message = Database.getInstance(this)
-                                  .getMessageDatabaseId(
-                                      uri.getQueryParameter("id").toLong())
+                    .getMessageDatabaseId(
+                        uri.getQueryParameter("id").toLong())
                 if (message == null) {
                     FirebaseCrash.report(Exception("Invalid URI: '$data'"))
                     finish()
@@ -207,6 +208,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             contact = contact.substring(1)
         }
         // Get DID and contact name and photo for use in recycler view adapter
+        @Suppress("ConstantConditionIf")
         contactName = if (!demo) {
             getContactName(this, contact)
         } else {
@@ -220,7 +222,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      */
     private fun setupToolbar() {
         // Set up toolbar
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         ViewCompat.setElevation(toolbar, resources
             .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
@@ -248,7 +250,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         // Most recent message at bottom of list
         layoutManager.stackFromEnd = true
-        recyclerView = findViewById(R.id.list) as RecyclerView
+        recyclerView = findViewById(R.id.list)
         adapter = ConversationRecyclerViewAdapter(this, recyclerView,
                                                   layoutManager,
                                                   conversationId,
@@ -258,7 +260,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        val fastScroller = findViewById(R.id.fastscroll) as FastScroller
+        val fastScroller = findViewById<FastScroller>(R.id.fastscroll)
         fastScroller.setRecyclerView(recyclerView)
         fastScroller.setViewProvider(
             CustomScrollerViewProvider())
@@ -267,31 +269,27 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     /**
      * Sets up the activity message text container.
      */
-    fun setupMessageText() {
+    private fun setupMessageText() {
         // Set up container for message text box
-        val messageSection = findViewById(
-            R.id.message_section) as LinearLayout
+        val messageSection = findViewById<LinearLayout>(R.id.message_section)
         ViewCompat.setElevation(
             messageSection,
             resources.getDimension(R.dimen.send_message_elevation))
 
         // Set up message text box
-        val messageEditText = findViewById(R.id.message_edit_text) as EditText
+        val messageEditText = findViewById<EditText>(R.id.message_edit_text)
         messageEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int,
                                            count: Int,
-                                           after: Int) {
-                // Do nothing.
-            }
+                                           after: Int) = // Do nothing.
+                Unit
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int,
-                                       count: Int) {
-                // Do nothing.
-            }
+                                       count: Int) = // Do nothing.
+                Unit
 
-            override fun afterTextChanged(s: Editable) {
+            override fun afterTextChanged(s: Editable) =
                 onMessageTextChange(s.toString())
-            }
         })
         messageEditText.onFocusChangeListener =
             View.OnFocusChangeListener { _, hasFocus ->
@@ -320,15 +318,16 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private fun onMessageTextChange(str: String) {
         val maxLength = applicationContext.resources.getInteger(
             R.integer.sms_max_length)
-        val charsRemainingTextView = findViewById(
-            R.id.chars_remaining_text) as TextView
+        val charsRemainingTextView = findViewById<TextView>(
+            R.id.chars_remaining_text)
 
         if (str.length <= maxLength) {
             if (str.length >= maxLength - 10) {
                 // Show "N" when there are N characters left in the first
                 // message and N <= 10
                 charsRemainingTextView.visibility = View.VISIBLE
-                charsRemainingTextView.text = (maxLength - str.length).toString()
+                charsRemainingTextView.text =
+                    (maxLength - str.length).toString()
             } else {
                 // Show nothing
                 charsRemainingTextView.visibility = View.GONE
@@ -355,9 +354,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     /**
      * Sets up the activity send button.
      */
-    fun setupSendButton() {
+    private fun setupSendButton() {
         // Set up send button
-        val sendButton = findViewById(R.id.send_button) as ImageButton
+        val sendButton = findViewById<ImageButton>(R.id.send_button)
         sendButton.setOnClickListener {
             this@ConversationActivity.sendMessage()
         }
@@ -368,7 +367,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      */
     private fun sendMessage() {
         // Get message from UI
-        val messageEditText = findViewById(R.id.message_edit_text) as EditText
+        val messageEditText = findViewById<EditText>(R.id.message_edit_text)
         val messageText = messageEditText.text.toString()
 
         if (messageText.trim() != "") {
@@ -395,7 +394,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                              R.string.sent_message_action, did, contact)))
 
         // Load draft message
-        val messageText = findViewById(R.id.message_edit_text) as EditText
+        val messageText = findViewById<EditText>(R.id.message_edit_text)
         val draftMessage = Database.getInstance(this).getMessageDraft(
             conversationId)
         if (draftMessage != null) {
@@ -454,9 +453,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             R.id.search_button).actionView as SearchView
         searchView.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String): Boolean {
-                    return false
-                }
+                override fun onQueryTextSubmit(query: String): Boolean = false
 
                 override fun onQueryTextChange(newText: String): Boolean {
                     adapter.refresh(newText)
@@ -607,9 +604,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         return true
     }
 
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-        return false
-    }
+    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean =
+        false
 
     override fun onActionItemClicked(mode: ActionMode,
                                      item: MenuItem): Boolean {
@@ -624,7 +620,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     }
 
     override fun onDestroyActionMode(actionMode: ActionMode) {
-        for (i in 0..adapter.itemCount - 1) {
+        for (i in 0 until adapter.itemCount) {
             adapter[i].setChecked(false, i)
         }
         this.actionMode = null
@@ -900,21 +896,19 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      * Update the visible menu buttons to match whether or not the conversation
      * is archived.
      */
-    fun updateButtons() {
-        runOnNewThread {
-            if (Database.getInstance(this)
-                .isConversationArchived(conversationId)) {
-                runOnUiThread {
-                    // If conversation archived, only show unarchive button
-                    menu.findItem(R.id.archive_button).isVisible = false
-                    menu.findItem(R.id.unarchive_button).isVisible = true
-                }
-            } else {
-                runOnUiThread {
-                    // If conversation unarchived, only show archive button
-                    menu.findItem(R.id.archive_button).isVisible = true
-                    menu.findItem(R.id.unarchive_button).isVisible = false
-                }
+    private fun updateButtons() = runOnNewThread {
+        if (Database.getInstance(this)
+            .isConversationArchived(conversationId)) {
+            runOnUiThread {
+                // If conversation archived, only show unarchive button
+                menu.findItem(R.id.archive_button).isVisible = false
+                menu.findItem(R.id.unarchive_button).isVisible = true
+            }
+        } else {
+            runOnUiThread {
+                // If conversation unarchived, only show archive button
+                menu.findItem(R.id.archive_button).isVisible = true
+                menu.findItem(R.id.unarchive_button).isVisible = false
             }
         }
     }

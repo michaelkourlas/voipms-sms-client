@@ -43,12 +43,12 @@ class PreferencesFragment : PreferenceFragment(),
     var progressDialog: ProgressDialog? = null
 
     // Preference change handlers
-    val syncIntervalPreferenceChangeListener =
+    private val syncIntervalPreferenceChangeListener =
         Preference.OnPreferenceChangeListener { _, _ ->
             SyncService.setupInterval(activity.applicationContext)
             true
         }
-    val notificationsPreferenceChangeListener =
+    private val notificationsPreferenceChangeListener =
         Preference.OnPreferenceChangeListener { _, newValue ->
             if (newValue as Boolean) {
                 enablePushNotifications()
@@ -57,14 +57,15 @@ class PreferencesFragment : PreferenceFragment(),
         }
 
     // Broadcast receivers
-    val pushNotificationsRegistrationCompleteReceiver =
+    private val pushNotificationsRegistrationCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 progressDialog?.dismiss()
 
                 // Show error if one occurred
-                val failedDids = intent?.getStringArrayListExtra(getString(
-                    R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids))
+                val failedDids = intent?.getStringArrayListExtra(
+                    getString(
+                        R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids))
                 if (failedDids == null) {
                     // Unknown error
                     showInfoDialog(activity, getString(
@@ -81,7 +82,7 @@ class PreferencesFragment : PreferenceFragment(),
                 setSetupCompletedForVersion(activity, 114)
             }
         }
-    val didRetrievalCompleteReceiver =
+    private val didRetrievalCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 progressDialog?.dismiss()
@@ -93,16 +94,14 @@ class PreferencesFragment : PreferenceFragment(),
                 val error = intent?.getStringExtra(
                     activity.getString(
                         R.string.retrieve_dids_complete_error))
-                if (dids == null) {
-                    showInfoDialog(
+                when {
+                    dids == null -> showInfoDialog(
                         activity,
                         activity.getString(
                             R.string.preferences_account_dids_error_unknown))
-                } else if (error != null) {
-                    showInfoDialog(activity, error)
-                } else {
-                    // Otherwise, show dialog to allow user to select DIDs
-                    showSelectDidsDialog(dids)
+                    error != null -> showInfoDialog(activity, error)
+                    else -> // Otherwise, show dialog to allow user to select DIDs
+                        showSelectDidsDialog(dids)
                 }
             }
         }
@@ -248,7 +247,7 @@ class PreferencesFragment : PreferenceFragment(),
      * Enables push notifications by showing a progress dialog and starting
      * the push notifications registration service.
      */
-    fun enablePushNotifications() {
+    private fun enablePushNotifications() {
         // Check if account is active and silently quit if not
         if (!isAccountActive(activity)) {
             setSetupCompletedForVersion(activity, 114)
@@ -288,10 +287,10 @@ class PreferencesFragment : PreferenceFragment(),
      * Updates the summary text and handlers for all preferences.
      */
     fun updateSummaryAndHandlers() {
-        for (i in 0..preferenceScreen.preferenceCount - 1) {
+        for (i in 0 until preferenceScreen.preferenceCount) {
             val preference = preferenceScreen.getPreference(i)
             if (preference is PreferenceGroup) {
-                for (j in 0..preference.preferenceCount - 1) {
+                for (j in 0 until preference.preferenceCount) {
                     val subPreference = preference.getPreference(j)
                     updateHandlersForPreference(subPreference)
                     updateSummaryTextForPreference(subPreference)

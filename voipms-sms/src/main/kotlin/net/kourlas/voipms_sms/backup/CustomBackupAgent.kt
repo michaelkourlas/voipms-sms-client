@@ -30,14 +30,10 @@ import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 class CustomBackupAgent : BackupAgent() {
     override fun onBackup(oldState: ParcelFileDescriptor,
                           data: BackupDataOutput,
-                          newState: ParcelFileDescriptor) {
-        // Do nothing.
-    }
+                          newState: ParcelFileDescriptor) = Unit
 
     override fun onRestore(data: BackupDataInput, appVersionCode: Int,
-                           newState: ParcelFileDescriptor) {
-        // Do nothing.
-    }
+                           newState: ParcelFileDescriptor) = Unit
 
     override fun onRestoreFinished() {
         super.onRestoreFinished()

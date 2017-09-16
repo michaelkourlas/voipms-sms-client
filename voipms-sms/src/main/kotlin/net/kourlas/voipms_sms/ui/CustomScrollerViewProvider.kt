@@ -60,32 +60,24 @@ class CustomScrollerViewProvider : ScrollerViewProvider() {
         return bubble
     }
 
-    override fun provideBubbleTextView(): TextView {
-        return bubble as TextView
+    override fun provideBubbleTextView(): TextView = bubble as TextView
+
+    override fun getBubbleOffset(): Int = if (scroller.isVertical) {
+        (handle.height.toFloat() / 2f - bubble.height).toInt()
+    } else {
+        (handle.width.toFloat() / 2f - bubble.width).toInt()
     }
 
-    override fun getBubbleOffset(): Int {
-        return if (scroller.isVertical) {
-            (handle.height.toFloat() / 2f - bubble.height).toInt()
-        } else {
-            (handle.width.toFloat() / 2f - bubble.width).toInt()
-        }
-    }
+    override fun provideHandleBehavior(): ViewBehavior? = CustomHandleBehavior(
+        VisibilityAnimationManager.Builder(handle)
+            .build(),
+        CustomHandleBehavior.HandleAnimationManager.Builder(handle)
+            .withGrabAnimator(-1)
+            .withReleaseAnimator(-1)
+            .build())
 
-    override fun provideHandleBehavior(): ViewBehavior? {
-        return CustomHandleBehavior(
-            VisibilityAnimationManager.Builder(handle)
-                .build(),
-            CustomHandleBehavior.HandleAnimationManager.Builder(handle)
-                .withGrabAnimator(-1)
-                .withReleaseAnimator(-1)
-                .build())
-    }
-
-    override fun provideBubbleBehavior(): ViewBehavior? {
-        return DefaultBubbleBehavior(
-            VisibilityAnimationManager.Builder(bubble).withPivotX(
-                1f).withPivotY(1f).build())
-    }
+    override fun provideBubbleBehavior(): ViewBehavior? = DefaultBubbleBehavior(
+        VisibilityAnimationManager.Builder(bubble).withPivotX(
+            1f).withPivotY(1f).build())
 }
 

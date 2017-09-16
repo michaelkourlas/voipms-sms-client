@@ -47,9 +47,7 @@ class CustomHandleBehavior(
         grabManager.onRelease()
     }
 
-    override fun onScrollStarted() {
-        visibilityManager.show()
-    }
+    override fun onScrollStarted() = visibilityManager.show()
 
     override fun onScrollFinished() {
         if (!isGrabbed) visibilityManager.hide()
@@ -108,10 +106,9 @@ class CustomHandleBehavior(
                 return this
             }
 
-            fun build(): HandleAnimationManager {
-                return HandleAnimationManager(handle, grabAnimator,
-                                              releaseAnimator)
-            }
+            fun build(): HandleAnimationManager = HandleAnimationManager(handle,
+                                                                         grabAnimator,
+                                                                         releaseAnimator)
         }
     }
 

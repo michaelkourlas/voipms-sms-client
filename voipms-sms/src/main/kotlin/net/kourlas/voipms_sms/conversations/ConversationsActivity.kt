@@ -69,7 +69,7 @@ open class ConversationsActivity : AppCompatActivity(),
     var progressDialog: ProgressDialog? = null
 
     // Broadcast receivers
-    val syncCompleteReceiver =
+    private val syncCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val error = intent?.getStringExtra(getString(
@@ -83,7 +83,7 @@ open class ConversationsActivity : AppCompatActivity(),
                 if (intent?.getBooleanExtra(getString(
                     R.string.sync_complete_full), false) == true) {
                     // Turn off refresh icon
-                    val swipeRefreshLayout = findViewById(
+                    val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
                         R.id.swipe_refresh_layout) as SwipeRefreshLayout
                     swipeRefreshLayout.isRefreshing = false
                 }
@@ -91,7 +91,7 @@ open class ConversationsActivity : AppCompatActivity(),
                 adapter.refresh()
             }
         }
-    val pushNotificationsRegistrationCompleteReceiver =
+    private val pushNotificationsRegistrationCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 progressDialog?.dismiss()
@@ -143,7 +143,7 @@ open class ConversationsActivity : AppCompatActivity(),
      */
     open fun setupToolbar() {
         // Set up toolbar
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         ViewCompat.setElevation(toolbar, resources
             .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
@@ -152,18 +152,18 @@ open class ConversationsActivity : AppCompatActivity(),
     /**
      * Sets up the activity recycler view and swipe refresh layout.
      */
-    fun setupRecyclerViewAndSwipeRefreshLayout() {
+    private fun setupRecyclerViewAndSwipeRefreshLayout() {
         val layoutManager = LinearLayoutManager(this)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
-        recyclerView = findViewById(R.id.list) as RecyclerView
+        recyclerView = findViewById(R.id.list)
         adapter = ConversationsRecyclerViewAdapter(this, recyclerView,
                                                    layoutManager)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        val swipeRefreshLayout = findViewById(
-            R.id.swipe_refresh_layout) as SwipeRefreshLayout
+        val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
+            R.id.swipe_refresh_layout)
         swipeRefreshLayout.setOnRefreshListener {
             adapter.refresh()
             startService(SyncService.getIntent(this, forceRecent = false))
@@ -175,7 +175,7 @@ open class ConversationsActivity : AppCompatActivity(),
      * Sets up the new conversation floating action button.
      */
     open fun setupNewConversationButton() {
-        val button = findViewById(R.id.new_button) as FloatingActionButton
+        val button = findViewById<FloatingActionButton>(R.id.new_button)
         button.setOnClickListener {
             if (isAccountActive(this)) {
                 val newConversationIntent = Intent(
@@ -226,7 +226,7 @@ open class ConversationsActivity : AppCompatActivity(),
      * Show a dialog with help information when the app is running for the
      * first time.
      */
-    fun onFirstRun() {
+    private fun onFirstRun() {
         // Show a dialog with help information on first run of the app
         firstRunDialog = showAlertDialog(
             this,
@@ -271,9 +271,7 @@ open class ConversationsActivity : AppCompatActivity(),
         searchView.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         searchView.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String): Boolean {
-                    return false
-                }
+                override fun onQueryTextSubmit(query: String): Boolean = false
 
                 override fun onQueryTextChange(newText: String): Boolean {
                     adapter.refresh(newText)
@@ -348,12 +346,11 @@ open class ConversationsActivity : AppCompatActivity(),
         return false
     }
 
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-        return false
-    }
+    override fun onPrepareActionMode(mode: ActionMode,
+                                     menu: Menu): Boolean = false
 
     override fun onDestroyActionMode(mode: ActionMode) {
-        for (i in 0..adapter.itemCount - 1) {
+        for (i in 0 until adapter.itemCount) {
             adapter[i].setChecked(i, false)
         }
         actionMode = null
@@ -604,7 +601,7 @@ open class ConversationsActivity : AppCompatActivity(),
      * Enables push notifications after an upgrade by showing a progress dialog
      * and starting the push notifications registration service.
      */
-    fun onSetupIncompleteForVersion114() {
+    private fun onSetupIncompleteForVersion114() {
         // Check if account is active and notifications are enabled
         // and silently quit if not
         if (!isAccountActive(this) || !getNotificationsEnabled(this)) {

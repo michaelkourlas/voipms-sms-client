@@ -68,12 +68,10 @@ class NewConversationRecyclerViewAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup,
-                                    viewType: Int): ContactViewHolder {
-        // There is only one item view type
-        return ContactViewHolder(LayoutInflater.from(parent.context)
-                                     .inflate(R.layout.new_conversation_item,
-                                              parent, false))
-    }
+                                    viewType: Int): ContactViewHolder = // There is only one item view type
+        ContactViewHolder(LayoutInflater.from(parent.context)
+                              .inflate(R.layout.new_conversation_item,
+                                       parent, false))
 
     override fun onBindViewHolder(holder: ContactViewHolder, position: Int) {
         updateViewHolderIndex(holder, position)
@@ -88,7 +86,8 @@ class NewConversationRecyclerViewAdapter(
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    fun updateViewHolderIndex(holder: ContactViewHolder, position: Int) {
+    private fun updateViewHolderIndex(holder: ContactViewHolder,
+                                      position: Int) {
         val contactItem = contactItems[position]
 
         // Add indexes to entries where appropriate
@@ -123,7 +122,8 @@ class NewConversationRecyclerViewAdapter(
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    fun updateViewHolderContactBadge(holder: ContactViewHolder, position: Int) {
+    private fun updateViewHolderContactBadge(holder: ContactViewHolder,
+                                             position: Int) {
         val contactItem = contactItems[position]
 
         // Set contact photo
@@ -163,7 +163,8 @@ class NewConversationRecyclerViewAdapter(
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    fun updateViewHolderContact(holder: ContactViewHolder, position: Int) {
+    private fun updateViewHolderContact(holder: ContactViewHolder,
+                                        position: Int) {
         val contactItem = contactItems[position]
 
         // Set contact name
@@ -193,133 +194,126 @@ class NewConversationRecyclerViewAdapter(
         }
     }
 
-    override fun getItemCount(): Int {
-        return contactItems.size
-    }
+    override fun getItemCount(): Int = contactItems.size
 
-    operator fun get(i: Int): BaseContactItem {
-        return contactItems[i]
-    }
+    operator fun get(i: Int): BaseContactItem = contactItems[i]
 
-    override fun getFilter(): Filter {
-        return object : Filter() {
-            /**
-             * Perform filtering using the specified filter constraint.
-             *
-             * @param constraint The specified constraint.
-             * @return The filtered objects.
-             */
-            fun doFiltering(constraint: CharSequence): List<BaseContactItem> {
-                val filteredContactItems = mutableListOf<BaseContactItem>()
+    override fun getFilter(): Filter = object : Filter() {
+        /**
+         * Perform filtering using the specified filter constraint.
+         *
+         * @param constraint The specified constraint.
+         * @return The filtered objects.
+         */
+        fun doFiltering(constraint: CharSequence): List<BaseContactItem> {
+            val filteredContactItems = mutableListOf<BaseContactItem>()
 
-                // If there is a typed in phone number, always include it in
-                // the filtered list
-                if (typedInPhoneNumber != "") {
-                    filteredContactItems.add(TypedInContactItem(
-                        typedInPhoneNumber))
-                }
-
-                // Perform actual filtering
-                val currConstraint = constraint.toString().trim { it <= ' ' }
-                for (contactItem in allContactItems) {
-                    if (contactItem is ContactItem) {
-                        val match =
-                            contactItem.name.toLowerCase().contains(
-                                currConstraint.toLowerCase())
-                            || contactItem.primaryPhoneNumber.toLowerCase()
-                                .contains(currConstraint.toLowerCase())
-                            || (getDigitsOfString(currConstraint) != ""
-                                && getDigitsOfString(
-                                contactItem.primaryPhoneNumber).contains(
-                                getDigitsOfString(currConstraint)))
-                        if (match) {
-                            filteredContactItems.add(contactItem)
-                        }
-                    }
-                }
-
-                return filteredContactItems
+            // If there is a typed in phone number, always include it in
+            // the filtered list
+            if (typedInPhoneNumber != "") {
+                filteredContactItems.add(TypedInContactItem(
+                    typedInPhoneNumber))
             }
 
-            override fun performFiltering(
-                constraint: CharSequence): FilterResults {
-
-                try {
-                    val filteredContactItems = doFiltering(constraint)
-
-                    // Return the filtered results
-                    val results = Filter.FilterResults()
-                    results.count = filteredContactItems.size
-                    results.values = filteredContactItems
-                    return results
-                } catch (e: Exception) {
-                    FirebaseCrash.report(e)
-                    return Filter.FilterResults()
+            // Perform actual filtering
+            val currConstraint = constraint.toString().trim { it <= ' ' }
+            for (contactItem in allContactItems) {
+                val match =
+                    contactItem.name.toLowerCase().contains(
+                        currConstraint.toLowerCase())
+                    || contactItem.primaryPhoneNumber.toLowerCase()
+                        .contains(currConstraint.toLowerCase())
+                    || (getDigitsOfString(currConstraint) != ""
+                        && getDigitsOfString(
+                        contactItem.primaryPhoneNumber).contains(
+                        getDigitsOfString(currConstraint)))
+                if (match) {
+                    filteredContactItems.add(contactItem)
                 }
             }
 
-            override fun publishResults(constraint: CharSequence,
-                                        results: Filter.FilterResults?) {
-                if (results == null || results.values == null) {
-                    showSnackbar(activity, R.id.coordinator_layout,
-                                 activity.getString(
-                                     R.string.new_conversation_error_refresh))
-                    return
+            return filteredContactItems
+        }
+
+        override fun performFiltering(
+            constraint: CharSequence): FilterResults = try {
+            val filteredContactItems = doFiltering(constraint)
+
+            // Return the filtered results
+            val results = Filter.FilterResults()
+            results.count = filteredContactItems.size
+            results.values = filteredContactItems
+            results
+        } catch (e: Exception) {
+            FirebaseCrash.report(e)
+            Filter.FilterResults()
+        }
+
+        override fun publishResults(constraint: CharSequence,
+                                    results: Filter.FilterResults?) {
+            if (results?.values == null) {
+                showSnackbar(activity, R.id.coordinator_layout,
+                             activity.getString(
+                                 R.string.new_conversation_error_refresh))
+                return
+            }
+
+            // Process new filter string
+            currConstraint = constraint.toString().trim { it <= ' ' }
+
+            // The Android results interface uses type Any, so we
+            // have no choice but to use an unchecked cast)
+            @Suppress("UNCHECKED_CAST")
+            val newContactItems = results.values as List<BaseContactItem>
+
+            // Create copy of current contacts
+            val oldContactItems = mutableListOf<BaseContactItem>()
+            oldContactItems.addAll(contactItems)
+
+            // Iterate through contacts, determining which contacts have
+            // been added or removed to show appropriate
+            // animations and update views
+            var newIdx = 0
+            var oldIdx = 0
+            val contactItemIndexes = mutableListOf<Int>()
+            while (oldIdx < oldContactItems.size
+                   || newIdx < newContactItems.size) {
+                // Positive value indicates addition, negative value
+                // indicates deletion, zero indicates changed, moved, or
+                // nothing
+                val comparison: Int
+                if (newIdx >= newContactItems.size) {
+                    comparison = -1
+                } else if (oldIdx >= oldContactItems.size) {
+                    comparison = 1
+                } else if (oldContactItems[oldIdx] is TypedInContactItem
+                           && newContactItems[newIdx] is TypedInContactItem) {
+                    comparison = 0
+                } else if (oldContactItems[oldIdx] is TypedInContactItem) {
+                    comparison = -1
+                } else if (newContactItems[newIdx] is TypedInContactItem) {
+                    comparison = 1
+                } else {
+                    val oldContact = oldContactItems[oldIdx] as ContactItem
+                    val newContact = newContactItems[newIdx] as ContactItem
+                    comparison = oldContact.name.compareTo(
+                        newContact.name, ignoreCase = true)
                 }
 
-                // Process new filter string
-                currConstraint = constraint.toString().trim { it <= ' ' }
-
-                // The Android results interface uses type Any, so we
-                // have no choice but to use an unchecked cast)
-                @Suppress("UNCHECKED_CAST")
-                val newContactItems = results.values as List<BaseContactItem>
-
-                // Create copy of current contacts
-                val oldContactItems = mutableListOf<BaseContactItem>()
-                oldContactItems.addAll(contactItems)
-
-                // Iterate through contacts, determining which contacts have
-                // been added or removed to show appropriate
-                // animations and update views
-                var newIdx: Int = 0
-                var oldIdx: Int = 0
-                val contactItemIndexes = mutableListOf<Int>()
-                while (oldIdx < oldContactItems.size
-                       || newIdx < newContactItems.size) {
-                    // Positive value indicates addition, negative value
-                    // indicates deletion, zero indicates changed, moved, or
-                    // nothing
-                    val comparison: Int
-                    if (newIdx >= newContactItems.size) {
-                        comparison = -1
-                    } else if (oldIdx >= oldContactItems.size) {
-                        comparison = 1
-                    } else if (oldContactItems[oldIdx] is TypedInContactItem
-                               && newContactItems[newIdx] is TypedInContactItem) {
-                        comparison = 0
-                    } else if (oldContactItems[oldIdx] is TypedInContactItem) {
-                        comparison = -1
-                    } else if (newContactItems[newIdx] is TypedInContactItem) {
-                        comparison = 1
-                    } else {
-                        val oldContact = oldContactItems[oldIdx] as ContactItem
-                        val newContact = newContactItems[newIdx] as ContactItem
-                        comparison = oldContact.name.compareTo(
-                            newContact.name, ignoreCase = true)
-                    }
-
-                    if (comparison < 0) {
+                when {
+                    comparison < 0 -> {
                         // Remove old contact
                         _contactItems.removeAt(newIdx)
                         notifyItemRemoved(newIdx)
                         oldIdx += 1
-                    } else if (comparison > 0) {
+                    }
+                    comparison > 0 -> {
                         // Add new contact
                         _contactItems.add(newIdx, newContactItems[newIdx])
                         notifyItemInserted(newIdx)
                         newIdx += 1
-                    } else {
+                    }
+                    else -> {
                         // Replace existing contact, just to be safe
                         _contactItems[newIdx] = newContactItems[newIdx]
                         contactItemIndexes.add(newIdx)
@@ -328,76 +322,73 @@ class NewConversationRecyclerViewAdapter(
                         newIdx += 1
                     }
                 }
+            }
 
-                for (idx in contactItemIndexes) {
-                    // Get the view holder for the view
-                    val viewHolder = recyclerView
-                        .findViewHolderForAdapterPosition(idx)
-                        as ContactViewHolder?
+            for (idx in contactItemIndexes) {
+                // Get the view holder for the view
+                val viewHolder = recyclerView
+                    .findViewHolderForAdapterPosition(idx)
+                    as ContactViewHolder?
 
-                    if (viewHolder != null) {
-                        // Try to update the view holder directly so that we
-                        // don't see the "change" animation
-                        onBindViewHolder(viewHolder, idx)
-                    } else {
-                        // We can't find the view holder (probably because
-                        // it's not actually visible), so we'll just tell
-                        // the adapter to redraw the whole view to be safe
-                        notifyItemChanged(idx)
-                    }
-                }
-
-                // Show message if filter returned no contacts
-                val emptyTextView = activity.findViewById(
-                    R.id.empty_text) as TextView
-                if (contactItems.isEmpty()) {
-                    if (currConstraint == "") {
-                        emptyTextView.text = activity.getString(
-                            R.string.new_conversation_no_contacts)
-                    } else {
-                        emptyTextView.text = activity.getString(
-                            R.string.new_conversation_no_results,
-                            constraint.toString())
-                    }
+                if (viewHolder != null) {
+                    // Try to update the view holder directly so that we
+                    // don't see the "change" animation
+                    onBindViewHolder(viewHolder, idx)
                 } else {
-                    emptyTextView.text = ""
+                    // We can't find the view holder (probably because
+                    // it's not actually visible), so we'll just tell
+                    // the adapter to redraw the whole view to be safe
+                    notifyItemChanged(idx)
                 }
             }
 
+            // Show message if filter returned no contacts
+            val emptyTextView = activity.findViewById<TextView>(
+                R.id.empty_text)
+            if (contactItems.isEmpty()) {
+                if (currConstraint == "") {
+                    emptyTextView.text = activity.getString(
+                        R.string.new_conversation_no_contacts)
+                } else {
+                    emptyTextView.text = activity.getString(
+                        R.string.new_conversation_no_results,
+                        constraint.toString())
+                }
+            } else {
+                emptyTextView.text = ""
+            }
         }
+
     }
 
     override fun getSectionTitle(position: Int): String {
         // The typed in phone number item has no section title
         val contactItem = contactItems[position]
-        if (contactItem is ContactItem) {
-            return getContactInitial(contactItem.name,
-                                     contactItem.primaryPhoneNumber)
+        return if (contactItem is ContactItem) {
+            getContactInitial(contactItem.name,
+                              contactItem.primaryPhoneNumber)
         } else {
-            return ""
+            ""
         }
     }
 
     /**
      * Refreshes the adapter using the currently defined filter constraint.
      */
-    fun refresh() {
-        filter.filter(currConstraint)
-    }
+    fun refresh() = filter.filter(currConstraint)
 
     /**
      * Refreshes the adapter using the specified filter constraint.
      *
      * @param constraint The specified filter constraint.
      */
-    fun refresh(constraint: String) {
-        filter.filter(constraint)
-    }
+    fun refresh(constraint: String) = filter.filter(constraint)
 
     /**
      * Loads all contacts from the Android contacts provider.
      */
-    fun loadAllContactItems() {
+    private fun loadAllContactItems() {
+        @Suppress("ConstantConditionIf")
         if (demo) {
             allContactItems.addAll(getNewConversationContacts())
             return
@@ -438,11 +429,12 @@ class NewConversationRecyclerViewAdapter(
                             null
                         }
 
-                        val previousContactItem = if (allContactItems.size > 0) {
-                            allContactItems.last()
-                        } else {
-                            null
-                        }
+                        val previousContactItem =
+                            if (allContactItems.size > 0) {
+                                allContactItems.last()
+                            } else {
+                                null
+                            }
                         // If multiple phone numbers, show "Multiple" as type
                         if (previousContactItem?.id == id) {
                             previousContactItem.secondaryPhoneNumbers.add(
@@ -473,17 +465,17 @@ class NewConversationRecyclerViewAdapter(
         // All configurable views on a contact item
         itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal val letterText: TextView =
-            itemView.findViewById(R.id.letter) as TextView
+            itemView.findViewById(R.id.letter)
         internal val contactBadge: QuickContactBadge =
-            itemView.findViewById(R.id.photo) as QuickContactBadge
+            itemView.findViewById(R.id.photo)
         internal val contactBadgeLetterText: TextView =
-            itemView.findViewById(R.id.photo_letter) as TextView
+            itemView.findViewById(R.id.photo_letter)
         internal val contactText: TextView =
-            itemView.findViewById(R.id.contact) as TextView
+            itemView.findViewById(R.id.contact)
         internal val phoneNumberText: TextView =
-            itemView.findViewById(R.id.phone_number) as TextView
+            itemView.findViewById(R.id.phone_number)
         internal val phoneNumberTypeText: TextView =
-            itemView.findViewById(R.id.phone_number_type) as TextView
+            itemView.findViewById(R.id.phone_number_type)
 
         init {
             // Allow the contact view itself to be clickable

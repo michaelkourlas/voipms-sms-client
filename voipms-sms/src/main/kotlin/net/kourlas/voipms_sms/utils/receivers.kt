@@ -27,10 +27,9 @@ import android.content.BroadcastReceiver
  * @param activity The specified activity.
  * @param receiver The specified broadcast receiver.
  */
-fun safeUnregisterReceiver(activity: Activity, receiver: BroadcastReceiver) {
-    try {
-        activity.unregisterReceiver(receiver)
-    } catch (_: IllegalArgumentException) {
-        // Do nothing.
-    }
+fun safeUnregisterReceiver(activity: Activity,
+                           receiver: BroadcastReceiver) = try {
+    activity.unregisterReceiver(receiver)
+} catch (_: IllegalArgumentException) {
+    // Do nothing.
 }

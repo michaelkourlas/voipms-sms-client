@@ -40,7 +40,7 @@ import java.net.URLEncoder
  * specified DID with the VoIP.ms API.
  */
 class SendMessageService : IntentService(SendMessageService::class.java.name) {
-    var error: String? = null
+    private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
         val conversationId = handleSendMessage(intent)
@@ -62,7 +62,7 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
         applicationContext.sendBroadcast(sentMessageBroadcastIntent)
     }
 
-    fun handleSendMessage(intent: Intent?): ConversationId {
+    private fun handleSendMessage(intent: Intent?): ConversationId {
         try {
             // Terminate quietly if intent does not exist or does not contain
             // the send SMS action
@@ -147,7 +147,7 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
      * @param intent The specified intent.
      * @return The data from the intent.
      */
-    fun getIntentData(intent: Intent): IntentData {
+    private fun getIntentData(intent: Intent): IntentData {
         // Extract the DID and contact from the intent
         val did = intent.getStringExtra(
             applicationContext.getString(R.string.send_message_did))
@@ -166,15 +166,12 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
         // otherwise, use the manually specified message text
         var messageText: String
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
-        if (remoteInput != null) {
-            messageText = remoteInput.getCharSequence(
-                applicationContext.getString(
-                    R.string.notifications_reply_key)).toString()
-        } else {
-            messageText = intent.getStringExtra(
-                applicationContext.getString(R.string.send_message_text))
-                          ?: throw Exception("Message text missing")
-        }
+        messageText = remoteInput?.getCharSequence(
+            applicationContext.getString(
+                R.string.notifications_reply_key))?.toString() ?: (intent.getStringExtra(
+            applicationContext.getString(R.string.send_message_text))
+                                                                   ?: throw Exception(
+            "Message text missing"))
 
         // If the message text exceeds the maximum length of an SMS message,
         // split it into multiple message texts
@@ -198,7 +195,7 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
      * Sends the specified message using the VoIP.ms API and updates the
      * database accordingly.
      */
-    fun sendMessage(message: OutgoingMessage) {
+    private fun sendMessage(message: OutgoingMessage) {
         // Terminate if no network connection is available
         if (!isNetworkConnectionAvailable(applicationContext)) {
             error = applicationContext.getString(
@@ -228,7 +225,7 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
      * @return The VoIP.ms ID associated with the sent message, or null if the
      * message could not be sent.
      */
-    fun sendMessageWithVoipMsApi(message: OutgoingMessage): Long? {
+    private fun sendMessageWithVoipMsApi(message: OutgoingMessage): Long? {
         // Get encoded versions of URI values
         val email = URLEncoder.encode(getEmail(applicationContext), "UTF-8")
         val password = URLEncoder.encode(getPassword(applicationContext),

@@ -43,7 +43,7 @@ class PreferencesActivity : AppCompatActivity(),
         setContentView(R.layout.preferences)
 
         // Configure toolbar
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         ViewCompat.setElevation(toolbar, resources
             .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)

@@ -177,22 +177,20 @@ fun getContactPhotoUri(context: Context, uri: Uri,
  * @param context The specified context.
  * @param uri The specified URI.
  */
-fun getBitmapFromUri(context: Context, uri: Uri): Bitmap? {
-    try {
-        val options = BitmapFactory.Options()
-        options.inJustDecodeBounds = true
-        BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri),
-                                   null, options)
+fun getBitmapFromUri(context: Context, uri: Uri): Bitmap? = try {
+    val options = BitmapFactory.Options()
+    options.inJustDecodeBounds = true
+    BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri),
+                               null, options)
 
-        val size = context.resources.getDimensionPixelSize(
-            R.dimen.contact_badge)
-        options.inJustDecodeBounds = false
-        options.inSampleSize = calculateInSampleSize(options, size, size)
-        return BitmapFactory.decodeStream(
-            context.contentResolver.openInputStream(uri), null, options)
-    } catch (e: Exception) {
-        return null
-    }
+    val size = context.resources.getDimensionPixelSize(
+        R.dimen.contact_badge)
+    options.inJustDecodeBounds = false
+    options.inSampleSize = calculateInSampleSize(options, size, size)
+    BitmapFactory.decodeStream(
+        context.contentResolver.openInputStream(uri), null, options)
+} catch (e: Exception) {
+    null
 }
 
 /**
@@ -243,10 +241,9 @@ fun calculateInSampleSize(options: BitmapFactory.Options,
  * @param name The specified name.
  * @param phoneNumber The specified phone number.
  */
-fun getContactInitial(name: String?, phoneNumber: String): String {
+fun getContactInitial(name: String?, phoneNumber: String): String =
     if (name == null || name == phoneNumber) {
-        return getDigitsOfString(phoneNumber).getOrNull(0)?.toString() ?: "…"
+        getDigitsOfString(phoneNumber).getOrNull(0)?.toString() ?: "…"
     } else {
-        return name.toUpperCase().getOrNull(0)?.toString() ?: "…"
+        name.toUpperCase().getOrNull(0)?.toString() ?: "…"
     }
-}

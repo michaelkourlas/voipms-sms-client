@@ -60,7 +60,7 @@ class ConversationsRecyclerViewAdapter<T>(
         T>.ConversationViewHolder>(),
     Filterable,
     Iterable<ConversationsRecyclerViewAdapter<T>.ConversationItem>
-where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
+    where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
     // List of items shown by the adapter; the index of each item
     // corresponds to the location of each item in the adapter
     private val _conversationItems = mutableListOf<ConversationItem>()
@@ -137,8 +137,8 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    fun updateViewHolderContactText(holder: ConversationViewHolder,
-                                    position: Int) {
+    private fun updateViewHolderContactText(holder: ConversationViewHolder,
+                                            position: Int) {
         val conversationItem = conversationItems[position]
         val message = conversationItem.message
 
@@ -178,8 +178,8 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    fun updateViewHolderMessageText(holder: ConversationViewHolder,
-                                    position: Int) {
+    private fun updateViewHolderMessageText(holder: ConversationViewHolder,
+                                            position: Int) {
         val conversationItem = conversationItems[position]
         val message = conversationItem.message
 
@@ -247,7 +247,8 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    fun updateViewHolderDidText(holder: ConversationViewHolder, position: Int) {
+    private fun updateViewHolderDidText(holder: ConversationViewHolder,
+                                        position: Int) =
         if (getDids(activity).count() <= 1) {
             holder.didTextView.visibility = View.GONE
         } else {
@@ -256,7 +257,6 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
             holder.didTextView.text = getFormattedPhoneNumber(
                 conversationItem.message.did)
         }
-    }
 
     /**
      * Displays the date of the displayed message of the conversation
@@ -266,8 +266,8 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    fun updateViewHolderDateText(holder: ConversationViewHolder,
-                                 position: Int) {
+    private fun updateViewHolderDateText(holder: ConversationViewHolder,
+                                         position: Int) {
         val conversationItem = conversationItems[position]
         val message = conversationItem.message
 
@@ -301,174 +301,164 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
         }
     }
 
-    override fun getItemCount(): Int {
-        return conversationItems.size
-    }
+    override fun getItemCount(): Int = conversationItems.size
 
     /**
      * Gets the number of items in the adapter that are checked.
      *
      * @return The number of items in the adapter that are checked.
      */
-    fun getCheckedItemCount(): Int {
-        return conversationItems.filter { it.checked }.size
-    }
+    fun getCheckedItemCount(): Int =
+        conversationItems.filter { it.checked }.size
 
-    operator fun get(i: Int): ConversationItem {
-        return conversationItems[i]
-    }
+    operator fun get(i: Int): ConversationItem = conversationItems[i]
 
-    override fun iterator(): Iterator<ConversationItem> {
-        return conversationItems.iterator()
-    }
+    override fun iterator(): Iterator<ConversationItem> =
+        conversationItems.iterator()
 
-    override fun getFilter(): Filter {
-        return object : Filter() {
-            /**
-             * Perform filtering using the specified filter constraint.
-             *
-             * @param constraint The specified constraint.
-             * @return The filtered objects.
-             */
-            fun doFiltering(constraint: CharSequence):
-                ConversationsRecyclerViewAdapter<T>.ConversationsFilter {
-                val resultsObject = ConversationsFilter()
+    override fun getFilter(): Filter = object : Filter() {
+        /**
+         * Perform filtering using the specified filter constraint.
+         *
+         * @param constraint The specified constraint.
+         * @return The filtered objects.
+         */
+        fun doFiltering(constraint: CharSequence):
+            ConversationsRecyclerViewAdapter<T>.ConversationsFilter {
+            val resultsObject = ConversationsFilter()
 
-                if (!demo) {
-                    resultsObject.messages.addAll(
-                        Database.getInstance(activity)
-                            .getMessagesMostRecentFiltered(
-                                getDids(activity),
-                                constraint.toString()
-                                    .trim { it <= ' ' }
-                                    .toLowerCase())
-                            .toMutableList())
-                    if (activity is ConversationsArchivedActivity) {
-                        val iterator = resultsObject.messages.iterator()
-                        while (iterator.hasNext()) {
-                            val message = iterator.next()
-                            if (!Database.getInstance(activity)
-                                .isConversationArchived(
-                                    message.conversationId)) {
-                                iterator.remove()
-                            }
-                        }
-                    } else {
-                        val iterator = resultsObject.messages.iterator()
-                        while (iterator.hasNext()) {
-                            val message = iterator.next()
-                            if (Database.getInstance(activity)
-                                .isConversationArchived(
-                                    message.conversationId)) {
-                                iterator.remove()
-                            }
+            @Suppress("ConstantConditionIf")
+            if (!demo) {
+                resultsObject.messages.addAll(
+                    Database.getInstance(activity)
+                        .getMessagesMostRecentFiltered(
+                            getDids(activity),
+                            constraint.toString()
+                                .trim { it <= ' ' }
+                                .toLowerCase())
+                        .toMutableList())
+                if (activity is ConversationsArchivedActivity) {
+                    val iterator = resultsObject.messages.iterator()
+                    while (iterator.hasNext()) {
+                        val message = iterator.next()
+                        if (!Database.getInstance(activity)
+                            .isConversationArchived(
+                                message.conversationId)) {
+                            iterator.remove()
                         }
                     }
                 } else {
-                    resultsObject.messages.addAll(
-                        getConversationsDemoMessages())
-                }
-
-                for (message in resultsObject.messages) {
-                    val contactName = if (!demo) {
-                        getContactName(activity,
-                                       message.contact,
-                                       contactNameCache)
-                    } else {
-                        net.kourlas.voipms_sms.demo.getContactName(
-                            message.contact)
-                    }
-                    if (contactName != null) {
-                        resultsObject.contactNames[message.contact] =
-                            contactName
-                    }
-
-                    val bitmap = getContactPhotoBitmap(activity,
-                                                       message.contact,
-                                                       contactBitmapCache)
-                    if (bitmap != null) {
-                        resultsObject.contactBitmaps[message.contact] =
-                            bitmap
+                    val iterator = resultsObject.messages.iterator()
+                    while (iterator.hasNext()) {
+                        val message = iterator.next()
+                        if (Database.getInstance(activity)
+                            .isConversationArchived(
+                                message.conversationId)) {
+                            iterator.remove()
+                        }
                     }
                 }
-
-                return resultsObject
+            } else {
+                resultsObject.messages.addAll(
+                    getConversationsDemoMessages())
             }
 
-            override fun performFiltering(
-                constraint: CharSequence): Filter.FilterResults {
+            for (message in resultsObject.messages) {
+                @Suppress("ConstantConditionIf")
+                val contactName = if (!demo) {
+                    getContactName(activity,
+                                   message.contact,
+                                   contactNameCache)
+                } else {
+                    net.kourlas.voipms_sms.demo.getContactName(
+                        message.contact)
+                }
+                if (contactName != null) {
+                    resultsObject.contactNames[message.contact] =
+                        contactName
+                }
 
-                try {
-                    val resultsObject = doFiltering(constraint)
-
-                    // Return filtered messages
-                    val results = Filter.FilterResults()
-                    results.count = resultsObject.messages.size
-                    results.values = resultsObject
-                    return results
-                } catch (e: Exception) {
-                    FirebaseCrash.report(e)
-                    return Filter.FilterResults()
+                val bitmap = getContactPhotoBitmap(activity,
+                                                   message.contact,
+                                                   contactBitmapCache)
+                if (bitmap != null) {
+                    resultsObject.contactBitmaps[message.contact] =
+                        bitmap
                 }
             }
 
-            override fun publishResults(constraint: CharSequence,
-                                        results: Filter.FilterResults?) {
-                if (results == null || results.values == null) {
-                    showSnackbar(activity, R.id.coordinator_layout,
-                                 activity.getString(
-                                     R.string.conversations_error_refresh))
-                    return
-                }
+            return resultsObject
+        }
 
-                // Process new filter string
-                prevConstraint = currConstraint
-                currConstraint = constraint.toString().trim { it <= ' ' }
+        override fun performFiltering(
+            constraint: CharSequence): Filter.FilterResults = try {
+            val resultsObject = doFiltering(constraint)
 
-                val position = layoutManager.findFirstVisibleItemPosition()
+            // Return filtered messages
+            val results = Filter.FilterResults()
+            results.count = resultsObject.messages.size
+            results.values = resultsObject
+            results
+        } catch (e: Exception) {
+            FirebaseCrash.report(e)
+            Filter.FilterResults()
+        }
 
-                // The Android results interface uses type Any, so we
-                // have no choice but to use an unchecked cast
+        override fun publishResults(constraint: CharSequence,
+                                    results: Filter.FilterResults?) {
+            if (results?.values == null) {
+                showSnackbar(activity, R.id.coordinator_layout,
+                             activity.getString(
+                                 R.string.conversations_error_refresh))
+                return
+            }
+
+            // Process new filter string
+            prevConstraint = currConstraint
+            currConstraint = constraint.toString().trim { it <= ' ' }
+
+            val position = layoutManager.findFirstVisibleItemPosition()
+
+            // The Android results interface uses type Any, so we
+            // have no choice but to use an unchecked cast
+            @Suppress("UNCHECKED_CAST")
+            val resultsObject = results.values
+                as ConversationsRecyclerViewAdapter<T>.ConversationsFilter
+
+            // Get new messages from results list
+            val newMessages: List<Message>
+            if (results.values != null) {
+                // The Android results interface uses type Any, so we have
+                // no choice but to use an unchecked cast
                 @Suppress("UNCHECKED_CAST")
-                val resultsObject = results.values
-                    as ConversationsRecyclerViewAdapter<T>.ConversationsFilter
+                newMessages = resultsObject.messages
+            } else {
+                newMessages = emptyList()
+            }
 
-                // Get new messages from results list
-                val newMessages: List<Message>
-                if (results.values != null) {
-                    // The Android results interface uses type Any, so we have
-                    // no choice but to use an unchecked cast
-                    @Suppress("UNCHECKED_CAST")
-                    newMessages = resultsObject.messages
-                } else {
-                    newMessages = emptyList()
+            // Create copy of current messages
+            val oldMessages = mutableListOf<Message>()
+            conversationItems.mapTo(oldMessages) { it.message }
+
+            // Iterate through messages, determining which messages have
+            // been added, changed, or removed to show appropriate
+            // animations and update views
+            var newIdx = 0
+            var oldIdx = 0
+            val messageIndexes = mutableListOf<Int>()
+            while (oldIdx < oldMessages.size || newIdx < newMessages.size) {
+                // Positive value indicates deletion, negative value
+                // indicates addition, zero indicates changed, moved, or
+                // nothing
+                val comparison: Int = when {
+                    newIdx >= newMessages.size -> 1
+                    oldIdx >= oldMessages.size -> -1
+                    else -> oldMessages[oldIdx]
+                        .conversationsViewCompareTo(newMessages[newIdx])
                 }
 
-                // Create copy of current messages
-                val oldMessages = mutableListOf<Message>()
-                conversationItems.mapTo(oldMessages) { it.message }
-
-                // Iterate through messages, determining which messages have
-                // been added, changed, or removed to show appropriate
-                // animations and update views
-                var newIdx: Int = 0
-                var oldIdx: Int = 0
-                val messageIndexes = mutableListOf<Int>()
-                while (oldIdx < oldMessages.size || newIdx < newMessages.size) {
-                    // Positive value indicates deletion, negative value
-                    // indicates addition, zero indicates changed, moved, or
-                    // nothing
-                    val comparison: Int
-                    if (newIdx >= newMessages.size) {
-                        comparison = 1
-                    } else if (oldIdx >= oldMessages.size) {
-                        comparison = -1
-                    } else {
-                        comparison = oldMessages[oldIdx]
-                            .conversationsViewCompareTo(newMessages[newIdx])
-                    }
-
-                    if (comparison < 0) {
+                when {
+                    comparison < 0 -> {
                         // Add new message
                         val contact = newMessages[newIdx].contact
                         _conversationItems.add(
@@ -480,12 +470,14 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
                                                  contact]))
                         notifyItemInserted(newIdx)
                         newIdx += 1
-                    } else if (comparison > 0) {
+                    }
+                    comparison > 0 -> {
                         // Remove old message
                         _conversationItems.removeAt(newIdx)
                         notifyItemRemoved(newIdx)
                         oldIdx += 1
-                    } else {
+                    }
+                    else -> {
                         // Update the underlying message
                         conversationItems[newIdx].message = newMessages[newIdx]
                         messageIndexes.add(newIdx)
@@ -494,66 +486,62 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
                         newIdx += 1
                     }
                 }
+            }
 
-                for (idx in messageIndexes) {
-                    // Get the view holder for the view
-                    @Suppress("UNCHECKED_CAST")
-                    val holder = recyclerView.findViewHolderForAdapterPosition(
-                        idx) as ConversationsRecyclerViewAdapter<
-                        T>.ConversationViewHolder?
+            for (idx in messageIndexes) {
+                // Get the view holder for the view
+                @Suppress("UNCHECKED_CAST")
+                val holder = recyclerView.findViewHolderForAdapterPosition(
+                    idx) as ConversationsRecyclerViewAdapter<
+                    T>.ConversationViewHolder?
 
-                    if (holder != null) {
-                        // Try to update the view holder directly so that we
-                        // don't see the "change" animation
-                        onBindViewHolder(holder, idx)
-                    } else {
-                        // We can't find the view holder (probably because
-                        // it's not actually visible), so we'll just tell
-                        // the adapter to redraw the whole view to be safe
-                        notifyItemChanged(idx)
-                    }
+                if (holder != null) {
+                    // Try to update the view holder directly so that we
+                    // don't see the "change" animation
+                    onBindViewHolder(holder, idx)
+                } else {
+                    // We can't find the view holder (probably because
+                    // it's not actually visible), so we'll just tell
+                    // the adapter to redraw the whole view to be safe
+                    notifyItemChanged(idx)
                 }
+            }
 
-                // Show message if filter returned no messages
-                val emptyTextView = activity.findViewById(
-                    R.id.empty_text) as TextView
-                if (conversationItems.isEmpty()) {
-                    if (currConstraint == "") {
-                        if (activity is ConversationsArchivedActivity) {
-                            emptyTextView.text = activity.getString(
-                                R.string.conversations_archived_no_messages)
-                        } else {
-                            emptyTextView.text = activity.getString(
-                                R.string.conversations_no_messages)
-                        }
+            // Show message if filter returned no messages
+            val emptyTextView = activity.findViewById<TextView>(
+                R.id.empty_text)
+            if (conversationItems.isEmpty()) {
+                if (currConstraint == "") {
+                    if (activity is ConversationsArchivedActivity) {
+                        emptyTextView.text = activity.getString(
+                            R.string.conversations_archived_no_messages)
                     } else {
                         emptyTextView.text = activity.getString(
-                            R.string.conversations_no_results, currConstraint)
+                            R.string.conversations_no_messages)
                     }
                 } else {
-                    emptyTextView.text = ""
+                    emptyTextView.text = activity.getString(
+                        R.string.conversations_no_results, currConstraint)
                 }
-
-                layoutManager.scrollToPosition(position)
+            } else {
+                emptyTextView.text = ""
             }
+
+            layoutManager.scrollToPosition(position)
         }
     }
 
     /**
      * Refreshes the adapter using the currently defined filter constraint.
      */
-    fun refresh() {
-        filter.filter(currConstraint)
-    }
+    fun refresh() = filter.filter(currConstraint)
 
     /**
      * Refreshes the adapter using the specified filter constraint.
      *
      * @param constraint The specified filter constraint.
      */
-    fun refresh(constraint: String) {
-        filter.filter(constraint)
-    }
+    fun refresh(constraint: String) = filter.filter(constraint)
 
     /**
      * Helper class used to store retrieved contact names and bitmaps in
@@ -612,9 +600,7 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
          *
          * @param position The position of the message item in the adapter.
          */
-        fun toggle(position: Int) {
-            setChecked(position, !_checked)
-        }
+        fun toggle(position: Int) = setChecked(position, !_checked)
     }
 
     /**
@@ -626,19 +612,19 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
         itemView: View) : RecyclerView.ViewHolder(itemView) {
         // All configurable views on a message item
         internal val viewSwitcher: ViewSwitcher =
-            itemView.findViewById(R.id.view_switcher) as ViewSwitcher
+            itemView.findViewById(R.id.view_switcher)
         internal val contactBadge: QuickContactBadge =
-            itemView.findViewById(R.id.photo) as QuickContactBadge
+            itemView.findViewById(R.id.photo)
         internal val contactBadgeLetterText: TextView =
-            itemView.findViewById(R.id.photo_letter) as TextView
+            itemView.findViewById(R.id.photo_letter)
         internal val contactTextView: TextView =
-            itemView.findViewById(R.id.contact) as TextView
+            itemView.findViewById(R.id.contact)
         internal val messageTextView: TextView =
-            itemView.findViewById(R.id.message) as TextView
+            itemView.findViewById(R.id.message)
         internal val dateTextView: TextView =
-            itemView.findViewById(R.id.date) as TextView
+            itemView.findViewById(R.id.date)
         internal val didTextView: TextView =
-            itemView.findViewById(R.id.did) as TextView
+            itemView.findViewById(R.id.did)
 
         init {
             // Allow the conversation view itself to be clickable and
@@ -656,7 +642,7 @@ where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
                 contactBadge.setOverlay(null)
             }
             val contactBadgeChecked = itemView
-                .findViewById(R.id.conversations_photo_checked) as ImageView
+                .findViewById<ImageView>(R.id.conversations_photo_checked)
             applyCircularMask(contactBadgeChecked)
         }
     }

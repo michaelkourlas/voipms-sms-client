@@ -188,17 +188,15 @@ class Database private constructor(private val context: Context) {
      * @return The message with the specified database ID from the database, or
      * null if it does not exist.
      */
-    fun getMessageDatabaseId(databaseId: Long): Message? {
-        synchronized(this) {
-            val cursor = database.query(TABLE_MESSAGE, messageColumns,
-                                        "$COLUMN_DATABASE_ID = $databaseId",
-                                        null, null, null, null)
-            val messages = getMessagesCursor(cursor)
-            if (messages.size > 0) {
-                return messages[0]
-            } else {
-                return null
-            }
+    fun getMessageDatabaseId(databaseId: Long): Message? = synchronized(this) {
+        val cursor = database.query(TABLE_MESSAGE, messageColumns,
+                                    "$COLUMN_DATABASE_ID = $databaseId",
+                                    null, null, null, null)
+        val messages = getMessagesCursor(cursor)
+        return if (messages.size > 0) {
+            messages[0]
+        } else {
+            null
         }
     }
 
@@ -208,10 +206,9 @@ class Database private constructor(private val context: Context) {
      * @param conversationId The ID of the specified conversation.
      * @return The draft message for the specified conversation.
      */
-    fun getMessageDraft(conversationId: ConversationId): Message? {
-        synchronized(this) {
-            return getMessageDraftWithoutLock(conversationId)
-        }
+    fun getMessageDraft(
+        conversationId: ConversationId): Message? = synchronized(this) {
+        return getMessageDraftWithoutLock(conversationId)
     }
 
     /**
@@ -236,10 +233,10 @@ class Database private constructor(private val context: Context) {
                                         null, null, null,
                                         COLUMN_DATE + " DESC", "1")
             val messages = getMessagesCursor(cursor)
-            if (messages.size > 0) {
-                return messages[0]
+            return if (messages.size > 0) {
+                messages[0]
             } else {
-                return null
+                null
             }
         }
     }
@@ -276,7 +273,8 @@ class Database private constructor(private val context: Context) {
      * @param conversationId The ID of the specified conversation.
      * @return The messages associated with the specified conversation.
      */
-    fun getMessagesConversation(conversationId: ConversationId): List<Message> {
+    private fun getMessagesConversation(
+        conversationId: ConversationId): List<Message> {
         val did = conversationId.did
         val contact = conversationId.contact
 
@@ -412,7 +410,7 @@ class Database private constructor(private val context: Context) {
                                                          filterConstraint)
             for (draftMessage in draftMessages) {
                 var messageAdded = false
-                for (i in 0..allMessages.size - 1) {
+                for (i in 0 until allMessages.size) {
                     if (allMessages[i].contact == draftMessage.contact
                         && allMessages[i].did == draftMessage.did) {
                         allMessages.removeAt(i)
@@ -478,38 +476,36 @@ class Database private constructor(private val context: Context) {
      *
      * @param importPath The import path.
      */
-    fun import(importPath: File) {
-        synchronized(this) {
-            val dbPath = context.getDatabasePath(Database.DATABASE_NAME)
-            val backupPath = File("${dbPath.absolutePath}.backup")
+    fun import(importPath: File) = synchronized(this) {
+        val dbPath = context.getDatabasePath(Database.DATABASE_NAME)
+        val backupPath = File("${dbPath.absolutePath}.backup")
 
+        try {
+            // Close database to persist it to disk
+            database.close()
+
+            // Try importing database, but restore from backup on failure
+            dbPath.copyTo(backupPath, overwrite = true)
             try {
-                // Close database to persist it to disk
-                database.close()
+                importPath.copyTo(dbPath, overwrite = true)
 
-                // Try importing database, but restore from backup on failure
-                dbPath.copyTo(backupPath, overwrite = true)
-                try {
-                    importPath.copyTo(dbPath, overwrite = true)
-
-                    // Try refreshing database
-                    database = databaseHelper.writableDatabase
-
-                    runOnNewThread {
-                        AppIndexingService.replaceIndex(context)
-                    }
-                } catch (e: Exception) {
-                    backupPath.copyTo(dbPath, overwrite = true)
-                    throw e
-                }
-            } finally {
-                // Refresh database
-                database.close()
+                // Try refreshing database
                 database = databaseHelper.writableDatabase
 
-                // Remove backup file
-                backupPath.delete()
+                runOnNewThread {
+                    AppIndexingService.replaceIndex(context)
+                }
+            } catch (e: Exception) {
+                backupPath.copyTo(dbPath, overwrite = true)
+                throw e
             }
+        } finally {
+            // Refresh database
+            database.close()
+            database = databaseHelper.writableDatabase
+
+            // Remove backup file
+            backupPath.delete()
         }
     }
 
@@ -845,7 +841,7 @@ class Database private constructor(private val context: Context) {
      * @param dids The specified DIDs.
      * @param voipId The specified VoIP.ms message ID.
      */
-    fun removeDeletedVoipId(dids: Set<String>, voipId: Long) {
+    private fun removeDeletedVoipId(dids: Set<String>, voipId: Long) {
         var query = "$COLUMN_VOIP_ID = $voipId AND ("
         for (did in dids) {
             query += "$COLUMN_DID=$did OR "
@@ -1060,13 +1056,12 @@ class Database private constructor(private val context: Context) {
      * @return The most recent draft message in each conversation associated
      * with the specified DIDs that matches a specified filter constraint.
      */
-    private fun getMessagesDraftFiltered(dids: Set<String>,
-                                         filterConstraint: String): List<Message> {
+    private fun getMessagesDraftFiltered(
+        dids: Set<String>, filterConstraint: String): List<Message> {
         val messages = getMessagesDraft(dids)
-        val filteredMessages = messages
+        return messages
             .filter { it.text.toLowerCase().contains(filterConstraint) }
             .toMutableList()
-        return filteredMessages
     }
 
     /**
@@ -1241,10 +1236,9 @@ class Database private constructor(private val context: Context) {
          *
          * @param db The database to use.
          */
-        fun handleDraftAddition7(db: SQLiteDatabase) {
-            db.execSQL("ALTER TABLE sms" +
-                       " ADD Draft INTEGER NOT NULL DEFAULT(0)")
-        }
+        fun handleDraftAddition7(db: SQLiteDatabase) = db.execSQL(
+            "ALTER TABLE sms" +
+            " ADD Draft INTEGER NOT NULL DEFAULT(0)")
 
         /**
          * Handles a change in the way deleted messages are tracked from version
@@ -1334,14 +1328,13 @@ class Database private constructor(private val context: Context) {
          *
          * @param db The database to use.
          */
-        fun handleArchivedAddition8(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE archived(" +
-                       "DatabaseId INTEGER PRIMARY KEY AUTOINCREMENT" +
-                       " NOT NULL," +
-                       "Did TEXT NOT NULL," +
-                       "Contact TEXT NOT NULL," +
-                       "Archived INTEGER NOT NULL)")
-        }
+        fun handleArchivedAddition8(db: SQLiteDatabase) = db.execSQL(
+            "CREATE TABLE archived(" +
+            "DatabaseId INTEGER PRIMARY KEY AUTOINCREMENT" +
+            " NOT NULL," +
+            "Did TEXT NOT NULL," +
+            "Contact TEXT NOT NULL," +
+            "Archived INTEGER NOT NULL)")
 
         /**
          * Handles the removal of the draft and deleted columns from the main

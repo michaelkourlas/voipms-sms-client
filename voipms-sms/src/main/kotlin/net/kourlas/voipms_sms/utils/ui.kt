@@ -80,12 +80,11 @@ fun applyCircularMask(view: View) {
  * @return A a view outline provider for ovals.
  */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-private fun getOvalViewOutlineProvider(): ViewOutlineProvider {
-    return object : ViewOutlineProvider() {
-        override fun getOutline(view: View, outline: Outline) {
-            outline.setOval(0, 0, view.width, view.height)
-        }
-    }
+private fun getOvalViewOutlineProvider(): ViewOutlineProvider = object : ViewOutlineProvider() {
+    override fun getOutline(view: View, outline: Outline) = outline.setOval(0,
+                                                                            0,
+                                                                            view.width,
+                                                                            view.height)
 }
 
 /**
@@ -109,14 +108,10 @@ fun applyRoundedCornersMask(view: View) {
  * @return A a view outline provider for rounded rectangles.
  */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider {
-    return object : ViewOutlineProvider() {
-        override fun getOutline(view: View, outline: Outline) {
-            outline
-                .setRoundRect(0, 0, view.width, view.height,
-                              15f)
-        }
-    }
+private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider = object : ViewOutlineProvider() {
+    override fun getOutline(view: View, outline: Outline) = outline
+        .setRoundRect(0, 0, view.width, view.height,
+                      15f)
 }
 
 /**
@@ -152,10 +147,13 @@ fun showAlertDialog(context: Context, title: String?, text: String?,
  * @param text The specified text.
  * @return The dialog.
  */
-fun showInfoDialog(context: Context, text: String?): AlertDialog {
-    return showAlertDialog(context, null, text, context.getString(R.string.ok),
-                           null, null, null)
-}
+fun showInfoDialog(context: Context,
+                   text: String?): AlertDialog = showAlertDialog(context, null,
+                                                                 text,
+                                                                 context.getString(
+                                                                     R.string.ok),
+                                                                 null, null,
+                                                                 null)
 
 /**
  * Shows an information dialog with the specified title and text.
@@ -166,10 +164,12 @@ fun showInfoDialog(context: Context, text: String?): AlertDialog {
  * @return The dialog.
  */
 fun showInfoDialog(context: Context, title: String?,
-                   text: String?): AlertDialog {
-    return showAlertDialog(context, title, text, context.getString(R.string.ok),
-                           null, null, null)
-}
+                   text: String?): AlertDialog = showAlertDialog(context, title,
+                                                                 text,
+                                                                 context.getString(
+                                                                     R.string.ok),
+                                                                 null, null,
+                                                                 null)
 
 /**
  * Shows a generic snackbar.
@@ -180,7 +180,7 @@ fun showInfoDialog(context: Context, title: String?,
  * @return The snackbar.
  */
 fun showSnackbar(activity: Activity, viewId: Int, text: String): Snackbar {
-    val view = activity.findViewById(viewId)
+    val view = activity.findViewById<View>(viewId)
     val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
     snackbar.show()
     return snackbar
@@ -197,7 +197,7 @@ fun showSnackbar(activity: Activity, viewId: Int, text: String): Snackbar {
  */
 fun showPermissionSnackbar(activity: Activity, viewId: Int,
                            text: String): Snackbar {
-    val view = activity.findViewById(viewId)
+    val view = activity.findViewById<View>(viewId)
     val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
     snackbar.setAction(R.string.settings) {
         val intent = Intent()

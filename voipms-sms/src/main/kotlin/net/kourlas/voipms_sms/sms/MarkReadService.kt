@@ -65,7 +65,7 @@ class MarkReadService : IntentService(MarkReadService::class.java.name) {
      * @param intent The specified intent.
      * @return The data from the intent.
      */
-    fun getIntentData(intent: Intent): ConversationId {
+    private fun getIntentData(intent: Intent): ConversationId {
         // Extract the DID and contact from the intent
         val did = intent.getStringExtra(
             applicationContext.getString(R.string.mark_read_did))

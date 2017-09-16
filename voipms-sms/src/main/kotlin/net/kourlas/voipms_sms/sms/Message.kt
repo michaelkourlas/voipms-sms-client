@@ -269,9 +269,8 @@ class Message(val databaseId: Long, val voipId: Long?, date: Long,
          * @param databaseId The database ID that uniquely identifies the
          * specified message.
          */
-        fun getMessageUrl(databaseId: Long): String {
-            return "voipmssms://message?id=$databaseId"
-        }
+        fun getMessageUrl(
+            databaseId: Long): String = "voipmssms://message?id=$databaseId"
 
         /**
          * Gets a URL used for Firebase indexing representing a single
@@ -279,9 +278,8 @@ class Message(val databaseId: Long, val voipId: Long?, date: Long,
          *
          * @param conversationId The ID of the specified conversation.
          */
-        fun getConversationUrl(conversationId: ConversationId): String {
-            return "voipmssms://conversation?did=${conversationId.did}" +
-                   "&contact=${conversationId.contact}"
-        }
+        fun getConversationUrl(
+            conversationId: ConversationId): String = "voipmssms://conversation?did=${conversationId.did}" +
+                                                      "&contact=${conversationId.contact}"
     }
 }

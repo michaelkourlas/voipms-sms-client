@@ -35,7 +35,7 @@ import java.net.URLEncoder
  */
 class RetrieveDidsService : IntentService(
     RetrieveDidsService::class.java.name) {
-    var error: String? = null
+    private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
         // Retrieve DIDs
@@ -61,7 +61,7 @@ class RetrieveDidsService : IntentService(
      * @return The DIDs associated with the configured VoIP.ms account, or null
      * if an error occurred.
      */
-    fun handleRetrieveDids(intent: Intent?): Set<String>? {
+    private fun handleRetrieveDids(intent: Intent?): Set<String>? {
         // Retrieve DIDs from VoIP.ms API
         var dids: Set<String>? = null
         try {
@@ -144,7 +144,7 @@ class RetrieveDidsService : IntentService(
             }
 
             val rawDids = response.getJSONArray("dids")
-            (0..rawDids.length() - 1)
+            (0 until rawDids.length())
                 .map { rawDids.getJSONObject(it) }
                 .filter {
                     it.getString("sms_available") == "1"

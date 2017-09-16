@@ -90,9 +90,8 @@ class Notifications private constructor(
             }
     }
 
-    fun showDemoNotification(message: Message) {
-        showNotification(listOf(message))
-    }
+    fun showDemoNotification(message: Message) = showNotification(
+        listOf(message))
 
     /**
      * Shows a notification with the specified messages.
@@ -109,6 +108,7 @@ class Notifications private constructor(
         val conversationId = messages[0].conversationId
         val did = conversationId.did
         val contact = conversationId.contact
+        @Suppress("ConstantConditionIf")
         var contactName = if (!demo) {
             getContactName(context, contact)
         } else {
@@ -267,16 +267,14 @@ class Notifications private constructor(
      * @param contact The specified contact.
      * @return The large icon bitmap for the specified contact.
      */
-    private fun getLargeIconBitmap(contact: String): Bitmap? {
-        try {
-            var largeIconBitmap = getContactPhotoBitmap(context, contact)
-            largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap,
-                                                        256, 256, false)
-            largeIconBitmap = applyCircularMask(largeIconBitmap)
-            return largeIconBitmap
-        } catch (_: Exception) {
-            return null
-        }
+    private fun getLargeIconBitmap(contact: String): Bitmap? = try {
+        var largeIconBitmap = getContactPhotoBitmap(context, contact)
+        largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap,
+                                                    256, 256, false)
+        largeIconBitmap = applyCircularMask(largeIconBitmap)
+        largeIconBitmap
+    } catch (_: Exception) {
+        null
     }
 
     companion object {
