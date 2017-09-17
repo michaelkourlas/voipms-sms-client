@@ -38,6 +38,8 @@ class Database private constructor(private val context: Context) {
     private val databaseHelper = DatabaseHelper(context)
     private var database = databaseHelper.writableDatabase
 
+    // TODO: Correctly implement transaction support
+
     /**
      * Deletes the specified message from the database.
      *
@@ -594,64 +596,86 @@ class Database private constructor(private val context: Context) {
     }
 
     /**
-     * Inserts a new message with the specified VoIP.ms ID if one does not
-     * already exist.
+     * Inserts new messages from the VoIP.ms API.
      *
-     * @param voipId The specified VoIP.ms ID.
-     * @param date The date of the message.
-     * @param isIncoming Whether the message is incoming.
-     * @param conversationId The conversation ID of the message.
-     * @param text The text of the message.
-     * @param retrieveDeletedMessages If true, then any existing message with
-     * the specified VoIP.ms ID is marked as not deleted.
-     * @return Whether a new message was inserted.
+     * @param incomingMessages The incoming messages from the VoIP.ms API.
+     * @param retrieveDeletedMessages If true, then any existing messages that
+     * have the same VoIP.ms ID as a message in [incomingMessages] are marked
+     * as not deleted.
+     * @return The conversation IDs associated with the newly added messages.
      */
-    fun insertMessageVoipMsApi(voipId: Long, date: Date,
-                               isIncoming: Boolean,
-                               conversationId: ConversationId, text: String,
-                               retrieveDeletedMessages: Boolean): Boolean {
-        val did = conversationId.did
-        val contact = conversationId.contact
-
+    fun insertMessagesVoipMsApi(
+        incomingMessages: List<SyncService.IncomingMessage>,
+        retrieveDeletedMessages: Boolean): Set<ConversationId> {
         synchronized(this) {
-            if (retrieveDeletedMessages) {
-                removeDeletedVoipId(setOf(did), voipId)
-            } else if (isVoipIdDeleted(did, voipId)) {
-                return false
-            }
+            database.beginTransaction()
 
-            val values = ContentValues()
+            try {
+                val addedConversationIds = mutableSetOf<ConversationId>()
+                val addedDatabaseIds = mutableListOf<Long>()
+                for ((voipId, date, isIncoming,
+                    did, contact, text) in incomingMessages) {
+                    if (retrieveDeletedMessages) {
+                        // Retrieve deleted messages is true, so we should
+                        // remove this message from our list of deleted messages
+                        removeDeletedVoipId(setOf(did), voipId)
+                    } else if (isVoipIdDeleted(did, voipId)) {
+                        // Retrieve deleted messages is not true and this
+                        // message has been previously deleted, so we
+                        // shouldn't add it back
+                        continue
+                    }
 
-            val databaseId = getMessageDatabaseIdVoipId(did, voipId)
-            if (databaseId != null) {
-                return false
-            }
+                    val databaseId = getMessageDatabaseIdVoipId(did, voipId)
+                    if (databaseId != null) {
+                        // Don't add the message if it already exists in our
+                        // database
+                        continue
+                    }
 
-            values.put(COLUMN_VOIP_ID, voipId)
-            values.put(COLUMN_DATE, date.time / 1000L)
-            values.put(COLUMN_INCOMING, if (isIncoming) 1L else 0L)
-            values.put(COLUMN_DID, did)
-            values.put(COLUMN_CONTACT, contact)
-            values.put(COLUMN_MESSAGE, text)
-            values.put(COLUMN_UNREAD, if (isIncoming) 1L else 0L)
-            values.put(COLUMN_DELIVERED, 1L)
-            values.put(COLUMN_DELIVERY_IN_PROGRESS, 0L)
+                    // Add new message to database
+                    val values = ContentValues()
+                    values.put(COLUMN_VOIP_ID, voipId)
+                    values.put(COLUMN_DATE, date.time / 1000L)
+                    values.put(COLUMN_INCOMING, if (isIncoming) 1L else 0L)
+                    values.put(COLUMN_DID, did)
+                    values.put(COLUMN_CONTACT, contact)
+                    values.put(COLUMN_MESSAGE, text)
+                    values.put(COLUMN_UNREAD, if (isIncoming) 1L else 0L)
+                    values.put(COLUMN_DELIVERED, 1L)
+                    values.put(COLUMN_DELIVERY_IN_PROGRESS, 0L)
 
-            val newId = database.insertOrThrow(TABLE_MESSAGE, null, values)
-            if (newId == -1L) {
-                throw Exception("Returned database ID was -1")
-            }
+                    val newId = database.insertOrThrow(TABLE_MESSAGE, null,
+                                                       values)
+                    if (newId == -1L) {
+                        throw Exception("Returned database ID was -1")
+                    }
+                    addedConversationIds.add(ConversationId(did, contact))
+                    addedDatabaseIds.add(newId)
 
-            val message = getMessageDatabaseId(newId)
-            if (message != null) {
-                runOnNewThread {
-                    FirebaseAppIndex.getInstance().update(
-                        AppIndexingService.getMessageBuilder(context,
-                                                             message).build())
+                    // Mark conversation as unarchived
+                    database.delete(
+                        TABLE_ARCHIVED,
+                        "$COLUMN_CONTACT=$contact AND $COLUMN_DID=$did",
+                        null)
                 }
-            }
 
-            return true
+                database.setTransactionSuccessful()
+
+                addedDatabaseIds
+                    .mapNotNull { getMessageDatabaseId(it) }
+                    .forEach {
+                        runOnNewThread {
+                            FirebaseAppIndex.getInstance().update(
+                                AppIndexingService.getMessageBuilder(
+                                    context, it).build())
+                        }
+                    }
+
+                return addedConversationIds
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 

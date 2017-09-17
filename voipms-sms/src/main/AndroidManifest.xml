@@ -118,7 +118,7 @@
         <receiver android:name=".sms.SyncBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.ACTION_LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
         <receiver android:name=".sms.SyncIntervalReceiver" />
@@ -151,6 +151,8 @@
         <service android:name=".sms.MarkReadService" />
         <service android:name=".sms.RetrieveDidsService" />
         <service android:name=".sms.SendMessageService" />
-        <service android:name=".sms.SyncService" />
+        <service
+            android:name=".sms.SyncService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 </manifest>

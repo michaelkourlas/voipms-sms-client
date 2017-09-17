@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.sms
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.PowerManager
 
 /**
  * Receiver called on system startup and used to set up the synchronization
@@ -37,20 +36,8 @@ class SyncBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null && intent != null &&
             (intent.action == "android.intent.action.BOOT_COMPLETED"
-             || intent.action == "android.intent.action.QUICKBOOT_POWERON")) {
-            // Get wake lock
-            val powerManager = context.getSystemService(
-                Context.POWER_SERVICE) as PowerManager
-            val wakeLock = powerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK,
-                SyncBootReceiver::class.java.name)
-            wakeLock.acquire()
-
-            // Setup synchronization interval
-            SyncService.setupInterval(context)
-
-            // Release wake lock
-            wakeLock.release()
+             || intent.action == "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED")) {
+            SyncIntervalService.startService(context)
         }
     }
 }

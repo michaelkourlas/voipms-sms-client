@@ -166,7 +166,7 @@ open class ConversationsActivity : AppCompatActivity(),
             R.id.swipe_refresh_layout)
         swipeRefreshLayout.setOnRefreshListener {
             adapter.refresh()
-            startService(SyncService.getIntent(this, forceRecent = false))
+            SyncService.startService(this, forceRecent = false)
         }
         swipeRefreshLayout.setColorSchemeResources(R.color.accent)
     }
@@ -211,7 +211,7 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Refresh and perform limited synchronization
         adapter.refresh()
-        startService(SyncService.getIntent(this, forceRecent = true))
+        SyncService.startService(this, forceRecent = true)
 
         // Refresh on resume just in case the contacts permission was newly
         // granted and we need to add the contact names and photos

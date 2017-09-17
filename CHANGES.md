@@ -1,3 +1,10 @@
+## 0.5.4 ##
+
+* Add support for Android O notification features
+* Show notification while synchronizing
+* Add support for database transactions to prevent data corruption
+* Bug fixes
+
 ## 0.5.3 ##
 
 * Add DID to conversation view

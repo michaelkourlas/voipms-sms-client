@@ -143,8 +143,9 @@ class ConversationsRecyclerViewAdapter<T>(
         val message = conversationItem.message
 
         val contactTextBuilder = SpannableStringBuilder()
-        contactTextBuilder.append(conversationItem.contactName ?:
-                                  conversationItem.message.contact)
+        contactTextBuilder.append(
+            conversationItem.contactName ?:
+            getFormattedPhoneNumber(conversationItem.message.contact))
 
         // Highlight text that matches filter
         if (currConstraint != "") {

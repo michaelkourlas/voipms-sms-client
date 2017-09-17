@@ -224,8 +224,12 @@
     <string name="sync_error_api_request">Synchronization failed: request to VoIP.ms API failed</string>
     <string name="sync_error_api_parse">Synchronization failed: VoIP.ms API response could not be parsed</string>
     <string name="sync_error_api_error">Synchronization failed: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="sync_error_stopped">Synchronization failed: stopped</string>
     <string name="sync_error_database">Synchronization failed: unknown database error</string>
     <string name="sync_error_unknown">Synchronization failed: unknown error</string>
+
+    <!-- SyncIntervalService -->
+    <string name="sync_interval_service_action" translatable="false">sync_interval_service_action</string>
 
     <!-- BROADCAST RECEIVERS -->
 
@@ -262,6 +266,9 @@
     <string name="notifications_reply_key" translatable="false">notification_reply</string>
     <string name="notifications_button_reply">Reply</string>
     <string name="notifications_button_mark_read">Mark Read</string>
+    <string name="notifications_channel_sync">channel_sync</string>
+    <string name="notification_channel_sync_title">Synchronization</string>
+    <string name="notifications_sync_message">Synchronizing with VoIP.ms</string>
 
     <!-- UTILS -->
     <string name="utils_date_just_now">Just now</string>

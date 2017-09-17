@@ -17,13 +17,12 @@
 
 package net.kourlas.voipms_sms.sms
 
-import android.app.AlarmManager
 import android.app.IntentService
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.support.v4.content.WakefulBroadcastReceiver.completeWakefulIntent
+import android.support.v4.app.NotificationManagerCompat
+import android.support.v4.content.ContextCompat
+import android.util.Log
 import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -41,11 +40,37 @@ import java.util.*
 
 /**
  * Service used to synchronize the database with VoIP.ms.
+ *
+ * SyncService is an IntentService rather than a JobIntentService because
+ * it is a foreground service that uses a notification to indicate
+ * synchronization progress. This is mainly to prevent Android from killing
+ * the service.
  */
 class SyncService : IntentService(SyncService::class.java.name) {
     private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
+        // Terminate quietly if intent does not exist or does not contain
+        // the sync action
+        if (intent == null || intent.action != applicationContext.getString(
+            R.string.sync_action)) {
+            return
+        }
+
+        // Terminate quietly if account inactive
+        if (!isAccountActive(applicationContext)) {
+            return
+        }
+
+        val rand = Random().nextInt().toString(16)
+        Log.i(SyncService::class.java.name, "[$rand] starting synchronization")
+
+        // Show notification during synchronization to prevent phone from
+        // going to sleep
+        val notification = Notifications.getInstance(application)
+            .getSyncNotification()
+        startForeground(Notifications.SYNC_NOTIFICATION_ID, notification)
+
         // Perform synchronization
         handleSync(intent)
 
@@ -56,32 +81,20 @@ class SyncService : IntentService(SyncService::class.java.name) {
                 R.string.sync_complete_action))
         syncCompleteBroadcastIntent.putExtra(getString(
             R.string.sync_complete_error), error)
-        if (intent?.extras?.get(getString(
+        if (intent.extras?.get(getString(
             R.string.sync_force_recent)) != true) {
             syncCompleteBroadcastIntent.putExtra(getString(
                 R.string.sync_complete_full), true)
         }
         applicationContext.sendBroadcast(syncCompleteBroadcastIntent)
 
-        // This service is sometimes triggered by a wakeful broadcast
-        // receiver
-        completeWakefulIntent(intent)
+        Log.i(SyncService::class.java.name, "[$rand] completed synchronization")
+
+        stopForeground(true)
     }
 
-    private fun handleSync(intent: Intent?) {
+    private fun handleSync(intent: Intent) {
         try {
-            // Terminate quietly if intent does not exist or does not contain
-            // the send SMS action
-            if (intent == null || intent.action != applicationContext.getString(
-                R.string.sync_action)) {
-                return
-            }
-
-            // Terminate quietly if account inactive
-            if (!isAccountActive(applicationContext)) {
-                return
-            }
-
             // Extract the boolean properties from the intent
             val forceRecent = intent.extras.get(
                 applicationContext.getString(R.string.sync_force_recent))
@@ -113,7 +126,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
             if (!forceRecent) {
                 setLastCompleteSyncTime(applicationContext,
                                         System.currentTimeMillis())
-                setupInterval(applicationContext)
+                SyncIntervalService.startService(applicationContext)
             }
         } catch (e: Exception) {
             FirebaseCrash.report(e)
@@ -225,32 +238,60 @@ class SyncService : IntentService(SyncService::class.java.name) {
      * VoIP.ms even after being deleted locally.
      */
     private fun processRequests(retrievalRequests: List<RetrievalRequest>,
-                                retrieveDeletedMessages: Boolean) = retrievalRequests
-        .map {
-            processRetrievalRequest(it, retrieveDeletedMessages)
+                                retrieveDeletedMessages: Boolean) {
+        val incomingMessages = mutableListOf<IncomingMessage>()
+        for (i in 0 until retrievalRequests.size) {
+            val nextIncomingMessages = processRetrievalRequest(
+                retrievalRequests[i])
+            if (nextIncomingMessages != null) {
+                incomingMessages.addAll(nextIncomingMessages)
+            } else {
+                return
+            }
+
+            val notification = Notifications.getInstance(application)
+                .getSyncNotification(((i + 1) * 100) / retrievalRequests.size)
+            NotificationManagerCompat.from(applicationContext).notify(
+                Notifications.SYNC_NOTIFICATION_ID, notification)
         }
-        .filterNot { it }
-        .forEach { return }
+
+        // Add new messages from the server
+        val newConversationIds: Set<ConversationId>
+        try {
+            newConversationIds = Database.getInstance(applicationContext)
+                .insertMessagesVoipMsApi(incomingMessages,
+                                         retrieveDeletedMessages)
+        } catch (e: Exception) {
+            FirebaseCrash.report(e)
+            error = applicationContext.getString(
+                R.string.sync_error_database)
+            return
+        }
+
+        // Show notifications for new messages
+        if (newConversationIds.isNotEmpty()) {
+            Notifications.getInstance(application).showNotifications(
+                newConversationIds)
+        }
+    }
 
     /**
      * Processes the specified retrieval request using the VoIP.ms API.
      *
      * @param request The specified retrieval request.
-     * @param retrieveDeletedMessages If true, messages are retrieved from
-     * VoIP.ms even after being deleted locally.
-     * @return True if the retrieval request was successfully processed.
+     * @return The list of retrieved messages, or null if the request failed.
      */
-    private fun processRetrievalRequest(request: RetrievalRequest,
-                                        retrieveDeletedMessages: Boolean): Boolean {
-        val response = sendRequestWithVoipMsApi(request.url) ?: return false
+    private fun processRetrievalRequest(
+        request: RetrievalRequest): List<IncomingMessage>? {
+        val response = sendRequestWithVoipMsApi(request.url) ?: return null
 
         // Extract messages from the VoIP.ms API response
-        val incomingMessages = ArrayList<IncomingMessage>()
+        val incomingMessages = mutableListOf<IncomingMessage>()
         val status = response.optString("status")
         if (status != "success" && status != "no_sms") {
             error = applicationContext.getString(R.string.sync_error_api_error,
                                                  status)
-            return false
+            return null
         }
 
         if (status != "no_sms") {
@@ -258,14 +299,14 @@ class SyncService : IntentService(SyncService::class.java.name) {
             if (rawMessages == null) {
                 error = applicationContext.getString(
                     R.string.sync_error_api_parse)
-                return false
+                return null
             }
             for (i in 0 until rawMessages.length()) {
                 val rawSms = rawMessages.optJSONObject(i)
                 if (rawSms == null) {
                     error = applicationContext.getString(
                         R.string.sync_error_api_parse)
-                    return false
+                    return null
                 }
 
                 val rawDate = rawSms.getString("date")
@@ -283,40 +324,12 @@ class SyncService : IntentService(SyncService::class.java.name) {
                     FirebaseCrash.report(e)
                     error = applicationContext.getString(
                         R.string.sync_error_api_parse)
-                    return false
+                    return null
                 }
             }
-            incomingMessages.sortBy { it.date }
         }
 
-        // Add new messages from the server
-        val newConversationIds = mutableSetOf<ConversationId>()
-        for ((voipId, date, isIncoming, did, contact, text) in incomingMessages) {
-            try {
-                if (Database.getInstance(applicationContext)
-                    .insertMessageVoipMsApi(voipId, date, isIncoming,
-                                            ConversationId(did, contact), text,
-                                            retrieveDeletedMessages)) {
-                    Database.getInstance(applicationContext)
-                        .markConversationUnarchived(ConversationId(did,
-                                                                   contact))
-                    newConversationIds.add(ConversationId(did, contact))
-                }
-            } catch (e: Exception) {
-                FirebaseCrash.report(e)
-                error = applicationContext.getString(
-                    R.string.sync_error_database)
-                return false
-            }
-        }
-
-        // Show notifications for new messages
-        if (newConversationIds.isNotEmpty()) {
-            Notifications.getInstance(application).showNotifications(
-                newConversationIds)
-        }
-
-        return true
+        return incomingMessages
     }
 
     /**
@@ -379,60 +392,20 @@ class SyncService : IntentService(SyncService::class.java.name) {
 
     companion object {
         /**
-         * Sets up an alarm to trigger database synchronization using the
-         * specified context.
-         *
-         * @param context The specified context.
-         */
-        fun setupInterval(context: Context) {
-            val alarmManager = context.getSystemService(
-                Context.ALARM_SERVICE) as AlarmManager
-            val pendingIntent = PendingIntent.getBroadcast(
-                context, 0,
-                SyncIntervalReceiver.getIntent(
-                    context, forceRecent = false),
-                0)
-            alarmManager.cancel(pendingIntent)
-
-            val syncInterval = (getSyncInterval(context)
-                                * (24 * 60 * 60 * 1000)).toLong()
-            // Only setup interval if periodic synchronization is enabled
-            if (syncInterval != 0L) {
-                val nextSyncTime = getLastCompleteSyncTime(context) +
-                                   syncInterval
-
-                val now = System.currentTimeMillis()
-                if (nextSyncTime <= now) {
-                    pendingIntent.send()
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        alarmManager.setAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP, nextSyncTime,
-                            pendingIntent)
-                    } else {
-                        alarmManager.set(
-                            AlarmManager.RTC_WAKEUP, nextSyncTime,
-                            pendingIntent)
-                    }
-                }
-            }
-        }
-
-        /**
-         * Gets an intent which can be used to launch this service using the
-         * specified context.
+         * Starts the service as a foreground service using the specified
+         * context.
          *
          * @param context The specified context.
          * @param forceRecent If true, retrieves only the most recent messages
          * regardless of the app configuration.
-         * @return An intent which can be used to launch this service.
          */
-        fun getIntent(context: Context, forceRecent: Boolean = false): Intent {
+        fun startService(context: Context, forceRecent: Boolean = false) {
             val intent = Intent(context, SyncService::class.java)
             intent.action = context.getString(R.string.sync_action)
             intent.putExtra(context.getString(R.string.sync_force_recent),
                             forceRecent)
-            return intent
+
+            ContextCompat.startForegroundService(context, intent)
         }
     }
 }

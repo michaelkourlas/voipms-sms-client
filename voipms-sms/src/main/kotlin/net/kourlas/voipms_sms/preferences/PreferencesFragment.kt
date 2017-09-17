@@ -30,7 +30,7 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.NotificationsRegistrationService
 import net.kourlas.voipms_sms.sms.AppIndexingService
 import net.kourlas.voipms_sms.sms.RetrieveDidsService
-import net.kourlas.voipms_sms.sms.SyncService
+import net.kourlas.voipms_sms.sms.SyncIntervalService
 import net.kourlas.voipms_sms.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -45,7 +45,7 @@ class PreferencesFragment : PreferenceFragment(),
     // Preference change handlers
     private val syncIntervalPreferenceChangeListener =
         Preference.OnPreferenceChangeListener { _, _ ->
-            SyncService.setupInterval(activity.applicationContext)
+            SyncIntervalService.startService(activity.applicationContext)
             true
         }
     private val notificationsPreferenceChangeListener =

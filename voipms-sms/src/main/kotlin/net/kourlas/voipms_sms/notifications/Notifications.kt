@@ -17,10 +17,8 @@
 
 package net.kourlas.voipms_sms.notifications
 
-import android.app.Application
-import android.app.Notification
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -32,6 +30,7 @@ import android.support.v4.app.TaskStackBuilder
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
+import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.preferences.getNotificationSound
 import net.kourlas.voipms_sms.preferences.getNotificationVibrateEnabled
@@ -56,11 +55,42 @@ class Notifications private constructor(
 
     // Notification ID for the group notification, which contains all other
     // notifications
-    private val GROUP_NOTIFICATION_ID = 0
+    private val GROUP_NOTIFICATION_ID = 2
 
     // Information associated with active notifications
     private val notificationIds = mutableMapOf<ConversationId, Int>()
-    private var notificationIdCount = 1
+    private var notificationIdCount = 3
+
+    fun getSyncNotification(progress: Int = 0): Notification {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManagerO = context.getSystemService(
+                Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channel = NotificationChannel(
+                context.getString(R.string.notifications_channel_sync),
+                context.getString(R.string.notification_channel_sync_title),
+                NotificationManagerCompat.IMPORTANCE_LOW)
+            notificationManagerO.createNotificationChannel(channel)
+        }
+
+        val builder = NotificationCompat.Builder(
+            context, context.getString(R.string.notifications_channel_sync))
+        builder.setCategory(NotificationCompat.CATEGORY_PROGRESS)
+        builder.setSmallIcon(R.drawable.ic_message_refresh_white_24dp)
+        builder.setContentTitle(context.getString(
+            R.string.notifications_sync_message))
+        builder.setContentText("$progress%")
+        builder.setProgress(100, progress, false)
+
+        // Primary notification action
+        val intent = Intent(context, ConversationsActivity::class.java)
+        val stackBuilder = TaskStackBuilder.create(context)
+        stackBuilder.addNextIntentWithParentStack(intent)
+        builder.setContentIntent(stackBuilder.getPendingIntent(
+            ConversationsActivity::class.java.hashCode(),
+            PendingIntent.FLAG_CANCEL_CURRENT))
+
+        return builder.build()
+    }
 
     /**
      * Show notifications for new messages for the specified conversations.
@@ -279,6 +309,8 @@ class Notifications private constructor(
 
     companion object {
         private var instance: Notifications? = null
+
+        val SYNC_NOTIFICATION_ID = 1
 
         /**
          * Gets the sole instance of the Notifications class. Initializes the

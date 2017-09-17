@@ -17,9 +17,9 @@
 
 package net.kourlas.voipms_sms.sms
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.support.v4.content.WakefulBroadcastReceiver
 import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 
@@ -27,7 +27,7 @@ import net.kourlas.voipms_sms.R
  * Receiver called when a database synchronization is requested (automatically
  * or triggered by a particular action).
  */
-class SyncIntervalReceiver : WakefulBroadcastReceiver() {
+class SyncIntervalReceiver : BroadcastReceiver() {
     /**
      * Performs database synchronization using the specified context and
      * intent.
@@ -37,18 +37,18 @@ class SyncIntervalReceiver : WakefulBroadcastReceiver() {
      */
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
-            if (context != null && intent != null
-                && intent.action == context.getString(
-                R.string.sync_interval_action)) {
-                val forceRecent = intent.extras.get(
-                    context.getString(R.string.sync_interval_force_recent))
-                                      as Boolean?
-                                  ?: throw Exception("Force recent missing")
-
-                val syncIntent = SyncService.getIntent(context,
-                                                       forceRecent)
-                startWakefulService(context, syncIntent)
+            if (context == null || intent == null) {
+                return
             }
+            if (intent.action != context.getString(
+                R.string.sync_interval_action)) {
+                return
+            }
+            val forceRecent = intent.extras.get(
+                context.getString(
+                    R.string.sync_interval_force_recent)) as Boolean?
+                              ?: throw Exception("Force recent missing")
+            SyncService.startService(context, forceRecent)
         } catch (e: Exception) {
             FirebaseCrash.report(e)
         }
