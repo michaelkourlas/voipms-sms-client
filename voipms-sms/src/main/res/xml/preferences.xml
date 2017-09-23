@@ -51,6 +51,11 @@
             android:dependency="@string/preferences_notifications_enable_key"
             android:key="@string/preferences_notifications_vibrate_key"
             android:title="@string/preferences_notifications_vibrate_title" />
+		<net.kourlas.voipms_sms.preferences.CustomSwitchPreference
+            android:defaultValue="@string/preferences_notifications_until_dismissed_default_value"
+            android:dependency="@string/preferences_notifications_enable_key"
+            android:key="@string/preferences_notifications_until_dismissed_key"
+            android:title="@string/preferences_notifications_until_dismissed_title" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Synchronization">

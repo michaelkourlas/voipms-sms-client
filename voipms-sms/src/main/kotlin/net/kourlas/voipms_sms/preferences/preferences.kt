@@ -73,6 +73,16 @@ fun getNotificationVibrateEnabled(context: Context): Boolean {
             .toBoolean())
 }
 
+fun getNotificationUntilDismissedEnabled(context: Context): Boolean {
+    return getBooleanPreference(
+            context,
+            context.getString(
+                    R.string.preferences_notifications_until_dismissed_key),
+            context.getString(
+                    R.string.preferences_notifications_until_dismissed_default_value)
+                    .toBoolean())
+}
+
 fun getNotificationSound(context: Context): String {
     return getStringPreference(
         context,
