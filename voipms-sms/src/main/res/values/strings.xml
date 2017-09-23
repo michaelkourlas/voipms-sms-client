@@ -66,6 +66,9 @@
     <string name="preferences_notifications_vibrate_key" translatable="false">sms_notification_vibrate</string>
     <string name="preferences_notifications_vibrate_title">Vibrate</string>
     <string name="preferences_notifications_vibrate_default_value" translatable="false">true</string>
+    <string name="preferences_notifications_until_dismissed_key" translatable="false">sms_notification_until_dismissed</string>
+    <string name="preferences_notifications_until_dismissed_title">Show until dismissed</string>
+    <string name="preferences_notifications_until_dismissed_default_value" translatable="false">false</string>
 
     <!-- Network -->
     <string name="preferences_network_category_name">Network</string>

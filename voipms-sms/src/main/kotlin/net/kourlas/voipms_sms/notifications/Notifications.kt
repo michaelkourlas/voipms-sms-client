@@ -36,6 +36,7 @@ import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.preferences.getNotificationSound
 import net.kourlas.voipms_sms.preferences.getNotificationVibrateEnabled
 import net.kourlas.voipms_sms.preferences.getNotificationsEnabled
+import net.kourlas.voipms_sms.preferences.getNotificationUntilDismissedEnabled
 import net.kourlas.voipms_sms.sms.*
 import net.kourlas.voipms_sms.utils.applyCircularMask
 import net.kourlas.voipms_sms.utils.getContactName
@@ -129,6 +130,9 @@ class Notifications private constructor(
         }
         notification.addPerson("tel:" + contact)
         notification.setLights(0xFFAA0000.toInt(), 1000, 5000)
+        if(getNotificationUntilDismissedEnabled(context)) {
+            notification.setOngoing(true);
+        }
         val notificationSound = getNotificationSound(context)
         if (notificationSound != "") {
             notification.setSound(Uri.parse(getNotificationSound(context)))
