@@ -25,6 +25,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.support.v4.app.NotificationCompat.CarExtender
+import android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.app.RemoteInput
@@ -236,6 +238,19 @@ class Notifications private constructor(
             NotificationManagerCompat.from(context).notify(
                 GROUP_NOTIFICATION_ID, groupNotification.build())
         }
+
+        // Android Auto
+        val unreadConvBuilder = UnreadConversation.Builder(contactName)
+                .setReadPendingIntent(markReadPendingIntent)
+                .setReplyAction(replyPendingIntent, remoteInput)
+        for (message in messages) {
+            unreadConvBuilder.addMessage(message.text)
+            unreadConvBuilder.setLatestTimestamp(message.date.time)
+        }
+        val carExtender = CarExtender()
+                .setUnreadConversation(unreadConvBuilder.build())
+                .setColor(notification.color)
+        notification.extend(carExtender)
 
         NotificationManagerCompat.from(context).notify(id, notification.build())
     }
