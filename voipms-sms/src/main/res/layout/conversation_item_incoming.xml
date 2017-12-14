@@ -96,7 +96,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/conversation_text_spacing"
-                android:textColor="@color/message_translucent_white"
+                android:textColor="@color/message_translucent_dark_grey"
                 android:textSize="@dimen/caption" />
         </LinearLayout>
     </LinearLayout>

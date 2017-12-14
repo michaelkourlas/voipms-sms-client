@@ -67,14 +67,16 @@
 
         <TextView
             android:id="@+id/contact"
+            android:textColor="@android:color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textSize="@dimen/subheading" />
+            android:textSize="@dimen/subheading"/>
 
         <TextView
             android:id="@+id/message"
+            android:textColor="@android:color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -87,6 +89,7 @@
 
             <TextView
                 android:id="@+id/date"
+                android:textColor="@android:color/white"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
@@ -99,6 +102,7 @@
 
             <TextView
                 android:id="@+id/did"
+                android:textColor="@android:color/white"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"

@@ -296,12 +296,13 @@ class ConversationRecyclerViewAdapter(
                 dateText.setTextColor(ContextCompat.getColor(
                     activity, R.color.message_translucent_white))
             } else {
-                smsContainer.setBackgroundResource(android.R.color.white)
+                smsContainer.setBackgroundResource(R.color.primary)
                 messageText.setTextColor(ContextCompat.getColor(
-                    activity, R.color.dark_gray))
+                    activity, R.color.message_translucent_white))
                 messageText.setLinkTextColor(ContextCompat.getColor(
-                    activity, R.color.dark_gray))
-                dateText.setTextColor(R.color.message_translucent_dark_grey)
+                    activity, R.color.message_translucent_white))
+                dateText.setTextColor(ContextCompat.getColor(
+                    activity, R.color.message_translucent_dark_grey))
             }
         }
     }

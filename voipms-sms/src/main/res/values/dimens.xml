@@ -21,7 +21,7 @@
     <dimen name="text">14sp</dimen>
     <dimen name="caption">12sp</dimen>
 
-    <dimen name="margin">16dp</dimen>
+    <dimen name="margin">13dp</dimen>
     <dimen name="sms_container_margin">10dp</dimen>
     <dimen name="conversation_item_margin_top_primary">16dp</dimen>
     <dimen name="conversation_item_margin_top_secondary">2dp</dimen>

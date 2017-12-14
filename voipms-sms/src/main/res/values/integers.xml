@@ -17,5 +17,5 @@
 
 <resources>
     <integer name="sms_max_length">160</integer>
-    <integer name="message_text_height">4</integer>
+    <integer name="message_text_height">8</integer>
 </resources>

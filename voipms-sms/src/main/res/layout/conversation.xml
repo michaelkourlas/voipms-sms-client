@@ -33,14 +33,15 @@
             android:layout_gravity="top"
             android:background="@color/primary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
             app:titleTextAppearance="@style/ToolbarTitle" />
 
         <RelativeLayout
             android:id="@+id/conversation_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:background="@android:color/black">
 
             <TextView
                 android:id="@+id/empty_text"
@@ -70,9 +71,9 @@
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
                     android:orientation="vertical"
-                    app:fastscroll__bubbleColor="@color/primary"
+                    app:fastscroll__bubbleColor="@color/message_translucent_white"
                     app:fastscroll__bubbleTextAppearance="@style/ScrollerTheme"
-                    app:fastscroll__handleColor="@color/primary" />
+                    app:fastscroll__handleColor="@color/message_translucent_white" />
             </RelativeLayout>
         </RelativeLayout>
 
@@ -81,11 +82,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:background="@android:color/white"
+            android:background="@color/primary"
             android:focusableInTouchMode="true">
 
             <EditText
                 android:id="@+id/message_edit_text"
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/message_translucent_dark_grey"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -113,6 +116,7 @@
 
                 <TextView
                     android:id="@+id/chars_remaining_text"
+                    android:textColor="@android:color/white"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"

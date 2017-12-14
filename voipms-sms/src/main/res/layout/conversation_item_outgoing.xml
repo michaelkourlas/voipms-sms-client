@@ -63,8 +63,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:autoLink="all"
-                android:textColor="@color/dark_gray"
-                android:textColorLink="@color/dark_gray"
+                android:textColor="@color/message_translucent_white"
+                android:textColorLink="@color/message_translucent_white"
                 android:textSize="@dimen/subheading" />
 
             <TextView
