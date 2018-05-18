@@ -15,92 +15,33 @@
   ~ limitations under the License.
   -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="@string/preferences_account_category_name">
-        <!--suppress AndroidDomInspection -->
-        <EditTextPreference
-            android:defaultValue=""
-            android:inputType="textEmailAddress"
-            android:key="@string/preferences_account_email_key"
-            android:title="@string/preferences_account_email_title" />
-        <!--suppress AndroidDomInspection -->
-        <EditTextPreference
-            android:defaultValue=""
-            android:inputType="textPassword"
-            android:key="@string/preferences_account_password_key"
-            android:title="@string/preferences_account_password_title" />
-        <net.kourlas.voipms_sms.preferences.DidsPreference
-            android:key="@string/preferences_account_dids_key"
-            android:title="@string/preferences_account_dids_title" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="@string/preferences_notifications_category_name">
-        <net.kourlas.voipms_sms.preferences.CustomSwitchPreference
-            android:defaultValue="@string/preferences_notifications_enable_default_value"
-            android:key="@string/preferences_notifications_enable_key"
-            android:summary="@string/preferences_notifications_enable_summary"
-            android:title="@string/preferences_notifications_enable_title" />
-        <RingtonePreference
-            android:defaultValue="@string/preferences_notifications_sound_default_value"
-            android:dependency="@string/preferences_notifications_enable_key"
-            android:key="@string/preferences_notifications_sound_key"
-            android:ringtoneType="notification"
-            android:title="@string/preferences_notifications_sound_title" />
-        <net.kourlas.voipms_sms.preferences.CustomSwitchPreference
-            android:defaultValue="@string/preferences_notifications_vibrate_default_value"
-            android:dependency="@string/preferences_notifications_enable_key"
-            android:key="@string/preferences_notifications_vibrate_key"
-            android:title="@string/preferences_notifications_vibrate_title" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="Synchronization">
-        <ListPreference
-            android:defaultValue="@string/preferences_sync_interval_default_value"
-            android:entries="@array/preferences_sync_interval_entries"
-            android:entryValues="@array/preferences_sync_interval_values"
-            android:key="@string/preferences_sync_interval_key"
-            android:title="@string/preferences_sync_interval_title" />
-        <net.kourlas.voipms_sms.preferences.StartDatePreference
-            android:key="@string/preferences_sync_start_date_key"
-            android:numeric="integer"
-            android:title="@string/preferences_sync_start_date_title" />
-        <net.kourlas.voipms_sms.preferences.CustomSwitchPreference
-            android:defaultValue="@string/preferences_sync_retrieve_only_recent_messages_default_value"
-            android:key="@string/preferences_sync_retrieve_only_recent_messages_key"
-            android:summary="@string/preferences_sync_retrieve_only_recent_messages_summary"
-            android:title="@string/preferences_sync_retrieve_only_recent_messages_title" />
-        <net.kourlas.voipms_sms.preferences.CustomSwitchPreference
-            android:defaultValue="@string/preferences_sync_retrieve_deleted_messages_default_value"
-            android:key="@string/preferences_sync_retrieve_deleted_messages_key"
-            android:summary="@string/preferences_sync_retrieve_deleted_messages_summary"
-            android:title="@string/preferences_sync_retrieve_deleted_messages_title" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="@string/preferences_network_category_name">
-        <EditTextPreference
-            android:defaultValue="@string/preferences_network_connect_timeout_default_value"
-            android:inputType="number"
-            android:key="@string/preferences_network_connect_timeout_key"
-            android:title="@string/preferences_network_connect_timeout_title" />
-        <EditTextPreference
-            android:defaultValue="@string/preferences_network_read_timeout_default_value"
-            android:inputType="number"
-            android:key="@string/preferences_network_read_timeout_key"
-            android:title="@string/preferences_network_read_timeout_title" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="@string/preferences_database_category_name">
-        <net.kourlas.voipms_sms.preferences.DatabaseImportPreference
-            android:summary="@string/preferences_database_import_summary"
-            android:title="@string/preferences_database_import_title" />
-        <net.kourlas.voipms_sms.preferences.DatabaseExportPreference
-            android:summary="@string/preferences_database_export_summary"
-            android:title="@string/preferences_database_export_title" />
-        <net.kourlas.voipms_sms.preferences.DatabaseCleanUpPreference
-            android:summary="@string/preferences_database_clean_up_summary"
-            android:title="@string/preferences_database_clean_up_title" />
-        <net.kourlas.voipms_sms.preferences.DatabaseDeletePreference
-            android:summary="@string/preferences_database_delete_summary"
-            android:title="@string/preferences_database_delete_title" />
-    </PreferenceCategory>
-</PreferenceScreen>
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v7.preference.Preference
+        android:icon="@drawable/ic_account_box_primary_dark_24dp"
+        android:title="@string/preferences_account_category_name">
+        <intent android:action=".preferences.AccountPreferencesActivity" />
+    </android.support.v7.preference.Preference>
+    <android.support.v7.preference.Preference
+        android:icon="@drawable/ic_call_primary_dark_24dp"
+        android:title="@string/preferences_dids_category_name">
+        <intent android:action=".preferences.DidsPreferencesActivity" />
+    </android.support.v7.preference.Preference>
+    <android.support.v7.preference.Preference
+        android:icon="@drawable/ic_message_primary_dark_24dp"
+        android:title="@string/preferences_notifications_category_name" />
+    <android.support.v7.preference.Preference
+        android:icon="@drawable/ic_sync_primary_dark_24dp"
+        android:title="@string/preferences_sync_category_name">
+        <intent android:action=".preferences.SynchronizationPreferencesActivity" />
+    </android.support.v7.preference.Preference>
+    <android.support.v7.preference.Preference
+        android:icon="@drawable/ic_router_primary_dark_24dp"
+        android:title="@string/preferences_network_category_name">
+        <intent android:action=".preferences.NetworkPreferencesActivity" />
+    </android.support.v7.preference.Preference>
+    <android.support.v7.preference.Preference
+        android:icon="@drawable/ic_storage_primary_dark_24dp"
+        android:title="@string/preferences_database_category_name">
+        <intent android:action=".preferences.DatabasePreferencesActivity" />
+    </android.support.v7.preference.Preference>
+</android.support.v7.preference.PreferenceScreen>

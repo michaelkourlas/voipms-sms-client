@@ -31,6 +31,8 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.view.View
 import android.view.ViewOutlineProvider
+import android.widget.Toast
+import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import java.lang.Math.abs
 
@@ -80,12 +82,11 @@ fun applyCircularMask(view: View) {
  * @return A a view outline provider for ovals.
  */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-private fun getOvalViewOutlineProvider(): ViewOutlineProvider = object : ViewOutlineProvider() {
-    override fun getOutline(view: View, outline: Outline) = outline.setOval(0,
-                                                                            0,
-                                                                            view.width,
-                                                                            view.height)
-}
+private fun getOvalViewOutlineProvider(): ViewOutlineProvider =
+    object : ViewOutlineProvider() {
+        override fun getOutline(view: View, outline: Outline) =
+            outline.setOval(0, 0, view.width, view.height)
+    }
 
 /**
  * Applies a rectangular rounded corners mask to a view.
@@ -108,11 +109,11 @@ fun applyRoundedCornersMask(view: View) {
  * @return A a view outline provider for rounded rectangles.
  */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider = object : ViewOutlineProvider() {
-    override fun getOutline(view: View, outline: Outline) = outline
-        .setRoundRect(0, 0, view.width, view.height,
-                      15f)
-}
+private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
+    object : ViewOutlineProvider() {
+        override fun getOutline(view: View, outline: Outline) =
+            outline.setRoundRect(0, 0, view.width, view.height, 15f)
+    }
 
 /**
  * Shows an alert dialog with the specified title, text, and buttons.
@@ -147,13 +148,9 @@ fun showAlertDialog(context: Context, title: String?, text: String?,
  * @param text The specified text.
  * @return The dialog.
  */
-fun showInfoDialog(context: Context,
-                   text: String?): AlertDialog = showAlertDialog(context, null,
-                                                                 text,
-                                                                 context.getString(
-                                                                     R.string.ok),
-                                                                 null, null,
-                                                                 null)
+fun showInfoDialog(context: Context, text: String?): AlertDialog =
+    showAlertDialog(context, null, text, context.getString(R.string.ok),
+                    null, null, null)
 
 /**
  * Shows an information dialog with the specified title and text.
@@ -164,12 +161,9 @@ fun showInfoDialog(context: Context,
  * @return The dialog.
  */
 fun showInfoDialog(context: Context, title: String?,
-                   text: String?): AlertDialog = showAlertDialog(context, title,
-                                                                 text,
-                                                                 context.getString(
-                                                                     R.string.ok),
-                                                                 null, null,
-                                                                 null)
+                   text: String?): AlertDialog =
+    showAlertDialog(context, title, text, context.getString(R.string.ok),
+                    null, null, null)
 
 /**
  * Shows a generic snackbar.
@@ -211,6 +205,15 @@ fun showPermissionSnackbar(activity: Activity, viewId: Int,
     }
     snackbar.show()
     return snackbar
+}
+
+fun abortActivity(activity: Activity, ex: Exception,
+                  duration: Int = Toast.LENGTH_SHORT) {
+    FirebaseCrash.report(ex)
+    Toast.makeText(activity,
+                   activity.getString(R.string.toast_unknown_error, ex.message),
+                   duration).show()
+    activity.finish()
 }
 
 /**

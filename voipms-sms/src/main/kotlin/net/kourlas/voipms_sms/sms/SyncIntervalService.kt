@@ -23,9 +23,11 @@ import android.content.Context
 import android.content.Intent
 import android.support.v4.app.AlarmManagerCompat
 import android.support.v4.app.JobIntentService
+import android.util.Log
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getLastCompleteSyncTime
 import net.kourlas.voipms_sms.preferences.getSyncInterval
+import java.util.*
 
 /**
  * Service used to set up an alarm to trigger database synchronization.
@@ -38,7 +40,14 @@ class SyncIntervalService : JobIntentService() {
             return
         }
 
+        val rand = Random().nextInt().toString(16)
+        Log.i(SyncIntervalService::class.java.name,
+              "[$rand] setting sync interval")
+
         setInterval()
+
+        Log.i(SyncIntervalService::class.java.name,
+              "[$rand] sync interval set")
     }
 
     /**

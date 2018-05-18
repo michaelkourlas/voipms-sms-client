@@ -44,6 +44,7 @@ import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.newconversation.NewConversationActivity
+import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.notifications.NotificationsRegistrationService
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.Database
@@ -105,8 +106,7 @@ open class ConversationsActivity : AppCompatActivity(),
                 } else if (!failedDids.isEmpty()) {
                     // Some DIDs failed registration
                     showInfoDialog(this@ConversationsActivity, getString(
-                        R.string.push_notifications_fail_register,
-                        failedDids.joinToString(", ")))
+                        R.string.push_notifications_fail_register))
                 }
 
                 // Regardless of whether an error occurred, mark setup as
@@ -604,7 +604,7 @@ open class ConversationsActivity : AppCompatActivity(),
     private fun onSetupIncompleteForVersion114() {
         // Check if account is active and notifications are enabled
         // and silently quit if not
-        if (!isAccountActive(this) || !getNotificationsEnabled(this)) {
+        if (!isAccountActive(this) || !Notifications.getInstance(application).getNotificationsEnabled()) {
             setSetupCompletedForVersion(this@ConversationsActivity, 114)
             return
         }
@@ -612,29 +612,17 @@ open class ConversationsActivity : AppCompatActivity(),
         // Check if Google Play Services is available
         if (GoogleApiAvailability.getInstance()
             .isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
-            showInfoDialog(this, getString(
+            showSnackbar(this, R.id.coordinator_layout, getString(
                 R.string.push_notifications_fail_google_play))
             setSetupCompletedForVersion(this@ConversationsActivity, 114)
             return
         }
 
-        // Show progress dialog
-        val progressDialog = ProgressDialog(this)
-        with(progressDialog) {
-            setMessage(context.getString(
-                R.string.push_notifications_progress))
-            setCancelable(false)
-            show()
-        }
-        this.progressDialog?.dismiss()
-        this.progressDialog = progressDialog
-
         // Subscribe to DID topics
         subscribeToDidTopics(this)
 
         // Start push notifications registration service
-        startService(NotificationsRegistrationService
-                         .getIntent(this))
+        startService(NotificationsRegistrationService.getIntent(this))
     }
 
     companion object {

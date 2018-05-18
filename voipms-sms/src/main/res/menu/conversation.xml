@@ -45,4 +45,8 @@
         android:id="@+id/delete_button"
         android:title="@string/conversation_action_delete"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/notifications_button"
+        android:title="@string/conversation_action_notifications"
+        app:showAsAction="never" />
 </menu>

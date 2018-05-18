@@ -22,7 +22,9 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
@@ -447,6 +449,13 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             phoneMenuItem.isVisible = false
         }
 
+        // Hide the notifications button on devices running versions of Android
+        // prior to Oreo
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            val notificationsItem = menu.findItem(R.id.notifications_button)
+            notificationsItem.isVisible = false
+        }
+
         // Configure the search box to trigger adapter filtering when the
         // text changes
         val searchView = menu.findItem(
@@ -473,6 +482,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             R.id.archive_button -> return onArchiveButtonClick()
             R.id.unarchive_button -> return onUnarchiveButtonClick()
             R.id.delete_button -> return onDeleteAllButtonClick()
+            R.id.notifications_button -> return onNotificationsButtonClick()
         }
 
         return super.onOptionsItemSelected(item)
@@ -595,6 +605,29 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             },
             getString(R.string.cancel), null)
 
+        return true
+    }
+
+    /**
+     * Handles the notifications button.
+     *
+     * @return Always returns true.
+     */
+    private fun onNotificationsButtonClick(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notifications.getInstance(application).createNotificationChannel(
+                contact, did)
+
+            val intent = Intent(
+                Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE,
+                            packageName)
+            intent.putExtra(Settings.EXTRA_CHANNEL_ID,
+                            getString(
+                                R.string.notifications_channel_contact,
+                                did, contact))
+            startActivity(intent)
+        }
         return true
     }
 

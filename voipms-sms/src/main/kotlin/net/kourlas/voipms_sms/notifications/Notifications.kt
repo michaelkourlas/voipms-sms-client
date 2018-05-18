@@ -17,10 +17,11 @@
 
 package net.kourlas.voipms_sms.notifications
 
+import android.annotation.SuppressLint
 import android.app.*
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.support.v4.app.NotificationCompat
@@ -32,6 +33,7 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.demo.demo
+import net.kourlas.voipms_sms.preferences.getDidShowNotifications
 import net.kourlas.voipms_sms.preferences.getNotificationSound
 import net.kourlas.voipms_sms.preferences.getNotificationVibrateEnabled
 import net.kourlas.voipms_sms.preferences.getNotificationsEnabled
@@ -40,6 +42,7 @@ import net.kourlas.voipms_sms.utils.applyCircularMask
 import net.kourlas.voipms_sms.utils.getContactName
 import net.kourlas.voipms_sms.utils.getContactPhotoBitmap
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+
 
 /**
  * Single-instance class used to send notifications when new SMS messages
@@ -53,29 +56,28 @@ class Notifications private constructor(
     // Helper variables
     private val context = application.applicationContext
 
-    // Notification ID for the group notification, which contains all other
-    // notifications
-    private val GROUP_NOTIFICATION_ID = 2
-
     // Information associated with active notifications
     private val notificationIds = mutableMapOf<ConversationId, Int>()
     private var notificationIdCount = 3
 
+    /**
+     * Gets the notification displayed during database synchronization.
+     */
     fun getSyncNotification(progress: Int = 0): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManagerO = context.getSystemService(
-                Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = context.getSystemService(
+                NotificationManager::class.java)
             val channel = NotificationChannel(
                 context.getString(R.string.notifications_channel_sync),
-                context.getString(R.string.notification_channel_sync_title),
-                NotificationManagerCompat.IMPORTANCE_LOW)
-            notificationManagerO.createNotificationChannel(channel)
+                context.getString(R.string.notifications_channel_sync_title),
+                NotificationManager.IMPORTANCE_LOW)
+            notificationManager.createNotificationChannel(channel)
         }
 
         val builder = NotificationCompat.Builder(
             context, context.getString(R.string.notifications_channel_sync))
         builder.setCategory(NotificationCompat.CATEGORY_PROGRESS)
-        builder.setSmallIcon(R.drawable.ic_message_refresh_white_24dp)
+        builder.setSmallIcon(R.drawable.ic_message_sync_white_24dp)
         builder.setContentTitle(context.getString(
             R.string.notifications_sync_message))
         builder.setContentText("$progress%")
@@ -93,16 +95,110 @@ class Notifications private constructor(
     }
 
     /**
+     * Attempts to create the default notification channel. This does nothing
+     * if the channel already exists.
+     */
+    fun createDefaultNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                context.getString(R.string.notifications_channel_default),
+                context.getString(R.string.notifications_channel_default_title),
+                NotificationManager.IMPORTANCE_HIGH)
+            channel.enableLights(true)
+            channel.lightColor = Color.RED
+            channel.enableVibration(true)
+            channel.vibrationPattern = longArrayOf(0, 250, 250, 250)
+
+            val notificationManager = context.getSystemService(
+                NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    /**
+     * Attempts to create a notification channel for the specified DID.
+     * Does nothing if this channel does not already exist.
+     */
+    fun createNotificationChannel(contact: String, did: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create the default notification channel if it doesn't already
+            // exist
+            createDefaultNotificationChannel()
+            val notificationManager = context.getSystemService(
+                NotificationManager::class.java)
+            val defaultChannel = notificationManager.getNotificationChannel(
+                context.getString(R.string.notifications_channel_default))
+
+            val channelGroup = NotificationChannelGroup(
+                context.getString(R.string.notifications_channel_group_did,
+                                  did),
+                getFormattedPhoneNumber(did))
+            notificationManager.createNotificationChannelGroup(channelGroup)
+
+            val contactName = getContactName(context, did)
+            val channel = NotificationChannel(
+                context.getString(R.string.notifications_channel_contact,
+                                  contact, did),
+                contactName ?: getFormattedPhoneNumber(did),
+                defaultChannel.importance)
+            channel.enableLights(defaultChannel.shouldShowLights())
+            channel.lightColor = defaultChannel.lightColor
+            channel.enableVibration(defaultChannel.shouldVibrate())
+            channel.vibrationPattern = defaultChannel.vibrationPattern
+            channel.lockscreenVisibility = defaultChannel.lockscreenVisibility
+            channel.setBypassDnd(defaultChannel.canBypassDnd())
+            channel.setSound(defaultChannel.sound,
+                             defaultChannel.audioAttributes)
+            channel.setShowBadge(defaultChannel.canShowBadge())
+            channel.group = context.getString(
+                R.string.notifications_channel_group_did,
+                did)
+
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    fun getNotificationsEnabled(
+        conversationId: ConversationId? = null): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            @Suppress("DEPRECATION")
+            if (!getNotificationsEnabled(context)) {
+                return false
+            }
+
+            if (!NotificationManagerCompat.from(
+                context).areNotificationsEnabled()) {
+                return false
+            }
+        }
+
+        if (conversationId != null) {
+            if (!getDidShowNotifications(context, conversationId.did)) {
+                return false
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val notificationManager = context.getSystemService(
+                    NotificationManager::class.java)
+                val channel = notificationManager.getNotificationChannel(
+                    context.getString(R.string.notifications_channel_contact,
+                                      conversationId.contact,
+                                      conversationId.did))
+                if (channel.importance == NotificationManager.IMPORTANCE_NONE) {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+
+    /**
      * Show notifications for new messages for the specified conversations.
      *
      * @param conversationIds A list of conversation IDs.
      */
     fun showNotifications(conversationIds: Set<ConversationId>) {
-        // Only show notifications if notifications are enabled
-        if (!getNotificationsEnabled(context)) {
-            return
-        }
-
         // Do not show notifications when the conversations view is open
         if (application.conversationsActivityVisible()) {
             return
@@ -114,12 +210,21 @@ class Notifications private constructor(
                 // conversation view is open
                 application.conversationActivityVisible(it)
             }
+            .filter {
+                getNotificationsEnabled(it)
+            }
             .forEach {
                 showNotification(
                     Database.getInstance(context).getMessagesUnread(it))
             }
     }
 
+    /**
+     * Shows a notification for the specified message, bypassing all normal
+     * checks. Only used for demo purposes.
+     *
+     * @param message The message to show a notification for.
+     */
     fun showDemoNotification(message: Message) = showNotification(
         listOf(message))
 
@@ -148,26 +253,49 @@ class Notifications private constructor(
             contactName = getFormattedPhoneNumber(contact)
         }
 
+        // Notification channel
+        createDefaultNotificationChannel()
+        val channel = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            context.getString(R.string.notifications_default_channel_name)
+        } else {
+            val notificationManager = context.getSystemService(
+                NotificationManager::class.java)
+            val channel = notificationManager.getNotificationChannel(
+                context.getString(R.string.notifications_channel_contact,
+                                  did, contact))
+            if (channel == null) {
+                context.getString(R.string.notifications_default_channel_name)
+            } else {
+                context.getString(R.string.notifications_channel_contact,
+                                  did, contact)
+            }
+        }
+
         // General notification properties
-        val notification = android.support.v7.app.NotificationCompat.Builder(
-            context)
+        val notification = NotificationCompat.Builder(context, channel)
         notification.setSmallIcon(R.drawable.ic_chat_white_24dp)
         notification.setLargeIcon(getLargeIconBitmap(contact))
-        notification.priority = Notification.PRIORITY_HIGH
+        notification.setAutoCancel(true)
+        notification.addPerson("tel:" + contact)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notification.setCategory(Notification.CATEGORY_MESSAGE)
         }
-        notification.addPerson("tel:" + contact)
-        notification.setLights(0xFFAA0000.toInt(), 1000, 5000)
-        val notificationSound = getNotificationSound(context)
-        if (notificationSound != "") {
-            notification.setSound(Uri.parse(getNotificationSound(context)))
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            @Suppress("DEPRECATION")
+            notification.priority = Notification.PRIORITY_HIGH
+            notification.setLights(0xFFAA0000.toInt(), 1000, 5000)
+            @Suppress("DEPRECATION")
+            val notificationSound = getNotificationSound(context)
+            if (notificationSound != "") {
+                @Suppress("DEPRECATION")
+                notification.setSound(Uri.parse(getNotificationSound(context)))
+            }
+            @Suppress("DEPRECATION")
+            if (getNotificationVibrateEnabled(context)) {
+                notification.setVibrate(longArrayOf(0, 250, 250, 250))
+            }
+            notification.color = 0xFFAA0000.toInt()
         }
-        if (getNotificationVibrateEnabled(context)) {
-            notification.setVibrate(longArrayOf(0, 250, 250, 250))
-        }
-        notification.color = 0xFFAA0000.toInt()
-        notification.setAutoCancel(true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             notification.setGroup(context.getString(
                 R.string.notifications_group_key))
@@ -257,8 +385,7 @@ class Notifications private constructor(
 
         // Group notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val groupNotification = android.support.v7.app.NotificationCompat
-                .Builder(context)
+            val groupNotification = NotificationCompat.Builder(context, channel)
             groupNotification.setSmallIcon(R.drawable.ic_chat_white_24dp)
             groupNotification.setGroup(context.getString(
                 R.string.notifications_group_key))
@@ -308,9 +435,17 @@ class Notifications private constructor(
     }
 
     companion object {
+        // It is not a leak to store an instance to the Application object,
+        // since it has the same lifetime as the application itself
+        @SuppressLint("StaticFieldLeak")
         private var instance: Notifications? = null
 
+        // Notification ID for the database synchronization notification
         val SYNC_NOTIFICATION_ID = 1
+
+        // Notification ID for the group notification, which contains all other
+        // notifications
+        val GROUP_NOTIFICATION_ID = 2
 
         /**
          * Gets the sole instance of the Notifications class. Initializes the

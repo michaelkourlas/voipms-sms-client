@@ -112,6 +112,68 @@
             android:name=".preferences.PreferencesActivity"
             android:label="@string/preferences_name"
             android:parentActivityName=".conversations.ConversationsActivity" />
+        <activity
+            android:name=".preferences.DidPreferencesActivity"
+            android:parentActivityName=".preferences.DidsPreferencesActivity">
+            <intent-filter>
+                <action android:name=".preferences.DidPreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".preferences.DidsPreferencesActivity"
+            android:label="@string/preferences_did_name"
+            android:parentActivityName=".preferences.AccountPreferencesActivity">
+            <intent-filter>
+                <action android:name=".preferences.DidsPreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".preferences.AccountPreferencesActivity"
+            android:label="@string/preferences_account_category_name"
+            android:parentActivityName=".preferences.PreferencesActivity">
+            <intent-filter>
+                <action android:name=".preferences.AccountPreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".preferences.DatabasePreferencesActivity"
+            android:label="@string/preferences_database_category_name"
+            android:parentActivityName=".preferences.PreferencesActivity">
+            <intent-filter>
+                <action android:name=".preferences.DatabasePreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".preferences.NetworkPreferencesActivity"
+            android:label="@string/preferences_network_category_name"
+            android:parentActivityName=".preferences.PreferencesActivity">
+            <intent-filter>
+                <action android:name=".preferences.NetworkPreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".preferences.NotificationsPreferencesActivity"
+            android:label="@string/preferences_notifications_category_name"
+            android:parentActivityName=".preferences.PreferencesActivity">
+            <intent-filter>
+                <action android:name=".preferences.NotificationsPreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".preferences.SynchronizationPreferencesActivity"
+            android:label="@string/preferences_sync_category_name"
+            android:parentActivityName=".preferences.PreferencesActivity">
+            <intent-filter>
+                <action android:name=".preferences.SynchronizationPreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!-- BROADCAST RECEIVERS -->
 
@@ -150,9 +212,10 @@
         </service>
         <service android:name=".sms.MarkReadService" />
         <service android:name=".sms.RetrieveDidsService" />
-        <service android:name=".sms.SendMessageService" />
-        <service
-            android:name=".sms.SyncService"
+        <service android:name=".sms.SendMessageService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <service android:name=".sms.SyncIntervalService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service android:name=".sms.SyncService" />
     </application>
 </manifest>

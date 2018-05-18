@@ -40,6 +40,23 @@ class Database private constructor(private val context: Context) {
 
     // TODO: Correctly implement transaction support
 
+    fun getDids(): List<String> {
+        synchronized(this) {
+            val cursor = database.query(
+                true, TABLE_MESSAGE, arrayOf(COLUMN_DID), null, null, null,
+                null, null, null)
+            val dids = mutableListOf<String>()
+            cursor.moveToFirst()
+            while (!cursor.isAfterLast) {
+                dids.add(cursor.getString(
+                    cursor.getColumnIndexOrThrow(COLUMN_DID)))
+                cursor.moveToNext()
+            }
+            cursor.close()
+            return dids
+        }
+    }
+
     /**
      * Deletes the specified message from the database.
      *
@@ -64,7 +81,7 @@ class Database private constructor(private val context: Context) {
     }
 
     /**
-     * Deletes all messages associated with the specified DIDs.
+     * Deletes all messages that are not associated with the specified DIDs.
      *
      * @param dids The specified DIDs.
      */

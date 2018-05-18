@@ -38,6 +38,7 @@ import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.ui.CustomScrollerViewProvider
 import net.kourlas.voipms_sms.utils.getDigitsOfString
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 
 /**
  * Activity that contains a list of contacts to select to create a new
@@ -265,10 +266,12 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 var selectedIndex = 0
                 AlertDialog.Builder(this, R.style.DialogTheme).apply {
                     setTitle("Select DID")
-                    setSingleChoiceItems(dids.toTypedArray(), selectedIndex,
-                                         { _, which ->
-                                             selectedIndex = which
-                                         })
+                    setSingleChoiceItems(
+                        dids.map(::getFormattedPhoneNumber).toTypedArray(),
+                        selectedIndex,
+                        { _, which ->
+                            selectedIndex = which
+                        })
                     setPositiveButton(getString(R.string.ok),
                                       { _, _ ->
                                           intent.putExtra(

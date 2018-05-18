@@ -20,7 +20,9 @@ package net.kourlas.voipms_sms.sms
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
+import android.support.v4.app.JobIntentService
 import android.support.v4.app.RemoteInput
+import android.util.Log
 import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -34,16 +36,21 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 import java.net.URLEncoder
+import java.util.*
 
 /**
  * Service used to send an SMS message to the specified contact using the
  * specified DID with the VoIP.ms API.
  */
-class SendMessageService : IntentService(SendMessageService::class.java.name) {
+class SendMessageService : JobIntentService() {
     private var error: String? = null
 
-    override fun onHandleIntent(intent: Intent?) {
-        val conversationId = handleSendMessage(intent)
+    override fun onHandleWork(intent: Intent) {
+        val rand = Random().nextInt().toString(16)
+        Log.i(SendMessageService::class.java.name,
+              "[$rand] sending message")
+
+        val conversationId = handleSendMessage(intent) ?: return
 
         // Cancel any existing notification with this conversation ID
         Notifications.getInstance(application)
@@ -60,20 +67,23 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
                 R.string.sent_message_error), error)
         }
         applicationContext.sendBroadcast(sentMessageBroadcastIntent)
+
+        Log.i(SendMessageService::class.java.name,
+              "[$rand] sent message")
     }
 
-    private fun handleSendMessage(intent: Intent?): ConversationId {
+    private fun handleSendMessage(intent: Intent): ConversationId? {
         try {
             // Terminate quietly if intent does not exist or does not contain
             // the send SMS action
-            if (intent == null || intent.action != applicationContext.getString(
+            if (intent.action != applicationContext.getString(
                 R.string.send_message_action)) {
-                return ConversationId("ERROR", "ERROR")
+                return null
             }
 
             // Terminate quietly if account inactive
             if (!isAccountActive(applicationContext)) {
-                return ConversationId("ERROR", "ERROR")
+                return null
             }
 
             // Retrieve the DID, contact, and list of message texts from the
@@ -138,7 +148,7 @@ class SendMessageService : IntentService(SendMessageService::class.java.name) {
                 R.string.send_message_error_unknown)
         }
 
-        return ConversationId("ERROR", "ERROR")
+        return null
     }
 
     /**

@@ -18,6 +18,7 @@
 package net.kourlas.voipms_sms;
 
 import android.app.Application;
+import android.os.Build;
 
 import net.kourlas.voipms_sms.sms.ConversationId;
 
@@ -78,5 +79,10 @@ public class CustomApplication extends Application {
 
         // Subscribe to topics for current DIDs
         subscribeToDidTopics(getApplicationContext());
+
+        // Clean up unused notification channels
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+        }
     }
 }

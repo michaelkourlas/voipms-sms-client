@@ -21,7 +21,6 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.preferences.getNotificationsEnabled
 import net.kourlas.voipms_sms.sms.SyncIntervalReceiver
 
 /**
@@ -39,7 +38,7 @@ class FcmListenerService : FirebaseMessagingService() {
         if (match) {
             // If so, and if notifications are enabled, update the message
             // database and shows notifications for any new messages
-            if (getNotificationsEnabled(applicationContext)) {
+            if (Notifications.getInstance(application).getNotificationsEnabled()) {
                 val intent = SyncIntervalReceiver.getIntent(
                     applicationContext, forceRecent = true)
                 sendBroadcast(intent)

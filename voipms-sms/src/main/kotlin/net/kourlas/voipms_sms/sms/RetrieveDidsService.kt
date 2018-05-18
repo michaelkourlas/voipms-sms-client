@@ -157,11 +157,6 @@ class RetrieveDidsService : IntentService(
             return null
         }
 
-        if (dids.size == 0) {
-            error = getString(
-                R.string.preferences_account_dids_error_no_dids)
-            return null
-        }
         return dids.toSet()
     }
 

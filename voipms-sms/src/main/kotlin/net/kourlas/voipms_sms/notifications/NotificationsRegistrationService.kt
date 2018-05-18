@@ -43,7 +43,7 @@ class NotificationsRegistrationService : IntentService(
         }
 
         // Terminate quietly if notifications are not enabled
-        if (!getNotificationsEnabled(applicationContext)) {
+        if (!Notifications.getInstance(application).getNotificationsEnabled()) {
             return
         }
 
@@ -52,11 +52,12 @@ class NotificationsRegistrationService : IntentService(
             return
         }
 
+        val dids = getDids(applicationContext)
         var callbackFailedDids: Set<String>? = null
         try {
             // Try to register URL callbacks with VoIP.ms for DIDs
-            val responses = getVoipMsApiCallbackResponses()
-            callbackFailedDids = parseVoipMsApiCallbackResponses(responses)
+            val responses = getVoipMsApiCallbackResponses(dids)
+            callbackFailedDids = parseVoipMsApiCallbackResponses(dids, responses)
         } catch (e: Exception) {
             FirebaseCrash.report(e)
         }
@@ -65,10 +66,8 @@ class NotificationsRegistrationService : IntentService(
         val registrationCompleteIntent = Intent(
             applicationContext.getString(
                 R.string.push_notifications_reg_complete_action))
-        registrationCompleteIntent.putStringArrayListExtra(
-            getString(
-                R.string
-                    .push_notifications_reg_complete_voip_ms_api_callback_failed_dids),
+        registrationCompleteIntent.putStringArrayListExtra(getString(
+            R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids),
             if (callbackFailedDids != null)
                 ArrayList<String>(callbackFailedDids.toList()) else null)
         applicationContext.sendBroadcast(registrationCompleteIntent)
@@ -77,9 +76,8 @@ class NotificationsRegistrationService : IntentService(
     /**
      * Gets the response of a setSMS call to the VoIP.ms API for each DID.
      */
-    private fun getVoipMsApiCallbackResponses(): Map<String, JSONObject> {
+    private fun getVoipMsApiCallbackResponses(dids: Set<String>): Map<String, JSONObject> {
         val responses = mutableMapOf<String, JSONObject>()
-        val dids = getDids(applicationContext)
         for (did in dids) {
             try {
                 val registerVoipCallbackUrl =
@@ -119,9 +117,9 @@ class NotificationsRegistrationService : IntentService(
      * @return A list of any DIDs that failed the setSMS call.
      */
     private fun parseVoipMsApiCallbackResponses(
+        dids: Set<String>,
         responses: Map<String, JSONObject>): Set<String> {
         val failedDids = mutableSetOf<String>()
-        val dids = getDids(applicationContext)
         for (did in dids) {
             try {
                 if (did !in responses
