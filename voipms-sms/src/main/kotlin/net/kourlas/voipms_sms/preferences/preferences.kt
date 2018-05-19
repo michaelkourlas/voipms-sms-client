@@ -63,7 +63,7 @@ fun getNotificationsEnabled(context: Context): Boolean =
         context,
         context.getString(R.string.preferences_notifications_enable_key),
         context.getString(
-            R.string.preferences_notifications_enable_default_value)
+            R.string.preferences_notifications_enable_default_value)!!
             .toBoolean())
 
 @Deprecated("Remove when Android versions earlier than Oreo are no longer supported.")
@@ -73,7 +73,7 @@ fun getNotificationVibrateEnabled(context: Context): Boolean =
         context.getString(
             R.string.preferences_notifications_vibrate_key),
         context.getString(
-            R.string.preferences_notifications_vibrate_default_value)
+            R.string.preferences_notifications_vibrate_default_value)!!
             .toBoolean())
 
 @Deprecated("Remove when Android versions earlier than Oreo are no longer supported.")
@@ -97,7 +97,7 @@ fun getRetrieveDeletedMessages(context: Context): Boolean =
         context.getString(
             R.string.preferences_sync_retrieve_deleted_messages_key),
         context.getString(
-            R.string.preferences_sync_retrieve_deleted_messages_default_value)
+            R.string.preferences_sync_retrieve_deleted_messages_default_value)!!
             .toBoolean())
 
 fun getRetrieveOnlyRecentMessages(context: Context): Boolean =
@@ -106,7 +106,7 @@ fun getRetrieveOnlyRecentMessages(context: Context): Boolean =
         context.getString(
             R.string.preferences_sync_retrieve_only_recent_messages_key),
         context.getString(
-            R.string.preferences_sync_retrieve_only_recent_messages_default_value)
+            R.string.preferences_sync_retrieve_only_recent_messages_default_value)!!
             .toBoolean())
 
 fun getSetupCompletedForVersion(context: Context): Long =
@@ -281,7 +281,6 @@ private fun setBooleanPreference(context: Context, key: String,
         apply()
     }
 }
-
 
 private fun setLongPreference(context: Context, key: String, value: Long) {
     val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
