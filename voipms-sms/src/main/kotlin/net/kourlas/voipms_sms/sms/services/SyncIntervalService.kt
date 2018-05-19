@@ -87,7 +87,7 @@ class SyncIntervalService : JobIntentService() {
 
     companion object {
         /**
-         * Starts the service as a job using the specified context.
+         * Set up an alarm to trigger database synchronization.
          */
         fun startService(context: Context) {
             val intent = Intent()

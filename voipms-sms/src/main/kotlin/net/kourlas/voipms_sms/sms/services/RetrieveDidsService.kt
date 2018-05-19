@@ -32,6 +32,9 @@ import java.net.URLEncoder
 
 /**
  * Service used to retrieve DIDs for a particular account from VoIP.ms.
+ *
+ * This service is an IntentService rather than a JobIntentService because it
+ * does not need to be run in the background.
  */
 class RetrieveDidsService : IntentService(
     RetrieveDidsService::class.java.name) {
@@ -57,9 +60,7 @@ class RetrieveDidsService : IntentService(
      * Retrieves and returns the DIDs associated with the configured VoIP.ms
      * account using the parameters from the specified intent.
      *
-     * @param intent The specified intent.
-     * @return The DIDs associated with the configured VoIP.ms account, or null
-     * if an error occurred.
+     * @return Null if an error occurred.
      */
     private fun handleRetrieveDids(intent: Intent?): Set<String>? {
         // Retrieve DIDs from VoIP.ms API
@@ -91,8 +92,7 @@ class RetrieveDidsService : IntentService(
     /**
      * Gets the response of a getDIDsInfo call to the VoIP.ms API.
      *
-     * @return The response of a getDIDsInfo call to the VoIP.ms API, or null
-     * if an error occurred.
+     * @return Null if an error occurred.
      */
     private fun getApiResponse(): JSONObject? {
         val retrieveDidsUrl =
@@ -129,9 +129,7 @@ class RetrieveDidsService : IntentService(
      * Parses the response of a getDIDsInfo from the VoIP.ms API to
      * extract all DIDs with SMS enabled.
      *
-     * @param response The specified response.
-     * @return The DIDs extracted from the response, or null if an error
-     * occurred.
+     * @return Null if an error occurred.
      */
     private fun getDidsFromResponse(response: JSONObject): Set<String>? {
         val dids = mutableListOf<String>()
@@ -162,16 +160,12 @@ class RetrieveDidsService : IntentService(
 
     companion object {
         /**
-         * Gets an intent which can be used to launch this service using the
-         * specified context.
-         *
-         * @param context The specified context.
-         * @return An intent which can be used to launch this service.
+         * Retrieve DIDs for a particular account from VoIP.ms.
          */
-        fun getIntent(context: Context): Intent {
+        fun startService(context: Context) {
             val intent = Intent(context, RetrieveDidsService::class.java)
             intent.action = context.getString(R.string.retrieve_dids_action)
-            return intent
+            context.startService(intent)
         }
     }
 }

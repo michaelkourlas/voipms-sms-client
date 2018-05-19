@@ -45,7 +45,7 @@ class SendMessageReceiver : BroadcastReceiver() {
 
             // Forward intent to SendMessageService
             intent.setClass(context, SendMessageService::class.java)
-            SendMessageService.sendMessage(context, intent)
+            SendMessageService.startService(context, intent)
         } catch (e: Exception) {
             Crashlytics.logException(e)
         }

@@ -375,7 +375,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
         if (messageText.trim() != "") {
             // Send the message using the SendMessageService
-            SendMessageService.sendMessage(this, did, contact, messageText)
+            SendMessageService.startService(this, did, contact, messageText)
 
             // Clear the message text box
             messageEditText.setText("")
@@ -669,7 +669,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         // Resends all checked items
         for (messageItem in adapter.messageItems) {
             if (messageItem.checked) {
-                SendMessageService.sendMessage(
+                SendMessageService.startService(
                     applicationContext, conversationId,
                     messageItem.message.databaseId)
                 break
@@ -841,7 +841,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 val messageItem = adapter[position]
                 val message = messageItem.message
                 if (!message.isDelivered && !message.isDeliveryInProgress) {
-                    SendMessageService.sendMessage(
+                    SendMessageService.startService(
                         this, conversationId, message.databaseId)
                 }
             }

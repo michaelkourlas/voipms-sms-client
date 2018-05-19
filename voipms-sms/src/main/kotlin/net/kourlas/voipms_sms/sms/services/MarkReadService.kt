@@ -30,6 +30,9 @@ import net.kourlas.voipms_sms.sms.Database
 /**
  * Service used to mark the conversation defined by the specified contact
  * using the specified DID as read.
+ *
+ * This service is an IntentService rather than a JobIntentService because
+ * although it is run in the background, the execution time is very short.
  */
 class MarkReadService : IntentService(
     MarkReadService::class.java.name) {

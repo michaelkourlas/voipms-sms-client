@@ -361,7 +361,7 @@ class Notifications private constructor(
         val replyPendingIntent: PendingIntent
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             // Send reply string directly to SendMessageService
-            val replyIntent = SendMessageService.getSendMessageIntent(
+            val replyIntent = SendMessageService.getIntent(
                 context, did, contact)
             replyIntent.component = ComponentName(
                 context, SendMessageReceiver::class.java)

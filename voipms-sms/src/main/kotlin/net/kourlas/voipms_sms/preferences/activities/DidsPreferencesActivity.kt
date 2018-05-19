@@ -151,8 +151,7 @@ class DidsPreferencesActivity : AppCompatActivity() {
         }
 
         // Pass control to RetrieveDidsService
-        startService(
-            RetrieveDidsService.getIntent(this))
+        RetrieveDidsService.startService(this)
     }
 
     /**

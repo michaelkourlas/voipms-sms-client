@@ -247,8 +247,7 @@ class SendMessageService : JobIntentService() {
     /**
      * Sends the specified message using the VoIP.ms API
      *
-     * @return The VoIP.ms ID associated with the sent message, or null if the
-     * message could not be sent.
+     * @return Null if the message could not be sent.
      */
     private fun sendMessageWithVoipMsApi(message: OutgoingMessage): Long? {
         // Get encoded versions of URI values
@@ -328,8 +327,7 @@ class SendMessageService : JobIntentService() {
          * Gets an intent which can be used to send a message to the
          * specified contact and from the specified DID.
          */
-        fun getSendMessageIntent(context: Context, did: String,
-                                 contact: String): Intent {
+        fun getIntent(context: Context, did: String, contact: String): Intent {
             val intent = Intent()
             intent.action = context.getString(R.string.send_message_action)
             intent.putExtra(context.getString(
@@ -343,12 +341,12 @@ class SendMessageService : JobIntentService() {
          * Sends the specified message to the specified contact and from the
          * specified DID.
          */
-        fun sendMessage(context: Context, did: String, contact: String,
-                        text: String) {
-            val intent = getSendMessageIntent(
+        fun startService(context: Context, did: String, contact: String,
+                         text: String) {
+            val intent = getIntent(
                 context, did, contact)
             intent.putExtra(context.getString(R.string.send_message_text), text)
-            sendMessage(
+            startService(
                 context, intent)
         }
 
@@ -356,21 +354,21 @@ class SendMessageService : JobIntentService() {
          * Sends the message associated with the specified database ID to the
          * contact and from the DID associated with the specified conversation ID.
          */
-        fun sendMessage(context: Context, conversationId: ConversationId,
-                        databaseId: Long) {
-            val intent = getSendMessageIntent(
+        fun startService(context: Context, conversationId: ConversationId,
+                         databaseId: Long) {
+            val intent = getIntent(
                 context, conversationId.did,
                 conversationId.contact)
             intent.putExtra(context.getString(
                 R.string.send_message_database_id), databaseId)
-            sendMessage(
+            startService(
                 context, intent)
         }
 
         /**
-         * Sends a message as directed by the specified intent.
+         * Sends a message.
          */
-        fun sendMessage(context: Context, intent: Intent) {
+        fun startService(context: Context, intent: Intent) {
             enqueueWork(context, SendMessageService::class.java,
                         JobId.SendMessageService.ordinal, intent)
         }

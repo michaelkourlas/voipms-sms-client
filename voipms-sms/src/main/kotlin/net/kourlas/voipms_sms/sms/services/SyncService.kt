@@ -96,6 +96,9 @@ class SyncService : IntentService(
         stopForeground(true)
     }
 
+    /**
+     * Perform synchronization.
+     */
     private fun handleSync(intent: Intent) {
         try {
             // Extract the boolean properties from the intent
@@ -145,7 +148,6 @@ class SyncService : IntentService(
      * @param retrieveOnlyRecentMessages Whether or not the constructed
      * retrieval requests should date back to the most recent message or the
      * message retrieval start date.
-     * @return A list of retrieval requests.
      */
     private fun createRetrievalRequests(
         retrieveOnlyRecentMessages: Boolean): List<RetrievalRequest> {
@@ -287,8 +289,7 @@ class SyncService : IntentService(
     /**
      * Processes the specified retrieval request using the VoIP.ms API.
      *
-     * @param request The specified retrieval request.
-     * @return The list of retrieved messages, or null if the request failed.
+     * @return Null if the request failed.
      */
     private fun processRetrievalRequest(
         request: RetrievalRequest): List<IncomingMessage>? {
@@ -344,9 +345,6 @@ class SyncService : IntentService(
     /**
      * Performs a GET request using the specified url and parses the response
      * as JSON.
-     *
-     * @param url The specified url.
-     * @return The response received.
      */
     private fun sendRequestWithVoipMsApi(url: String): JSONObject? {
         val response: JSONObject
@@ -392,19 +390,14 @@ class SyncService : IntentService(
     /**
      * A request to the VoIP.ms API to retrieve the messages from the specified
      * period using the specified URL.
-     *
-     * @param url The specified URL.
-     * @param period The specified period.
      */
     data class RetrievalRequest(val url: String,
                                 private val period: Pair<Date, Date>)
 
     companion object {
         /**
-         * Starts the service as a foreground service using the specified
-         * context.
+         * Synchronize the database with VoIP.ms.
          *
-         * @param context The specified context.
          * @param forceRecent If true, retrieves only the most recent messages
          * regardless of the app configuration.
          */
