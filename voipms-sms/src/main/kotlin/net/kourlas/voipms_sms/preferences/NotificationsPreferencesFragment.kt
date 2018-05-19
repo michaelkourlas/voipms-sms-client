@@ -82,6 +82,7 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompatDividers(),
         if (preference is RingtonePreference) {
             // Display selected notification sound as summary text for
             // notification setting
+            @Suppress("DEPRECATION")
             val notificationSound = getNotificationSound(context)
             if (notificationSound == "") {
                 preference.summary = "None"
