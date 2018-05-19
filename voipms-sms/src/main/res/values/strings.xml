@@ -278,6 +278,8 @@
     <string name="notifications_reply_key" translatable="false">notification_reply</string>
     <string name="notifications_button_reply">Reply</string>
     <string name="notifications_button_mark_read">Mark Read</string>
+    <string name="notifications_channel_group_other">channel_group_other</string>
+    <string name="notifications_channel_group_other_title">Other</string>
     <string name="notifications_channel_group_did">channel_group_%1$s</string>
     <string name="notifications_channel_sync">channel_sync</string>
     <string name="notifications_channel_sync_title">Synchronization</string>

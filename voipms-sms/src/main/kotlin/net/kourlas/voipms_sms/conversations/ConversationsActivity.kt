@@ -220,6 +220,9 @@ open class ConversationsActivity : AppCompatActivity(),
             == PackageManager.PERMISSION_GRANTED) {
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
         }
+
+        // Delete any notification channels that are no longer needed
+        Notifications.getInstance(application).deleteNotificationChannels()
     }
 
     /**

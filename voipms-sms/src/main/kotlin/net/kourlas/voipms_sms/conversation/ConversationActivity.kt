@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2017 Michael Kourlas
+ * Copyright (C) 2015-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -615,7 +615,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      */
     private fun onNotificationsButtonClick(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notifications.getInstance(application).createNotificationChannel(
+            Notifications.getInstance(application).createDidNotificationChannel(
                 contact, did)
 
             val intent = Intent(
