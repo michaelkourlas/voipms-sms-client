@@ -57,7 +57,8 @@ fun getLastCompleteSyncTime(context: Context): Long =
                           R.string.preferences_sync_last_complete_time_key),
                       0)
 
-@Deprecated("Remove when Android versions earlier than Oreo are no longer supported.")
+@Deprecated(
+    "Remove when Android versions earlier than Oreo are no longer supported.")
 fun getNotificationsEnabled(context: Context): Boolean =
     getBooleanPreference(
         context,
@@ -66,7 +67,8 @@ fun getNotificationsEnabled(context: Context): Boolean =
             R.string.preferences_notifications_enable_default_value)!!
             .toBoolean())
 
-@Deprecated("Remove when Android versions earlier than Oreo are no longer supported.")
+@Deprecated(
+    "Remove when Android versions earlier than Oreo are no longer supported.")
 fun getNotificationVibrateEnabled(context: Context): Boolean =
     getBooleanPreference(
         context,
@@ -76,7 +78,8 @@ fun getNotificationVibrateEnabled(context: Context): Boolean =
             R.string.preferences_notifications_vibrate_default_value)!!
             .toBoolean())
 
-@Deprecated("Remove when Android versions earlier than Oreo are no longer supported.")
+@Deprecated(
+    "Remove when Android versions earlier than Oreo are no longer supported.")
 fun getNotificationSound(context: Context): String =
     getStringPreference(
         context,
