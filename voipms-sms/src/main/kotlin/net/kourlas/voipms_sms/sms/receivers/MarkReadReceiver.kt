@@ -29,7 +29,7 @@ import net.kourlas.voipms_sms.sms.services.SendMessageService
  * Broadcast receiver used to forward mark read requests from a PendingIntent
  * to the MarkReadService.
  */
-class MarkReadReceiver: BroadcastReceiver() {
+class MarkReadReceiver : BroadcastReceiver() {
     /**
      * Forwards mark read request using the specified context and
      * intent.
