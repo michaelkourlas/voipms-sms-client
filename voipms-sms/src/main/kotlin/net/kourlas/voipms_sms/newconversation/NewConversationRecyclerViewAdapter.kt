@@ -19,7 +19,6 @@ package net.kourlas.voipms_sms.newconversation
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.provider.ContactsContract
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater

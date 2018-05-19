@@ -18,7 +18,6 @@
 package net.kourlas.voipms_sms.conversation
 
 import android.graphics.Bitmap
-import android.os.Build
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
