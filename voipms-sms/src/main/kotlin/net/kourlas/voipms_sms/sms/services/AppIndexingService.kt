@@ -17,9 +17,9 @@
 
 package net.kourlas.voipms_sms.sms.services
 
-import android.app.IntentService
 import android.content.Context
 import android.content.Intent
+import android.support.v4.app.JobIntentService
 import com.google.firebase.appindexing.FirebaseAppIndex
 import com.google.firebase.appindexing.Indexable
 import com.google.firebase.appindexing.builders.Indexables
@@ -28,22 +28,27 @@ import com.google.firebase.appindexing.builders.PersonBuilder
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
+import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.getContactName
 import net.kourlas.voipms_sms.utils.getContactPhotoUri
 
 /**
  * Service used to perform Firebase app indexing.
  */
-class AppIndexingService : IntentService(
-    AppIndexingService::class.java.name) {
-    override fun onHandleIntent(intent: Intent?) = replaceIndex(
-        applicationContext)
+class AppIndexingService : JobIntentService() {
+    override fun onHandleWork(intent: Intent) = replaceIndex(applicationContext)
 
     companion object {
         /**
+         * Perform Firebase app indexing.
+         */
+        fun startService(context: Context) {
+            enqueueWork(context, AppIndexingService::class.java,
+                        JobId.AppIndexingService.ordinal, Intent())
+        }
+
+        /**
          * Replace the app index with the conversations in the database.
-         *
-         * @param context The context to use.
          */
         fun replaceIndex(context: Context) {
             val indexables = mutableListOf<Indexable>()
@@ -70,8 +75,6 @@ class AppIndexingService : IntentService(
 
         /**
          * Update the app index with the specified indexables.
-         *
-         * @param indexables The specified indexables.
          */
         private fun updateIndex(indexables: List<Indexable>) {
             val max = Indexable.MAX_INDEXABLES_TO_BE_UPDATED_IN_ONE_CALL
@@ -89,12 +92,8 @@ class AppIndexingService : IntentService(
         }
 
         /**
-         * Gets a message builder based on the specified message.
-         *
-         * @param context The context to use.
-         * @param message The specified message.
-         * @param contactNameCache The contact and DID names cache.
-         * @param contactPhotoUriCache The contact and DID photo URIs cache.
+         * Gets a message builder based on the specified message. Certain data
+         * is retrieved from the specified caches to avoid repeated requests.
          */
         fun getMessageBuilder(
             context: Context, message: Message,
@@ -133,11 +132,8 @@ class AppIndexingService : IntentService(
 
         /**
          * Gets a person builder based on the contact in the specified message.
-         *
-         * @param context The context to use.
-         * @param message The specified message.
-         * @param contactNameCache The contact and DID names cache.
-         * @param contactPhotoUriCache The contact and DID photo URIs cache.
+         * Certain data is retrieved from the specified caches to avoid
+         * repeated requests.
          */
         private fun getContactBuilder(
             context: Context, message: Message,
@@ -166,11 +162,8 @@ class AppIndexingService : IntentService(
 
         /**
          * Gets a person builder based on the DID in the specified message.
-         *
-         * @param context The context to use.
-         * @param message The specified message.
-         * @param contactNameCache The contact and DID names cache.
-         * @param contactPhotoUriCache The contact and DID photo URIs cache.
+         * Certain data is retrieved from the specified caches to avoid
+         * repeated requests.
          */
         private fun getDidBuilder(
             context: Context, message: Message,

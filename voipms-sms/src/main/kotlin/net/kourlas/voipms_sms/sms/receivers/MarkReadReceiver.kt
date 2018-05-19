@@ -30,10 +30,6 @@ import net.kourlas.voipms_sms.sms.services.SendMessageService
  * to the MarkReadService.
  */
 class MarkReadReceiver : BroadcastReceiver() {
-    /**
-     * Forwards mark read request using the specified context and
-     * intent.
-     */
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             if (context == null || intent == null) {
@@ -43,8 +39,6 @@ class MarkReadReceiver : BroadcastReceiver() {
                     R.string.mark_read_action)) {
                 return
             }
-
-            // Forward intent to MarkReadService
             intent.setClass(context, MarkReadService::class.java)
             SendMessageService.startService(context, intent)
         } catch (e: Exception) {

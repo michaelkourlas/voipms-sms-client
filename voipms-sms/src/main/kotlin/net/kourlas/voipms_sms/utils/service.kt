@@ -17,7 +17,11 @@
 
 package net.kourlas.voipms_sms.utils
 
+/**
+ * Job IDs used by JobIntentServices in this application.
+ */
 enum class JobId {
+    AppIndexingService,
     MarkReadService,
     SendMessageService,
     SyncIntervalService,

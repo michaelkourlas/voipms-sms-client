@@ -29,10 +29,6 @@ import net.kourlas.voipms_sms.sms.services.SendMessageService
  * to the SendMessageService.
  */
 class SendMessageReceiver : BroadcastReceiver() {
-    /**
-     * Forwards a send message request using the specified context and
-     * intent.
-     */
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             if (context == null || intent == null) {
@@ -42,8 +38,6 @@ class SendMessageReceiver : BroadcastReceiver() {
                     R.string.send_message_action)) {
                 return
             }
-
-            // Forward intent to SendMessageService
             intent.setClass(context, SendMessageService::class.java)
             SendMessageService.startService(context, intent)
         } catch (e: Exception) {

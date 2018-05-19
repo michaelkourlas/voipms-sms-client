@@ -29,10 +29,6 @@ import net.kourlas.voipms_sms.sms.services.SyncService
  * automatically or triggered by a particular action.
  */
 class SyncIntervalReceiver : BroadcastReceiver() {
-    /**
-     * Performs database synchronization using the specified context and
-     * intent.
-     */
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             if (context == null || intent == null) {
@@ -54,8 +50,7 @@ class SyncIntervalReceiver : BroadcastReceiver() {
 
     companion object {
         /**
-         * Gets an intent which can be used to trigger this receiver using the
-         * specified context.
+         * Gets an intent which can be used to trigger this receiver.
          *
          * @param forceRecent If true, retrieves only the most recent messages
          * regardless of the app configuration.

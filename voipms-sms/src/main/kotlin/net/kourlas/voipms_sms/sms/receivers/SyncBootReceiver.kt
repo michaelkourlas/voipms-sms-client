@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.sms.services.SyncIntervalService
 
 /**
@@ -27,20 +28,18 @@ import net.kourlas.voipms_sms.sms.services.SyncIntervalService
  * interval.
  */
 class SyncBootReceiver : BroadcastReceiver() {
-    /**
-     * Sets up the synchronization interval using the specified context and
-     * intent.
-     *
-     * @param context The specified context.
-     * @param intent The specified intent.
-     */
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (context != null && intent != null &&
-            (intent.action ==
-             "android.intent.action.BOOT_COMPLETED"
-             || intent.action ==
-             "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED")) {
+        try {
+            if (context == null || intent == null) {
+                return
+            }
+            if (intent.action != "android.intent.action.BOOT_COMPLETED"
+                && intent.action != "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED") {
+                return
+            }
             SyncIntervalService.startService(context)
+        } catch (e: Exception) {
+            Crashlytics.logException(e)
         }
     }
 }

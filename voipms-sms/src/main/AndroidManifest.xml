@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2017 Michael Kourlas
+  ~ Copyright (C) 2015-2018 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -176,6 +176,14 @@
 
         <!-- BROADCAST RECEIVERS -->
 
+        <receiver
+            android:name=".sms.receivers.AppIndexingReceiver"
+            android:exported="true"
+            android:permission="com.google.android.gms.permission.APPINDEXING">
+            <intent-filter>
+                <action android:name="com.google.firebase.appindexing.UPDATE_INDEX" />
+            </intent-filter>
+        </receiver>
         <receiver android:name=".sms.receivers.MarkReadReceiver" />
         <receiver android:name=".sms.receivers.SendMessageReceiver" />
         <receiver android:name=".sms.receivers.SyncBootReceiver">
@@ -208,18 +216,16 @@
 
         <service
             android:name=".sms.services.AppIndexingService"
-            android:exported="true"
-            android:permission="com.google.android.gms.permission.APPINDEXING">
-            <intent-filter>
-                <action android:name="com.google.firebase.appindexing.UPDATE_INDEX" />
-            </intent-filter>
-        </service>
-        <service android:name=".sms.services.MarkReadService"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".sms.services.MarkReadService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service android:name=".sms.services.RetrieveDidsService" />
-        <service android:name=".sms.services.SendMessageService"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-        <service android:name=".sms.services.SyncIntervalService"
+        <service
+            android:name=".sms.services.SendMessageService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".sms.services.SyncIntervalService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service android:name=".sms.services.SyncService" />
     </application>
