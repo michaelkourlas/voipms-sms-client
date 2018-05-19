@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 package net.kourlas.voipms_sms.conversations
 
-import android.app.ProgressDialog
 import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -67,7 +66,6 @@ open class ConversationsActivity : AppCompatActivity(),
 
     // Dialog to show on first run of application
     private var firstRunDialog: AlertDialog? = null
-    var progressDialog: ProgressDialog? = null
 
     // Broadcast receivers
     private val syncCompleteReceiver =
@@ -95,8 +93,6 @@ open class ConversationsActivity : AppCompatActivity(),
     private val pushNotificationsRegistrationCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                progressDialog?.dismiss()
-
                 val failedDids = intent?.getStringArrayListExtra(getString(
                     R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids))
                 if (failedDids == null) {
