@@ -31,7 +31,6 @@
     <string name="preferences_dids_category_name">Phone numbers</string>
     <string name="preferences_dids_info">The phone numbers you wish to use with this app must have SMS enabled. Otherwise, they will not appear in this list. Use the VoIP.ms &lt;a href="https://voip.ms/m/managedid.php"&gt;phone number configuration menu&lt;/a&gt; to enable SMS for your phone numbers.&lt;br&gt;&lt;br&gt;This app uses the SMS URL callback feature for push notifications and attempts to configure it automatically. If you need to complete this step manually, use the VoIP.ms phone number configuration menu to enable the callback feature for your phone numbers, entering the following URL into the associated field: https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}</string>
     <string name="preferences_did_did" translatable="false">did</string>
-
     <string name="preferences_account_did_key" translatable="false">did</string>
     <string name="preferences_account_dids_key" translatable="false">dids</string>
     <string name="preferences_account_dids_title">Phone numbers</string>
@@ -44,6 +43,10 @@
     <string name="preferences_account_dids_error_unknown">Phone number retrieval failed: unknown error</string>
     <string name="preferences_account_dids_fragment_retrieved_dids_key">voipms_dids</string>
     <string name="preferences_account_dids_fragment_database_dids_key">database_dids</string>
+    <string name="preferences_did_show_in_conversations_view" translatable="false">preferences_did_%1$s_show_in_conversations_view</string>
+    <string name="preferences_did_retrieve_messages" translatable="false">preferences_did_%1$s_retrieve_messages</string>
+    <string name="preferences_did_show_notifications" translatable="false">preferences_did_%1$s_show_notifications</string>
+    <string name="preferences_did_fragment_argument_did">did</string>
 
     <!-- Synchronization -->
     <string name="preferences_sync_category_name">Synchronization</string>
@@ -308,12 +311,5 @@
     <string name="credits_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE.md</string>
     <string name="donate_url">https://paypal.me/kourlas</string>
     <string name="information">Information</string>
-
-
     <string name="toast_unknown_error">Unknown error: %1$s</string>
-
-    <string name="preferences_did_show_in_conversations_view" translatable="false">preferences_did_%1$s_show_in_conversations_view</string>
-    <string name="preferences_did_retrieve_messages" translatable="false">preferences_did_%1$s_retrieve_messages</string>
-    <string name="preferences_did_show_notifications" translatable="false">preferences_did_%1$s_show_notifications</string>
-    <string name="preferences_did_fragment_argument_did">did</string>
 </resources>
