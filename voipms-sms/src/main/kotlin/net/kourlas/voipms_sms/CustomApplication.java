@@ -79,10 +79,5 @@ public class CustomApplication extends Application {
 
         // Subscribe to topics for current DIDs
         subscribeToDidTopics(getApplicationContext());
-
-        // Clean up unused notification channels
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-        }
     }
 }
