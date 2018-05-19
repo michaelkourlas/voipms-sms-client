@@ -489,7 +489,7 @@ class Notifications private constructor(
     fun enablePushNotifications(activity: Activity) {
         // Check if account is active and that notifications are enabled,
         // and silently quit if not
-        if (!isAccountActive(activity) && getNotificationsEnabled()) {
+        if (!isAccountActive(activity) || !getNotificationsEnabled()) {
             setSetupCompletedForVersion(activity, 114)
             return
         }
