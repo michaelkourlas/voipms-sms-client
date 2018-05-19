@@ -26,8 +26,7 @@
         android:layout_weight="1"
         android:background="?android:attr/selectableItemBackground"
         android:gravity="start|center_vertical"
-        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-        android:paddingLeft="?android:attr/listPreferredItemPaddingLeft">
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart">
         <LinearLayout
             android:id="@+id/icon_container"
             android:layout_width="wrap_content"
@@ -36,8 +35,7 @@
             android:orientation="horizontal"
             android:paddingEnd="12dp"
             android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:paddingRight="12dp">
+            android:paddingBottom="4dp">
             <com.android.internal.widget.PreferenceImageView
                 android:id="@android:id/icon"
                 android:layout_width="wrap_content"
@@ -64,9 +62,9 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@android:id/title"
                 android:layout_alignStart="@android:id/title"
+                android:textAppearance="?android:attr/textAppearanceListItemSecondary"
                 android:textColor="?android:attr/textColorSecondary"
-                android:maxLines="10"
-                android:layout_alignLeft="@android:id/title" />
+                android:maxLines="10" />
         </RelativeLayout>
     </LinearLayout>
     <include layout="@layout/preference_two_target_divider" />
