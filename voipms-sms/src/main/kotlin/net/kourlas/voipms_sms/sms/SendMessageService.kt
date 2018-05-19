@@ -28,6 +28,7 @@ import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.preferences.isAccountActive
+import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.getJson
 import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
@@ -305,9 +306,6 @@ class SendMessageService : JobIntentService() {
     }
 
     companion object {
-        // Arbitrary job ID
-        private const val JOB_ID = 1
-
         /**
          * Gets an intent which can be used to send a message to the
          * specified contact and from the specified DID.
@@ -350,7 +348,8 @@ class SendMessageService : JobIntentService() {
          * Sends a message as directed by the specified intent.
          */
         fun sendMessage(context: Context, intent: Intent) {
-            enqueueWork(context, SendMessageService::class.java, JOB_ID, intent)
+            enqueueWork(context, SendMessageService::class.java,
+                        JobId.SendMessageService.ordinal, intent)
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import android.util.Log
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getLastCompleteSyncTime
 import net.kourlas.voipms_sms.preferences.getSyncInterval
+import net.kourlas.voipms_sms.utils.JobId
 import java.util.*
 
 /**
@@ -91,7 +92,7 @@ class SyncIntervalService : JobIntentService() {
                 R.string.sync_interval_service_action)
 
             enqueueWork(context, SyncIntervalService::class.java,
-                        SyncIntervalService::class.java.hashCode(), intent)
+                        JobId.SyncIntervalService.ordinal, intent)
         }
     }
 }
