@@ -16,12 +16,14 @@
   -->
 
 <android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <net.kourlas.voipms_sms.preferences.controls.DatabaseImportPreference
+    <android.support.v7.preference.Preference
         android:icon="@android:color/transparent"
+        android:key="@string/preferences_database_import_key"
         android:summary="@string/preferences_database_import_summary"
         android:title="@string/preferences_database_import_title" />
-    <net.kourlas.voipms_sms.preferences.controls.DatabaseExportPreference
+    <android.support.v7.preference.Preference
         android:icon="@android:color/transparent"
+        android:key="@string/preferences_database_export_key"
         android:summary="@string/preferences_database_export_summary"
         android:title="@string/preferences_database_export_title" />
     <net.kourlas.voipms_sms.preferences.controls.DatabaseCleanUpPreference

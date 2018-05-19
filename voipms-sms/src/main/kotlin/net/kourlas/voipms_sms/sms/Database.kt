@@ -22,11 +22,14 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.ParcelFileDescriptor
 import com.google.firebase.appindexing.FirebaseAppIndex
 import net.kourlas.voipms_sms.utils.getContactName
 import net.kourlas.voipms_sms.utils.getDigitsOfString
 import net.kourlas.voipms_sms.utils.runOnNewThread
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 
 import java.text.SimpleDateFormat
 import java.util.*
@@ -163,41 +166,37 @@ class Database private constructor(private val context: Context) {
     }
 
     /**
-     * Exports the database to the database import and export file path.
-     *
-     * @param exportPath The export path.
+     * Exports the database to the specified file descriptor.
      */
-    fun export(exportPath: File) {
-        synchronized(this) {
-            try {
-                // Close database to persist it to disk
-                database.close()
+    fun export(exportFd: ParcelFileDescriptor) = synchronized(this) {
+        val dbFile = context.getDatabasePath(Database.DATABASE_NAME)
 
-                // Export database
-                val dbPath = context.getDatabasePath(Database.DATABASE_NAME)
-                dbPath.copyTo(exportPath, overwrite = true)
-            } finally {
-                // Refresh database
-                database.close()
-                database = databaseHelper.writableDatabase
-            }
+        try {
+            // Close database to persist it to disk
+            database.close()
+
+            // Export database
+            val exportStream = FileOutputStream(exportFd.fileDescriptor)
+            val dbStream = FileInputStream(dbFile)
+
+            exportStream.channel.truncate(0)
+
+            val buffer = ByteArray(1024)
+            do {
+                val length = dbStream.read(buffer)
+                if (length > 0) {
+                    exportStream.write(buffer, 0, length)
+                } else {
+                    break
+                }
+            } while (true)
+            exportStream.close()
+            dbStream.close()
+        } finally {
+            // Refresh database
+            database.close()
+            database = databaseHelper.writableDatabase
         }
-    }
-
-    /**
-     * Gets the database import and export file path.
-     */
-    fun getImportPath(): File? {
-        val dir = context.getExternalFilesDir(null) ?: return null
-        return File(dir.absolutePath + "/backup_import.db")
-    }
-
-    /**
-     * Gets the database import and export file path.
-     */
-    fun getExportPath(): File? {
-        val dir = context.getExternalFilesDir(null) ?: return null
-        return File(dir.absolutePath + "/backup_export.db")
     }
 
     /**
@@ -491,22 +490,35 @@ class Database private constructor(private val context: Context) {
     }
 
     /**
-     * Imports the database from the database import and export file path.
-     *
-     * @param importPath The import path.
+     * Imports the database from the specified file descriptor.
      */
-    fun import(importPath: File) = synchronized(this) {
-        val dbPath = context.getDatabasePath(Database.DATABASE_NAME)
-        val backupPath = File("${dbPath.absolutePath}.backup")
+    fun import(importFd: ParcelFileDescriptor) = synchronized(this) {
+        val dbFile = context.getDatabasePath(Database.DATABASE_NAME)
+        val backupFile = File("${dbFile.absolutePath}.backup")
 
         try {
             // Close database to persist it to disk
             database.close()
 
             // Try importing database, but restore from backup on failure
-            dbPath.copyTo(backupPath, overwrite = true)
+            dbFile.copyTo(backupFile, overwrite = true)
             try {
-                importPath.copyTo(dbPath, overwrite = true)
+                val importStream = FileInputStream(importFd.fileDescriptor)
+                val dbStream = FileOutputStream(dbFile)
+
+                dbStream.channel.truncate(0)
+
+                val buffer = ByteArray(1024)
+                do {
+                    val length = importStream.read(buffer)
+                    if (length > 0) {
+                        dbStream.write(buffer, 0, length)
+                    } else {
+                        break
+                    }
+                } while (true)
+                importStream.close()
+                dbStream.close()
 
                 // Try refreshing database
                 database = databaseHelper.writableDatabase
@@ -515,7 +527,7 @@ class Database private constructor(private val context: Context) {
                     AppIndexingService.replaceIndex(context)
                 }
             } catch (e: Exception) {
-                backupPath.copyTo(dbPath, overwrite = true)
+                backupFile.copyTo(dbFile, overwrite = true)
                 throw e
             }
         } finally {
@@ -524,7 +536,7 @@ class Database private constructor(private val context: Context) {
             database = databaseHelper.writableDatabase
 
             // Remove backup file
-            backupPath.delete()
+            backupFile.delete()
         }
     }
 
