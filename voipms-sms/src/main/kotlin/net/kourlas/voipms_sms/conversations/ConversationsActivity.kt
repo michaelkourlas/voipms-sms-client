@@ -202,7 +202,7 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Perform special setup for version 114
         if (getSetupCompletedForVersion(this) < 114) {
-            onSetupIncompleteForVersion114()
+            Notifications.getInstance(application).enablePushNotifications(this)
         }
 
         // Refresh and perform limited synchronization
@@ -594,34 +594,6 @@ open class ConversationsActivity : AppCompatActivity(),
             markReadButton.isVisible = true
             markUnreadButton.isVisible = false
         }
-    }
-
-    /**
-     * Enables push notifications after an upgrade by showing a progress dialog
-     * and starting the push notifications registration service.
-     */
-    private fun onSetupIncompleteForVersion114() {
-        // Check if account is active and notifications are enabled
-        // and silently quit if not
-        if (!isAccountActive(this) || !Notifications.getInstance(application).getNotificationsEnabled()) {
-            setSetupCompletedForVersion(this@ConversationsActivity, 114)
-            return
-        }
-
-        // Check if Google Play Services is available
-        if (GoogleApiAvailability.getInstance()
-            .isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
-            showSnackbar(this, R.id.coordinator_layout, getString(
-                R.string.push_notifications_fail_google_play))
-            setSetupCompletedForVersion(this@ConversationsActivity, 114)
-            return
-        }
-
-        // Subscribe to DID topics
-        subscribeToDidTopics(this)
-
-        // Start push notifications registration service
-        startService(NotificationsRegistrationService.getIntent(this))
     }
 
     companion object {
