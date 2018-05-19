@@ -41,6 +41,7 @@ import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
+import net.kourlas.voipms_sms.sms.receivers.MarkReadReceiver
 import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
 import net.kourlas.voipms_sms.sms.services.MarkReadService
 import net.kourlas.voipms_sms.sms.services.SendMessageService
@@ -397,7 +398,9 @@ class Notifications private constructor(
 
         // Mark as read button
         val markReadIntent = MarkReadService.getIntent(context, did, contact)
-        val markReadPendingIntent = PendingIntent.getService(
+        markReadIntent.component = ComponentName(
+            context, MarkReadReceiver::class.java)
+        val markReadPendingIntent = PendingIntent.getBroadcast(
             context, (did + contact).hashCode(),
             markReadIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         val markReadAction = NotificationCompat.Action.Builder(

@@ -176,6 +176,7 @@
 
         <!-- BROADCAST RECEIVERS -->
 
+        <receiver android:name=".sms.receivers.MarkReadReceiver" />
         <receiver android:name=".sms.receivers.SendMessageReceiver" />
         <receiver android:name=".sms.receivers.SyncBootReceiver">
             <intent-filter>
@@ -189,6 +190,7 @@
 
         <service
             android:name=".notifications.services.FcmListenerService"
+            android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -196,12 +198,14 @@
         </service>
         <service
             android:name=".notifications.services.FcmInstanceIdService"
+            android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
         <service android:name=".notifications.services.NotificationsRegistrationService" />
+
         <service
             android:name=".sms.services.AppIndexingService"
             android:exported="true"
@@ -210,7 +214,8 @@
                 <action android:name="com.google.firebase.appindexing.UPDATE_INDEX" />
             </intent-filter>
         </service>
-        <service android:name=".sms.services.MarkReadService" />
+        <service android:name=".sms.services.MarkReadService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
         <service android:name=".sms.services.RetrieveDidsService" />
         <service android:name=".sms.services.SendMessageService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>

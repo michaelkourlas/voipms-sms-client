@@ -352,7 +352,8 @@ class SendMessageService : JobIntentService() {
 
         /**
          * Sends the message associated with the specified database ID to the
-         * contact and from the DID associated with the specified conversation ID.
+         * contact and from the DID associated with the specified conversation
+         * ID.
          */
         fun startService(context: Context, conversationId: ConversationId,
                          databaseId: Long) {
