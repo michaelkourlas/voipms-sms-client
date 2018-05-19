@@ -6,7 +6,7 @@ android {
     buildToolsVersion "27.0.3"
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 27
         versionCode 118
         versionName "0.5.4"

@@ -4,6 +4,7 @@
 * Show notification while synchronizing
 * Add support for database transactions to prevent data corruption
 * New settings interface
+* Minimum API version is now 19 (KitKat)
 * Bug fixes
 
 ## 0.5.3 ##
