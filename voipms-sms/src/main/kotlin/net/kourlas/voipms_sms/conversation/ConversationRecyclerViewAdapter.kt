@@ -611,9 +611,7 @@ class ConversationRecyclerViewAdapter(
             // to match Android Messages aesthetic
             if (contactBadge != null) {
                 applyCircularMask(contactBadge)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    contactBadge.setOverlay(null)
-                }
+                contactBadge.setOverlay(null)
             }
         }
     }

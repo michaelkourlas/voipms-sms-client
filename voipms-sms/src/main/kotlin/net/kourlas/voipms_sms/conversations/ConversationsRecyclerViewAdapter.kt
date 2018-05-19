@@ -639,9 +639,7 @@ class ConversationsRecyclerViewAdapter<T>(
             // to match Android Messages aesthetic; in addition, set up
             // check box image
             applyCircularMask(contactBadge)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                contactBadge.setOverlay(null)
-            }
+            contactBadge.setOverlay(null)
             val contactBadgeChecked = itemView
                 .findViewById<ImageView>(R.id.conversations_photo_checked)
             applyCircularMask(contactBadgeChecked)

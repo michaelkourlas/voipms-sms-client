@@ -328,9 +328,7 @@ class Notifications private constructor(
         notification.setLargeIcon(getLargeIconBitmap(contact))
         notification.setAutoCancel(true)
         notification.addPerson("tel:$contact")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            notification.setCategory(Notification.CATEGORY_MESSAGE)
-        }
+        notification.setCategory(Notification.CATEGORY_MESSAGE)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             @Suppress("DEPRECATION")
             notification.priority = Notification.PRIORITY_HIGH
@@ -380,12 +378,7 @@ class Notifications private constructor(
                 R.string.conversation_contact), contact)
             replyIntent.putExtra(context.getString(
                 R.string.conversation_extra_focus), true)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                replyIntent.flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-            } else {
-                @Suppress("DEPRECATION")
-                replyIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
-            }
+            replyIntent.flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
             replyPendingIntent = PendingIntent.getActivity(
                 context, (did + contact + "reply").hashCode(),
                 replyIntent, PendingIntent.FLAG_CANCEL_CURRENT)

@@ -38,9 +38,6 @@ import java.lang.Math.abs
 
 /**
  * Applies a circular mask to a bitmap.
- *
- * @param bitmap The specified bitmap.
- * @return The bitmap with a circular mask.
  */
 fun applyCircularMask(bitmap: Bitmap): Bitmap {
     val output = Bitmap.createBitmap(bitmap.width,
@@ -62,26 +59,15 @@ fun applyCircularMask(bitmap: Bitmap): Bitmap {
 
 /**
  * Applies a circular mask to a view.
- *
- * Note that this method only works on Lollipop and above; it will
- * silently fail on older versions.
- *
- * @param view The specified view.
  */
 fun applyCircularMask(view: View) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-        view.outlineProvider = getOvalViewOutlineProvider()
-        view.clipToOutline = true
-    }
+    view.outlineProvider = getOvalViewOutlineProvider()
+    view.clipToOutline = true
 }
 
 /**
  * Gets a view outline provider for ovals.
- *
- * @return A a view outline provider for ovals.
  */
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 private fun getOvalViewOutlineProvider(): ViewOutlineProvider =
     object : ViewOutlineProvider() {
         override fun getOutline(view: View, outline: Outline) =
@@ -90,17 +76,10 @@ private fun getOvalViewOutlineProvider(): ViewOutlineProvider =
 
 /**
  * Applies a rectangular rounded corners mask to a view.
- *
- * Note that this method only works on Lollipop and above; it will
- * silently fail on older versions.
- *
- * @param view The specified view.
  */
 fun applyRoundedCornersMask(view: View) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        view.outlineProvider = getRoundRectViewOutlineProvider()
-        view.clipToOutline = true
-    }
+    view.outlineProvider = getRoundRectViewOutlineProvider()
+    view.clipToOutline = true
 }
 
 /**
@@ -108,7 +87,6 @@ fun applyRoundedCornersMask(view: View) {
  *
  * @return A a view outline provider for rounded rectangles.
  */
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
     object : ViewOutlineProvider() {
         override fun getOutline(view: View, outline: Outline) =

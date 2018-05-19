@@ -485,9 +485,7 @@ class NewConversationRecyclerViewAdapter(
             // Apply circular mask to and remove overlay from contact badge
             // to match Android Messages aesthetic
             applyCircularMask(contactBadge)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                contactBadge.setOverlay(null)
-            }
+            contactBadge.setOverlay(null)
         }
     }
 
