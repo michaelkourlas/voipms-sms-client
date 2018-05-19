@@ -6,10 +6,10 @@ android {
     buildToolsVersion "27.0.3"
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode 118
-        versionName "0.5.4"
+        versionName "0.6.0"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
