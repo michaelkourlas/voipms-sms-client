@@ -176,6 +176,7 @@
 
         <!-- BROADCAST RECEIVERS -->
 
+        <receiver android:name=".sms.SendMessageReceiver" />
         <receiver android:name=".sms.SyncBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

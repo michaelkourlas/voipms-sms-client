@@ -19,6 +19,7 @@ package net.kourlas.voipms_sms.notifications
 
 import android.annotation.SuppressLint
 import android.app.*
+import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -197,6 +198,10 @@ class Notifications private constructor(
             R.string.notifications_sync_message))
         builder.setContentText("$progress%")
         builder.setProgress(100, progress, false)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            @Suppress("DEPRECATION")
+            builder.priority = Notification.PRIORITY_LOW
+        }
 
         // Primary notification action
         val intent = Intent(context, ConversationsActivity::class.java)
@@ -229,21 +234,12 @@ class Notifications private constructor(
             }
         }
 
+        // However, we do check to see if notifications are enabled for a
+        // particular DID, since the Android O interface doesn't really work
+        // with this use case
         if (conversationId != null) {
             if (!getDidShowNotifications(context, conversationId.did)) {
                 return false
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val notificationManager = context.getSystemService(
-                    NotificationManager::class.java)
-                val channel = notificationManager.getNotificationChannel(
-                    context.getString(R.string.notifications_channel_contact,
-                                      conversationId.contact,
-                                      conversationId.did))
-                if (channel.importance == NotificationManager.IMPORTANCE_NONE) {
-                    return false
-                }
             }
         }
 
@@ -259,19 +255,15 @@ class Notifications private constructor(
             return
         }
 
-        conversationIds
-            .filterNot {
-                // Do not show notifications for a contact when that contact's
-                // conversation view is open
-                application.conversationActivityVisible(it)
+        for (conversationId in conversationIds) {
+            if (application.conversationActivityVisible(conversationId)
+                || !getNotificationsEnabled(conversationId)) {
+                continue
             }
-            .filter {
-                getNotificationsEnabled(it)
-            }
-            .forEach {
-                showNotification(
-                    Database.getInstance(context).getMessagesUnread(it))
-            }
+
+            showNotification(
+                Database.getInstance(context).getMessagesUnread(conversationId))
+        }
     }
 
     /**
@@ -307,7 +299,7 @@ class Notifications private constructor(
         // Notification channel
         createDefaultNotificationChannel()
         val channel = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            context.getString(R.string.notifications_default_channel_name)
+            context.getString(R.string.notifications_channel_default)
         } else {
             val notificationManager = context.getSystemService(
                 NotificationManager::class.java)
@@ -315,7 +307,7 @@ class Notifications private constructor(
                 context.getString(R.string.notifications_channel_contact,
                                   did, contact))
             if (channel == null) {
-                context.getString(R.string.notifications_default_channel_name)
+                context.getString(R.string.notifications_channel_default)
             } else {
                 context.getString(R.string.notifications_channel_contact,
                                   did, contact)
@@ -329,6 +321,7 @@ class Notifications private constructor(
         notification.setAutoCancel(true)
         notification.addPerson("tel:$contact")
         notification.setCategory(Notification.CATEGORY_MESSAGE)
+        notification.color = 0xFFAA0000.toInt()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             @Suppress("DEPRECATION")
             notification.priority = Notification.PRIORITY_HIGH
@@ -343,7 +336,6 @@ class Notifications private constructor(
             if (getNotificationVibrateEnabled(context)) {
                 notification.setVibrate(longArrayOf(0, 250, 250, 250))
             }
-            notification.color = 0xFFAA0000.toInt()
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             notification.setGroup(context.getString(
@@ -363,9 +355,11 @@ class Notifications private constructor(
         val replyPendingIntent: PendingIntent
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             // Send reply string directly to SendMessageService
-            val replyIntent = SendMessageService.getIntent(context, did,
-                                                           contact)
-            replyPendingIntent = PendingIntent.getService(
+            val replyIntent = SendMessageService.getSendMessageIntent(
+                context, did, contact)
+            replyIntent.component = ComponentName(
+                context, SendMessageReceiver::class.java)
+            replyPendingIntent = PendingIntent.getBroadcast(
                 context, (did + contact).hashCode(),
                 replyIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         } else {

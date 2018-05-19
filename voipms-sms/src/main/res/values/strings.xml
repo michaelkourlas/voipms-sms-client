@@ -291,8 +291,6 @@
     <string name="notifications_channel_contact">channel_%1$s_%2$s</string>
     <string name="notifications_sync_message">Synchronizing with VoIP.ms</string>
 
-    <string name="notifications_default_channel_name">Default</string>
-
     <!-- UTILS -->
     <string name="utils_date_just_now">Just now</string>
     <string name="utils_date_seconds_ago">seconds ago</string>

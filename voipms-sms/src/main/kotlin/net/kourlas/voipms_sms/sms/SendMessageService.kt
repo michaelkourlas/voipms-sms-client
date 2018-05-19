@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,9 +152,6 @@ class SendMessageService : JobIntentService() {
 
     /**
      * Extracts the DID, contact, and message texts from the specified intent.
-     *
-     * @param intent The specified intent.
-     * @return The data from the intent.
      */
     private fun getIntentData(intent: Intent): IntentData {
         // Extract the DID and contact from the intent
@@ -290,10 +287,6 @@ class SendMessageService : JobIntentService() {
 
     /**
      * Represents the data in the intent sent to this service.
-     *
-     * @param did The DID of the messages to be sent.
-     * @param contact The contact of the messages to be sent.
-     * @param messageTexts The texts of the messages to be sent.
      */
     data class IntentData(val did: String, val contact: String,
                           val messageTexts: List<String>?,
@@ -302,11 +295,6 @@ class SendMessageService : JobIntentService() {
     /**
      * Represents a message that has been input into the database but has not
      * yet been sent.
-     *
-     * @param databaseId The database ID of the message to be sent.
-     * @param did The DID of the message to be sent.
-     * @param contact The contact of the message to be sent.
-     * @param text The text of the message to be sent.
      */
     data class OutgoingMessage(val databaseId: Long, val did: String,
                                val contact: String, val text: String) {
@@ -317,16 +305,15 @@ class SendMessageService : JobIntentService() {
     }
 
     companion object {
+        // Arbitrary job ID
+        private const val JOB_ID = 1
+
         /**
-         * Gets an intent which can be used to launch this service. This intent
-         * requires the use of a RemoteInput for the message text.
-         *
-         * @param did The DID associated with the message.
-         * @param contact The contact associated with the message.
-         * @return An intent which can be used to launch this service.
+         * Gets an intent which can be used to send a message to the
+         * specified contact and from the specified DID.
          */
-        fun getIntent(context: Context, did: String, contact: String): Intent {
-            val intent = Intent(context, SendMessageService::class.java)
+        fun getSendMessageIntent(context: Context, did: String, contact: String): Intent {
+            val intent = Intent()
             intent.action = context.getString(R.string.send_message_action)
             intent.putExtra(context.getString(
                 R.string.send_message_did), did)
@@ -336,35 +323,34 @@ class SendMessageService : JobIntentService() {
         }
 
         /**
-         * Gets an intent which can be used to launch this service.
-         *
-         * @param did The DID associated with the message.
-         * @param contact The contact associated with the message.
-         * @param text The text of the message to send.
-         * @return An intent which can be used to launch this service.
+         * Sends the specified message to the specified contact and from the
+         * specified DID.
          */
-        fun getIntent(context: Context, did: String, contact: String,
-                      text: String): Intent {
-            val intent = getIntent(context, did, contact)
+        fun sendMessage(context: Context, did: String, contact: String,
+                      text: String) {
+            val intent = getSendMessageIntent(context, did, contact)
             intent.putExtra(context.getString(R.string.send_message_text), text)
-            return intent
+            sendMessage(context, intent)
         }
 
         /**
-         * Gets an intent which can be used to launch this service.
-         *
-         * @param conversationId The conversation ID associated with the
-         * message.
-         * @param databaseId The database ID of the message to send
-         * @return An intent which can be used to launch this service.
+         * Sends the message associated with the specified database ID to the
+         * contact and from the DID associated with the specified conversation ID.
          */
-        fun getIntent(context: Context, conversationId: ConversationId,
-                      databaseId: Long): Intent {
-            val intent = getIntent(context, conversationId.did,
-                                   conversationId.contact)
+        fun sendMessage(context: Context, conversationId: ConversationId,
+                        databaseId: Long) {
+            val intent = getSendMessageIntent(context, conversationId.did,
+                                              conversationId.contact)
             intent.putExtra(context.getString(
                 R.string.send_message_database_id), databaseId)
-            return intent
+            sendMessage(context, intent)
+        }
+
+        /**
+         * Sends a message as directed by the specified intent.
+         */
+        fun sendMessage(context: Context, intent: Intent) {
+            enqueueWork(context, SendMessageService::class.java, JOB_ID, intent)
         }
     }
 }
