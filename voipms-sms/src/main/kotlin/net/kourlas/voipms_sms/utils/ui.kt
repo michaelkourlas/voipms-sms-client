@@ -30,7 +30,7 @@ import android.support.v7.app.AlertDialog
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.Toast
-import com.google.firebase.crash.FirebaseCrash
+import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import java.lang.Math.abs
 
@@ -185,7 +185,7 @@ fun showPermissionSnackbar(activity: Activity, viewId: Int,
 
 fun abortActivity(activity: Activity, ex: Exception,
                   duration: Int = Toast.LENGTH_SHORT) {
-    FirebaseCrash.report(ex)
+    Crashlytics.logException(ex)
     Toast.makeText(activity,
                    activity.getString(R.string.toast_unknown_error, ex.message),
                    duration).show()

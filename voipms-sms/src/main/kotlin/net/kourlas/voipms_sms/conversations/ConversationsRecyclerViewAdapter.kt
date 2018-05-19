@@ -33,7 +33,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.google.firebase.crash.FirebaseCrash
+import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
@@ -400,7 +400,7 @@ class ConversationsRecyclerViewAdapter<T>(
             results.values = resultsObject
             results
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
             Filter.FilterResults()
         }
 

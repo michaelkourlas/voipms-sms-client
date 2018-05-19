@@ -20,7 +20,7 @@ package net.kourlas.voipms_sms.sms
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.google.firebase.crash.FirebaseCrash
+import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
@@ -83,7 +83,7 @@ class RetrieveDidsService : IntentService(
                 dids = getDidsFromResponse(response)
             }
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
         }
         return dids
     }
@@ -112,12 +112,12 @@ class RetrieveDidsService : IntentService(
                 R.string.preferences_account_dids_error_api_request)
             return null
         } catch (e: JSONException) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.preferences_account_dids_error_api_parse)
             return null
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.preferences_account_dids_error_unknown)
             return null

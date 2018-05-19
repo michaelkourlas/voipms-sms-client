@@ -33,8 +33,8 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.QuickContactBadge
 import android.widget.TextView
+import com.crashlytics.android.Crashlytics
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
-import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationDemoMessages
@@ -366,7 +366,7 @@ class ConversationRecyclerViewAdapter(
             results.values = messages
             results
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
             Filter.FilterResults()
         }
 

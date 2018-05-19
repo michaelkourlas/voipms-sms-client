@@ -20,7 +20,7 @@ package net.kourlas.voipms_sms.sms
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.google.firebase.crash.FirebaseCrash
+import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.isAccountActive
@@ -55,7 +55,7 @@ class MarkReadService : IntentService(MarkReadService::class.java.name) {
             Notifications.getInstance(application).cancelNotification(
                 conversationId)
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
         }
     }
 

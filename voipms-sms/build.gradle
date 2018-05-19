@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
+apply plugin: "io.fabric"
 
 android {
     compileSdkVersion 27
@@ -34,8 +35,8 @@ dependencies {
     // Firebase libraries
     implementation "com.google.firebase:firebase-appindexing:15.0.1"
     implementation "com.google.firebase:firebase-core:15.0.2"
-    implementation "com.google.firebase:firebase-crash:15.0.2"
     implementation "com.google.firebase:firebase-messaging:15.0.2"
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.2'
 
     // Additional libraries and fixes
     implementation "com.futuremind.recyclerfastscroll:fastscroll:0.2.5"

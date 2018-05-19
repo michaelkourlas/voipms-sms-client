@@ -43,8 +43,8 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.crashlytics.android.Crashlytics
 import com.futuremind.recyclerviewfastscroll.FastScroller
-import com.google.firebase.crash.FirebaseCrash
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
@@ -171,7 +171,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                     .getMessageDatabaseId(
                         uri.getQueryParameter("id").toLong())
                 if (message == null) {
-                    FirebaseCrash.report(Exception("Invalid URI: '$data'"))
+                    Crashlytics.logException(Exception("Invalid URI: '$data'"))
                     finish()
                     return
                 } else {
@@ -184,7 +184,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 did = uri.getQueryParameter("did")
                 contact = uri.getQueryParameter("contact")
             } else {
-                FirebaseCrash.report(Exception("Invalid URI: '$data'"))
+                Crashlytics.logException(Exception("Invalid URI: '$data'"))
                 finish()
                 return
             }
@@ -194,8 +194,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             val c = intent.getStringExtra(getString(
                 R.string.conversation_contact))
             if (d == null || c == null) {
-                FirebaseCrash.report(Exception("No DID or contact specified:" +
-                                               " did: '$d', contact: '$c'"))
+                Crashlytics.logException(
+                    Exception("No DID or contact specified:" +
+                              " did: '$d', contact: '$c'"))
                 finish()
                 return
             } else {

@@ -23,7 +23,7 @@ import android.content.Intent
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
-import com.google.firebase.crash.FirebaseCrash
+import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
@@ -129,7 +129,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
                 SyncIntervalService.startService(applicationContext)
             }
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.sync_error_unknown)
         }
@@ -262,7 +262,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
                 .insertMessagesVoipMsApi(incomingMessages,
                                          retrieveDeletedMessages)
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.sync_error_database)
             return
@@ -321,7 +321,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
                         rawSms.getString("message"))
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
-                    FirebaseCrash.report(e)
+                    Crashlytics.logException(e)
                     error = applicationContext.getString(
                         R.string.sync_error_api_parse)
                     return null
@@ -348,11 +348,11 @@ class SyncService : IntentService(SyncService::class.java.name) {
                 R.string.sync_error_api_request)
             return null
         } catch (e: JSONException) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
             error = applicationContext.getString(R.string.sync_error_api_parse)
             return null
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
             error = applicationContext.getString(R.string.sync_error_unknown)
             return null
         }

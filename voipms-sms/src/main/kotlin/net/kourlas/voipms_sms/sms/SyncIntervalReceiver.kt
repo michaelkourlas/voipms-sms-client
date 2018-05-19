@@ -20,7 +20,7 @@ package net.kourlas.voipms_sms.sms
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.google.firebase.crash.FirebaseCrash
+import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 
 /**
@@ -50,7 +50,7 @@ class SyncIntervalReceiver : BroadcastReceiver() {
                               ?: throw Exception("Force recent missing")
             SyncService.startService(context, forceRecent)
         } catch (e: Exception) {
-            FirebaseCrash.report(e)
+            Crashlytics.logException(e)
         }
     }
 
