@@ -17,10 +17,14 @@
 
 package net.kourlas.voipms_sms.preferences.activities
 
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.text.Html
+import android.text.method.LinkMovementMethod
+import android.widget.TextView
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.SynchronizationPreferencesFragment
 
@@ -48,6 +52,17 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
             actionBar.setHomeButtonEnabled(true)
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
+
+        val textView = findViewById<TextView>(R.id.info_text_view)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            textView.text = Html.fromHtml(
+                getString(R.string.preferences_sync_info), 0)
+        } else {
+            @Suppress("DEPRECATION")
+            textView.text = Html.fromHtml(
+                getString(R.string.preferences_sync_info))
+        }
+        textView.movementMethod = LinkMovementMethod.getInstance()
 
         fragment = SynchronizationPreferencesFragment()
         supportFragmentManager.beginTransaction().replace(
