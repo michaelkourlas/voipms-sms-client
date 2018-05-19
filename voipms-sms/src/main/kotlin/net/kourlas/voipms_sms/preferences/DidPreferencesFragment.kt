@@ -21,24 +21,21 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.support.v14.preference.SwitchPreference
-import android.support.v7.preference.Preference
 import android.support.v7.widget.SwitchCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.notifications.NotificationsRegistrationService
 import net.kourlas.voipms_sms.sms.AppIndexingService
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.abortActivity
+import net.kourlas.voipms_sms.utils.runOnNewThread
+import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
+import net.kourlas.voipms_sms.utils.showSnackbar
 
 class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
     CompoundButton.OnCheckedChangeListener {
@@ -73,7 +70,7 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
         val activity = activity ?: return
         val context = context ?: return
         val did = arguments?.getString(getString(
-                    R.string.preferences_did_fragment_argument_did))
+            R.string.preferences_did_fragment_argument_did))
         if (did == null) {
             abortActivity(activity, Exception("Missing DID argument"))
             return
@@ -88,10 +85,10 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
         }
         setDids(activity, dids)
 
-        if (dids.isNotEmpty() && Notifications.getInstance(activity.application).getNotificationsEnabled()) {
-            // Re-register for push notifications when
-            // DIDs change
-            enablePushNotifications()
+        if (dids.isNotEmpty()) {
+            // Re-register for push notifications when DIDs change
+            Notifications.getInstance(
+                activity.application).enablePushNotifications(activity)
         }
         runOnNewThread {
             AppIndexingService.replaceIndex(activity)
@@ -202,7 +199,8 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
             preferenceScreen.getPreference(2) as SwitchPreference
         showNotificationsPreference.isEnabled =
             enabledSwitch.isChecked
-        showNotificationsPreference.isChecked = getDidShowNotifications(context, did)
+        showNotificationsPreference.isChecked = getDidShowNotifications(context,
+                                                                        did)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -212,35 +210,5 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
         } finally {
             setDividerPreferences(DIVIDER_NONE)
         }
-    }
-
-    /**
-     * Enables push notifications by starting the push notifications
-     * registration service.
-     */
-    private fun enablePushNotifications() {
-        val activity = activity ?: return
-        // Check if account is active and silently quit if not
-        if (!isAccountActive(activity)) {
-            setSetupCompletedForVersion(activity, 114)
-            return
-        }
-
-        // Check if Google Play Services is available
-        if (GoogleApiAvailability.getInstance()
-            .isGooglePlayServicesAvailable(
-                activity) != ConnectionResult.SUCCESS) {
-            showSnackbar(activity, R.id.coordinator_layout, getString(
-                R.string.push_notifications_fail_google_play))
-            setSetupCompletedForVersion(activity, 114)
-            return
-        }
-
-        // Subscribe to DID topics
-        subscribeToDidTopics(activity)
-
-        // Start push notifications registration service
-        activity.startService(
-            NotificationsRegistrationService.getIntent(activity))
     }
 }

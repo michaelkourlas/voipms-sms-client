@@ -28,6 +28,8 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.app.RemoteInput
 import android.support.v4.app.TaskStackBuilder
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
@@ -35,10 +37,7 @@ import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.*
-import net.kourlas.voipms_sms.utils.applyCircularMask
-import net.kourlas.voipms_sms.utils.getContactName
-import net.kourlas.voipms_sms.utils.getContactPhotoBitmap
-import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.*
 
 /**
  * Single-instance class used to send notifications when new SMS messages
@@ -479,6 +478,39 @@ class Notifications private constructor(
         largeIconBitmap
     } catch (_: Exception) {
         null
+    }
+
+    /**
+     * Enables push notifications by starting the push notifications
+     * registration service.
+     *
+     * @param activity The activity on which to display messages.
+     */
+    fun enablePushNotifications(activity: Activity) {
+        // Check if account is active and that notifications are enabled,
+        // and silently quit if not
+        if (!isAccountActive(activity) && getNotificationsEnabled()) {
+            setSetupCompletedForVersion(activity, 114)
+            return
+        }
+
+        // Check if Google Play Services is available
+        if (GoogleApiAvailability.getInstance()
+                .isGooglePlayServicesAvailable(
+                    activity) != ConnectionResult.SUCCESS) {
+            showSnackbar(activity, R.id.coordinator_layout,
+                         application.getString(
+                             R.string.push_notifications_fail_google_play))
+            setSetupCompletedForVersion(activity, 114)
+            return
+        }
+
+        // Subscribe to DID topics
+        subscribeToDidTopics(activity)
+
+        // Start push notifications registration service
+        activity.startService(
+            NotificationsRegistrationService.getIntent(activity))
     }
 
     companion object {

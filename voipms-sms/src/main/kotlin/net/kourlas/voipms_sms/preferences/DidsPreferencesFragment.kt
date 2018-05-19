@@ -26,15 +26,15 @@ import android.support.v7.preference.Preference
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.notifications.NotificationsRegistrationService
 import net.kourlas.voipms_sms.preferences.controls.MasterSwitchPreference
 import net.kourlas.voipms_sms.sms.AppIndexingService
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.runOnNewThread
+import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
+import net.kourlas.voipms_sms.utils.showSnackbar
 
 class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
     Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
@@ -89,12 +89,12 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
         // Retrieve all DIDs
         retrievedDids = arguments?.getStringArrayList(getString(
             R.string.preferences_account_dids_fragment_retrieved_dids_key))
-                            ?.toSet()
-                        ?: emptySet()
+            ?.toSet()
+            ?: emptySet()
         databaseDids = arguments?.getStringArrayList(getString(
             R.string.preferences_account_dids_fragment_database_dids_key))
-                           ?.toSet()
-                       ?: emptySet()
+            ?.toSet()
+            ?: emptySet()
         activeDids = getDids(activity)
 
         // Transfer all DIDs into common set
@@ -177,12 +177,10 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
         }
         setDids(activity, dids)
 
-        if (dids.isNotEmpty()
-            && Notifications.getInstance(activity.application)
-                .getNotificationsEnabled()) {
-            // Re-register for push notifications when
-            // DIDs change
-            enablePushNotifications()
+        if (dids.isNotEmpty()) {
+            // Re-register for push notifications when DIDs change
+            Notifications.getInstance(
+                activity.application).enablePushNotifications(activity)
         }
         runOnNewThread {
             AppIndexingService.replaceIndex(activity)
@@ -198,36 +196,5 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
         } finally {
             setDividerPreferences(DIVIDER_NONE)
         }
-    }
-
-    /**
-     * Enables push notifications by starting the push notifications
-     * registration service.
-     */
-    private fun enablePushNotifications() {
-        val activity = activity ?: return
-
-        // Check if account is active and silently quit if not
-        if (!isAccountActive(activity)) {
-            setSetupCompletedForVersion(activity, 114)
-            return
-        }
-
-        // Check if Google Play Services is available
-        if (GoogleApiAvailability.getInstance()
-            .isGooglePlayServicesAvailable(
-                activity) != ConnectionResult.SUCCESS) {
-            showSnackbar(activity, R.id.coordinator_layout, getString(
-                R.string.push_notifications_fail_google_play))
-            setSetupCompletedForVersion(activity, 114)
-            return
-        }
-
-        // Subscribe to DID topics
-        subscribeToDidTopics(activity)
-
-        // Start push notifications registration service
-        activity.startService(
-            NotificationsRegistrationService.getIntent(activity))
     }
 }
