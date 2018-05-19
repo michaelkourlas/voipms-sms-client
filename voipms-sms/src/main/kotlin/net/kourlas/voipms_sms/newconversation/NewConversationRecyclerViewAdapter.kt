@@ -102,8 +102,8 @@ class NewConversationRecyclerViewAdapter(
                 || (previousItem is ContactItem
                     && getContactInitial(contactItem.name,
                                          contactItem.primaryPhoneNumber)
-                        != getContactInitial(previousItem.name,
-                                             previousItem.primaryPhoneNumber))) {
+                    != getContactInitial(previousItem.name,
+                                         previousItem.primaryPhoneNumber))) {
                 holder.letterText.text = getContactInitial(
                     contactItem.name, contactItem.primaryPhoneNumber)
             } else {
@@ -403,7 +403,7 @@ class NewConversationRecyclerViewAdapter(
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     if (cursor.getString(cursor.getColumnIndex(
-                        ContactsContract.Contacts.HAS_PHONE_NUMBER)) == "1") {
+                            ContactsContract.Contacts.HAS_PHONE_NUMBER)) == "1") {
                         val id = cursor.getLong(
                             cursor.getColumnIndex(
                                 ContactsContract.CommonDataKinds.Phone

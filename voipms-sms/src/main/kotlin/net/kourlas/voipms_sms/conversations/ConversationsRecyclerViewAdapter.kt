@@ -144,8 +144,8 @@ class ConversationsRecyclerViewAdapter<T>(
 
         val contactTextBuilder = SpannableStringBuilder()
         contactTextBuilder.append(
-            conversationItem.contactName ?:
-            getFormattedPhoneNumber(conversationItem.message.contact))
+            conversationItem.contactName ?: getFormattedPhoneNumber(
+                conversationItem.message.contact))
 
         // Highlight text that matches filter
         if (currConstraint != "") {
@@ -343,8 +343,8 @@ class ConversationsRecyclerViewAdapter<T>(
                     while (iterator.hasNext()) {
                         val message = iterator.next()
                         if (!Database.getInstance(activity)
-                            .isConversationArchived(
-                                message.conversationId)) {
+                                .isConversationArchived(
+                                    message.conversationId)) {
                             iterator.remove()
                         }
                     }
@@ -353,8 +353,8 @@ class ConversationsRecyclerViewAdapter<T>(
                     while (iterator.hasNext()) {
                         val message = iterator.next()
                         if (Database.getInstance(activity)
-                            .isConversationArchived(
-                                message.conversationId)) {
+                                .isConversationArchived(
+                                    message.conversationId)) {
                             iterator.remove()
                         }
                     }

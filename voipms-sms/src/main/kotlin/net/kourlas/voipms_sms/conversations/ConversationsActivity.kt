@@ -37,15 +37,15 @@ import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.newconversation.NewConversationActivity
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.notifications.NotificationsRegistrationService
-import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.preferences.PreferencesActivity
+import net.kourlas.voipms_sms.preferences.getSetupCompletedForVersion
+import net.kourlas.voipms_sms.preferences.isAccountActive
+import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.SyncService
 import net.kourlas.voipms_sms.utils.*
@@ -80,7 +80,7 @@ open class ConversationsActivity : AppCompatActivity(),
                 }
 
                 if (intent?.getBooleanExtra(getString(
-                    R.string.sync_complete_full), false) == true) {
+                        R.string.sync_complete_full), false) == true) {
                     // Turn off refresh icon
                     val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
                         R.id.swipe_refresh_layout)
@@ -126,7 +126,7 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Contacts permission is required to get contact names and photos
         if (ContextCompat.checkSelfPermission(
-            this, android.Manifest.permission.READ_CONTACTS)
+                this, android.Manifest.permission.READ_CONTACTS)
             != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 this, arrayOf(android.Manifest.permission.READ_CONTACTS),
@@ -212,7 +212,7 @@ open class ConversationsActivity : AppCompatActivity(),
         // Refresh on resume just in case the contacts permission was newly
         // granted and we need to add the contact names and photos
         if (ContextCompat.checkSelfPermission(
-            this, android.Manifest.permission.READ_CONTACTS)
+                this, android.Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED) {
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
         }

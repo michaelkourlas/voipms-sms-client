@@ -35,7 +35,7 @@ class MarkReadService : IntentService(MarkReadService::class.java.name) {
             // Terminate quietly if intent does not exist or does not contain
             // the mark as read action
             if (intent == null || intent.action != applicationContext.getString(
-                R.string.mark_read_action)) {
+                    R.string.mark_read_action)) {
                 return
             }
 

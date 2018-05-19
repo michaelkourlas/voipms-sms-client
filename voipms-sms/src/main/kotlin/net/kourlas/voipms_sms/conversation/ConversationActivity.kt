@@ -104,7 +104,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private val sendingMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?,
                                intent: Intent?) =
-            // Refresh adapter to show message being sent
+        // Refresh adapter to show message being sent
             adapter.refresh()
     }
     private val sentMessageReceiver = object : BroadcastReceiver() {
@@ -228,8 +228,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         ViewCompat.setElevation(toolbar, resources
             .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
-        val actionBar = supportActionBar ?:
-                        throw Exception("Action bar cannot be null")
+        val actionBar = supportActionBar ?: throw Exception(
+            "Action bar cannot be null")
         // Show phone number under contact name if there is a contact name;
         // otherwise just show phone number
         if (contactName != null) {
@@ -444,7 +444,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
         // Hide the call button on devices without telephony support
         if (!packageManager
-            .hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+                .hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
             val phoneMenuItem = menu.findItem(R.id.call_button)
             phoneMenuItem.isVisible = false
         }
@@ -498,7 +498,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         // has multiple parents
         runOnNewThread {
             val clazz = if (Database.getInstance(this)
-                .isConversationArchived(conversationId)) {
+                    .isConversationArchived(conversationId)) {
                 ConversationsArchivedActivity::class.java
             } else {
                 ConversationsActivity::class.java
@@ -813,7 +813,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
                     // Go back to the previous activity if no messages remain
                     if (!Database.getInstance(applicationContext)
-                        .isConversationEmpty(conversationId)) {
+                            .isConversationEmpty(conversationId)) {
                         runOnUiThread {
                             finish()
                         }
@@ -931,7 +931,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      */
     private fun updateButtons() = runOnNewThread {
         if (Database.getInstance(this)
-            .isConversationArchived(conversationId)) {
+                .isConversationArchived(conversationId)) {
             runOnUiThread {
                 // If conversation archived, only show unarchive button
                 menu.findItem(R.id.archive_button).isVisible = false

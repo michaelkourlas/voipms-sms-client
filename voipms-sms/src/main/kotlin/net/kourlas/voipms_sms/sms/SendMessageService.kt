@@ -17,7 +17,6 @@
 
 package net.kourlas.voipms_sms.sms
 
-import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.support.v4.app.JobIntentService
@@ -77,7 +76,7 @@ class SendMessageService : JobIntentService() {
             // Terminate quietly if intent does not exist or does not contain
             // the send SMS action
             if (intent.action != applicationContext.getString(
-                R.string.send_message_action)) {
+                    R.string.send_message_action)) {
                 return null
             }
 
@@ -181,7 +180,7 @@ class SendMessageService : JobIntentService() {
                 R.string.notifications_reply_key))?.toString() ?: (intent.getStringExtra(
             applicationContext.getString(R.string.send_message_text))
                                                                    ?: throw Exception(
-            "Message text missing"))
+                                                                       "Message text missing"))
 
         // If the message text exceeds the maximum length of an SMS message,
         // split it into multiple message texts

@@ -68,7 +68,7 @@ class RetrieveDidsService : IntentService(
             // Terminate quietly if intent does not exist or does not contain
             // the send SMS action
             if (intent == null || intent.action != applicationContext.getString(
-                R.string.retrieve_dids_action)) {
+                    R.string.retrieve_dids_action)) {
                 return dids
             }
 

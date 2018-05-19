@@ -80,9 +80,9 @@ class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
         if (preference is EditTextPreference) {
             // Display value of preference as summary text
             if (preference.key == getString(
-                R.string.preferences_network_connect_timeout_key)
-                     || preference.key == getString(
-                R.string.preferences_network_read_timeout_key)) {
+                    R.string.preferences_network_connect_timeout_key)
+                || preference.key == getString(
+                    R.string.preferences_network_read_timeout_key)) {
                 try {
                     if (preference.text.toInt() == 0) {
                         preference.summary = "Infinite"

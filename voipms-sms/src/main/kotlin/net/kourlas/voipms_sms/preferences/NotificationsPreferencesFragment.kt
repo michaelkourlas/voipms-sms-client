@@ -29,7 +29,7 @@ import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import com.takisoft.fix.support.v7.preference.RingtonePreference
 import net.kourlas.voipms_sms.R
 
-class NotificationsPreferencesFragment: PreferenceFragmentCompatDividers(),
+class NotificationsPreferencesFragment : PreferenceFragmentCompatDividers(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {

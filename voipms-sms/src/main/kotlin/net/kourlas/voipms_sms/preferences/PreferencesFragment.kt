@@ -40,7 +40,7 @@ class PreferencesFragment : PreferenceFragmentCompatDividers() {
         for (i in 0 until preferenceScreen.preferenceCount) {
             val preference = preferenceScreen.getPreference(i)
             if (preference.title == getString(
-                R.string.preferences_notifications_category_name)) {
+                    R.string.preferences_notifications_category_name)) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     val activity = activity ?: return
                     Notifications.getInstance(activity.application)

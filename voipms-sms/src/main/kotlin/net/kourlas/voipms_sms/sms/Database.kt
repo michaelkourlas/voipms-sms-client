@@ -363,7 +363,7 @@ class Database private constructor(private val context: Context) {
             params = arrayOf(filterString, numericFilterString,
                              numericFilterString)
             numericFilterStringQuery = "OR $COLUMN_CONTACT LIKE ?" +
-                                       " OR $COLUMN_DID LIKE ?"
+                " OR $COLUMN_DID LIKE ?"
         }
 
         synchronized(this) {
@@ -393,13 +393,13 @@ class Database private constructor(private val context: Context) {
                 // the second list on contact name and add it to the first list
                 // if there is a match
                 query = "SELECT * FROM $TABLE_MESSAGE a INNER JOIN" +
-                        " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT," +
-                        " MAX($COLUMN_DATE)" +
-                        " AS $COLUMN_DATE FROM $TABLE_MESSAGE" +
-                        " WHERE $COLUMN_DID=$did GROUP BY $COLUMN_CONTACT)" +
-                        " b on a.$COLUMN_DATABASE_ID = b.$COLUMN_DATABASE_ID" +
-                        " AND a.$COLUMN_DATE = b.$COLUMN_DATE" +
-                        " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID DESC"
+                    " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT," +
+                    " MAX($COLUMN_DATE)" +
+                    " AS $COLUMN_DATE FROM $TABLE_MESSAGE" +
+                    " WHERE $COLUMN_DID=$did GROUP BY $COLUMN_CONTACT)" +
+                    " b on a.$COLUMN_DATABASE_ID = b.$COLUMN_DATABASE_ID" +
+                    " AND a.$COLUMN_DATE = b.$COLUMN_DATE" +
+                    " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID DESC"
                 cursor = database.rawQuery(query, null)
                 val contactNameMessages = getMessagesCursor(cursor)
                 cursor.close()
@@ -415,7 +415,7 @@ class Database private constructor(private val context: Context) {
                                                      contactNameMessage.contact,
                                                      contactNameCache)
                     if (contactName != null && contactName.toLowerCase()
-                        .contains(filterConstraint)) {
+                            .contains(filterConstraint)) {
                         messages.add(contactNameMessage)
                     }
                 }
@@ -1001,7 +1001,7 @@ class Database private constructor(private val context: Context) {
                 cursor.getLong(
                     cursor.getColumnIndexOrThrow(COLUMN_DATABASE_ID)),
                 if (cursor.isNull(cursor.getColumnIndexOrThrow(
-                    COLUMN_VOIP_ID))) null else cursor.getLong(
+                        COLUMN_VOIP_ID))) null else cursor.getLong(
                     cursor.getColumnIndex(COLUMN_VOIP_ID)),
                 cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
                 cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_INCOMING)),
@@ -1209,7 +1209,7 @@ class Database private constructor(private val context: Context) {
                 val databaseId = cursor.getLong(
                     cursor.getColumnIndexOrThrow(columns[0]))
                 val voipId = if (cursor.isNull(cursor.getColumnIndexOrThrow(
-                    columns[1]))) null else cursor.getLong(
+                        columns[1]))) null else cursor.getLong(
                     cursor.getColumnIndex(columns[1]))
                 var date = cursor.getLong(
                     cursor.getColumnIndexOrThrow(columns[2]))
@@ -1304,7 +1304,7 @@ class Database private constructor(private val context: Context) {
             cursor.moveToFirst()
             while (!cursor.isAfterLast) {
                 val voipId = (if (cursor.isNull(cursor.getColumnIndexOrThrow(
-                    columns[1]))) null else cursor.getLong(
+                        columns[1]))) null else cursor.getLong(
                     cursor.getColumnIndex(columns[1]))) ?: continue
                 val did = cursor.getString(cursor.getColumnIndexOrThrow(
                     columns[4]))

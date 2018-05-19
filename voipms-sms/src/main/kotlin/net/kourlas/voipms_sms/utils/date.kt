@@ -59,8 +59,8 @@ fun getScrollBarDate(date: Date): String {
     }
 
     if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) == calendar.get(
-        Calendar.WEEK_OF_YEAR) && Calendar.getInstance().get(
-        Calendar.YEAR) == calendar.get(Calendar.YEAR)) {
+            Calendar.WEEK_OF_YEAR) && Calendar.getInstance().get(
+            Calendar.YEAR) == calendar.get(Calendar.YEAR)) {
         // This week: EEE
         val format = SimpleDateFormat("EEE",
                                       Locale.getDefault())
@@ -68,7 +68,7 @@ fun getScrollBarDate(date: Date): String {
     }
 
     if (Calendar.getInstance().get(Calendar.YEAR) == calendar.get(
-        Calendar.YEAR)) {
+            Calendar.YEAR)) {
         // This year: MMM
         val format = SimpleDateFormat("MMM",
                                       Locale.getDefault())
@@ -129,8 +129,8 @@ fun getFormattedDate(context: Context, date: Date, hideTime: Boolean): String {
     }
 
     if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) == calendar.get(
-        Calendar.WEEK_OF_YEAR) && Calendar.getInstance().get(
-        Calendar.YEAR) == calendar.get(Calendar.YEAR)) {
+            Calendar.WEEK_OF_YEAR) && Calendar.getInstance().get(
+            Calendar.YEAR) == calendar.get(Calendar.YEAR)) {
         return if (hideTime) {
             // This week: EEE
             val format = SimpleDateFormat("EEE",
@@ -145,7 +145,7 @@ fun getFormattedDate(context: Context, date: Date, hideTime: Boolean): String {
     }
 
     if (Calendar.getInstance().get(Calendar.YEAR) == calendar.get(
-        Calendar.YEAR)) {
+            Calendar.YEAR)) {
         return if (hideTime) {
             // This year: MMM d
             val format = SimpleDateFormat("MMM d",

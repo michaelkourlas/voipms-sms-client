@@ -17,15 +17,15 @@
 
 package net.kourlas.voipms_sms.utils
 
-import android.support.v7.preference.PreferenceScreen
 import android.support.v7.preference.Preference
+import android.support.v7.preference.PreferenceScreen
 
 /**
  * Extension property allowing easy iteration over a [PreferenceScreen]'s
  * preferences.
  */
 val PreferenceScreen.preferences: Iterable<Preference>
-    get() = object: Iterable<Preference> {
+    get() = object : Iterable<Preference> {
         override fun iterator(): Iterator<Preference> {
             return object : Iterator<Preference> {
                 var i = 0

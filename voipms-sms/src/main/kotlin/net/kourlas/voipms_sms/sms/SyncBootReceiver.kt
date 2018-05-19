@@ -36,9 +36,9 @@ class SyncBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null && intent != null &&
             (intent.action ==
-                 "android.intent.action.BOOT_COMPLETED"
+             "android.intent.action.BOOT_COMPLETED"
              || intent.action ==
-                 "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED")) {
+             "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED")) {
             SyncIntervalService.startService(context)
         }
     }

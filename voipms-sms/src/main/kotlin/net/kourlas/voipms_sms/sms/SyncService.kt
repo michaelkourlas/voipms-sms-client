@@ -53,7 +53,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
         // Terminate quietly if intent does not exist or does not contain
         // the sync action
         if (intent == null || intent.action != applicationContext.getString(
-            R.string.sync_action)) {
+                R.string.sync_action)) {
             return
         }
 
@@ -82,7 +82,7 @@ class SyncService : IntentService(SyncService::class.java.name) {
         syncCompleteBroadcastIntent.putExtra(getString(
             R.string.sync_complete_error), error)
         if (intent.extras?.get(getString(
-            R.string.sync_force_recent)) != true) {
+                R.string.sync_force_recent)) != true) {
             syncCompleteBroadcastIntent.putExtra(getString(
                 R.string.sync_complete_full), true)
         }

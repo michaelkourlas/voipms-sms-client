@@ -311,8 +311,8 @@ class ConversationRecyclerViewAdapter(
     }
 
     override fun getItemViewType(i: Int): Int =
-        // There are two different view types: one for incoming messages and
-        // one for outgoing messages
+    // There are two different view types: one for incoming messages and
+    // one for outgoing messages
         if (messageItems[i].message.isIncoming) {
             R.layout.conversation_item_incoming
         } else {

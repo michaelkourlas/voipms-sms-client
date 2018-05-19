@@ -92,8 +92,8 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
             .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
 
-        val actionBar = supportActionBar ?:
-                        throw Exception("Action bar cannot be null")
+        val actionBar = supportActionBar ?: throw Exception(
+            "Action bar cannot be null")
         actionBar.setHomeButtonEnabled(true)
         actionBar.setDisplayHomeAsUpEnabled(true)
         actionBar.setDisplayShowTitleEnabled(false)
@@ -169,8 +169,8 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
      * @return Always returns true.
      */
     private fun onDialpadButtonClick(item: MenuItem): Boolean {
-        val actionBar = supportActionBar ?:
-                        throw Exception("Action bar cannot be null")
+        val actionBar = supportActionBar ?: throw Exception(
+            "Action bar cannot be null")
         val searchView = actionBar.customView
             .findViewById<SearchView>(R.id.search_view)
         searchView.inputType = InputType.TYPE_CLASS_PHONE
@@ -185,8 +185,8 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
      * @return Always returns true.
      */
     private fun onKeyboardButtonClick(item: MenuItem): Boolean {
-        val actionBar = supportActionBar ?:
-                        throw Exception("Action bar cannot be null")
+        val actionBar = supportActionBar ?: throw Exception(
+            "Action bar cannot be null")
         val searchView = actionBar.customView
             .findViewById<SearchView>(R.id.search_view)
         searchView.inputType = InputType.TYPE_TEXT_VARIATION_PERSON_NAME
@@ -203,7 +203,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
 
         val contactItem = adapter[position]
         if (contactItem is
-            NewConversationRecyclerViewAdapter.Companion.ContactItem) {
+                NewConversationRecyclerViewAdapter.Companion.ContactItem) {
             // If the selected contact has multiple phone numbers, allow the
             // user to select one of the numbers
             if (contactItem.secondaryPhoneNumbers.isNotEmpty()) {
@@ -232,7 +232,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 startConversationActivity(contactItem.primaryPhoneNumber)
             }
         } else if (contactItem is
-            NewConversationRecyclerViewAdapter.Companion.TypedInContactItem) {
+                NewConversationRecyclerViewAdapter.Companion.TypedInContactItem) {
             startConversationActivity(contactItem.primaryPhoneNumber)
         } else {
             throw Exception("Unrecognized contact item type")

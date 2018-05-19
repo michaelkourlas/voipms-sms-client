@@ -27,7 +27,7 @@ import net.kourlas.voipms_sms.R
  * Activity that houses a [PreferencesFragment] that displays the network
  * preferences.
  */
-class NetworkPreferencesActivity: AppCompatActivity() {
+class NetworkPreferencesActivity : AppCompatActivity() {
     // Preferences fragment for this preferences activity
     private lateinit var fragment: NetworkPreferencesFragment
 

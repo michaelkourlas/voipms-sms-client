@@ -112,7 +112,7 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompatDividers(),
      */
     private fun updateHandlersForPreference(preference: Preference) {
         if (preference.key == getString(
-            R.string.preferences_sync_interval_key)) {
+                R.string.preferences_sync_interval_key)) {
             preference.onPreferenceChangeListener =
                 syncIntervalPreferenceChangeListener
         }

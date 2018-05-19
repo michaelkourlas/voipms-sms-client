@@ -36,7 +36,7 @@ class SyncIntervalService : JobIntentService() {
     override fun onHandleWork(intent: Intent) {
         // Terminate quietly if does not contain the sync interval action
         if (intent.action != applicationContext.getString(
-            R.string.sync_interval_service_action)) {
+                R.string.sync_interval_service_action)) {
             return
         }
 

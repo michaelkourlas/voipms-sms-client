@@ -60,8 +60,8 @@ class NotificationsPreferencesActivity : AppCompatActivity() {
         // Ask for external storage permission (required to display
         // information associated with ringtones on external storage)
         if (ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.READ_EXTERNAL_STORAGE)
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 this,

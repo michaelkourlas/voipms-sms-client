@@ -93,9 +93,9 @@ class AppIndexingService : IntentService(AppIndexingService::class.java.name) {
         fun getMessageBuilder(
             context: Context, message: Message,
             contactNameCache: MutableMap<String, String> =
-            mutableMapOf(),
+                mutableMapOf(),
             contactPhotoUriCache: MutableMap<String, String> =
-            mutableMapOf()): MessageBuilder {
+                mutableMapOf()): MessageBuilder {
             val messageBuilder = Indexables.messageBuilder()
                 .setUrl(message.messageUrl)
                 .setName(message.text)

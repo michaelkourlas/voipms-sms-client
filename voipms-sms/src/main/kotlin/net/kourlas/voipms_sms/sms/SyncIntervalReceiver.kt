@@ -41,7 +41,7 @@ class SyncIntervalReceiver : BroadcastReceiver() {
                 return
             }
             if (intent.action != context.getString(
-                R.string.sync_interval_action)) {
+                    R.string.sync_interval_action)) {
                 return
             }
             val forceRecent = intent.extras.get(

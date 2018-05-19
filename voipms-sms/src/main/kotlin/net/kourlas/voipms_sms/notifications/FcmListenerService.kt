@@ -38,7 +38,8 @@ class FcmListenerService : FirebaseMessagingService() {
         if (match) {
             // If so, and if notifications are enabled, update the message
             // database and shows notifications for any new messages
-            if (Notifications.getInstance(application).getNotificationsEnabled()) {
+            if (Notifications.getInstance(
+                    application).getNotificationsEnabled()) {
                 val intent = SyncIntervalReceiver.getIntent(
                     applicationContext, forceRecent = true)
                 sendBroadcast(intent)

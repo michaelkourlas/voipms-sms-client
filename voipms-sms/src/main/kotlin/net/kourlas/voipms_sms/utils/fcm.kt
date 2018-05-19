@@ -32,7 +32,8 @@ import net.kourlas.voipms_sms.preferences.getDids
 fun subscribeToDidTopics(context: Context) {
     // Do not subscribe to DID topics if Google Play Services is unavailable
     if (GoogleApiAvailability.getInstance()
-        .isGooglePlayServicesAvailable(context) != ConnectionResult.SUCCESS) {
+            .isGooglePlayServicesAvailable(
+                context) != ConnectionResult.SUCCESS) {
         return
     }
 

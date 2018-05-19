@@ -18,7 +18,6 @@
 package net.kourlas.voipms_sms;
 
 import android.app.Application;
-import android.os.Build;
 
 import net.kourlas.voipms_sms.sms.ConversationId;
 
