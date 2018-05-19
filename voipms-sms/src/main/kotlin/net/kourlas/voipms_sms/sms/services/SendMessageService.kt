@@ -118,7 +118,7 @@ class SendMessageService : JobIntentService() {
                             applicationContext)
                             .insertMessageDeliveryInProgress(
                                 ConversationId(did,
-                                                                          contact), messageText)
+                                               contact), messageText)
                         messages.add(
                             OutgoingMessage(
                                 newDatabaseId, did,
@@ -137,7 +137,7 @@ class SendMessageService : JobIntentService() {
                             }
                         }
                         return ConversationId(did,
-                                                                         contact)
+                                              contact)
                     }
                 }
             }
@@ -328,7 +328,8 @@ class SendMessageService : JobIntentService() {
          * Gets an intent which can be used to send a message to the
          * specified contact and from the specified DID.
          */
-        fun getSendMessageIntent(context: Context, did: String, contact: String): Intent {
+        fun getSendMessageIntent(context: Context, did: String,
+                                 contact: String): Intent {
             val intent = Intent()
             intent.action = context.getString(R.string.send_message_action)
             intent.putExtra(context.getString(
@@ -343,7 +344,7 @@ class SendMessageService : JobIntentService() {
          * specified DID.
          */
         fun sendMessage(context: Context, did: String, contact: String,
-                      text: String) {
+                        text: String) {
             val intent = getSendMessageIntent(
                 context, did, contact)
             intent.putExtra(context.getString(R.string.send_message_text), text)

@@ -198,7 +198,7 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
             enabledSwitch.isChecked
         retrieveMessagesPreference.isChecked =
             getDidRetrieveMessages(context,
-                                                                      did)
+                                   did)
 
         val showNotificationsPreference =
             preferenceScreen.getPreference(2) as SwitchPreference

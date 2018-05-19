@@ -38,7 +38,9 @@ import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.notifications.services.NotificationsRegistrationService
 import net.kourlas.voipms_sms.preferences.*
-import net.kourlas.voipms_sms.sms.*
+import net.kourlas.voipms_sms.sms.ConversationId
+import net.kourlas.voipms_sms.sms.Database
+import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
 import net.kourlas.voipms_sms.sms.services.MarkReadService
 import net.kourlas.voipms_sms.sms.services.SendMessageService
