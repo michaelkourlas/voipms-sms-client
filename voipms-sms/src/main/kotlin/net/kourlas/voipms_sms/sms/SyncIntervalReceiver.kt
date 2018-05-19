@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,13 @@ import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 
 /**
- * Receiver called when a database synchronization is requested (automatically
- * or triggered by a particular action).
+ * Receiver called when a database synchronization is requested, either
+ * automatically or triggered by a particular action.
  */
 class SyncIntervalReceiver : BroadcastReceiver() {
     /**
      * Performs database synchronization using the specified context and
      * intent.
-     *
-     * @param context The specified context.
-     * @param intent The specified intent.
      */
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
@@ -59,10 +56,8 @@ class SyncIntervalReceiver : BroadcastReceiver() {
          * Gets an intent which can be used to trigger this receiver using the
          * specified context.
          *
-         * @param context The specified context.
          * @param forceRecent If true, retrieves only the most recent messages
          * regardless of the app configuration.
-         * @return An intent which can be used to launch this service.
          */
         fun getIntent(context: Context, forceRecent: Boolean = true): Intent {
             val intent = Intent(context, SyncIntervalReceiver::class.java)

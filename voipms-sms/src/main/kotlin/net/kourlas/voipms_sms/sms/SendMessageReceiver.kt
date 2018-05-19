@@ -20,15 +20,33 @@ package net.kourlas.voipms_sms.sms
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.crashlytics.android.Crashlytics
+import net.kourlas.voipms_sms.R
 
 /**
  * Broadcast receiver used to forward send message requests from a PendingIntent
  * to the SendMessageService.
  */
 class SendMessageReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) {
-        // Forward intent to SendMessageService
-        intent.setClass(context, SendMessageService::class.java)
-        SendMessageService.sendMessage(context, intent)
+    /**
+     * Forwards a send message request using the specified context and
+     * intent.
+     */
+    override fun onReceive(context: Context?, intent: Intent?) {
+        try {
+            if (context == null || intent == null) {
+                return
+            }
+            if (intent.action != context.getString(
+                    R.string.send_message_action)) {
+                return
+            }
+
+            // Forward intent to SendMessageService
+            intent.setClass(context, SendMessageService::class.java)
+            SendMessageService.sendMessage(context, intent)
+        } catch (e: Exception) {
+            Crashlytics.logException(e)
+        }
     }
 }
