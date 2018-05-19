@@ -304,7 +304,8 @@ class ConversationRecyclerViewAdapter(
                     activity, R.color.dark_gray))
                 messageText.setLinkTextColor(ContextCompat.getColor(
                     activity, R.color.dark_gray))
-                dateText.setTextColor(R.color.message_translucent_dark_grey)
+                dateText.setTextColor(ContextCompat.getColor(
+                    activity, R.color.message_translucent_dark_grey))
             }
         }
     }
