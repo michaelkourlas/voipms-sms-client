@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,39 +15,31 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.activities
 
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.utils.abortActivity
-import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.preferences.fragments.NetworkPreferencesFragment
 
 /**
- * Activity that houses a [PreferencesFragment] that displays settings
- * associated with a particular DID.
+ * Activity that houses a [PreferencesFragment] that displays the network
+ * preferences.
  */
-class DidPreferencesActivity : AppCompatActivity() {
+class NetworkPreferencesActivity : AppCompatActivity() {
     // Preferences fragment for this preferences activity
-    private lateinit var fragment: DidPreferencesFragment
+    private lateinit var fragment: NetworkPreferencesFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Get DID from intent extras
-        val did = intent.getStringExtra(getString(R.string.conversation_did))
-        if (did == null) {
-            abortActivity(this, Exception("Missing DID extra"))
-        }
-
         // Load activity layout
-        setContentView(R.layout.preferences_did)
+        setContentView(R.layout.preferences_network)
 
         // Configure toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        toolbar.title = getFormattedPhoneNumber(did)
         ViewCompat.setElevation(toolbar, resources
             .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
@@ -57,16 +49,7 @@ class DidPreferencesActivity : AppCompatActivity() {
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
 
-        // Load label and switch inside enabled toolbar
-        val didToolbar = findViewById<Toolbar>(R.id.enabled_toolbar)
-        didToolbar.inflateMenu(R.menu.preferences_did_enabled)
-
-        // Load preferences fragment
-        val bundle = Bundle()
-        bundle.putString(getString(
-            R.string.preferences_did_fragment_argument_did), did)
-        fragment = DidPreferencesFragment()
-        fragment.arguments = bundle
+        fragment = NetworkPreferencesFragment()
         supportFragmentManager.beginTransaction().replace(
             R.id.preferences_fragment_layout, fragment).commit()
     }

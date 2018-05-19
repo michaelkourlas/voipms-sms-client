@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.activities
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -26,6 +26,7 @@ import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.fragments.NotificationsPreferencesFragment
 import net.kourlas.voipms_sms.utils.showPermissionSnackbar
 
 /**
@@ -66,7 +67,7 @@ class NotificationsPreferencesActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                NotificationsPreferencesActivity.Companion.PermissionIndex.EXTERNAL_STORAGE.ordinal)
+                PermissionIndex.EXTERNAL_STORAGE.ordinal)
         }
     }
 

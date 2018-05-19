@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import com.takisoft.fix.support.v7.preference.EditTextPreference
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 import net.kourlas.voipms_sms.utils.preferences
 
@@ -93,7 +94,8 @@ class AccountPreferencesFragment : PreferenceFragmentCompatDividers(),
         if (preference?.key == getString(
                 R.string.preferences_account_dids_key)) {
             // Display list of selected DIDs as summary text
-            val formattedDids = getDids(context).map(::getFormattedPhoneNumber)
+            val formattedDids = getDids(
+                context).map(::getFormattedPhoneNumber)
             preference.summary = formattedDids.joinToString(separator = ", ")
         } else if (preference is EditTextPreference) {
             // Display value of preference as summary text (except for

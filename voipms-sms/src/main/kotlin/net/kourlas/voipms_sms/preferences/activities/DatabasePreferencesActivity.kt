@@ -15,27 +15,28 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.activities
 
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.fragments.DatabasePreferencesFragment
 
 /**
- * Activity that houses a [PreferencesFragment] that displays the network
+ * Activity that houses a [PreferencesFragment] that displays the database
  * preferences.
  */
-class NetworkPreferencesActivity : AppCompatActivity() {
+class DatabasePreferencesActivity : AppCompatActivity() {
     // Preferences fragment for this preferences activity
-    private lateinit var fragment: NetworkPreferencesFragment
+    private lateinit var fragment: DatabasePreferencesFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Load activity layout
-        setContentView(R.layout.preferences_network)
+        setContentView(R.layout.preferences_database)
 
         // Configure toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -48,7 +49,7 @@ class NetworkPreferencesActivity : AppCompatActivity() {
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
 
-        fragment = NetworkPreferencesFragment()
+        fragment = DatabasePreferencesFragment()
         supportFragmentManager.beginTransaction().replace(
             R.id.preferences_fragment_layout, fragment).commit()
     }

@@ -56,7 +56,7 @@ import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
-import net.kourlas.voipms_sms.sms.SendMessageService
+import net.kourlas.voipms_sms.sms.services.SendMessageService
 import net.kourlas.voipms_sms.ui.CustomScrollerViewProvider
 import net.kourlas.voipms_sms.utils.*
 import java.text.SimpleDateFormat

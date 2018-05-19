@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -31,7 +31,8 @@ import android.widget.CompoundButton
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.sms.AppIndexingService
+import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.sms.services.AppIndexingService
 import net.kourlas.voipms_sms.utils.abortActivity
 import net.kourlas.voipms_sms.utils.runOnNewThread
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
@@ -61,7 +62,8 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
 
                 // Regardless of whether an error occurred, mark setup as
                 // complete
-                setSetupCompletedForVersion(activity, 114)
+                setSetupCompletedForVersion(
+                    activity, 114)
             }
         }
 
@@ -179,28 +181,32 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
 
         val enabledSwitch = activity.findViewById<SwitchCompat>(
             R.id.enabled_switch)
-        enabledSwitch.isChecked = did in getDids(context)
+        enabledSwitch.isChecked = did in getDids(
+            context)
 
         val showInConversationsViewPreference =
             preferenceScreen.getPreference(0) as SwitchPreference
         showInConversationsViewPreference.isEnabled =
             enabledSwitch.isChecked
         showInConversationsViewPreference.isChecked =
-            getDidShowInConversationsView(context, did)
+            getDidShowInConversationsView(
+                context, did)
 
         val retrieveMessagesPreference =
             preferenceScreen.getPreference(1) as SwitchPreference
         retrieveMessagesPreference.isEnabled =
             enabledSwitch.isChecked
         retrieveMessagesPreference.isChecked =
-            getDidRetrieveMessages(context, did)
+            getDidRetrieveMessages(context,
+                                                                      did)
 
         val showNotificationsPreference =
             preferenceScreen.getPreference(2) as SwitchPreference
         showNotificationsPreference.isEnabled =
             enabledSwitch.isChecked
-        showNotificationsPreference.isChecked = getDidShowNotifications(context,
-                                                                        did)
+        showNotificationsPreference.isChecked = getDidShowNotifications(
+            context,
+            did)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

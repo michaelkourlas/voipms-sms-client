@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.sms
+package net.kourlas.voipms_sms.sms.services
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -27,6 +27,7 @@ import android.util.Log
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getLastCompleteSyncTime
 import net.kourlas.voipms_sms.preferences.getSyncInterval
+import net.kourlas.voipms_sms.sms.receivers.SyncIntervalReceiver
 import net.kourlas.voipms_sms.utils.JobId
 import java.util.*
 
@@ -42,13 +43,15 @@ class SyncIntervalService : JobIntentService() {
         }
 
         val rand = Random().nextInt().toString(16)
-        Log.i(SyncIntervalService::class.java.name,
-              "[$rand] setting sync interval")
+        Log.i(
+            SyncIntervalService::class.java.name,
+            "[$rand] setting sync interval")
 
         setInterval()
 
-        Log.i(SyncIntervalService::class.java.name,
-              "[$rand] sync interval set")
+        Log.i(
+            SyncIntervalService::class.java.name,
+            "[$rand] sync interval set")
     }
 
     /**

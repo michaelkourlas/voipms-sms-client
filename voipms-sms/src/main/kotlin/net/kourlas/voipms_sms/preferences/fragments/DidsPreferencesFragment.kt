@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -29,8 +29,12 @@ import android.view.ViewGroup
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
+import net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity
 import net.kourlas.voipms_sms.preferences.controls.MasterSwitchPreference
-import net.kourlas.voipms_sms.sms.AppIndexingService
+import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.preferences.setDids
+import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
+import net.kourlas.voipms_sms.sms.services.AppIndexingService
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 import net.kourlas.voipms_sms.utils.runOnNewThread
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
@@ -72,7 +76,8 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
 
                 // Regardless of whether an error occurred, mark setup as
                 // complete
-                setSetupCompletedForVersion(activity, 114)
+                setSetupCompletedForVersion(
+                    activity, 114)
             }
         }
 

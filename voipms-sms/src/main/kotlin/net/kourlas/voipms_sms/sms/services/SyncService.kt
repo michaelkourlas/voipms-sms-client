@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.sms
+package net.kourlas.voipms_sms.sms.services
 
 import android.app.IntentService
 import android.content.Context
@@ -27,6 +27,8 @@ import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.sms.ConversationId
+import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.getJson
 import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
 import net.kourlas.voipms_sms.utils.toBoolean
@@ -46,7 +48,8 @@ import java.util.*
  * synchronization progress. This is mainly to prevent Android from killing
  * the service.
  */
-class SyncService : IntentService(SyncService::class.java.name) {
+class SyncService : IntentService(
+    SyncService::class.java.name) {
     private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
@@ -126,7 +129,8 @@ class SyncService : IntentService(SyncService::class.java.name) {
             if (!forceRecent) {
                 setLastCompleteSyncTime(applicationContext,
                                         System.currentTimeMillis())
-                SyncIntervalService.startService(applicationContext)
+                SyncIntervalService.startService(
+                    applicationContext)
             }
         } catch (e: Exception) {
             Crashlytics.logException(e)
@@ -158,7 +162,8 @@ class SyncService : IntentService(SyncService::class.java.name) {
         // date or when the most recent message was received, as appropriate;
         // note that EDT is used throughout because the VoIP.ms API only works
         // with EDT
-        val mostRecentMessage = Database.getInstance(applicationContext)
+        val mostRecentMessage = Database.getInstance(
+            applicationContext)
             .getMessageMostRecent(
                 getDids(applicationContext))
         val thenCalendar = Calendar.getInstance(
@@ -224,7 +229,10 @@ class SyncService : IntentService(SyncService::class.java.name) {
                     "&from=$encodedDateFrom&to=$encodedDateTo" +
                     "&timezone=-5" // -5 corresponds to EDT
                 }
-                .mapTo(retrievalRequests) { RetrievalRequest(it, period) }
+                .mapTo(retrievalRequests) {
+                    RetrievalRequest(
+                        it, period)
+                }
         }
 
         return retrievalRequests
@@ -258,7 +266,8 @@ class SyncService : IntentService(SyncService::class.java.name) {
         // Add new messages from the server
         val newConversationIds: Set<ConversationId>
         try {
-            newConversationIds = Database.getInstance(applicationContext)
+            newConversationIds = Database.getInstance(
+                applicationContext)
                 .insertMessagesVoipMsApi(incomingMessages,
                                          retrieveDeletedMessages)
         } catch (e: Exception) {

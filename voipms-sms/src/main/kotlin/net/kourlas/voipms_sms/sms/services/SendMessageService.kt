@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.sms
+package net.kourlas.voipms_sms.sms.services
 
 import android.content.Context
 import android.content.Intent
@@ -28,6 +28,8 @@ import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.preferences.isAccountActive
+import net.kourlas.voipms_sms.sms.ConversationId
+import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.getJson
 import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
@@ -47,8 +49,9 @@ class SendMessageService : JobIntentService() {
 
     override fun onHandleWork(intent: Intent) {
         val rand = Random().nextInt().toString(16)
-        Log.i(SendMessageService::class.java.name,
-              "[$rand] sending message")
+        Log.i(
+            SendMessageService::class.java.name,
+            "[$rand] sending message")
 
         val conversationId = handleSendMessage(intent) ?: return
 
@@ -68,8 +71,9 @@ class SendMessageService : JobIntentService() {
         }
         applicationContext.sendBroadcast(sentMessageBroadcastIntent)
 
-        Log.i(SendMessageService::class.java.name,
-              "[$rand] sent message")
+        Log.i(
+            SendMessageService::class.java.name,
+            "[$rand] sent message")
     }
 
     private fun handleSendMessage(intent: Intent): ConversationId? {
@@ -92,39 +96,48 @@ class SendMessageService : JobIntentService() {
 
             val messages = mutableListOf<OutgoingMessage>()
             if (databaseId != null) {
-                val message = Database.getInstance(applicationContext)
+                val message = Database.getInstance(
+                    applicationContext)
                                   .getMessageDatabaseId(databaseId)
                               ?: throw Exception("No message with database" +
                                                  " ID found")
-                Database.getInstance(applicationContext)
+                Database.getInstance(
+                    applicationContext)
                     .markMessageDeliveryInProgress(databaseId)
-                messages.add(OutgoingMessage(databaseId, did, contact,
-                                             message.text))
+                messages.add(
+                    OutgoingMessage(
+                        databaseId, did, contact,
+                        message.text))
             } else if (messageTexts != null) {
                 // Try adding the messages to the database; if this fails,
                 // terminate with a toast and try to remove existing added
                 // messages
                 for (messageText in messageTexts) {
                     try {
-                        val newDatabaseId = Database
-                            .getInstance(applicationContext)
+                        val newDatabaseId = Database.getInstance(
+                            applicationContext)
                             .insertMessageDeliveryInProgress(
-                                ConversationId(did, contact), messageText)
-                        messages.add(OutgoingMessage(newDatabaseId, did,
-                                                     contact, messageText))
+                                ConversationId(did,
+                                                                          contact), messageText)
+                        messages.add(
+                            OutgoingMessage(
+                                newDatabaseId, did,
+                                contact, messageText))
                     } catch (e: Exception) {
                         Crashlytics.logException(e)
                         error = applicationContext.getString(
                             R.string.send_message_error_database)
                         for ((newDatabaseId) in messages) {
                             try {
-                                Database.getInstance(applicationContext)
+                                Database.getInstance(
+                                    applicationContext)
                                     .removeMessage(newDatabaseId)
                             } catch (e: Exception) {
                                 Crashlytics.logException(e)
                             }
                         }
-                        return ConversationId(did, contact)
+                        return ConversationId(did,
+                                                                         contact)
                     }
                 }
             }
@@ -166,7 +179,8 @@ class SendMessageService : JobIntentService() {
         val databaseId = intent.getLongExtra(getString(
             R.string.send_message_database_id), -1)
         if (databaseId != -1L) {
-            return IntentData(did, contact, null, databaseId)
+            return IntentData(
+                did, contact, null, databaseId)
         }
 
         // Extract the message text provided by inline reply if it exists;
@@ -195,7 +209,8 @@ class SendMessageService : JobIntentService() {
             messageText = messageText.substring(sublength)
         } while (messageText.isNotEmpty())
 
-        return IntentData(did, contact, messageTexts, null)
+        return IntentData(
+            did, contact, messageTexts, null)
     }
 
     /**
@@ -207,7 +222,8 @@ class SendMessageService : JobIntentService() {
         if (!isNetworkConnectionAvailable(applicationContext)) {
             error = applicationContext.getString(
                 R.string.send_message_error_network)
-            Database.getInstance(applicationContext).markMessageNotSent(
+            Database.getInstance(
+                applicationContext).markMessageNotSent(
                 message.databaseId)
             return
         }
@@ -218,10 +234,12 @@ class SendMessageService : JobIntentService() {
         // If the message was sent, mark it as sent and update it with the
         // retrieved VoIP.ms ID; if not, mark it as failed to send
         if (voipId != null) {
-            Database.getInstance(applicationContext).markMessageSent(
+            Database.getInstance(
+                applicationContext).markMessageSent(
                 message.databaseId, voipId)
         } else {
-            Database.getInstance(applicationContext).markMessageNotSent(
+            Database.getInstance(
+                applicationContext).markMessageNotSent(
                 message.databaseId)
         }
     }
@@ -326,9 +344,11 @@ class SendMessageService : JobIntentService() {
          */
         fun sendMessage(context: Context, did: String, contact: String,
                       text: String) {
-            val intent = getSendMessageIntent(context, did, contact)
+            val intent = getSendMessageIntent(
+                context, did, contact)
             intent.putExtra(context.getString(R.string.send_message_text), text)
-            sendMessage(context, intent)
+            sendMessage(
+                context, intent)
         }
 
         /**
@@ -337,11 +357,13 @@ class SendMessageService : JobIntentService() {
          */
         fun sendMessage(context: Context, conversationId: ConversationId,
                         databaseId: Long) {
-            val intent = getSendMessageIntent(context, conversationId.did,
-                                              conversationId.contact)
+            val intent = getSendMessageIntent(
+                context, conversationId.did,
+                conversationId.contact)
             intent.putExtra(context.getString(
                 R.string.send_message_database_id), databaseId)
-            sendMessage(context, intent)
+            sendMessage(
+                context, intent)
         }
 
         /**

@@ -15,27 +15,28 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.activities
 
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.fragments.SynchronizationPreferencesFragment
 
 /**
- * Activity that houses a [PreferencesFragment] that displays the database
- * preferences.
+ * Activity that houses a [PreferencesFragment] that displays the
+ * synchronization preferences.
  */
-class DatabasePreferencesActivity : AppCompatActivity() {
+class SynchronizationPreferencesActivity : AppCompatActivity() {
     // Preferences fragment for this preferences activity
-    private lateinit var fragment: DatabasePreferencesFragment
+    private lateinit var fragment: SynchronizationPreferencesFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Load activity layout
-        setContentView(R.layout.preferences_database)
+        setContentView(R.layout.preferences_synchronization)
 
         // Configure toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -48,7 +49,7 @@ class DatabasePreferencesActivity : AppCompatActivity() {
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
 
-        fragment = DatabasePreferencesFragment()
+        fragment = SynchronizationPreferencesFragment()
         supportFragmentManager.beginTransaction().replace(
             R.id.preferences_fragment_layout, fragment).commit()
     }

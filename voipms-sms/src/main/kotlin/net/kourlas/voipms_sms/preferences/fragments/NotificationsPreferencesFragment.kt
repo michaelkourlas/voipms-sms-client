@@ -15,25 +15,27 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.SharedPreferences
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.preference.Preference
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.takisoft.fix.support.v7.preference.EditTextPreference
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import com.takisoft.fix.support.v7.preference.RingtonePreference
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.getNotificationSound
 
-class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
+class NotificationsPreferencesFragment : PreferenceFragmentCompatDividers(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
         // Add preferences
-        addPreferencesFromResource(R.xml.preferences_network)
+        addPreferencesFromResource(R.xml.preferences_notifications)
 
         // Add listener for preference changes
         preferenceScreen.sharedPreferences
@@ -51,7 +53,7 @@ class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
     /**
      * Updates the summary text for all preferences.
      */
-    private fun updateSummaries() {
+    fun updateSummaries() {
         if (preferenceScreen != null) {
             for (i in 0 until preferenceScreen.preferenceCount) {
                 val subPreference = preferenceScreen.getPreference(i)
@@ -77,23 +79,30 @@ class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
      * @param preference The specified preference.
      */
     private fun updateSummaryTextForPreference(preference: Preference?) {
-        if (preference is EditTextPreference) {
-            // Display value of preference as summary text
-            if (preference.key == getString(
-                    R.string.preferences_network_connect_timeout_key)
-                || preference.key == getString(
-                    R.string.preferences_network_read_timeout_key)) {
-                try {
-                    if (preference.text.toInt() == 0) {
-                        preference.summary = "Infinite"
-                    } else {
-                        preference.summary = preference.text + " seconds"
-                    }
-                } catch (e: NumberFormatException) {
-                    preference.summary = "Infinite"
-                }
+        val context = context ?: return
+        if (preference is RingtonePreference) {
+            // Display selected notification sound as summary text for
+            // notification setting
+            @Suppress("DEPRECATION")
+            val notificationSound = getNotificationSound(
+                context)
+            if (notificationSound == "") {
+                preference.summary = "None"
             } else {
-                preference.summary = preference.text
+                try {
+                    val ringtone = RingtoneManager.getRingtone(
+                        activity, Uri.parse(notificationSound))
+                    if (ringtone != null) {
+                        preference.summary = ringtone.getTitle(
+                            activity)
+                    } else {
+                        preference.summary = getString(
+                            R.string.preferences_notifications_sound_unknown)
+                    }
+                } catch (ex: SecurityException) {
+                    preference.summary = getString(
+                        R.string.preferences_notifications_sound_unknown_perm)
+                }
             }
         }
     }

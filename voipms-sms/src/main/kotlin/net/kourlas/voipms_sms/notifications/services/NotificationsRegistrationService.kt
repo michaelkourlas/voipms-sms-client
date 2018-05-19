@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.notifications
+package net.kourlas.voipms_sms.notifications.services
 
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
@@ -46,7 +47,8 @@ class NotificationsRegistrationService : IntentService(
         }
 
         // Terminate quietly if notifications are not enabled
-        if (!Notifications.getInstance(application).getNotificationsEnabled()) {
+        if (!Notifications.getInstance(
+                application).getNotificationsEnabled()) {
             return
         }
 

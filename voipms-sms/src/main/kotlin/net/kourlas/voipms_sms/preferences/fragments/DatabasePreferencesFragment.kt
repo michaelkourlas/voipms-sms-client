@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.fragments
 
 import android.app.Activity.RESULT_OK
 import android.content.DialogInterface
@@ -43,13 +43,15 @@ class DatabasePreferencesFragment : PreferenceFragmentCompatDividers() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.type = "*/*"
         intent.addCategory(CATEGORY_OPENABLE)
-        startActivityForResult(intent, IMPORT_REQUEST_CODE)
+        startActivityForResult(intent,
+                               IMPORT_REQUEST_CODE)
         true
     }
 
     private val exportListener = Preference.OnPreferenceClickListener {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        startActivityForResult(intent, EXPORT_REQUEST_CODE)
+        startActivityForResult(intent,
+                               EXPORT_REQUEST_CODE)
         true
     }
 

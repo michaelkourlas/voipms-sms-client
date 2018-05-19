@@ -108,66 +108,66 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".preferences.PreferencesActivity"
+            android:name=".preferences.activities.PreferencesActivity"
             android:label="@string/preferences_name"
             android:parentActivityName=".conversations.ConversationsActivity" />
         <activity
-            android:name=".preferences.DidPreferencesActivity"
-            android:parentActivityName=".preferences.DidsPreferencesActivity">
+            android:name=".preferences.activities.DidPreferencesActivity"
+            android:parentActivityName=".preferences.activities.DidsPreferencesActivity">
             <intent-filter>
                 <action android:name=".preferences.DidPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".preferences.DidsPreferencesActivity"
+            android:name=".preferences.activities.DidsPreferencesActivity"
             android:label="@string/preferences_did_name"
-            android:parentActivityName=".preferences.AccountPreferencesActivity">
+            android:parentActivityName=".preferences.activities.AccountPreferencesActivity">
             <intent-filter>
                 <action android:name=".preferences.DidsPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".preferences.AccountPreferencesActivity"
+            android:name=".preferences.activities.AccountPreferencesActivity"
             android:label="@string/preferences_account_category_name"
-            android:parentActivityName=".preferences.PreferencesActivity">
+            android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
                 <action android:name=".preferences.AccountPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".preferences.DatabasePreferencesActivity"
+            android:name=".preferences.activities.DatabasePreferencesActivity"
             android:label="@string/preferences_database_category_name"
-            android:parentActivityName=".preferences.PreferencesActivity">
+            android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
                 <action android:name=".preferences.DatabasePreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".preferences.NetworkPreferencesActivity"
+            android:name=".preferences.activities.NetworkPreferencesActivity"
             android:label="@string/preferences_network_category_name"
-            android:parentActivityName=".preferences.PreferencesActivity">
+            android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
                 <action android:name=".preferences.NetworkPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".preferences.NotificationsPreferencesActivity"
+            android:name=".preferences.activities.NotificationsPreferencesActivity"
             android:label="@string/preferences_notifications_category_name"
-            android:parentActivityName=".preferences.PreferencesActivity">
+            android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
                 <action android:name=".preferences.NotificationsPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".preferences.SynchronizationPreferencesActivity"
+            android:name=".preferences.activities.SynchronizationPreferencesActivity"
             android:label="@string/preferences_sync_category_name"
-            android:parentActivityName=".preferences.PreferencesActivity">
+            android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
                 <action android:name=".preferences.SynchronizationPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -176,46 +176,46 @@
 
         <!-- BROADCAST RECEIVERS -->
 
-        <receiver android:name=".sms.SendMessageReceiver" />
-        <receiver android:name=".sms.SyncBootReceiver">
+        <receiver android:name=".sms.receivers.SendMessageReceiver" />
+        <receiver android:name=".sms.receivers.SyncBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".sms.SyncIntervalReceiver" />
+        <receiver android:name=".sms.receivers.SyncIntervalReceiver" />
 
         <!-- SERVICES -->
 
         <service
-            android:name=".notifications.FcmListenerService"
+            android:name=".notifications.services.FcmListenerService"
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <service
-            android:name=".notifications.FcmInstanceIdService"
+            android:name=".notifications.services.FcmInstanceIdService"
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".notifications.NotificationsRegistrationService" />
+        <service android:name=".notifications.services.NotificationsRegistrationService" />
         <service
-            android:name=".sms.AppIndexingService"
+            android:name=".sms.services.AppIndexingService"
             android:exported="true"
             android:permission="com.google.android.gms.permission.APPINDEXING">
             <intent-filter>
                 <action android:name="com.google.firebase.appindexing.UPDATE_INDEX" />
             </intent-filter>
         </service>
-        <service android:name=".sms.MarkReadService" />
-        <service android:name=".sms.RetrieveDidsService" />
-        <service android:name=".sms.SendMessageService"
+        <service android:name=".sms.services.MarkReadService" />
+        <service android:name=".sms.services.RetrieveDidsService" />
+        <service android:name=".sms.services.SendMessageService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
-        <service android:name=".sms.SyncIntervalService"
+        <service android:name=".sms.services.SyncIntervalService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service android:name=".sms.SyncService" />
+        <service android:name=".sms.services.SyncService" />
     </application>
 </manifest>

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.sms
+package net.kourlas.voipms_sms.sms.services
 
 import android.app.IntentService
 import android.content.Context
@@ -24,12 +24,15 @@ import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.isAccountActive
+import net.kourlas.voipms_sms.sms.ConversationId
+import net.kourlas.voipms_sms.sms.Database
 
 /**
  * Service used to mark the conversation defined by the specified contact
  * using the specified DID as read.
  */
-class MarkReadService : IntentService(MarkReadService::class.java.name) {
+class MarkReadService : IntentService(
+    MarkReadService::class.java.name) {
     override fun onHandleIntent(intent: Intent?) {
         try {
             // Terminate quietly if intent does not exist or does not contain
@@ -48,7 +51,8 @@ class MarkReadService : IntentService(MarkReadService::class.java.name) {
             val conversationId = getIntentData(intent)
 
             // Mark the conversation as read
-            Database.getInstance(applicationContext).markConversationRead(
+            Database.getInstance(
+                applicationContext).markConversationRead(
                 conversationId)
 
             // Cancel existing notification

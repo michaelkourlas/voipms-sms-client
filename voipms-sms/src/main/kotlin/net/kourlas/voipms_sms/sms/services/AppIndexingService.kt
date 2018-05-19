@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.sms
+package net.kourlas.voipms_sms.sms.services
 
 import android.app.IntentService
 import android.content.Context
@@ -26,13 +26,16 @@ import com.google.firebase.appindexing.builders.Indexables
 import com.google.firebase.appindexing.builders.MessageBuilder
 import com.google.firebase.appindexing.builders.PersonBuilder
 import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.sms.Database
+import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.utils.getContactName
 import net.kourlas.voipms_sms.utils.getContactPhotoUri
 
 /**
  * Service used to perform Firebase app indexing.
  */
-class AppIndexingService : IntentService(AppIndexingService::class.java.name) {
+class AppIndexingService : IntentService(
+    AppIndexingService::class.java.name) {
     override fun onHandleIntent(intent: Intent?) = replaceIndex(
         applicationContext)
 
@@ -48,17 +51,20 @@ class AppIndexingService : IntentService(AppIndexingService::class.java.name) {
             // Create message indexables
             val contactNameCache = mutableMapOf<String, String>()
             val contactPhotoUriCache = mutableMapOf<String, String>()
-            val messages = Database.getInstance(context).getMessagesAll(
+            val messages = Database.getInstance(
+                context).getMessagesAll(
                 getDids(context))
             messages.mapTo(indexables) {
-                getMessageBuilder(context, it,
-                                  contactNameCache,
-                                  contactPhotoUriCache).build()
+                getMessageBuilder(
+                    context, it,
+                    contactNameCache,
+                    contactPhotoUriCache).build()
             }
 
             // Delete app index and update index with indexables
             FirebaseAppIndex.getInstance().removeAll().addOnCompleteListener {
-                updateIndex(indexables)
+                updateIndex(
+                    indexables)
             }
         }
 
@@ -103,12 +109,14 @@ class AppIndexingService : IntentService(AppIndexingService::class.java.name) {
                                  .setUrl(message.conversationUrl)
                                  .setId("${message.did},${message.contact}"))
 
-            val contactBuilder = getContactBuilder(context,
-                                                   message, contactNameCache,
-                                                   contactPhotoUriCache)
-            val didBuilder = getDidBuilder(context,
-                                           message, contactNameCache,
-                                           contactPhotoUriCache)
+            val contactBuilder = getContactBuilder(
+                context,
+                message, contactNameCache,
+                contactPhotoUriCache)
+            val didBuilder = getDidBuilder(
+                context,
+                message, contactNameCache,
+                contactPhotoUriCache)
 
             if (message.isIncoming) {
                 messageBuilder.setDateReceived(message.date)

@@ -15,50 +15,47 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v7.preference.ListPreference
 import android.support.v7.preference.Preference
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.takisoft.fix.support.v7.preference.EditTextPreference
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.sms.SyncIntervalService
 
-class SynchronizationPreferencesFragment : PreferenceFragmentCompatDividers(),
+class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
         // Add preferences
-        addPreferencesFromResource(R.xml.preferences_synchronization)
+        addPreferencesFromResource(R.xml.preferences_network)
 
         // Add listener for preference changes
         preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
 
-        updateSummariesAndHandlers()
+        updateSummaries()
     }
 
     override fun onResume() {
         super.onResume()
 
-        updateSummariesAndHandlers()
+        updateSummaries()
     }
 
     /**
      * Updates the summary text for all preferences.
      */
-    private fun updateSummariesAndHandlers() {
+    private fun updateSummaries() {
         if (preferenceScreen != null) {
             for (i in 0 until preferenceScreen.preferenceCount) {
                 val subPreference = preferenceScreen.getPreference(i)
                 updateSummaryTextForPreference(subPreference)
-                updateHandlersForPreference(subPreference)
             }
         }
     }
@@ -80,9 +77,24 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompatDividers(),
      * @param preference The specified preference.
      */
     private fun updateSummaryTextForPreference(preference: Preference?) {
-        if (preference is ListPreference) {
-            // Display value of selected element as summary text
-            preference.summary = preference.entry
+        if (preference is EditTextPreference) {
+            // Display value of preference as summary text
+            if (preference.key == getString(
+                    R.string.preferences_network_connect_timeout_key)
+                || preference.key == getString(
+                    R.string.preferences_network_read_timeout_key)) {
+                try {
+                    if (preference.text.toInt() == 0) {
+                        preference.summary = "Infinite"
+                    } else {
+                        preference.summary = preference.text + " seconds"
+                    }
+                } catch (e: NumberFormatException) {
+                    preference.summary = "Infinite"
+                }
+            } else {
+                preference.summary = preference.text
+            }
         }
     }
 
@@ -92,29 +104,6 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompatDividers(),
             return super.onCreateView(inflater, container, savedInstanceState)
         } finally {
             setDividerPreferences(DIVIDER_NONE)
-        }
-    }
-
-    // Preference change handlers
-    private val syncIntervalPreferenceChangeListener =
-        Preference.OnPreferenceChangeListener { _, _ ->
-            val activity = activity
-            if (activity != null) {
-                SyncIntervalService.startService(activity.applicationContext)
-            }
-            true
-        }
-
-    /**
-     * Updates the handlers for the specified preference.
-     *
-     * @param preference The specified preference.
-     */
-    private fun updateHandlersForPreference(preference: Preference) {
-        if (preference.key == getString(
-                R.string.preferences_sync_interval_key)) {
-            preference.onPreferenceChangeListener =
-                syncIntervalPreferenceChangeListener
         }
     }
 }

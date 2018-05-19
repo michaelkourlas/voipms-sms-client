@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2017 Michael Kourlas
+ * Copyright (C) 2015-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.notifications
+package net.kourlas.voipms_sms.notifications.services
 
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.sms.SyncIntervalReceiver
+import net.kourlas.voipms_sms.sms.receivers.SyncIntervalReceiver
 
 /**
  * Service that processes FCM messages by showing notifications for new SMS

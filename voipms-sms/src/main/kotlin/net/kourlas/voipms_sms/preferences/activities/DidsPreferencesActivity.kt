@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.activities
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -31,8 +31,11 @@ import android.text.method.LinkMovementMethod
 import android.view.View
 import android.widget.TextView
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.fragments.DidsPreferencesFragment
+import net.kourlas.voipms_sms.preferences.getEmail
+import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.sms.RetrieveDidsService
+import net.kourlas.voipms_sms.sms.services.RetrieveDidsService
 import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
@@ -148,7 +151,8 @@ class DidsPreferencesActivity : AppCompatActivity() {
         }
 
         // Pass control to RetrieveDidsService
-        startService(RetrieveDidsService.getIntent(this))
+        startService(
+            RetrieveDidsService.getIntent(this))
     }
 
     /**

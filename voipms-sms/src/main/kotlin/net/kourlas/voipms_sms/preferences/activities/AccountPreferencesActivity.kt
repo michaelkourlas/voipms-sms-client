@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,32 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.preferences
+package net.kourlas.voipms_sms.preferences.activities
 
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.text.Html
+import android.text.method.LinkMovementMethod
+import android.widget.TextView
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.fragments.AccountPreferencesFragment
 
 /**
- * Activity that houses a [PreferencesFragment] that displays the
- * synchronization preferences.
+ * Activity that houses a [PreferencesFragment] that displays the account
+ * preferences.
  */
-class SynchronizationPreferencesActivity : AppCompatActivity() {
+class AccountPreferencesActivity : AppCompatActivity() {
     // Preferences fragment for this preferences activity
-    private lateinit var fragment: SynchronizationPreferencesFragment
+    private lateinit var fragment: AccountPreferencesFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Load activity layout
-        setContentView(R.layout.preferences_synchronization)
+        setContentView(R.layout.preferences_account)
 
         // Configure toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -48,8 +53,19 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
 
-        fragment = SynchronizationPreferencesFragment()
+        fragment = AccountPreferencesFragment()
         supportFragmentManager.beginTransaction().replace(
             R.id.preferences_fragment_layout, fragment).commit()
+
+        val textView = findViewById<TextView>(R.id.text_view)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            textView.text = Html.fromHtml(
+                getString(R.string.preferences_account_info), 0)
+        } else {
+            @Suppress("DEPRECATION")
+            textView.text = Html.fromHtml(
+                getString(R.string.preferences_account_info))
+        }
+        textView.movementMethod = LinkMovementMethod.getInstance()
     }
 }
