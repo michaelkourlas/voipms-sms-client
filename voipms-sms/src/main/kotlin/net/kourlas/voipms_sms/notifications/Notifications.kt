@@ -505,8 +505,7 @@ class Notifications private constructor(
         subscribeToDidTopics(activity)
 
         // Start push notifications registration service
-        activity.startService(
-            NotificationsRegistrationService.getIntent(activity))
+        NotificationsRegistrationService.startService(activity)
     }
 
     companion object {

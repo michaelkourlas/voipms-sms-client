@@ -35,6 +35,9 @@ import java.net.URLEncoder
 
 /**
  * Service that registers a VoIP.ms callback for each DID.
+ *
+ * This service is an IntentService rather than a JobIntentService because it
+ * does not need to be run in the background.
  */
 class NotificationsRegistrationService : IntentService(
     NotificationsRegistrationService::class.java.name) {
@@ -72,11 +75,12 @@ class NotificationsRegistrationService : IntentService(
         val registrationCompleteIntent = Intent(
             applicationContext.getString(
                 R.string.push_notifications_reg_complete_action))
-        registrationCompleteIntent.putStringArrayListExtra(getString(
-            R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids),
-                                                           if (callbackFailedDids != null)
-                                                               ArrayList<String>(
-                                                                   callbackFailedDids.toList()) else null)
+        registrationCompleteIntent.putStringArrayListExtra(
+            getString(
+                R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids),
+            if (callbackFailedDids != null)
+                ArrayList<String>(
+                    callbackFailedDids.toList()) else null)
         applicationContext.sendBroadcast(registrationCompleteIntent)
     }
 
@@ -121,7 +125,6 @@ class NotificationsRegistrationService : IntentService(
      * Parses the specified responses from several setSMS calls to the VoIP.ms
      * API to ensure that they all succeeded.
      *
-     * @param responses The specified responses.
      * @return A list of any DIDs that failed the setSMS call.
      */
     private fun parseVoipMsApiCallbackResponses(
@@ -143,18 +146,15 @@ class NotificationsRegistrationService : IntentService(
 
     companion object {
         /**
-         * Gets an intent which can be used to launch this service using the
-         * specified context.
-         *
-         * @param context The specified context.
+         * Registers a VoIP.ms callback for each DID.
          */
-        fun getIntent(context: Context): Intent {
+        fun startService(context: Context) {
             val intent = Intent(
                 context,
                 NotificationsRegistrationService::class.java)
             intent.action = context.getString(
                 R.string.push_notifications_reg_action)
-            return intent
+            context.startService(intent)
         }
     }
 }
