@@ -410,6 +410,26 @@ class Notifications private constructor(
             .build()
         notification.addAction(markReadAction)
 
+        // Group notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val groupNotification = NotificationCompat.Builder(context, channel)
+            groupNotification.setSmallIcon(R.drawable.ic_chat_white_24dp)
+            groupNotification.setGroup(context.getString(
+                R.string.notifications_group_key))
+            groupNotification.setGroupSummary(true)
+            groupNotification.setAutoCancel(true)
+
+            val intent = Intent(context, ConversationsActivity::class.java)
+            val stackBuilder = TaskStackBuilder.create(context)
+            stackBuilder.addNextIntentWithParentStack(intent)
+            groupNotification.setContentIntent(stackBuilder.getPendingIntent(
+                "group".hashCode(),
+                PendingIntent.FLAG_CANCEL_CURRENT))
+
+            NotificationManagerCompat.from(context).notify(
+                GROUP_NOTIFICATION_ID, groupNotification.build())
+        }
+
         // Primary notification action
         val intent = Intent(context, ConversationActivity::class.java)
         intent.putExtra(context.getString(
@@ -419,7 +439,8 @@ class Notifications private constructor(
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addNextIntentWithParentStack(intent)
         notification.setContentIntent(stackBuilder.getPendingIntent(
-            (did + contact).hashCode(), PendingIntent.FLAG_CANCEL_CURRENT))
+            (did + contact).hashCode(),
+            PendingIntent.FLAG_CANCEL_CURRENT))
 
         // Notification ID
         val id: Int
@@ -428,17 +449,6 @@ class Notifications private constructor(
         } else {
             id = notificationIdCount++
             notificationIds[conversationId] = id
-        }
-
-        // Group notification
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val groupNotification = NotificationCompat.Builder(context, channel)
-            groupNotification.setSmallIcon(R.drawable.ic_chat_white_24dp)
-            groupNotification.setGroup(context.getString(
-                R.string.notifications_group_key))
-            groupNotification.setGroupSummary(true)
-            NotificationManagerCompat.from(context).notify(
-                GROUP_NOTIFICATION_ID, groupNotification.build())
         }
 
         NotificationManagerCompat.from(context).notify(id, notification.build())
@@ -455,8 +465,14 @@ class Notifications private constructor(
             val notificationManager = context.getSystemService(
                 NotificationManager::class.java)
             val activeNotifications = notificationManager.activeNotifications
-            if (activeNotifications.size == 1
-                && activeNotifications[0].id == GROUP_NOTIFICATION_ID) {
+            if ((activeNotifications.size == 1
+                 && activeNotifications[0].id == GROUP_NOTIFICATION_ID)
+                || (activeNotifications.size == 2
+                    && activeNotifications[0].id == GROUP_NOTIFICATION_ID
+                    && activeNotifications[1].id == SYNC_NOTIFICATION_ID)
+                || (activeNotifications.size == 2
+                    && activeNotifications[0].id == SYNC_NOTIFICATION_ID
+                    && activeNotifications[1].id == GROUP_NOTIFICATION_ID)) {
                 NotificationManagerCompat.from(context).cancel(
                     GROUP_NOTIFICATION_ID)
             }
