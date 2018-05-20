@@ -26,11 +26,11 @@
         android:key="@string/preferences_database_export_key"
         android:summary="@string/preferences_database_export_summary"
         android:title="@string/preferences_database_export_title" />
-    <net.kourlas.voipms_sms.preferences.controls.DatabaseCleanUpPreference
+    <android.support.v7.preference.Preference
         android:icon="@android:color/transparent"
         android:summary="@string/preferences_database_clean_up_summary"
         android:title="@string/preferences_database_clean_up_title" />
-    <net.kourlas.voipms_sms.preferences.controls.DatabaseDeletePreference
+    <android.support.v7.preference.Preference
         android:icon="@android:color/transparent"
         android:summary="@string/preferences_database_delete_summary"
         android:title="@string/preferences_database_delete_title" />
