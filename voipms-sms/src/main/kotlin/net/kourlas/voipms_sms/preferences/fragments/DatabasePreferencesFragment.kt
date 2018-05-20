@@ -24,14 +24,17 @@ import android.content.Intent.CATEGORY_OPENABLE
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.provider.DocumentFile
+import android.support.v7.app.AlertDialog
 import android.support.v7.preference.Preference
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.preferences
+import net.kourlas.voipms_sms.utils.runOnNewThread
 import net.kourlas.voipms_sms.utils.showAlertDialog
 import net.kourlas.voipms_sms.utils.showInfoDialog
 
@@ -55,6 +58,16 @@ class DatabasePreferencesFragment : PreferenceFragmentCompatDividers() {
         true
     }
 
+    private val cleanUpListener = Preference.OnPreferenceClickListener {
+        cleanUp()
+        true
+    }
+
+    private val deleteListener = Preference.OnPreferenceClickListener {
+        delete()
+        true
+    }
+
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
         // Add preferences
@@ -68,6 +81,12 @@ class DatabasePreferencesFragment : PreferenceFragmentCompatDividers() {
             } else if (preference.key == getString(
                     R.string.preferences_database_export_key)) {
                 preference.onPreferenceClickListener = exportListener
+            } else if (preference.key == getString(
+                    R.string.preferences_database_clean_up_key)) {
+                preference.onPreferenceClickListener = cleanUpListener
+            } else if (preference.key == getString(
+                    R.string.preferences_database_delete_key)) {
+                preference.onPreferenceClickListener = deleteListener
             }
         }
     }
@@ -147,6 +166,72 @@ class DatabasePreferencesFragment : PreferenceFragmentCompatDividers() {
             },
             activity.getString(R.string.cancel),
             null)
+    }
+
+    private fun cleanUp() {
+        val activity = activity ?: return
+
+        val options = arrayOf(
+            activity.getString(
+                R.string.preferences_database_clean_up_deleted_messages),
+            activity.getString(
+                R.string.preferences_database_clean_up_removed_dids))
+        val selectedOptions = mutableListOf<Int>()
+
+        // Ask user which kind of clean up is desired, and then perform that
+        // clean up
+        AlertDialog.Builder(activity, R.style.DialogTheme).apply {
+            setTitle(context.getString(
+                R.string.preferences_database_clean_up_title))
+            setMultiChoiceItems(
+                options, null,
+                { _, which, isChecked ->
+                    if (isChecked) {
+                        selectedOptions.add(which)
+                    } else {
+                        selectedOptions.remove(which)
+                    }
+                })
+            setPositiveButton(
+                context.getString(R.string.ok),
+                { _, _ ->
+                    val deletedMessages = selectedOptions.contains(0)
+                    val removedDids = selectedOptions.contains(1)
+
+                    runOnNewThread {
+                        if (deletedMessages) {
+                            Database.getInstance(context).deleteTableDeleted()
+                        }
+                        if (removedDids) {
+                            Database.getInstance(context).deleteMessages(
+                                getDids(
+                                    context))
+                        }
+                    }
+                })
+            setNegativeButton(context.getString(R.string.cancel), null)
+            setCancelable(false)
+            show()
+        }
+    }
+
+    private fun delete() {
+        val activity = activity ?: return
+
+        // Prompt the user before actually deleting the entire database
+        showAlertDialog(activity,
+                        activity.getString(
+                            R.string.preferences_database_delete_confirm_title),
+                        activity.getString(
+                            R.string.preferences_database_delete_confirm_message),
+                        activity.applicationContext
+                            .getString(R.string.delete),
+                        DialogInterface.OnClickListener { _, _ ->
+                            Database.getInstance(
+                                activity.applicationContext)
+                                .deleteTablesAll()
+                        },
+                        activity.getString(R.string.cancel), null)
     }
 
     companion object {
