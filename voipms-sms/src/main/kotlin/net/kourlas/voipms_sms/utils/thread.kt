@@ -22,7 +22,5 @@ package net.kourlas.voipms_sms.utils
  *
  * @param block The specified block.
  */
-fun runOnNewThread(block: () -> Unit) {
-    Thread(Runnable(block)).start()
-}
+fun runOnNewThread(block: () -> Unit) = Thread(Runnable(block)).start()
 

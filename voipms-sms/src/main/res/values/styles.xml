@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2017 Michael Kourlas
+  ~ Copyright (C) 2015-2018 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
   -->
 
 <resources>
-    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+
+    <style name="AppTheme" parent="@style/PreferenceFixTheme.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
@@ -43,6 +44,7 @@
         <item name="android:textColor">@android:color/primary_text_dark</item>
     </style>
 
+    <!--suppress AndroidDomInspection -->
     <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorAccent">@color/accent</item>
 
@@ -61,6 +63,7 @@
         </item>
     </style>
 
+    <!--suppress AndroidDomInspection -->
     <style name="ToolbarTitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">20sp</item>
     </style>

@@ -38,6 +38,7 @@ import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.ui.CustomScrollerViewProvider
 import net.kourlas.voipms_sms.utils.getDigitsOfString
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 
 /**
  * Activity that contains a list of contacts to select to create a new
@@ -71,7 +72,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * Retrieves and stores the message text from the intent.
      */
-    fun getMessageTextFromIntent() {
+    private fun getMessageTextFromIntent() {
         val intent = intent
         val action = intent.action
         val type = intent.type
@@ -84,15 +85,15 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * Sets up the activity toolbar.
      */
-    fun setupToolbar() {
+    private fun setupToolbar() {
         // Set up toolbar
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         ViewCompat.setElevation(toolbar, resources
             .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
 
-        val actionBar = supportActionBar ?:
-                        throw Exception("Action bar cannot be null")
+        val actionBar = supportActionBar ?: throw Exception(
+            "Action bar cannot be null")
         actionBar.setHomeButtonEnabled(true)
         actionBar.setDisplayHomeAsUpEnabled(true)
         actionBar.setDisplayShowTitleEnabled(false)
@@ -101,15 +102,14 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
 
         // Configure the search box to trigger adapter filtering when the
         // text changes
-        val searchView = actionBar.customView.findViewById(
-            R.id.search_view) as SearchView
+        val searchView = actionBar.customView.findViewById<SearchView>(
+            R.id.search_view)
         searchView.inputType = InputType.TYPE_TEXT_VARIATION_PERSON_NAME
         searchView
             .setOnQueryTextListener(
                 object : SearchView.OnQueryTextListener {
-                    override fun onQueryTextSubmit(query: String): Boolean {
-                        return false
-                    }
+                    override fun onQueryTextSubmit(query: String): Boolean =
+                        false
 
                     override fun onQueryTextChange(
                         newText: String): Boolean {
@@ -123,25 +123,25 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         searchView.requestFocus()
 
         // Hide search icon
-        val searchMagIcon = searchView.findViewById(
-            R.id.search_mag_icon) as ImageView
+        val searchMagIcon = searchView.findViewById<ImageView>(
+            R.id.search_mag_icon)
         searchMagIcon.layoutParams = LinearLayout.LayoutParams(0, 0)
     }
 
     /**
      * Sets up the activity recycler view.
      */
-    fun setupRecyclerView() {
+    private fun setupRecyclerView() {
         // Set up recycler view
         val layoutManager = LinearLayoutManager(this)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
-        recyclerView = findViewById(R.id.list) as RecyclerView
+        recyclerView = findViewById(R.id.list)
         adapter = NewConversationRecyclerViewAdapter(this, recyclerView)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        val fastScroller = findViewById(R.id.fastscroll) as FastScroller
+        val fastScroller = findViewById<FastScroller>(R.id.fastscroll)
         fastScroller.setRecyclerView(recyclerView)
         fastScroller.setViewProvider(
             CustomScrollerViewProvider())
@@ -168,11 +168,11 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
      *
      * @return Always returns true.
      */
-    fun onDialpadButtonClick(item: MenuItem): Boolean {
-        val actionBar = supportActionBar ?:
-                        throw Exception("Action bar cannot be null")
+    private fun onDialpadButtonClick(item: MenuItem): Boolean {
+        val actionBar = supportActionBar ?: throw Exception(
+            "Action bar cannot be null")
         val searchView = actionBar.customView
-            .findViewById(R.id.search_view) as SearchView
+            .findViewById<SearchView>(R.id.search_view)
         searchView.inputType = InputType.TYPE_CLASS_PHONE
         item.isVisible = false
         menu.findItem(R.id.keyboard_button).isVisible = true
@@ -184,11 +184,11 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
      *
      * @return Always returns true.
      */
-    fun onKeyboardButtonClick(item: MenuItem): Boolean {
-        val actionBar = supportActionBar ?:
-                        throw Exception("Action bar cannot be null")
+    private fun onKeyboardButtonClick(item: MenuItem): Boolean {
+        val actionBar = supportActionBar ?: throw Exception(
+            "Action bar cannot be null")
         val searchView = actionBar.customView
-            .findViewById(R.id.search_view) as SearchView
+            .findViewById<SearchView>(R.id.search_view)
         searchView.inputType = InputType.TYPE_TEXT_VARIATION_PERSON_NAME
         item.isVisible = false
         menu.findItem(R.id.dialpad_button).isVisible = true
@@ -202,7 +202,8 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         val contactItem = adapter[position]
-        if (contactItem is NewConversationRecyclerViewAdapter.Companion.ContactItem) {
+        if (contactItem is
+                NewConversationRecyclerViewAdapter.Companion.ContactItem) {
             // If the selected contact has multiple phone numbers, allow the
             // user to select one of the numbers
             if (contactItem.secondaryPhoneNumbers.isNotEmpty()) {
@@ -210,12 +211,11 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 phoneNumbers.add(contactItem.primaryPhoneNumber)
                 phoneNumbers.addAll(contactItem.secondaryPhoneNumbers)
 
-                var selectedIndex: Int = 0
+                var selectedIndex = 0
                 AlertDialog.Builder(this, R.style.DialogTheme).apply {
                     setTitle("Select phone number")
                     setSingleChoiceItems(phoneNumbers.toTypedArray(),
-                                         selectedIndex, {
-                                             _, which ->
+                                         selectedIndex, { _, which ->
                                              selectedIndex = which
                                          })
                     setPositiveButton(context.getString(R.string.ok),
@@ -231,8 +231,8 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
             } else {
                 startConversationActivity(contactItem.primaryPhoneNumber)
             }
-        } else if (contactItem
-            is NewConversationRecyclerViewAdapter.Companion.TypedInContactItem) {
+        } else if (contactItem is
+                NewConversationRecyclerViewAdapter.Companion.TypedInContactItem) {
             startConversationActivity(contactItem.primaryPhoneNumber)
         } else {
             throw Exception("Unrecognized contact item type")
@@ -244,7 +244,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
      *
      * @param contact The specified contact.
      */
-    fun startConversationActivity(contact: String) {
+    private fun startConversationActivity(contact: String) {
         val intent = Intent(this, ConversationActivity::class.java)
         intent.putExtra(this.getString(R.string.conversation_contact),
                         getDigitsOfString(contact))
@@ -259,30 +259,38 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         // If the user has multiple DIDs, allow the user to select the one
         // they want to use with the conversation
         val dids = getDids(this).toList()
-        if (dids.size > 1) {
-            var selectedIndex: Int = 0
-            AlertDialog.Builder(this, R.style.DialogTheme).apply {
-                setTitle("Select DID")
-                setSingleChoiceItems(dids.toTypedArray(), selectedIndex, {
-                    _, which ->
-                    selectedIndex = which
-                })
-                setPositiveButton(getString(R.string.ok),
-                                  { _, _ ->
-                                      intent.putExtra(
-                                          getString(R.string.conversation_did),
-                                          dids[selectedIndex])
-                                      startActivity(intent)
-                                  })
-                setNegativeButton(getString(R.string.cancel),
-                                  null)
-                setCancelable(false)
-                show()
+        when {
+            dids.isEmpty() -> // Silently fail if no DID set
+                return
+            dids.size > 1 -> {
+                var selectedIndex = 0
+                AlertDialog.Builder(this, R.style.DialogTheme).apply {
+                    setTitle("Select DID")
+                    setSingleChoiceItems(
+                        dids.map(::getFormattedPhoneNumber).toTypedArray(),
+                        selectedIndex,
+                        { _, which ->
+                            selectedIndex = which
+                        })
+                    setPositiveButton(getString(R.string.ok),
+                                      { _, _ ->
+                                          intent.putExtra(
+                                              getString(
+                                                  R.string.conversation_did),
+                                              dids[selectedIndex])
+                                          startActivity(intent)
+                                      })
+                    setNegativeButton(getString(R.string.cancel),
+                                      null)
+                    setCancelable(false)
+                    show()
+                }
             }
-        } else {
-            intent.putExtra(getString(R.string.conversation_did),
-                            getDids(this).first())
-            this.startActivity(intent)
+            else -> {
+                intent.putExtra(getString(R.string.conversation_did),
+                                dids.first())
+                this.startActivity(intent)
+            }
         }
     }
 }

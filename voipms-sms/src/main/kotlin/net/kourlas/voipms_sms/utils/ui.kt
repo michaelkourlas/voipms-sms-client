@@ -17,7 +17,6 @@
 
 package net.kourlas.voipms_sms.utils
 
-import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
@@ -25,20 +24,18 @@ import android.content.Intent
 import android.graphics.*
 import android.graphics.Color.rgb
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.view.View
 import android.view.ViewOutlineProvider
+import android.widget.Toast
+import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import java.lang.Math.abs
 
 /**
  * Applies a circular mask to a bitmap.
- *
- * @param bitmap The specified bitmap.
- * @return The bitmap with a circular mask.
  */
 fun applyCircularMask(bitmap: Bitmap): Bitmap {
     val output = Bitmap.createBitmap(bitmap.width,
@@ -60,47 +57,27 @@ fun applyCircularMask(bitmap: Bitmap): Bitmap {
 
 /**
  * Applies a circular mask to a view.
- *
- * Note that this method only works on Lollipop and above; it will
- * silently fail on older versions.
- *
- * @param view The specified view.
  */
 fun applyCircularMask(view: View) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-        view.outlineProvider = getOvalViewOutlineProvider()
-        view.clipToOutline = true
-    }
+    view.outlineProvider = getOvalViewOutlineProvider()
+    view.clipToOutline = true
 }
 
 /**
  * Gets a view outline provider for ovals.
- *
- * @return A a view outline provider for ovals.
  */
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-private fun getOvalViewOutlineProvider(): ViewOutlineProvider {
-    return object : ViewOutlineProvider() {
-        override fun getOutline(view: View, outline: Outline) {
+private fun getOvalViewOutlineProvider(): ViewOutlineProvider =
+    object : ViewOutlineProvider() {
+        override fun getOutline(view: View, outline: Outline) =
             outline.setOval(0, 0, view.width, view.height)
-        }
     }
-}
 
 /**
  * Applies a rectangular rounded corners mask to a view.
- *
- * Note that this method only works on Lollipop and above; it will
- * silently fail on older versions.
- *
- * @param view The specified view.
  */
 fun applyRoundedCornersMask(view: View) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        view.outlineProvider = getRoundRectViewOutlineProvider()
-        view.clipToOutline = true
-    }
+    view.outlineProvider = getRoundRectViewOutlineProvider()
+    view.clipToOutline = true
 }
 
 /**
@@ -108,16 +85,11 @@ fun applyRoundedCornersMask(view: View) {
  *
  * @return A a view outline provider for rounded rectangles.
  */
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider {
-    return object : ViewOutlineProvider() {
-        override fun getOutline(view: View, outline: Outline) {
-            outline
-                .setRoundRect(0, 0, view.width, view.height,
-                              15f)
-        }
+private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
+    object : ViewOutlineProvider() {
+        override fun getOutline(view: View, outline: Outline) =
+            outline.setRoundRect(0, 0, view.width, view.height, 15f)
     }
-}
 
 /**
  * Shows an alert dialog with the specified title, text, and buttons.
@@ -152,10 +124,9 @@ fun showAlertDialog(context: Context, title: String?, text: String?,
  * @param text The specified text.
  * @return The dialog.
  */
-fun showInfoDialog(context: Context, text: String?): AlertDialog {
-    return showAlertDialog(context, null, text, context.getString(R.string.ok),
-                           null, null, null)
-}
+fun showInfoDialog(context: Context, text: String?): AlertDialog =
+    showAlertDialog(context, null, text, context.getString(R.string.ok),
+                    null, null, null)
 
 /**
  * Shows an information dialog with the specified title and text.
@@ -166,10 +137,9 @@ fun showInfoDialog(context: Context, text: String?): AlertDialog {
  * @return The dialog.
  */
 fun showInfoDialog(context: Context, title: String?,
-                   text: String?): AlertDialog {
-    return showAlertDialog(context, title, text, context.getString(R.string.ok),
-                           null, null, null)
-}
+                   text: String?): AlertDialog =
+    showAlertDialog(context, title, text, context.getString(R.string.ok),
+                    null, null, null)
 
 /**
  * Shows a generic snackbar.
@@ -180,7 +150,7 @@ fun showInfoDialog(context: Context, title: String?,
  * @return The snackbar.
  */
 fun showSnackbar(activity: Activity, viewId: Int, text: String): Snackbar {
-    val view = activity.findViewById(viewId)
+    val view = activity.findViewById<View>(viewId)
     val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
     snackbar.show()
     return snackbar
@@ -197,7 +167,7 @@ fun showSnackbar(activity: Activity, viewId: Int, text: String): Snackbar {
  */
 fun showPermissionSnackbar(activity: Activity, viewId: Int,
                            text: String): Snackbar {
-    val view = activity.findViewById(viewId)
+    val view = activity.findViewById<View>(viewId)
     val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
     snackbar.setAction(R.string.settings) {
         val intent = Intent()
@@ -211,6 +181,15 @@ fun showPermissionSnackbar(activity: Activity, viewId: Int,
     }
     snackbar.show()
     return snackbar
+}
+
+fun abortActivity(activity: Activity, ex: Exception,
+                  duration: Int = Toast.LENGTH_SHORT) {
+    Crashlytics.logException(ex)
+    Toast.makeText(activity,
+                   activity.getString(R.string.toast_unknown_error, ex.message),
+                   duration).show()
+    activity.finish()
 }
 
 /**

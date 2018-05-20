@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2017 Michael Kourlas
+  ~ Copyright (C) 2015-2018 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
+    android:background="?android:attr/selectableItemBackground"
     android:orientation="horizontal"
     android:padding="@dimen/margin">
 
@@ -27,7 +27,6 @@
         android:layout_height="@dimen/contact_badge"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/margin"
-        android:layout_marginRight="@dimen/margin"
         android:orientation="horizontal">
 
         <TextView
@@ -64,7 +63,6 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/margin"
         android:layout_marginStart="@dimen/margin"
         android:orientation="vertical">
 
@@ -84,7 +82,6 @@
                 android:id="@+id/phone_number"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:ellipsize="end"
                 android:maxLines="1"
@@ -95,9 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
                 android:layout_toEndOf="@+id/phone_number"
-                android:layout_toRightOf="@+id/phone_number"
                 android:ellipsize="end"
                 android:gravity="end"
                 android:maxLines="1"

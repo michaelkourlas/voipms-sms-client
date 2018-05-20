@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public class CustomApplication extends Application {
         new HashMap<ConversationId, Integer>();
     private int conversationsActivitiesVisible = 0;
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean conversationsActivityVisible() {
         return conversationsActivitiesVisible > 0;
     }
@@ -47,6 +48,7 @@ public class CustomApplication extends Application {
         conversationsActivitiesVisible--;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean conversationActivityVisible(ConversationId conversationId) {
         Integer count = conversationActivitiesVisible.get(conversationId);
         return count != null && count > 0;

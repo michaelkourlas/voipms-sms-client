@@ -1,3 +1,12 @@
+## 0.6.0 ##
+
+* Add support for Android O notification features
+* Show notification while synchronizing
+* Add support for database transactions to prevent data corruption
+* New settings interface
+* Minimum API version is now 21 (Lollipop)
+* Bug fixes
+
 ## 0.5.3 ##
 
 * Add DID to conversation view

@@ -43,7 +43,7 @@ class ConversationsArchivedActivity : ConversationsActivity() {
 
     override fun setupNewConversationButton() {
         // Remove new conversation button
-        findViewById(R.id.new_button).visibility = View.GONE
+        findViewById<View>(R.id.new_button).visibility = View.GONE
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2017 Michael Kourlas
+  ~ Copyright (C) 2015-2018 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -31,26 +31,21 @@
         android:id="@+id/placeholder"
         android:layout_width="@dimen/contact_badge"
         android:layout_height="@dimen/contact_badge"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_gravity="bottom"
-        android:layout_marginLeft="@dimen/margin"
         android:layout_marginStart="@dimen/margin" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_toEndOf="@id/placeholder"
-        android:layout_toRightOf="@id/placeholder">
+        android:layout_toEndOf="@id/placeholder">
 
         <LinearLayout
             android:id="@+id/sms_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:layout_gravity="bottom"
             android:background="@color/primary"
             android:minHeight="@dimen/contact_badge"

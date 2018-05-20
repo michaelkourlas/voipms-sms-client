@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,16 +41,14 @@ import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.newconversation.NewConversationActivity
-import net.kourlas.voipms_sms.preferences.PreferencesActivity
+import net.kourlas.voipms_sms.notifications.Notifications
+import net.kourlas.voipms_sms.preferences.activities.PreferencesActivity
 import net.kourlas.voipms_sms.preferences.getSetupCompletedForVersion
 import net.kourlas.voipms_sms.preferences.isAccountActive
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.sms.SyncService
-import net.kourlas.voipms_sms.utils.runOnNewThread
-import net.kourlas.voipms_sms.utils.showAlertDialog
-import net.kourlas.voipms_sms.utils.showPermissionSnackbar
-import net.kourlas.voipms_sms.utils.showSnackbar
+import net.kourlas.voipms_sms.sms.services.SyncService
+import net.kourlas.voipms_sms.utils.*
 
 /**
  * Activity that contains a generic list of conversations.
@@ -70,7 +68,7 @@ open class ConversationsActivity : AppCompatActivity(),
     private var firstRunDialog: AlertDialog? = null
 
     // Broadcast receivers
-    val syncCompleteReceiver =
+    private val syncCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val error = intent?.getStringExtra(getString(
@@ -82,14 +80,34 @@ open class ConversationsActivity : AppCompatActivity(),
                 }
 
                 if (intent?.getBooleanExtra(getString(
-                    R.string.sync_complete_full), false) == true) {
+                        R.string.sync_complete_full), false) == true) {
                     // Turn off refresh icon
-                    val swipeRefreshLayout = findViewById(
-                        R.id.swipe_refresh_layout) as SwipeRefreshLayout
+                    val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
+                        R.id.swipe_refresh_layout)
                     swipeRefreshLayout.isRefreshing = false
                 }
 
                 adapter.refresh()
+            }
+        }
+    private val pushNotificationsRegistrationCompleteReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val failedDids = intent?.getStringArrayListExtra(getString(
+                    R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids))
+                if (failedDids == null) {
+                    // Unknown error
+                    showInfoDialog(this@ConversationsActivity, getString(
+                        R.string.push_notifications_fail_unknown))
+                } else if (!failedDids.isEmpty()) {
+                    // Some DIDs failed registration
+                    showInfoDialog(this@ConversationsActivity, getString(
+                        R.string.push_notifications_fail_register))
+                }
+
+                // Regardless of whether an error occurred, mark setup as
+                // complete
+                setSetupCompletedForVersion(this@ConversationsActivity, 114)
             }
         }
 
@@ -108,7 +126,7 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Contacts permission is required to get contact names and photos
         if (ContextCompat.checkSelfPermission(
-            this, android.Manifest.permission.READ_CONTACTS)
+                this, android.Manifest.permission.READ_CONTACTS)
             != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 this, arrayOf(android.Manifest.permission.READ_CONTACTS),
@@ -121,7 +139,7 @@ open class ConversationsActivity : AppCompatActivity(),
      */
     open fun setupToolbar() {
         // Set up toolbar
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         ViewCompat.setElevation(toolbar, resources
             .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
@@ -130,21 +148,21 @@ open class ConversationsActivity : AppCompatActivity(),
     /**
      * Sets up the activity recycler view and swipe refresh layout.
      */
-    fun setupRecyclerViewAndSwipeRefreshLayout() {
+    private fun setupRecyclerViewAndSwipeRefreshLayout() {
         val layoutManager = LinearLayoutManager(this)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
-        recyclerView = findViewById(R.id.list) as RecyclerView
+        recyclerView = findViewById(R.id.list)
         adapter = ConversationsRecyclerViewAdapter(this, recyclerView,
                                                    layoutManager)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        val swipeRefreshLayout = findViewById(
-            R.id.swipe_refresh_layout) as SwipeRefreshLayout
+        val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
+            R.id.swipe_refresh_layout)
         swipeRefreshLayout.setOnRefreshListener {
             adapter.refresh()
-            startService(SyncService.getIntent(this, forceRecent = false))
+            SyncService.startService(this, forceRecent = false)
         }
         swipeRefreshLayout.setColorSchemeResources(R.color.accent)
     }
@@ -153,7 +171,7 @@ open class ConversationsActivity : AppCompatActivity(),
      * Sets up the new conversation floating action button.
      */
     open fun setupNewConversationButton() {
-        val button = findViewById(R.id.new_button) as FloatingActionButton
+        val button = findViewById<FloatingActionButton>(R.id.new_button)
         button.setOnClickListener {
             if (isAccountActive(this)) {
                 val newConversationIntent = Intent(
@@ -172,6 +190,9 @@ open class ConversationsActivity : AppCompatActivity(),
         // Register dynamic receivers for this activity
         registerReceiver(syncCompleteReceiver,
                          IntentFilter(getString(R.string.sync_complete_action)))
+        registerReceiver(pushNotificationsRegistrationCompleteReceiver,
+                         IntentFilter(getString(
+                             R.string.push_notifications_reg_complete_action)))
 
         // Perform special setup for the first time running this app
         if (!isAccountActive(this)) {
@@ -181,27 +202,30 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Perform special setup for version 114
         if (getSetupCompletedForVersion(this) < 114) {
-            setSetupCompletedForVersion(this@ConversationsActivity, 114)
+            Notifications.getInstance(application).enablePushNotifications(this)
         }
 
         // Refresh and perform limited synchronization
         adapter.refresh()
-        startService(SyncService.getIntent(this, forceRecent = true))
+        SyncService.startService(this, forceRecent = true)
 
         // Refresh on resume just in case the contacts permission was newly
         // granted and we need to add the contact names and photos
         if (ContextCompat.checkSelfPermission(
-            this, android.Manifest.permission.READ_CONTACTS)
+                this, android.Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED) {
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
         }
+
+        // Delete any notification channels that are no longer needed
+        Notifications.getInstance(application).deleteNotificationChannels()
     }
 
     /**
      * Show a dialog with help information when the app is running for the
      * first time.
      */
-    fun onFirstRun() {
+    private fun onFirstRun() {
         // Show a dialog with help information on first run of the app
         firstRunDialog = showAlertDialog(
             this,
@@ -225,7 +249,9 @@ open class ConversationsActivity : AppCompatActivity(),
         firstRunDialog?.dismiss()
 
         // Unregister all dynamic receivers for this activity
-        unregisterReceiver(syncCompleteReceiver)
+        safeUnregisterReceiver(this, syncCompleteReceiver)
+        safeUnregisterReceiver(this,
+                               pushNotificationsRegistrationCompleteReceiver)
 
         // Track number of activities
         (application as CustomApplication).conversationsActivityDecrementCount()
@@ -244,9 +270,7 @@ open class ConversationsActivity : AppCompatActivity(),
         searchView.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         searchView.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String): Boolean {
-                    return false
-                }
+                override fun onQueryTextSubmit(query: String): Boolean = false
 
                 override fun onQueryTextChange(newText: String): Boolean {
                     adapter.refresh(newText)
@@ -321,12 +345,11 @@ open class ConversationsActivity : AppCompatActivity(),
         return false
     }
 
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-        return false
-    }
+    override fun onPrepareActionMode(mode: ActionMode,
+                                     menu: Menu): Boolean = false
 
     override fun onDestroyActionMode(mode: ActionMode) {
-        for (i in 0..adapter.itemCount - 1) {
+        for (i in 0 until adapter.itemCount) {
             adapter[i].setChecked(i, false)
         }
         actionMode = null

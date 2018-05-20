@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 Future Mind.
- * Modifications copyright (C) 2017 Michael Kourlas.
+ * Modifications copyright (C) 2017 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,7 @@ class CustomHandleBehavior(
         grabManager.onRelease()
     }
 
-    override fun onScrollStarted() {
-        visibilityManager.show()
-    }
+    override fun onScrollStarted() = visibilityManager.show()
 
     override fun onScrollFinished() {
         if (!isGrabbed) visibilityManager.hide()
@@ -108,10 +106,9 @@ class CustomHandleBehavior(
                 return this
             }
 
-            fun build(): HandleAnimationManager {
-                return HandleAnimationManager(handle, grabAnimator,
-                                              releaseAnimator)
-            }
+            fun build(): HandleAnimationManager = HandleAnimationManager(handle,
+                                                                         grabAnimator,
+                                                                         releaseAnimator)
         }
     }
 

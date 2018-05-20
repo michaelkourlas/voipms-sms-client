@@ -34,9 +34,8 @@ class FloatingActionButtonBehaviour(
     attrs: AttributeSet) : CoordinatorLayout.Behavior<FloatingActionButton>() {
     override fun layoutDependsOn(parent: CoordinatorLayout?,
                                  child: FloatingActionButton?,
-                                 dependency: View?): Boolean {
-        return dependency is Snackbar.SnackbarLayout
-    }
+                                 dependency: View?): Boolean =
+        dependency is Snackbar.SnackbarLayout
 
     override fun onDependentViewChanged(parent: CoordinatorLayout,
                                         child: FloatingActionButton,

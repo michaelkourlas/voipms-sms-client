@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2017 Michael Kourlas
+  ~ Copyright (C) 2015-2018 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
             android:layout_gravity="top"
             android:background="@color/primary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
@@ -37,7 +37,6 @@
             app:titleTextAppearance="@style/ToolbarTitle" />
 
         <RelativeLayout
-            android:id="@+id/conversation_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
@@ -68,7 +67,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
                     android:orientation="vertical"
                     app:fastscroll__bubbleColor="@color/primary"
                     app:fastscroll__bubbleTextAppearance="@style/ScrollerTheme"
@@ -105,8 +103,6 @@
                 android:layout_gravity="bottom"
                 android:layout_marginBottom="@dimen/margin"
                 android:layout_marginEnd="@dimen/margin"
-                android:layout_marginLeft="@dimen/button_margin"
-                android:layout_marginRight="@dimen/margin"
                 android:layout_marginStart="@dimen/button_margin"
                 android:layout_marginTop="@dimen/margin"
                 android:orientation="vertical">

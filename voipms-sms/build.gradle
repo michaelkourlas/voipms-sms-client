@@ -1,27 +1,16 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
-    }
-}
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
-
-repositories {
-    jcenter()
-}
+apply plugin: "io.fabric"
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
-        minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 117
-        versionName "0.5.3-fdroid"
+        minSdkVersion 21
+        targetSdkVersion 27
+        versionCode 118
+        versionName "0.6.0"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
@@ -33,13 +22,27 @@ android {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    compile "com.android.support:appcompat-v7:25.3.1"
-    compile "com.android.support:design:25.3.1"
-    compile "com.android.support:multidex:1.0.1"
-    compile "com.android.support:recyclerview-v7:25.3.1"
-    compile "com.android.support:support-v4:25.3.1"
+    // Support libraries
+    implementation "com.android.support:support-compat:27.1.1"
+    implementation "com.android.support:appcompat-v7:27.1.1"
+    implementation "com.android.support:recyclerview-v7:27.1.1"
+    implementation "com.android.support:preference-v14:27.1.1"
+    implementation "com.android.support:design:27.1.1"
 
-    compile 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
+    // Firebase libraries
+    implementation "com.google.firebase:firebase-appindexing:15.0.1"
+    implementation "com.google.firebase:firebase-core:15.0.2"
+    implementation "com.google.firebase:firebase-messaging:15.0.2"
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.2'
+
+    // Additional libraries and fixes
+    implementation "com.futuremind.recyclerfastscroll:fastscroll:0.2.5"
+    implementation "com.takisoft.fix:preference-v7:27.0.2.0"
+    implementation "com.takisoft.fix:preference-v7-ringtone:27.0.2.0"
+    implementation "com.takisoft.fix:preference-v7-datetimepicker:27.0.2.0"
 }
+
+apply plugin: "com.google.gms.google-services"

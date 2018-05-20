@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ VoIP.ms SMS
+  ~ Copyright (C) 2018 Michael Kourlas
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v7.preference.ListPreference
+        android:defaultValue="@string/preferences_sync_interval_default_value"
+        android:entries="@array/preferences_sync_interval_entries"
+        android:entryValues="@array/preferences_sync_interval_values"
+        android:icon="@android:color/transparent"
+        android:key="@string/preferences_sync_interval_key"
+        android:title="@string/preferences_sync_interval_title" />
+    <com.takisoft.fix.support.v7.preference.DatePickerPreference
+        android:icon="@android:color/transparent"
+        android:key="@string/preferences_sync_start_date_key"
+        android:numeric="integer"
+        android:title="@string/preferences_sync_start_date_title" />
+    <android.support.v14.preference.SwitchPreference
+        android:defaultValue="@string/preferences_sync_retrieve_only_recent_messages_default_value"
+        android:icon="@android:color/transparent"
+        android:key="@string/preferences_sync_retrieve_only_recent_messages_key"
+        android:summary="@string/preferences_sync_retrieve_only_recent_messages_summary"
+        android:title="@string/preferences_sync_retrieve_only_recent_messages_title" />
+    <android.support.v14.preference.SwitchPreference
+        android:defaultValue="@string/preferences_sync_retrieve_deleted_messages_default_value"
+        android:icon="@android:color/transparent"
+        android:key="@string/preferences_sync_retrieve_deleted_messages_key"
+        android:summary="@string/preferences_sync_retrieve_deleted_messages_summary"
+        android:title="@string/preferences_sync_retrieve_deleted_messages_title" />
+</android.support.v7.preference.PreferenceScreen>

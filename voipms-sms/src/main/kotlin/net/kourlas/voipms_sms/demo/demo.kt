@@ -21,8 +21,8 @@ import net.kourlas.voipms_sms.newconversation.NewConversationRecyclerViewAdapter
 import net.kourlas.voipms_sms.sms.Message
 import java.util.*
 
-val demo = false
-val sending = false
+const val demo = false
+const val sending = false
 
 fun getConversationsDemoMessages(): List<Message> {
     val messages = mutableListOf<Message>()
@@ -76,6 +76,7 @@ fun getConversationDemoMessages(): List<Message> {
                          "5145553495",
                          "Sounds great!",
                          1, 1, 0))
+    @Suppress("ConstantConditionIf")
     if (sending) {
         messages.add(Message(1, 1, Date().time / 1000, 0,
                              "6135559483",
@@ -86,13 +87,11 @@ fun getConversationDemoMessages(): List<Message> {
     return messages
 }
 
-fun getDemoNotification(): Message {
-    return Message(1, 1, Date().time / 1000, 1,
-                   "6135559483",
-                   "6135551242",
-                   "Where are you?",
-                   1, 1, 0)
-}
+fun getDemoNotification(): Message = Message(1, 1, Date().time / 1000, 1,
+                                             "6135559483",
+                                             "6135551242",
+                                             "Where are you?",
+                                             1, 1, 0)
 
 fun getNewConversationContacts(): List<NewConversationRecyclerViewAdapter
 .Companion.ContactItem> {
@@ -100,15 +99,15 @@ fun getNewConversationContacts(): List<NewConversationRecyclerViewAdapter
     .Companion.ContactItem>()
     contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
         1, "Craig Johnson", "4165550919",
-        mutableListOf<String>(),
+        mutableListOf(),
         "Mobile", null))
     contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
         3, "Jennifer Morris", "6135556019",
-        mutableListOf<String>(),
+        mutableListOf(),
         "Work", null))
     contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
         4, "Martin Wheeler", "6135551242",
-        mutableListOf<String>(),
+        mutableListOf(),
         "Home", null))
     contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
         2, "Monica Alexander", "5145553495",
@@ -117,12 +116,10 @@ fun getNewConversationContacts(): List<NewConversationRecyclerViewAdapter
     return contactItems
 }
 
-fun getContactName(phoneNumber: String): String {
-    return when (phoneNumber) {
-        "4165550919" -> "Craig Johnson"
-        "5145553495" -> "Monica Alexander"
-        "6135556019" -> "Jennifer Morris"
-        "6135551242" -> "Martin Wheeler"
-        else -> phoneNumber
-    }
+fun getContactName(phoneNumber: String): String = when (phoneNumber) {
+    "4165550919" -> "Craig Johnson"
+    "5145553495" -> "Monica Alexander"
+    "6135556019" -> "Jennifer Morris"
+    "6135551242" -> "Martin Wheeler"
+    else -> phoneNumber
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2017 Michael Kourlas
+  ~ Copyright (C) 2015-2018 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -20,26 +20,36 @@
 
     <!-- Account -->
     <string name="preferences_account_category_name">Account</string>
+    <string name="preferences_account_info">A VoIP.ms account is required to use this app. Sign up for an account on the &lt;a href="https://www.voip.ms"&gt;VoIP.ms website&lt;/a&gt;. &lt;strong&gt;You must use the email address you use to log into the VoIP.ms website to log into this app.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;VoIP.ms API access is also required to use this app. Use the &lt;a href="https://www.voip.ms/m/api.php"&gt;VoIP.ms API configuration menu&lt;/a&gt; to enable API access, set an API password, and add "0.0.0.0" to the list of IP addresses approved for API access. &lt;strong&gt;You must use the API password to log into this app, not your normal account password.&lt;/strong&gt;</string>
     <string name="preferences_account_email_key" translatable="false">api_email</string>
-    <string name="preferences_account_email_title">Email address</string>
+    <string name="preferences_account_email_title">VoIP.ms account email address</string>
     <string name="preferences_account_password_key" translatable="false">api_password</string>
-    <string name="preferences_account_password_title">API password</string>
+    <string name="preferences_account_password_title">VoIP.ms API password</string>
     <string name="preferences_account_password_placeholder" translatable="false">********</string>
-    <string name="preferences_account_did_key" translatable="false">did</string>
-    <string name="preferences_account_dids_key" translatable="false">dids</string>
-    <string name="preferences_account_dids_title">DIDs (phone numbers)</string>
-    <string name="preferences_account_dids_status">Retrieving DIDs…</string>
-    <string name="preferences_account_dids_dialog_title">Select DIDs</string>
-    <string name="preferences_account_dids_error_network">Failed to retrieve DIDs. No network connection is available.</string>
-    <string name="preferences_account_dids_error_api_request">Failed to retrieve DIDs. A request to the VoIP.ms API failed.</string>
-    <string name="preferences_account_dids_error_api_parse">Failed to retrieve DIDs. The VoIP.ms API response could not be parsed.</string>
-    <string name="preferences_account_dids_error_api_error">Failed to retrieve DIDs. The VoIP.ms API returned the following error: %1$s.</string>
-    <string name="preferences_account_dids_error_email">You must set your VoIP.ms portal email address and API password before selecting a DID.</string>
-    <string name="preferences_account_dids_error_password">You must set your VoIP.ms portal email address and API password before selecting a DID.</string>
-    <string name="preferences_account_dids_error_no_dids">There are no DIDs in your VoIP.ms account.</string>
-    <string name="preferences_account_dids_error_unknown">Failed to retrieve DIDs. An unknown error occurred.</string>
+
+    <!-- Phone numbers -->
+    <string name="preferences_dids_category_name">Phone numbers</string>
+    <string name="preferences_dids_info">The phone numbers you wish to use with this app must have SMS enabled. Otherwise, they will not appear in this list. Use the VoIP.ms &lt;a href="https://voip.ms/m/managedid.php"&gt;phone number configuration menu&lt;/a&gt; to enable SMS for your phone numbers.&lt;br&gt;&lt;br&gt;This app uses the SMS URL callback feature for push notifications and attempts to configure it automatically. If you need to complete this step manually, use the VoIP.ms phone number configuration menu to enable the callback feature for your phone numbers, entering the following URL into the associated field: https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}</string>
+    <string name="preferences_dids_did_key" translatable="false">did</string>
+    <string name="preferences_dids_key" translatable="false">dids</string>
+    <string name="preferences_dids_error_network">Phone number retrieval failed: no network connection available</string>
+    <string name="preferences_dids_error_api_request">Phone number retrieval failed: request to VoIP.ms API failed</string>
+    <string name="preferences_dids_error_api_parse">Phone number retrieval failed: VoIP.ms API response could not be parsed</string>
+    <string name="preferences_dids_error_api_error">Phone number retrieval failed: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="preferences_dids_error_email">Phone number retrieval failed: email address not set</string>
+    <string name="preferences_dids_error_password">Phone number retrieval failed: password not set.</string>
+    <string name="preferences_dids_error_unknown">Phone number retrieval failed: unknown error</string>
+    <string name="preferences_dids_fragment_retrieved_dids_key">voipms_dids</string>
+    <string name="preferences_dids_fragment_database_dids_key">database_dids</string>
+    <string name="preferences_did_did" translatable="false">did</string>
+    <string name="preferences_did_show_in_conversations_view" translatable="false">preferences_did_%1$s_show_in_conversations_view</string>
+    <string name="preferences_did_retrieve_messages" translatable="false">preferences_did_%1$s_retrieve_messages</string>
+    <string name="preferences_did_show_notifications" translatable="false">preferences_did_%1$s_show_notifications</string>
+    <string name="preferences_did_fragment_argument_did">did</string>
 
     <!-- Synchronization -->
+    <string name="preferences_sync_category_name">Synchronization</string>
+    <string name="preferences_sync_info">It is not necessary to schedule automatic synchronizations simply to retrieve new messages. All new messages are downloaded automatically when the main conversations screen is loaded and when a push notification is received.&lt;br&gt;&lt;br&gt;In general, it is only necessary to schedule automatic synchronizations when you cannot use push notifications, such as when you are using the F-Droid version of the app.</string>
     <string name="preferences_sync_interval_key" translatable="false">sync_interval</string>
     <string name="preferences_sync_interval_title">Synchronization interval</string>
     <string name="preferences_sync_interval_default_value" translatable="false">0</string>
@@ -63,6 +73,8 @@
     <string name="preferences_notifications_sound_key" translatable="false">sms_notification_ringtone</string>
     <string name="preferences_notifications_sound_title">Sound</string>
     <string name="preferences_notifications_sound_default_value" translatable="false">content://settings/system/notification_sound</string>
+    <string name="preferences_notifications_sound_unknown">Unknown ringtone</string>
+    <string name="preferences_notifications_sound_unknown_perm">Unknown ringtone (external storage permission denied)</string>
     <string name="preferences_notifications_vibrate_key" translatable="false">sms_notification_vibrate</string>
     <string name="preferences_notifications_vibrate_title">Vibrate</string>
     <string name="preferences_notifications_vibrate_default_value" translatable="false">true</string>
@@ -78,20 +90,22 @@
 
     <!-- Database -->
     <string name="preferences_database_category_name">Database</string>
+    <string name="preferences_database_import_key" translatable="false">database_import</string>
     <string name="preferences_database_import_title">Import database</string>
     <string name="preferences_database_import_summary">Import raw SQLite database from a file</string>
-    <string name="preferences_database_import_confirm_title">Import database?</string>
-    <string name="preferences_database_import_confirm_text">Database will be imported from \'%1$s\'</string>
     <string name="preferences_database_import_fail">Failed to import database</string>
+    <string name="preferences_database_export_key" translatable="false">database_export</string>
     <string name="preferences_database_export_title">Export database</string>
     <string name="preferences_database_export_summary">Export raw SQLite database to a file</string>
     <string name="preferences_database_export_confirm_title">Export database?</string>
-    <string name="preferences_database_export_confirm_text">Database will be exported to \'%1$s\'</string>
+    <string name="preferences_database_export_confirm_text">Database will be exported to a file called \'%1$s\' in the specified directory.</string>
     <string name="preferences_database_export_fail">Failed to export database</string>
+    <string name="preferences_database_clean_up_key" translatable="false">database_clean_up</string>
     <string name="preferences_database_clean_up_title">Clean up database</string>
     <string name="preferences_database_clean_up_summary">Remove outdated information from database</string>
     <string name="preferences_database_clean_up_deleted_messages">Metadata associated with deleted messages</string>
     <string name="preferences_database_clean_up_removed_dids">Messages and metadata associated with removed DIDs</string>
+    <string name="preferences_database_delete_key" translatable="false">database_delete</string>
     <string name="preferences_database_delete_title">Delete database</string>
     <string name="preferences_database_delete_summary">Delete all messages and associated metadata</string>
     <string name="preferences_database_delete_confirm_title">Delete database?</string>
@@ -99,7 +113,7 @@
 
     <!-- Uncategorized -->
     <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>
-    <string name="preferences_perm_denied_external_storage">External storage permission required for certain settings</string>
+    <string name="preferences_perm_denied_external_storage">External storage permission required to access ringtones</string>
     <string name="preferences_setup_completed_for_version_key" translatable="false">setup_completed_for_version</string>
     <string name="preferences_setup_completed_for_version_default_value" translatable="false">0</string>
 
@@ -107,6 +121,7 @@
 
     <!-- ConversationActivity -->
     <string name="conversation_action_call">Make a call</string>
+    <string name="conversation_action_notifications">Make a call</string>
     <string name="conversation_action_resend">Resend</string>
     <string name="conversation_action_did">DID: %1$s</string>
     <string name="conversation_action_search">Search</string>
@@ -181,10 +196,12 @@
     <!-- ConversationActivity -->
     <string name="conversation_did" translatable="false">did</string>
     <string name="conversation_contact" translatable="false">contact</string>
-    <string name="conversation_error_refresh">Conversation view refresh failed; please restart the app</string>
 
     <!-- PreferencesActivity -->
     <string name="preferences_name">Settings</string>
+
+    <!-- DidsPreferencesActivity -->
+    <string name="preferences_did_name">Phone numbers</string>
 
     <!-- SERVICES -->
 
@@ -192,6 +209,12 @@
     <string name="mark_read_action" translatable="false">mark_read_action</string>
     <string name="mark_read_did" translatable="false">mark_read_did</string>
     <string name="mark_read_contact" translatable="false">mark_read_contact</string>
+
+    <!-- PushNotificationsRegistrationService -->
+    <string name="push_notifications_reg_action" translatable="false">push_notifications_reg_action</string>
+    <string name="push_notifications_fail_register">Failed to register for notifications: VoIP.ms SMS URL callback registration failed</string>
+    <string name="push_notifications_fail_google_play">Failed to register for notifications: Google Play Services unavailable</string>
+    <string name="push_notifications_fail_unknown">Failed to register for notifications: unknown error</string>
 
     <!-- RetrieveDidsService -->
     <string name="retrieve_dids_action" translatable="false">retrieve_dids_action</string>
@@ -219,6 +242,9 @@
     <string name="sync_error_database">Synchronization failed: unknown database error</string>
     <string name="sync_error_unknown">Synchronization failed: unknown error</string>
 
+    <!-- SyncIntervalService -->
+    <string name="sync_interval_service_action" translatable="false">sync_interval_service_action</string>
+
     <!-- BROADCAST RECEIVERS -->
 
     <!-- SyncIntervalReceiver -->
@@ -237,6 +263,10 @@
     <string name="sync_complete_error" translatable="false">sync_complete_error</string>
     <string name="sync_complete_full" translatable="false">sync_complete_full</string>
 
+    <!-- Push notifications registration complete receiver -->
+    <string name="push_notifications_reg_complete_action" translatable="false">push_notifications_reg_complete_action</string>
+    <string name="push_notifications_reg_complete_voip_ms_api_callback_failed_dids" translatable="false">voip_ms_api_callback_failed_dids</string>
+
     <!-- DID retrieval complete receiver -->
     <string name="retrieve_dids_complete_action" translatable="false">retrieve_dids_complete_action</string>
     <string name="retrieve_dids_complete_dids" translatable="false">retrieve_dids_complete_dids</string>
@@ -250,6 +280,15 @@
     <string name="notifications_reply_key" translatable="false">notification_reply</string>
     <string name="notifications_button_reply">Reply</string>
     <string name="notifications_button_mark_read">Mark Read</string>
+    <string name="notifications_channel_group_other">channel_group_other</string>
+    <string name="notifications_channel_group_other_title">Other</string>
+    <string name="notifications_channel_group_did">channel_group_%1$s</string>
+    <string name="notifications_channel_sync">channel_sync</string>
+    <string name="notifications_channel_sync_title">Synchronization</string>
+    <string name="notifications_channel_default">channel_default</string>
+    <string name="notifications_channel_default_title">Default</string>
+    <string name="notifications_channel_contact">channel_%1$s_%2$s</string>
+    <string name="notifications_sync_message">Synchronizing with VoIP.ms</string>
 
     <!-- UTILS -->
     <string name="utils_date_just_now">Just now</string>
@@ -268,4 +307,5 @@
     <string name="license_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE.md</string>
     <string name="credits_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE.md</string>
     <string name="donate_url">https://paypal.me/kourlas</string>
+    <string name="toast_unknown_error">Unknown error: %1$s</string>
 </resources>
