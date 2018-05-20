@@ -1,54 +1,73 @@
 # Contents
 
-* [Quick Start](#quickstart)
+* [Quick Start](#quick-start)
 * [Settings](#settings)
   * [Account](#account)
+  * [Phone Numbers](#phone-numbers)
   * [Notifications](#notifications)
   * [Synchronization](#synchronization)
   * [Network](#network)
   * [Database](#database)
 * [Donations](#donations)
-* [Contacting the Developer](#contacting_the_developer)
-* [Reporting Bugs](#reporting_bugs)
+* [Contacting the Developer](#contacting-the-developer)
+* [Reporting Bugs](#reporting-bugs)
 
 # Quick Start
 
-1. Go to the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php) and open the configuration options for the DIDs you wish to use with the app. Ensure that SMS is enabled for each DID.
-
+1. Go to the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php) and open the configuration options for the phone numbers you wish to use with the app. Ensure that SMS is enabled for each phone number.
 2. Go to the VoIP.ms [API Configuration menu](https://www.voip.ms/m/api.php) and:
-
-   * enable API access for your VoIP.ms account;
-   * set an API password (which is **distinct** from your account password); and
-   * set the list of approved IP addresses to "0.0.0.0".
-
+    * enable API access for your VoIP.ms account;
+    * set an API password (which is **distinct** from your account password); and
+    * set the list of approved IP addresses to "0.0.0.0".
 3. Go the *Settings* page in the app and set:
-
-   * the *Email address* field to the email you use to sign into the VoIP.ms portal (**not** your SIP username);
-   * the *Password* field to the API password which you set above; and
-   * the *Synchronization start date* field to the date on which you started using VoIP.ms.
-
-4. Select the *DIDs (phone numbers)* option and pick the DIDs you wish to use with the app.
-
-5. Go to the conversations list and swipe down to synchronize with VoIP.ms servers.
+    * on the *Account* page:
+        * the *VoIP.ms account email address* field to the email you use to sign into the VoIP.ms portal (**not** your SIP username);
+        * the *VoIP.ms account password* field to the API password which you set above;
+    * on the *Synchronization* page:
+        * the *Synchronization start date* field to the date on which you started using VoIP.ms; and
+    * on the *Phone Numbers* page:
+        * the phone numbers (DIDs) you wish to use with the app.
+4. Go to the conversations list and swipe down to synchronize with VoIP.ms servers.
 
 # Settings
 
 ## Account
 
-### Email address and API password
-
 This app requires access to the VoIP.ms API in order to retrieve messages from your VoIP.ms account. To facilitate this, go to the VoIP.ms [API Configuration menu](https://www.voip.ms/m/api.php) and:
-* enable API access for your VoIP.ms account;
-* set an API password (which is **distinct** from your account password); and
-* set the list of approved IP addresses to "0.0.0.0".
+    * enable API access for your VoIP.ms account;
+    * set an API password (which is **distinct** from your account password); and
+    * set the list of approved IP addresses to "0.0.0.0".
+  
+The *VoIP.ms account email address* field should be set to the email you use to sign into the VoIP.ms portal (**not** your SIP username), while the *VoIP.ms account password* field should be set to the API password which you set above.
 
-The *Email address* field should be set to the email you use to sign into the VoIP.ms portal (**not** your SIP username), while the *Password* field should be set to the API password which you set above.
+## Phone Numbers
 
-### DIDs (phone numbers)
+The phone numbers (DIDs) you wish to use with the app must have the SMS function enabled. To verify this, go to the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php) and open the configuration options for the phone numbers you wish to use with the app. Ensure that SMS is enabled for each phone number.
 
-The DIDs you wish to use with the app must have the SMS function enabled. To verify this, go to the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php) and open the configuration options for the DIDs you wish to use with the app. Ensure that SMS is enabled for each DID.
+This app can send and receive messages from multiple phone numbers in your account at a time.
 
-This app can send and receive messages from multiple DIDs (phone numbers) in your account at a time. To configure which of your DIDs are used by the app, select the *DIDs (phone numbers)* option and then select the DIDs you wish to use.
+You can hide messages from the conversations view, block the retrieval of messages, and block notifications on a per-phone number basis.
+
+## Notifications
+
+### Push notifications
+
+This application supports push notifications using Firebase Cloud Messaging. Push notifications are automatically setup when selecting phone numbers if notifications are enabled.
+
+However, if setup fails for whatever reason, you can configure them manually by:
+    * accessing the settings for your phone numbers (DIDs) on the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php);
+    * enabling the *SMS URL Callback* option; and
+    * entering the following URL into the neighbouring field: [https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}](https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO})
+
+If push notifications are configured correctly, VoIP.ms will send a callback to Google when your phone number receives a text message. Google will then forward the callback to your device using Firebase Cloud Messaging. When the app receives the callback, it performs a synchronization with the VoIP.ms servers and retrieves the text message. 
+
+To protect your privacy, the callback is configured to **only** include your phone number. It does not include the text of individual messages.
+
+### Regular notifications
+
+If push notifications could not be enabled or if you are using the F-Droid version of the app, you will still receive notifications whenever a new message is received during synchronization with the VoIP.ms servers if notifications are enabled. 
+
+This can be a reasonable substitute for push notifications if automatic synchronization is enabled, though obviously this solution consumes more battery life.
 
 ## Synchronization
 
@@ -82,26 +101,9 @@ This option significantly reduces the amount of data that synchronization uses.
 
 Normally, synchronization does not retrieve messages that have been deleted locally. You can choose to restore these messages during synchronization by enabling this option.
 
-## Notifications
+## Network
 
-### Push notifications
-
-This application supports push notifications using Firebase Cloud Messaging. Push notifications are automatically setup when selecting DIDs if notifications are enabled.
-
-However, if setup fails for whatever reason, you can configure them manually by:
-* accessing the settings for your DIDs on the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php);
-* enabling the *SMS URL Callback* option; and
-* entering the following URL into the neighbouring field: [https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}](https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO})
-
-If push notifications are configured correctly, VoIP.ms will send a callback to Google when your DID receives a text message. Google will then forward the callback to your device using Firebase Cloud Messaging. When the app receives the callback, it performs a synchronization with the VoIP.ms servers and retrieves the text message. 
-
-To protect your privacy, the callback is configured to **only** include your DID. It does not include the text of individual messages.
-
-### Regular notifications
-
-If push notifications could not be enabled or if you are using the F-Droid version of the app, you will still receive notifications whenever a new message is received during synchronization with the VoIP.ms servers if notifications are enabled. 
-
-This can be a reasonable substitute for push notifications if automatic synchronization is enabled, though obviously this solution consumes more battery life.
+You can configure certain network settings such as the timeout for establishing connections and for reading data from established connections.
 
 ## Database
 
@@ -117,7 +119,7 @@ This option exports the database to a specified file. This allows you to make ba
 
 This option allows you to remove certain data from the database that might be considered outdated or no longer useful, such as:
 * metadata associated with deleted messages, which is stored to prevent the app from downloading deleted messages again; and
-* messages and metadata associated with a DID you no longer use, which is stored in case you start using this DID again.
+* messages and metadata associated with a phone number (DID) you no longer use, which is stored in case you start using this phone number again.
 
 ### Delete database
 
