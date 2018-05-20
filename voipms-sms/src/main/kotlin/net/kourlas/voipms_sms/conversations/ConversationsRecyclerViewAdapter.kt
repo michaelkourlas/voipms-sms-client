@@ -37,7 +37,6 @@ import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
-import net.kourlas.voipms_sms.preferences.getDidShowInConversationsView
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
@@ -250,7 +249,8 @@ class ConversationsRecyclerViewAdapter<T>(
      */
     private fun updateViewHolderDidText(holder: ConversationViewHolder,
                                         position: Int) =
-        if (getDids(activity).count() <= 1) {
+        if (getDids(activity,
+                    onlyShowInConversationsView = true).count() <= 1) {
             holder.didTextView.visibility = View.GONE
         } else {
             holder.didTextView.visibility = View.VISIBLE
@@ -333,7 +333,8 @@ class ConversationsRecyclerViewAdapter<T>(
                 resultsObject.messages.addAll(
                     Database.getInstance(activity)
                         .getMessagesMostRecentFiltered(
-                            getDids(activity),
+                            getDids(activity,
+                                    onlyShowInConversationsView = true),
                             constraint.toString()
                                 .trim { it <= ' ' }
                                 .toLowerCase())
@@ -347,10 +348,6 @@ class ConversationsRecyclerViewAdapter<T>(
                                     message.conversationId)) {
                             iterator.remove()
                         }
-                        if (!getDidShowInConversationsView(activity,
-                                                           message.did)) {
-                            iterator.remove()
-                        }
                     }
                 } else {
                     val iterator = resultsObject.messages.iterator()
@@ -359,10 +356,6 @@ class ConversationsRecyclerViewAdapter<T>(
                         if (Database.getInstance(activity)
                                 .isConversationArchived(
                                     message.conversationId)) {
-                            iterator.remove()
-                        }
-                        if (!getDidShowInConversationsView(activity,
-                                                           message.did)) {
                             iterator.remove()
                         }
                     }

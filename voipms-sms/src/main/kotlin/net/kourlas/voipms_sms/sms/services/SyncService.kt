@@ -153,9 +153,7 @@ class SyncService : IntentService(
         retrieveOnlyRecentMessages: Boolean): List<RetrievalRequest> {
         val retrievalRequests = mutableListOf<RetrievalRequest>()
 
-        val dids = getDids(applicationContext)
-            .filter { getDidRetrieveMessages(applicationContext, it) }
-            .toSet()
+        val dids = getDids(applicationContext, onlyRetrieveMessages = true)
 
         val encodedEmail = URLEncoder.encode(getEmail(applicationContext),
                                              "UTF-8")

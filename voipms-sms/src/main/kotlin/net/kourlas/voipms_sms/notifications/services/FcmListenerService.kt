@@ -34,7 +34,7 @@ class FcmListenerService : FirebaseMessagingService() {
 
         // Called when a FCM message is received; check to see if topic matches
         // a currently configured DID
-        val dids = getDids(applicationContext)
+        val dids = getDids(applicationContext, onlyShowNotifications = true)
         val match = dids.any { message?.from == "/topics/did-$it" }
         if (match) {
             // If so, and if notifications are enabled, update the message

@@ -41,7 +41,7 @@ fun subscribeToDidTopics(context: Context) {
     FirebaseInstanceId.getInstance().token
 
     // Subscribe to topics for current DIDs
-    for (did in getDids(context)) {
+    for (did in getDids(context, onlyShowNotifications = true)) {
         FirebaseMessaging.getInstance().subscribeToTopic("did-$did")
     }
 }

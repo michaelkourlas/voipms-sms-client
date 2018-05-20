@@ -288,7 +288,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
             }
             else -> {
                 intent.putExtra(getString(R.string.conversation_did),
-                                getDids(this).first())
+                                dids.first())
                 this.startActivity(intent)
             }
         }

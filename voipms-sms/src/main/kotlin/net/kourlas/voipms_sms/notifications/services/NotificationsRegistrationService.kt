@@ -60,7 +60,7 @@ class NotificationsRegistrationService : IntentService(
             return
         }
 
-        val dids = getDids(applicationContext)
+        val dids = getDids(applicationContext, onlyShowNotifications = true)
         var callbackFailedDids: Set<String>? = null
         try {
             // Try to register URL callbacks with VoIP.ms for DIDs

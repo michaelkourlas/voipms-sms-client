@@ -58,7 +58,7 @@ class AppIndexingService : JobIntentService() {
             val contactPhotoUriCache = mutableMapOf<String, String>()
             val messages = Database.getInstance(
                 context).getMessagesAll(
-                getDids(context))
+                getDids(context, onlyShowInConversationsView = true))
             messages.mapTo(indexables) {
                 getMessageBuilder(
                     context, it,

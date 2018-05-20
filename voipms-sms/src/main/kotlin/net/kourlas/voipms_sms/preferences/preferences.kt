@@ -33,7 +33,10 @@ fun getConnectTimeout(context: Context): Int =
             R.string.preferences_network_connect_timeout_default_value))
         .toIntOrNull() ?: 0
 
-fun getDids(context: Context): Set<String> {
+fun getDids(context: Context,
+            onlyShowInConversationsView: Boolean = false,
+            onlyRetrieveMessages: Boolean = false,
+            onlyShowNotifications: Boolean = false): Set<String> {
     val did = getStringPreference(context, context.getString(
         R.string.preferences_dids_did_key), "")
     val default: Set<String> = if (did != "") {
@@ -41,8 +44,18 @@ fun getDids(context: Context): Set<String> {
     } else {
         emptySet()
     }
-    return getStringSetPreference(context, context.getString(
+    var set = getStringSetPreference(context, context.getString(
         R.string.preferences_dids_key), default)
+    if (onlyShowInConversationsView) {
+        set = set.filter { getDidShowInConversationsView(context, it) }.toSet()
+    }
+    if (onlyRetrieveMessages) {
+        set = set.filter { getDidRetrieveMessages(context, it) }.toSet()
+    }
+    if (onlyShowNotifications) {
+        set = set.filter { getDidShowNotifications(context, it) }.toSet()
+    }
+    return set
 }
 
 fun getEmail(context: Context): String =
@@ -161,15 +174,13 @@ fun getReadTimeout(context: Context): Int =
         .toIntOrNull() ?: 0
 
 fun isAccountActive(context: Context): Boolean =
-    getEmail(
-        context) != "" && getPassword(context) != ""
-    && getDids(
-        context).isNotEmpty()
+    getEmail(context) != ""
+    && getPassword(context) != ""
+    && getDids(context).isNotEmpty()
 
 fun setDids(context: Context, dids: Set<String>) {
     val currentDids = getDids(context)
     val newDids = dids.filter { it -> it !in currentDids }
-    val removedDids = currentDids.filter { it -> it !in dids }
 
     setStringSetPreference(context, context.getString(
         R.string.preferences_dids_key), dids)
@@ -177,11 +188,6 @@ fun setDids(context: Context, dids: Set<String>) {
         setDidShowInConversationsView(context, did, true)
         setDidRetrieveMessages(context, did, true)
         setDidShowNotifications(context, did, true)
-    }
-    for (did in removedDids) {
-        setDidShowInConversationsView(context, did, false)
-        setDidRetrieveMessages(context, did, false)
-        setDidShowNotifications(context, did, false)
     }
 
     subscribeToDidTopics(context)
@@ -196,12 +202,18 @@ fun setDidShowInConversationsView(context: Context, did: String,
                          value)
 }
 
-fun getDidShowInConversationsView(context: Context, did: String): Boolean =
-    getBooleanPreference(context,
-                         context.getString(
-                             R.string.preferences_did_show_in_conversations_view,
-                             did),
-                         true)
+fun getDidShowInConversationsView(context: Context, did: String): Boolean {
+    if (did !in getDids(context)) {
+        return false
+    }
+
+    return getBooleanPreference(
+        context,
+        context.getString(
+            R.string.preferences_did_show_in_conversations_view,
+            did),
+        true)
+}
 
 fun setDidRetrieveMessages(context: Context, did: String, value: Boolean) {
     setBooleanPreference(context,
@@ -210,22 +222,34 @@ fun setDidRetrieveMessages(context: Context, did: String, value: Boolean) {
                          value)
 }
 
-fun getDidRetrieveMessages(context: Context, did: String): Boolean =
-    getBooleanPreference(context,
-                         context.getString(
-                             R.string.preferences_did_retrieve_messages, did),
-                         true)
+fun getDidRetrieveMessages(context: Context, did: String): Boolean {
+    if (did !in getDids(context)) {
+        return false
+    }
+
+    return getBooleanPreference(
+        context,
+        context.getString(
+            R.string.preferences_did_retrieve_messages, did),
+        true)
+}
 
 fun setDidShowNotifications(context: Context, did: String, value: Boolean) {
     setBooleanPreference(context, context.getString(
         R.string.preferences_did_show_notifications, did), value)
 }
 
-fun getDidShowNotifications(context: Context, did: String): Boolean =
-    getBooleanPreference(context,
-                         context.getString(
-                             R.string.preferences_did_show_notifications, did),
-                         true)
+fun getDidShowNotifications(context: Context, did: String): Boolean {
+    if (did !in getDids(context)) {
+        return false
+    }
+
+    return getBooleanPreference(
+        context,
+        context.getString(
+            R.string.preferences_did_show_notifications, did),
+        true)
+}
 
 fun setLastCompleteSyncTime(context: Context,
                             lastCompleteSyncTime: Long) =

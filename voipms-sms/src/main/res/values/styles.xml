@@ -16,6 +16,7 @@
   -->
 
 <resources>
+
     <style name="AppTheme" parent="@style/PreferenceFixTheme.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>

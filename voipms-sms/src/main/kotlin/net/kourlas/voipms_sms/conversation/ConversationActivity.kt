@@ -52,7 +52,6 @@ import net.kourlas.voipms_sms.conversations.ConversationsArchivedActivity
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getDemoNotification
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
@@ -136,11 +135,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        if (getDids(applicationContext).isEmpty()) {
-            finish()
-        }
-
-        setupDidAndContact(intent ?: throw Exception("Intent cannot be null"))
+        setupDidAndContact(intent ?: return finish())
         setupToolbar()
         setupRecyclerView()
         setupMessageText()
