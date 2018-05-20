@@ -49,7 +49,7 @@
 
     <!-- Synchronization -->
     <string name="preferences_sync_category_name">Synchronization</string>
-    <string name="preferences_sync_info">It is not necessary to schedule automatic synchronizations simply to retrieve new messages. All new messages are downloaded automatically when the main conversations screen is loaded and when a push notification is received.&lt;br&gt;&lt;br&gt;In general, it is only necessary to schedule automatic synchronizations when you cannot use push notifications, such as when you are using the F-Droid version of the app.</string>
+    <string name="preferences_sync_info">It is not necessary to schedule automatic synchronizations simply to retrieve new messages. All new messages are downloaded automatically when the main conversations screen is loaded and when a push notification is received.</string>
     <string name="preferences_sync_interval_key" translatable="false">sync_interval</string>
     <string name="preferences_sync_interval_title">Synchronization interval</string>
     <string name="preferences_sync_interval_default_value" translatable="false">0</string>
