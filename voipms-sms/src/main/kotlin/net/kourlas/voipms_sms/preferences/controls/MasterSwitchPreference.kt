@@ -24,9 +24,9 @@ import android.util.AttributeSet
 import android.view.View.OnClickListener
 import net.kourlas.voipms_sms.R
 
+@Suppress("unused")
 open class MasterSwitchPreference : TwoTargetPreference {
-    var switch: SwitchCompat? = null
-        private set
+    private var switch: SwitchCompat? = null
     private var mChecked: Boolean = false
     private var mEnableSwitch = true
 

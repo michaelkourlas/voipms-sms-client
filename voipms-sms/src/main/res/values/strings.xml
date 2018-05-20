@@ -30,10 +30,8 @@
     <!-- Phone numbers -->
     <string name="preferences_dids_category_name">Phone numbers</string>
     <string name="preferences_dids_info">The phone numbers you wish to use with this app must have SMS enabled. Otherwise, they will not appear in this list. Use the VoIP.ms &lt;a href="https://voip.ms/m/managedid.php"&gt;phone number configuration menu&lt;/a&gt; to enable SMS for your phone numbers.&lt;br&gt;&lt;br&gt;This app uses the SMS URL callback feature for push notifications and attempts to configure it automatically. If you need to complete this step manually, use the VoIP.ms phone number configuration menu to enable the callback feature for your phone numbers, entering the following URL into the associated field: https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}</string>
-
     <string name="preferences_dids_did_key" translatable="false">did</string>
     <string name="preferences_dids_key" translatable="false">dids</string>
-    <string name="preferences_dids_title">Phone numbers</string>
     <string name="preferences_dids_error_network">Phone number retrieval failed: no network connection available</string>
     <string name="preferences_dids_error_api_request">Phone number retrieval failed: request to VoIP.ms API failed</string>
     <string name="preferences_dids_error_api_parse">Phone number retrieval failed: VoIP.ms API response could not be parsed</string>
@@ -110,7 +108,6 @@
     <string name="preferences_database_delete_summary">Delete all messages and associated metadata</string>
     <string name="preferences_database_delete_confirm_title">Delete database?</string>
     <string name="preferences_database_delete_confirm_message">This action cannot be undone.</string>
-    <string name="preferences_database_external_storage_unavailable">External storage unavailable.</string>
 
     <!-- Uncategorized -->
     <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>
@@ -197,7 +194,6 @@
     <!-- ConversationActivity -->
     <string name="conversation_did" translatable="false">did</string>
     <string name="conversation_contact" translatable="false">contact</string>
-    <string name="conversation_error_refresh">Conversation view refresh failed; please restart the app</string>
 
     <!-- PreferencesActivity -->
     <string name="preferences_name">Settings</string>
@@ -214,7 +210,6 @@
 
     <!-- PushNotificationsRegistrationService -->
     <string name="push_notifications_reg_action" translatable="false">push_notifications_reg_action</string>
-    <string name="push_notifications_progress">Registering for notifications…</string>
     <string name="push_notifications_fail_register">Failed to register for notifications: VoIP.ms SMS URL callback registration failed</string>
     <string name="push_notifications_fail_google_play">Failed to register for notifications: Google Play Services unavailable</string>
     <string name="push_notifications_fail_unknown">Failed to register for notifications: unknown error</string>
@@ -310,6 +305,5 @@
     <string name="license_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE.md</string>
     <string name="credits_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE.md</string>
     <string name="donate_url">https://paypal.me/kourlas</string>
-    <string name="information">Information</string>
     <string name="toast_unknown_error">Unknown error: %1$s</string>
 </resources>

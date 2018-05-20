@@ -29,7 +29,7 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.SynchronizationPreferencesFragment
 
 /**
- * Activity that houses a [PreferencesFragment] that displays the
+ * Activity that houses a PreferencesFragment that displays the
  * synchronization preferences.
  */
 class SynchronizationPreferencesActivity : AppCompatActivity() {

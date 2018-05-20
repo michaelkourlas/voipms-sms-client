@@ -41,7 +41,7 @@ import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
 /**
- * Activity that houses a [PreferencesFragment] that displays the DID selection
+ * Activity that houses a PreferencesFragment that displays the DID selection
  * preferences.
  */
 class DidsPreferencesActivity : AppCompatActivity() {

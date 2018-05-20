@@ -25,7 +25,7 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.DatabasePreferencesFragment
 
 /**
- * Activity that houses a [PreferencesFragment] that displays the database
+ * Activity that houses a PreferencesFragment that displays the database
  * preferences.
  */
 class DatabasePreferencesActivity : AppCompatActivity() {

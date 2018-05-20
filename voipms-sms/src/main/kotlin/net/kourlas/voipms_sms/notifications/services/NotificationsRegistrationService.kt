@@ -109,7 +109,7 @@ class NotificationsRegistrationService : IntentService(
                     "url_callback_retry=0"
                 val response = getJson(applicationContext,
                                        registerVoipCallbackUrl)
-                responses.put(did, response)
+                responses[did] = response
             } catch (e: IOException) {
                 // Do nothing.
             } catch (e: JSONException) {

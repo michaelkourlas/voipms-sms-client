@@ -37,6 +37,7 @@ public class CustomApplication extends Application {
         new HashMap<ConversationId, Integer>();
     private int conversationsActivitiesVisible = 0;
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean conversationsActivityVisible() {
         return conversationsActivitiesVisible > 0;
     }
@@ -49,6 +50,7 @@ public class CustomApplication extends Application {
         conversationsActivitiesVisible--;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean conversationActivityVisible(ConversationId conversationId) {
         Integer count = conversationActivitiesVisible.get(conversationId);
         return count != null && count > 0;

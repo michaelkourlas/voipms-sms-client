@@ -19,10 +19,8 @@
     <color name="primary">#AA3939</color>
     <color name="primary_dark">#801515</color>
     <color name="accent">#D4686A</color>
-    <color name="translucent_black">#CC000000</color>
     <color name="highlight">#F3F315</color>
     <color name="dark_gray">#656363</color>
-    <color name="info_icon_gray">#737373</color>
     <color name="message_translucent_white">#89FFFFFF</color>
     <color name="message_translucent_dark_grey">#89656363</color>
     <color name="contact_badge_letter_white">#8FFF</color>

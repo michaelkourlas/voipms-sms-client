@@ -29,7 +29,7 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.AccountPreferencesFragment
 
 /**
- * Activity that houses a [PreferencesFragment] that displays the account
+ * Activity that houses a PreferencesFragment that displays the account
  * preferences.
  */
 class AccountPreferencesActivity : AppCompatActivity() {

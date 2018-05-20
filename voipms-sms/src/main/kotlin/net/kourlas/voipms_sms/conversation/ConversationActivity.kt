@@ -523,7 +523,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      */
     private fun onCallButtonClick(): Boolean {
         val intent = Intent(Intent.ACTION_CALL)
-        intent.data = Uri.parse("tel:" + contact)
+        intent.data = Uri.parse("tel:$contact")
 
         // Before trying to call the contact's phone number, request the
         // CALL_PHONE permission

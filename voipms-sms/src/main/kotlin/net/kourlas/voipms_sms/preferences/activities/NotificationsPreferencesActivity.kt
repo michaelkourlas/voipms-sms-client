@@ -30,7 +30,7 @@ import net.kourlas.voipms_sms.preferences.fragments.NotificationsPreferencesFrag
 import net.kourlas.voipms_sms.utils.showPermissionSnackbar
 
 /**
- * Activity that houses a [PreferencesFragment] that displays the notifications
+ * Activity that houses a PreferencesFragment that displays the notifications
  * preferences.
  */
 class NotificationsPreferencesActivity : AppCompatActivity() {

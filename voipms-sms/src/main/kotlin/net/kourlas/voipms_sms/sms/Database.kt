@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.sms
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
@@ -251,7 +252,7 @@ class Database private constructor(private val context: Context) {
         synchronized(this) {
             val cursor = database.query(TABLE_MESSAGE, messageColumns, query,
                                         null, null, null,
-                                        COLUMN_DATE + " DESC", "1")
+                                        "$COLUMN_DATE DESC", "1")
             val messages = getMessagesCursor(cursor)
             return if (messages.size > 0) {
                 messages[0]
@@ -282,7 +283,7 @@ class Database private constructor(private val context: Context) {
                 messageColumns,
                 query,
                 null, null, null,
-                COLUMN_DATABASE_ID + " DESC")
+                "$COLUMN_DATABASE_ID DESC")
             return getMessagesCursor(cursor)
         }
     }
@@ -1418,62 +1419,28 @@ class Database private constructor(private val context: Context) {
                        " FROM sms_backup")
             db.execSQL("DROP TABLE sms_backup")
         }
-
-        private val DATABASE_MESSAGE_TABLE_CREATE =
-            "CREATE TABLE " + TABLE_MESSAGE + "(" +
-            COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT" +
-            " NOT NULL," +
-            COLUMN_VOIP_ID + " INTEGER," +
-            COLUMN_DATE + " INTEGER NOT NULL," +
-            COLUMN_INCOMING + " INTEGER NOT NULL," +
-            COLUMN_DID + " TEXT NOT NULL," +
-            COLUMN_CONTACT + " TEXT NOT NULL," +
-            COLUMN_MESSAGE + " TEXT NOT NULL," +
-            COLUMN_UNREAD + " INTEGER NOT NULL," +
-            COLUMN_DELIVERED + " INTEGER NOT NULL," +
-            COLUMN_DELIVERY_IN_PROGRESS + " INTEGER NOT NULL)"
-        private val DATABASE_DELETED_TABLE_CREATE =
-            "CREATE TABLE " + TABLE_DELETED + "(" +
-            COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT" +
-            " NOT NULL," +
-            COLUMN_VOIP_ID + " INTEGER NOT NULL," +
-            COLUMN_DID + " TEXT NOT NULL)"
-        private val DATABASE_DRAFT_TABLE_CREATE =
-            "CREATE TABLE " + TABLE_DRAFT + "(" +
-            COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT" +
-            " NOT NULL," +
-            COLUMN_DID + " TEXT NOT NULL," +
-            COLUMN_CONTACT + " TEXT NOT NULL," +
-            COLUMN_MESSAGE + " TEXT NOT NULL)"
-        private val DATABASE_ARCHIVED_TABLE_CREATE =
-            "CREATE TABLE " + TABLE_ARCHIVED + "(" +
-            COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT" +
-            " NOT NULL," +
-            COLUMN_DID + " TEXT NOT NULL," +
-            COLUMN_CONTACT + " TEXT NOT NULL," +
-            COLUMN_ARCHIVED + " INTEGER NOT NULL)"
     }
 
     companion object {
-        val DATABASE_NAME = "sms.db"
-        private val DATABASE_VERSION = 9
+        const val DATABASE_NAME = "sms.db"
+        private const val DATABASE_VERSION = 9
 
-        private val TABLE_MESSAGE = "sms"
-        private val TABLE_DELETED = "deleted"
-        private val TABLE_DRAFT = "draft"
-        private val TABLE_ARCHIVED = "archived"
+        private const val TABLE_MESSAGE = "sms"
+        private const val TABLE_DELETED = "deleted"
+        private const val TABLE_DRAFT = "draft"
+        private const val TABLE_ARCHIVED = "archived"
 
-        val COLUMN_DATABASE_ID = "DatabaseId"
-        val COLUMN_VOIP_ID = "VoipId"
-        val COLUMN_DATE = "Date"
-        val COLUMN_INCOMING = "Type"
-        val COLUMN_DID = "Did"
-        val COLUMN_CONTACT = "Contact"
-        val COLUMN_MESSAGE = "Text"
-        val COLUMN_UNREAD = "Unread"
-        val COLUMN_DELIVERED = "Delivered"
-        val COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress"
-        val COLUMN_ARCHIVED = "Archived"
+        const val COLUMN_DATABASE_ID = "DatabaseId"
+        const val COLUMN_VOIP_ID = "VoipId"
+        const val COLUMN_DATE = "Date"
+        const val COLUMN_INCOMING = "Type"
+        const val COLUMN_DID = "Did"
+        const val COLUMN_CONTACT = "Contact"
+        const val COLUMN_MESSAGE = "Text"
+        const val COLUMN_UNREAD = "Unread"
+        const val COLUMN_DELIVERED = "Delivered"
+        const val COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress"
+        const val COLUMN_ARCHIVED = "Archived"
 
         private val messageColumns = arrayOf(COLUMN_DATABASE_ID,
                                              COLUMN_VOIP_ID,
@@ -1497,6 +1464,43 @@ class Database private constructor(private val context: Context) {
                                               COLUMN_CONTACT,
                                               COLUMN_ARCHIVED)
 
+        private const val DATABASE_MESSAGE_TABLE_CREATE =
+            "CREATE TABLE " + TABLE_MESSAGE + "(" +
+            COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT" +
+            " NOT NULL," +
+            COLUMN_VOIP_ID + " INTEGER," +
+            COLUMN_DATE + " INTEGER NOT NULL," +
+            COLUMN_INCOMING + " INTEGER NOT NULL," +
+            COLUMN_DID + " TEXT NOT NULL," +
+            COLUMN_CONTACT + " TEXT NOT NULL," +
+            COLUMN_MESSAGE + " TEXT NOT NULL," +
+            COLUMN_UNREAD + " INTEGER NOT NULL," +
+            COLUMN_DELIVERED + " INTEGER NOT NULL," +
+            COLUMN_DELIVERY_IN_PROGRESS + " INTEGER NOT NULL)"
+        private const val DATABASE_DELETED_TABLE_CREATE =
+            "CREATE TABLE " + TABLE_DELETED + "(" +
+            COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT" +
+            " NOT NULL," +
+            COLUMN_VOIP_ID + " INTEGER NOT NULL," +
+            COLUMN_DID + " TEXT NOT NULL)"
+        private const val DATABASE_DRAFT_TABLE_CREATE =
+            "CREATE TABLE " + TABLE_DRAFT + "(" +
+            COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT" +
+            " NOT NULL," +
+            COLUMN_DID + " TEXT NOT NULL," +
+            COLUMN_CONTACT + " TEXT NOT NULL," +
+            COLUMN_MESSAGE + " TEXT NOT NULL)"
+        private const val DATABASE_ARCHIVED_TABLE_CREATE =
+            "CREATE TABLE " + TABLE_ARCHIVED + "(" +
+            COLUMN_DATABASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT" +
+            " NOT NULL," +
+            COLUMN_DID + " TEXT NOT NULL," +
+            COLUMN_CONTACT + " TEXT NOT NULL," +
+            COLUMN_ARCHIVED + " INTEGER NOT NULL)"
+
+        // It is not a leak to store an instance to the Application object,
+        // since it has the same lifetime as the application itself
+        @SuppressLint("StaticFieldLeak")
         private var instance: Database? = null
 
         /**

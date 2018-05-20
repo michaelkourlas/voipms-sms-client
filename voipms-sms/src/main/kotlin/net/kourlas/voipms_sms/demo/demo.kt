@@ -21,8 +21,8 @@ import net.kourlas.voipms_sms.newconversation.NewConversationRecyclerViewAdapter
 import net.kourlas.voipms_sms.sms.Message
 import java.util.*
 
-val demo = false
-val sending = false
+const val demo = false
+const val sending = false
 
 fun getConversationsDemoMessages(): List<Message> {
     val messages = mutableListOf<Message>()

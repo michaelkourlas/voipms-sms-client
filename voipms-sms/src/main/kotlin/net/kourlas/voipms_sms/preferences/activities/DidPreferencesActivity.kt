@@ -27,7 +27,7 @@ import net.kourlas.voipms_sms.utils.abortActivity
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 
 /**
- * Activity that houses a [PreferencesFragment] that displays settings
+ * Activity that houses a PreferencesFragment that displays settings
  * associated with a particular DID.
  */
 class DidPreferencesActivity : AppCompatActivity() {
