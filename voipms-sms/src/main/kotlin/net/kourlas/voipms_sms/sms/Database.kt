@@ -289,7 +289,6 @@ class Database private constructor(private val context: Context) {
             query = query.substring(0, query.length - 4)
         }
 
-
         val cursor = database.query(
             TABLE_MESSAGE,
             messageColumns,
