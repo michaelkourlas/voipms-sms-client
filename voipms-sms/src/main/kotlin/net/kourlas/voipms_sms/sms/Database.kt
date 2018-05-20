@@ -311,7 +311,6 @@ class Database private constructor(private val context: Context) {
         val filterString = "%$filterConstraint%"
         val params = arrayOf(filterString)
 
-
         val cursor = database.query(
             TABLE_MESSAGE,
             messageColumns,
