@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.sms.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
@@ -84,7 +83,6 @@ class RetrieveDidsService : IntentService(
                 dids = getDidsFromResponse(response)
             }
         } catch (e: Exception) {
-            Crashlytics.logException(e)
         }
         return dids
     }
@@ -112,12 +110,10 @@ class RetrieveDidsService : IntentService(
                 R.string.preferences_dids_error_api_request)
             return null
         } catch (e: JSONException) {
-            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.preferences_dids_error_api_parse)
             return null
         } catch (e: Exception) {
-            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.preferences_dids_error_unknown)
             return null

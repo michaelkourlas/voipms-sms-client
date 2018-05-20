@@ -23,7 +23,6 @@ import android.content.Intent
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
@@ -136,7 +135,6 @@ class SyncService : IntentService(
                     applicationContext)
             }
         } catch (e: Exception) {
-            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.sync_error_unknown)
         }
@@ -272,7 +270,6 @@ class SyncService : IntentService(
                 .insertMessagesVoipMsApi(incomingMessages,
                                          retrieveDeletedMessages)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.sync_error_database)
             return
@@ -332,7 +329,6 @@ class SyncService : IntentService(
                         rawSms.getString("message"))
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
-                    Crashlytics.logException(e)
                     error = applicationContext.getString(
                         R.string.sync_error_api_parse)
                     return null
@@ -356,11 +352,9 @@ class SyncService : IntentService(
                 R.string.sync_error_api_request)
             return null
         } catch (e: JSONException) {
-            Crashlytics.logException(e)
             error = applicationContext.getString(R.string.sync_error_api_parse)
             return null
         } catch (e: Exception) {
-            Crashlytics.logException(e)
             error = applicationContext.getString(R.string.sync_error_unknown)
             return null
         }

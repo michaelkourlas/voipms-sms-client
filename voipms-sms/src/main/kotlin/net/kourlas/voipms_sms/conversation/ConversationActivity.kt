@@ -43,7 +43,6 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.crashlytics.android.Crashlytics
 import com.futuremind.recyclerviewfastscroll.FastScroller
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
@@ -155,49 +154,16 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      * @param intent The intent that this activity was launched with.
      */
     private fun setupDidAndContact(intent: Intent) {
-        val action = intent.action
-        val data = intent.dataString
-        if (Intent.ACTION_VIEW == action && data != null) {
-            // Firebase URL intent
-            val uri = Uri.parse(data)
-            if (uri.getQueryParameter("id") != null) {
-                // Firebase message index URL
-                val message = Database.getInstance(this)
-                    .getMessageDatabaseId(
-                        uri.getQueryParameter("id").toLong())
-                if (message == null) {
-                    Crashlytics.logException(Exception("Invalid URI: '$data'"))
-                    finish()
-                    return
-                } else {
-                    did = message.did
-                    contact = message.contact
-                }
-            } else if (uri.getQueryParameter("did") != null
-                       && uri.getQueryParameter("contact") != null) {
-                // Firebase conversation index URL
-                did = uri.getQueryParameter("did")
-                contact = uri.getQueryParameter("contact")
-            } else {
-                Crashlytics.logException(Exception("Invalid URI: '$data'"))
-                finish()
-                return
-            }
+        // Standard intent
+        val d = intent.getStringExtra(getString(R.string.conversation_did))
+        val c = intent.getStringExtra(getString(
+            R.string.conversation_contact))
+        if (d == null || c == null) {
+            finish()
+            return
         } else {
-            // Standard intent
-            val d = intent.getStringExtra(getString(R.string.conversation_did))
-            val c = intent.getStringExtra(getString(
-                R.string.conversation_contact))
-            if (d == null || c == null) {
-                Crashlytics.logException(
-                    Exception("No DID or contact specified:" +
-                              " did: '$d', contact: '$c'"))
-                finish()
-                return
-            } else {
-                did = d
-                contact = c
-            }
+            did = d
+            contact = c
         }
 
         if (contact.length == 11 && contact[0] == '1') {

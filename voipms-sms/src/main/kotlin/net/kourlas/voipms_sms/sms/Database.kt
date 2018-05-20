@@ -24,16 +24,12 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.ParcelFileDescriptor
-import com.google.firebase.appindexing.FirebaseAppIndex
-import net.kourlas.voipms_sms.sms.services.AppIndexingService
 import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.getContactName
 import net.kourlas.voipms_sms.utils.getDigitsOfString
-import net.kourlas.voipms_sms.utils.runOnNewThread
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -64,9 +60,6 @@ class Database private constructor(private val context: Context) {
                             null)
 
             database.setTransactionSuccessful()
-
-            FirebaseAppIndex.getInstance().remove(Message.getMessageUrl(
-                databaseId))
         } finally {
             database.endTransaction()
         }
@@ -134,11 +127,6 @@ class Database private constructor(private val context: Context) {
                             null)
 
             database.setTransactionSuccessful()
-
-            for (message in messages) {
-                // Remove messages from index
-                FirebaseAppIndex.getInstance().remove(message.messageUrl)
-            }
         } finally {
             database.endTransaction()
         }
@@ -172,8 +160,6 @@ class Database private constructor(private val context: Context) {
             database.delete(TABLE_ARCHIVED, null, null)
 
             database.setTransactionSuccessful()
-
-            FirebaseAppIndex.getInstance().removeAll()
         } finally {
             database.endTransaction()
         }
@@ -274,28 +260,6 @@ class Database private constructor(private val context: Context) {
         } else {
             null
         }
-    }
-
-    /**
-     * Gets all of the messages in the message table with the specified DIDs.
-     * The resulting list is sorted by database ID in descending order.
-     */
-    fun getMessagesAll(dids: Set<String>): List<Message> = synchronized(this) {
-        var query = ""
-        for (did in dids) {
-            query += "$COLUMN_DID=\"$did\" OR "
-        }
-        if (dids.isNotEmpty()) {
-            query = query.substring(0, query.length - 4)
-        }
-
-        val cursor = database.query(
-            TABLE_MESSAGE,
-            messageColumns,
-            query,
-            null, null, null,
-            "$COLUMN_DATABASE_ID DESC")
-        return getMessagesCursor(cursor)
     }
 
     /**
@@ -496,10 +460,6 @@ class Database private constructor(private val context: Context) {
 
                 // Try refreshing database
                 database = databaseHelper.writableDatabase
-
-                runOnNewThread {
-                    AppIndexingService.replaceIndex(context)
-                }
             } catch (e: Exception) {
                 backupFile.copyTo(dbFile, overwrite = true)
                 throw e
@@ -548,15 +508,6 @@ class Database private constructor(private val context: Context) {
             }
 
             database.setTransactionSuccessful()
-
-            val message = getMessageDatabaseIdWithoutLock(databaseId)
-            if (message != null) {
-                runOnNewThread {
-                    FirebaseAppIndex.getInstance().update(
-                        AppIndexingService.getMessageBuilder(context,
-                                                             message).build())
-                }
-            }
 
             return databaseId
         } finally {
@@ -673,16 +624,6 @@ class Database private constructor(private val context: Context) {
             }
 
             database.setTransactionSuccessful()
-
-            addedDatabaseIds
-                .mapNotNull { getMessageDatabaseIdWithoutLock(it) }
-                .forEach {
-                    runOnNewThread {
-                        FirebaseAppIndex.getInstance().update(
-                            AppIndexingService.getMessageBuilder(
-                                context, it).build())
-                    }
-                }
 
             return addedConversationIds
         } finally {

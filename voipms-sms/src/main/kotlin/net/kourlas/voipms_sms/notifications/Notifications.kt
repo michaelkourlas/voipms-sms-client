@@ -29,14 +29,11 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.app.RemoteInput
 import android.support.v4.app.TaskStackBuilder
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.demo.demo
-import net.kourlas.voipms_sms.notifications.services.NotificationsRegistrationService
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
@@ -45,7 +42,10 @@ import net.kourlas.voipms_sms.sms.receivers.MarkReadReceiver
 import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
 import net.kourlas.voipms_sms.sms.services.MarkReadService
 import net.kourlas.voipms_sms.sms.services.SendMessageService
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.applyCircularMask
+import net.kourlas.voipms_sms.utils.getContactName
+import net.kourlas.voipms_sms.utils.getContactPhotoBitmap
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 
 /**
  * Single-instance class used to send notifications when new SMS messages
@@ -226,7 +226,7 @@ class Notifications private constructor(
      * Returns whether notifications are enabled globally and for the
      * conversation ID if one is specified.
      */
-    fun getNotificationsEnabled(
+    private fun getNotificationsEnabled(
         conversationId: ConversationId? = null): Boolean {
         // Prior to Android O, check the global notification settings;
         // otherwise we can just rely on the system to block the notifications
@@ -491,38 +491,6 @@ class Notifications private constructor(
         largeIconBitmap
     } catch (_: Exception) {
         null
-    }
-
-    /**
-     * Enables push notifications by starting the push notifications
-     * registration service.
-     *
-     * @param activity The activity on which to display messages.
-     */
-    fun enablePushNotifications(activity: Activity) {
-        // Check if account is active and that notifications are enabled,
-        // and silently quit if not
-        if (!isAccountActive(activity) || !getNotificationsEnabled()) {
-            setSetupCompletedForVersion(activity, 114)
-            return
-        }
-
-        // Check if Google Play Services is available
-        if (GoogleApiAvailability.getInstance()
-                .isGooglePlayServicesAvailable(
-                    activity) != ConnectionResult.SUCCESS) {
-            showSnackbar(activity, R.id.coordinator_layout,
-                         application.getString(
-                             R.string.push_notifications_fail_google_play))
-            setSetupCompletedForVersion(activity, 114)
-            return
-        }
-
-        // Subscribe to DID topics
-        subscribeToDidTopics(activity)
-
-        // Start push notifications registration service
-        NotificationsRegistrationService.startService(activity)
     }
 
     companion object {

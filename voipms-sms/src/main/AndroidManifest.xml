@@ -188,8 +188,6 @@
 
         <!-- SERVICES -->
 
-        <service android:name=".notifications.services.NotificationsRegistrationService" />
-
         <service
             android:name=".sms.services.MarkReadService"
             android:permission="android.permission.BIND_JOB_SERVICE" />

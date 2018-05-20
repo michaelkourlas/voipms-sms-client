@@ -1,6 +1,5 @@
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
-apply plugin: "io.fabric"
 
 android {
     compileSdkVersion 27
@@ -10,7 +9,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 118
-        versionName "0.6.0"
+        versionName "0.6.0-fdroid"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
@@ -32,17 +31,9 @@ dependencies {
     implementation "com.android.support:preference-v14:27.1.1"
     implementation "com.android.support:design:27.1.1"
 
-    // Firebase libraries
-    implementation "com.google.firebase:firebase-appindexing:15.0.1"
-    implementation "com.google.firebase:firebase-core:15.0.2"
-    implementation "com.google.firebase:firebase-messaging:15.0.2"
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.2'
-
     // Additional libraries and fixes
     implementation "com.futuremind.recyclerfastscroll:fastscroll:0.2.5"
     implementation "com.takisoft.fix:preference-v7:27.0.2.0"
     implementation "com.takisoft.fix:preference-v7-ringtone:27.0.2.0"
     implementation "com.takisoft.fix:preference-v7-datetimepicker:27.0.2.0"
 }
-
-apply plugin: "com.google.gms.google-services"

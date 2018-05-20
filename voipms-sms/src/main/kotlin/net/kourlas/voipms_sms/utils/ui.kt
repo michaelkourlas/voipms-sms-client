@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2017 Michael Kourlas
+ * Copyright (C) 2015-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import android.support.v7.app.AlertDialog
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.Toast
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import java.lang.Math.abs
 
@@ -118,17 +117,6 @@ fun showAlertDialog(context: Context, title: String?, text: String?,
 }
 
 /**
- * Shows an information dialog with the specified text.
- *
- * @param context The context to use.
- * @param text The specified text.
- * @return The dialog.
- */
-fun showInfoDialog(context: Context, text: String?): AlertDialog =
-    showAlertDialog(context, null, text, context.getString(R.string.ok),
-                    null, null, null)
-
-/**
  * Shows an information dialog with the specified title and text.
  *
  * @param context The context to use.
@@ -185,7 +173,6 @@ fun showPermissionSnackbar(activity: Activity, viewId: Int,
 
 fun abortActivity(activity: Activity, ex: Exception,
                   duration: Int = Toast.LENGTH_SHORT) {
-    Crashlytics.logException(ex)
     Toast.makeText(activity,
                    activity.getString(R.string.toast_unknown_error, ex.message),
                    duration).show()

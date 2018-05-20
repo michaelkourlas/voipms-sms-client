@@ -22,7 +22,6 @@ import android.content.Intent
 import android.support.v4.app.JobIntentService
 import android.support.v4.app.RemoteInput
 import android.util.Log
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getEmail
@@ -124,7 +123,6 @@ class SendMessageService : JobIntentService() {
                                 newDatabaseId, did,
                                 contact, messageText))
                     } catch (e: Exception) {
-                        Crashlytics.logException(e)
                         error = applicationContext.getString(
                             R.string.send_message_error_database)
                         for ((newDatabaseId) in messages) {
@@ -133,7 +131,6 @@ class SendMessageService : JobIntentService() {
                                     applicationContext)
                                     .removeMessage(newDatabaseId)
                             } catch (e: Exception) {
-                                Crashlytics.logException(e)
                             }
                         }
                         return ConversationId(did,
@@ -156,7 +153,6 @@ class SendMessageService : JobIntentService() {
 
             return ConversationId(did, contact)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.send_message_error_unknown)
         }
@@ -271,12 +267,10 @@ class SendMessageService : JobIntentService() {
                 R.string.send_message_error_api_request)
             return null
         } catch (e: JSONException) {
-            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.send_message_error_api_parse)
             return null
         } catch (e: Exception) {
-            Crashlytics.logException(e)
             error = applicationContext.getString(
                 R.string.send_message_error_unknown)
             return null

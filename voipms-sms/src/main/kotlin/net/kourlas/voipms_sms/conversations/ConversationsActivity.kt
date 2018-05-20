@@ -43,9 +43,7 @@ import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.newconversation.NewConversationActivity
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.activities.PreferencesActivity
-import net.kourlas.voipms_sms.preferences.getSetupCompletedForVersion
 import net.kourlas.voipms_sms.preferences.isAccountActive
-import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
@@ -88,26 +86,6 @@ open class ConversationsActivity : AppCompatActivity(),
                 }
 
                 adapter.refresh()
-            }
-        }
-    private val pushNotificationsRegistrationCompleteReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val failedDids = intent?.getStringArrayListExtra(getString(
-                    R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids))
-                if (failedDids == null) {
-                    // Unknown error
-                    showInfoDialog(this@ConversationsActivity, getString(
-                        R.string.push_notifications_fail_unknown))
-                } else if (!failedDids.isEmpty()) {
-                    // Some DIDs failed registration
-                    showInfoDialog(this@ConversationsActivity, getString(
-                        R.string.push_notifications_fail_register))
-                }
-
-                // Regardless of whether an error occurred, mark setup as
-                // complete
-                setSetupCompletedForVersion(this@ConversationsActivity, 114)
             }
         }
 
@@ -190,19 +168,11 @@ open class ConversationsActivity : AppCompatActivity(),
         // Register dynamic receivers for this activity
         registerReceiver(syncCompleteReceiver,
                          IntentFilter(getString(R.string.sync_complete_action)))
-        registerReceiver(pushNotificationsRegistrationCompleteReceiver,
-                         IntentFilter(getString(
-                             R.string.push_notifications_reg_complete_action)))
 
         // Perform special setup for the first time running this app
         if (!isAccountActive(this)) {
             onFirstRun()
             return
-        }
-
-        // Perform special setup for version 114
-        if (getSetupCompletedForVersion(this) < 114) {
-            Notifications.getInstance(application).enablePushNotifications(this)
         }
 
         // Refresh and perform limited synchronization
@@ -250,8 +220,6 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Unregister all dynamic receivers for this activity
         safeUnregisterReceiver(this, syncCompleteReceiver)
-        safeUnregisterReceiver(this,
-                               pushNotificationsRegistrationCompleteReceiver)
 
         // Track number of activities
         (application as CustomApplication).conversationsActivityDecrementCount()

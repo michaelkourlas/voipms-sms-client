@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.sms.services
 import android.content.Context
 import android.content.Intent
 import android.support.v4.app.JobIntentService
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.isAccountActive
@@ -59,7 +58,6 @@ class MarkReadService : JobIntentService() {
             Notifications.getInstance(application).cancelNotification(
                 conversationId)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
         }
     }
 

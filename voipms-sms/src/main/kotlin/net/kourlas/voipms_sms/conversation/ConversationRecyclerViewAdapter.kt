@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2017 Michael Kourlas
+ * Copyright (C) 2015-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.QuickContactBadge
 import android.widget.TextView
-import com.crashlytics.android.Crashlytics
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
@@ -367,7 +366,6 @@ class ConversationRecyclerViewAdapter(
             results.values = messages
             results
         } catch (e: Exception) {
-            Crashlytics.logException(e)
             Filter.FilterResults()
         }
 

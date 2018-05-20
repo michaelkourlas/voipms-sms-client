@@ -75,18 +75,15 @@ class DatabasePreferencesFragment : PreferenceFragmentCompatDividers() {
 
         // Assign handlers to preferences
         for (preference in preferenceScreen.preferences) {
-            if (preference.key == getString(
-                    R.string.preferences_database_import_key)) {
-                preference.onPreferenceClickListener = importListener
-            } else if (preference.key == getString(
-                    R.string.preferences_database_export_key)) {
-                preference.onPreferenceClickListener = exportListener
-            } else if (preference.key == getString(
-                    R.string.preferences_database_clean_up_key)) {
-                preference.onPreferenceClickListener = cleanUpListener
-            } else if (preference.key == getString(
-                    R.string.preferences_database_delete_key)) {
-                preference.onPreferenceClickListener = deleteListener
+            when {
+                preference.key == getString(
+                    R.string.preferences_database_import_key) -> preference.onPreferenceClickListener = importListener
+                preference.key == getString(
+                    R.string.preferences_database_export_key) -> preference.onPreferenceClickListener = exportListener
+                preference.key == getString(
+                    R.string.preferences_database_clean_up_key) -> preference.onPreferenceClickListener = cleanUpListener
+                preference.key == getString(
+                    R.string.preferences_database_delete_key) -> preference.onPreferenceClickListener = deleteListener
             }
         }
     }

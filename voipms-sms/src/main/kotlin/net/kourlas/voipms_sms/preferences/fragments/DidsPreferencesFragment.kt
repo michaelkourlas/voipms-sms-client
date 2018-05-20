@@ -17,10 +17,7 @@
 
 package net.kourlas.voipms_sms.preferences.fragments
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v7.preference.Preference
 import android.view.LayoutInflater
@@ -28,17 +25,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity
 import net.kourlas.voipms_sms.preferences.controls.MasterSwitchPreference
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.setDids
-import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
-import net.kourlas.voipms_sms.sms.services.AppIndexingService
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
-import net.kourlas.voipms_sms.utils.runOnNewThread
-import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
-import net.kourlas.voipms_sms.utils.showSnackbar
 
 class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
     Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
@@ -54,32 +45,6 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
 
     // Map between preferences and DIDs to use in listeners
     private lateinit var preferenceDidMap: Map<Preference, String>
-
-    // Broadcast receivers
-    private val pushNotificationsRegistrationCompleteReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val activity = activity ?: return
-                // Show error if one occurred
-                val failedDids = intent?.getStringArrayListExtra(
-                    getString(
-                        R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids))
-                if (failedDids == null) {
-                    // Unknown error
-                    showSnackbar(activity, R.id.coordinator_layout, getString(
-                        R.string.push_notifications_fail_unknown))
-                } else if (!failedDids.isEmpty()) {
-                    // Some DIDs failed registration
-                    showSnackbar(activity, R.id.coordinator_layout, getString(
-                        R.string.push_notifications_fail_register))
-                }
-
-                // Regardless of whether an error occurred, mark setup as
-                // complete
-                setSetupCompletedForVersion(
-                    activity, 114)
-            }
-        }
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
@@ -126,13 +91,6 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
 
     override fun onResume() {
         super.onResume()
-        val activity = activity ?: return
-
-        // Register dynamic receivers for this fragment
-        activity.registerReceiver(
-            pushNotificationsRegistrationCompleteReceiver,
-            IntentFilter(getString(
-                R.string.push_notifications_reg_complete_action)))
 
         // Load DIDs and create preference for each
         if (!beforeFirstPreferenceLoad) {
@@ -145,16 +103,6 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
             }
         }
         beforeFirstPreferenceLoad = false
-    }
-
-    override fun onPause() {
-        super.onPause()
-        val activity = activity ?: return
-
-        // Unregister dynamic receivers for this fragment
-        safeUnregisterReceiver(
-            activity,
-            pushNotificationsRegistrationCompleteReceiver)
     }
 
     override fun onPreferenceClick(preference: Preference?): Boolean {
@@ -181,15 +129,6 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
             getDids(context).minus(did)
         }
         setDids(activity, dids)
-
-        if (dids.isNotEmpty()) {
-            // Re-register for push notifications when DIDs change
-            Notifications.getInstance(
-                activity.application).enablePushNotifications(activity)
-        }
-        runOnNewThread {
-            AppIndexingService.replaceIndex(activity)
-        }
 
         return true
     }

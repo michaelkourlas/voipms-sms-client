@@ -17,10 +17,6 @@
 
 package net.kourlas.voipms_sms.preferences.fragments
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v14.preference.SwitchPreference
 import android.support.v7.widget.SwitchCompat
@@ -30,43 +26,11 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
-import net.kourlas.voipms_sms.sms.services.AppIndexingService
 import net.kourlas.voipms_sms.utils.abortActivity
-import net.kourlas.voipms_sms.utils.runOnNewThread
-import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
-import net.kourlas.voipms_sms.utils.showSnackbar
 
 class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
     CompoundButton.OnCheckedChangeListener {
-
-    // Broadcast receivers
-    private val pushNotificationsRegistrationCompleteReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val activity = activity ?: return
-                // Show error if one occurred
-                val failedDids = intent?.getStringArrayListExtra(
-                    getString(
-                        R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids))
-                if (failedDids == null) {
-                    // Unknown error
-                    showSnackbar(activity, R.id.coordinator_layout, getString(
-                        R.string.push_notifications_fail_unknown))
-                } else if (!failedDids.isEmpty()) {
-                    // Some DIDs failed registration
-                    showSnackbar(activity, R.id.coordinator_layout, getString(
-                        R.string.push_notifications_fail_register))
-                }
-
-                // Regardless of whether an error occurred, mark setup as
-                // complete
-                setSetupCompletedForVersion(
-                    activity, 114)
-            }
-        }
-
     override fun onCheckedChanged(buttonView: CompoundButton?,
                                   isChecked: Boolean) {
         val activity = activity ?: return
@@ -86,15 +50,6 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
             getDids(context).minus(did)
         }
         setDids(activity, dids)
-
-        if (dids.isNotEmpty()) {
-            // Re-register for push notifications when DIDs change
-            Notifications.getInstance(
-                activity.application).enablePushNotifications(activity)
-        }
-        runOnNewThread {
-            AppIndexingService.replaceIndex(activity)
-        }
 
         updatePreferences()
     }
@@ -117,26 +72,9 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
 
     override fun onResume() {
         super.onResume()
-        val activity = activity ?: return
-
-        // Register dynamic receivers for this fragment
-        activity.registerReceiver(
-            pushNotificationsRegistrationCompleteReceiver,
-            IntentFilter(getString(
-                R.string.push_notifications_reg_complete_action)))
 
         // Update checked status for each preference
         updatePreferences()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        val activity = activity ?: return
-
-        // Unregister dynamic receivers for this fragment
-        safeUnregisterReceiver(
-            activity,
-            pushNotificationsRegistrationCompleteReceiver)
     }
 
     /**

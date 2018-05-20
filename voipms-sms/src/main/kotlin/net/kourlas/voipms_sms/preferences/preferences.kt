@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.preferences
 import android.content.Context
 import android.preference.PreferenceManager
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -125,14 +124,6 @@ fun getRetrieveOnlyRecentMessages(context: Context): Boolean =
             R.string.preferences_sync_retrieve_only_recent_messages_default_value)!!
             .toBoolean())
 
-fun getSetupCompletedForVersion(context: Context): Long =
-    getLongPreference(
-        context,
-        context.getString(R.string.preferences_setup_completed_for_version_key),
-        context.getString(
-            R.string.preferences_setup_completed_for_version_default_value)
-            .toLong())
-
 fun getStartDate(context: Context): Date {
     return try {
         try {
@@ -189,8 +180,6 @@ fun setDids(context: Context, dids: Set<String>) {
         setDidRetrieveMessages(context, did, true)
         setDidShowNotifications(context, did, true)
     }
-
-    subscribeToDidTopics(context)
 }
 
 fun setDidShowInConversationsView(context: Context, did: String,
@@ -256,19 +245,6 @@ fun setLastCompleteSyncTime(context: Context,
     setLongPreference(
         context, context.getString(
         R.string.preferences_sync_last_complete_time_key), lastCompleteSyncTime)
-
-fun setSetupCompletedForVersion(context: Context, version: Long) {
-    if (getLongPreference(context,
-                          context.getString(
-                              R.string.preferences_setup_completed_for_version_key),
-                          0) < version) {
-        setLongPreference(
-            context,
-            context.getString(
-                R.string.preferences_setup_completed_for_version_key),
-            version)
-    }
-}
 
 private fun getBooleanPreference(context: Context, key: String,
                                  default: Boolean): Boolean {

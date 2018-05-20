@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2017 Michael Kourlas
+ * Copyright (C) 2015-2018 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,18 +98,6 @@ class Message(val databaseId: Long, val voipId: Long?, date: Long,
      * delivered.
      */
     var isDeliveryInProgress: Boolean = toBoolean(isDeliveryInProgress)
-
-    /**
-     * Gets the URL that can be used to access this message.
-     */
-    val messageUrl: String
-        get() = getMessageUrl(databaseId)
-
-    /**
-     * Gets the URL that can be used to access the conversation.
-     */
-    val conversationUrl: String
-        get() = getConversationUrl(conversationId)
 
     fun conversationsViewCompareTo(other: Message): Int {
         if (this.contact == other.contact && this.did == other.did) {
@@ -260,26 +248,5 @@ class Message(val databaseId: Long, val voipId: Long?, date: Long,
         result = 31 * result + isDelivered.hashCode()
         result = 31 * result + isDeliveryInProgress.hashCode()
         return result
-    }
-
-    companion object {
-        /**
-         * Gets a URL used for Firebase indexing representing a single message.
-         *
-         * @param databaseId The database ID that uniquely identifies the
-         * specified message.
-         */
-        fun getMessageUrl(
-            databaseId: Long): String = "voipmssms://message?id=$databaseId"
-
-        /**
-         * Gets a URL used for Firebase indexing representing a single
-         * conversation.
-         *
-         * @param conversationId The ID of the specified conversation.
-         */
-        fun getConversationUrl(
-            conversationId: ConversationId): String = "voipmssms://conversation?did=${conversationId.did}" +
-                                                      "&contact=${conversationId.contact}"
     }
 }

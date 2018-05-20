@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.sms.services.SendMessageService
 
@@ -41,7 +40,6 @@ class SendMessageReceiver : BroadcastReceiver() {
             intent.setClass(context, SendMessageService::class.java)
             SendMessageService.startService(context, intent)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
         }
     }
 }
