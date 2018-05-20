@@ -153,21 +153,22 @@ class SyncService : IntentService(
         retrieveOnlyRecentMessages: Boolean): List<RetrievalRequest> {
         val retrievalRequests = mutableListOf<RetrievalRequest>()
 
+        val dids = getDids(applicationContext)
+            .filter { getDidRetrieveMessages(applicationContext, it) }
+            .toSet()
+
         val encodedEmail = URLEncoder.encode(getEmail(applicationContext),
                                              "UTF-8")
         val encodedPassword = URLEncoder.encode(getPassword(applicationContext),
                                                 "UTF-8")
-        val encodedDids = getDids(applicationContext)
-            .map { URLEncoder.encode(it, "UTF-8") }
+        val encodedDids = dids.map { URLEncoder.encode(it, "UTF-8") }
 
         // Get number of days between now and the message retrieval start
         // date or when the most recent message was received, as appropriate;
         // note that EDT is used throughout because the VoIP.ms API only works
         // with EDT
-        val mostRecentMessage = Database.getInstance(
-            applicationContext)
-            .getMessageMostRecent(
-                getDids(applicationContext))
+        val mostRecentMessage = Database.getInstance(applicationContext)
+            .getMessageMostRecent(dids)
         val thenCalendar = Calendar.getInstance(
             TimeZone.getTimeZone("America/New_York"), Locale.US)
         thenCalendar.time = if (mostRecentMessage == null
@@ -325,9 +326,11 @@ class SyncService : IntentService(
 
                 try {
                     val incomingMessage = IncomingMessage(
-                        rawSms.getString("id").toLong(), sdf.parse(rawDate),
+                        rawSms.getString("id").toLong(),
+                        sdf.parse(rawDate),
                         toBoolean(rawSms.getString("type")),
-                        rawSms.getString("did"), rawSms.getString("contact"),
+                        rawSms.getString("did"),
+                        rawSms.getString("contact"),
                         rawSms.getString("message"))
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {

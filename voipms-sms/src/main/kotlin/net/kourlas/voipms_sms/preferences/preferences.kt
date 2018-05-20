@@ -176,12 +176,12 @@ fun setDids(context: Context, dids: Set<String>) {
     for (did in newDids) {
         setDidShowInConversationsView(context, did, true)
         setDidRetrieveMessages(context, did, true)
-        setDidSendMessages(context, did, true)
+        setDidShowNotifications(context, did, true)
     }
     for (did in removedDids) {
         setDidShowInConversationsView(context, did, false)
         setDidRetrieveMessages(context, did, false)
-        setDidSendMessages(context, did, false)
+        setDidShowNotifications(context, did, false)
     }
 
     subscribeToDidTopics(context)
@@ -216,7 +216,7 @@ fun getDidRetrieveMessages(context: Context, did: String): Boolean =
                              R.string.preferences_did_retrieve_messages, did),
                          true)
 
-fun setDidSendMessages(context: Context, did: String, value: Boolean) {
+fun setDidShowNotifications(context: Context, did: String, value: Boolean) {
     setBooleanPreference(context, context.getString(
         R.string.preferences_did_show_notifications, did), value)
 }
