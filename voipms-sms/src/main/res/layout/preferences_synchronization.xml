@@ -30,16 +30,16 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
             android:background="@color/primary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:titleTextAppearance="@style/ToolbarTitle" />
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <FrameLayout
                 android:id="@+id/preferences_fragment_layout"
@@ -47,27 +47,27 @@
                 android:layout_height="wrap_content" />
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin"
-                android:layout_marginTop="@dimen/margin"
                 android:layout_marginEnd="@dimen/margin"
+                android:layout_marginTop="@dimen/margin"
+                android:orientation="horizontal"
                 tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin"
                     android:layout_marginEnd="@dimen/double_margin"
-                    android:src="@drawable/ic_info_outline_primary_dark_24dp"
-                    android:contentDescription="@null" />
+                    android:layout_marginStart="@dimen/margin"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_info_outline_primary_dark_24dp" />
 
                 <TextView
                     android:id="@+id/info_text_view"
-                    android:textIsSelectable="true"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:textIsSelectable="true" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

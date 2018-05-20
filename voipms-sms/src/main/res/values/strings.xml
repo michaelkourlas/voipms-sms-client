@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2017 Michael Kourlas
+  ~ Copyright (C) 2015-2018 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -30,19 +30,20 @@
     <!-- Phone numbers -->
     <string name="preferences_dids_category_name">Phone numbers</string>
     <string name="preferences_dids_info">The phone numbers you wish to use with this app must have SMS enabled. Otherwise, they will not appear in this list. Use the VoIP.ms &lt;a href="https://voip.ms/m/managedid.php"&gt;phone number configuration menu&lt;/a&gt; to enable SMS for your phone numbers.&lt;br&gt;&lt;br&gt;This app uses the SMS URL callback feature for push notifications and attempts to configure it automatically. If you need to complete this step manually, use the VoIP.ms phone number configuration menu to enable the callback feature for your phone numbers, entering the following URL into the associated field: https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}</string>
+
+    <string name="preferences_dids_did_key" translatable="false">did</string>
+    <string name="preferences_dids_key" translatable="false">dids</string>
+    <string name="preferences_dids_title">Phone numbers</string>
+    <string name="preferences_dids_error_network">Phone number retrieval failed: no network connection available</string>
+    <string name="preferences_dids_error_api_request">Phone number retrieval failed: request to VoIP.ms API failed</string>
+    <string name="preferences_dids_error_api_parse">Phone number retrieval failed: VoIP.ms API response could not be parsed</string>
+    <string name="preferences_dids_error_api_error">Phone number retrieval failed: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="preferences_dids_error_email">Phone number retrieval failed: email address not set</string>
+    <string name="preferences_dids_error_password">Phone number retrieval failed: password not set.</string>
+    <string name="preferences_dids_error_unknown">Phone number retrieval failed: unknown error</string>
+    <string name="preferences_dids_fragment_retrieved_dids_key">voipms_dids</string>
+    <string name="preferences_dids_fragment_database_dids_key">database_dids</string>
     <string name="preferences_did_did" translatable="false">did</string>
-    <string name="preferences_account_did_key" translatable="false">did</string>
-    <string name="preferences_account_dids_key" translatable="false">dids</string>
-    <string name="preferences_account_dids_title">Phone numbers</string>
-    <string name="preferences_account_dids_error_network">Phone number retrieval failed: no network connection available</string>
-    <string name="preferences_account_dids_error_api_request">Phone number retrieval failed: request to VoIP.ms API failed</string>
-    <string name="preferences_account_dids_error_api_parse">Phone number retrieval failed: VoIP.ms API response could not be parsed</string>
-    <string name="preferences_account_dids_error_api_error">Phone number retrieval failed: VoIP.ms API returned error \'%1$s\'</string>
-    <string name="preferences_account_dids_error_email">Phone number retrieval failed: email address not set</string>
-    <string name="preferences_account_dids_error_password">Phone number retrieval failed: password not set.</string>
-    <string name="preferences_account_dids_error_unknown">Phone number retrieval failed: unknown error</string>
-    <string name="preferences_account_dids_fragment_retrieved_dids_key">voipms_dids</string>
-    <string name="preferences_account_dids_fragment_database_dids_key">database_dids</string>
     <string name="preferences_did_show_in_conversations_view" translatable="false">preferences_did_%1$s_show_in_conversations_view</string>
     <string name="preferences_did_retrieve_messages" translatable="false">preferences_did_%1$s_retrieve_messages</string>
     <string name="preferences_did_show_notifications" translatable="false">preferences_did_%1$s_show_notifications</string>

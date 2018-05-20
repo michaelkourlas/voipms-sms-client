@@ -92,7 +92,7 @@ class AccountPreferencesFragment : PreferenceFragmentCompatDividers(),
     private fun updateSummaryTextForPreference(preference: Preference?) {
         val context = context ?: return
         if (preference?.key == getString(
-                R.string.preferences_account_dids_key)) {
+                R.string.preferences_dids_key)) {
             // Display list of selected DIDs as summary text
             val formattedDids = getDids(
                 context).map(::getFormattedPhoneNumber)

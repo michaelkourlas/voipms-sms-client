@@ -25,16 +25,16 @@
         <intent android:action=".preferences.SelectDidsActivity" />
     </android.support.v14.preference.SwitchPreference>
     <com.takisoft.fix.support.v7.preference.RingtonePreference
-        android:icon="@android:color/transparent"
         android:defaultValue="@string/preferences_notifications_sound_default_value"
         android:dependency="@string/preferences_notifications_enable_key"
+        android:icon="@android:color/transparent"
         android:key="@string/preferences_notifications_sound_key"
         android:ringtoneType="notification"
         android:title="@string/preferences_notifications_sound_title" />
     <android.support.v14.preference.SwitchPreference
-        android:icon="@android:color/transparent"
         android:defaultValue="@string/preferences_notifications_vibrate_default_value"
         android:dependency="@string/preferences_notifications_enable_key"
+        android:icon="@android:color/transparent"
         android:key="@string/preferences_notifications_vibrate_key"
         android:title="@string/preferences_notifications_vibrate_title" />
 </android.support.v7.preference.PreferenceScreen>

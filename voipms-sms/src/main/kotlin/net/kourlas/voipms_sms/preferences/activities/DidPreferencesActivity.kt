@@ -38,7 +38,7 @@ class DidPreferencesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Get DID from intent extras
-        val did = intent.getStringExtra(getString(R.string.conversation_did))
+        val did = intent.getStringExtra(getString(R.string.preferences_did_did))
         if (did == null) {
             abortActivity(this, Exception("Missing DID extra"))
         }

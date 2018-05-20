@@ -35,14 +35,14 @@ fun getConnectTimeout(context: Context): Int =
 
 fun getDids(context: Context): Set<String> {
     val did = getStringPreference(context, context.getString(
-        R.string.preferences_account_did_key), "")
+        R.string.preferences_dids_did_key), "")
     val default: Set<String> = if (did != "") {
         setOf(did)
     } else {
         emptySet()
     }
     return getStringSetPreference(context, context.getString(
-        R.string.preferences_account_dids_key), default)
+        R.string.preferences_dids_key), default)
 }
 
 fun getEmail(context: Context): String =
@@ -172,7 +172,7 @@ fun setDids(context: Context, dids: Set<String>) {
     val removedDids = currentDids.filter { it -> it !in dids }
 
     setStringSetPreference(context, context.getString(
-        R.string.preferences_account_dids_key), dids)
+        R.string.preferences_dids_key), dids)
     for (did in newDids) {
         setDidShowInConversationsView(context, did, true)
         setDidRetrieveMessages(context, did, true)

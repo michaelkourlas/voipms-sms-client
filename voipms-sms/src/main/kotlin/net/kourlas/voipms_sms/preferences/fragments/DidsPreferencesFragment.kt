@@ -93,11 +93,11 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
 
         // Retrieve all DIDs
         retrievedDids = arguments?.getStringArrayList(getString(
-            R.string.preferences_account_dids_fragment_retrieved_dids_key))
+            R.string.preferences_dids_fragment_retrieved_dids_key))
             ?.toSet()
             ?: emptySet()
         databaseDids = arguments?.getStringArrayList(getString(
-            R.string.preferences_account_dids_fragment_database_dids_key))
+            R.string.preferences_dids_fragment_database_dids_key))
             ?.toSet()
             ?: emptySet()
         activeDids = getDids(activity)

@@ -68,7 +68,7 @@ class DidsPreferencesActivity : AppCompatActivity() {
                         this@DidsPreferencesActivity,
                         R.id.coordinator_layout,
                         getString(
-                            R.string.preferences_account_dids_error_unknown))
+                            R.string.preferences_dids_error_unknown))
                 }
 
                 loadPreferences(retrievedDids)
@@ -133,19 +133,19 @@ class DidsPreferencesActivity : AppCompatActivity() {
         // available (avoid lengthy timeout)
         if (getEmail(this) == "") {
             showSnackbar(this, R.id.coordinator_layout, getString(
-                R.string.preferences_account_dids_error_email))
+                R.string.preferences_dids_error_email))
             loadPreferences(null)
             return
         }
         if (getPassword(this) == "") {
             showSnackbar(this, R.id.coordinator_layout, getString(
-                R.string.preferences_account_dids_error_password))
+                R.string.preferences_dids_error_password))
             loadPreferences(null)
             return
         }
         if (!isNetworkConnectionAvailable(this)) {
             showSnackbar(this, R.id.coordinator_layout, getString(
-                R.string.preferences_account_dids_error_network))
+                R.string.preferences_dids_error_network))
             loadPreferences(null)
             return
         }
@@ -175,11 +175,11 @@ class DidsPreferencesActivity : AppCompatActivity() {
         val bundle = Bundle()
         bundle.putStringArrayList(getString(
             R.string
-                .preferences_account_dids_fragment_retrieved_dids_key),
+                .preferences_dids_fragment_retrieved_dids_key),
                                   retrievedDids)
         bundle.putStringArrayList(getString(
             R.string
-                .preferences_account_dids_fragment_database_dids_key),
+                .preferences_dids_fragment_database_dids_key),
                                   ArrayList(databaseDids))
 
         fragment = DidsPreferencesFragment()

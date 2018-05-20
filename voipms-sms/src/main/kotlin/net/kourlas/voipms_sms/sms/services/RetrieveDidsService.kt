@@ -109,17 +109,17 @@ class RetrieveDidsService : IntentService(
             response = getJson(applicationContext, retrieveDidsUrl)
         } catch (e: IOException) {
             error = applicationContext.getString(
-                R.string.preferences_account_dids_error_api_request)
+                R.string.preferences_dids_error_api_request)
             return null
         } catch (e: JSONException) {
             Crashlytics.logException(e)
             error = applicationContext.getString(
-                R.string.preferences_account_dids_error_api_parse)
+                R.string.preferences_dids_error_api_parse)
             return null
         } catch (e: Exception) {
             Crashlytics.logException(e)
             error = applicationContext.getString(
-                R.string.preferences_account_dids_error_unknown)
+                R.string.preferences_dids_error_unknown)
             return null
         }
         return response
@@ -137,7 +137,7 @@ class RetrieveDidsService : IntentService(
             val status = response.getString("status")
             if (status != "success") {
                 error = getString(
-                    R.string.preferences_account_dids_error_api_error, status)
+                    R.string.preferences_dids_error_api_error, status)
                 return null
             }
 
@@ -151,7 +151,7 @@ class RetrieveDidsService : IntentService(
                 .mapTo(dids) { it.getString("did") }
         } catch (e: JSONException) {
             error = getString(
-                R.string.preferences_account_dids_error_api_parse)
+                R.string.preferences_dids_error_api_parse)
             return null
         }
 

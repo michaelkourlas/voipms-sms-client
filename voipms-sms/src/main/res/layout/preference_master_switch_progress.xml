@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2017 Michael Kourlas
+  ~ Copyright (C) 2017-2018 Michael Kourlas
   ~ Portions copyright (C) 2017 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,20 +19,22 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/switch_widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clickable="false"
         android:gravity="center_vertical"
-        android:paddingStart="?android:attr/listPreferredItemPaddingEnd"
         android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-        android:clickable="false" />
+        android:paddingStart="?android:attr/listPreferredItemPaddingEnd" />
+
     <ProgressBar
-        android:visibility="gone"
         android:id="@+id/progress_bar_widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
         android:paddingStart="?android:attr/listPreferredItemPaddingEnd"
-        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd" />
+        android:visibility="gone" />
 </FrameLayout>

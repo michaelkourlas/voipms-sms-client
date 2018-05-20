@@ -17,10 +17,10 @@
 
 <android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <android.support.v7.preference.ListPreference
-        android:icon="@android:color/transparent"
         android:defaultValue="@string/preferences_sync_interval_default_value"
         android:entries="@array/preferences_sync_interval_entries"
         android:entryValues="@array/preferences_sync_interval_values"
+        android:icon="@android:color/transparent"
         android:key="@string/preferences_sync_interval_key"
         android:title="@string/preferences_sync_interval_title" />
     <com.takisoft.fix.support.v7.preference.DatePickerPreference
@@ -29,14 +29,14 @@
         android:numeric="integer"
         android:title="@string/preferences_sync_start_date_title" />
     <android.support.v14.preference.SwitchPreference
-        android:icon="@android:color/transparent"
         android:defaultValue="@string/preferences_sync_retrieve_only_recent_messages_default_value"
+        android:icon="@android:color/transparent"
         android:key="@string/preferences_sync_retrieve_only_recent_messages_key"
         android:summary="@string/preferences_sync_retrieve_only_recent_messages_summary"
         android:title="@string/preferences_sync_retrieve_only_recent_messages_title" />
     <android.support.v14.preference.SwitchPreference
-        android:icon="@android:color/transparent"
         android:defaultValue="@string/preferences_sync_retrieve_deleted_messages_default_value"
+        android:icon="@android:color/transparent"
         android:key="@string/preferences_sync_retrieve_deleted_messages_key"
         android:summary="@string/preferences_sync_retrieve_deleted_messages_summary"
         android:title="@string/preferences_sync_retrieve_deleted_messages_title" />
