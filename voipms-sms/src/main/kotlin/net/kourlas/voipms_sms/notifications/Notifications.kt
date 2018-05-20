@@ -184,7 +184,8 @@ class Notifications private constructor(
                 if (index != -1) {
                     val did = notificationChannel.id.substring(index)
                     if (did !in dids) {
-
+                        notificationManager.deleteNotificationChannel(
+                            notificationChannel.id)
                     }
                 }
             }
