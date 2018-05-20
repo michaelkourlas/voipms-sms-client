@@ -9,8 +9,8 @@
   * [Network](#network)
   * [Database](#database)
 * [Donations](#donations)
-* [Contacting the Developer](#contacting-the-developer)
 * [Reporting Bugs](#reporting-bugs)
+* [Contacting the Developer](#contacting-the-developer)
 
 # Quick Start
 
