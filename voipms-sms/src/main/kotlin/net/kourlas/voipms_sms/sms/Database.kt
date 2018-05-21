@@ -1110,7 +1110,7 @@ class Database private constructor(private val context: Context) {
                     it
                 }
             }
-            if (!added) {
+            if (!added && draftMessage.did in dids) {
                 allMessages.add(0, draftMessage)
             }
         }
