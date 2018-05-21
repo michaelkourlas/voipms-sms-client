@@ -465,6 +465,7 @@ class Database private constructor(private val context: Context) {
                     database.delete(TABLE_DRAFT,
                                     "$COLUMN_DATABASE_ID=?",
                                     arrayOf(databaseId.toString()))
+                    database.setTransactionSuccessful()
                 }
                 return
             }
@@ -1048,7 +1049,7 @@ class Database private constructor(private val context: Context) {
             ""
         }
 
-        val allMessages = mutableListOf<Message>()
+        var allMessages = mutableListOf<Message>()
         for (did in dids) {
             // First, retrieve the most recent message for each
             // conversation, filtering only on the DID phone number,
@@ -1102,14 +1103,14 @@ class Database private constructor(private val context: Context) {
                                                      filterConstraint)
         for (draftMessage in draftMessages) {
             var added = false
-            allMessages.map {
+            allMessages = allMessages.map {
                 if (it.conversationId == draftMessage.conversationId) {
                     added = true
                     draftMessage
                 } else {
                     it
                 }
-            }
+            }.toMutableList()
             if (!added && draftMessage.did in dids) {
                 allMessages.add(0, draftMessage)
             }
