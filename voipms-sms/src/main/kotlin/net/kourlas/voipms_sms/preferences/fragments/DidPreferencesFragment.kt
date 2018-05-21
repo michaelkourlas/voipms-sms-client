@@ -91,17 +91,18 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
         val showInConversationsViewPreference =
             preferenceScreen.getPreference(0) as SwitchPreference
         showInConversationsViewPreference.key =
-            getString(R.string.preferences_did_show_in_conversations_view, did)
+            getString(R.string.preferences_did_show_in_conversations_view_key,
+                      did)
 
         val retrieveMessagesPreference =
             preferenceScreen.getPreference(1) as SwitchPreference
         retrieveMessagesPreference.key =
-            getString(R.string.preferences_did_retrieve_messages, did)
+            getString(R.string.preferences_did_retrieve_messages_key, did)
 
         val showNotificationsPreference =
             preferenceScreen.getPreference(2) as SwitchPreference
         showNotificationsPreference.key =
-            getString(R.string.preferences_did_show_notifications, did)
+            getString(R.string.preferences_did_show_notifications_key, did)
     }
 
     /**

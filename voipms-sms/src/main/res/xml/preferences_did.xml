@@ -20,11 +20,11 @@
          must be reflected in DidPreferencesFragment.kt -->
     <android.support.v14.preference.SwitchPreference
         android:icon="@android:color/transparent"
-        android:title="Show in conversations view" />
+        android:title="@string/preferences_did_show_in_conversations_view_title" />
     <android.support.v14.preference.SwitchPreference
         android:icon="@android:color/transparent"
-        android:title="Retrieve messages" />
+        android:title="@string/preferences_did_retrieve_messages_title" />
     <android.support.v14.preference.SwitchPreference
         android:icon="@android:color/transparent"
-        android:title="Show notifications" />
+        android:title="@string/preferences_did_show_notifications_title" />
 </android.support.v7.preference.PreferenceScreen>

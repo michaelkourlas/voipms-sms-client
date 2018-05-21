@@ -577,7 +577,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private fun onNotificationsButtonClick(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notifications.getInstance(application).createDidNotificationChannel(
-                contact, did)
+                did, contact)
 
             val intent = Intent(
                 Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)

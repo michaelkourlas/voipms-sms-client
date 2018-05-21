@@ -186,7 +186,7 @@ fun setDidShowInConversationsView(context: Context, did: String,
                                   value: Boolean) {
     setBooleanPreference(context,
                          context.getString(
-                             R.string.preferences_did_show_in_conversations_view,
+                             R.string.preferences_did_show_in_conversations_view_key,
                              did),
                          value)
 }
@@ -199,7 +199,7 @@ fun getDidShowInConversationsView(context: Context, did: String): Boolean {
     return getBooleanPreference(
         context,
         context.getString(
-            R.string.preferences_did_show_in_conversations_view,
+            R.string.preferences_did_show_in_conversations_view_key,
             did),
         true)
 }
@@ -207,7 +207,8 @@ fun getDidShowInConversationsView(context: Context, did: String): Boolean {
 fun setDidRetrieveMessages(context: Context, did: String, value: Boolean) {
     setBooleanPreference(context,
                          context.getString(
-                             R.string.preferences_did_retrieve_messages, did),
+                             R.string.preferences_did_retrieve_messages_key,
+                             did),
                          value)
 }
 
@@ -219,13 +220,13 @@ fun getDidRetrieveMessages(context: Context, did: String): Boolean {
     return getBooleanPreference(
         context,
         context.getString(
-            R.string.preferences_did_retrieve_messages, did),
+            R.string.preferences_did_retrieve_messages_key, did),
         true)
 }
 
 fun setDidShowNotifications(context: Context, did: String, value: Boolean) {
     setBooleanPreference(context, context.getString(
-        R.string.preferences_did_show_notifications, did), value)
+        R.string.preferences_did_show_notifications_key, did), value)
 }
 
 fun getDidShowNotifications(context: Context, did: String): Boolean {
@@ -236,7 +237,7 @@ fun getDidShowNotifications(context: Context, did: String): Boolean {
     return getBooleanPreference(
         context,
         context.getString(
-            R.string.preferences_did_show_notifications, did),
+            R.string.preferences_did_show_notifications_key, did),
         true)
 }
 
