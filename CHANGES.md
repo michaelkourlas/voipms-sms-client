@@ -1,3 +1,7 @@
+## 0.6.1 ##
+
+* Bug fixes
+
 ## 0.6.0 ##
 
 * Add support for Android O notification features
