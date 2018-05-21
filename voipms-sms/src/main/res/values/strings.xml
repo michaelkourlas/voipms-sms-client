@@ -42,9 +42,12 @@
     <string name="preferences_dids_fragment_retrieved_dids_key">voipms_dids</string>
     <string name="preferences_dids_fragment_database_dids_key">database_dids</string>
     <string name="preferences_did_did" translatable="false">did</string>
-    <string name="preferences_did_show_in_conversations_view" translatable="false">preferences_did_%1$s_show_in_conversations_view</string>
-    <string name="preferences_did_retrieve_messages" translatable="false">preferences_did_%1$s_retrieve_messages</string>
-    <string name="preferences_did_show_notifications" translatable="false">preferences_did_%1$s_show_notifications</string>
+    <string name="preferences_did_show_in_conversations_view_key" translatable="false">preferences_did_%1$s_show_in_conversations_view</string>
+    <string name="preferences_did_show_in_conversations_view_title">Show in conversations view</string>
+    <string name="preferences_did_retrieve_messages_key" translatable="false">preferences_did_%1$s_retrieve_messages</string>
+    <string name="preferences_did_retrieve_messages_title">Retrieve messages</string>
+    <string name="preferences_did_show_notifications_key" translatable="false">preferences_did_%1$s_show_notifications</string>
+    <string name="preferences_did_show_notifications_title">Show notifications</string>
     <string name="preferences_did_fragment_argument_did">did</string>
 
     <!-- Synchronization -->
@@ -121,7 +124,7 @@
 
     <!-- ConversationActivity -->
     <string name="conversation_action_call">Make a call</string>
-    <string name="conversation_action_notifications">Make a call</string>
+    <string name="conversation_action_notifications">Notifications</string>
     <string name="conversation_action_resend">Resend</string>
     <string name="conversation_action_did">DID: %1$s</string>
     <string name="conversation_action_search">Search</string>
@@ -282,12 +285,13 @@
     <string name="notifications_button_mark_read">Mark Read</string>
     <string name="notifications_channel_group_other">channel_group_other</string>
     <string name="notifications_channel_group_other_title">Other</string>
-    <string name="notifications_channel_group_did">channel_group_%1$s</string>
+    <string name="notifications_channel_group_did">channel_group_did_%1$s</string>
     <string name="notifications_channel_sync">channel_sync</string>
     <string name="notifications_channel_sync_title">Synchronization</string>
     <string name="notifications_channel_default">channel_default</string>
     <string name="notifications_channel_default_title">Default</string>
-    <string name="notifications_channel_contact">channel_%1$s_%2$s</string>
+    <string name="notifications_channel_contact_prefix">channel_did_contact_</string>
+    <string name="notifications_channel_contact">channel_did_contact_%1$s_%2$s</string>
     <string name="notifications_sync_message">Synchronizing with VoIP.ms</string>
 
     <!-- UTILS -->

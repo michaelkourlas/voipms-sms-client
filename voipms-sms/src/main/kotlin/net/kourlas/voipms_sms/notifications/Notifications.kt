@@ -83,11 +83,11 @@ class Notifications private constructor(
                 getFormattedPhoneNumber(did))
             notificationManager.createNotificationChannelGroup(channelGroup)
 
-            val contactName = getContactName(context, did)
+            val contactName = getContactName(context, contact)
             val channel = NotificationChannel(
                 context.getString(R.string.notifications_channel_contact,
                                   contact, did),
-                contactName ?: getFormattedPhoneNumber(did),
+                contactName ?: getFormattedPhoneNumber(contact),
                 defaultChannel.importance)
             channel.enableLights(defaultChannel.shouldShowLights())
             channel.lightColor = defaultChannel.lightColor
@@ -170,22 +170,63 @@ class Notifications private constructor(
     }
 
     /**
-     * Delete notification channels for DIDs that are no longer active.
+     * Rename notification channels for changed contact numbers.
      */
-    fun deleteNotificationChannels() {
+    fun renameNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val dids = getDids(context)
             val notificationManager = context.getSystemService(
                 NotificationManager::class.java)
-            for (notificationChannel in notificationManager.notificationChannels) {
-                val index = notificationChannel.id.indexOf(
-                    context.getString(R.string.notifications_channel_group_did,
-                                      ""))
-                if (index != -1) {
-                    val did = notificationChannel.id.substring(index)
-                    if (did !in dids) {
+
+            // Rename all channels
+            for (channel in notificationManager.notificationChannels) {
+                if (channel.id.startsWith(context.getString(
+                        R.string.notifications_channel_contact_prefix))) {
+                    val contact = channel.id.split("_")[4]
+                    val contactName = getContactName(context, contact)
+                    channel.name = contactName ?: getFormattedPhoneNumber(
+                        contact)
+                    notificationManager.createNotificationChannel(channel)
+                }
+
+            }
+        }
+    }
+
+    /**
+     * Delete notification channels for conversations that are no longer active.
+     */
+    fun deleteNotificationChannelsAndGroups() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager = context.getSystemService(
+                NotificationManager::class.java)
+
+            // Remove any channel for which there is no conversation with
+            // notifications enabled in the database
+            val conversationIds = Database.getInstance(context)
+                .getConversationIds(
+                    getDids(context, onlyShowNotifications = true))
+            for (channel in notificationManager.notificationChannels) {
+                if (channel.id.startsWith(context.getString(
+                        R.string.notifications_channel_contact_prefix))) {
+                    val splitId = channel.id.split("_")
+                    val conversationId = ConversationId(splitId[3], splitId[4])
+                    if (conversationId !in conversationIds) {
                         notificationManager.deleteNotificationChannel(
-                            notificationChannel.id)
+                            channel.id)
+                    }
+                }
+            }
+
+            // Remove any channel for which there is no conversation with
+            // notifications enabled in the database
+            val dids = conversationIds.map { it.did }.toSet()
+            for (group in notificationManager.notificationChannelGroups) {
+                if (group.id.startsWith(context.getString(
+                        R.string.notifications_channel_group_did, ""))) {
+                    val did = group.id.split("_")[3]
+                    if (did !in dids) {
+                        notificationManager.deleteNotificationChannelGroup(
+                            group.id)
                     }
                 }
             }

@@ -186,9 +186,21 @@ class Database private constructor(private val context: Context) {
     }
 
     /**
+     * Gets all conversation IDs in the database associated with the specified
+     * DIDs.
+     */
+    fun getConversationIds(
+        dids: Set<String>): Set<ConversationId> = synchronized(this)
+    {
+        return getMessagesMostRecentFilteredWithoutLock(dids)
+            .map { it.conversationId }
+            .toSet()
+    }
+
+    /**
      * Gets all DIDs used in the database.
      */
-    fun getDids(): List<String> = synchronized(this) {
+    fun getDids(): Set<String> = synchronized(this) {
         val cursor = database.query(
             true, TABLE_MESSAGE, arrayOf(COLUMN_DID),
             null, null, null, null, null, null)
@@ -199,7 +211,7 @@ class Database private constructor(private val context: Context) {
             cursor.moveToNext()
         }
         cursor.close()
-        return dids
+        return dids.toSet()
     }
 
     /**
@@ -282,7 +294,7 @@ class Database private constructor(private val context: Context) {
     /**
      * Gets the most recent message in each conversation associated with the
      * specified DIDs that matches a specified filter constraint. The resulting
-     * list is sorted by date, from  most recent to least recent.
+     * list is sorted by date, from most recent to least recent.
      */
     fun getMessagesMostRecentFiltered(
         dids: Set<String>,
@@ -290,88 +302,8 @@ class Database private constructor(private val context: Context) {
         contactNameCache: MutableMap<String,
             String>? = null): List<Message> = synchronized(this)
     {
-        val queryParams = mutableListOf("%$filterConstraint%")
-        val numberFilterConstraint = getDigitsOfString(filterConstraint)
-        if (numberFilterConstraint != "") {
-            val numericFilterString = "%$numberFilterConstraint%"
-            queryParams.add(numericFilterString)
-            queryParams.add(numericFilterString)
-        }
-        val numericFilterStringQuery = if (numberFilterConstraint != "") {
-            "OR $COLUMN_CONTACT LIKE ? OR $COLUMN_DID LIKE ?"
-        } else {
-            ""
-        }
-
-        val allMessages = mutableListOf<Message>()
-        for (did in dids) {
-            // First, retrieve the most recent message for each
-            // conversation, filtering only on the DID phone number,
-            // contact phone number and message text
-            var query = ("SELECT * FROM $TABLE_MESSAGE a INNER JOIN"
-                         + " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT,"
-                         + " MAX($COLUMN_DATE)"
-                         + " AS $COLUMN_DATE FROM $TABLE_MESSAGE"
-                         + " WHERE ($COLUMN_MESSAGE LIKE ?"
-                         + " COLLATE NOCASE $numericFilterStringQuery)"
-                         + " AND $COLUMN_DID=? GROUP BY $COLUMN_CONTACT)"
-                         + " b on a.$COLUMN_DATABASE_ID=b.$COLUMN_DATABASE_ID"
-                         + " AND a.$COLUMN_DATE=b.$COLUMN_DATE"
-                         + " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID"
-                         + " DESC")
-            var cursor = database.rawQuery(query,
-                                           queryParams.plus(did).toTypedArray())
-            val messages = getMessagesCursor(cursor)
-
-            // Then, retrieve the most recent message for each conversation
-            // without filtering; if any conversation present in the second
-            // list is not present in the first list, filter the message in
-            // the second list on contact name and add it to the first list
-            // if there is a match
-            query = ("SELECT * FROM $TABLE_MESSAGE a INNER JOIN"
-                     + " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT,"
-                     + " MAX($COLUMN_DATE)"
-                     + " AS $COLUMN_DATE FROM $TABLE_MESSAGE"
-                     + " WHERE $COLUMN_DID=? GROUP BY $COLUMN_CONTACT)"
-                     + " b on a.$COLUMN_DATABASE_ID=b.$COLUMN_DATABASE_ID"
-                     + " AND a.$COLUMN_DATE=b.$COLUMN_DATE"
-                     + " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID DESC")
-            cursor = database.rawQuery(query, arrayOf(did))
-            messages.addAll(
-                getMessagesCursor(cursor)
-                    .filterNot { it.contact in messages.map { it.contact } }
-                    .filter {
-                        val contactName = getContactName(context,
-                                                         it.contact,
-                                                         contactNameCache)
-                        contactName?.toLowerCase()?.contains(
-                            filterConstraint)
-                        ?: false
-                    })
-
-            allMessages.addAll(messages)
-        }
-
-        // Replace messages with any applicable draft messages
-        val draftMessages = getMessagesDraftFiltered(dids,
-                                                     filterConstraint)
-        for (draftMessage in draftMessages) {
-            var added = false
-            allMessages.map {
-                if (it.conversationId == draftMessage.conversationId) {
-                    added = true
-                    draftMessage
-                } else {
-                    it
-                }
-            }
-            if (!added) {
-                allMessages.add(0, draftMessage)
-            }
-        }
-
-        allMessages.sort()
-        return allMessages
+        return getMessagesMostRecentFilteredWithoutLock(dids, filterConstraint,
+                                                        contactNameCache)
     }
 
     /**
@@ -1091,6 +1023,100 @@ class Database private constructor(private val context: Context) {
         return getMessagesDraft(dids)
             .filter { it.text.toLowerCase().contains(filterConstraint) }
             .toMutableList()
+    }
+
+    /**
+     * Gets the most recent message in each conversation associated with the
+     * specified DIDs that matches a specified filter constraint. The resulting
+     * list is sorted by date, from most recent to least recent.
+     */
+    private fun getMessagesMostRecentFilteredWithoutLock(
+        dids: Set<String>,
+        filterConstraint: String = "",
+        contactNameCache: MutableMap<String,
+            String>? = null): List<Message> {
+        val queryParams = mutableListOf("%$filterConstraint%")
+        val numberFilterConstraint = getDigitsOfString(filterConstraint)
+        if (numberFilterConstraint != "") {
+            val numericFilterString = "%$numberFilterConstraint%"
+            queryParams.add(numericFilterString)
+            queryParams.add(numericFilterString)
+        }
+        val numericFilterStringQuery = if (numberFilterConstraint != "") {
+            "OR $COLUMN_CONTACT LIKE ? OR $COLUMN_DID LIKE ?"
+        } else {
+            ""
+        }
+
+        val allMessages = mutableListOf<Message>()
+        for (did in dids) {
+            // First, retrieve the most recent message for each
+            // conversation, filtering only on the DID phone number,
+            // contact phone number and message text
+            var query = ("SELECT * FROM $TABLE_MESSAGE a INNER JOIN"
+                         + " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT,"
+                         + " MAX($COLUMN_DATE)"
+                         + " AS $COLUMN_DATE FROM $TABLE_MESSAGE"
+                         + " WHERE ($COLUMN_MESSAGE LIKE ?"
+                         + " COLLATE NOCASE $numericFilterStringQuery)"
+                         + " AND $COLUMN_DID=? GROUP BY $COLUMN_CONTACT)"
+                         + " b on a.$COLUMN_DATABASE_ID=b.$COLUMN_DATABASE_ID"
+                         + " AND a.$COLUMN_DATE=b.$COLUMN_DATE"
+                         + " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID"
+                         + " DESC")
+            var cursor = database.rawQuery(query,
+                                           queryParams.plus(did).toTypedArray())
+            val messages = getMessagesCursor(cursor)
+
+            // Then, retrieve the most recent message for each conversation
+            // without filtering; if any conversation present in the second
+            // list is not present in the first list, filter the message in
+            // the second list on contact name and add it to the first list
+            // if there is a match
+            query = ("SELECT * FROM $TABLE_MESSAGE a INNER JOIN"
+                     + " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT,"
+                     + " MAX($COLUMN_DATE)"
+                     + " AS $COLUMN_DATE FROM $TABLE_MESSAGE"
+                     + " WHERE $COLUMN_DID=? GROUP BY $COLUMN_CONTACT)"
+                     + " b on a.$COLUMN_DATABASE_ID=b.$COLUMN_DATABASE_ID"
+                     + " AND a.$COLUMN_DATE=b.$COLUMN_DATE"
+                     + " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID DESC")
+            cursor = database.rawQuery(query, arrayOf(did))
+            messages.addAll(
+                getMessagesCursor(cursor)
+                    .filterNot { it.contact in messages.map { it.contact } }
+                    .filter {
+                        val contactName = getContactName(context,
+                                                         it.contact,
+                                                         contactNameCache)
+                        contactName?.toLowerCase()?.contains(
+                            filterConstraint)
+                        ?: false
+                    })
+
+            allMessages.addAll(messages)
+        }
+
+        // Replace messages with any applicable draft messages
+        val draftMessages = getMessagesDraftFiltered(dids,
+                                                     filterConstraint)
+        for (draftMessage in draftMessages) {
+            var added = false
+            allMessages.map {
+                if (it.conversationId == draftMessage.conversationId) {
+                    added = true
+                    draftMessage
+                } else {
+                    it
+                }
+            }
+            if (!added) {
+                allMessages.add(0, draftMessage)
+            }
+        }
+
+        allMessages.sort()
+        return allMessages
     }
 
     /**
