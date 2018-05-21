@@ -52,7 +52,7 @@
 
     <!-- Synchronization -->
     <string name="preferences_sync_category_name">Synchronization</string>
-    <string name="preferences_sync_info">Since you are using the F-Droid version of the app, it is necessary to schedule automatic synchronizations simply to retrieve new messages.</string>
+    <string name="preferences_sync_info">Since you are using the F-Droid version of the app, it is necessary to schedule automatic synchronizations to retrieve new messages.</string>
     <string name="preferences_sync_interval_key" translatable="false">sync_interval</string>
     <string name="preferences_sync_interval_title">Synchronization interval</string>
     <string name="preferences_sync_interval_default_value" translatable="false">0</string>
