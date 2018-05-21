@@ -76,7 +76,7 @@ class Database private constructor(private val context: Context) {
         try {
             database.beginTransaction()
 
-            val query = dids.joinToString(" AND ") { "$it!=?" }
+            val query = dids.joinToString(" AND ") { "$COLUMN_DID!=?" }
             val queryArgs = dids.toTypedArray()
             database.delete(TABLE_MESSAGE, query, queryArgs)
             database.delete(TABLE_DELETED, query, queryArgs)
@@ -233,7 +233,7 @@ class Database private constructor(private val context: Context) {
             database.query(
                 TABLE_MESSAGE,
                 messageColumns,
-                dids.joinToString(" OR ") { "$it=?" },
+                dids.joinToString(" OR ") { "$COLUMN_DID=?" },
                 dids.toTypedArray(),
                 null, null,
                 "$COLUMN_DATE DESC", "1"))
@@ -252,7 +252,7 @@ class Database private constructor(private val context: Context) {
             database.query(
                 TABLE_MESSAGE,
                 messageColumns,
-                dids.joinToString(" OR ") { "$it=?" },
+                dids.joinToString(" OR ") { "$COLUMN_DID=?" },
                 dids.toTypedArray(),
                 null, null,
                 "$COLUMN_DATABASE_ID DESC"))
@@ -1059,7 +1059,7 @@ class Database private constructor(private val context: Context) {
         val cursor = database.query(
             TABLE_DRAFT,
             draftColumns,
-            dids.joinToString(" OR ") { "$it=?" },
+            dids.joinToString(" OR ") { "$COLUMN_DID=?" },
             dids.toTypedArray(),
             null, null,
             "$COLUMN_DID DESC, $COLUMN_CONTACT DESC")
@@ -1142,7 +1142,8 @@ class Database private constructor(private val context: Context) {
     private fun removeDeletedVoipId(dids: Set<String>, voipId: Long) {
         database.delete(
             TABLE_DELETED,
-            "(${dids.joinToString(" OR ") { "$it=?" }}) AND $COLUMN_VOIP_ID=?",
+            "(${dids.joinToString(" OR ") { "$COLUMN_DID=?" }})"
+            + " AND $COLUMN_VOIP_ID=?",
             dids.plus(voipId.toString()).toTypedArray())
     }
 
