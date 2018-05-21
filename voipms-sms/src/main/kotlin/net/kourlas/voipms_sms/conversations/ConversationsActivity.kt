@@ -220,6 +220,8 @@ open class ConversationsActivity : AppCompatActivity(),
         // Delete any notification channels and groups that are no longer
         // needed and rename existing channels if necessary
         Notifications.getInstance(application)
+            .createDefaultNotificationChannel()
+        Notifications.getInstance(application)
             .deleteNotificationChannelsAndGroups()
         Notifications.getInstance(application).renameNotificationChannels()
     }

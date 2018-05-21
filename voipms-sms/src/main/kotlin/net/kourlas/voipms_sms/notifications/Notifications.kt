@@ -67,7 +67,7 @@ class Notifications private constructor(
      * Attempts to create a notification channel for the specified DID.
      * Does nothing if this channel does not already exist.
      */
-    fun createDidNotificationChannel(contact: String, did: String) {
+    fun createDidNotificationChannel(did: String, contact: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create the default notification channel if it doesn't already
             // exist
@@ -86,7 +86,7 @@ class Notifications private constructor(
             val contactName = getContactName(context, contact)
             val channel = NotificationChannel(
                 context.getString(R.string.notifications_channel_contact,
-                                  contact, did),
+                                  did, contact),
                 contactName ?: getFormattedPhoneNumber(contact),
                 defaultChannel.importance)
             channel.enableLights(defaultChannel.shouldShowLights())
