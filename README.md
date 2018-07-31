@@ -7,6 +7,8 @@
 VoIP.ms SMS is an Android messaging app for VoIP.ms that seeks to replicate the
 aesthetic of [Android Messages](https://play.google.com/store/apps/details?id=com.google.android.apps.messaging).
 
+<a href='https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="100"/></a> <a href="https://f-droid.org/app/net.kourlas.voipms_sms"><img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="100"></a>
+
 ## Rationale ##
 
 A number of people use VoIP.ms as a cheaper alternative to subscribing to a
@@ -33,12 +35,10 @@ possible with a dedicated app.
 
 ## Installation ##
 
-The application is available on the [Google Play Store](https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms).
-
 The standard version of the application uses closed-source Firebase libraries 
 to support push notifications and facilitate crash reporting and analytics, 
 among other purposes. A version of the application that is completely open 
-source is available from [F-Droid](https://f-droid.org/repository/browse/?fdid=net.kourlas.voipms_sms).
+source is available from F-Droid.
 
 Both versions are available from the [Releases section](https://github.com/michaelkourlas/voipms-sms-client/releases) 
 of the GitHub repository.
