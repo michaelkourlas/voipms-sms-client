@@ -1,7 +1,9 @@
 ## 0.6.2 ##
 
 * New logo
-* Changes to color scheme, text placement, fonts
+* Changes to conversations and conversation view layout
+* Changes to color scheme and fonts
+* Bug fixes
 
 ## 0.6.1 ##
 

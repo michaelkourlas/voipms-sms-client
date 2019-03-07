@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.conversations
 
+import android.animation.ValueAnimator
 import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -334,8 +335,17 @@ open class ConversationsActivity : AppCompatActivity(),
         val inflater = mode.menuInflater
         inflater.inflate(R.menu.conversations_secondary, menu)
 
-        window.statusBarColor = ContextCompat.getColor(
-            applicationContext, R.color.colorSecondaryDark)
+        val colorAnimation = ValueAnimator.ofArgb(
+            ContextCompat.getColor(applicationContext,
+                                   R.color.colorPrimaryDark),
+            ContextCompat.getColor(applicationContext,
+                                   R.color.colorSecondaryDark))
+        colorAnimation.duration = applicationContext.resources.getInteger(
+            android.R.integer.config_longAnimTime).toLong()
+        colorAnimation.addUpdateListener { animator ->
+            window.statusBarColor = animator.animatedValue as Int
+        }
+        colorAnimation.start()
 
         return true
     }
@@ -359,8 +369,18 @@ open class ConversationsActivity : AppCompatActivity(),
             adapter[i].setChecked(i, false)
         }
 
-        window.statusBarColor = ContextCompat.getColor(
-            applicationContext, R.color.colorPrimaryDark)
+        val colorAnimation = ValueAnimator.ofArgb(
+            ContextCompat.getColor(applicationContext,
+                                   R.color.colorSecondaryDark),
+            ContextCompat.getColor(applicationContext,
+                                   R.color.colorPrimaryDark))
+        colorAnimation.duration = applicationContext.resources.getInteger(
+            android.R.integer.config_longAnimTime).toLong()
+        colorAnimation.addUpdateListener { animator ->
+            window.statusBarColor = animator.animatedValue as Int
+        }
+        colorAnimation.start()
+
         actionMode = null
     }
 
