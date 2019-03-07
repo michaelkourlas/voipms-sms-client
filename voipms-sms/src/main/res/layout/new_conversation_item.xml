@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="?attr/selectableItemBackground"
     android:orientation="horizontal"
     android:padding="@dimen/margin">
 
@@ -34,7 +34,7 @@
             android:layout_width="@dimen/contact_badge"
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
-            android:textColor="@color/primary"
+            android:textColor="@color/colorPrimary"
             android:textSize="@dimen/subheading"
             android:textStyle="bold" />
     </LinearLayout>

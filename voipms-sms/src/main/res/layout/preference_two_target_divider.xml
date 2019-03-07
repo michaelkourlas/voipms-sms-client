@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2017 The Android Open Source Project
-  ~ Modifications copyright (C) 2017-2018 Michael Kourlas
+  ~ Modifications copyright (C) 2017-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -27,5 +27,5 @@
     <View
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:background="?android:attr/dividerVertical" />
+        android:background="?attr/dividerVertical" />
 </LinearLayout>

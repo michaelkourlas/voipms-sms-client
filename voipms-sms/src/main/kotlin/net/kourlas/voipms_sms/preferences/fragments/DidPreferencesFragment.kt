@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.v14.preference.SwitchPreference
-import android.support.v7.widget.SwitchCompat
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.CompoundButton
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import androidx.appcompat.widget.SwitchCompat
+import androidx.preference.SwitchPreference
+import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
@@ -38,7 +35,7 @@ import net.kourlas.voipms_sms.utils.runOnNewThread
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
-class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
+class DidPreferencesFragment : PreferenceFragmentCompat(),
     CompoundButton.OnCheckedChangeListener {
 
     // Broadcast receivers
@@ -208,14 +205,5 @@ class DidPreferencesFragment : PreferenceFragmentCompatDividers(),
         showNotificationsPreference.isChecked = getDidShowNotifications(
             context,
             did)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        try {
-            return super.onCreateView(inflater, container, savedInstanceState)
-        } finally {
-            setDividerPreferences(DIVIDER_NONE)
-        }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,11 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.app.RemoteInput
-import android.support.v4.app.TaskStackBuilder
+import androidx.core.app.*
+import androidx.core.app.Person
+import androidx.core.app.RemoteInput
+import androidx.core.app.TaskStackBuilder
+import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import net.kourlas.voipms_sms.CustomApplication
@@ -392,11 +393,16 @@ class Notifications private constructor(
         }
 
         // Notification text
-        val style = NotificationCompat.MessagingStyle(
-            context.getString(R.string.notifications_current_user))
+        val person = Person.Builder().setName(
+            context.getString(R.string.notifications_current_user)).build()
+        val style = NotificationCompat.MessagingStyle(person)
         for (message in messages) {
-            style.addMessage(message.text, message.date.time,
-                             if (message.isIncoming) contactName else null)
+            style.addMessage(
+                message.text,
+                message.date.time,
+                if (message.isIncoming)
+                    Person.Builder().setName(contactName).build()
+                else null)
         }
         notification.setStyle(style)
 
@@ -526,10 +532,14 @@ class Notifications private constructor(
      */
     private fun getLargeIconBitmap(contact: String): Bitmap? = try {
         var largeIconBitmap = getContactPhotoBitmap(context, contact)
-        largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap,
-                                                    256, 256, false)
-        largeIconBitmap = applyCircularMask(largeIconBitmap)
-        largeIconBitmap
+        if (largeIconBitmap != null) {
+            largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap,
+                                                        256, 256, false)
+            largeIconBitmap = applyCircularMask(largeIconBitmap)
+            largeIconBitmap
+        } else {
+            null
+        }
     } catch (_: Exception) {
         null
     }
@@ -540,7 +550,7 @@ class Notifications private constructor(
      *
      * @param activity The activity on which to display messages.
      */
-    fun enablePushNotifications(activity: Activity) {
+    fun enablePushNotifications(activity: FragmentActivity) {
         // Check if account is active and that notifications are enabled,
         // and silently quit if not
         if (!isAccountActive(activity) || !getNotificationsEnabled()) {

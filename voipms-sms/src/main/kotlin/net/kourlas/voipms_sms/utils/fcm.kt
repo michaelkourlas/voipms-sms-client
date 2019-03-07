@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.utils
 import android.content.Context
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
 import net.kourlas.voipms_sms.preferences.getDids
 
@@ -36,9 +35,6 @@ fun subscribeToDidTopics(context: Context) {
                 context) != ConnectionResult.SUCCESS) {
         return
     }
-
-    // Generate token but don't do anything with it
-    FirebaseInstanceId.getInstance().token
 
     // Subscribe to topics for current DIDs
     for (did in getDids(context, onlyShowNotifications = true)) {

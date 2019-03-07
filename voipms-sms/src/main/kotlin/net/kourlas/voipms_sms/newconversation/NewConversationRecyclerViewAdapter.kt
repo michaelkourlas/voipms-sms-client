@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ package net.kourlas.voipms_sms.newconversation
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.ContactsContract
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.recyclerview.widget.RecyclerView
 import com.crashlytics.android.Crashlytics
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import net.kourlas.voipms_sms.R
@@ -131,7 +131,7 @@ class NewConversationRecyclerViewAdapter(
         if (contactItem is TypedInContactItem) {
             // Show dialpad for typed in phone number
             holder.contactBadge.scaleType = ImageView.ScaleType.CENTER
-            holder.contactBadge.setBackgroundResource(R.color.primary)
+            holder.contactBadge.setBackgroundResource(R.color.colorPrimary)
             holder.contactBadge.setImageResource(
                 R.drawable.ic_dialpad_white_24dp)
             holder.contactBadgeLetterText.text = ""

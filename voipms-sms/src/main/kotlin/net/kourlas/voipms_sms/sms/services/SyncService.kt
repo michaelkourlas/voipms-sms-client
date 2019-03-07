@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ package net.kourlas.voipms_sms.sms.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.content.ContextCompat
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -102,7 +102,7 @@ class SyncService : IntentService(
     private fun handleSync(intent: Intent) {
         try {
             // Extract the boolean properties from the intent
-            val forceRecent = intent.extras.get(
+            val forceRecent = intent.extras?.get(
                 applicationContext.getString(R.string.sync_force_recent))
                                   as Boolean?
                               ?: throw Exception("Force recent missing")

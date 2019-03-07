@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2018 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@ package net.kourlas.voipms_sms.newconversation
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.view.ViewCompat
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SearchView
-import android.support.v7.widget.Toolbar
 import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.futuremind.recyclerviewfastscroll.FastScroller
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.preferences.getDids
@@ -134,7 +134,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     private fun setupRecyclerView() {
         // Set up recycler view
         val layoutManager = LinearLayoutManager(this)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        layoutManager.orientation = RecyclerView.VERTICAL
         recyclerView = findViewById(R.id.list)
         adapter = NewConversationRecyclerViewAdapter(this, recyclerView)
         recyclerView.setHasFixedSize(true)
@@ -195,7 +195,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         return true
     }
 
-    override fun onClick(v: View?) {
+    override fun onClick(v: View) {
         val position = recyclerView.getChildAdapterPosition(v)
         if (position == RecyclerView.NO_POSITION) {
             return
@@ -212,17 +212,17 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 phoneNumbers.addAll(contactItem.secondaryPhoneNumbers)
 
                 var selectedIndex = 0
-                AlertDialog.Builder(this, R.style.DialogTheme).apply {
+                MaterialAlertDialogBuilder(this).apply {
                     setTitle("Select phone number")
                     setSingleChoiceItems(phoneNumbers.toTypedArray(),
-                                         selectedIndex, { _, which ->
-                                             selectedIndex = which
-                                         })
-                    setPositiveButton(context.getString(R.string.ok),
-                                      { _, _ ->
-                                          startConversationActivity(
-                                              phoneNumbers[selectedIndex])
-                                      })
+                                         selectedIndex) { _, which ->
+                        selectedIndex = which
+                    }
+                    setPositiveButton(context.getString(R.string.ok)
+                                     ) { _, _ ->
+                        startConversationActivity(
+                            phoneNumbers[selectedIndex])
+                    }
                     setNegativeButton(context.getString(R.string.cancel),
                                       null)
                     setCancelable(false)
@@ -264,22 +264,20 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 return
             dids.size > 1 -> {
                 var selectedIndex = 0
-                AlertDialog.Builder(this, R.style.DialogTheme).apply {
+                MaterialAlertDialogBuilder(this).apply {
                     setTitle("Select DID")
                     setSingleChoiceItems(
                         dids.map(::getFormattedPhoneNumber).toTypedArray(),
-                        selectedIndex,
-                        { _, which ->
-                            selectedIndex = which
-                        })
-                    setPositiveButton(getString(R.string.ok),
-                                      { _, _ ->
-                                          intent.putExtra(
-                                              getString(
-                                                  R.string.conversation_did),
-                                              dids[selectedIndex])
-                                          startActivity(intent)
-                                      })
+                        selectedIndex) { _, which ->
+                        selectedIndex = which
+                    }
+                    setPositiveButton(getString(R.string.ok)) { _, _ ->
+                        intent.putExtra(
+                            getString(
+                                R.string.conversation_did),
+                            dids[selectedIndex])
+                        startActivity(intent)
+                    }
                     setNegativeButton(getString(R.string.cancel),
                                       null)
                     setCancelable(false)

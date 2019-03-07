@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2018 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,6 @@
 package net.kourlas.voipms_sms.conversation
 
 import android.graphics.Bitmap
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -33,6 +30,9 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.QuickContactBadge
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.crashlytics.android.Crashlytics
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import net.kourlas.voipms_sms.R
@@ -279,33 +279,17 @@ class ConversationRecyclerViewAdapter(
         val message = messageItem.message
 
         val smsContainer = holder.smsContainer
-        val messageText = holder.messageText
-        val dateText = holder.dateText
         if (message.isIncoming) {
             if (messageItem.checked) {
-                smsContainer.setBackgroundResource(
-                    android.R.color.holo_blue_dark)
+                smsContainer.setBackgroundResource(R.color.colorSecondaryDark)
             } else {
-                smsContainer.setBackgroundResource(R.color.primary)
+                smsContainer.setBackgroundResource(R.color.colorSecondary)
             }
         } else {
             if (messageItem.checked) {
-                smsContainer.setBackgroundResource(
-                    android.R.color.holo_blue_dark)
-                messageText.setTextColor(ContextCompat.getColor(
-                    activity, android.R.color.white))
-                messageText.setLinkTextColor(ContextCompat.getColor(
-                    activity, android.R.color.white))
-                dateText.setTextColor(ContextCompat.getColor(
-                    activity, R.color.message_translucent_white))
+                smsContainer.setBackgroundResource(R.color.colorPrimaryDark)
             } else {
-                smsContainer.setBackgroundResource(android.R.color.white)
-                messageText.setTextColor(ContextCompat.getColor(
-                    activity, R.color.dark_gray))
-                messageText.setLinkTextColor(ContextCompat.getColor(
-                    activity, R.color.dark_gray))
-                dateText.setTextColor(ContextCompat.getColor(
-                    activity, R.color.message_translucent_dark_grey))
+                smsContainer.setBackgroundResource(R.color.colorPrimary)
             }
         }
     }
@@ -577,7 +561,9 @@ class ConversationRecyclerViewAdapter(
      * @param itemView The primary view of the message item.
      */
     inner class MessageViewHolder internal constructor(
-        itemView: View, viewType: Int) : RecyclerView.ViewHolder(itemView) {
+        itemView: View,
+        viewType: Int) : RecyclerView.ViewHolder(
+        itemView) {
         // All configurable views on a message item
         internal val contactBadge: QuickContactBadge? =
             if (viewType == R.layout.conversation_item_incoming) {

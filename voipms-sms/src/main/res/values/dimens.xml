@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@
     <dimen name="fab">56dp</dimen>
     <dimen name="send_message_elevation">10dp</dimen>
     <dimen name="toolbar_elevation">4dp</dimen>
-    <dimen name="fab_elevation">6dp</dimen>
     <dimen name="conversation_scrollbar_height">60dp</dimen>
     <dimen name="conversation_scrollbar_width">10dp</dimen>
     <dimen name="conversation_text_spacing">5dp</dimen>

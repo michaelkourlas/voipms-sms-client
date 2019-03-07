@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 
 package net.kourlas.voipms_sms.conversations
 
-import android.support.v7.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.view.ActionMode
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.runOnNewThread
@@ -43,7 +43,7 @@ class ConversationsArchivedActivity : ConversationsActivity() {
 
     override fun setupNewConversationButton() {
         // Remove new conversation button
-        findViewById<View>(R.id.new_button).visibility = View.GONE
+        findViewById<View>(R.id.chat_button).visibility = View.GONE
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

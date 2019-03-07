@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018 Michael Kourlas
+ * Copyright (C) 2018-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 
 package net.kourlas.voipms_sms.utils
 
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceScreen
+import androidx.preference.Preference
+import androidx.preference.PreferenceScreen
 
 /**
  * Extension property allowing easy iteration over a [PreferenceScreen]'s

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,21 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v4.view.ViewCompat
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SearchView
-import android.support.v7.widget.Toolbar
 import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
@@ -140,8 +139,6 @@ open class ConversationsActivity : AppCompatActivity(),
     open fun setupToolbar() {
         // Set up toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        ViewCompat.setElevation(toolbar, resources
-            .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
     }
 
@@ -150,7 +147,7 @@ open class ConversationsActivity : AppCompatActivity(),
      */
     private fun setupRecyclerViewAndSwipeRefreshLayout() {
         val layoutManager = LinearLayoutManager(this)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        layoutManager.orientation = RecyclerView.VERTICAL
         recyclerView = findViewById(R.id.list)
         adapter = ConversationsRecyclerViewAdapter(this, recyclerView,
                                                    layoutManager)
@@ -164,14 +161,14 @@ open class ConversationsActivity : AppCompatActivity(),
             adapter.refresh()
             SyncService.startService(this, forceRecent = false)
         }
-        swipeRefreshLayout.setColorSchemeResources(R.color.accent)
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimaryVariant)
     }
 
     /**
      * Sets up the new conversation floating action button.
      */
     open fun setupNewConversationButton() {
-        val button = findViewById<FloatingActionButton>(R.id.new_button)
+        val button = findViewById<FloatingActionButton>(R.id.chat_button)
         button.setOnClickListener {
             if (isAccountActive(this)) {
                 val newConversationIntent = Intent(
@@ -336,6 +333,10 @@ open class ConversationsActivity : AppCompatActivity(),
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         val inflater = mode.menuInflater
         inflater.inflate(R.menu.conversations_secondary, menu)
+
+        window.statusBarColor = ContextCompat.getColor(
+            applicationContext, R.color.colorSecondaryDark)
+
         return true
     }
 
@@ -357,6 +358,9 @@ open class ConversationsActivity : AppCompatActivity(),
         for (i in 0 until adapter.itemCount) {
             adapter[i].setChecked(i, false)
         }
+
+        window.statusBarColor = ContextCompat.getColor(
+            applicationContext, R.color.colorPrimaryDark)
         actionMode = null
     }
 
@@ -530,7 +534,7 @@ open class ConversationsActivity : AppCompatActivity(),
                         // Otherwise, show a warning
                         showPermissionSnackbar(
                             this,
-                            R.id.new_button,
+                            R.id.chat_button,
                             getString(
                                 R.string.conversations_perm_denied_contacts))
                     }

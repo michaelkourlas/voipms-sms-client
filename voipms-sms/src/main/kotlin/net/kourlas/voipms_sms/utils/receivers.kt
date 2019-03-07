@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 
 package net.kourlas.voipms_sms.utils
 
-import android.app.Activity
 import android.content.BroadcastReceiver
+import androidx.fragment.app.FragmentActivity
 
 /**
  * Unregisters the specified broadcast receiver from the specified activity.
@@ -27,7 +27,7 @@ import android.content.BroadcastReceiver
  * @param activity The specified activity.
  * @param receiver The specified broadcast receiver.
  */
-fun safeUnregisterReceiver(activity: Activity,
+fun safeUnregisterReceiver(activity: FragmentActivity,
                            receiver: BroadcastReceiver) = try {
     activity.unregisterReceiver(receiver)
 } catch (_: IllegalArgumentException) {

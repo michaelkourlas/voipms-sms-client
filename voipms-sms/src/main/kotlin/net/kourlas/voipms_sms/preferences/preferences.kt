@@ -72,24 +72,26 @@ fun getLastCompleteSyncTime(context: Context): Long =
 
 @Deprecated(
     "Remove when Android versions earlier than Oreo are no longer supported.")
-fun getNotificationsEnabled(context: Context): Boolean =
-    getBooleanPreference(
+fun getNotificationsEnabled(context: Context): Boolean {
+    val value: String = context.getString(
+        R.string.preferences_notifications_enable_default_value)
+    return getBooleanPreference(
         context,
         context.getString(R.string.preferences_notifications_enable_key),
-        context.getString(
-            R.string.preferences_notifications_enable_default_value)!!
-            .toBoolean())
+        value.toBoolean())
+}
 
 @Deprecated(
     "Remove when Android versions earlier than Oreo are no longer supported.")
-fun getNotificationVibrateEnabled(context: Context): Boolean =
-    getBooleanPreference(
+fun getNotificationVibrateEnabled(context: Context): Boolean {
+    val value: String = context.getString(
+        R.string.preferences_notifications_vibrate_default_value)
+    return getBooleanPreference(
         context,
         context.getString(
             R.string.preferences_notifications_vibrate_key),
-        context.getString(
-            R.string.preferences_notifications_vibrate_default_value)!!
-            .toBoolean())
+        value.toBoolean())
+}
 
 @Deprecated(
     "Remove when Android versions earlier than Oreo are no longer supported.")
@@ -107,23 +109,25 @@ fun getPassword(context: Context): String =
                             R.string.preferences_account_password_key),
                         "")
 
-fun getRetrieveDeletedMessages(context: Context): Boolean =
-    getBooleanPreference(
+fun getRetrieveDeletedMessages(context: Context): Boolean {
+    val value: String = context.getString(
+        R.string.preferences_sync_retrieve_deleted_messages_default_value)
+    return getBooleanPreference(
         context,
         context.getString(
             R.string.preferences_sync_retrieve_deleted_messages_key),
-        context.getString(
-            R.string.preferences_sync_retrieve_deleted_messages_default_value)!!
-            .toBoolean())
+        value.toBoolean())
+}
 
-fun getRetrieveOnlyRecentMessages(context: Context): Boolean =
-    getBooleanPreference(
+fun getRetrieveOnlyRecentMessages(context: Context): Boolean {
+    val value: String = context.getString(
+        R.string.preferences_sync_retrieve_only_recent_messages_default_value)
+    return getBooleanPreference(
         context,
         context.getString(
             R.string.preferences_sync_retrieve_only_recent_messages_key),
-        context.getString(
-            R.string.preferences_sync_retrieve_only_recent_messages_default_value)!!
-            .toBoolean())
+        value.toBoolean())
+}
 
 fun getSetupCompletedForVersion(context: Context): Long =
     getLongPreference(
@@ -180,7 +184,7 @@ fun isAccountActive(context: Context): Boolean =
 
 fun setDids(context: Context, dids: Set<String>) {
     val currentDids = getDids(context)
-    val newDids = dids.filter { it -> it !in currentDids }
+    val newDids = dids.filter { it !in currentDids }
 
     setStringSetPreference(context, context.getString(
         R.string.preferences_dids_key), dids)
@@ -289,14 +293,14 @@ private fun getStringPreference(context: Context, key: String,
                                 default: String): String {
     val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
         context.applicationContext)
-    return sharedPreferences.getString(key, default)
+    return sharedPreferences.getString(key, null) ?: default
 }
 
 private fun getStringSetPreference(context: Context, key: String,
                                    default: Set<String>): Set<String> {
     val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
         context.applicationContext)
-    return sharedPreferences.getStringSet(key, default)
+    return sharedPreferences.getStringSet(key, null) ?: default
 }
 
 private fun setBooleanPreference(context: Context, key: String,

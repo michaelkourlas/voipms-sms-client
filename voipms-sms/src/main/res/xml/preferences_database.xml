@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2018 Michael Kourlas
+  ~ Copyright (C) 2018-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,25 +15,25 @@
   ~ limitations under the License.
   -->
 
-<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <android.support.v7.preference.Preference
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.preference.Preference
         android:icon="@android:color/transparent"
         android:key="@string/preferences_database_import_key"
         android:summary="@string/preferences_database_import_summary"
         android:title="@string/preferences_database_import_title" />
-    <android.support.v7.preference.Preference
+    <androidx.preference.Preference
         android:icon="@android:color/transparent"
         android:key="@string/preferences_database_export_key"
         android:summary="@string/preferences_database_export_summary"
         android:title="@string/preferences_database_export_title" />
-    <android.support.v7.preference.Preference
+    <androidx.preference.Preference
         android:icon="@android:color/transparent"
         android:key="@string/preferences_database_clean_up_key"
         android:summary="@string/preferences_database_clean_up_summary"
         android:title="@string/preferences_database_clean_up_title" />
-    <android.support.v7.preference.Preference
+    <androidx.preference.Preference
         android:icon="@android:color/transparent"
         android:key="@string/preferences_database_delete_key"
         android:summary="@string/preferences_database_delete_summary"
         android:title="@string/preferences_database_delete_title" />
-</android.support.v7.preference.PreferenceScreen>
+</androidx.preference.PreferenceScreen>

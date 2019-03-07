@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -177,7 +177,7 @@
     <string name="conversations_action_mark_read">Mark read</string>
     <string name="conversations_action_mark_unread">Mark unread</string>
     <string name="conversations_action_delete">Delete</string>
-    <string name="conversations_action_add">Add</string>
+    <string name="conversations_action_chat">Chat</string>
     <string name="conversations_delete_confirm_title">Delete this conversation?</string>
     <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
     <string name="conversations_no_messages">You have no messages.</string>

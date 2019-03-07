@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.v7.preference.Preference
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import androidx.preference.Preference
+import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity
@@ -40,7 +37,7 @@ import net.kourlas.voipms_sms.utils.runOnNewThread
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
-class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
+class DidsPreferencesFragment : PreferenceFragmentCompat(),
     Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
     // Sentinel use to prevent preferences from being loaded twice (once on
     // creation, once on resumption)
@@ -94,12 +91,12 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
         // Retrieve all DIDs
         retrievedDids = arguments?.getStringArrayList(getString(
             R.string.preferences_dids_fragment_retrieved_dids_key))
-            ?.toSet()
-            ?: emptySet()
+                            ?.toSet()
+                        ?: emptySet()
         databaseDids = arguments?.getStringArrayList(getString(
             R.string.preferences_dids_fragment_database_dids_key))
-            ?.toSet()
-            ?: emptySet()
+                           ?.toSet()
+                       ?: emptySet()
         activeDids = getDids(activity)
 
         // Transfer all DIDs into common set
@@ -192,14 +189,5 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
         }
 
         return true
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        try {
-            return super.onCreateView(inflater, container, savedInstanceState)
-        } finally {
-            setDividerPreferences(DIVIDER_NONE)
-        }
     }
 }

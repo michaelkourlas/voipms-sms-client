@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018 Michael Kourlas
+ * Copyright (C) 2018-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,16 @@
 
 package net.kourlas.voipms_sms.preferences.fragments
 
-import android.app.Activity.RESULT_OK
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.Intent.CATEGORY_OPENABLE
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.provider.DocumentFile
-import android.support.v7.app.AlertDialog
-import android.support.v7.preference.Preference
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import androidx.appcompat.app.AppCompatActivity.RESULT_OK
+import androidx.documentfile.provider.DocumentFile
+import androidx.preference.Preference
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.Database
@@ -41,7 +38,7 @@ import net.kourlas.voipms_sms.utils.showInfoDialog
 /**
  * Fragment used to display the database preferences.
  */
-class DatabasePreferencesFragment : PreferenceFragmentCompatDividers() {
+class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     private val importListener = Preference.OnPreferenceClickListener {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.type = "*/*"
@@ -88,24 +85,16 @@ class DatabasePreferencesFragment : PreferenceFragmentCompatDividers() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        try {
-            return super.onCreateView(inflater, container, savedInstanceState)
-        } finally {
-            setDividerPreferences(DIVIDER_NONE)
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int,
                                   data: Intent?) {
+        val d = data?.data
         if (requestCode == IMPORT_REQUEST_CODE) {
-            if (resultCode == RESULT_OK && data != null) {
-                import(data.data)
+            if (resultCode == RESULT_OK && d != null) {
+                import(d)
             }
         } else if (requestCode == EXPORT_REQUEST_CODE) {
-            if (resultCode == RESULT_OK && data != null) {
-                export(data.data)
+            if (resultCode == RESULT_OK && d != null) {
+                export(d)
             }
         }
     }
@@ -144,7 +133,8 @@ class DatabasePreferencesFragment : PreferenceFragmentCompatDividers() {
             activity.getString(R.string.ok),
             DialogInterface.OnClickListener { _, _ ->
                 try {
-                    val directory = DocumentFile.fromTreeUri(activity, uri)
+                    val directory = DocumentFile.fromTreeUri(
+                        activity, uri)
                                     ?: throw Exception(
                                         "Could not process directory")
                     val file = directory.createFile(
@@ -177,35 +167,33 @@ class DatabasePreferencesFragment : PreferenceFragmentCompatDividers() {
 
         // Ask user which kind of clean up is desired, and then perform that
         // clean up
-        AlertDialog.Builder(activity, R.style.DialogTheme).apply {
+        MaterialAlertDialogBuilder(activity).apply {
             setTitle(context.getString(
                 R.string.preferences_database_clean_up_title))
             setMultiChoiceItems(
-                options, null,
-                { _, which, isChecked ->
-                    if (isChecked) {
-                        selectedOptions.add(which)
-                    } else {
-                        selectedOptions.remove(which)
-                    }
-                })
+                options, null) { _, which, isChecked ->
+                if (isChecked) {
+                    selectedOptions.add(which)
+                } else {
+                    selectedOptions.remove(which)
+                }
+            }
             setPositiveButton(
-                context.getString(R.string.ok),
-                { _, _ ->
-                    val deletedMessages = selectedOptions.contains(0)
-                    val removedDids = selectedOptions.contains(1)
+                context.getString(R.string.ok)) { _, _ ->
+                val deletedMessages = selectedOptions.contains(0)
+                val removedDids = selectedOptions.contains(1)
 
-                    runOnNewThread {
-                        if (deletedMessages) {
-                            Database.getInstance(context).deleteTableDeleted()
-                        }
-                        if (removedDids) {
-                            Database.getInstance(context).deleteMessages(
-                                getDids(
-                                    context))
-                        }
+                runOnNewThread {
+                    if (deletedMessages) {
+                        Database.getInstance(context).deleteTableDeleted()
                     }
-                })
+                    if (removedDids) {
+                        Database.getInstance(context).deleteMessages(
+                            getDids(
+                                context))
+                    }
+                }
+            }
             setNegativeButton(context.getString(R.string.cancel), null)
             setCancelable(false)
             show()

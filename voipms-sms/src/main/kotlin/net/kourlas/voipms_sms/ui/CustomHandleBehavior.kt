@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 Future Mind.
- * Modifications copyright (C) 2017-2018 Michael Kourlas
+ * Modifications copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package net.kourlas.voipms_sms.ui
 
 import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
-import android.support.annotation.AnimatorRes
 import android.view.View
-
+import androidx.annotation.AnimatorRes
 import com.futuremind.recyclerviewfastscroll.viewprovider.ViewBehavior
 import com.futuremind.recyclerviewfastscroll.viewprovider.VisibilityAnimationManager
 

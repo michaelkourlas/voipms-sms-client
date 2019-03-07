@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2018 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v4.view.ViewCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SearchView
-import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
@@ -43,6 +34,15 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.crashlytics.android.Crashlytics
 import com.futuremind.recyclerviewfastscroll.FastScroller
 import net.kourlas.voipms_sms.CustomApplication
@@ -160,11 +160,13 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         if (Intent.ACTION_VIEW == action && data != null) {
             // Firebase URL intent
             val uri = Uri.parse(data)
-            if (uri.getQueryParameter("id") != null) {
+            val id = uri.getQueryParameter("id")
+            val uriDid = uri.getQueryParameter("did")
+            val contactDid = uri.getQueryParameter("contact")
+            if (id != null) {
                 // Firebase message index URL
                 val message = Database.getInstance(this)
-                    .getMessageDatabaseId(
-                        uri.getQueryParameter("id").toLong())
+                    .getMessageDatabaseId(id.toLong())
                 if (message == null) {
                     Crashlytics.logException(Exception("Invalid URI: '$data'"))
                     finish()
@@ -173,11 +175,10 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                     did = message.did
                     contact = message.contact
                 }
-            } else if (uri.getQueryParameter("did") != null
-                       && uri.getQueryParameter("contact") != null) {
+            } else if (uriDid != null && contactDid != null) {
                 // Firebase conversation index URL
-                did = uri.getQueryParameter("did")
-                contact = uri.getQueryParameter("contact")
+                did = uriDid
+                contact = contactDid
             } else {
                 Crashlytics.logException(Exception("Invalid URI: '$data'"))
                 finish()
@@ -245,7 +246,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private fun setupRecyclerView() {
         // Set up recycler view
         layoutManager = LinearLayoutManager(this)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        layoutManager.orientation = RecyclerView.VERTICAL
         // Most recent message at bottom of list
         layoutManager.stackFromEnd = true
         recyclerView = findViewById(R.id.list)

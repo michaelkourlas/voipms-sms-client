@@ -1,3 +1,8 @@
+## 0.6.2 ##
+
+* New logo
+* Changes to color scheme, text placement, fonts
+
 ## 0.6.1 ##
 
 * Bug fixes

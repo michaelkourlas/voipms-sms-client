@@ -1085,7 +1085,7 @@ class Database private constructor(private val context: Context) {
             cursor = database.rawQuery(query, arrayOf(did))
             messages.addAll(
                 getMessagesCursor(cursor)
-                    .filterNot { it.contact in messages.map { it.contact } }
+                    .filterNot { it.contact in messages.map { it2 -> it2.contact } }
                     .filter {
                         val contactName = getContactName(context,
                                                          it.contact,

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018 Michael Kourlas
+ * Copyright (C) 2018-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,13 @@ import android.content.SharedPreferences
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
-import android.support.v7.preference.Preference
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
-import com.takisoft.fix.support.v7.preference.RingtonePreference
+import androidx.preference.Preference
+import com.takisoft.preferencex.PreferenceFragmentCompat
+import com.takisoft.preferencex.RingtonePreference
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getNotificationSound
 
-class NotificationsPreferencesFragment : PreferenceFragmentCompatDividers(),
+class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
@@ -104,15 +101,6 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompatDividers(),
                         R.string.preferences_notifications_sound_unknown_perm)
                 }
             }
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        try {
-            return super.onCreateView(inflater, container, savedInstanceState)
-        } finally {
-            setDividerPreferences(DIVIDER_NONE)
         }
     }
 }

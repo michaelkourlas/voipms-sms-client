@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package net.kourlas.voipms_sms.sms.services
 
 import android.content.Context
 import android.content.Intent
-import android.support.v4.app.JobIntentService
-import android.support.v4.app.RemoteInput
 import android.util.Log
+import androidx.core.app.JobIntentService
+import androidx.core.app.RemoteInput
 import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -189,10 +189,12 @@ class SendMessageService : JobIntentService() {
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
         messageText = remoteInput?.getCharSequence(
             applicationContext.getString(
-                R.string.notifications_reply_key))?.toString() ?: (intent.getStringExtra(
-            applicationContext.getString(R.string.send_message_text))
-                                                                   ?: throw Exception(
-                                                                       "Message text missing"))
+                R.string.notifications_reply_key))?.toString()
+                      ?: (intent.getStringExtra(
+                          applicationContext.getString(
+                              R.string.send_message_text))
+                          ?: throw Exception(
+                              "Message text missing"))
 
         // If the message text exceeds the maximum length of an SMS message,
         // split it into multiple message texts

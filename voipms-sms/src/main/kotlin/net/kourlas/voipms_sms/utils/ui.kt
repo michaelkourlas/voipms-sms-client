@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2018 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 package net.kourlas.voipms_sms.utils
 
-import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -25,12 +24,15 @@ import android.graphics.*
 import android.graphics.Color.rgb
 import android.net.Uri
 import android.provider.Settings
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AlertDialog
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import com.crashlytics.android.Crashlytics
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import net.kourlas.voipms_sms.R
 import java.lang.Math.abs
 
@@ -88,7 +90,7 @@ fun applyRoundedCornersMask(view: View) {
 private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
     object : ViewOutlineProvider() {
         override fun getOutline(view: View, outline: Outline) =
-            outline.setRoundRect(0, 0, view.width, view.height, 15f)
+            outline.setRoundRect(0, 0, view.width, view.height, 75f)
     }
 
 /**
@@ -108,7 +110,7 @@ fun showAlertDialog(context: Context, title: String?, text: String?,
                     positiveButtonAction: DialogInterface.OnClickListener? = null,
                     negativeButtonText: String? = null,
                     negativeButtonAction: DialogInterface.OnClickListener? = null): AlertDialog {
-    val builder = AlertDialog.Builder(context, R.style.DialogTheme)
+    val builder = MaterialAlertDialogBuilder(context)
     builder.setMessage(text)
     builder.setTitle(title)
     builder.setPositiveButton(positiveButtonText, positiveButtonAction)
@@ -149,7 +151,8 @@ fun showInfoDialog(context: Context, title: String?,
  * @param text The text to show.
  * @return The snackbar.
  */
-fun showSnackbar(activity: Activity, viewId: Int, text: String): Snackbar {
+fun showSnackbar(activity: FragmentActivity, viewId: Int,
+                 text: String): Snackbar {
     val view = activity.findViewById<View>(viewId)
     val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
     snackbar.show()
@@ -165,7 +168,7 @@ fun showSnackbar(activity: Activity, viewId: Int, text: String): Snackbar {
  * @param text The text to show.
  * @return The snackbar.
  */
-fun showPermissionSnackbar(activity: Activity, viewId: Int,
+fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
                            text: String): Snackbar {
     val view = activity.findViewById<View>(viewId)
     val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
@@ -183,7 +186,7 @@ fun showPermissionSnackbar(activity: Activity, viewId: Int,
     return snackbar
 }
 
-fun abortActivity(activity: Activity, ex: Exception,
+fun abortActivity(activity: FragmentActivity, ex: Exception,
                   duration: Int = Toast.LENGTH_SHORT) {
     Crashlytics.logException(ex)
     Toast.makeText(activity,

@@ -102,7 +102,7 @@ fun getFormattedDate(context: Context, date: Date, hideTime: Boolean): String {
         return if (seconds < 10) {
             context.getString(R.string.utils_date_just_now)
         } else {
-            seconds.toString() + " " + context.getString(
+            "$seconds " + context.getString(
                 R.string.utils_date_seconds_ago)
         }
     }
@@ -116,7 +116,7 @@ fun getFormattedDate(context: Context, date: Date, hideTime: Boolean): String {
         return if (minutes == 1L) {
             context.getString(R.string.utils_date_one_minute_ago)
         } else {
-            minutes.toString() + " " + context.getString(
+            "$minutes " + context.getString(
                 R.string.utils_date_minutes_ago)
         }
     }

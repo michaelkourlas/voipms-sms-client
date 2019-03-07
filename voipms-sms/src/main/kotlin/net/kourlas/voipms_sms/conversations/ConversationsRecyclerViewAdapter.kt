@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2018 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,8 @@
 
 package net.kourlas.voipms_sms.conversations
 
-import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.Typeface
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -33,6 +29,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
@@ -55,11 +55,10 @@ class ConversationsRecyclerViewAdapter<T>(
     private val activity: T,
     private val recyclerView: RecyclerView,
     private val layoutManager: LinearLayoutManager) :
-    RecyclerView.Adapter<ConversationsRecyclerViewAdapter<
-        T>.ConversationViewHolder>(),
+    RecyclerView.Adapter<ConversationsRecyclerViewAdapter<T>.ConversationViewHolder>(),
     Filterable,
     Iterable<ConversationsRecyclerViewAdapter<T>.ConversationItem>
-    where T : Activity, T : View.OnClickListener, T : View.OnLongClickListener {
+    where T : AppCompatActivity, T : View.OnClickListener, T : View.OnLongClickListener {
     // List of items shown by the adapter; the index of each item
     // corresponds to the location of each item in the adapter
     private val _conversationItems = mutableListOf<ConversationItem>()
@@ -231,11 +230,13 @@ class ConversationsRecyclerViewAdapter<T>(
         }
         holder.messageTextView.text = messageTextBuilder
 
-        // Mark text as bold if unread
+        // Mark text as bold and supporting additional lines if unread
         if (message.isUnread) {
             holder.messageTextView.setTypeface(null, Typeface.BOLD)
+            holder.messageTextView.maxLines = 3
         } else {
             holder.messageTextView.setTypeface(null, Typeface.NORMAL)
+            holder.messageTextView.maxLines = 1
         }
     }
 
@@ -611,7 +612,8 @@ class ConversationsRecyclerViewAdapter<T>(
      * @param itemView The primary view of the conversation item.
      */
     inner class ConversationViewHolder internal constructor(
-        itemView: View) : RecyclerView.ViewHolder(itemView) {
+        itemView: View) : RecyclerView.ViewHolder(
+        itemView) {
         // All configurable views on a message item
         internal val viewSwitcher: ViewSwitcher =
             itemView.findViewById(R.id.view_switcher)

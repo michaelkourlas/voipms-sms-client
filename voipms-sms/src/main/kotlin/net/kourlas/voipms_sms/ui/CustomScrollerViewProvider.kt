@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 Future Mind.
- * Modifications copyright (C) 2017-2018 Michael Kourlas
+ * Modifications copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 
 package net.kourlas.voipms_sms.ui
 
-import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-
+import androidx.core.content.ContextCompat
 import com.futuremind.recyclerviewfastscroll.R
 import com.futuremind.recyclerviewfastscroll.Utils
 import com.futuremind.recyclerviewfastscroll.viewprovider.DefaultBubbleBehavior
