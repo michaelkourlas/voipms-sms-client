@@ -161,7 +161,7 @@ open class ConversationsActivity : AppCompatActivity(),
             adapter.refresh()
             SyncService.startService(this, forceRecent = false)
         }
-        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimaryVariant)
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorSecondary)
     }
 
     /**
