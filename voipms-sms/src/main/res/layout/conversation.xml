@@ -93,14 +93,15 @@
                 android:background="@android:color/transparent"
                 android:gravity="center_vertical"
                 android:hint="@string/conversation_text_hint"
+                android:importantForAutofill="no"
                 android:inputType="textMultiLine|textCapSentences|textAutoCorrect|textShortMessage"
                 android:isScrollContainer="true"
                 android:maxLines="@integer/message_text_height"
-                android:importantForAutofill="no"
                 android:paddingStart="@dimen/margin"
                 android:paddingTop="@dimen/half_margin"
                 android:paddingEnd="@dimen/half_margin"
                 android:paddingBottom="@dimen/half_margin"
+                android:scrollbars="vertical"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                 tools:targetApi="o" />
 
