@@ -34,8 +34,8 @@
             android:layout_width="@dimen/contact_badge"
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
-            android:textColor="@color/colorPrimary"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+            android:textColor="@color/colorPrimary" />
     </LinearLayout>
 
     <FrameLayout
@@ -54,8 +54,8 @@
             android:layout_width="@dimen/contact_badge"
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+            android:textColor="@android:color/white" />
 
     </FrameLayout>
 
