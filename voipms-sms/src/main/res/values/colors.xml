@@ -16,13 +16,13 @@
   -->
 
 <resources>
-    <color name="colorPrimary">#b71c1c</color>
-    <color name="colorPrimaryDark">#7f0000</color>
-    <color name="colorPrimaryVariant">#f05545</color>
+    <color name="colorPrimary">#B71C1C</color>
+    <color name="colorPrimaryDark">#7F0000</color>
+    <color name="colorPrimaryVariant">#F05545</color>
     <color name="colorOnPrimary">#FFFFFF</color>
     <color name="colorSecondary">#424242</color>
-    <color name="colorSecondaryDark">#1b1b1b</color>
-    <color name="colorSecondaryVariant">#6d6d6d</color>
+    <color name="colorSecondaryDark">#1B1B1B</color>
+    <color name="colorSecondaryVariant">#6D6D6D</color>
     <color name="colorOnSecondary">#FFFFFF</color>
 
     <color name="highlight">#F3F315</color>
@@ -30,9 +30,7 @@
     <color name="message_translucent_white">#89FFFFFF</color>
     <color name="message_translucent_dark_grey">#89656363</color>
     <color name="contact_badge_letter_white">#FFFFFF</color>
-
-    <color name="fastscroll_track_color">#1e000000</color>
+    <color name="fastscroll_track_color">#1E000000</color>
     <color name="fastscroll_thumb_color">#42000000</color>
-    <color name="fastscroll_preview_text_color">#ffffff</color>
-    <color name="color_filter_base_color">#ff0000</color>
+    <color name="fastscroll_preview_text_color">#FFFFFF</color>
 </resources>

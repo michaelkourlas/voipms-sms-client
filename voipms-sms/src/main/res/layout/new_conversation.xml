@@ -52,8 +52,7 @@
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:divider="@null"
-                android:dividerHeight="0dp"
-                app:fastScrollEnabled="true" />
+                android:dividerHeight="0dp" />
         </RelativeLayout>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
