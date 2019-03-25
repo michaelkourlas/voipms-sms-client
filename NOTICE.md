@@ -1,11 +1,10 @@
 VoIP.ms SMS  
-Copyright (C) 2015-2018 Michael Kourlas
+Copyright (C) 2015-2019 Michael Kourlas
 
 ## Apache License 2.0 ##
 
 The following components are provided under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0):
 
-* [recycler-fast-scroll](https://github.com/FutureMind/recycler-fast-scroll) from [FutureMind](https://github.com/FutureMind)
 * [material-design-icons](https://github.com/google/material-design-icons) from [Google](https://github.com/google)
 * [Bitmap loading code](https://developer.android.com/topic/performance/graphics/load-bitmap.html) from [Google](http://www.google.com)
 
@@ -19,7 +18,7 @@ The following components are provided under the [ISC License](https://www.apache
 
 The text of the ISC License is as follows:
     
-    Copyright (c) <year> <copyright holder>
+    Copyright 2014 Shuhei Kagawa
     
     Permission to use, copy, modify, and/or distribute this software for any
     purpose with or without fee is hereby granted, provided that the above

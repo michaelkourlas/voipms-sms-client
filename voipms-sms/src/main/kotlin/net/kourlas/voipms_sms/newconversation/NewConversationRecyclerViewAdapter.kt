@@ -26,10 +26,10 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.crashlytics.android.Crashlytics
-import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getNewConversationContacts
+import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
 
 /**
@@ -40,9 +40,11 @@ import net.kourlas.voipms_sms.utils.*
  */
 class NewConversationRecyclerViewAdapter(
     private val activity: NewConversationActivity,
-    private val recyclerView: RecyclerView) : RecyclerView.Adapter<
-    NewConversationRecyclerViewAdapter.ContactViewHolder>(), Filterable,
-    SectionTitleProvider {
+    private val recyclerView: RecyclerView) :
+    RecyclerView.Adapter<
+        NewConversationRecyclerViewAdapter.ContactViewHolder>(),
+    Filterable,
+    FastScroller.SectionTitleProvider {
 
     // List of items shown by the adapter; the index of each item
     // corresponds to the location of each item in the adapter
@@ -196,6 +198,17 @@ class NewConversationRecyclerViewAdapter(
     override fun getItemCount(): Int = contactItems.size
 
     operator fun get(i: Int): BaseContactItem = contactItems[i]
+
+    override fun getSectionTitle(position: Int): String {
+        // The typed in phone number item has no section title
+        val contactItem = contactItems[position]
+        return if (contactItem is ContactItem) {
+            getContactInitial(contactItem.name,
+                              contactItem.primaryPhoneNumber)
+        } else {
+            ""
+        }
+    }
 
     override fun getFilter(): Filter = object : Filter() {
         /**
@@ -358,17 +371,6 @@ class NewConversationRecyclerViewAdapter(
             }
         }
 
-    }
-
-    override fun getSectionTitle(position: Int): String {
-        // The typed in phone number item has no section title
-        val contactItem = contactItems[position]
-        return if (contactItem is ContactItem) {
-            getContactInitial(contactItem.name,
-                              contactItem.primaryPhoneNumber)
-        } else {
-            ""
-        }
     }
 
     /**

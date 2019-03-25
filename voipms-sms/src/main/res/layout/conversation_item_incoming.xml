@@ -15,82 +15,96 @@
   ~ limitations under the License.
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="0dp"
-    android:layout_marginEnd="@dimen/margin"
-    android:layout_marginLeft="@dimen/margin"
-    android:layout_marginRight="@dimen/margin"
     android:layout_marginStart="@dimen/margin"
     android:layout_marginTop="@dimen/conversation_item_margin_top_primary"
-    android:descendantFocusability="blocksDescendants">
+    android:layout_marginEnd="@dimen/margin"
+    android:orientation="vertical">
 
-    <FrameLayout
-        android:id="@+id/photo_layout"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/top_date"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_gravity="bottom"
-        android:layout_marginEnd="@dimen/margin">
+        android:layout_marginBottom="@dimen/half_margin"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:visibility="gone" />
 
-        <QuickContactBadge
-            android:id="@+id/photo"
-            android:layout_width="@dimen/contact_badge"
-            android:layout_height="@dimen/contact_badge"
-            android:layout_gravity="center_vertical"
-            android:scaleType="centerCrop" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/photo_letter"
-            android:layout_width="@dimen/contact_badge"
-            android:layout_height="@dimen/contact_badge"
-            android:gravity="center"
-            android:textColor="@color/contact_badge_letter_white"
-            android:textSize="@dimen/headline" />
-    </FrameLayout>
-
-    <View
-        android:id="@+id/placeholder"
-        android:layout_width="@dimen/contact_badge"
-        android:layout_height="@dimen/contact_badge"
-        android:layout_alignParentEnd="true"
-        android:layout_gravity="bottom"
-        android:layout_marginStart="@dimen/margin" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/photo_layout"
-        android:layout_toStartOf="@id/placeholder">
-
-        <LinearLayout
-            android:id="@+id/sms_container"
+        <FrameLayout
+            android:id="@+id/photo_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
             android:layout_gravity="bottom"
-            android:minHeight="@dimen/contact_badge"
-            android:orientation="vertical"
-            android:padding="@dimen/sms_container_margin"
-            tools:ignore="UselessParent">
+            android:layout_marginEnd="@dimen/margin">
+
+            <QuickContactBadge
+                android:id="@+id/photo"
+                android:layout_width="@dimen/contact_badge"
+                android:layout_height="@dimen/contact_badge"
+                android:layout_gravity="center_vertical"
+                android:scaleType="centerCrop" />
 
             <TextView
-                android:id="@+id/message"
+                android:id="@+id/photo_letter"
+                android:layout_width="@dimen/contact_badge"
+                android:layout_height="@dimen/contact_badge"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                android:textColor="@color/contact_badge_letter_white" />
+        </FrameLayout>
+
+        <View
+            android:id="@+id/placeholder"
+            android:layout_width="@dimen/contact_badge"
+            android:layout_height="@dimen/contact_badge"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="@dimen/margin" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/placeholder"
+            android:layout_toEndOf="@id/photo_layout"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/sms_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:autoLink="all"
-                android:textColor="@android:color/white"
-                android:textColorLink="@android:color/white"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+                android:layout_gravity="bottom"
+                android:minHeight="@dimen/contact_badge"
+                android:orientation="vertical"
+                android:padding="@dimen/sms_container_padding">
+
+                <TextView
+                    android:id="@+id/message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autoLink="all"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    android:textColor="@android:color/white"
+                    android:textColorLink="@android:color/white" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/conversation_text_spacing"
-                android:textColor="@color/message_translucent_white"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                android:visibility="gone" />
         </LinearLayout>
-    </LinearLayout>
-</RelativeLayout>
+    </RelativeLayout>
+</LinearLayout>
+
+

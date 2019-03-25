@@ -45,7 +45,6 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.crashlytics.android.Crashlytics
-import com.futuremind.recyclerviewfastscroll.FastScroller
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
@@ -57,7 +56,7 @@ import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.services.SendMessageService
-import net.kourlas.voipms_sms.ui.CustomScrollerViewProvider
+import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -223,8 +222,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private fun setupToolbar() {
         // Set up toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        ViewCompat.setElevation(toolbar, resources
-            .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
         val actionBar = supportActionBar ?: throw Exception(
             "Action bar cannot be null")
@@ -260,10 +257,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        val fastScroller = findViewById<FastScroller>(R.id.fastscroll)
-        fastScroller.setRecyclerView(recyclerView)
-        fastScroller.setViewProvider(
-            CustomScrollerViewProvider())
+        FastScroller.addTo(
+            recyclerView, FastScroller.POSITION_RIGHT_SIDE)
     }
 
     /**
@@ -275,6 +270,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         ViewCompat.setElevation(
             messageSection,
             resources.getDimension(R.dimen.send_message_elevation))
+        applyRoundedCornersMask(messageSection)
 
         // Set up message text box
         val messageEditText = findViewById<EditText>(R.id.message_edit_text)
@@ -855,11 +851,11 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     override fun onClick(view: View) {
         if (actionMode != null) {
             // Check or uncheck item when action mode is enabled
-            toggleItem(view.parent.parent as View)
+            toggleItem(getRecyclerViewItem(view))
         } else {
             // Resend message if has not yet been sent
             val position = recyclerView.getChildAdapterPosition(
-                view.parent.parent as View)
+                getRecyclerViewItem(view))
             if (position != RecyclerView.NO_POSITION) {
                 val messageItem = adapter[position]
                 val message = messageItem.message
@@ -868,12 +864,20 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                         this, conversationId, message.databaseId)
                 }
             }
+
+            val date = getRecyclerViewItem(view).findViewById<TextView>(
+                R.id.date)
+            if (date.visibility == View.GONE) {
+                date.visibility = View.VISIBLE
+            } else {
+                date.visibility = View.GONE
+            }
         }
     }
 
     override fun onLongClick(view: View): Boolean {
         // On long click, toggle selected item
-        toggleItem(view.parent.parent as View)
+        toggleItem(getRecyclerViewItem(view))
         return true
     }
 
@@ -998,6 +1002,14 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             infoAction.isVisible = true
             copyAction.isVisible = true
             shareAction.isVisible = true
+        }
+    }
+
+    private fun getRecyclerViewItem(view: View): View {
+        return if (view.parent is RecyclerView) {
+            view
+        } else {
+            getRecyclerViewItem(view.parent as View)
         }
     }
 }

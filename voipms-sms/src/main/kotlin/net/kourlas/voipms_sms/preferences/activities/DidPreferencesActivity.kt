@@ -20,7 +20,6 @@ package net.kourlas.voipms_sms.preferences.activities
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.ViewCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.DidPreferencesFragment
 import net.kourlas.voipms_sms.utils.abortActivity
@@ -49,8 +48,6 @@ class DidPreferencesActivity : AppCompatActivity() {
         // Configure toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.title = getFormattedPhoneNumber(did)
-        ViewCompat.setElevation(toolbar, resources
-            .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
         val actionBar = supportActionBar
         if (actionBar != null) {

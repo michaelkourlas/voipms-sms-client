@@ -30,4 +30,9 @@
     <color name="message_translucent_white">#89FFFFFF</color>
     <color name="message_translucent_dark_grey">#89656363</color>
     <color name="contact_badge_letter_white">#FFFFFF</color>
+
+    <color name="fastscroll_track_color">#1e000000</color>
+    <color name="fastscroll_thumb_color">#42000000</color>
+    <color name="fastscroll_preview_text_color">#ffffff</color>
+    <color name="color_filter_base_color">#ff0000</color>
 </resources>

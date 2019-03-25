@@ -30,19 +30,19 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary" />
+            android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary"
+            app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/empty_text"
@@ -53,8 +53,9 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_alignTop="@id/empty_text"
                 android:layout_alignBottom="@id/empty_text"
-                android:layout_alignTop="@id/empty_text">
+                android:layout_marginBottom="@dimen/double_margin">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/list"
@@ -63,27 +64,25 @@
                     android:clipToPadding="false"
                     android:divider="@null"
                     android:dividerHeight="0dp"
-                    android:paddingBottom="@dimen/margin" />
-
-                <com.futuremind.recyclerviewfastscroll.FastScroller
-                    android:id="@+id/fastscroll"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:orientation="vertical"
-                    app:fastscroll__bubbleColor="@color/colorPrimary"
-                    app:fastscroll__bubbleTextAppearance="@style/ScrollerTheme"
-                    app:fastscroll__handleColor="@color/colorPrimary" />
+                    android:paddingBottom="@dimen/quadruple_margin" />
             </RelativeLayout>
         </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/quadruple_margin"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/double_margin"
+            android:background="@drawable/conversation_fade" />
 
         <LinearLayout
             android:id="@+id/message_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top"
+            android:layout_gravity="bottom"
+            android:layout_margin="@dimen/margin"
             android:background="@android:color/white"
-            android:focusableInTouchMode="true">
+            android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/message_edit_text"
@@ -97,18 +96,22 @@
                 android:inputType="textMultiLine|textCapSentences|textAutoCorrect|textShortMessage"
                 android:isScrollContainer="true"
                 android:maxLines="@integer/message_text_height"
-                android:padding="@dimen/margin"
-                android:textSize="@dimen/subheading"
-                tools:ignore="Autofill" />
+                android:importantForAutofill="no"
+                android:paddingStart="@dimen/margin"
+                android:paddingTop="@dimen/half_margin"
+                android:paddingEnd="@dimen/half_margin"
+                android:paddingBottom="@dimen/half_margin"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                tools:targetApi="o" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:layout_marginBottom="@dimen/margin"
-                android:layout_marginEnd="@dimen/margin"
-                android:layout_marginStart="@dimen/button_margin"
-                android:layout_marginTop="@dimen/margin"
+                android:layout_marginStart="@dimen/half_margin"
+                android:layout_marginTop="@dimen/half_margin"
+                android:layout_marginEnd="@dimen/half_margin"
+                android:layout_marginBottom="@dimen/half_margin"
                 android:orientation="vertical">
 
                 <TextView
@@ -117,7 +120,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:gravity="center"
-                    android:textSize="@dimen/caption"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
                     android:visibility="gone" />
 
                 <ImageButton
@@ -127,10 +130,10 @@
                     android:layout_gravity="center_horizontal"
                     android:background="@drawable/conversation_button_send"
                     android:contentDescription="@string/conversation_action_send"
-                    android:padding="@dimen/button_margin"
+                    android:padding="@dimen/half_margin"
                     android:tint="@color/colorPrimary"
                     app:srcCompat="@drawable/ic_send_white_24dp" />
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

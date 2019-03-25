@@ -28,15 +28,13 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.futuremind.recyclerviewfastscroll.FastScroller
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.ui.CustomScrollerViewProvider
+import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.getDigitsOfString
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 
@@ -88,8 +86,6 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     private fun setupToolbar() {
         // Set up toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        ViewCompat.setElevation(toolbar, resources
-            .getDimension(R.dimen.toolbar_elevation))
         setSupportActionBar(toolbar)
 
         val actionBar = supportActionBar ?: throw Exception(
@@ -141,10 +137,8 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        val fastScroller = findViewById<FastScroller>(R.id.fastscroll)
-        fastScroller.setRecyclerView(recyclerView)
-        fastScroller.setViewProvider(
-            CustomScrollerViewProvider())
+        FastScroller.addTo(
+            recyclerView, FastScroller.POSITION_RIGHT_SIDE)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

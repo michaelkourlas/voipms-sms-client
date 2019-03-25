@@ -295,10 +295,9 @@
     <string name="notifications_sync_message">Synchronizing with VoIP.ms</string>
 
     <!-- UTILS -->
-    <string name="utils_date_just_now">Just now</string>
-    <string name="utils_date_seconds_ago">seconds ago</string>
-    <string name="utils_date_one_minute_ago">1 minute ago</string>
-    <string name="utils_date_minutes_ago">minutes ago</string>
+    <string name="utils_date_just_now">Now</string>
+    <string name="utils_date_seconds_ago">s</string>
+    <string name="utils_date_minutes_ago">min</string>
 
     <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>

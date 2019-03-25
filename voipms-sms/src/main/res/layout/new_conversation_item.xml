@@ -35,8 +35,7 @@
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
             android:textColor="@color/colorPrimary"
-            android:textSize="@dimen/subheading"
-            android:textStyle="bold" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
     </LinearLayout>
 
     <FrameLayout
@@ -56,7 +55,7 @@
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
             android:textColor="@color/contact_badge_letter_white"
-            android:textSize="@dimen/headline" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5" />
 
     </FrameLayout>
 
@@ -72,7 +71,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textSize="@dimen/subheading" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
@@ -85,7 +84,7 @@
                 android:layout_alignParentStart="true"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textSize="@dimen/text" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
             <TextView
                 android:id="@+id/phone_number_type"
@@ -96,7 +95,7 @@
                 android:ellipsize="end"
                 android:gravity="end"
                 android:maxLines="1"
-                android:textSize="@dimen/text" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
         </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

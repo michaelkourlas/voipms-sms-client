@@ -47,7 +47,7 @@
                 android:layout_height="@dimen/contact_badge"
                 android:gravity="center"
                 android:textColor="@color/contact_badge_letter_white"
-                android:textSize="@dimen/headline" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5" />
         </FrameLayout>
 
         <ImageView

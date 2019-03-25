@@ -298,8 +298,8 @@ class ConversationsRecyclerViewAdapter<T>(
                     R.string.conversations_message_sending)
             }
         } else {
-            holder.dateTextView.text = getFormattedDate(activity, message.date,
-                                                        true)
+            holder.dateTextView.text = getConversationsViewDate(
+                activity, message.date)
         }
     }
 
