@@ -292,6 +292,11 @@ class ConversationsRecyclerViewAdapter<T>(
                                                android.R.color.holo_red_dark)),
                     0, dateTextBuilder.length,
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                dateTextBuilder.setSpan(
+                    StyleSpan(Typeface.BOLD),
+                    0,
+                    dateTextBuilder.length,
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 holder.dateTextView.text = dateTextBuilder
             } else {
                 holder.dateTextView.text = activity.getString(

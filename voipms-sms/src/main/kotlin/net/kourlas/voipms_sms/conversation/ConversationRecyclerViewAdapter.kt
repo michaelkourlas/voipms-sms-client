@@ -18,11 +18,13 @@
 package net.kourlas.voipms_sms.conversation
 
 import android.graphics.Bitmap
+import android.graphics.Typeface
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -232,31 +234,28 @@ class ConversationRecyclerViewAdapter(
             if (!message.isDeliveryInProgress) {
                 // Show tried but failed to send text
                 val dateTextBuilder = SpannableStringBuilder()
-                if (messageItems[position].checked) {
-                    dateTextBuilder.append(activity.getString(
-                        R.string.conversation_message_not_sent_selected))
-                } else {
-                    dateTextBuilder.append(activity.getString(
-                        R.string.conversation_message_not_sent))
-                }
-
-                if (messageItems[position].checked) {
-                    dateTextBuilder.setSpan(
-                        ForegroundColorSpan(
-                            ContextCompat.getColor(
-                                activity,
-                                android.R.color.holo_red_dark)),
-                        0,
-                        dateTextBuilder.length,
-                        Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                }
-
+                dateTextBuilder.append(activity.getString(
+                    R.string.conversation_message_not_sent))
+                dateTextBuilder.setSpan(
+                    ForegroundColorSpan(
+                        ContextCompat.getColor(
+                            activity,
+                            android.R.color.holo_red_dark)),
+                    0,
+                    dateTextBuilder.length,
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                dateTextBuilder.setSpan(
+                    StyleSpan(Typeface.BOLD),
+                    0,
+                    dateTextBuilder.length,
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 dateText.text = dateTextBuilder
             } else {
                 // Show sending text
                 dateText.text = activity.getString(
                     R.string.conversation_message_sending)
             }
+            dateText.visibility = View.VISIBLE
         } else {
             dateText.text = getConversationViewDate(activity, message.date)
         }

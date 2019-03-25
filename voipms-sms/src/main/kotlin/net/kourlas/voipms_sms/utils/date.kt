@@ -42,7 +42,7 @@ private fun compareDateWithoutTime(first: Calendar, second: Calendar): Int {
 
 /**
  * Get the formatted date used for the scroll bar on the recycler view in the
- * ConversationActivity and NewConversationActivity.
+ * conversation view.
  *
  * @param date The date to format.
  * @return The formatted date.
@@ -76,6 +76,12 @@ fun getScrollBarDate(date: Date): String {
     return format.format(date)
 }
 
+/**
+ * Get the formatted date used for the conversations view.
+ *
+ * @param date The date to format.
+ * @return The formatted date.
+ */
 fun getConversationsViewDate(context: Context, date: Date): String {
     val calendar = Calendar.getInstance()
     calendar.time = date
@@ -131,6 +137,13 @@ fun getConversationsViewDate(context: Context, date: Date): String {
     return format.format(date)
 }
 
+/**
+ * Get the formatted date used for the start of a portion of a conversation in
+ * the conversation view.
+ *
+ * @param date The date to format.
+ * @return The formatted date.
+ */
 fun getConversationViewTopDate(date: Date): String {
     val calendar = Calendar.getInstance()
     calendar.time = date
@@ -169,6 +182,13 @@ fun getConversationViewTopDate(date: Date): String {
     return format.format(date)
 }
 
+/**
+ * Get the formatted date used for an individual message in the conversation
+ * view.
+ *
+ * @param date The date to format.
+ * @return The formatted date.
+ */
 fun getConversationViewDate(context: Context, date: Date): String {
     val calendar = Calendar.getInstance()
     calendar.time = date

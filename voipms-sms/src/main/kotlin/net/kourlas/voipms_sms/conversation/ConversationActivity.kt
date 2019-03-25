@@ -463,6 +463,21 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 }
             })
 
+        // Set cursor color and hint text
+        val searchAutoComplete = searchView.findViewById<
+            SearchView.SearchAutoComplete>(
+            androidx.appcompat.R.id.search_src_text)
+        searchAutoComplete.hint = getString(R.string.conversation_action_search)
+        searchAutoComplete.setHintTextColor(ContextCompat.getColor(
+            applicationContext, R.color.search_hint))
+        try {
+            val field = TextView::class.java.getDeclaredField(
+                "mCursorDrawableRes")
+            field.isAccessible = true
+            field.set(searchAutoComplete, R.drawable.search_cursor)
+        } catch (_: java.lang.Exception) {
+        }
+
         updateButtons()
 
         return super.onCreateOptionsMenu(menu)

@@ -147,7 +147,6 @@
     <string name="conversation_text_hint">Send message</string>
     <string name="conversation_message_sending">Sending…</string>
     <string name="conversation_message_not_sent">Not sent. Touch to try again.</string>
-    <string name="conversation_message_not_sent_selected">Resend or delete</string>
     <string name="conversation_extra_message_text" translatable="false">messageText</string>
     <string name="conversation_extra_focus" translatable="false">focus</string>
     <string name="conversation_perm_denied_call">Phone permission required to make calls</string>

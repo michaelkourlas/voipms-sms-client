@@ -26,10 +26,10 @@
     <color name="colorOnSecondary">#FFFFFF</color>
 
     <color name="highlight">#F3F315</color>
+    <color name="search_hint">#AFFFFFFF</color>
     <color name="dark_gray">#656363</color>
     <color name="message_translucent_white">#89FFFFFF</color>
     <color name="message_translucent_dark_grey">#89656363</color>
-    <color name="contact_badge_letter_white">#FFFFFF</color>
     <color name="fastscroll_track_color">#1E000000</color>
     <color name="fastscroll_thumb_color">#42000000</color>
     <color name="fastscroll_preview_text_color">#FFFFFF</color>

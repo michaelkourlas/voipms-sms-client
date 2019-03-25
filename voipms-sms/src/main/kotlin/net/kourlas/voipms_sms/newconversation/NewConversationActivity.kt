@@ -25,9 +25,11 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -122,6 +124,21 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         val searchMagIcon = searchView.findViewById<ImageView>(
             R.id.search_mag_icon)
         searchMagIcon.layoutParams = LinearLayout.LayoutParams(0, 0)
+
+        // Set cursor color and hint text
+        val searchAutoComplete = searchView.findViewById<
+            SearchView.SearchAutoComplete>(
+            androidx.appcompat.R.id.search_src_text)
+        searchAutoComplete.hint = getString(R.string.conversation_action_search)
+        searchAutoComplete.setHintTextColor(ContextCompat.getColor(
+            applicationContext, R.color.search_hint))
+        try {
+            val field = TextView::class.java.getDeclaredField(
+                "mCursorDrawableRes")
+            field.isAccessible = true
+            field.set(searchAutoComplete, R.drawable.search_cursor)
+        } catch (_: java.lang.Exception) {
+        }
     }
 
     /**

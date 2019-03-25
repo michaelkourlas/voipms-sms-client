@@ -26,6 +26,7 @@ import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
@@ -280,6 +281,21 @@ open class ConversationsActivity : AppCompatActivity(),
                     return true
                 }
             })
+
+        // Set cursor color and hint text
+        val searchAutoComplete = searchView.findViewById<
+            SearchView.SearchAutoComplete>(
+            androidx.appcompat.R.id.search_src_text)
+        searchAutoComplete.hint = getString(R.string.conversation_action_search)
+        searchAutoComplete.setHintTextColor(ContextCompat.getColor(
+            applicationContext, R.color.search_hint))
+        try {
+            val field = TextView::class.java.getDeclaredField(
+                "mCursorDrawableRes")
+            field.isAccessible = true
+            field.set(searchAutoComplete, R.drawable.search_cursor)
+        } catch (_: java.lang.Exception) {
+        }
 
         return super.onCreateOptionsMenu(menu)
     }
