@@ -391,6 +391,8 @@ class Notifications private constructor(
             notification.setGroup(context.getString(
                 R.string.notifications_group_key))
         }
+        notification.setGroupAlertBehavior(
+            NotificationCompat.GROUP_ALERT_CHILDREN)
 
         // Notification text
         val person = Person.Builder().setName(
@@ -466,6 +468,8 @@ class Notifications private constructor(
                 R.string.notifications_group_key))
             groupNotification.setGroupSummary(true)
             groupNotification.setAutoCancel(true)
+            groupNotification.setGroupAlertBehavior(
+                NotificationCompat.GROUP_ALERT_CHILDREN)
 
             val intent = Intent(context, ConversationsActivity::class.java)
             val stackBuilder = TaskStackBuilder.create(context)
