@@ -20,24 +20,20 @@
 
     <!-- Account -->
     <string name="preferences_account_category_name">Account</string>
-    <string name="preferences_account_info">A VoIP.ms account is required to use this app. Sign up for an account on the &lt;a href="https://www.voip.ms"&gt;VoIP.ms website&lt;/a&gt;. &lt;strong&gt;You must use the email address you use to log into the VoIP.ms website to log into this app.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;VoIP.ms API access is also required to use this app. Use the &lt;a href="https://www.voip.ms/m/api.php"&gt;VoIP.ms API configuration menu&lt;/a&gt; to enable API access, set an API password, and add "0.0.0.0" to the list of IP addresses approved for API access. &lt;strong&gt;You must use the API password to log into this app, not your normal account password.&lt;/strong&gt;</string>
     <string name="preferences_account_email_key" translatable="false">api_email</string>
-    <string name="preferences_account_email_title">VoIP.ms account email address</string>
     <string name="preferences_account_password_key" translatable="false">api_password</string>
-    <string name="preferences_account_password_title">VoIP.ms API password</string>
-    <string name="preferences_account_password_placeholder" translatable="false">********</string>
+    <string name="preferences_account_sign_out_key" translatable="false">sign_out</string>
 
     <!-- Phone numbers -->
     <string name="preferences_dids_category_name">Phone numbers</string>
     <string name="preferences_dids_info">The phone numbers you wish to use with this app must have SMS enabled. Otherwise, they will not appear in this list. Use the VoIP.ms &lt;a href="https://voip.ms/m/managedid.php"&gt;phone number configuration menu&lt;/a&gt; to enable SMS for your phone numbers.&lt;br&gt;&lt;br&gt;This app uses the SMS URL callback feature for push notifications and attempts to configure it automatically. If you need to complete this step manually, use the VoIP.ms phone number configuration menu to enable the callback feature for your phone numbers, entering the following URL into the associated field: https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}</string>
     <string name="preferences_dids_did_key" translatable="false">did</string>
+    <string name="preferences_dids_active_did_key" translatable="false">active_did</string>
     <string name="preferences_dids_key" translatable="false">dids</string>
     <string name="preferences_dids_error_network">Phone number retrieval failed: no network connection available</string>
     <string name="preferences_dids_error_api_request">Phone number retrieval failed: request to VoIP.ms API failed</string>
     <string name="preferences_dids_error_api_parse">Phone number retrieval failed: VoIP.ms API response could not be parsed</string>
     <string name="preferences_dids_error_api_error">Phone number retrieval failed: VoIP.ms API returned error \'%1$s\'</string>
-    <string name="preferences_dids_error_email">Phone number retrieval failed: email address not set</string>
-    <string name="preferences_dids_error_password">Phone number retrieval failed: password not set.</string>
     <string name="preferences_dids_error_unknown">Phone number retrieval failed: unknown error</string>
     <string name="preferences_dids_fragment_retrieved_dids_key">voipms_dids</string>
     <string name="preferences_dids_fragment_database_dids_key">database_dids</string>
@@ -185,11 +181,11 @@
     <string name="conversations_message_sending">Sending…</string>
     <string name="conversations_message_not_sent">Not sent.</string>
     <string name="conversations_message_draft">Draft</string>
-    <string name="conversations_first_run_dialog_title">Important</string>
-    <string name="conversations_first_run_dialog_text">To use this application, you must set your VoIP.ms portal email address, API password, and one or more SMS-enabled DIDs using the Settings option in the application\'s main menu. If you do not know what an API password is, see Help.\n\nBy default, the message retrieval start date is set to today. If you wish to receive messages older than this, you can change this date in Settings and then perform a full synchronization by swiping down in the conversations view.\n\nFor more information, see Help.</string>
     <string name="conversations_checked_content_description">Checked</string>
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>
     <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>
+    <string name="conversations_text_hint">Search…</string>
+    <string name="conversations_no_account">No account configured</string>
 
     <!-- ConversationsArchivedActivity -->
     <string name="conversations_archived_name">Archived</string>
@@ -201,6 +197,13 @@
 
     <!-- PreferencesActivity -->
     <string name="preferences_name">Settings</string>
+
+    <!-- SignInActivity -->
+    <string name="sign_in_name">Sign in to the VoIP.ms SMS API</string>
+    <string name="sign_in_info">&lt;strong&gt;Please read these instructions carefully. The sign-in process for this app is not intuitive.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;A VoIP.ms account is required to use this app. Sign up for an account on the &lt;a href="https://www.voip.ms"&gt;VoIP.ms website&lt;/a&gt;. You must use the email address you use to log into the VoIP.ms website to log into this app.&lt;br&gt;&lt;br&gt;VoIP.ms API access is also required to use this app. Use the &lt;a href="https://www.voip.ms/m/api.php"&gt;VoIP.ms API configuration menu&lt;/a&gt; to enable API access, set an API password, and add "0.0.0.0" to the list of IP addresses approved for API access. You must use the API password to log into this app, not your normal account password.</string>
+    <string name="sign_in_email_hint">VoIP.ms account email address</string>
+    <string name="sign_in_password_hint">VoIP.ms API password</string>
+    <string name="sign_in_button">Sign in</string>
 
     <!-- DidsPreferencesActivity -->
     <string name="preferences_did_name">Phone numbers</string>
@@ -220,6 +223,7 @@
 
     <!-- RetrieveDidsService -->
     <string name="retrieve_dids_action" translatable="false">retrieve_dids_action</string>
+    <string name="retrieve_dids_auto_add" translatable="false">retrieve_dids_auto_add</string>
 
     <!-- SendMessageService -->
     <string name="send_message_action" translatable="false">send_message_action</string>
@@ -247,6 +251,16 @@
     <!-- SyncIntervalService -->
     <string name="sync_interval_service_action" translatable="false">sync_interval_service_action</string>
 
+    <!-- VerifyCredentialsService -->
+    <string name="verify_credentials_action" translatable="false">verify_credentials_action</string>
+    <string name="verify_credentials_email" translatable="false">verify_credentials_email</string>
+    <string name="verify_credentials_password" translatable="false">verify_credentials_password</string>
+    <string name="verify_credentials_error_network">Sign-in failed: no network connection available</string>
+    <string name="verify_credentials_error_api_request">Sign-in failed: request to VoIP.ms API failed</string>
+    <string name="verify_credentials_error_api_parse">Sign-in failed: VoIP.ms API response could not be parsed</string>
+    <string name="verify_credentials_error_api_error">Sign-in failed: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="verify_credentials_error_unknown">Sign-in failed: unknown error</string>
+
     <!-- BROADCAST RECEIVERS -->
 
     <!-- SyncIntervalReceiver -->
@@ -273,6 +287,11 @@
     <string name="retrieve_dids_complete_action" translatable="false">retrieve_dids_complete_action</string>
     <string name="retrieve_dids_complete_dids" translatable="false">retrieve_dids_complete_dids</string>
     <string name="retrieve_dids_complete_error" translatable="false">retrieve_dids_complete_error</string>
+
+    <!-- Verify credentials complete receiver -->
+    <string name="verify_credentials_complete_action" translatable="false">verify_credentials_complete_action</string>
+    <string name="verify_credentials_complete_valid" translatable="false">verify_credentials_complete_valid</string>
+    <string name="verify_credentials_complete_error" translatable="false">verify_credentials_complete_error</string>
 
     <!-- SINGLETONS -->
 

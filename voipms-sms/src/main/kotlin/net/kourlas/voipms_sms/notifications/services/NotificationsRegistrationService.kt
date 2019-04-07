@@ -23,10 +23,7 @@ import android.content.Intent
 import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.preferences.getEmail
-import net.kourlas.voipms_sms.preferences.getPassword
-import net.kourlas.voipms_sms.preferences.isAccountActive
+import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.utils.getJson
 import org.json.JSONException
 import org.json.JSONObject
@@ -55,8 +52,9 @@ class NotificationsRegistrationService : IntentService(
             return
         }
 
-        // Terminate quietly if account inactive
-        if (!isAccountActive(applicationContext)) {
+        // Terminate quietly if account or DIDs are not configured
+        if (!didsConfigured(applicationContext)
+            || !accountConfigured(applicationContext)) {
             return
         }
 

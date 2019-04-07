@@ -23,7 +23,6 @@ import androidx.core.app.JobIntentService
 import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.preferences.isAccountActive
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.JobId
@@ -39,11 +38,6 @@ class MarkReadService : JobIntentService() {
             // the mark as read action
             if (intent.action != applicationContext.getString(
                     R.string.mark_read_action)) {
-                return
-            }
-
-            // Terminate quietly if account inactive
-            if (!isAccountActive(applicationContext)) {
                 return
             }
 

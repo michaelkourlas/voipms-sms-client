@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ VoIP.ms SMS
-  ~ Copyright (C) 2017-2019 Michael Kourlas
+  ~ Material Design Icons
+  ~ Copyright (C) Google
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,8 +15,13 @@
   ~ limitations under the License.
   -->
 
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidx.preference.Preference
-        android:key="@string/preferences_account_sign_out_key"
-        android:title="Sign out" />
-</androidx.preference.PreferenceScreen>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="#FFFFFF"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M3,18h18v-2L3,16v2zM3,13h18v-2L3,11v2zM3,6v2h18L21,6L3,6z" />
+</vector>

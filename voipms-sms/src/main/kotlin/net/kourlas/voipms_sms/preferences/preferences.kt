@@ -33,6 +33,12 @@ fun getConnectTimeout(context: Context): Int =
             R.string.preferences_network_connect_timeout_default_value))
         .toIntOrNull() ?: 0
 
+fun getActiveDid(context: Context): String =
+    getStringPreference(context,
+                        context.getString(
+                            R.string.preferences_dids_active_did_key),
+                        "")
+
 fun getDids(context: Context,
             onlyShowInConversationsView: Boolean = false,
             onlyRetrieveMessages: Boolean = false,
@@ -177,10 +183,16 @@ fun getReadTimeout(context: Context): Int =
             R.string.preferences_network_read_timeout_default_value))
         .toIntOrNull() ?: 0
 
-fun isAccountActive(context: Context): Boolean =
+fun accountConfigured(context: Context): Boolean =
     getEmail(context) != ""
     && getPassword(context) != ""
-    && getDids(context).isNotEmpty()
+
+fun didsConfigured(context: Context): Boolean = getDids(context).isNotEmpty()
+
+fun setActiveDid(context: Context, did: String) {
+    setStringPreference(context, context.getString(
+        R.string.preferences_dids_active_did_key), did)
+}
 
 fun setDids(context: Context, dids: Set<String>) {
     val currentDids = getDids(context)
@@ -195,6 +207,16 @@ fun setDids(context: Context, dids: Set<String>) {
     }
 
     subscribeToDidTopics(context)
+}
+
+fun setEmail(context: Context, email: String) {
+    setStringPreference(context, context.getString(
+        R.string.preferences_account_email_key), email)
+}
+
+fun setPassword(context: Context, password: String) {
+    setStringPreference(context, context.getString(
+        R.string.preferences_account_password_key), password)
 }
 
 fun setDidShowInConversationsView(context: Context, did: String,
@@ -275,6 +297,13 @@ fun setSetupCompletedForVersion(context: Context, version: Long) {
     }
 }
 
+fun setStartDate(context: Context, date: Date) {
+    setStringPreference(
+        context,
+        context.getString(R.string.preferences_sync_start_date_key),
+        SimpleDateFormat("MM/dd/YYYY", Locale.US).format(date))
+}
+
 private fun getBooleanPreference(context: Context, key: String,
                                  default: Boolean): Boolean {
     val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
@@ -310,6 +339,17 @@ private fun setBooleanPreference(context: Context, key: String,
     val editor = sharedPreferences.edit()
     with(editor) {
         putBoolean(key, value)
+        apply()
+    }
+}
+
+private fun setStringPreference(context: Context, key: String,
+                                value: String) {
+    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+        context.applicationContext)
+    val editor = sharedPreferences.edit()
+    with(editor) {
+        putString(key, value)
         apply()
     }
 }

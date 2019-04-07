@@ -129,7 +129,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         val searchAutoComplete = searchView.findViewById<
             SearchView.SearchAutoComplete>(
             androidx.appcompat.R.id.search_src_text)
-        searchAutoComplete.hint = getString(R.string.conversation_action_search)
+        searchAutoComplete.hint = getString(R.string.new_conversation_text_hint)
         searchAutoComplete.setHintTextColor(ContextCompat.getColor(
             applicationContext, R.color.search_hint))
         try {

@@ -24,7 +24,10 @@ import android.provider.Settings
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
+import net.kourlas.voipms_sms.preferences.accountConfigured
+import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.NotificationsPreferencesActivity
+import net.kourlas.voipms_sms.signin.SignInActivity
 
 /**
  * Fragment used to display the app's preferences.
@@ -32,6 +35,8 @@ import net.kourlas.voipms_sms.preferences.activities.NotificationsPreferencesAct
 class PreferencesFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
+        val context = context ?: return
+
         // Populate fragment with preferences defined in XML file
         addPreferencesFromResource(R.xml.preferences)
 
@@ -47,7 +52,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                     val intent = Intent(
                         Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
                     intent.putExtra(Settings.EXTRA_APP_PACKAGE,
-                                    context?.packageName)
+                                    context.packageName)
                     intent.putExtra(Settings.EXTRA_CHANNEL_ID,
                                     getString(
                                         R.string.notifications_channel_default))
@@ -55,6 +60,15 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                 } else {
                     preference.intent = Intent(
                         context, NotificationsPreferencesActivity::class.java)
+                }
+            } else if (preference.title == getString(
+                    R.string.preferences_account_category_name)) {
+                if (accountConfigured(context)) {
+                    preference.intent = Intent(context,
+                                               AccountPreferencesActivity::class.java)
+                } else {
+                    preference.intent = Intent(context,
+                                               SignInActivity::class.java)
                 }
             }
         }

@@ -30,9 +30,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.DidsPreferencesFragment
-import net.kourlas.voipms_sms.preferences.getEmail
-import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.services.RetrieveDidsService
 import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
@@ -58,16 +57,11 @@ class DidsPreferencesActivity : AppCompatActivity() {
                 val error = intent?.getStringExtra(
                     getString(
                         R.string.retrieve_dids_complete_error))
-                when {
-                    error != null -> showSnackbar(
+                if (error != null) {
+                    showSnackbar(
                         this@DidsPreferencesActivity,
                         R.id.coordinator_layout,
                         error)
-                    retrievedDids == null -> showSnackbar(
-                        this@DidsPreferencesActivity,
-                        R.id.coordinator_layout,
-                        getString(
-                            R.string.preferences_dids_error_unknown))
                 }
 
                 loadPreferences(retrievedDids)
@@ -128,15 +122,7 @@ class DidsPreferencesActivity : AppCompatActivity() {
     private fun retrieveDids() {
         // Verify email and password are set and that Internet connection is
         // available (avoid lengthy timeout)
-        if (getEmail(this) == "") {
-            showSnackbar(this, R.id.coordinator_layout, getString(
-                R.string.preferences_dids_error_email))
-            loadPreferences(null)
-            return
-        }
-        if (getPassword(this) == "") {
-            showSnackbar(this, R.id.coordinator_layout, getString(
-                R.string.preferences_dids_error_password))
+        if (!accountConfigured(this)) {
             loadPreferences(null)
             return
         }

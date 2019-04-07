@@ -22,8 +22,11 @@ import android.content.Context
 import android.content.Intent
 import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.notifications.Notifications
+import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
+import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.utils.getJson
 import org.json.JSONException
 import org.json.JSONObject
@@ -82,6 +85,18 @@ class RetrieveDidsService : IntentService(
             val response = getApiResponse()
             if (response != null) {
                 dids = getDidsFromResponse(response)
+            }
+
+            val autoAdd = intent.extras?.get(
+                applicationContext.getString(R.string.retrieve_dids_auto_add))
+                              as Boolean?
+                          ?: throw Exception("Auto add missing")
+            if (autoAdd && dids?.isNotEmpty() == true) {
+                setDids(applicationContext,
+                        getDids(applicationContext).plus(dids))
+                Notifications.getInstance(application).enablePushNotifications(
+                    applicationContext)
+                AppIndexingService.replaceIndex(applicationContext)
             }
         } catch (e: Exception) {
             Crashlytics.logException(e)
@@ -162,9 +177,12 @@ class RetrieveDidsService : IntentService(
         /**
          * Retrieve DIDs for a particular account from VoIP.ms.
          */
-        fun startService(context: Context) {
+        fun startService(context: Context, autoAdd: Boolean = false) {
             val intent = Intent(context, RetrieveDidsService::class.java)
             intent.action = context.getString(R.string.retrieve_dids_action)
+            intent.putExtra(context.getString(R.string.retrieve_dids_auto_add),
+                            autoAdd)
+
             context.startService(intent)
         }
     }

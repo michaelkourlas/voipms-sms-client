@@ -17,14 +17,11 @@
 
 package net.kourlas.voipms_sms.preferences.activities
 
-import android.os.Build
 import android.os.Bundle
-import android.text.Html
-import android.text.method.LinkMovementMethod
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.AccountPreferencesFragment
 
 /**
@@ -53,16 +50,13 @@ class AccountPreferencesActivity : AppCompatActivity() {
         fragment = AccountPreferencesFragment()
         supportFragmentManager.beginTransaction().replace(
             R.id.preferences_fragment_layout, fragment).commit()
+    }
 
-        val textView = findViewById<TextView>(R.id.text_view)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            textView.text = Html.fromHtml(
-                getString(R.string.preferences_account_info), 0)
-        } else {
-            @Suppress("DEPRECATION")
-            textView.text = Html.fromHtml(
-                getString(R.string.preferences_account_info))
+    override fun onResume() {
+        super.onResume()
+
+        if (!accountConfigured(applicationContext)) {
+            finish()
         }
-        textView.movementMethod = LinkMovementMethod.getInstance()
     }
 }

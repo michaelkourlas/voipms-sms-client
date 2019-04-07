@@ -26,30 +26,36 @@ import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationView
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.newconversation.NewConversationActivity
 import net.kourlas.voipms_sms.notifications.Notifications
+import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.PreferencesActivity
-import net.kourlas.voipms_sms.preferences.getSetupCompletedForVersion
-import net.kourlas.voipms_sms.preferences.isAccountActive
-import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
+import net.kourlas.voipms_sms.signin.SignInActivity
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
+import java.util.*
 
 /**
  * Activity that contains a generic list of conversations.
@@ -63,10 +69,8 @@ open class ConversationsActivity : AppCompatActivity(),
     protected lateinit var adapter: ConversationsRecyclerViewAdapter<
         ConversationsActivity>
     private lateinit var menu: Menu
+    private lateinit var navMenuItemDidMap: HashMap<MenuItem, String>
     private var actionMode: ActionMode? = null
-
-    // Dialog to show on first run of application
-    private var firstRunDialog: AlertDialog? = null
 
     // Broadcast receivers
     private val syncCompleteReceiver =
@@ -133,6 +137,29 @@ open class ConversationsActivity : AppCompatActivity(),
                 this, arrayOf(android.Manifest.permission.READ_CONTACTS),
                 PermissionIndex.CONTACTS.ordinal)
         }
+
+        navMenuItemDidMap = HashMap()
+
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            drawerLayout.closeDrawer(GravityCompat.START)
+            navMenuItemDidMap[menuItem]?.let {
+                setActiveDid(applicationContext, it)
+                menuItem.isChecked = true
+                adapter.refresh()
+            }
+            true
+        }
+
+        navigationView.getHeaderView(0).setOnClickListener {
+            if (accountConfigured(applicationContext)) {
+                startActivity(
+                    Intent(this, AccountPreferencesActivity::class.java))
+            } else {
+                startActivity(Intent(this, SignInActivity::class.java))
+            }
+        }
     }
 
     /**
@@ -142,6 +169,11 @@ open class ConversationsActivity : AppCompatActivity(),
         // Set up toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+        val actionBar = supportActionBar
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
+        }
     }
 
     /**
@@ -171,12 +203,17 @@ open class ConversationsActivity : AppCompatActivity(),
      */
     open fun setupNewConversationButton() {
         val button = findViewById<FloatingActionButton>(R.id.chat_button)
+
+        if (!didsConfigured(applicationContext)) {
+            button.visibility = View.GONE
+        } else {
+            button.visibility = View.VISIBLE
+        }
+
         button.setOnClickListener {
-            if (isAccountActive(this)) {
-                val newConversationIntent = Intent(
-                    this, NewConversationActivity::class.java)
-                startActivity(newConversationIntent)
-            }
+            val newConversationIntent = Intent(
+                this, NewConversationActivity::class.java)
+            startActivity(newConversationIntent)
         }
     }
 
@@ -193,15 +230,39 @@ open class ConversationsActivity : AppCompatActivity(),
                          IntentFilter(getString(
                              R.string.push_notifications_reg_complete_action)))
 
-        // Perform special setup for the first time running this app
-        if (!isAccountActive(this)) {
-            onFirstRun()
+        // Perform special setup if there are no DIDs available and the user
+        // has not configured an account
+        if (!didsConfigured(applicationContext)
+            && Database.getInstance(applicationContext).getDids().isEmpty()) {
+            if (!accountConfigured(applicationContext)) {
+                startActivity(Intent(this, SignInActivity::class.java))
+            }
             return
         }
 
-        // Perform special setup for version 114
+        // Perform special setup for version 114: need to re-enable push
+        // notifications
         if (getSetupCompletedForVersion(this) < 114) {
+            if (GoogleApiAvailability.getInstance()
+                    .isGooglePlayServicesAvailable(
+                        this) != ConnectionResult.SUCCESS) {
+                showSnackbar(this, R.id.coordinator_layout,
+                             this.getString(
+                                 R.string.push_notifications_fail_google_play))
+            }
             Notifications.getInstance(application).enablePushNotifications(this)
+        }
+
+        // Perform special setup for version 120: default start date is 30 days
+        // prior to today
+        if (getSetupCompletedForVersion(this) < 120) {
+            val calendar = Calendar.getInstance()
+            calendar.add(Calendar.DAY_OF_YEAR, -30)
+            val date = Date()
+            if (date < getStartDate(application)) {
+                setStartDate(application, calendar.time)
+            }
+            setSetupCompletedForVersion(application, 120)
         }
 
         // Refresh and perform limited synchronization
@@ -223,34 +284,52 @@ open class ConversationsActivity : AppCompatActivity(),
         Notifications.getInstance(application)
             .deleteNotificationChannelsAndGroups()
         Notifications.getInstance(application).renameNotificationChannels()
-    }
 
-    /**
-     * Show a dialog with help information when the app is running for the
-     * first time.
-     */
-    private fun onFirstRun() {
-        // Show a dialog with help information on first run of the app
-        firstRunDialog = showAlertDialog(
-            this,
-            getString(R.string.conversations_first_run_dialog_title),
-            getString(R.string.conversations_first_run_dialog_text),
-            getString(R.string.conversations_action_settings),
-            DialogInterface.OnClickListener { _, _ ->
-                startActivity(Intent(this, PreferencesActivity::class.java))
-            },
-            getString(R.string.conversations_action_help),
-            DialogInterface.OnClickListener { _, _ ->
-                startActivity(Intent(Intent.ACTION_VIEW,
-                                     Uri.parse(getString(R.string.help_url))))
-            })
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+
+        // Apply circular mask to and remove overlay from picture
+        // to match Android Messages aesthetic
+        val photo = navigationView.getHeaderView(0).findViewById<ImageView>(
+            R.id.photo)
+        applyCircularMask(photo)
+
+        // Set navigation bar email address
+        val email = navigationView.getHeaderView(0).findViewById<TextView>(
+            R.id.email)
+        if (accountConfigured(applicationContext)) {
+            email.text = getEmail(applicationContext)
+        } else {
+            email.text = getString(R.string.conversations_no_account)
+        }
+
+        // Set navigation bar DIDs
+        val dids = getDids(applicationContext,
+                           onlyShowInConversationsView = true)
+        if (dids.isNotEmpty()) {
+            var activeDid = getActiveDid(applicationContext)
+            if (activeDid !in dids) {
+                activeDid = dids.first()
+                setActiveDid(applicationContext, activeDid)
+            }
+
+            navigationView.menu.clear()
+            navMenuItemDidMap.clear()
+            for (did in dids) {
+                val menuItem = navigationView.menu.add(
+                    getFormattedPhoneNumber(did))
+                navMenuItemDidMap[menuItem] = did
+                menuItem.isCheckable = true
+                if (activeDid == did) {
+                    menuItem.isChecked = true
+                }
+            }
+        } else {
+            setActiveDid(applicationContext, "")
+        }
     }
 
     override fun onPause() {
         super.onPause()
-
-        // Dismiss first run dialog if it is visible
-        firstRunDialog?.dismiss()
 
         // Unregister all dynamic receivers for this activity
         safeUnregisterReceiver(this, syncCompleteReceiver)
@@ -286,7 +365,7 @@ open class ConversationsActivity : AppCompatActivity(),
         val searchAutoComplete = searchView.findViewById<
             SearchView.SearchAutoComplete>(
             androidx.appcompat.R.id.search_src_text)
-        searchAutoComplete.hint = getString(R.string.conversation_action_search)
+        searchAutoComplete.hint = getString(R.string.conversations_text_hint)
         searchAutoComplete.setHintTextColor(ContextCompat.getColor(
             applicationContext, R.color.search_hint))
         try {
@@ -302,6 +381,12 @@ open class ConversationsActivity : AppCompatActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            android.R.id.home -> {
+                val drawerLayout = findViewById<DrawerLayout>(
+                    R.id.drawer_layout)
+                drawerLayout.openDrawer(GravityCompat.START)
+                return true
+            }
             R.id.archived_button -> {
                 val intent = Intent(this,
                                     ConversationsArchivedActivity::class.java)

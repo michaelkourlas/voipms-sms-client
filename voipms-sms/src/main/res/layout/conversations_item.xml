@@ -103,15 +103,6 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
-
-            <TextView
-                android:id="@+id/did"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/margin"
-                android:gravity="end|top"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

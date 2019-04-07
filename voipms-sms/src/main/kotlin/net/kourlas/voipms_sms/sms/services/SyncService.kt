@@ -53,18 +53,6 @@ class SyncService : IntentService(
     private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
-        // Terminate quietly if intent does not exist or does not contain
-        // the sync action
-        if (intent == null || intent.action != applicationContext.getString(
-                R.string.sync_action)) {
-            return
-        }
-
-        // Terminate quietly if account inactive
-        if (!isAccountActive(applicationContext)) {
-            return
-        }
-
         val rand = Random().nextInt().toString(16)
         Log.i(SyncService::class.java.name, "[$rand] starting synchronization")
 
@@ -84,7 +72,7 @@ class SyncService : IntentService(
                 R.string.sync_complete_action))
         syncCompleteBroadcastIntent.putExtra(getString(
             R.string.sync_complete_error), error)
-        if (intent.extras?.get(getString(
+        if (intent?.extras?.get(getString(
                 R.string.sync_force_recent)) != true) {
             syncCompleteBroadcastIntent.putExtra(getString(
                 R.string.sync_complete_full), true)
@@ -99,8 +87,21 @@ class SyncService : IntentService(
     /**
      * Perform synchronization.
      */
-    private fun handleSync(intent: Intent) {
+    private fun handleSync(intent: Intent?) {
         try {
+            // Terminate quietly if intent does not exist or does not contain
+            // the sync action
+            if (intent == null || intent.action != applicationContext.getString(
+                    R.string.sync_action)) {
+                return
+            }
+
+            // Terminate quietly if account inactive
+            if (!accountConfigured(applicationContext) || !didsConfigured(
+                    applicationContext)) {
+                return
+            }
+
             // Extract the boolean properties from the intent
             val forceRecent = intent.extras?.get(
                 applicationContext.getString(R.string.sync_force_recent))

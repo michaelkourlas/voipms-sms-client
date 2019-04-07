@@ -23,6 +23,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import androidx.preference.Preference
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -181,6 +183,13 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
 
         if (dids.isNotEmpty()) {
             // Re-register for push notifications when DIDs change
+            if (GoogleApiAvailability.getInstance()
+                    .isGooglePlayServicesAvailable(
+                        activity) != ConnectionResult.SUCCESS) {
+                showSnackbar(activity, R.id.coordinator_layout,
+                             activity.getString(
+                                 R.string.push_notifications_fail_google_play))
+            }
             Notifications.getInstance(
                 activity.application).enablePushNotifications(activity)
         }

@@ -17,7 +17,6 @@
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -33,44 +32,9 @@
             android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ScrollView
+    <FrameLayout
+        android:id="@+id/preferences_fragment_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <FrameLayout
-                android:id="@+id/preferences_fragment_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin"
-                android:layout_marginEnd="@dimen/margin"
-                android:layout_marginBottom="@dimen/margin"
-                android:orientation="horizontal"
-                tools:ignore="UseCompoundDrawables">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin"
-                    android:layout_marginEnd="@dimen/double_margin"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/ic_info_outline_primary_dark_24dp" />
-
-                <TextView
-                    android:id="@+id/text_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textIsSelectable="true" />
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

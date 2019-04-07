@@ -15,56 +15,73 @@
   ~ limitations under the License.
   -->
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/coordinator_layout"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary"
-            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
-    </com.google.android.material.appbar.AppBarLayout>
+            android:layout_height="wrap_content">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary"
+                app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+        </com.google.android.material.appbar.AppBarLayout>
 
-        <TextView
-            android:id="@+id/empty_text"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center" />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/swipe_refresh_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/list"
+            <TextView
+                android:id="@+id/empty_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:divider="@null"
-                android:dividerHeight="0dp"
-                android:scrollbars="vertical" />
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    </FrameLayout>
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/chat_button"
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipe_refresh_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:divider="@null"
+                    android:dividerHeight="0dp"
+                    android:scrollbars="vertical" />
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </FrameLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/chat_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/margin"
+            android:contentDescription="@string/conversations_action_chat"
+            android:src="@drawable/ic_chat_white_24dp" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/margin"
-        android:contentDescription="@string/conversations_action_chat"
-        android:src="@drawable/ic_chat_white_24dp" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/conversations_nav_header"
+        app:itemTextAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        app:menu="@menu/conversations_nav" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

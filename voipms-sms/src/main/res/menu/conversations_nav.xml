@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2017-2019 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,8 +15,5 @@
   ~ limitations under the License.
   -->
 
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidx.preference.Preference
-        android:key="@string/preferences_account_sign_out_key"
-        android:title="Sign out" />
-</androidx.preference.PreferenceScreen>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:checkableBehavior="single" />

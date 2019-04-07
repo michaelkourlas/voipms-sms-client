@@ -20,11 +20,11 @@ package net.kourlas.voipms_sms.preferences.fragments
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.preference.Preference
-import com.takisoft.preferencex.EditTextPreference
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.preferences.getEmail
+import net.kourlas.voipms_sms.preferences.setEmail
+import net.kourlas.voipms_sms.preferences.setPassword
 import net.kourlas.voipms_sms.utils.preferences
 
 /**
@@ -80,25 +80,13 @@ class AccountPreferencesFragment : PreferenceFragmentCompat(),
     private fun updateSummaryTextForPreference(preference: Preference?) {
         val context = context ?: return
         if (preference?.key == getString(
-                R.string.preferences_dids_key)) {
-            // Display list of selected DIDs as summary text
-            val formattedDids = getDids(
-                context).map(::getFormattedPhoneNumber)
-            preference.summary = formattedDids.joinToString(separator = ", ")
-        } else if (preference is EditTextPreference) {
-            // Display value of preference as summary text (except for
-            // passwords, which should be masked, as well as the read and
-            // connect timeouts, which should include the unit)
-            if (preference.key == getString(
-                    R.string.preferences_account_password_key)) {
-                if (preference.text != "") {
-                    preference.summary = getString(
-                        R.string.preferences_account_password_placeholder)
-                } else {
-                    preference.summary = ""
-                }
-            } else {
-                preference.summary = preference.text
+                R.string.preferences_account_sign_out_key)) {
+            preference.summary = getEmail(context)
+            preference.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+                setEmail(context, "")
+                setPassword(context, "")
+                activity?.finish()
+                true
             }
         }
     }

@@ -25,9 +25,10 @@ import androidx.core.app.RemoteInput
 import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
+import net.kourlas.voipms_sms.preferences.accountConfigured
+import net.kourlas.voipms_sms.preferences.didsConfigured
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
-import net.kourlas.voipms_sms.preferences.isAccountActive
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.JobId
@@ -86,7 +87,8 @@ class SendMessageService : JobIntentService() {
             }
 
             // Terminate quietly if account inactive
-            if (!isAccountActive(applicationContext)) {
+            if (!accountConfigured(applicationContext)
+                || !didsConfigured(applicationContext)) {
                 return null
             }
 

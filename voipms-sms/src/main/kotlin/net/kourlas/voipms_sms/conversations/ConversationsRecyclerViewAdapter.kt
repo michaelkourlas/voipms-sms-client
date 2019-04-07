@@ -37,7 +37,7 @@ import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
-import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.preferences.getActiveDid
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.utils.*
@@ -87,7 +87,6 @@ class ConversationsRecyclerViewAdapter<T>(
         updateViewHolderContactBadge(holder, position)
         updateViewHolderContactText(holder, position)
         updateViewHolderMessageText(holder, position)
-        updateViewHolderDidText(holder, position)
         updateViewHolderDateText(holder, position)
     }
 
@@ -241,26 +240,6 @@ class ConversationsRecyclerViewAdapter<T>(
     }
 
     /**
-     * Displays the DID associated with the conversation on the view holder.
-     * Selects and highlights part of the text if a filter is configured.
-     * Marks text as bold if unread.
-     *
-     * @param holder The message view holder to use.
-     * @param position The position of the view in the adapter.
-     */
-    private fun updateViewHolderDidText(holder: ConversationViewHolder,
-                                        position: Int) =
-        if (getDids(activity,
-                    onlyShowInConversationsView = true).count() <= 1) {
-            holder.didTextView.visibility = View.GONE
-        } else {
-            holder.didTextView.visibility = View.VISIBLE
-            val conversationItem = conversationItems[position]
-            holder.didTextView.text = getFormattedPhoneNumber(
-                conversationItem.message.did)
-        }
-
-    /**
      * Displays the date of the displayed message of the conversation
      * on the view holder. Shows special text if the message is a draft,
      * is sending or is not sent.
@@ -336,33 +315,35 @@ class ConversationsRecyclerViewAdapter<T>(
 
             @Suppress("ConstantConditionIf")
             if (!demo) {
-                resultsObject.messages.addAll(
-                    Database.getInstance(activity)
-                        .getMessagesMostRecentFiltered(
-                            getDids(activity,
-                                    onlyShowInConversationsView = true),
-                            constraint.toString()
-                                .trim { it <= ' ' }
-                                .toLowerCase())
-                        .toMutableList())
-                if (activity is ConversationsArchivedActivity) {
-                    val iterator = resultsObject.messages.iterator()
-                    while (iterator.hasNext()) {
-                        val message = iterator.next()
-                        if (!Database.getInstance(activity)
-                                .isConversationArchived(
-                                    message.conversationId)) {
-                            iterator.remove()
+                val activeDid = getActiveDid(activity)
+                if (activeDid.isNotEmpty()) {
+                    resultsObject.messages.addAll(
+                        Database.getInstance(activity)
+                            .getMessagesMostRecentFiltered(
+                                setOf(activeDid),
+                                constraint.toString()
+                                    .trim { it <= ' ' }
+                                    .toLowerCase())
+                            .toMutableList())
+                    if (activity is ConversationsArchivedActivity) {
+                        val iterator = resultsObject.messages.iterator()
+                        while (iterator.hasNext()) {
+                            val message = iterator.next()
+                            if (!Database.getInstance(activity)
+                                    .isConversationArchived(
+                                        message.conversationId)) {
+                                iterator.remove()
+                            }
                         }
-                    }
-                } else {
-                    val iterator = resultsObject.messages.iterator()
-                    while (iterator.hasNext()) {
-                        val message = iterator.next()
-                        if (Database.getInstance(activity)
-                                .isConversationArchived(
-                                    message.conversationId)) {
-                            iterator.remove()
+                    } else {
+                        val iterator = resultsObject.messages.iterator()
+                        while (iterator.hasNext()) {
+                            val message = iterator.next()
+                            if (Database.getInstance(activity)
+                                    .isConversationArchived(
+                                        message.conversationId)) {
+                                iterator.remove()
+                            }
                         }
                     }
                 }
@@ -632,8 +613,6 @@ class ConversationsRecyclerViewAdapter<T>(
             itemView.findViewById(R.id.message)
         internal val dateTextView: TextView =
             itemView.findViewById(R.id.date)
-        internal val didTextView: TextView =
-            itemView.findViewById(R.id.did)
 
         init {
             // Allow the conversation view itself to be clickable and

@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms.notifications
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -29,7 +30,6 @@ import androidx.core.app.*
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.app.TaskStackBuilder
-import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import net.kourlas.voipms_sms.CustomApplication
@@ -551,33 +551,28 @@ class Notifications private constructor(
     /**
      * Enables push notifications by starting the push notifications
      * registration service.
-     *
-     * @param activity The activity on which to display messages.
      */
-    fun enablePushNotifications(activity: FragmentActivity) {
-        // Check if account is active and that notifications are enabled,
+    fun enablePushNotifications(context: Context) {
+        // Check if DIDs are configured and that notifications are enabled,
         // and silently quit if not
-        if (!isAccountActive(activity) || !getNotificationsEnabled()) {
-            setSetupCompletedForVersion(activity, 114)
+        if (!didsConfigured(context) || !getNotificationsEnabled()) {
+            setSetupCompletedForVersion(context, 114)
             return
         }
 
         // Check if Google Play Services is available
         if (GoogleApiAvailability.getInstance()
                 .isGooglePlayServicesAvailable(
-                    activity) != ConnectionResult.SUCCESS) {
-            showSnackbar(activity, R.id.coordinator_layout,
-                         application.getString(
-                             R.string.push_notifications_fail_google_play))
-            setSetupCompletedForVersion(activity, 114)
+                    context) != ConnectionResult.SUCCESS) {
+            setSetupCompletedForVersion(context, 114)
             return
         }
 
         // Subscribe to DID topics
-        subscribeToDidTopics(activity)
+        subscribeToDidTopics(context)
 
         // Start push notifications registration service
-        NotificationsRegistrationService.startService(activity)
+        NotificationsRegistrationService.startService(context)
     }
 
     companion object {

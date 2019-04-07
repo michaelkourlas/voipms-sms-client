@@ -1,8 +1,9 @@
 ## 0.6.2 ##
 
-* New logo
-* Changes to conversations and conversation view layout
-* Changes to color scheme and fonts
+* New login screen to simplify authentication process
+* New app icon
+* New conversations and conversation view UI
+* Updated color scheme and fonts
 * Bug fixes
 
 ## 0.6.1 ##
