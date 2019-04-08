@@ -317,16 +317,22 @@
     <string name="utils_date_seconds_ago">s</string>
     <string name="utils_date_minutes_ago">min</string>
 
+    <!-- URLS -->
+    <string name="help_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md</string>
+    <string name="privacy_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/PRIVACY.md</string>
+    <string name="license_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE.md</string>
+    <string name="credits_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE.md</string>
+    <string name="donate_url">https://paypal.me/kourlas</string>
+
+    <!-- SHORTCUTS -->
+    <string name="new_conversation_shortcut_short">Compose</string>
+    <string name="new_conversation_shortcut_long">New conversation</string>
+
     <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="settings">Settings</string>
-    <string name="help_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md</string>
-    <string name="privacy_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/PRIVACY.md</string>
-    <string name="license_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE.md</string>
-    <string name="credits_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE.md</string>
-    <string name="donate_url">https://paypal.me/kourlas</string>
     <string name="toast_unknown_error">Unknown error: %1$s</string>
 </resources>

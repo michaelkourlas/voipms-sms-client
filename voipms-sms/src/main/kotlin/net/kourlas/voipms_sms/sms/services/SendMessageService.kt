@@ -26,7 +26,7 @@ import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.accountConfigured
-import net.kourlas.voipms_sms.preferences.didsConfigured
+import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.sms.ConversationId
@@ -86,15 +86,16 @@ class SendMessageService : JobIntentService() {
                 return null
             }
 
-            // Terminate quietly if account inactive
-            if (!accountConfigured(applicationContext)
-                || !didsConfigured(applicationContext)) {
-                return null
-            }
-
             // Retrieve the DID, contact, and list of message texts from the
             // intent
             val (did, contact, messageTexts, databaseId) = getIntentData(intent)
+
+            // Terminate quietly if impossible to send message due to account
+            // configuration
+            if (!accountConfigured(applicationContext)
+                || did !in getDids(applicationContext)) {
+                return null
+            }
 
             val messages = mutableListOf<OutgoingMessage>()
             if (databaseId != null) {

@@ -20,16 +20,20 @@ package net.kourlas.voipms_sms.sms
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.ParcelFileDescriptor
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.google.firebase.appindexing.FirebaseAppIndex
+import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.sms.services.AppIndexingService
 import net.kourlas.voipms_sms.sms.services.SyncService
-import net.kourlas.voipms_sms.utils.getContactName
-import net.kourlas.voipms_sms.utils.getDigitsOfString
-import net.kourlas.voipms_sms.utils.runOnNewThread
+import net.kourlas.voipms_sms.utils.*
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -64,6 +68,7 @@ class Database private constructor(private val context: Context) {
 
             FirebaseAppIndex.getInstance().remove(Message.getMessageUrl(
                 databaseId))
+            updateShortcuts(context)
         } finally {
             database.endTransaction()
         }
@@ -114,6 +119,7 @@ class Database private constructor(private val context: Context) {
             for (message in messages) {
                 FirebaseAppIndex.getInstance().remove(message.messageUrl)
             }
+            updateShortcuts(context)
         } finally {
             database.endTransaction()
         }
@@ -149,6 +155,7 @@ class Database private constructor(private val context: Context) {
             database.setTransactionSuccessful()
 
             FirebaseAppIndex.getInstance().removeAll()
+            updateShortcuts(context)
         } finally {
             database.endTransaction()
         }
@@ -435,6 +442,7 @@ class Database private constructor(private val context: Context) {
                         AppIndexingService.getMessageBuilder(context,
                                                              message).build())
                 }
+                updateShortcuts(context)
             }
 
             return databaseId
@@ -466,6 +474,8 @@ class Database private constructor(private val context: Context) {
                                     "$COLUMN_DATABASE_ID=?",
                                     arrayOf(databaseId.toString()))
                     database.setTransactionSuccessful()
+
+                    updateShortcuts(context)
                 }
                 return
             }
@@ -481,6 +491,8 @@ class Database private constructor(private val context: Context) {
             database.replaceOrThrow(TABLE_DRAFT, null, values)
 
             database.setTransactionSuccessful()
+
+            updateShortcuts(context)
         } finally {
             database.endTransaction()
         }
@@ -569,6 +581,9 @@ class Database private constructor(private val context: Context) {
                                 context, it).build())
                     }
                 }
+            if (addedDatabaseIds.isNotEmpty()) {
+                updateShortcuts(context)
+            }
 
             return addedConversationIds
         } finally {
@@ -1034,8 +1049,7 @@ class Database private constructor(private val context: Context) {
     private fun getMessagesMostRecentFilteredWithoutLock(
         dids: Set<String>,
         filterConstraint: String = "",
-        contactNameCache: MutableMap<String,
-            String>? = null): List<Message> {
+        contactNameCache: MutableMap<String, String>? = null): List<Message> {
         val queryParams = mutableListOf("%$filterConstraint%")
         val numberFilterConstraint = getDigitsOfString(filterConstraint)
         if (numberFilterConstraint != "") {
@@ -1157,6 +1171,50 @@ class Database private constructor(private val context: Context) {
         val deleted = !cursor.isAfterLast
         cursor.close()
         return deleted
+    }
+
+    /**
+     * Update the app shortcuts.
+     */
+    private fun updateShortcuts(context: Context) {
+        // There is one static shortcut
+        val maxCount = ShortcutManagerCompat
+                           .getMaxShortcutCountPerActivity(context) - 1
+        val messages = Database.getInstance(context)
+            .getMessagesMostRecentFilteredWithoutLock(
+                net.kourlas.voipms_sms.preferences.getDids(
+                    context, onlyShowInConversationsView = true))
+        val shortcutInfoList = messages.zip(0 until maxCount).map {
+            val message = it.first
+
+            val intent = Intent(context, ConversationActivity::class.java)
+            intent.action = "android.intent.action.VIEW"
+            intent.putExtra(context.getString(R.string.conversation_did),
+                            message.did)
+            intent.putExtra(context.getString(R.string.conversation_contact),
+                            message.contact)
+
+            val contactBitmap = getContactPhotoBitmap(context, message.contact)
+            val icon = if (contactBitmap == null) {
+                IconCompat.createWithResource(
+                    context, R.drawable.ic_shortcut_chat)
+            } else {
+                IconCompat.createWithBitmap(applyCircularMask(contactBitmap))
+            }
+
+            val label = getContactName(context, message.contact)
+                        ?: getFormattedPhoneNumber(message.contact)
+
+            ShortcutInfoCompat.Builder(
+                context, message.conversationId.getId())
+                .setIcon(icon)
+                .setIntent(intent)
+                .setLongLabel(label)
+                .setShortLabel(label.split(" ")[0])
+                .build()
+        }
+        ShortcutManagerCompat.removeAllDynamicShortcuts(context)
+        ShortcutManagerCompat.addDynamicShortcuts(context, shortcutInfoList)
     }
 
     /**

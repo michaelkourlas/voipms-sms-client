@@ -233,11 +233,9 @@ open class ConversationsActivity : AppCompatActivity(),
         // Perform special setup if there are no DIDs available and the user
         // has not configured an account
         if (!didsConfigured(applicationContext)
-            && Database.getInstance(applicationContext).getDids().isEmpty()) {
-            if (!accountConfigured(applicationContext)) {
-                startActivity(Intent(this, SignInActivity::class.java))
-            }
-            return
+            && Database.getInstance(applicationContext).getDids().isEmpty()
+            && !accountConfigured(applicationContext)) {
+            startActivity(Intent(this, SignInActivity::class.java))
         }
 
         // Perform special setup for version 114: need to re-enable push
@@ -251,18 +249,6 @@ open class ConversationsActivity : AppCompatActivity(),
                                  R.string.push_notifications_fail_google_play))
             }
             Notifications.getInstance(application).enablePushNotifications(this)
-        }
-
-        // Perform special setup for version 120: default start date is 30 days
-        // prior to today
-        if (getSetupCompletedForVersion(this) < 120) {
-            val calendar = Calendar.getInstance()
-            calendar.add(Calendar.DAY_OF_YEAR, -30)
-            val date = Date()
-            if (date < getStartDate(application)) {
-                setStartDate(application, calendar.time)
-            }
-            setSetupCompletedForVersion(application, 120)
         }
 
         // Refresh and perform limited synchronization
@@ -305,6 +291,8 @@ open class ConversationsActivity : AppCompatActivity(),
         // Set navigation bar DIDs
         val dids = getDids(applicationContext,
                            onlyShowInConversationsView = true)
+        navigationView.menu.clear()
+        navMenuItemDidMap.clear()
         if (dids.isNotEmpty()) {
             var activeDid = getActiveDid(applicationContext)
             if (activeDid !in dids) {
@@ -312,8 +300,6 @@ open class ConversationsActivity : AppCompatActivity(),
                 setActiveDid(applicationContext, activeDid)
             }
 
-            navigationView.menu.clear()
-            navMenuItemDidMap.clear()
             for (did in dids) {
                 val menuItem = navigationView.menu.add(
                     getFormattedPhoneNumber(did))

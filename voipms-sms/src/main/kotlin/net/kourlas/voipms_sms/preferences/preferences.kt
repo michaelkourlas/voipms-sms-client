@@ -144,6 +144,9 @@ fun getSetupCompletedForVersion(context: Context): Long =
             .toLong())
 
 fun getStartDate(context: Context): Date {
+    val calendar = Calendar.getInstance()
+    calendar.add(Calendar.DAY_OF_YEAR, -30)
+
     return try {
         try {
             val dateString = getStringPreference(context, context.getString(
@@ -152,10 +155,12 @@ fun getStartDate(context: Context): Date {
                 val sdf = SimpleDateFormat("MM/dd/YYYY", Locale.US)
                 sdf.parse(dateString)
             } else {
-                Date()
+                setStartDate(context, calendar.time)
+                return calendar.time
             }
         } catch (_: ParseException) {
-            Date()
+            setStartDate(context, calendar.time)
+            return calendar.time
         }
     } catch (_: ClassCastException) {
         val milliseconds = getLongPreference(context, context.getString(
@@ -163,7 +168,8 @@ fun getStartDate(context: Context): Date {
         if (milliseconds != java.lang.Long.MIN_VALUE) {
             Date(milliseconds)
         } else {
-            Date()
+            setStartDate(context, calendar.time)
+            return calendar.time
         }
     }
 }

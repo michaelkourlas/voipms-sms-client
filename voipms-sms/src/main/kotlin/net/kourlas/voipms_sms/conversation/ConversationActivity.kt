@@ -52,6 +52,8 @@ import net.kourlas.voipms_sms.conversations.ConversationsArchivedActivity
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getDemoNotification
 import net.kourlas.voipms_sms.notifications.Notifications
+import net.kourlas.voipms_sms.preferences.accountConfigured
+import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
@@ -199,6 +201,11 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 did = d
                 contact = c
             }
+        }
+
+        if (did !in getDids(applicationContext)) {
+            finish()
+            return
         }
 
         if (contact.length == 11 && contact[0] == '1') {
@@ -366,7 +373,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         val messageEditText = findViewById<EditText>(R.id.message_edit_text)
         val messageText = messageEditText.text.toString()
 
-        if (messageText.trim() != "") {
+        if (messageText.trim() != ""
+            && accountConfigured(applicationContext)
+            && did in getDids(applicationContext)) {
             // Send the message using the SendMessageService
             SendMessageService.startService(this, did, contact, messageText)
 

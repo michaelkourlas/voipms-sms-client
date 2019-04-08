@@ -35,7 +35,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
+import net.kourlas.voipms_sms.preferences.accountConfigured
+import net.kourlas.voipms_sms.preferences.activities.DidsPreferencesActivity
+import net.kourlas.voipms_sms.preferences.didsConfigured
 import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.signin.SignInActivity
+import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.getDigitsOfString
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
@@ -61,6 +66,17 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+
+        // Perform special setup if there are no DIDs available or the user
+        // has not configured an account
+        if (!didsConfigured(applicationContext)) {
+            if (Database.getInstance(applicationContext).getDids().isEmpty()
+                && !accountConfigured(applicationContext)) {
+                startActivity(Intent(this, SignInActivity::class.java))
+            } else {
+                startActivity(Intent(this, DidsPreferencesActivity::class.java))
+            }
+        }
 
         getMessageTextFromIntent()
         setupToolbar()

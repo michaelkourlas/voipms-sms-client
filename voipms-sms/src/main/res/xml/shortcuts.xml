@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Update Database.kt when adding new static shortcuts -->
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_chat"
+        android:shortcutId="new_conversation"
+        android:shortcutLongLabel="@string/new_conversation_shortcut_long"
+        android:shortcutShortLabel="@string/new_conversation_shortcut_short"
+        tools:targetApi="n_mr1">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="net.kourlas.voipms_sms.newconversation.NewConversationActivity"
+            android:targetPackage="net.kourlas.voipms_sms" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+</shortcuts>
