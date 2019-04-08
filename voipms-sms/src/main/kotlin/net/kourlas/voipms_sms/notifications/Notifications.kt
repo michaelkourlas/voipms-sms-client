@@ -442,6 +442,8 @@ class Notifications private constructor(
             R.drawable.ic_reply_white_24dp,
             context.getString(R.string.notifications_button_reply),
             replyPendingIntent)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
+            .setShowsUserInterface(false)
             .setAllowGeneratedReplies(true)
             .addRemoteInput(remoteInput)
         notification.addAction(replyActionBuilder.build())
@@ -457,6 +459,9 @@ class Notifications private constructor(
             R.drawable.ic_drafts_white_24dp,
             context.getString(R.string.notifications_button_mark_read),
             markReadPendingIntent)
+            .setSemanticAction(
+                NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
+            .setShowsUserInterface(false)
             .build()
         notification.addAction(markReadAction)
 
