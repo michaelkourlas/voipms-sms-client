@@ -5,6 +5,7 @@
 * New conversations and conversation view UI
 * Updated color scheme and fonts
 * Add app shortcuts
+* Added Android Auto support
 * Bug fixes
 
 ## 0.6.1 ##
