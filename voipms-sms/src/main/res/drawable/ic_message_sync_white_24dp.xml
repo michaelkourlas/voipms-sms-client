@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Material Design Icons
+  ~ Copyright (C) Google
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillAlpha="1"
+        android:fillColor="#ffffff"
+        android:pathData="M4,2C2.9,2 2.0098,2.9 2.0098,4L2,22L6,18L20,18C21.1,18 22,17.1 22,16L22,4C22,2.9 21.1,2 20,2L4,2zM12,2.5L12,4.5449C15.0136,4.5449 17.4551,6.9864 17.4551,10C17.4551,11.0705 17.1412,12.0657 16.6094,12.9043L15.6133,11.9082C15.9201,11.3423 16.0918,10.6886 16.0918,10C16.0918,7.7432 14.2568,5.9082 12,5.9082L12,7.9551L9.2734,5.2266L12,2.5zM7.3906,7.0957L8.3867,8.0918C8.0799,8.6577 7.9082,9.3114 7.9082,10C7.9082,12.2568 9.7432,14.0918 12,14.0918L12,12.0449L14.7266,14.7734L12,17.5L12,15.4551C8.9864,15.4551 6.5449,13.0136 6.5449,10C6.5449,8.9295 6.8588,7.9343 7.3906,7.0957z" />
+</vector>
