@@ -68,7 +68,7 @@ open class ConversationsActivity : AppCompatActivity(),
     private lateinit var recyclerView: RecyclerView
     protected lateinit var adapter: ConversationsRecyclerViewAdapter<
         ConversationsActivity>
-    private lateinit var menu: Menu
+    private var menu: Menu? = null
     private lateinit var navMenuItemDidMap: HashMap<MenuItem, String>
     private var actionMode: ActionMode? = null
 
@@ -613,11 +613,13 @@ open class ConversationsActivity : AppCompatActivity(),
         }
 
         // Close the search box if visible
-        val searchItem = menu.findItem(R.id.search_button)
-        val searchView = searchItem.actionView as SearchView
-        if (!searchView.isIconified) {
-            searchItem.collapseActionView()
-            return
+        menu?.let {
+            val searchItem = it.findItem(R.id.search_button)
+            val searchView = searchItem.actionView as SearchView
+            if (!searchView.isIconified) {
+                searchItem.collapseActionView()
+                return
+            }
         }
 
         // Otherwise, do normal back button behaviour

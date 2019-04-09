@@ -53,7 +53,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     // UI elements
     private lateinit var adapter: NewConversationRecyclerViewAdapter
     private lateinit var recyclerView: RecyclerView
-    private lateinit var menu: Menu
+    private var menu: Menu? = null
 
     // Relay used to forward message text from intent to new conversation
     private var messageText: String? = null
@@ -202,7 +202,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
             .findViewById<SearchView>(R.id.search_view)
         searchView.inputType = InputType.TYPE_CLASS_PHONE
         item.isVisible = false
-        menu.findItem(R.id.keyboard_button).isVisible = true
+        menu?.findItem(R.id.keyboard_button)?.isVisible = true
         return true
     }
 
@@ -218,7 +218,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
             .findViewById<SearchView>(R.id.search_view)
         searchView.inputType = InputType.TYPE_TEXT_VARIATION_PERSON_NAME
         item.isVisible = false
-        menu.findItem(R.id.dialpad_button).isVisible = true
+        menu?.findItem(R.id.dialpad_button)?.isVisible = true
         return true
     }
 

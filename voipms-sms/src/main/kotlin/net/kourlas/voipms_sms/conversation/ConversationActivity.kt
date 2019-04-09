@@ -73,7 +73,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ConversationRecyclerViewAdapter
     private lateinit var layoutManager: LinearLayoutManager
-    private lateinit var menu: Menu
+    private var menu: Menu? = null
     private var actionMode: ActionMode? = null
 
     // The DID and contact associated with this conversation
@@ -917,11 +917,13 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         }
 
         // Close the search box if visible
-        val searchItem = menu.findItem(R.id.search_button)
-        val searchView = searchItem.actionView as SearchView
-        if (!searchView.isIconified) {
-            searchItem.collapseActionView()
-            return
+        menu?.let {
+            val searchItem = it.findItem(R.id.search_button)
+            val searchView = searchItem.actionView as SearchView
+            if (!searchView.isIconified) {
+                searchItem.collapseActionView()
+                return
+            }
         }
 
         // Otherwise, do normal back button behaviour
@@ -989,14 +991,18 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 .isConversationArchived(conversationId)) {
             runOnUiThread {
                 // If conversation archived, only show unarchive button
-                menu.findItem(R.id.archive_button).isVisible = false
-                menu.findItem(R.id.unarchive_button).isVisible = true
+                menu?.let {
+                    it.findItem(R.id.archive_button).isVisible = false
+                    it.findItem(R.id.unarchive_button).isVisible = true
+                }
             }
         } else {
             runOnUiThread {
                 // If conversation unarchived, only show archive button
-                menu.findItem(R.id.archive_button).isVisible = true
-                menu.findItem(R.id.unarchive_button).isVisible = false
+                menu?.let {
+                    it.findItem(R.id.archive_button).isVisible = true
+                    it.findItem(R.id.unarchive_button).isVisible = false
+                }
             }
         }
     }
