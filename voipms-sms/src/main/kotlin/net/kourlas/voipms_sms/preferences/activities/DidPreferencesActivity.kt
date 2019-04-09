@@ -40,6 +40,7 @@ class DidPreferencesActivity : AppCompatActivity() {
         val did = intent.getStringExtra(getString(R.string.preferences_did_did))
         if (did == null) {
             abortActivity(this, Exception("Missing DID extra"))
+            return
         }
 
         // Load activity layout

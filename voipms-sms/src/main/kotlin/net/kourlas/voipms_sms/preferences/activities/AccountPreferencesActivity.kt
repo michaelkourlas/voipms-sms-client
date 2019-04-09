@@ -23,6 +23,7 @@ import androidx.appcompat.widget.Toolbar
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.AccountPreferencesFragment
+import net.kourlas.voipms_sms.utils.abortActivity
 
 /**
  * Activity that houses a PreferencesFragment that displays the account
@@ -58,7 +59,8 @@ class AccountPreferencesActivity : AppCompatActivity() {
         super.onResume()
 
         if (!accountConfigured(applicationContext)) {
-            finish()
+            abortActivity(this, Exception("Account not configured"))
+            return
         }
     }
 }

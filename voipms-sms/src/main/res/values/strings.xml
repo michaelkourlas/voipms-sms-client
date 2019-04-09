@@ -92,13 +92,13 @@
     <string name="preferences_database_import_key" translatable="false">database_import</string>
     <string name="preferences_database_import_title">Import database</string>
     <string name="preferences_database_import_summary">Import raw SQLite database from a file</string>
-    <string name="preferences_database_import_fail">Failed to import database</string>
+    <string name="preferences_database_import_fail">Failed to import database: %1$s</string>
     <string name="preferences_database_export_key" translatable="false">database_export</string>
     <string name="preferences_database_export_title">Export database</string>
     <string name="preferences_database_export_summary">Export raw SQLite database to a file</string>
     <string name="preferences_database_export_confirm_title">Export database?</string>
     <string name="preferences_database_export_confirm_text">Database will be exported to a file called \'%1$s\' in the specified directory.</string>
-    <string name="preferences_database_export_fail">Failed to export database</string>
+    <string name="preferences_database_export_fail">Failed to export database: %1$s</string>
     <string name="preferences_database_clean_up_key" translatable="false">database_clean_up</string>
     <string name="preferences_database_clean_up_title">Clean up database</string>
     <string name="preferences_database_clean_up_summary">Remove outdated information from database</string>

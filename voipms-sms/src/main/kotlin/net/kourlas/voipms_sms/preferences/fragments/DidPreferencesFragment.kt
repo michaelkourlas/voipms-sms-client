@@ -154,6 +154,7 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
             R.string.preferences_did_fragment_argument_did))
         if (did == null) {
             abortActivity(activity, Exception("Missing DID argument"))
+            return
         }
 
         val showInConversationsViewPreference =

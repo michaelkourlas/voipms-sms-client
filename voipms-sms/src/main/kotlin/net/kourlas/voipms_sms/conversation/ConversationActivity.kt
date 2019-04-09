@@ -44,7 +44,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
@@ -137,7 +136,12 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        setupDidAndContact(intent ?: return finish())
+        if (intent == null) {
+            abortActivity(this, Exception("Intent is null"))
+            return
+        }
+
+        setupDidAndContact(intent)
         setupToolbar()
         setupRecyclerView()
         setupMessageText()
@@ -170,8 +174,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 val message = Database.getInstance(this)
                     .getMessageDatabaseId(id.toLong())
                 if (message == null) {
-                    Crashlytics.logException(Exception("Invalid URI: '$data'"))
-                    finish()
+                    abortActivity(this, Exception("Invalid URI: '$data'"))
                     return
                 } else {
                     did = message.did
@@ -182,8 +185,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 did = uriDid
                 contact = contactDid
             } else {
-                Crashlytics.logException(Exception("Invalid URI: '$data'"))
-                finish()
+                abortActivity(this, Exception("Invalid URI: '$data'"))
                 return
             }
         } else {
@@ -192,10 +194,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             val c = intent.getStringExtra(getString(
                 R.string.conversation_contact))
             if (d == null || c == null) {
-                Crashlytics.logException(
-                    Exception("No DID or contact specified:" +
-                              " did: '$d', contact: '$c'"))
-                finish()
+                abortActivity(this, Exception("No DID or contact specified:" +
+                                              " did: '$d', contact: '$c'"))
                 return
             } else {
                 did = d
@@ -204,7 +204,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         }
 
         if (did !in getDids(applicationContext)) {
-            finish()
+            abortActivity(this, Exception("DID no longer exists"))
             return
         }
 

@@ -17,7 +17,6 @@
 
 package net.kourlas.voipms_sms.utils
 
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.*
@@ -84,8 +83,6 @@ fun applyRoundedCornersMask(view: View) {
 
 /**
  * Gets a view outline provider for rounded rectangles.
- *
- * @return A a view outline provider for rounded rectangles.
  */
 private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
     object : ViewOutlineProvider() {
@@ -95,68 +92,53 @@ private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
 
 /**
  * Shows an alert dialog with the specified title, text, and buttons.
- *
- * @param context The context to use.
- * @param title The specified title.
- * @param text The specified text.
- * @param positiveButtonText The text of the positive button.
- * @param positiveButtonAction The action associated with the positive button.
- * @param negativeButtonText The text of the negative button.
- * @param negativeButtonAction The action associated with the negative button.
- * @return The created alert dialog.
  */
-fun showAlertDialog(context: Context, title: String?, text: String?,
+fun showAlertDialog(activity: FragmentActivity, title: String?, text: String?,
                     positiveButtonText: String? = null,
                     positiveButtonAction: DialogInterface.OnClickListener? = null,
                     negativeButtonText: String? = null,
-                    negativeButtonAction: DialogInterface.OnClickListener? = null): AlertDialog {
-    val builder = MaterialAlertDialogBuilder(context)
-    builder.setMessage(text)
-    builder.setTitle(title)
-    builder.setPositiveButton(positiveButtonText, positiveButtonAction)
-    builder.setNegativeButton(negativeButtonText, negativeButtonAction)
-    builder.setCancelable(false)
-    return builder.show()
+                    negativeButtonAction: DialogInterface.OnClickListener? = null): AlertDialog? {
+    if (!activity.isFinishing) {
+        val builder = MaterialAlertDialogBuilder(activity)
+        builder.setMessage(text)
+        builder.setTitle(title)
+        builder.setPositiveButton(positiveButtonText, positiveButtonAction)
+        builder.setNegativeButton(negativeButtonText, negativeButtonAction)
+        builder.setCancelable(false)
+        return builder.show()
+    }
+    return null
 }
 
 /**
- * Shows an information dialog with the specified text.
- *
- * @param context The context to use.
- * @param text The specified text.
- * @return The dialog.
- */
-fun showInfoDialog(context: Context, text: String?): AlertDialog =
-    showAlertDialog(context, null, text, context.getString(R.string.ok),
-                    null, null, null)
-
-/**
- * Shows an information dialog with the specified title and text.
- *
- * @param context The context to use.
- * @param title The specified title.
- * @param text The specified text.
- * @return The dialog.
- */
-fun showInfoDialog(context: Context, title: String?,
-                   text: String?): AlertDialog =
-    showAlertDialog(context, title, text, context.getString(R.string.ok),
-                    null, null, null)
-
-/**
  * Shows a generic snackbar.
- *
- * @param activity The activity to use.
- * @param viewId The ID of the view to add the snackbar to.
- * @param text The text to show.
- * @return The snackbar.
  */
 fun showSnackbar(activity: FragmentActivity, viewId: Int,
-                 text: String): Snackbar {
-    val view = activity.findViewById<View>(viewId)
-    val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
-    snackbar.show()
-    return snackbar
+                 text: String): Snackbar? {
+    if (!activity.isFinishing) {
+        val view = activity.findViewById<View>(viewId)
+        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        snackbar.show()
+        return snackbar
+    }
+    return null
+}
+
+/**
+ * Shows a generic snackbar with a button.
+ */
+fun showSnackbar(activity: FragmentActivity, viewId: Int,
+                 text: String,
+                 buttonText: String? = null,
+                 buttonAction: View.OnClickListener? = null): Snackbar? {
+    if (!activity.isFinishing) {
+        val view = activity.findViewById<View>(viewId)
+        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        snackbar.setAction(buttonText, buttonAction)
+        snackbar.show()
+        return snackbar
+    }
+    return null
 }
 
 /**
@@ -169,21 +151,24 @@ fun showSnackbar(activity: FragmentActivity, viewId: Int,
  * @return The snackbar.
  */
 fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
-                           text: String): Snackbar {
-    val view = activity.findViewById<View>(viewId)
-    val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
-    snackbar.setAction(R.string.settings) {
-        val intent = Intent()
-        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-        val uri = Uri.fromParts("package", activity.packageName, null)
-        intent.data = uri
-        activity.startActivity(intent)
+                           text: String): Snackbar? {
+    if (activity.isFinishing) {
+        val view = activity.findViewById<View>(viewId)
+        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        snackbar.setAction(R.string.settings) {
+            val intent = Intent()
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+            val uri = Uri.fromParts("package", activity.packageName, null)
+            intent.data = uri
+            activity.startActivity(intent)
+        }
+        snackbar.show()
+        return snackbar
     }
-    snackbar.show()
-    return snackbar
+    return null
 }
 
 fun abortActivity(activity: FragmentActivity, ex: Exception,

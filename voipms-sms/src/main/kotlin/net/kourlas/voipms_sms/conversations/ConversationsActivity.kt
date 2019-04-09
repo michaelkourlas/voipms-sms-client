@@ -102,12 +102,16 @@ open class ConversationsActivity : AppCompatActivity(),
                     R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids))
                 if (failedDids == null) {
                     // Unknown error
-                    showInfoDialog(this@ConversationsActivity, getString(
-                        R.string.push_notifications_fail_unknown))
+                    showSnackbar(
+                        this@ConversationsActivity,
+                        R.id.coordinator_layout,
+                        getString(R.string.push_notifications_fail_unknown))
                 } else if (!failedDids.isEmpty()) {
                     // Some DIDs failed registration
-                    showInfoDialog(this@ConversationsActivity, getString(
-                        R.string.push_notifications_fail_register))
+                    showSnackbar(
+                        this@ConversationsActivity,
+                        R.id.coordinator_layout,
+                        getString(R.string.push_notifications_fail_register))
                 }
 
                 // Regardless of whether an error occurred, mark setup as

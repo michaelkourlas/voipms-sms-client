@@ -33,7 +33,7 @@ import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.preferences
 import net.kourlas.voipms_sms.utils.runOnNewThread
 import net.kourlas.voipms_sms.utils.showAlertDialog
-import net.kourlas.voipms_sms.utils.showInfoDialog
+import net.kourlas.voipms_sms.utils.showSnackbar
 
 /**
  * Fragment used to display the database preferences.
@@ -111,9 +111,12 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 Database.getInstance(activity).import(importFd)
             } catch (e: Exception) {
                 activity.runOnUiThread {
-                    showInfoDialog(activity, getString(
-                        R.string.preferences_database_import_fail),
-                                   "${e.message} (${e.javaClass.simpleName})")
+                    showSnackbar(
+                        activity,
+                        R.id.coordinator_layout,
+                        getString(
+                            R.string.preferences_database_import_fail,
+                            "${e.message} (${e.javaClass.simpleName})"))
                 }
             }
         }
@@ -152,11 +155,12 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                         Database.getInstance(activity).export(exportFd)
                     } catch (e: Exception) {
                         activity.runOnUiThread {
-                            showInfoDialog(
+                            showSnackbar(
                                 activity,
+                                R.id.coordinator_layout,
                                 getString(
-                                    R.string.preferences_database_export_fail),
-                                   "${e.message} (${e.javaClass.simpleName})")
+                                    R.string.preferences_database_export_fail,
+                                    "${e.message} (${e.javaClass.simpleName})"))
                         }
                     }
                 }
