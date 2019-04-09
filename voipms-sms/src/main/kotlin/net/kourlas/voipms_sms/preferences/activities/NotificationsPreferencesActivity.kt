@@ -51,9 +51,11 @@ class NotificationsPreferencesActivity : AppCompatActivity() {
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
 
-        fragment = NotificationsPreferencesFragment()
-        supportFragmentManager.beginTransaction().replace(
-            R.id.preferences_fragment_layout, fragment).commit()
+        if (savedInstanceState == null) {
+            fragment = NotificationsPreferencesFragment()
+            supportFragmentManager.beginTransaction().replace(
+                R.id.preferences_fragment_layout, fragment).commit()
+        }
 
         // Ask for external storage permission (required to display
         // information associated with ringtones on external storage)

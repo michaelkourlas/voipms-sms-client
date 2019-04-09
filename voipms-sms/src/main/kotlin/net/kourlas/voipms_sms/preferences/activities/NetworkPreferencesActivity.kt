@@ -46,8 +46,10 @@ class NetworkPreferencesActivity : AppCompatActivity() {
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
 
-        fragment = NetworkPreferencesFragment()
-        supportFragmentManager.beginTransaction().replace(
-            R.id.preferences_fragment_layout, fragment).commit()
+        if (savedInstanceState == null) {
+            fragment = NetworkPreferencesFragment()
+            supportFragmentManager.beginTransaction().replace(
+                R.id.preferences_fragment_layout, fragment).commit()
+        }
     }
 }

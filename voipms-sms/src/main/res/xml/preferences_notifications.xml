@@ -21,9 +21,7 @@
         android:icon="@android:color/transparent"
         android:key="@string/preferences_notifications_enable_key"
         android:summary="@string/preferences_notifications_enable_summary"
-        android:title="@string/preferences_notifications_enable_title">
-        <intent android:action=".preferences.SelectDidsActivity" />
-    </androidx.preference.SwitchPreference>
+        android:title="@string/preferences_notifications_enable_title" />
     <com.takisoft.preferencex.RingtonePreference
         android:defaultValue="@string/preferences_notifications_sound_default_value"
         android:dependency="@string/preferences_notifications_enable_key"

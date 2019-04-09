@@ -61,8 +61,10 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
         }
         textView.movementMethod = LinkMovementMethod.getInstance()
 
-        fragment = SynchronizationPreferencesFragment()
-        supportFragmentManager.beginTransaction().replace(
-            R.id.preferences_fragment_layout, fragment).commit()
+        if (savedInstanceState == null) {
+            fragment = SynchronizationPreferencesFragment()
+            supportFragmentManager.beginTransaction().replace(
+                R.id.preferences_fragment_layout, fragment).commit()
+        }
     }
 }

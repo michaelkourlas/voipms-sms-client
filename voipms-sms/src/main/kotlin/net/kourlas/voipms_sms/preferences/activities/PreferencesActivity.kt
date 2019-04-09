@@ -48,8 +48,10 @@ class PreferencesActivity : AppCompatActivity(),
         }
 
         // Load instance of PreferencesFragment
-        fragment = PreferencesFragment()
-        supportFragmentManager.beginTransaction().replace(
-            R.id.preference_fragment_content, fragment).commit()
+        if (savedInstanceState == null) {
+            fragment = PreferencesFragment()
+            supportFragmentManager.beginTransaction().replace(
+                R.id.preference_fragment_content, fragment).commit()
+        }
     }
 }
