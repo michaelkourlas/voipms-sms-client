@@ -76,8 +76,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private var actionMode: ActionMode? = null
 
     // The DID and contact associated with this conversation
-    private lateinit var did: String
-    private lateinit var contact: String
+    private var did: String = ""
+    private var contact: String = ""
     val conversationId: ConversationId
         get() = ConversationId(did, contact)
 

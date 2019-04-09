@@ -1129,8 +1129,8 @@ class Database private constructor(private val context: Context) {
      * This method intentionally does not use transaction or lock semantics;
      * this is a responsibility of the caller.
      */
-    fun insertMessageDraftWithoutLock(conversationId: ConversationId,
-                                      text: String) {
+    private fun insertMessageDraftWithoutLock(conversationId: ConversationId,
+                                              text: String) {
         val databaseId = getDraftDatabaseIdConversation(conversationId)
 
         // If text is empty, then delete any existing draft message
