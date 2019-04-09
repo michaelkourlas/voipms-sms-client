@@ -409,13 +409,14 @@ class NewConversationRecyclerViewAdapter(
                             cursor.getColumnIndex(
                                 ContactsContract.CommonDataKinds.Phone
                                     .CONTACT_ID))
-                        val contact = cursor.getString(
-                            cursor.getColumnIndex(
-                                ContactsContract.Contacts.DISPLAY_NAME))
                         val phoneNumber = cursor.getString(
                             cursor.getColumnIndex(
                                 ContactsContract.CommonDataKinds
                                     .Phone.NUMBER)) ?: continue
+                        val contact = cursor.getString(
+                            cursor.getColumnIndex(
+                                ContactsContract.Contacts.DISPLAY_NAME))
+                                      ?: getFormattedPhoneNumber(phoneNumber)
                         val phoneNumberType = getPhoneNumberType(
                             cursor.getInt(
                                 cursor.getColumnIndex(
