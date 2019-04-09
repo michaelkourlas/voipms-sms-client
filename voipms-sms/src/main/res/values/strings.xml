@@ -186,6 +186,7 @@
     <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>
     <string name="conversations_text_hint">Search…</string>
     <string name="conversations_no_account">No account configured</string>
+    <string name="conversations_fail_web_browser">Failed to launch web browser</string>
 
     <!-- ConversationsArchivedActivity -->
     <string name="conversations_archived_name">Archived</string>

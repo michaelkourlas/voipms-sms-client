@@ -391,33 +391,67 @@ open class ConversationsActivity : AppCompatActivity(),
                 return true
             }
             R.id.help_button -> {
-                val intent = Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(getString(R.string.help_url)))
-                startActivity(intent)
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW,
+                                        Uri.parse(getString(R.string.help_url)))
+                    startActivity(intent)
+                } catch (_: ActivityNotFoundException) {
+                    showSnackbar(this, R.id.coordinator_layout,
+                                 getString(
+                                     R.string.conversations_fail_web_browser))
+                }
                 return true
             }
             R.id.privacy_button -> {
-                val intent = Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(getString(R.string.privacy_url)))
-                startActivity(intent)
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW,
+                                        Uri.parse(getString(
+                                            R.string.privacy_url)))
+                    startActivity(intent)
+                } catch (_: ActivityNotFoundException) {
+                    showSnackbar(this, R.id.coordinator_layout,
+                                 getString(
+                                     R.string.conversations_fail_web_browser))
+                }
                 return true
             }
             R.id.license_button -> {
-                val intent = Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(getString(R.string.license_url)))
-                startActivity(intent)
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW,
+                                        Uri.parse(getString(
+                                            R.string.license_url)))
+                    startActivity(intent)
+                } catch (_: ActivityNotFoundException) {
+                    showSnackbar(this, R.id.coordinator_layout,
+                                 getString(
+                                     R.string.conversations_fail_web_browser))
+                }
                 return true
             }
             R.id.credits_button -> {
-                val intent = Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(getString(R.string.credits_url)))
-                startActivity(intent)
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW,
+                                        Uri.parse(getString(
+                                            R.string.credits_url)))
+                    startActivity(intent)
+                } catch (_: ActivityNotFoundException) {
+                    showSnackbar(this, R.id.coordinator_layout,
+                                 getString(
+                                     R.string.conversations_fail_web_browser))
+                }
                 return true
             }
             R.id.donate_button -> {
-                val intent = Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(getString(R.string.donate_url)))
-                startActivity(intent)
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW,
+                                        Uri.parse(getString(
+                                            R.string.donate_url)))
+                    startActivity(intent)
+                } catch (_: ActivityNotFoundException) {
+                    showSnackbar(this, R.id.coordinator_layout,
+                                 getString(
+                                     R.string.conversations_fail_web_browser))
+                }
                 return true
             }
             else -> return super.onOptionsItemSelected(item)
