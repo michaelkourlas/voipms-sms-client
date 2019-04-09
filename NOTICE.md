@@ -7,6 +7,7 @@ The following components are provided under the [Apache License 2.0](https://www
 
 * [material-design-icons](https://github.com/google/material-design-icons) from [Google](https://github.com/google)
 * [Bitmap loading code](https://developer.android.com/topic/performance/graphics/load-bitmap.html) from [Google](http://www.google.com)
+* [ConversationFastScroller](https://android.googlesource.com/platform/packages/apps/Messaging/+/master/src/com/android/messaging/ui/conversation/ConversationFastScroller.java) from [Google](http://www.google.com)
 
 The text of the Apache License 2.0 can be found in the LICENSE.md file.
 
