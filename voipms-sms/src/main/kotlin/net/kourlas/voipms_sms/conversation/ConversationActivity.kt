@@ -399,20 +399,26 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
         // Load draft message
         val messageText = findViewById<EditText>(R.id.message_edit_text)
-        val draftMessage = Database.getInstance(this).getMessageDraft(
-            conversationId)
-        if (draftMessage != null) {
-            messageText.setText(draftMessage.text)
-            messageText.requestFocus()
-            messageText.setSelection(messageText.text.length)
+        runOnNewThread {
+            val draftMessage = Database.getInstance(this).getMessageDraft(
+                conversationId)
+            runOnUiThread {
+                if (draftMessage != null) {
+                    messageText.setText(draftMessage.text)
+                    messageText.requestFocus()
+                    messageText.setSelection(messageText.text.length)
+                }
+            }
         }
 
         // Mark the conversation as read and remove any open notifications
         // related to this conversation
         Notifications.getInstance(application).cancelNotification(
             conversationId)
-        Database.getInstance(applicationContext).markConversationRead(
-            conversationId)
+        runOnNewThread {
+            Database.getInstance(applicationContext).markConversationRead(
+                conversationId)
+        }
         adapter.refresh()
 
         // Track number of activities
@@ -613,8 +619,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             DialogInterface.OnClickListener { _, _ ->
                 runOnNewThread {
                     Database.getInstance(this).deleteMessages(conversationId)
-                    Database.getInstance(this).insertMessageDraft(
-                        conversationId, "")
                     runOnUiThread {
                         finish()
                     }

@@ -28,6 +28,7 @@ import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.utils.getJson
+import net.kourlas.voipms_sms.utils.runOnNewThread
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -96,7 +97,9 @@ class RetrieveDidsService : IntentService(
                         getDids(applicationContext).plus(dids))
                 Notifications.getInstance(application).enablePushNotifications(
                     applicationContext)
-                AppIndexingService.replaceIndex(applicationContext)
+                runOnNewThread {
+                    AppIndexingService.replaceIndex(applicationContext)
+                }
             }
         } catch (e: Exception) {
             Crashlytics.logException(e)

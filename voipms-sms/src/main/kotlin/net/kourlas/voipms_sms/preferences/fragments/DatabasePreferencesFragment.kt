@@ -104,14 +104,18 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
      */
     private fun import(uri: Uri) {
         val activity = activity ?: return
-        try {
-            val importFd = activity.contentResolver.openFileDescriptor(
-                uri, "r") ?: throw Exception("Could not open file")
-            Database.getInstance(activity).import(importFd)
-        } catch (e: Exception) {
-            showInfoDialog(activity, getString(
-                R.string.preferences_database_import_fail),
-                           "${e.message} (${e.javaClass.simpleName})")
+        runOnNewThread {
+            try {
+                val importFd = activity.contentResolver.openFileDescriptor(
+                    uri, "r") ?: throw Exception("Could not open file")
+                Database.getInstance(activity).import(importFd)
+            } catch (e: Exception) {
+                activity.runOnUiThread {
+                    showInfoDialog(activity, getString(
+                        R.string.preferences_database_import_fail),
+                                   "${e.message} (${e.javaClass.simpleName})")
+                }
+            }
         }
     }
 
@@ -132,23 +136,29 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 exportFilename),
             activity.getString(R.string.ok),
             DialogInterface.OnClickListener { _, _ ->
-                try {
-                    val directory = DocumentFile.fromTreeUri(
-                        activity, uri)
-                                    ?: throw Exception(
-                                        "Could not process directory")
-                    val file = directory.createFile(
-                        "text/plain",
-                        "voipmssms-${System.currentTimeMillis()}")
-                               ?: throw Exception("Could not create file")
-                    val exportFd = activity.contentResolver.openFileDescriptor(
-                        file.uri, "w")
-                                   ?: throw Exception("Could not open file")
-                    Database.getInstance(activity).export(exportFd)
-                } catch (e: Exception) {
-                    showInfoDialog(activity, getString(
-                        R.string.preferences_database_export_fail),
+                runOnNewThread {
+                    try {
+                        val directory = DocumentFile.fromTreeUri(
+                            activity, uri)
+                                        ?: throw Exception(
+                                            "Could not process directory")
+                        val file = directory.createFile(
+                            "text/plain",
+                            "voipmssms-${System.currentTimeMillis()}")
+                                   ?: throw Exception("Could not create file")
+                        val exportFd = activity.contentResolver
+                                           .openFileDescriptor(file.uri, "w")
+                                       ?: throw Exception("Could not open file")
+                        Database.getInstance(activity).export(exportFd)
+                    } catch (e: Exception) {
+                        activity.runOnUiThread {
+                            showInfoDialog(
+                                activity,
+                                getString(
+                                    R.string.preferences_database_export_fail),
                                    "${e.message} (${e.javaClass.simpleName})")
+                        }
+                    }
                 }
             },
             activity.getString(R.string.cancel),
@@ -212,9 +222,11 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                         activity.applicationContext
                             .getString(R.string.delete),
                         DialogInterface.OnClickListener { _, _ ->
-                            Database.getInstance(
-                                activity.applicationContext)
-                                .deleteTablesAll()
+                            runOnNewThread {
+                                Database.getInstance(
+                                    activity.applicationContext)
+                                    .deleteTablesAll()
+                            }
                         },
                         activity.getString(R.string.cancel), null)
     }

@@ -114,6 +114,8 @@ class Database private constructor(private val context: Context) {
             database.delete(TABLE_DRAFT, where, whereArgs)
             database.delete(TABLE_ARCHIVED, where, whereArgs)
 
+            insertMessageDraftWithoutLock(conversationId, "")
+
             database.setTransactionSuccessful()
 
             for (message in messages) {
@@ -411,41 +413,46 @@ class Database private constructor(private val context: Context) {
      */
     fun insertMessageDeliveryInProgress(
         conversationId: ConversationId,
-        text: String): Long = synchronized(this)
+        texts: List<String>): List<Long> = synchronized(this)
     {
         try {
             database.beginTransaction()
 
-            val values = ContentValues()
-            values.putNull(COLUMN_VOIP_ID)
-            values.put(COLUMN_DATE, Date().time / 1000L)
-            values.put(COLUMN_INCOMING, 0L)
-            values.put(COLUMN_DID, conversationId.did)
-            values.put(COLUMN_CONTACT, conversationId.contact)
-            values.put(COLUMN_MESSAGE, text)
-            values.put(COLUMN_UNREAD, 0L)
-            values.put(COLUMN_DELIVERED, 0L)
-            values.put(COLUMN_DELIVERY_IN_PROGRESS, 1L)
+            val databaseIds = texts.map {
+                val values = ContentValues()
+                values.putNull(COLUMN_VOIP_ID)
+                values.put(COLUMN_DATE, Date().time / 1000L)
+                values.put(COLUMN_INCOMING, 0L)
+                values.put(COLUMN_DID, conversationId.did)
+                values.put(COLUMN_CONTACT, conversationId.contact)
+                values.put(COLUMN_MESSAGE, it)
+                values.put(COLUMN_UNREAD, 0L)
+                values.put(COLUMN_DELIVERED, 0L)
+                values.put(COLUMN_DELIVERY_IN_PROGRESS, 1L)
 
-            val databaseId = database.insertOrThrow(TABLE_MESSAGE, null,
-                                                    values)
-            if (databaseId == -1L) {
-                throw Exception("Returned database ID was -1")
+                val databaseId = database.insertOrThrow(TABLE_MESSAGE, null,
+                                                        values)
+                if (databaseId == -1L) {
+                    throw Exception("Returned database ID was -1")
+                }
+                databaseId
             }
 
             database.setTransactionSuccessful()
 
-            val message = getMessageDatabaseIdWithoutLock(databaseId)
-            if (message != null) {
-                runOnNewThread {
-                    FirebaseAppIndex.getInstance().update(
-                        AppIndexingService.getMessageBuilder(context,
-                                                             message).build())
+            for (databaseId in databaseIds) {
+                val message = getMessageDatabaseIdWithoutLock(databaseId)
+                if (message != null) {
+                    runOnNewThread {
+                        FirebaseAppIndex.getInstance().update(
+                            AppIndexingService.getMessageBuilder(
+                                context, message).build())
+                    }
                 }
-                updateShortcuts(context)
             }
+            updateShortcuts(context)
 
-            return databaseId
+            return databaseIds
         } finally {
             database.endTransaction()
         }
@@ -465,30 +472,7 @@ class Database private constructor(private val context: Context) {
         try {
             database.beginTransaction()
 
-            val databaseId = getDraftDatabaseIdConversation(conversationId)
-
-            // If text is empty, then delete any existing draft message
-            if (text == "") {
-                if (databaseId != null) {
-                    database.delete(TABLE_DRAFT,
-                                    "$COLUMN_DATABASE_ID=?",
-                                    arrayOf(databaseId.toString()))
-                    database.setTransactionSuccessful()
-
-                    updateShortcuts(context)
-                }
-                return
-            }
-
-            val values = ContentValues()
-            if (databaseId != null) {
-                values.put(COLUMN_DATABASE_ID, databaseId)
-            }
-            values.put(COLUMN_DID, conversationId.did)
-            values.put(COLUMN_CONTACT, conversationId.contact)
-            values.put(COLUMN_MESSAGE, text)
-
-            database.replaceOrThrow(TABLE_DRAFT, null, values)
+            insertMessageDraftWithoutLock(conversationId, text)
 
             database.setTransactionSuccessful()
 
@@ -1135,6 +1119,42 @@ class Database private constructor(private val context: Context) {
     }
 
     /**
+     * Inserts a new draft message into the database associated with the
+     * specified conversation and containing the specified text.
+     *
+     * Any existing draft message with the specified conversation is
+     * automatically removed. If an empty message is inserted, any existing
+     * message is removed from the database.
+     *
+     * This method intentionally does not use transaction or lock semantics;
+     * this is a responsibility of the caller.
+     */
+    fun insertMessageDraftWithoutLock(conversationId: ConversationId,
+                                      text: String) {
+        val databaseId = getDraftDatabaseIdConversation(conversationId)
+
+        // If text is empty, then delete any existing draft message
+        if (text == "") {
+            if (databaseId != null) {
+                database.delete(TABLE_DRAFT,
+                                "$COLUMN_DATABASE_ID=?",
+                                arrayOf(databaseId.toString()))
+            }
+            return
+        }
+
+        val values = ContentValues()
+        if (databaseId != null) {
+            values.put(COLUMN_DATABASE_ID, databaseId)
+        }
+        values.put(COLUMN_DID, conversationId.did)
+        values.put(COLUMN_CONTACT, conversationId.contact)
+        values.put(COLUMN_MESSAGE, text)
+
+        database.replaceOrThrow(TABLE_DRAFT, null, values)
+    }
+
+    /**
      * Inserts the deleted VoIP.ms message ID associated with the specified
      * DID into the database.
      *
@@ -1180,10 +1200,9 @@ class Database private constructor(private val context: Context) {
         // There is one static shortcut
         val maxCount = ShortcutManagerCompat
                            .getMaxShortcutCountPerActivity(context) - 1
-        val messages = Database.getInstance(context)
-            .getMessagesMostRecentFilteredWithoutLock(
-                net.kourlas.voipms_sms.preferences.getDids(
-                    context, onlyShowInConversationsView = true))
+        val messages = getMessagesMostRecentFilteredWithoutLock(
+            net.kourlas.voipms_sms.preferences.getDids(
+                context, onlyShowInConversationsView = true))
         val shortcutInfoList = messages.zip(0 until maxCount).map {
             val message = it.first
 

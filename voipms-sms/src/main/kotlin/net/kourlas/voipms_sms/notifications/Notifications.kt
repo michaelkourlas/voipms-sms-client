@@ -305,14 +305,17 @@ class Notifications private constructor(
             return
         }
 
-        for (conversationId in conversationIds) {
-            if (application.conversationActivityVisible(conversationId)
-                || !getNotificationsEnabled(conversationId)) {
-                continue
-            }
+        runOnNewThread {
+            for (conversationId in conversationIds) {
+                if (application.conversationActivityVisible(conversationId)
+                    || !getNotificationsEnabled(conversationId)) {
+                    continue
+                }
 
-            showNotification(
-                Database.getInstance(context).getMessagesUnread(conversationId))
+                showNotification(
+                    Database.getInstance(context).getMessagesUnread(
+                        conversationId))
+            }
         }
     }
 

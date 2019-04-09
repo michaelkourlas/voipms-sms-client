@@ -265,11 +265,13 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Delete any notification channels and groups that are no longer
         // needed and rename existing channels if necessary
-        Notifications.getInstance(application)
-            .createDefaultNotificationChannel()
-        Notifications.getInstance(application)
-            .deleteNotificationChannelsAndGroups()
-        Notifications.getInstance(application).renameNotificationChannels()
+        runOnNewThread {
+            Notifications.getInstance(application)
+                .createDefaultNotificationChannel()
+            Notifications.getInstance(application)
+                .deleteNotificationChannelsAndGroups()
+            Notifications.getInstance(application).renameNotificationChannels()
+        }
 
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
 
@@ -561,7 +563,7 @@ open class ConversationsActivity : AppCompatActivity(),
             getString(R.string.conversations_delete_confirm_message),
             getString(R.string.delete),
             DialogInterface.OnClickListener { _, _ ->
-                Thread(Runnable {
+                runOnNewThread {
                     for (message in messages) {
                         Database.getInstance(applicationContext)
                             .deleteMessages(message.conversationId)
@@ -570,7 +572,7 @@ open class ConversationsActivity : AppCompatActivity(),
                         mode.finish()
                         adapter.refresh()
                     }
-                }).start()
+                }
             },
             getString(R.string.cancel), null)
         return true

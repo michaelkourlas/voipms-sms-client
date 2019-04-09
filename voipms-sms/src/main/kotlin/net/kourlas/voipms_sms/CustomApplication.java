@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms;
 import android.app.Application;
 
 import net.kourlas.voipms_sms.sms.ConversationId;
+import net.kourlas.voipms_sms.sms.Database;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,6 +78,9 @@ public class CustomApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Open database
+        Database.Companion.getInstance(getApplicationContext());
 
         // Subscribe to topics for current DIDs
         subscribeToDidTopics(getApplicationContext());

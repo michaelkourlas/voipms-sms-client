@@ -115,33 +115,24 @@ class SendMessageService : JobIntentService() {
                 // Try adding the messages to the database; if this fails,
                 // terminate with a toast and try to remove existing added
                 // messages
-                for (messageText in messageTexts) {
-                    try {
-                        val newDatabaseId = Database.getInstance(
-                            applicationContext)
-                            .insertMessageDeliveryInProgress(
-                                ConversationId(did,
-                                               contact), messageText)
+                try {
+                    val newDatabaseIds = Database.getInstance(
+                        applicationContext)
+                        .insertMessageDeliveryInProgress(
+                            ConversationId(did,
+                                           contact), messageTexts)
+                    for ((messageText, newDatabaseId) in messageTexts.zip(
+                        newDatabaseIds)) {
                         messages.add(
                             OutgoingMessage(
                                 newDatabaseId, did,
                                 contact, messageText))
-                    } catch (e: Exception) {
-                        Crashlytics.logException(e)
-                        error = applicationContext.getString(
-                            R.string.send_message_error_database)
-                        for ((newDatabaseId) in messages) {
-                            try {
-                                Database.getInstance(
-                                    applicationContext)
-                                    .removeMessage(newDatabaseId)
-                            } catch (e: Exception) {
-                                Crashlytics.logException(e)
-                            }
-                        }
-                        return ConversationId(did,
-                                              contact)
                     }
+                } catch (e: Exception) {
+                    Crashlytics.logException(e)
+                    error = applicationContext.getString(
+                        R.string.send_message_error_database)
+                    return ConversationId(did, contact)
                 }
             }
 
