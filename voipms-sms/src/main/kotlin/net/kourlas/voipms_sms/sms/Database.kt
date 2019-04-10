@@ -777,23 +777,6 @@ class Database private constructor(private val context: Context) {
     }
 
     /**
-     * Deletes the message with the specified database ID from the database.
-     */
-    fun removeMessage(databaseId: Long) = synchronized(this) {
-        try {
-            database.beginTransaction()
-
-            database.delete(TABLE_MESSAGE,
-                            "$COLUMN_DATABASE_ID=?",
-                            arrayOf(databaseId.toString()))
-
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
-        }
-    }
-
-    /**
      * Gets the database ID for the row in the archived table for the specified
      * conversation.
      *

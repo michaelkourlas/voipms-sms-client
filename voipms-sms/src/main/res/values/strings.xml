@@ -256,7 +256,6 @@
     <string name="verify_credentials_action" translatable="false">verify_credentials_action</string>
     <string name="verify_credentials_email" translatable="false">verify_credentials_email</string>
     <string name="verify_credentials_password" translatable="false">verify_credentials_password</string>
-    <string name="verify_credentials_error_network">Sign-in failed: no network connection available</string>
     <string name="verify_credentials_error_api_request">Sign-in failed: request to VoIP.ms API failed</string>
     <string name="verify_credentials_error_api_parse">Sign-in failed: VoIP.ms API response could not be parsed</string>
     <string name="verify_credentials_error_api_error">Sign-in failed: VoIP.ms API returned error \'%1$s\'</string>
@@ -315,7 +314,6 @@
 
     <!-- UTILS -->
     <string name="utils_date_just_now">Now</string>
-    <string name="utils_date_seconds_ago">s</string>
     <string name="utils_date_minutes_ago">min</string>
 
     <!-- URLS -->
