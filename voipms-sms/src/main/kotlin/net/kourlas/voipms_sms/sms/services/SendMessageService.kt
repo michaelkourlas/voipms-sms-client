@@ -286,8 +286,18 @@ class SendMessageService : JobIntentService() {
             return null
         }
         if (status != "success") {
-            error = applicationContext.getString(
-                R.string.send_message_error_api_error, status)
+            error = when (status) {
+                "invalid_credentials" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_invalid_credentials)
+                "invalid_dst" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_invalid_dst)
+                "limit_reached" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_limit_reached)
+                "sms_failed" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_sms_failed)
+                else -> applicationContext.getString(
+                    R.string.send_message_error_api_error, status)
+            }
             return null
         }
         val voipId = response.optLong("sms")

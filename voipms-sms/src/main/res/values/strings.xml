@@ -236,6 +236,10 @@
     <string name="send_message_error_api_request">Failed to send message: request to VoIP.ms API failed</string>
     <string name="send_message_error_api_parse">Failed to send message: VoIP.ms API response could not be parsed</string>
     <string name="send_message_error_api_error">Failed to send message: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="send_message_error_api_error_invalid_credentials">Failed to send message: invalid VoIP.ms email or API password</string>
+    <string name="send_message_error_api_error_invalid_dst">Failed to send message: invalid destination phone number</string>
+    <string name="send_message_error_api_error_sms_failed">Failed to send message: contact VoIP.ms for assistance (provide error code "sms_failed")</string>
+    <string name="send_message_error_api_error_limit_reached">Failed to send message: contact VoIP.ms for assistance (provide error code "limit_reached")</string>
     <string name="send_message_error_database">Failed to send message: unknown database error</string>
     <string name="send_message_error_unknown">Failed to send message: unknown error</string>
 
@@ -246,6 +250,7 @@
     <string name="sync_error_api_request">Synchronization failed: request to VoIP.ms API failed</string>
     <string name="sync_error_api_parse">Synchronization failed: VoIP.ms API response could not be parsed</string>
     <string name="sync_error_api_error">Synchronization failed: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="sync_error_api_error_invalid_credentials">Synchronization failed: invalid VoIP.ms email or API password</string>
     <string name="sync_error_database">Synchronization failed: unknown database error</string>
     <string name="sync_error_unknown">Synchronization failed: unknown error</string>
 
@@ -259,6 +264,7 @@
     <string name="verify_credentials_error_api_request">Sign-in failed: request to VoIP.ms API failed</string>
     <string name="verify_credentials_error_api_parse">Sign-in failed: VoIP.ms API response could not be parsed</string>
     <string name="verify_credentials_error_api_error">Sign-in failed: VoIP.ms API returned error \'%1$s\'</string>
+    <string name="verify_credentials_error_api_error_invalid_credentials">Sign-in failed: invalid VoIP.ms email or API password</string>
     <string name="verify_credentials_error_unknown">Sign-in failed: unknown error</string>
 
     <!-- BROADCAST RECEIVERS -->

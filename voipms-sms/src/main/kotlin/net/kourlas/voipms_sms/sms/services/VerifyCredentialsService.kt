@@ -130,8 +130,12 @@ class VerifyCredentialsService : IntentService(
         try {
             val status = response.getString("status")
             if (status != "success") {
-                error = getString(
-                    R.string.verify_credentials_error_api_error, status)
+                error = when (status) {
+                    "invalid_credentials" -> getString(
+                        R.string.verify_credentials_error_api_error_invalid_credentials)
+                    else -> getString(
+                        R.string.verify_credentials_error_api_error, status)
+                }
                 return false
             }
 

@@ -299,8 +299,13 @@ class SyncService : IntentService(
         val incomingMessages = mutableListOf<IncomingMessage>()
         val status = response.optString("status")
         if (status != "success" && status != "no_sms") {
-            error = applicationContext.getString(R.string.sync_error_api_error,
-                                                 status)
+            error = when (status) {
+                "invalid_credentials" -> applicationContext.getString(
+                    R.string.sync_error_api_error_invalid_credentials)
+                else -> applicationContext.getString(
+                    R.string.sync_error_api_error,
+                    status)
+            }
             return null
         }
 
