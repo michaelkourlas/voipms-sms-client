@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/michaelkourlas/voipms-sms-client.svg?branch=master)](https://travis-ci.org/michaelkourlas/voipms-sms-client)
 
-<a href='https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms'><img alt='Get it on Google Play' src='' height="100"/></a> <a href="https://f-droid.org/app/net.kourlas.voipms_sms"><img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="100"></a>
+<a href='https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="100"/></a> <a href="https://f-droid.org/app/net.kourlas.voipms_sms"><img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="100"></a>
 
 ## Overview ##
 
