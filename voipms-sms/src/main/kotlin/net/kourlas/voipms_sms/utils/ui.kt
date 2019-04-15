@@ -23,6 +23,7 @@ import android.graphics.*
 import android.graphics.Color.rgb
 import android.net.Uri
 import android.provider.Settings
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.Toast
@@ -86,8 +87,14 @@ fun applyRoundedCornersMask(view: View) {
  */
 private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
     object : ViewOutlineProvider() {
-        override fun getOutline(view: View, outline: Outline) =
-            outline.setRoundRect(0, 0, view.width, view.height, 75f)
+        override fun getOutline(view: View, outline: Outline) {
+            val pixels = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                22f,
+                view.context.resources.displayMetrics)
+            outline.setRoundRect(0, 0, view.width, view.height, pixels)
+        }
+
     }
 
 /**
