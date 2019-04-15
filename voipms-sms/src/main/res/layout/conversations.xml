@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,63 +15,75 @@
   ~ limitations under the License.
   -->
 
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/coordinator_layout"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/primary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:titleTextAppearance="@style/ToolbarTitle" />
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary"
+                app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+        </com.google.android.material.appbar.AppBarLayout>
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <TextView
                 android:id="@+id/empty_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center" />
+                android:layout_marginStart="@dimen/margin"
+                android:layout_marginEnd="@dimen/margin"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
-            <android.support.v4.widget.SwipeRefreshLayout
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                 android:id="@+id/swipe_refresh_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/list"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:divider="@null"
                     android:dividerHeight="0dp"
                     android:scrollbars="vertical" />
-            </android.support.v4.widget.SwipeRefreshLayout>
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
         </FrameLayout>
-    </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/new_button"
-        android:layout_width="@dimen/fab"
-        android:layout_height="@dimen/fab"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/margin"
-        android:contentDescription="@string/conversations_action_add"
-        android:src="@drawable/ic_add_white_24dp"
-        app:backgroundTint="@color/primary"
-        app:elevation="@dimen/fab_elevation"
-        app:fabSize="normal"
-        app:layout_behavior="net.kourlas.voipms_sms.conversations.FloatingActionButtonBehaviour"
-        app:rippleColor="@color/accent" />
-</android.support.design.widget.CoordinatorLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/chat_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/margin"
+            android:contentDescription="@string/conversations_action_chat"
+            android:src="@drawable/ic_chat_white_24dp" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/conversations_nav_header"
+        app:itemTextAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        app:menu="@menu/conversations_nav" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

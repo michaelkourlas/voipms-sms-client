@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2017-2018 Michael Kourlas
+  ~ Copyright (C) 2017-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
   ~ limitations under the License.
   -->
 
-<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Any changes to the number or ordering of the preferences in this file
          must be reflected in DidPreferencesFragment.kt -->
-    <android.support.v14.preference.SwitchPreference
+    <androidx.preference.SwitchPreference
         android:icon="@android:color/transparent"
         android:title="@string/preferences_did_show_in_conversations_view_title" />
-    <android.support.v14.preference.SwitchPreference
+    <androidx.preference.SwitchPreference
         android:icon="@android:color/transparent"
         android:title="@string/preferences_did_retrieve_messages_title" />
-    <android.support.v14.preference.SwitchPreference
+    <androidx.preference.SwitchPreference
         android:icon="@android:color/transparent"
         android:title="@string/preferences_did_show_notifications_title" />
-</android.support.v7.preference.PreferenceScreen>
+</androidx.preference.PreferenceScreen>

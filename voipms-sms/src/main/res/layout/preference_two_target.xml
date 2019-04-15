@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2017 The Android Open Source Project
-  ~ Modifications copyright (C) 2017-2018 Michael Kourlas
+  ~ Modifications copyright (C) 2017-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@
     android:baselineAligned="false"
     android:clipToPadding="false"
     android:gravity="center_vertical"
-    android:minHeight="?android:attr/listPreferredItemHeight">
+    android:minHeight="?attr/listPreferredItemHeight">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="?android:attr/selectableItemBackground"
+        android:background="?attr/selectableItemBackground"
         android:baselineAligned="false"
         android:gravity="start|center_vertical"
-        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:paddingStart="?attr/listPreferredItemPaddingStart"
         tools:ignore="RtlSymmetry">
 
         <LinearLayout
@@ -41,25 +41,25 @@
             android:layout_height="wrap_content"
             android:minWidth="56dp"
             android:orientation="horizontal"
-            android:paddingBottom="4dp"
-            android:paddingEnd="12dp"
             android:paddingTop="4dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="4dp"
             tools:ignore="RtlSymmetry">
 
             <com.android.internal.widget.PreferenceImageView
                 android:id="@android:id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxHeight="48dp"
-                android:maxWidth="48dp" />
+                android:maxWidth="48dp"
+                android:maxHeight="48dp" />
         </LinearLayout>
 
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingBottom="16dp"
             android:paddingTop="16dp"
+            android:paddingBottom="16dp"
             tools:ignore="NestedWeights">
 
             <TextView
@@ -68,16 +68,16 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="marquee"
                 android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceListItem" />
+                android:textAppearance="?attr/textAppearanceListItem" />
 
             <TextView
                 android:id="@android:id/summary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignStart="@android:id/title"
                 android:layout_below="@android:id/title"
+                android:layout_alignStart="@android:id/title"
                 android:maxLines="10"
-                android:textAppearance="?android:attr/textAppearanceListItemSecondary"
+                android:textAppearance="?attr/textAppearanceListItemSecondary"
                 android:textColor="?android:attr/textColorSecondary" />
         </RelativeLayout>
     </LinearLayout>

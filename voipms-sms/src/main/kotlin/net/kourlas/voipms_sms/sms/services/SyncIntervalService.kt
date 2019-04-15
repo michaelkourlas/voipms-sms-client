@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.support.v4.app.AlarmManagerCompat
-import android.support.v4.app.JobIntentService
 import android.util.Log
+import androidx.core.app.AlarmManagerCompat
+import androidx.core.app.JobIntentService
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getLastCompleteSyncTime
 import net.kourlas.voipms_sms.preferences.getSyncInterval

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2017-2018 Michael Kourlas
+  ~ Copyright (C) 2017-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,19 +15,8 @@
   ~ limitations under the License.
   -->
 
-<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--suppress AndroidDomInspection -->
-    <com.takisoft.fix.support.v7.preference.EditTextPreference
-        android:defaultValue=""
-        android:icon="@android:color/transparent"
-        android:inputType="textEmailAddress"
-        android:key="@string/preferences_account_email_key"
-        android:title="@string/preferences_account_email_title" />
-    <!--suppress AndroidDomInspection -->
-    <com.takisoft.fix.support.v7.preference.EditTextPreference
-        android:defaultValue=""
-        android:icon="@android:color/transparent"
-        android:inputType="textPassword"
-        android:key="@string/preferences_account_password_key"
-        android:title="@string/preferences_account_password_title" />
-</android.support.v7.preference.PreferenceScreen>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.preference.Preference
+        android:key="@string/preferences_account_sign_out_key"
+        android:title="Sign out" />
+</androidx.preference.PreferenceScreen>

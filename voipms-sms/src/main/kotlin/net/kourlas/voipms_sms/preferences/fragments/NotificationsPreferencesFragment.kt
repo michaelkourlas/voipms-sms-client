@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018 Michael Kourlas
+ * Copyright (C) 2018-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,14 @@ import android.content.SharedPreferences
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
-import android.support.v7.preference.Preference
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
-import com.takisoft.fix.support.v7.preference.RingtonePreference
+import androidx.preference.Preference
+import com.takisoft.preferencex.PreferenceFragmentCompat
+import com.takisoft.preferencex.RingtonePreference
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getNotificationSound
+import net.kourlas.voipms_sms.utils.preferences
 
-class NotificationsPreferencesFragment : PreferenceFragmentCompatDividers(),
+class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
@@ -41,12 +39,14 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompatDividers(),
         preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
 
+        // Update preferences summaries
         updateSummaries()
     }
 
     override fun onResume() {
         super.onResume()
 
+        // Update preferences summaries
         updateSummaries()
     }
 
@@ -54,11 +54,8 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompatDividers(),
      * Updates the summary text for all preferences.
      */
     fun updateSummaries() {
-        if (preferenceScreen != null) {
-            for (i in 0 until preferenceScreen.preferenceCount) {
-                val subPreference = preferenceScreen.getPreference(i)
-                updateSummaryTextForPreference(subPreference)
-            }
+        for (preference in preferenceScreen.preferences) {
+            updateSummaryTextForPreference(preference)
         }
     }
 
@@ -75,44 +72,33 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompatDividers(),
 
     /**
      * Updates the summary text for the specified preference.
-     *
-     * @param preference The specified preference.
      */
     private fun updateSummaryTextForPreference(preference: Preference?) {
-        val context = context ?: return
-        if (preference is RingtonePreference) {
-            // Display selected notification sound as summary text for
-            // notification setting
-            @Suppress("DEPRECATION")
-            val notificationSound = getNotificationSound(
-                context)
-            if (notificationSound == "") {
-                preference.summary = "None"
-            } else {
-                try {
-                    val ringtone = RingtoneManager.getRingtone(
-                        activity, Uri.parse(notificationSound))
-                    if (ringtone != null) {
-                        preference.summary = ringtone.getTitle(
-                            activity)
-                    } else {
+        context?.let {
+            if (preference is RingtonePreference) {
+                // Display selected notification sound as summary text for
+                // notification setting
+                @Suppress("DEPRECATION")
+                val notificationSound = getNotificationSound(it)
+                if (notificationSound == "") {
+                    preference.summary = "None"
+                } else {
+                    try {
+                        val ringtone = RingtoneManager.getRingtone(
+                            activity, Uri.parse(notificationSound))
+                        if (ringtone != null) {
+                            preference.summary = ringtone.getTitle(
+                                activity)
+                        } else {
+                            preference.summary = getString(
+                                R.string.preferences_notifications_sound_unknown)
+                        }
+                    } catch (ex: SecurityException) {
                         preference.summary = getString(
-                            R.string.preferences_notifications_sound_unknown)
+                            R.string.preferences_notifications_sound_unknown_perm)
                     }
-                } catch (ex: SecurityException) {
-                    preference.summary = getString(
-                        R.string.preferences_notifications_sound_unknown_perm)
                 }
             }
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        try {
-            return super.onCreateView(inflater, container, savedInstanceState)
-        } finally {
-            setDividerPreferences(DIVIDER_NONE)
         }
     }
 }

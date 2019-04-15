@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ package net.kourlas.voipms_sms.sms.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.content.ContextCompat
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
@@ -52,18 +52,6 @@ class SyncService : IntentService(
     private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
-        // Terminate quietly if intent does not exist or does not contain
-        // the sync action
-        if (intent == null || intent.action != applicationContext.getString(
-                R.string.sync_action)) {
-            return
-        }
-
-        // Terminate quietly if account inactive
-        if (!isAccountActive(applicationContext)) {
-            return
-        }
-
         val rand = Random().nextInt().toString(16)
         Log.i(SyncService::class.java.name, "[$rand] starting synchronization")
 
@@ -83,7 +71,7 @@ class SyncService : IntentService(
                 R.string.sync_complete_action))
         syncCompleteBroadcastIntent.putExtra(getString(
             R.string.sync_complete_error), error)
-        if (intent.extras?.get(getString(
+        if (intent?.extras?.get(getString(
                 R.string.sync_force_recent)) != true) {
             syncCompleteBroadcastIntent.putExtra(getString(
                 R.string.sync_complete_full), true)
@@ -98,10 +86,23 @@ class SyncService : IntentService(
     /**
      * Perform synchronization.
      */
-    private fun handleSync(intent: Intent) {
+    private fun handleSync(intent: Intent?) {
         try {
+            // Terminate quietly if intent does not exist or does not contain
+            // the sync action
+            if (intent == null || intent.action != applicationContext.getString(
+                    R.string.sync_action)) {
+                return
+            }
+
+            // Terminate quietly if account inactive
+            if (!accountConfigured(applicationContext) || !didsConfigured(
+                    applicationContext)) {
+                return
+            }
+
             // Extract the boolean properties from the intent
-            val forceRecent = intent.extras.get(
+            val forceRecent = intent.extras?.get(
                 applicationContext.getString(R.string.sync_force_recent))
                                   as Boolean?
                               ?: throw Exception("Force recent missing")
@@ -295,8 +296,13 @@ class SyncService : IntentService(
         val incomingMessages = mutableListOf<IncomingMessage>()
         val status = response.optString("status")
         if (status != "success" && status != "no_sms") {
-            error = applicationContext.getString(R.string.sync_error_api_error,
-                                                 status)
+            error = when (status) {
+                "invalid_credentials" -> applicationContext.getString(
+                    R.string.sync_error_api_error_invalid_credentials)
+                else -> applicationContext.getString(
+                    R.string.sync_error_api_error,
+                    status)
+            }
             return null
         }
 

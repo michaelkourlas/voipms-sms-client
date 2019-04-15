@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018 Michael Kourlas
+ * Copyright (C) 2018-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,9 @@ package net.kourlas.voipms_sms.preferences.activities
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v4.view.ViewCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.NotificationsPreferencesFragment
 import net.kourlas.voipms_sms.utils.showPermissionSnackbar
@@ -44,19 +42,18 @@ class NotificationsPreferencesActivity : AppCompatActivity() {
         setContentView(R.layout.preferences_notifications)
 
         // Configure toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        ViewCompat.setElevation(toolbar, resources
-            .getDimension(R.dimen.toolbar_elevation))
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
-        fragment = NotificationsPreferencesFragment()
-        supportFragmentManager.beginTransaction().replace(
-            R.id.preferences_fragment_layout, fragment).commit()
+        // Load preferences fragment
+        if (savedInstanceState == null) {
+            fragment = NotificationsPreferencesFragment()
+            supportFragmentManager.beginTransaction().replace(
+                R.id.preferences_fragment_layout, fragment).commit()
+        }
 
         // Ask for external storage permission (required to display
         // information associated with ringtones on external storage)

@@ -20,13 +20,18 @@ package net.kourlas.voipms_sms.sms
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.ParcelFileDescriptor
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
+import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.sms.services.SyncService
-import net.kourlas.voipms_sms.utils.getContactName
-import net.kourlas.voipms_sms.utils.getDigitsOfString
+import net.kourlas.voipms_sms.utils.*
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -58,6 +63,8 @@ class Database private constructor(private val context: Context) {
                             arrayOf(databaseId.toString()))
 
             database.setTransactionSuccessful()
+
+            updateShortcuts(context)
         } finally {
             database.endTransaction()
         }
@@ -103,7 +110,11 @@ class Database private constructor(private val context: Context) {
             database.delete(TABLE_DRAFT, where, whereArgs)
             database.delete(TABLE_ARCHIVED, where, whereArgs)
 
+            insertMessageDraftWithoutLock(conversationId, "")
+
             database.setTransactionSuccessful()
+
+            updateShortcuts(context)
         } finally {
             database.endTransaction()
         }
@@ -137,6 +148,8 @@ class Database private constructor(private val context: Context) {
             database.delete(TABLE_ARCHIVED, null, null)
 
             database.setTransactionSuccessful()
+
+            updateShortcuts(context)
         } finally {
             database.endTransaction()
         }
@@ -146,7 +159,7 @@ class Database private constructor(private val context: Context) {
      * Exports the database to the specified file descriptor.
      */
     fun export(exportFd: ParcelFileDescriptor) = synchronized(this) {
-        val dbFile = context.getDatabasePath(Database.DATABASE_NAME)
+        val dbFile = context.getDatabasePath(DATABASE_NAME)
 
         try {
             // Close database to persist it to disk before export
@@ -337,7 +350,7 @@ class Database private constructor(private val context: Context) {
      * Imports the database from the specified file descriptor.
      */
     fun import(importFd: ParcelFileDescriptor) = synchronized(this) {
-        val dbFile = context.getDatabasePath(Database.DATABASE_NAME)
+        val dbFile = context.getDatabasePath(DATABASE_NAME)
         val backupFile = File("${dbFile.absolutePath}.backup")
 
         try {
@@ -388,31 +401,36 @@ class Database private constructor(private val context: Context) {
      */
     fun insertMessageDeliveryInProgress(
         conversationId: ConversationId,
-        text: String): Long = synchronized(this)
+        texts: List<String>): List<Long> = synchronized(this)
     {
         try {
             database.beginTransaction()
 
-            val values = ContentValues()
-            values.putNull(COLUMN_VOIP_ID)
-            values.put(COLUMN_DATE, Date().time / 1000L)
-            values.put(COLUMN_INCOMING, 0L)
-            values.put(COLUMN_DID, conversationId.did)
-            values.put(COLUMN_CONTACT, conversationId.contact)
-            values.put(COLUMN_MESSAGE, text)
-            values.put(COLUMN_UNREAD, 0L)
-            values.put(COLUMN_DELIVERED, 0L)
-            values.put(COLUMN_DELIVERY_IN_PROGRESS, 1L)
+            val databaseIds = texts.map {
+                val values = ContentValues()
+                values.putNull(COLUMN_VOIP_ID)
+                values.put(COLUMN_DATE, Date().time / 1000L)
+                values.put(COLUMN_INCOMING, 0L)
+                values.put(COLUMN_DID, conversationId.did)
+                values.put(COLUMN_CONTACT, conversationId.contact)
+                values.put(COLUMN_MESSAGE, it)
+                values.put(COLUMN_UNREAD, 0L)
+                values.put(COLUMN_DELIVERED, 0L)
+                values.put(COLUMN_DELIVERY_IN_PROGRESS, 1L)
 
-            val databaseId = database.insertOrThrow(TABLE_MESSAGE, null,
-                                                    values)
-            if (databaseId == -1L) {
-                throw Exception("Returned database ID was -1")
+                val databaseId = database.insertOrThrow(TABLE_MESSAGE, null,
+                                                        values)
+                if (databaseId == -1L) {
+                    throw Exception("Returned database ID was -1")
+                }
+                databaseId
             }
 
             database.setTransactionSuccessful()
 
-            return databaseId
+            updateShortcuts(context)
+
+            return databaseIds
         } finally {
             database.endTransaction()
         }
@@ -432,30 +450,11 @@ class Database private constructor(private val context: Context) {
         try {
             database.beginTransaction()
 
-            val databaseId = getDraftDatabaseIdConversation(conversationId)
-
-            // If text is empty, then delete any existing draft message
-            if (text == "") {
-                if (databaseId != null) {
-                    database.delete(TABLE_DRAFT,
-                                    "$COLUMN_DATABASE_ID=?",
-                                    arrayOf(databaseId.toString()))
-                    database.setTransactionSuccessful()
-                }
-                return
-            }
-
-            val values = ContentValues()
-            if (databaseId != null) {
-                values.put(COLUMN_DATABASE_ID, databaseId)
-            }
-            values.put(COLUMN_DID, conversationId.did)
-            values.put(COLUMN_CONTACT, conversationId.contact)
-            values.put(COLUMN_MESSAGE, text)
-
-            database.replaceOrThrow(TABLE_DRAFT, null, values)
+            insertMessageDraftWithoutLock(conversationId, text)
 
             database.setTransactionSuccessful()
+
+            updateShortcuts(context)
         } finally {
             database.endTransaction()
         }
@@ -534,6 +533,10 @@ class Database private constructor(private val context: Context) {
             }
 
             database.setTransactionSuccessful()
+
+            if (addedDatabaseIds.isNotEmpty()) {
+                updateShortcuts(context)
+            }
 
             return addedConversationIds
         } finally {
@@ -733,23 +736,6 @@ class Database private constructor(private val context: Context) {
 
             database.update(TABLE_MESSAGE,
                             contentValues,
-                            "$COLUMN_DATABASE_ID=?",
-                            arrayOf(databaseId.toString()))
-
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
-        }
-    }
-
-    /**
-     * Deletes the message with the specified database ID from the database.
-     */
-    fun removeMessage(databaseId: Long) = synchronized(this) {
-        try {
-            database.beginTransaction()
-
-            database.delete(TABLE_MESSAGE,
                             "$COLUMN_DATABASE_ID=?",
                             arrayOf(databaseId.toString()))
 
@@ -999,8 +985,7 @@ class Database private constructor(private val context: Context) {
     private fun getMessagesMostRecentFilteredWithoutLock(
         dids: Set<String>,
         filterConstraint: String = "",
-        contactNameCache: MutableMap<String,
-            String>? = null): List<Message> {
+        contactNameCache: MutableMap<String, String>? = null): List<Message> {
         val queryParams = mutableListOf("%$filterConstraint%")
         val numberFilterConstraint = getDigitsOfString(filterConstraint)
         if (numberFilterConstraint != "") {
@@ -1050,7 +1035,7 @@ class Database private constructor(private val context: Context) {
             cursor = database.rawQuery(query, arrayOf(did))
             messages.addAll(
                 getMessagesCursor(cursor)
-                    .filterNot { it.contact in messages.map { it.contact } }
+                    .filterNot { it.contact in messages.map { it2 -> it2.contact } }
                     .filter {
                         val contactName = getContactName(context,
                                                          it.contact,
@@ -1083,6 +1068,42 @@ class Database private constructor(private val context: Context) {
 
         allMessages.sort()
         return allMessages
+    }
+
+    /**
+     * Inserts a new draft message into the database associated with the
+     * specified conversation and containing the specified text.
+     *
+     * Any existing draft message with the specified conversation is
+     * automatically removed. If an empty message is inserted, any existing
+     * message is removed from the database.
+     *
+     * This method intentionally does not use transaction or lock semantics;
+     * this is a responsibility of the caller.
+     */
+    private fun insertMessageDraftWithoutLock(conversationId: ConversationId,
+                                              text: String) {
+        val databaseId = getDraftDatabaseIdConversation(conversationId)
+
+        // If text is empty, then delete any existing draft message
+        if (text == "") {
+            if (databaseId != null) {
+                database.delete(TABLE_DRAFT,
+                                "$COLUMN_DATABASE_ID=?",
+                                arrayOf(databaseId.toString()))
+            }
+            return
+        }
+
+        val values = ContentValues()
+        if (databaseId != null) {
+            values.put(COLUMN_DATABASE_ID, databaseId)
+        }
+        values.put(COLUMN_DID, conversationId.did)
+        values.put(COLUMN_CONTACT, conversationId.contact)
+        values.put(COLUMN_MESSAGE, text)
+
+        database.replaceOrThrow(TABLE_DRAFT, null, values)
     }
 
     /**
@@ -1122,6 +1143,49 @@ class Database private constructor(private val context: Context) {
         val deleted = !cursor.isAfterLast
         cursor.close()
         return deleted
+    }
+
+    /**
+     * Update the app shortcuts.
+     */
+    private fun updateShortcuts(context: Context) {
+        // There is one static shortcut
+        val maxCount = ShortcutManagerCompat
+                           .getMaxShortcutCountPerActivity(context) - 1
+        val messages = getMessagesMostRecentFilteredWithoutLock(
+            net.kourlas.voipms_sms.preferences.getDids(
+                context, onlyShowInConversationsView = true))
+        val shortcutInfoList = messages.zip(0 until maxCount).map {
+            val message = it.first
+
+            val intent = Intent(context, ConversationActivity::class.java)
+            intent.action = "android.intent.action.VIEW"
+            intent.putExtra(context.getString(R.string.conversation_did),
+                            message.did)
+            intent.putExtra(context.getString(R.string.conversation_contact),
+                            message.contact)
+
+            val contactBitmap = getContactPhotoBitmap(context, message.contact)
+            val icon = if (contactBitmap == null) {
+                IconCompat.createWithResource(
+                    context, R.drawable.ic_shortcut_account_circle)
+            } else {
+                IconCompat.createWithBitmap(applyCircularMask(contactBitmap))
+            }
+
+            val label = getContactName(context, message.contact)
+                        ?: getFormattedPhoneNumber(message.contact)
+
+            ShortcutInfoCompat.Builder(
+                context, message.conversationId.getId())
+                .setIcon(icon)
+                .setIntent(intent)
+                .setLongLabel(label)
+                .setShortLabel(label.split(" ")[0])
+                .build()
+        }
+        ShortcutManagerCompat.removeAllDynamicShortcuts(context)
+        ShortcutManagerCompat.addDynamicShortcuts(context, shortcutInfoList)
     }
 
     /**

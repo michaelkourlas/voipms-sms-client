@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,27 @@
 
 package net.kourlas.voipms_sms.preferences.fragments
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
-import android.support.v7.preference.Preference
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import androidx.preference.Preference
+import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity
 import net.kourlas.voipms_sms.preferences.controls.MasterSwitchPreference
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.setDids
+import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.preferences
+import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
+import net.kourlas.voipms_sms.utils.showSnackbar
 
-class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
+class DidsPreferencesFragment : PreferenceFragmentCompat(),
     Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
-    // Sentinel use to prevent preferences from being loaded twice (once on
+    // Sentinel used to prevent preferences from being loaded twice (once on
     // creation, once on resumption)
     private var beforeFirstPreferenceLoad: Boolean = true
 
@@ -48,44 +52,46 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
-        val activity = activity ?: return
+        activity?.let {
+            // Load empty list of preferences
+            addPreferencesFromResource(R.xml.preferences_dids)
 
-        // Load empty list of preferences
-        addPreferencesFromResource(R.xml.preferences_dids)
+            // Remove all preferences
+            preferenceScreen.removeAll()
 
-        // Remove all preferences
-        preferenceScreen.removeAll()
+            // Retrieve all DIDs
+            retrievedDids = arguments?.getStringArrayList(getString(
+                R.string.preferences_dids_fragment_retrieved_dids_key))
+                                ?.toSet()
+                            ?: emptySet()
+            databaseDids = arguments?.getStringArrayList(getString(
+                R.string.preferences_dids_fragment_database_dids_key))
+                               ?.toSet()
+                           ?: emptySet()
+            activeDids = getDids(it)
 
-        // Retrieve all DIDs
-        retrievedDids = arguments?.getStringArrayList(getString(
-            R.string.preferences_dids_fragment_retrieved_dids_key))
-            ?.toSet()
-            ?: emptySet()
-        databaseDids = arguments?.getStringArrayList(getString(
-            R.string.preferences_dids_fragment_database_dids_key))
-            ?.toSet()
-            ?: emptySet()
-        activeDids = getDids(activity)
+            // Transfer all DIDs into common set
+            dids = mutableSetOf<String>()
+                .plus(retrievedDids)
+                .plus(databaseDids)
+                .plus(activeDids)
 
-        // Transfer all DIDs into common set
-        dids = mutableSetOf<String>()
-            .plus(retrievedDids)
-            .plus(databaseDids)
-            .plus(activeDids)
-
-        val preferenceDidMap = mutableMapOf<Preference, String>()
-        this.preferenceDidMap = preferenceDidMap
-        for (did in dids.sorted()) {
-            val preference = MasterSwitchPreference(activity)
-            preferenceDidMap[preference] = did
-            preference.title = getFormattedPhoneNumber(did)
-            if (did !in retrievedDids) {
-                preference.summary = "Stored locally but not found in VoIP.ms account"
+            // Add DIDs to preferences screen
+            val preferenceDidMap = mutableMapOf<Preference, String>()
+            this.preferenceDidMap = preferenceDidMap
+            for (did in dids.sorted()) {
+                val preference = MasterSwitchPreference(it)
+                preferenceDidMap[preference] = did
+                preference.title = getFormattedPhoneNumber(did)
+                if (did !in retrievedDids) {
+                    preference.summary = getString(
+                        R.string.preferences_dids_stored_locally)
+                }
+                preference.onPreferenceChangeListener = this
+                preference.onPreferenceClickListener = this
+                preference.isChecked = did in activeDids
+                preferenceScreen.addPreference(preference)
             }
-            preference.onPreferenceChangeListener = this
-            preference.onPreferenceClickListener = this
-            preference.isChecked = did in activeDids
-            preferenceScreen.addPreference(preference)
         }
     }
 
@@ -94,21 +100,22 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
 
         // Load DIDs and create preference for each
         if (!beforeFirstPreferenceLoad) {
-            for (i in 0 until preferenceScreen.preferenceCount) {
-                val preference = preferenceScreen.getPreference(i)
-                    as MasterSwitchPreference
-                val did = preferenceDidMap[preference]
-                          ?: throw Exception("Unrecognized preference")
-                preference.isChecked = did in activeDids
+            for (preference in preferenceScreen.preferences) {
+                (preference as MasterSwitchPreference).let {
+                    val did = preferenceDidMap[it]
+                              ?: throw Exception("Unrecognized preference")
+                    it.isChecked = did in activeDids
+                }
             }
         }
         beforeFirstPreferenceLoad = false
     }
 
     override fun onPreferenceClick(preference: Preference?): Boolean {
+        // Show the DID preference activity associated with the selected
+        // preference
         val did = preferenceDidMap[preference]
                   ?: throw Exception("Unrecognized preference")
-
         val intent = Intent(activity, DidPreferencesActivity::class.java)
         intent.putExtra(getString(R.string.preferences_did_did), did)
         startActivity(intent)
@@ -118,27 +125,19 @@ class DidsPreferencesFragment : PreferenceFragmentCompatDividers(),
 
     override fun onPreferenceChange(preference: Preference?,
                                     newValue: Any?): Boolean {
-        val activity = activity ?: return true
-        val context = context ?: return true
-        val did = preferenceDidMap[preference]
-                  ?: throw Exception("Unrecognized preference")
+        activity?.let {
+            // Enable the selected DID
+            val did = preferenceDidMap[preference]
+                      ?: throw Exception("Unrecognized preference")
 
-        val dids = if (newValue as Boolean) {
-            getDids(context).plus(did)
-        } else {
-            getDids(context).minus(did)
+            val dids = if (newValue as Boolean) {
+                getDids(it).plus(did)
+            } else {
+                getDids(it).minus(did)
+            }
+            setDids(it, dids)
         }
-        setDids(activity, dids)
 
         return true
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        try {
-            return super.onCreateView(inflater, container, savedInstanceState)
-        } finally {
-            setDividerPreferences(DIVIDER_NONE)
-        }
     }
 }

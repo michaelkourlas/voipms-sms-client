@@ -37,7 +37,7 @@ class SyncIntervalReceiver : BroadcastReceiver() {
                     R.string.sync_interval_action)) {
                 return
             }
-            val forceRecent = intent.extras.get(
+            val forceRecent = intent.extras?.get(
                 context.getString(
                     R.string.sync_interval_force_recent)) as Boolean?
                               ?: throw Exception("Force recent missing")

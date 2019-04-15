@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ package net.kourlas.voipms_sms.newconversation
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.ContactsContract
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
+import androidx.recyclerview.widget.RecyclerView
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getNewConversationContacts
+import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
 
 /**
@@ -39,9 +39,11 @@ import net.kourlas.voipms_sms.utils.*
  */
 class NewConversationRecyclerViewAdapter(
     private val activity: NewConversationActivity,
-    private val recyclerView: RecyclerView) : RecyclerView.Adapter<
-    NewConversationRecyclerViewAdapter.ContactViewHolder>(), Filterable,
-    SectionTitleProvider {
+    private val recyclerView: RecyclerView) :
+    RecyclerView.Adapter<
+        NewConversationRecyclerViewAdapter.ContactViewHolder>(),
+    Filterable,
+    FastScroller.SectionTitleProvider {
 
     // List of items shown by the adapter; the index of each item
     // corresponds to the location of each item in the adapter
@@ -95,22 +97,20 @@ class NewConversationRecyclerViewAdapter(
             } else {
                 null
             }
+
+            val currentInitial = getContactInitial(contactItem.getSortingName())
             if (position == 0
                 || previousItem is TypedInContactItem
                 || (previousItem is ContactItem
-                    && getContactInitial(contactItem.name,
-                                         contactItem.primaryPhoneNumber)
-                    != getContactInitial(previousItem.name,
-                                         previousItem.primaryPhoneNumber))) {
-                holder.letterText.text = getContactInitial(
-                    contactItem.name, contactItem.primaryPhoneNumber)
+                    && currentInitial != getContactInitial(
+                    previousItem.getSortingName()))) {
+                holder.letterText.text = currentInitial
             } else {
                 holder.letterText.text = ""
             }
         } else {
             holder.letterText.text = ""
         }
-
     }
 
     /**
@@ -130,7 +130,7 @@ class NewConversationRecyclerViewAdapter(
         if (contactItem is TypedInContactItem) {
             // Show dialpad for typed in phone number
             holder.contactBadge.scaleType = ImageView.ScaleType.CENTER
-            holder.contactBadge.setBackgroundResource(R.color.primary)
+            holder.contactBadge.setBackgroundResource(R.color.colorPrimary)
             holder.contactBadge.setImageResource(
                 R.drawable.ic_dialpad_white_24dp)
             holder.contactBadgeLetterText.text = ""
@@ -146,10 +146,17 @@ class NewConversationRecyclerViewAdapter(
                 // without bitmap
                 holder.contactBadge.setBackgroundColor(getMaterialDesignColour(
                     contactItem.primaryPhoneNumber))
-                holder.contactBadge.setImageResource(
-                    android.R.color.transparent)
-                holder.contactBadgeLetterText.text = getContactInitial(
-                    contactItem.name, contactItem.primaryPhoneNumber)
+                getContactInitial(contactItem.getSortingName()).let {
+                    if (it[0].isLetter()) {
+                        holder.contactBadgeLetterText.text = it
+                        holder.contactBadge.setImageResource(
+                            android.R.color.transparent)
+                    } else {
+                        holder.contactBadgeLetterText.text = ""
+                        holder.contactBadge.setImageResource(
+                            R.drawable.ic_account_circle_white_inverted_24dp)
+                    }
+                }
             }
         }
     }
@@ -174,14 +181,21 @@ class NewConversationRecyclerViewAdapter(
         }
 
         // Set phone number text
-        var text = contactItem.primaryPhoneNumber
         if (contactItem is ContactItem
-            && contactItem.secondaryPhoneNumbers.isNotEmpty()) {
-            // Add (+X) if there are secondary phone numbers
-            text += " (+${contactItem.secondaryPhoneNumbers.size})"
+            && !contactItem.showSeparateNameAndPhoneNumber()) {
+            holder.phoneNumberText.visibility = View.GONE
+        } else {
+            var text = contactItem.primaryPhoneNumber
+            if (contactItem is ContactItem
+                && contactItem.secondaryPhoneNumbers.isNotEmpty()) {
+                // Add (+X) if there are secondary phone numbers
+                text += " (+${contactItem.secondaryPhoneNumbers.size})"
 
+            }
+            holder.phoneNumberText.text = text
+            holder.phoneNumberText.visibility = View.VISIBLE
         }
-        holder.phoneNumberText.text = text
+
 
         // Set phone number type
         if (contactItem is ContactItem) {
@@ -195,6 +209,16 @@ class NewConversationRecyclerViewAdapter(
     override fun getItemCount(): Int = contactItems.size
 
     operator fun get(i: Int): BaseContactItem = contactItems[i]
+
+    override fun getSectionTitle(position: Int): String {
+        // The typed in phone number item has no section title
+        val contactItem = contactItems[position]
+        return if (contactItem is ContactItem) {
+            getContactInitial(contactItem.getSortingName())
+        } else {
+            ""
+        }
+    }
 
     override fun getFilter(): Filter = object : Filter() {
         /**
@@ -238,16 +262,16 @@ class NewConversationRecyclerViewAdapter(
             val filteredContactItems = doFiltering(constraint)
 
             // Return the filtered results
-            val results = Filter.FilterResults()
+            val results = FilterResults()
             results.count = filteredContactItems.size
             results.values = filteredContactItems
             results
         } catch (e: Exception) {
-            Filter.FilterResults()
+            FilterResults()
         }
 
         override fun publishResults(constraint: CharSequence,
-                                    results: Filter.FilterResults?) {
+                                    results: FilterResults?) {
             if (results?.values == null) {
                 showSnackbar(activity, R.id.coordinator_layout,
                              activity.getString(
@@ -358,17 +382,6 @@ class NewConversationRecyclerViewAdapter(
 
     }
 
-    override fun getSectionTitle(position: Int): String {
-        // The typed in phone number item has no section title
-        val contactItem = contactItems[position]
-        return if (contactItem is ContactItem) {
-            getContactInitial(contactItem.name,
-                              contactItem.primaryPhoneNumber)
-        } else {
-            ""
-        }
-    }
-
     /**
      * Refreshes the adapter using the currently defined filter constraint.
      */
@@ -385,7 +398,6 @@ class NewConversationRecyclerViewAdapter(
      * Loads all contacts from the Android contacts provider.
      */
     private fun loadAllContactItems() {
-        @Suppress("ConstantConditionIf")
         if (demo) {
             allContactItems.addAll(getNewConversationContacts())
             return
@@ -405,13 +417,14 @@ class NewConversationRecyclerViewAdapter(
                             cursor.getColumnIndex(
                                 ContactsContract.CommonDataKinds.Phone
                                     .CONTACT_ID))
-                        val contact = cursor.getString(
-                            cursor.getColumnIndex(
-                                ContactsContract.Contacts.DISPLAY_NAME))
                         val phoneNumber = cursor.getString(
                             cursor.getColumnIndex(
                                 ContactsContract.CommonDataKinds
                                     .Phone.NUMBER)) ?: continue
+                        val contact = cursor.getString(
+                            cursor.getColumnIndex(
+                                ContactsContract.Contacts.DISPLAY_NAME))
+                                      ?: getFormattedPhoneNumber(phoneNumber)
                         val phoneNumberType = getPhoneNumberType(
                             cursor.getInt(
                                 cursor.getColumnIndex(
@@ -451,6 +464,11 @@ class NewConversationRecyclerViewAdapter(
         } catch (ignored: SecurityException) {
             // Do nothing.
         }
+
+        // Sort contact items
+        allContactItems.sortBy {
+            it.getSortingName()
+        }
     }
 
     /**
@@ -486,35 +504,52 @@ class NewConversationRecyclerViewAdapter(
         }
     }
 
-    companion object {
+    /**
+     * Represents a contact item.
+     */
+    abstract class BaseContactItem(val primaryPhoneNumber: String)
+
+    /**
+     * Represents the contact item for a typed in phone number.
+     */
+    class TypedInContactItem(phoneNumber: String) :
+        BaseContactItem(phoneNumber)
+
+    /**
+     * Represents the contact item for a standard contact.
+     *
+     * @param id The ID of the contact from the Android contacts provider.
+     * @param name The name of the contact.
+     * @param primaryPhoneNumber The contact's primary phone number.
+     * @param secondaryPhoneNumbers Any additional contact phone numbers.
+     * @param phoneNumberType The type of the phone number if there is only one
+     * phone number, or "Multiple" otherwise.
+     * @param bitmap The photo of the contact.
+     */
+    class ContactItem(val id: Long,
+                      val name: String,
+                      primaryPhoneNumber: String,
+                      val secondaryPhoneNumbers: MutableList<String>,
+                      var phoneNumberType: String,
+                      val bitmap: Bitmap?) :
+        BaseContactItem(primaryPhoneNumber) {
         /**
-         * Represents a contact item.
+         * Returns true if the name and phone number are different.
          */
-        abstract class BaseContactItem(val primaryPhoneNumber: String)
+        fun showSeparateNameAndPhoneNumber(): Boolean {
+            return name != primaryPhoneNumber
+                   && name != getFormattedPhoneNumber(primaryPhoneNumber)
+        }
 
         /**
-         * Represents the contact item for a typed in phone number.
+         * Gets the name to be used for sorting.
          */
-        class TypedInContactItem(phoneNumber: String) :
-            BaseContactItem(phoneNumber)
-
-        /**
-         * Represents the contact item for a standard contact.
-         *
-         * @param id The ID of the contact from the Android contacts provider.
-         * @param name The name of the contact.
-         * @param primaryPhoneNumber The contact's primary phone number.
-         * @param secondaryPhoneNumbers Any additional contact phone numbers.
-         * @param phoneNumberType The type of the phone number if there is only one
-         * phone number, or "Multiple" otherwise.
-         * @param bitmap The photo of the contact.
-         */
-        class ContactItem(val id: Long,
-                          val name: String,
-                          primaryPhoneNumber: String,
-                          val secondaryPhoneNumbers: MutableList<String>,
-                          var phoneNumberType: String,
-                          val bitmap: Bitmap?) :
-            BaseContactItem(primaryPhoneNumber)
+        fun getSortingName(): String {
+            return if (showSeparateNameAndPhoneNumber()) {
+                name
+            } else {
+                getDigitsOfString(primaryPhoneNumber)
+            }
+        }
     }
 }

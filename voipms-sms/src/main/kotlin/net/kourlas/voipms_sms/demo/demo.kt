@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import net.kourlas.voipms_sms.newconversation.NewConversationRecyclerViewAdapter
 import net.kourlas.voipms_sms.sms.Message
 import java.util.*
 
-const val demo = false
-const val sending = false
+var demo = false
+var sending = false
 
 fun getConversationsDemoMessages(): List<Message> {
     val messages = mutableListOf<Message>()
@@ -76,7 +76,6 @@ fun getConversationDemoMessages(): List<Message> {
                          "5145553495",
                          "Sounds great!",
                          1, 1, 0))
-    @Suppress("ConstantConditionIf")
     if (sending) {
         messages.add(Message(1, 1, Date().time / 1000, 0,
                              "6135559483",
@@ -93,23 +92,21 @@ fun getDemoNotification(): Message = Message(1, 1, Date().time / 1000, 1,
                                              "Where are you?",
                                              1, 1, 0)
 
-fun getNewConversationContacts(): List<NewConversationRecyclerViewAdapter
-.Companion.ContactItem> {
-    val contactItems = mutableListOf<NewConversationRecyclerViewAdapter
-    .Companion.ContactItem>()
-    contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
+fun getNewConversationContacts(): List<NewConversationRecyclerViewAdapter.ContactItem> {
+    val contactItems = mutableListOf<NewConversationRecyclerViewAdapter.ContactItem>()
+    contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
         1, "Craig Johnson", "4165550919",
         mutableListOf(),
         "Mobile", null))
-    contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
+    contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
         3, "Jennifer Morris", "6135556019",
         mutableListOf(),
         "Work", null))
-    contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
+    contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
         4, "Martin Wheeler", "6135551242",
         mutableListOf(),
         "Home", null))
-    contactItems.add(NewConversationRecyclerViewAdapter.Companion.ContactItem(
+    contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
         2, "Monica Alexander", "5145553495",
         mutableListOf("5145553496"),
         "Multiple", null))

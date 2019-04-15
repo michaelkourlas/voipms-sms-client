@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,35 +16,36 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <item
         android:id="@+id/resend_button"
         android:icon="@drawable/ic_send_white_24dp"
-        android:showAsAction="always"
         android:title="@string/conversation_action_resend"
+        app:showAsAction="always"
         tools:ignore="AlwaysShowAction,AppCompatResource" />
     <item
         android:id="@+id/copy_button"
         android:icon="@drawable/ic_content_copy_white_24dp"
-        android:showAsAction="always"
         android:title="@string/conversation_action_copy"
+        app:showAsAction="always"
         tools:ignore="AlwaysShowAction,AppCompatResource" />
     <item
         android:id="@+id/share_button"
         android:icon="@drawable/ic_share_white_24dp"
-        android:showAsAction="always"
         android:title="@string/conversation_action_share"
+        app:showAsAction="always"
         tools:ignore="AlwaysShowAction,AppCompatResource" />
     <item
         android:id="@+id/delete_button"
         android:icon="@drawable/ic_delete_white_24dp"
-        android:showAsAction="always"
         android:title="@string/conversation_action_delete"
+        app:showAsAction="always"
         tools:ignore="AlwaysShowAction,AppCompatResource" />
     <item
         android:id="@+id/info_button"
         android:icon="@drawable/ic_info_white_24dp"
-        android:showAsAction="always"
         android:title="@string/conversation_action_info"
+        app:showAsAction="always"
         tools:ignore="AlwaysShowAction,AppCompatResource" />
 </menu>

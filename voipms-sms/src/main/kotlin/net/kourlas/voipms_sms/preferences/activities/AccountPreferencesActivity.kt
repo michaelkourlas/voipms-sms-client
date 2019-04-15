@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,13 @@
 
 package net.kourlas.voipms_sms.preferences.activities
 
-import android.os.Build
+import android.content.Intent
 import android.os.Bundle
-import android.support.v4.view.ViewCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
-import android.text.Html
-import android.text.method.LinkMovementMethod
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.AccountPreferencesFragment
+import net.kourlas.voipms_sms.signin.SignInActivity
 
 /**
  * Activity that houses a PreferencesFragment that displays the account
@@ -43,29 +40,27 @@ class AccountPreferencesActivity : AppCompatActivity() {
         setContentView(R.layout.preferences_account)
 
         // Configure toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        ViewCompat.setElevation(toolbar, resources
-            .getDimension(R.dimen.toolbar_elevation))
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
-        fragment = AccountPreferencesFragment()
-        supportFragmentManager.beginTransaction().replace(
-            R.id.preferences_fragment_layout, fragment).commit()
-
-        val textView = findViewById<TextView>(R.id.text_view)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            textView.text = Html.fromHtml(
-                getString(R.string.preferences_account_info), 0)
-        } else {
-            @Suppress("DEPRECATION")
-            textView.text = Html.fromHtml(
-                getString(R.string.preferences_account_info))
+        // Load preferences fragment
+        if (savedInstanceState == null) {
+            fragment = AccountPreferencesFragment()
+            supportFragmentManager.beginTransaction().replace(
+                R.id.preferences_fragment_layout, fragment).commit()
         }
-        textView.movementMethod = LinkMovementMethod.getInstance()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (!accountConfigured(this)) {
+            startActivity(Intent(this, SignInActivity::class.java))
+            finish()
+            return
+        }
     }
 }

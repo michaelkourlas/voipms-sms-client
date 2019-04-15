@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@ package net.kourlas.voipms_sms.notifications
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.app.RemoteInput
-import android.support.v4.app.TaskStackBuilder
+import androidx.core.app.*
+import androidx.core.app.Person
+import androidx.core.app.RemoteInput
+import androidx.core.app.TaskStackBuilder
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
@@ -42,20 +43,14 @@ import net.kourlas.voipms_sms.sms.receivers.MarkReadReceiver
 import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
 import net.kourlas.voipms_sms.sms.services.MarkReadService
 import net.kourlas.voipms_sms.sms.services.SendMessageService
-import net.kourlas.voipms_sms.utils.applyCircularMask
-import net.kourlas.voipms_sms.utils.getContactName
-import net.kourlas.voipms_sms.utils.getContactPhotoBitmap
-import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.*
 
 /**
  * Single-instance class used to send notifications when new SMS messages
  * are received.
- *
- * @param application This application.
  */
 class Notifications private constructor(
     private val application: CustomApplication) {
-
     // Helper variables
     private val context = application.applicationContext
 
@@ -304,14 +299,17 @@ class Notifications private constructor(
             return
         }
 
-        for (conversationId in conversationIds) {
-            if (application.conversationActivityVisible(conversationId)
-                || !getNotificationsEnabled(conversationId)) {
-                continue
-            }
+        runOnNewThread {
+            for (conversationId in conversationIds) {
+                if (application.conversationActivityVisible(conversationId)
+                    || !getNotificationsEnabled(conversationId)) {
+                    continue
+                }
 
-            showNotification(
-                Database.getInstance(context).getMessagesUnread(conversationId))
+                showNotification(
+                    Database.getInstance(context).getMessagesUnread(
+                        conversationId))
+            }
         }
     }
 
@@ -335,7 +333,6 @@ class Notifications private constructor(
         val conversationId = messages[0].conversationId
         val did = conversationId.did
         val contact = conversationId.contact
-        @Suppress("ConstantConditionIf")
         var contactName = if (!demo) {
             getContactName(context, contact)
         } else {
@@ -390,13 +387,20 @@ class Notifications private constructor(
             notification.setGroup(context.getString(
                 R.string.notifications_group_key))
         }
+        notification.setGroupAlertBehavior(
+            NotificationCompat.GROUP_ALERT_CHILDREN)
 
         // Notification text
-        val style = NotificationCompat.MessagingStyle(
-            context.getString(R.string.notifications_current_user))
+        val person = Person.Builder().setName(
+            context.getString(R.string.notifications_current_user)).build()
+        val style = NotificationCompat.MessagingStyle(person)
         for (message in messages) {
-            style.addMessage(message.text, message.date.time,
-                             if (message.isIncoming) contactName else null)
+            style.addMessage(
+                message.text,
+                message.date.time,
+                if (message.isIncoming)
+                    Person.Builder().setName(contactName).build()
+                else null)
         }
         notification.setStyle(style)
 
@@ -434,6 +438,8 @@ class Notifications private constructor(
             R.drawable.ic_reply_white_24dp,
             context.getString(R.string.notifications_button_reply),
             replyPendingIntent)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
+            .setShowsUserInterface(false)
             .setAllowGeneratedReplies(true)
             .addRemoteInput(remoteInput)
         notification.addAction(replyActionBuilder.build())
@@ -449,6 +455,9 @@ class Notifications private constructor(
             R.drawable.ic_drafts_white_24dp,
             context.getString(R.string.notifications_button_mark_read),
             markReadPendingIntent)
+            .setSemanticAction(
+                NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
+            .setShowsUserInterface(false)
             .build()
         notification.addAction(markReadAction)
 
@@ -460,6 +469,8 @@ class Notifications private constructor(
                 R.string.notifications_group_key))
             groupNotification.setGroupSummary(true)
             groupNotification.setAutoCancel(true)
+            groupNotification.setGroupAlertBehavior(
+                NotificationCompat.GROUP_ALERT_CHILDREN)
 
             val intent = Intent(context, ConversationsActivity::class.java)
             val stackBuilder = TaskStackBuilder.create(context)
@@ -526,10 +537,14 @@ class Notifications private constructor(
      */
     private fun getLargeIconBitmap(contact: String): Bitmap? = try {
         var largeIconBitmap = getContactPhotoBitmap(context, contact)
-        largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap,
-                                                    256, 256, false)
-        largeIconBitmap = applyCircularMask(largeIconBitmap)
-        largeIconBitmap
+        if (largeIconBitmap != null) {
+            largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap,
+                                                        256, 256, false)
+            largeIconBitmap = applyCircularMask(largeIconBitmap)
+            largeIconBitmap
+        } else {
+            null
+        }
     } catch (_: Exception) {
         null
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2018 Michael Kourlas
+  ~ Copyright (C) 2018-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
   ~ limitations under the License.
   -->
 
-<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <com.takisoft.fix.support.v7.preference.EditTextPreference
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.takisoft.preferencex.EditTextPreference
         android:defaultValue="@string/preferences_network_connect_timeout_default_value"
         android:icon="@android:color/transparent"
         android:inputType="number"
         android:key="@string/preferences_network_connect_timeout_key"
         android:title="@string/preferences_network_connect_timeout_title" />
-    <com.takisoft.fix.support.v7.preference.EditTextPreference
+    <com.takisoft.preferencex.EditTextPreference
         android:defaultValue="@string/preferences_network_read_timeout_default_value"
         android:icon="@android:color/transparent"
         android:inputType="number"
         android:key="@string/preferences_network_read_timeout_key"
         android:title="@string/preferences_network_read_timeout_title" />
-</android.support.v7.preference.PreferenceScreen>
+</androidx.preference.PreferenceScreen>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,24 +16,26 @@
   -->
 
 <resources>
-    <dimen name="headline">24sp</dimen>
-    <dimen name="subheading">16sp</dimen>
-    <dimen name="text">14sp</dimen>
-    <dimen name="caption">12sp</dimen>
-
+    <dimen name="half_margin">8dp</dimen>
     <dimen name="margin">16dp</dimen>
     <dimen name="double_margin">32dp</dimen>
-    <dimen name="sms_container_margin">10dp</dimen>
+    <dimen name="quadruple_margin">64dp</dimen>
+    <dimen name="sms_container_padding">12dp</dimen>
     <dimen name="conversation_item_margin_top_primary">16dp</dimen>
     <dimen name="conversation_item_margin_top_secondary">2dp</dimen>
     <dimen name="contact_badge">40dp</dimen>
-    <dimen name="button_margin">8dp</dimen>
-    <dimen name="fab">56dp</dimen>
-    <dimen name="send_message_elevation">10dp</dimen>
-    <dimen name="toolbar_elevation">4dp</dimen>
-    <dimen name="fab_elevation">6dp</dimen>
-    <dimen name="conversation_scrollbar_height">60dp</dimen>
-    <dimen name="conversation_scrollbar_width">10dp</dimen>
-    <dimen name="conversation_text_spacing">5dp</dimen>
+    <dimen name="send_message_elevation">4dp</dimen>
     <dimen name="toolbar_left_margin">72dp</dimen>
+
+    <!-- Fast scroller -->
+    <dimen name="fastscroll_touch_slop">8dp</dimen>
+    <dimen name="fastscroll_track_width">8dp</dimen>
+    <dimen name="fastscroll_thumb_height">48dp</dimen>
+    <dimen name="fastscroll_preview_min_width">88dp</dimen>
+    <dimen name="fastscroll_preview_height">88dp</dimen>
+    <dimen name="fastscroll_preview_corner_radius">44dp</dimen>
+    <dimen name="fastscroll_preview_padding">24dp</dimen>
+    <dimen name="fastscroll_preview_margin_top">8dp</dimen>
+    <dimen name="fastscroll_preview_margin_left_right">8dp</dimen>
+    <dimen name="fastscroll_preview_text_size">24sp</dimen>
 </resources>

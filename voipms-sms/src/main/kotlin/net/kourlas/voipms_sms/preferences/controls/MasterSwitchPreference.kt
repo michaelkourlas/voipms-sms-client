@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017 The Android Open Source Project
- * Modifications copyright (C) 2017-2018 Michael Kourlas
+ * Modifications copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@
 package net.kourlas.voipms_sms.preferences.controls
 
 import android.content.Context
-import android.support.v7.preference.PreferenceViewHolder
-import android.support.v7.widget.SwitchCompat
 import android.util.AttributeSet
 import android.view.View.OnClickListener
+import androidx.appcompat.widget.SwitchCompat
+import androidx.preference.PreferenceViewHolder
 import net.kourlas.voipms_sms.R
 
-@Suppress("unused")
 open class MasterSwitchPreference : TwoTargetPreference {
     private var switch: SwitchCompat? = null
     private var mChecked: Boolean = false
@@ -39,14 +38,17 @@ open class MasterSwitchPreference : TwoTargetPreference {
             }
         }
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet,
                 defStyleAttr: Int, defStyleRes: Int) : super(context, attrs,
                                                              defStyleAttr,
                                                              defStyleRes)
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet,
                 defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet) : super(context,
                                                                attrs)
 
@@ -78,6 +80,7 @@ open class MasterSwitchPreference : TwoTargetPreference {
         }
     }
 
+    @Suppress("unused")
     fun setSwitchEnabled(enabled: Boolean) {
         mEnableSwitch = enabled
         if (switch != null) {

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,9 @@ import android.net.Uri
 import android.provider.ContactsContract
 import net.kourlas.voipms_sms.R
 
-
 /**
  * Gets the name of a contact from the Android contacts provider, given a
  * phone number.
- *
- * @param context The context to use.
- * @param phoneNumber The specified phone number.
- * @return The name of the contact from the Android contacts provider.
  */
 fun getContactName(context: Context, phoneNumber: String,
                    contactNameCache: MutableMap<String, String>? = null): String? {
@@ -71,10 +66,6 @@ fun getContactName(context: Context, phoneNumber: String,
 /**
  * Gets the photo bitmap corresponding to the specified phone number using the
  * specified context. Uses the specified cache if one is provided.
- *
- * @param context The specified context.
- * @param phoneNumber The specified phone number.
- * @param contactBitmapCache The specified cache.
  */
 fun getContactPhotoBitmap(context: Context, phoneNumber: String,
                           contactBitmapCache: MutableMap<String, Bitmap>? = null): Bitmap? {
@@ -102,10 +93,6 @@ fun getContactPhotoBitmap(context: Context, phoneNumber: String,
 /**
  * Gets the photo URI corresponding to the specified phone number using the
  * specified context. Uses the specified cache if one is provided.
- *
- * @param context The specified context.
- * @param phoneNumber The specified phone number.
- * @param contactPhotoUriCache The specified cache.
  */
 fun getContactPhotoUri(context: Context, phoneNumber: String,
                        contactPhotoUriCache: MutableMap<String, String>? = null): String? {
@@ -132,10 +119,6 @@ fun getContactPhotoUri(context: Context, phoneNumber: String,
 
 /**
  * Gets a URI pointing to a contact's photo, given the URI for that contact.
- *
- * @param context The context to use.
- * @param uri The specified URI.
- * @return A URI pointing to the contact's photo.
  */
 fun getContactPhotoUri(context: Context, uri: Uri,
                        contactPhotoUriCache: MutableMap<Uri, String>? = null): String? {
@@ -172,10 +155,9 @@ fun getContactPhotoUri(context: Context, uri: Uri,
  * Ensures that the bitmap is roughly the same size as the contact photo badge
  * control.
  *
- * Adapted from https://developer.android.com/topic/performance/graphics/load-bitmap.html
- *
- * @param context The specified context.
- * @param uri The specified URI.
+ * Adapted from https://developer.android.com/topic/performance/graphics/load-bitmap.html.
+ * This code is therefore licensed under the Apache 2.0 license and is
+ * copyrighted by Google.
  */
 fun getBitmapFromUri(context: Context, uri: Uri): Bitmap? = try {
     val options = BitmapFactory.Options()
@@ -198,14 +180,9 @@ fun getBitmapFromUri(context: Context, uri: Uri): Bitmap? = try {
  * dimensions are contained in the specified options is decoded at roughly
  * the specified width and height.
  *
- * Adapted from https://developer.android.com/topic/performance/graphics/load-bitmap.html
- *
- * @param options The options containing the bitmap's raw width and height.
- * @param reqWidth The specified width.
- * @param reqHeight The specified height.
- * @return The inSampleSize required to ensure that the bitmap whose raw
- * dimensions are contained in the specified options is decoded at roughly
- * the specified width and height.
+ * Adapted from https://developer.android.com/topic/performance/graphics/load-bitmap.html.
+ * This code is therefore licensed under the Apache 2.0 license and is
+ * copyrighted by Google.
  */
 fun calculateInSampleSize(options: BitmapFactory.Options,
                           reqWidth: Int, reqHeight: Int): Int {
@@ -231,19 +208,13 @@ fun calculateInSampleSize(options: BitmapFactory.Options,
 }
 
 /**
- * Gets the contact initial corresponding to the specified name and phone
- * number. If a name is provided, the first letter of the name is used.
- * Otherwise, the first number in the phone number is used.
- *
- * If the first letter or number does not exist, the ellipsis character is
- * used.
- *
- * @param name The specified name.
- * @param phoneNumber The specified phone number.
+ * Gets the initial corresponding to the specified name.
  */
-fun getContactInitial(name: String?, phoneNumber: String): String =
-    if (name == null || name == phoneNumber) {
-        getDigitsOfString(phoneNumber).getOrNull(0)?.toString() ?: "…"
-    } else {
-        name.toUpperCase().getOrNull(0)?.toString() ?: "…"
-    }
+fun getContactInitial(name: String?): String =
+    name?.toUpperCase()?.getOrNull(0)?.let {
+        when {
+            it.isLetter() -> it.toString()
+            it.isDigit() -> "#"
+            else -> null
+        }
+    } ?: "…"

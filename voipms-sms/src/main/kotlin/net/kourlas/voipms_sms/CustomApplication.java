@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms;
 import android.app.Application;
 
 import net.kourlas.voipms_sms.sms.ConversationId;
+import net.kourlas.voipms_sms.sms.Database;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,5 +71,13 @@ public class CustomApplication extends Application {
             count = 0;
         }
         conversationActivitiesVisible.put(conversationId, count - 1);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        // Open database
+        Database.Companion.getInstance(getApplicationContext());
     }
 }

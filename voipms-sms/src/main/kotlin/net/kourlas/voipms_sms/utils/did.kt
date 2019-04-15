@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2018 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,6 @@ import java.text.MessageFormat
 
 /**
  * Returns a string consisting only of the digits in the specified string.
- *
- * @param str The specified string.
- * @return The digits in the specified string.
  */
 fun getDigitsOfString(str: String): String {
     val stringBuilder = StringBuilder()
@@ -40,9 +37,6 @@ fun getDigitsOfString(str: String): String {
  * Formats the specified phone number in the form (XXX) XXX-XXXX if it is
  * ten digits in length (or eleven with a leading one). Otherwise, simply
  * returns the original phone number.
- *
- * @param phoneNumber The specified phone number.
- * @return The formatted phone number.
  */
 fun getFormattedPhoneNumber(phoneNumber: String): String {
     if (phoneNumber.length == 10) {
@@ -64,9 +58,6 @@ fun getFormattedPhoneNumber(phoneNumber: String): String {
 
 /**
  * Returns the string representation of the specified phone number type.
- *
- * @param type The specified phone number type.
- * @return The string representation of the specified phone number type.
  */
 fun getPhoneNumberType(type: Int): String = when (type) {
     ContactsContract.CommonDataKinds.Phone.TYPE_HOME -> "Home"
@@ -84,8 +75,6 @@ fun getPhoneNumberType(type: Int): String = when (type) {
 /**
  * Throws an exception if the specified phone number contains anything other
  * than numbers.
- *
- * @param value The specified phone number.
  */
 fun validatePhoneNumber(value: String) {
     if (getDigitsOfString(value) != value) {

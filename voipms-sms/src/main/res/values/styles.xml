@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,54 +17,30 @@
 
 <resources>
 
-    <style name="AppTheme" parent="@style/PreferenceFixTheme.Light.NoActionBar">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primary_dark</item>
-        <item name="colorAccent">@color/accent</item>
+    <style name="AppTheme" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
+        <item name="colorAccent">@color/colorSecondary</item>
 
-        <item name="actionModeBackground">@color/primary</item>
-        <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat.Light
+        <!-- Apply theme to dialogs -->
+        <item name="materialAlertDialogTheme">
+            @style/ThemeOverlay.MaterialComponents.MaterialAlertDialog
         </item>
-        <!-- Fix black close button on Android 4.1 -->
-        <item name="actionModeCloseDrawable">
-            @drawable/ic_arrow_back_white_24dp
-        </item>
-        <!-- Force ActionMode to appear over ActionBar -->
+
+        <!-- Force ActionMode to appear over toolbar -->
         <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/ActionModeTheme</item>
+        <item name="actionModeBackground">@color/colorSecondary</item>
 
-        <item name="android:dialogTheme">@style/DialogTheme</item>
-        <item name="dialogTheme">@style/DialogTheme</item>
-
-        <item name="android:alertDialogTheme">@style/DialogTheme</item>
-        <item name="alertDialogTheme">@style/DialogTheme</item>
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
-    <style name="ScrollerTheme" parent="@android:style/TextAppearance">
-        <item name="android:textSize">@dimen/headline</item>
-        <item name="android:textColor">@android:color/primary_text_dark</item>
-    </style>
-
-    <!--suppress AndroidDomInspection -->
-    <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog">
-        <item name="colorAccent">@color/accent</item>
-
-        <item name="android:windowMinWidthMajor">
-            @android:dimen/dialog_min_width_major
-        </item>
-        <item name="windowMinWidthMajor">
-            @android:dimen/dialog_min_width_major
-        </item>
-
-        <item name="android:windowMinWidthMinor">
-            @android:dimen/dialog_min_width_minor
-        </item>
-        <item name="windowMinWidthMinor">
-            @android:dimen/dialog_min_width_minor
-        </item>
-    </style>
-
-    <!--suppress AndroidDomInspection -->
-    <style name="ToolbarTitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textSize">20sp</item>
+    <style name="ActionModeTheme" parent="Widget.AppCompat.ActionMode">
+        <item name="background">@color/colorSecondary</item>
     </style>
 </resources>

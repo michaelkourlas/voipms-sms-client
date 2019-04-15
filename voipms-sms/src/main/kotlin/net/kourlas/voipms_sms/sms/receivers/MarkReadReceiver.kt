@@ -22,7 +22,6 @@ import android.content.Context
 import android.content.Intent
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.sms.services.MarkReadService
-import net.kourlas.voipms_sms.sms.services.SendMessageService
 
 /**
  * Broadcast receiver used to forward mark read requests from a PendingIntent
@@ -39,7 +38,7 @@ class MarkReadReceiver : BroadcastReceiver() {
                 return
             }
             intent.setClass(context, MarkReadService::class.java)
-            SendMessageService.startService(context, intent)
+            MarkReadService.startService(context, intent)
         } catch (e: Exception) {
         }
     }

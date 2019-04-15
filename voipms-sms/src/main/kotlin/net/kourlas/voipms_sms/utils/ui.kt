@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2018 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,21 @@
 
 package net.kourlas.voipms_sms.utils
 
-import android.app.Activity
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.*
 import android.graphics.Color.rgb
 import android.net.Uri
 import android.provider.Settings
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AlertDialog
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import net.kourlas.voipms_sms.R
 import java.lang.Math.abs
 
@@ -81,100 +83,103 @@ fun applyRoundedCornersMask(view: View) {
 
 /**
  * Gets a view outline provider for rounded rectangles.
- *
- * @return A a view outline provider for rounded rectangles.
  */
 private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
     object : ViewOutlineProvider() {
-        override fun getOutline(view: View, outline: Outline) =
-            outline.setRoundRect(0, 0, view.width, view.height, 15f)
+        override fun getOutline(view: View, outline: Outline) {
+            val pixels = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                22f,
+                view.context.resources.displayMetrics)
+            outline.setRoundRect(0, 0, view.width, view.height, pixels)
+        }
+
     }
 
 /**
  * Shows an alert dialog with the specified title, text, and buttons.
- *
- * @param context The context to use.
- * @param title The specified title.
- * @param text The specified text.
- * @param positiveButtonText The text of the positive button.
- * @param positiveButtonAction The action associated with the positive button.
- * @param negativeButtonText The text of the negative button.
- * @param negativeButtonAction The action associated with the negative button.
- * @return The created alert dialog.
  */
-fun showAlertDialog(context: Context, title: String?, text: String?,
+fun showAlertDialog(activity: FragmentActivity, title: String?, text: String?,
                     positiveButtonText: String? = null,
                     positiveButtonAction: DialogInterface.OnClickListener? = null,
                     negativeButtonText: String? = null,
-                    negativeButtonAction: DialogInterface.OnClickListener? = null): AlertDialog {
-    val builder = AlertDialog.Builder(context, R.style.DialogTheme)
-    builder.setMessage(text)
-    builder.setTitle(title)
-    builder.setPositiveButton(positiveButtonText, positiveButtonAction)
-    builder.setNegativeButton(negativeButtonText, negativeButtonAction)
-    builder.setCancelable(false)
-    return builder.show()
+                    negativeButtonAction: DialogInterface.OnClickListener? = null): AlertDialog? {
+    if (!activity.isFinishing) {
+        val builder = MaterialAlertDialogBuilder(activity)
+        builder.setMessage(text)
+        builder.setTitle(title)
+        builder.setPositiveButton(positiveButtonText, positiveButtonAction)
+        builder.setNegativeButton(negativeButtonText, negativeButtonAction)
+        builder.setCancelable(false)
+        return builder.show()
+    }
+    return null
 }
 
 /**
- * Shows an information dialog with the specified title and text.
- *
- * @param context The context to use.
- * @param title The specified title.
- * @param text The specified text.
- * @return The dialog.
+ * Shows a generic snackbar.
  */
-fun showInfoDialog(context: Context, title: String?,
-                   text: String?): AlertDialog =
-    showAlertDialog(context, title, text, context.getString(R.string.ok),
-                    null, null, null)
+fun showSnackbar(activity: FragmentActivity, viewId: Int,
+                 text: String): Snackbar? {
+    if (!activity.isFinishing) {
+        val view = activity.findViewById<View>(viewId)
+        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        snackbar.show()
+        return snackbar
+    }
+    return null
+}
 
 /**
- * Shows a generic snackbar.
- *
- * @param activity The activity to use.
- * @param viewId The ID of the view to add the snackbar to.
- * @param text The text to show.
- * @return The snackbar.
+ * Shows a generic snackbar with a button.
  */
-fun showSnackbar(activity: Activity, viewId: Int, text: String): Snackbar {
-    val view = activity.findViewById<View>(viewId)
-    val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
-    snackbar.show()
-    return snackbar
+fun showSnackbar(activity: FragmentActivity, viewId: Int,
+                 text: String,
+                 buttonText: String? = null,
+                 buttonAction: View.OnClickListener? = null): Snackbar? {
+    if (!activity.isFinishing) {
+        val view = activity.findViewById<View>(viewId)
+        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        snackbar.setAction(buttonText, buttonAction)
+        snackbar.show()
+        return snackbar
+    }
+    return null
 }
 
 /**
  * Shows a snackbar requesting a permission with a button linking to the
  * application settings page.
- *
- * @param activity The activity to use.
- * @param viewId The ID of the view to add the snackbar to.
- * @param text The text to show.
- * @return The snackbar.
  */
-fun showPermissionSnackbar(activity: Activity, viewId: Int,
-                           text: String): Snackbar {
-    val view = activity.findViewById<View>(viewId)
-    val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
-    snackbar.setAction(R.string.settings) {
-        val intent = Intent()
-        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-        val uri = Uri.fromParts("package", activity.packageName, null)
-        intent.data = uri
-        activity.startActivity(intent)
+fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
+                           text: String): Snackbar? {
+    if (activity.isFinishing) {
+        val view = activity.findViewById<View>(viewId)
+        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        snackbar.setAction(R.string.settings) {
+            val intent = Intent()
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+            val uri = Uri.fromParts("package", activity.packageName, null)
+            intent.data = uri
+            activity.startActivity(intent)
+        }
+        snackbar.show()
+        return snackbar
     }
-    snackbar.show()
-    return snackbar
+    return null
 }
 
-fun abortActivity(activity: Activity, ex: Exception,
+/**
+ * Shows a toast with the value of the specified exception and aborts the
+ * specified activity.
+ */
+fun abortActivity(activity: FragmentActivity, ex: Exception,
                   duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(activity,
-                   activity.getString(R.string.toast_unknown_error, ex.message),
+                   activity.getString(R.string.toast_error, ex.message),
                    duration).show()
     activity.finish()
 }
@@ -182,9 +187,6 @@ fun abortActivity(activity: Activity, ex: Exception,
 /**
  * Gets a deterministically selected material design colour associated with
  * the specified phone number.
- *
- * @param phoneNumber The specified phone number
- * @return The selected colour.
  */
 fun getMaterialDesignColour(phoneNumber: String): Int {
     val colours = listOf(rgb(0xd5, 0x00, 0x00), rgb(0xc5, 0x11, 0x62),

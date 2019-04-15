@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@
     <!-- Sync scheduling -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- Vibration when notification received -->
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -52,19 +53,31 @@
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <!-- METADATA -->
+
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
 
         <!-- ACTIVITIES -->
 
         <activity
             android:name=".conversations.ConversationsActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
         <activity
             android:name=".conversations.ConversationsArchivedActivity"
@@ -110,6 +123,7 @@
         <activity
             android:name=".preferences.activities.PreferencesActivity"
             android:label="@string/preferences_name"
+            android:launchMode="singleTop"
             android:parentActivityName=".conversations.ConversationsActivity" />
         <activity
             android:name=".preferences.activities.DidPreferencesActivity"
@@ -173,6 +187,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".signin.SignInActivity"
+            android:label="@string/sign_in_name"
+            android:parentActivityName=".preferences.activities.PreferencesActivity">
+            <intent-filter>
+                <action android:name=".signin.SignInActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!-- BROADCAST RECEIVERS -->
 
@@ -199,5 +222,6 @@
             android:name=".sms.services.SyncIntervalService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service android:name=".sms.services.SyncService" />
+        <service android:name=".sms.services.VerifyCredentialsService" />
     </application>
 </manifest>

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,12 @@ fun getConnectTimeout(context: Context): Int =
         context.getString(
             R.string.preferences_network_connect_timeout_default_value))
         .toIntOrNull() ?: 0
+
+fun getActiveDid(context: Context): String =
+    getStringPreference(context,
+                        context.getString(
+                            R.string.preferences_dids_active_did_key),
+                        "")
 
 fun getDids(context: Context,
             onlyShowInConversationsView: Boolean = false,
@@ -71,24 +77,26 @@ fun getLastCompleteSyncTime(context: Context): Long =
 
 @Deprecated(
     "Remove when Android versions earlier than Oreo are no longer supported.")
-fun getNotificationsEnabled(context: Context): Boolean =
-    getBooleanPreference(
+fun getNotificationsEnabled(context: Context): Boolean {
+    val value: String = context.getString(
+        R.string.preferences_notifications_enable_default_value)
+    return getBooleanPreference(
         context,
         context.getString(R.string.preferences_notifications_enable_key),
-        context.getString(
-            R.string.preferences_notifications_enable_default_value)!!
-            .toBoolean())
+        value.toBoolean())
+}
 
 @Deprecated(
     "Remove when Android versions earlier than Oreo are no longer supported.")
-fun getNotificationVibrateEnabled(context: Context): Boolean =
-    getBooleanPreference(
+fun getNotificationVibrateEnabled(context: Context): Boolean {
+    val value: String = context.getString(
+        R.string.preferences_notifications_vibrate_default_value)
+    return getBooleanPreference(
         context,
         context.getString(
             R.string.preferences_notifications_vibrate_key),
-        context.getString(
-            R.string.preferences_notifications_vibrate_default_value)!!
-            .toBoolean())
+        value.toBoolean())
+}
 
 @Deprecated(
     "Remove when Android versions earlier than Oreo are no longer supported.")
@@ -106,45 +114,61 @@ fun getPassword(context: Context): String =
                             R.string.preferences_account_password_key),
                         "")
 
-fun getRetrieveDeletedMessages(context: Context): Boolean =
-    getBooleanPreference(
+fun getRetrieveDeletedMessages(context: Context): Boolean {
+    val value: String = context.getString(
+        R.string.preferences_sync_retrieve_deleted_messages_default_value)
+    return getBooleanPreference(
         context,
         context.getString(
             R.string.preferences_sync_retrieve_deleted_messages_key),
-        context.getString(
-            R.string.preferences_sync_retrieve_deleted_messages_default_value)!!
-            .toBoolean())
+        value.toBoolean())
+}
 
-fun getRetrieveOnlyRecentMessages(context: Context): Boolean =
-    getBooleanPreference(
+fun getRetrieveOnlyRecentMessages(context: Context): Boolean {
+    val value: String = context.getString(
+        R.string.preferences_sync_retrieve_only_recent_messages_default_value)
+    return getBooleanPreference(
         context,
         context.getString(
             R.string.preferences_sync_retrieve_only_recent_messages_key),
+        value.toBoolean())
+}
+
+fun getSetupCompletedForVersion(context: Context): Long =
+    getLongPreference(
+        context,
+        context.getString(R.string.preferences_setup_completed_for_version_key),
         context.getString(
-            R.string.preferences_sync_retrieve_only_recent_messages_default_value)!!
-            .toBoolean())
+            R.string.preferences_setup_completed_for_version_default_value)
+            .toLong())
 
 fun getStartDate(context: Context): Date {
-    return try {
-        try {
+    val calendar = Calendar.getInstance()
+    calendar.add(Calendar.DAY_OF_YEAR, -30)
+
+    try {
+        return try {
             val dateString = getStringPreference(context, context.getString(
                 R.string.preferences_sync_start_date_key), "")
             if (dateString != "") {
-                val sdf = SimpleDateFormat("MM/dd/YYYY", Locale.US)
+                val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.US)
                 sdf.parse(dateString)
             } else {
-                Date()
+                setStartDate(context, calendar.time)
+                calendar.time
             }
         } catch (_: ParseException) {
-            Date()
+            setStartDate(context, calendar.time)
+            calendar.time
         }
     } catch (_: ClassCastException) {
         val milliseconds = getLongPreference(context, context.getString(
             R.string.preferences_sync_start_date_key), Long.MIN_VALUE)
-        if (milliseconds != java.lang.Long.MIN_VALUE) {
+        return if (milliseconds != java.lang.Long.MIN_VALUE) {
             Date(milliseconds)
         } else {
-            Date()
+            setStartDate(context, calendar.time)
+            calendar.time
         }
     }
 }
@@ -164,14 +188,26 @@ fun getReadTimeout(context: Context): Int =
             R.string.preferences_network_read_timeout_default_value))
         .toIntOrNull() ?: 0
 
-fun isAccountActive(context: Context): Boolean =
+fun getFirstSyncAfterSignIn(context: Context): Boolean =
+    getBooleanPreference(
+        context,
+        context.getString(R.string.preferences_first_sync_after_sign_in_key),
+        false)
+
+fun accountConfigured(context: Context): Boolean =
     getEmail(context) != ""
     && getPassword(context) != ""
-    && getDids(context).isNotEmpty()
+
+fun didsConfigured(context: Context): Boolean = getDids(context).isNotEmpty()
+
+fun setActiveDid(context: Context, did: String) {
+    setStringPreference(context, context.getString(
+        R.string.preferences_dids_active_did_key), did)
+}
 
 fun setDids(context: Context, dids: Set<String>) {
     val currentDids = getDids(context)
-    val newDids = dids.filter { it -> it !in currentDids }
+    val newDids = dids.filter { it !in currentDids }
 
     setStringSetPreference(context, context.getString(
         R.string.preferences_dids_key), dids)
@@ -180,6 +216,16 @@ fun setDids(context: Context, dids: Set<String>) {
         setDidRetrieveMessages(context, did, true)
         setDidShowNotifications(context, did, true)
     }
+}
+
+fun setEmail(context: Context, email: String) {
+    setStringPreference(context, context.getString(
+        R.string.preferences_account_email_key), email)
+}
+
+fun setPassword(context: Context, password: String) {
+    setStringPreference(context, context.getString(
+        R.string.preferences_account_password_key), password)
 }
 
 fun setDidShowInConversationsView(context: Context, did: String,
@@ -247,6 +293,33 @@ fun setLastCompleteSyncTime(context: Context,
         context, context.getString(
         R.string.preferences_sync_last_complete_time_key), lastCompleteSyncTime)
 
+fun setSetupCompletedForVersion(context: Context, version: Long) {
+    if (getLongPreference(context,
+                          context.getString(
+                              R.string.preferences_setup_completed_for_version_key),
+                          0) < version) {
+        setLongPreference(
+            context,
+            context.getString(
+                R.string.preferences_setup_completed_for_version_key),
+            version)
+    }
+}
+
+fun setStartDate(context: Context, date: Date) {
+    setStringPreference(
+        context,
+        context.getString(R.string.preferences_sync_start_date_key),
+        SimpleDateFormat("MM/dd/yyyy", Locale.US).format(date))
+}
+
+fun setFirstSyncAfterSignIn(context: Context, firstSyncAfterSignIn: Boolean) {
+    setBooleanPreference(
+        context,
+        context.getString(R.string.preferences_first_sync_after_sign_in_key),
+        firstSyncAfterSignIn)
+}
+
 private fun getBooleanPreference(context: Context, key: String,
                                  default: Boolean): Boolean {
     val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
@@ -265,14 +338,14 @@ private fun getStringPreference(context: Context, key: String,
                                 default: String): String {
     val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
         context.applicationContext)
-    return sharedPreferences.getString(key, default)
+    return sharedPreferences.getString(key, null) ?: default
 }
 
 private fun getStringSetPreference(context: Context, key: String,
                                    default: Set<String>): Set<String> {
     val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
         context.applicationContext)
-    return sharedPreferences.getStringSet(key, default)
+    return sharedPreferences.getStringSet(key, null) ?: default
 }
 
 private fun setBooleanPreference(context: Context, key: String,
@@ -282,6 +355,17 @@ private fun setBooleanPreference(context: Context, key: String,
     val editor = sharedPreferences.edit()
     with(editor) {
         putBoolean(key, value)
+        apply()
+    }
+}
+
+private fun setStringPreference(context: Context, key: String,
+                                value: String) {
+    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+        context.applicationContext)
+    val editor = sharedPreferences.edit()
+    with(editor) {
+        putString(key, value)
         apply()
     }
 }

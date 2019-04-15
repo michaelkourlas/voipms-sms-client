@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="?attr/selectableItemBackground"
     android:orientation="horizontal"
     android:padding="@dimen/margin">
 
@@ -34,9 +34,8 @@
             android:layout_width="@dimen/contact_badge"
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
-            android:textColor="@color/primary"
-            android:textSize="@dimen/subheading"
-            android:textStyle="bold" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+            android:textColor="@color/colorPrimary" />
     </LinearLayout>
 
     <FrameLayout
@@ -55,8 +54,8 @@
             android:layout_width="@dimen/contact_badge"
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
-            android:textColor="@color/contact_badge_letter_white"
-            android:textSize="@dimen/headline" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+            android:textColor="@android:color/white" />
 
     </FrameLayout>
 
@@ -72,7 +71,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textSize="@dimen/subheading" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
@@ -85,7 +84,7 @@
                 android:layout_alignParentStart="true"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textSize="@dimen/text" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
             <TextView
                 android:id="@+id/phone_number_type"
@@ -96,7 +95,7 @@
                 android:ellipsize="end"
                 android:gravity="end"
                 android:maxLines="1"
-                android:textSize="@dimen/text" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
         </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

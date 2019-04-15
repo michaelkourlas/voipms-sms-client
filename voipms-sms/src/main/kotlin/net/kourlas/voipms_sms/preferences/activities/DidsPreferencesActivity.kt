@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,14 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.view.ViewCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.DidsPreferencesFragment
-import net.kourlas.voipms_sms.preferences.getEmail
-import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.services.RetrieveDidsService
 import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
@@ -48,6 +45,9 @@ class DidsPreferencesActivity : AppCompatActivity() {
     // Preferences fragment for this preferences activity
     private lateinit var fragment: DidsPreferencesFragment
 
+    // Saved instance state
+    private var savedInstanceState: Bundle? = null
+
     // Broadcast receivers
     private val didRetrievalCompleteReceiver =
         object : BroadcastReceiver() {
@@ -59,16 +59,11 @@ class DidsPreferencesActivity : AppCompatActivity() {
                 val error = intent?.getStringExtra(
                     getString(
                         R.string.retrieve_dids_complete_error))
-                when {
-                    error != null -> showSnackbar(
+                if (error != null) {
+                    showSnackbar(
                         this@DidsPreferencesActivity,
                         R.id.coordinator_layout,
                         error)
-                    retrievedDids == null -> showSnackbar(
-                        this@DidsPreferencesActivity,
-                        R.id.coordinator_layout,
-                        getString(
-                            R.string.preferences_dids_error_unknown))
                 }
 
                 loadPreferences(retrievedDids)
@@ -77,21 +72,19 @@ class DidsPreferencesActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        this.savedInstanceState = savedInstanceState
 
         // Load activity layout
         setContentView(R.layout.preferences_dids)
 
         // Configure toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        ViewCompat.setElevation(toolbar, resources
-            .getDimension(R.dimen.toolbar_elevation))
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
+        // Load info message
         val textView = findViewById<TextView>(R.id.info_text_view)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             textView.text = Html.fromHtml(
@@ -119,9 +112,13 @@ class DidsPreferencesActivity : AppCompatActivity() {
         super.onPause()
 
         // Unregister dynamic receivers for this fragment
-        safeUnregisterReceiver(
-            this,
-            didRetrievalCompleteReceiver)
+        safeUnregisterReceiver(this, didRetrievalCompleteReceiver)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        this.savedInstanceState = null
     }
 
     /**
@@ -130,16 +127,8 @@ class DidsPreferencesActivity : AppCompatActivity() {
      */
     private fun retrieveDids() {
         // Verify email and password are set and that Internet connection is
-        // available (avoid lengthy timeout)
-        if (getEmail(this) == "") {
-            showSnackbar(this, R.id.coordinator_layout, getString(
-                R.string.preferences_dids_error_email))
-            loadPreferences(null)
-            return
-        }
-        if (getPassword(this) == "") {
-            showSnackbar(this, R.id.coordinator_layout, getString(
-                R.string.preferences_dids_error_password))
+        // available to avoid lengthy timeout
+        if (!accountConfigured(this)) {
             loadPreferences(null)
             return
         }
@@ -169,22 +158,24 @@ class DidsPreferencesActivity : AppCompatActivity() {
         preloadLayout.visibility = View.GONE
         postloadLayout.visibility = View.VISIBLE
 
-        val databaseDids = Database.getInstance(applicationContext)
-            .getDids()
-
+        // Load preferences fragment
         val bundle = Bundle()
         bundle.putStringArrayList(getString(
             R.string
                 .preferences_dids_fragment_retrieved_dids_key),
                                   retrievedDids)
+        val databaseDids = Database.getInstance(applicationContext)
+            .getDids()
         bundle.putStringArrayList(getString(
             R.string
                 .preferences_dids_fragment_database_dids_key),
                                   ArrayList(databaseDids))
 
-        fragment = DidsPreferencesFragment()
-        fragment.arguments = bundle
-        supportFragmentManager.beginTransaction().replace(
-            R.id.preferences_fragment_layout, fragment).commit()
+        if (this.savedInstanceState == null) {
+            fragment = DidsPreferencesFragment()
+            fragment.arguments = bundle
+            supportFragmentManager.beginTransaction().replace(
+                R.id.preferences_fragment_layout, fragment).commit()
+        }
     }
 }

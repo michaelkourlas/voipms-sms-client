@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,35 +19,24 @@ package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v7.preference.Preference
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.takisoft.fix.support.v7.preference.EditTextPreference
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import androidx.preference.Preference
+import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.preferences.getEmail
+import net.kourlas.voipms_sms.preferences.setEmail
+import net.kourlas.voipms_sms.preferences.setPassword
 import net.kourlas.voipms_sms.utils.preferences
 
 /**
  * Fragment used to display the account preferences.
  */
-class AccountPreferencesFragment : PreferenceFragmentCompatDividers(),
+class AccountPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        try {
-            return super.onCreateView(inflater, container, savedInstanceState)
-        } finally {
-            setDividerPreferences(DIVIDER_NONE)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
 
-        updateSummaries()
+        // Update preference summaries and behaviours
+        updateSummariesAndHandlers()
     }
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
@@ -59,7 +48,8 @@ class AccountPreferencesFragment : PreferenceFragmentCompatDividers(),
         preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
 
-        updateSummaries()
+        // Update preference summaries and behaviours
+        updateSummariesAndHandlers()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences,
@@ -68,49 +58,39 @@ class AccountPreferencesFragment : PreferenceFragmentCompatDividers(),
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
         if (isAdded) {
-            // Update summary text for changed preference
-            updateSummaryTextForPreference(findPreference(key))
+            // Update preference summary and behaviour
+            updateSummaryAndHandlerForPreference(findPreference(key))
         }
     }
 
     /**
-     * Updates the summary text for all preferences.
+     * Updates the summary texts and behaviours for selected preferences.
      */
-    private fun updateSummaries() {
+    private fun updateSummariesAndHandlers() {
         if (preferenceScreen != null) {
             for (preference in preferenceScreen.preferences) {
-                updateSummaryTextForPreference(preference)
+                // Update preference summary and behaviour
+                updateSummaryAndHandlerForPreference(preference)
             }
         }
     }
 
     /**
-     * Updates the summary text for the specified preference.
-     *
-     * @param preference The specified preference.
+     * Updates the summary texts and behaviours for the specified preference.
      */
-    private fun updateSummaryTextForPreference(preference: Preference?) {
-        val context = context ?: return
-        if (preference?.key == getString(
-                R.string.preferences_dids_key)) {
-            // Display list of selected DIDs as summary text
-            val formattedDids = getDids(
-                context).map(::getFormattedPhoneNumber)
-            preference.summary = formattedDids.joinToString(separator = ", ")
-        } else if (preference is EditTextPreference) {
-            // Display value of preference as summary text (except for
-            // passwords, which should be masked, as well as the read and
-            // connect timeouts, which should include the unit)
-            if (preference.key == getString(
-                    R.string.preferences_account_password_key)) {
-                if (preference.text != "") {
-                    preference.summary = getString(
-                        R.string.preferences_account_password_placeholder)
-                } else {
-                    preference.summary = ""
-                }
-            } else {
-                preference.summary = preference.text
+    private fun updateSummaryAndHandlerForPreference(
+        preference: Preference?) {
+        activity?.let { activity ->
+            if (preference?.key == getString(
+                    R.string.preferences_account_sign_out_key)) {
+                preference.summary = getEmail(activity)
+                preference.onPreferenceClickListener =
+                    Preference.OnPreferenceClickListener {
+                        setEmail(activity, "")
+                        setPassword(activity, "")
+                        activity.finish()
+                        true
+                    }
             }
         }
     }

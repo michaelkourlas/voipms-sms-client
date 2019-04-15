@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="?attr/selectableItemBackground"
+    android:descendantFocusability="blocksDescendants"
     android:orientation="horizontal"
     android:padding="@dimen/margin">
 
@@ -44,18 +46,18 @@
                 android:layout_width="@dimen/contact_badge"
                 android:layout_height="@dimen/contact_badge"
                 android:gravity="center"
-                android:textColor="@color/contact_badge_letter_white"
-                android:textSize="@dimen/headline" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                android:textColor="@android:color/white" />
         </FrameLayout>
 
         <ImageView
             android:id="@+id/conversations_photo_checked"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/primary"
+            android:background="@color/colorPrimary"
             android:contentDescription="@string/conversations_checked_content_description"
             android:scaleType="center"
-            android:src="@drawable/ic_check_white_24dp" />
+            app:srcCompat="@drawable/ic_check_white_24dp" />
     </ViewSwitcher>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -64,48 +66,43 @@
         android:layout_marginStart="@dimen/margin"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/contact"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textSize="@dimen/subheading" />
-
-        <TextView
-            android:id="@+id/message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textSize="@dimen/text" />
-
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/contact"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
             <TextView
                 android:id="@+id/date"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
+                android:layout_height="match_parent"
                 android:ellipsize="end"
+                android:gravity="end|top"
                 android:maxLines="1"
-                android:textSize="@dimen/text" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/did"
-                android:layout_width="wrap_content"
+                android:id="@+id/message"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:layout_toEndOf="@+id/date"
-                android:gravity="end"
+                android:layout_weight="1"
+                android:ellipsize="end"
                 android:maxLines="1"
-                android:textSize="@dimen/text" />
-        </RelativeLayout>
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018 Michael Kourlas
+ * Copyright (C) 2018-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,14 @@ package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v7.preference.Preference
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.takisoft.fix.support.v7.preference.EditTextPreference
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import androidx.preference.Preference
+import com.takisoft.preferencex.EditTextPreference
+import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.utils.preferences
 
-class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
+class NetworkPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
         // Add preferences
@@ -39,12 +36,14 @@ class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
         preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
 
+        // Update preferences summaries
         updateSummaries()
     }
 
     override fun onResume() {
         super.onResume()
 
+        // Update preferences summaries
         updateSummaries()
     }
 
@@ -52,11 +51,8 @@ class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
      * Updates the summary text for all preferences.
      */
     private fun updateSummaries() {
-        if (preferenceScreen != null) {
-            for (i in 0 until preferenceScreen.preferenceCount) {
-                val subPreference = preferenceScreen.getPreference(i)
-                updateSummaryTextForPreference(subPreference)
-            }
+        for (preference in preferenceScreen.preferences) {
+            updateSummaryTextForPreference(preference)
         }
     }
 
@@ -73,8 +69,6 @@ class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
 
     /**
      * Updates the summary text for the specified preference.
-     *
-     * @param preference The specified preference.
      */
     private fun updateSummaryTextForPreference(preference: Preference?) {
         if (preference is EditTextPreference) {
@@ -95,15 +89,6 @@ class NetworkPreferencesFragment : PreferenceFragmentCompatDividers(),
             } else {
                 preference.summary = preference.text
             }
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        try {
-            return super.onCreateView(inflater, container, savedInstanceState)
-        } finally {
-            setDividerPreferences(DIVIDER_NONE)
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018 Michael Kourlas
+ * Copyright (C) 2018-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,23 @@ package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v7.preference.ListPreference
-import android.support.v7.preference.Preference
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import androidx.preference.ListPreference
+import androidx.preference.Preference
+import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.sms.services.SyncIntervalService
+import net.kourlas.voipms_sms.utils.preferences
 
-class SynchronizationPreferencesFragment : PreferenceFragmentCompatDividers(),
+class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-
+    // Preference change handlers
+    private val syncIntervalPreferenceChangeListener =
+        Preference.OnPreferenceChangeListener { _, _ ->
+            activity?.let {
+                SyncIntervalService.startService(it)
+            }
+            true
+        }
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
@@ -41,25 +46,24 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompatDividers(),
         preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
 
+        // Update preference summaries and handlers
         updateSummariesAndHandlers()
     }
 
     override fun onResume() {
         super.onResume()
 
+        // Update preference summaries and handlers
         updateSummariesAndHandlers()
     }
 
     /**
-     * Updates the summary text for all preferences.
+     * Updates the summaries and handlers for all preferences.
      */
     private fun updateSummariesAndHandlers() {
-        if (preferenceScreen != null) {
-            for (i in 0 until preferenceScreen.preferenceCount) {
-                val subPreference = preferenceScreen.getPreference(i)
-                updateSummaryTextForPreference(subPreference)
-                updateHandlersForPreference(subPreference)
-            }
+        for (preference in preferenceScreen.preferences) {
+            updateSummaryTextForPreference(preference)
+            updateHandlersForPreference(preference)
         }
     }
 
@@ -75,9 +79,7 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompatDividers(),
     }
 
     /**
-     * Updates the summary text for the specified preference.
-     *
-     * @param preference The specified preference.
+     * Updates the summary text and handler for the specified preference.
      */
     private fun updateSummaryTextForPreference(preference: Preference?) {
         if (preference is ListPreference) {
@@ -86,29 +88,8 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompatDividers(),
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        try {
-            return super.onCreateView(inflater, container, savedInstanceState)
-        } finally {
-            setDividerPreferences(DIVIDER_NONE)
-        }
-    }
-
-    // Preference change handlers
-    private val syncIntervalPreferenceChangeListener =
-        Preference.OnPreferenceChangeListener { _, _ ->
-            val activity = activity
-            if (activity != null) {
-                SyncIntervalService.startService(activity.applicationContext)
-            }
-            true
-        }
-
     /**
      * Updates the handlers for the specified preference.
-     *
-     * @param preference The specified preference.
      */
     private fun updateHandlersForPreference(preference: Preference) {
         if (preference.key == getString(

@@ -24,4 +24,11 @@ package net.kourlas.voipms_sms.sms
  * @param did The DID associated with the conversation.
  * @param contact The contact associated with the conversation.
  */
-data class ConversationId(val did: String, val contact: String)
+data class ConversationId(val did: String, val contact: String) {
+    /**
+     * Gets a unique identifier for this conversation.
+     */
+    fun getId(): String {
+        return "${did}_$contact"
+    }
+}

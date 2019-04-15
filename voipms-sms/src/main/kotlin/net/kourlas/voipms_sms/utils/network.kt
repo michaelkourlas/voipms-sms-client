@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2017 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,6 @@ import java.net.URL
 
 /**
  * Retrieves a JSON object from the specified URL.
- *
- * @param context The specified context.
- * @param url The specified URL.
- * @return The JSON object at the specified URL.
  */
 fun getJson(context: Context, url: String): JSONObject {
     val connection = URL(url).openConnection() as HttpURLConnection
@@ -44,9 +40,6 @@ fun getJson(context: Context, url: String): JSONObject {
 
 /**
  * Checks if the Internet connection is available.
- *
- * @param context The specified context.
- * @return Whether the Internet connection is available.
  */
 fun isNetworkConnectionAvailable(context: Context): Boolean {
     val connectivityManager = context.getSystemService(

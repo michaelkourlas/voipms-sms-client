@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018 Michael Kourlas
+ * Copyright (C) 2018-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,10 @@ package net.kourlas.voipms_sms.preferences.activities
 
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.view.ViewCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.SynchronizationPreferencesFragment
 
@@ -43,16 +41,13 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
         setContentView(R.layout.preferences_synchronization)
 
         // Configure toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        ViewCompat.setElevation(toolbar, resources
-            .getDimension(R.dimen.toolbar_elevation))
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
+        // Load info message
         val textView = findViewById<TextView>(R.id.info_text_view)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             textView.text = Html.fromHtml(
@@ -64,8 +59,11 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
         }
         textView.movementMethod = LinkMovementMethod.getInstance()
 
-        fragment = SynchronizationPreferencesFragment()
-        supportFragmentManager.beginTransaction().replace(
-            R.id.preferences_fragment_layout, fragment).commit()
+        // Load preferences fragment
+        if (savedInstanceState == null) {
+            fragment = SynchronizationPreferencesFragment()
+            supportFragmentManager.beginTransaction().replace(
+                R.id.preferences_fragment_layout, fragment).commit()
+        }
     }
 }

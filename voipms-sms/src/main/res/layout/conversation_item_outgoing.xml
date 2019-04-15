@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2018 Michael Kourlas
+  ~ Copyright (C) 2015-2019 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,60 +15,72 @@
   ~ limitations under the License.
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="0dp"
-    android:layout_marginEnd="@dimen/margin"
-    android:layout_marginLeft="@dimen/margin"
-    android:layout_marginRight="@dimen/margin"
     android:layout_marginStart="@dimen/margin"
     android:layout_marginTop="@dimen/conversation_item_margin_top_primary"
-    android:descendantFocusability="blocksDescendants">
+    android:layout_marginEnd="@dimen/margin"
+    android:orientation="vertical">
 
-    <View
-        android:id="@+id/placeholder"
-        android:layout_width="@dimen/contact_badge"
-        android:layout_height="@dimen/contact_badge"
-        android:layout_alignParentStart="true"
-        android:layout_gravity="bottom"
-        android:layout_marginStart="@dimen/margin" />
+    <TextView
+        android:id="@+id/top_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/half_margin"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:visibility="gone" />
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@id/placeholder">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/placeholder"
+            android:layout_width="@dimen/contact_badge"
+            android:layout_height="@dimen/contact_badge"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="@dimen/margin" />
 
         <LinearLayout
-            android:id="@+id/sms_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_gravity="bottom"
-            android:background="@color/primary"
-            android:minHeight="@dimen/contact_badge"
-            android:orientation="vertical"
-            android:padding="@dimen/sms_container_margin"
-            tools:ignore="UselessParent">
+            android:layout_toEndOf="@id/placeholder"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/message"
+            <LinearLayout
+                android:id="@+id/sms_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:autoLink="all"
-                android:textColor="@color/dark_gray"
-                android:textColorLink="@color/dark_gray"
-                android:textSize="@dimen/subheading" />
+                android:layout_gravity="end"
+                android:minHeight="@dimen/contact_badge"
+                android:orientation="vertical"
+                android:padding="@dimen/sms_container_padding">
+
+                <TextView
+                    android:id="@+id/message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autoLink="all"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    android:textColor="@android:color/white"
+                    android:textColorLink="@android:color/white" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/conversation_text_spacing"
-                android:textColor="@color/message_translucent_dark_grey"
-                android:textSize="@dimen/caption" />
+                android:layout_gravity="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                android:visibility="gone" />
         </LinearLayout>
     </RelativeLayout>
-</RelativeLayout>
+</LinearLayout>

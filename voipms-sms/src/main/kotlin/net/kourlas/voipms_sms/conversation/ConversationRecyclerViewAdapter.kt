@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2018 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@
 package net.kourlas.voipms_sms.conversation
 
 import android.graphics.Bitmap
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import android.graphics.Typeface
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,13 +32,16 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.QuickContactBadge
 import android.widget.TextView
-import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationDemoMessages
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
+import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
 
 /**
@@ -61,8 +63,9 @@ class ConversationRecyclerViewAdapter(
     private val contactName: String?,
     private val contactBitmap: Bitmap?) :
     RecyclerView.Adapter<ConversationRecyclerViewAdapter.MessageViewHolder>(),
-    Filterable, SectionTitleProvider,
-    Iterable<ConversationRecyclerViewAdapter.MessageItem> {
+    Filterable,
+    Iterable<ConversationRecyclerViewAdapter.MessageItem>,
+    FastScroller.SectionTitleProvider {
 
     // List of items shown by the adapter; the index of each item
     // corresponds to the location of each item in the adapter
@@ -115,13 +118,15 @@ class ConversationRecyclerViewAdapter(
                                            position: Int) {
         val marginParams = holder.itemView.layoutParams
             as ViewGroup.MarginLayoutParams
-        marginParams.topMargin = if (isFirstMessageInGroup(position)) {
-            activity.resources.getDimension(
-                R.dimen.conversation_item_margin_top_primary).toInt()
-        } else {
-            activity.resources.getDimension(
-                R.dimen.conversation_item_margin_top_secondary).toInt()
-        }
+        marginParams.topMargin =
+            if (isFirstMessageInGroup(position,
+                                      combineIncomingOutgoing = false)) {
+                activity.resources.getDimension(
+                    R.dimen.conversation_item_margin_top_primary).toInt()
+            } else {
+                activity.resources.getDimension(
+                    R.dimen.conversation_item_margin_top_secondary).toInt()
+            }
     }
 
     /**
@@ -140,7 +145,9 @@ class ConversationRecyclerViewAdapter(
         val contactBadge = holder.contactBadge
         val contactBadgeLetterText = holder.contactBadgeLetterText
         if (contactBadge != null && contactBadgeLetterText != null) {
-            if (isFirstMessageInGroup(position)) {
+            // Show contact badge if first message in group
+            if (isFirstMessageInGroup(position,
+                                      combineIncomingOutgoing = false)) {
                 holder.contactBadge.visibility = View.VISIBLE
                 holder.contactBadgeLetterText.visibility = View.VISIBLE
 
@@ -156,11 +163,17 @@ class ConversationRecyclerViewAdapter(
                     holder.contactBadge.setBackgroundColor(
                         getMaterialDesignColour(
                             message.contact))
-                    holder.contactBadge.setImageResource(
-                        android.R.color.transparent)
-                    holder.contactBadgeLetterText.text = getContactInitial(
-                        contactName,
-                        message.contact)
+                    getContactInitial(contactName).let {
+                        if (it[0].isLetter()) {
+                            holder.contactBadgeLetterText.text = it
+                            holder.contactBadge.setImageResource(
+                                android.R.color.transparent)
+                        } else {
+                            holder.contactBadgeLetterText.text = ""
+                            holder.contactBadge.setImageResource(
+                                R.drawable.ic_account_circle_white_inverted_24dp)
+                        }
+                    }
                 }
             } else {
                 holder.contactBadge.visibility = View.INVISIBLE
@@ -210,10 +223,13 @@ class ConversationRecyclerViewAdapter(
     }
 
     /**
-     * Displays the date of the message on the view holder. Displays a message
-     * about the status of the message in certain cases instead, such as when
-     * the message is being sent or has failed to send. Hides the text depending
-     * on the message's placement in a group.
+     * Displays the date and time for the message. Optionally displays a
+     * the status of the message in certain cases instead, such as when the
+     * message is being sent or has failed to send. Optionally hides it
+     * altogether, depending on the message's placement in a group.
+     *
+     * Optionally displays the date and time of the conversation group,
+     * depending on the message's placement in the group.
      *
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
@@ -223,28 +239,24 @@ class ConversationRecyclerViewAdapter(
         val messageItem = messageItems[position]
         val message = messageItem.message
 
+        // Set per-message date and time
         val dateText = holder.dateText
         if (!message.isDelivered) {
             if (!message.isDeliveryInProgress) {
                 // Show tried but failed to send text
                 val dateTextBuilder = SpannableStringBuilder()
-                if (messageItems[position].checked) {
-                    dateTextBuilder.append(activity.getString(
-                        R.string.conversation_message_not_sent_selected))
-                } else {
-                    dateTextBuilder.append(activity.getString(
-                        R.string.conversation_message_not_sent))
-                }
+                dateTextBuilder.append(activity.getString(
+                    R.string.conversation_message_not_sent))
                 dateTextBuilder.setSpan(
                     ForegroundColorSpan(
-                        if (messageItems[position].checked)
-                            ContextCompat.getColor(
-                                activity,
-                                android.R.color.white)
-                        else
-                            ContextCompat.getColor(
-                                activity,
-                                android.R.color.holo_red_dark)),
+                        ContextCompat.getColor(
+                            activity,
+                            android.R.color.holo_red_dark)),
+                    0,
+                    dateTextBuilder.length,
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                dateTextBuilder.setSpan(
+                    StyleSpan(Typeface.BOLD),
                     0,
                     dateTextBuilder.length,
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
@@ -255,14 +267,17 @@ class ConversationRecyclerViewAdapter(
                     R.string.conversation_message_sending)
             }
             dateText.visibility = View.VISIBLE
-        } else if (isLastMessageInGroup(position)) {
-            // Show date
-            dateText.text = getFormattedDate(activity,
-                                             message.date, false)
-            dateText.visibility = View.VISIBLE
         } else {
-            // Hide date altogether
-            dateText.visibility = View.GONE
+            dateText.text = getConversationViewDate(activity, message.date)
+        }
+
+        // Set conversation group date and time
+        val topDateText = holder.topDateText
+        if (isFirstMessageInGroup(position, combineIncomingOutgoing = true)) {
+            topDateText.text = getConversationViewTopDate(message.date)
+            topDateText.visibility = View.VISIBLE
+        } else {
+            topDateText.visibility = View.GONE
         }
     }
 
@@ -277,41 +292,27 @@ class ConversationRecyclerViewAdapter(
         val messageItem = messageItems[position]
         val message = messageItem.message
 
+        // Incoming messages have the secondary color, while outgoing messages
+        // have the primary color; dark variants are used for selection
         val smsContainer = holder.smsContainer
-        val messageText = holder.messageText
-        val dateText = holder.dateText
         if (message.isIncoming) {
             if (messageItem.checked) {
-                smsContainer.setBackgroundResource(
-                    android.R.color.holo_blue_dark)
+                smsContainer.setBackgroundResource(R.color.colorSecondaryDark)
             } else {
-                smsContainer.setBackgroundResource(R.color.primary)
+                smsContainer.setBackgroundResource(R.color.colorSecondary)
             }
         } else {
             if (messageItem.checked) {
-                smsContainer.setBackgroundResource(
-                    android.R.color.holo_blue_dark)
-                messageText.setTextColor(ContextCompat.getColor(
-                    activity, android.R.color.white))
-                messageText.setLinkTextColor(ContextCompat.getColor(
-                    activity, android.R.color.white))
-                dateText.setTextColor(ContextCompat.getColor(
-                    activity, R.color.message_translucent_white))
+                smsContainer.setBackgroundResource(R.color.colorPrimaryDark)
             } else {
-                smsContainer.setBackgroundResource(android.R.color.white)
-                messageText.setTextColor(ContextCompat.getColor(
-                    activity, R.color.dark_gray))
-                messageText.setLinkTextColor(ContextCompat.getColor(
-                    activity, R.color.dark_gray))
-                dateText.setTextColor(ContextCompat.getColor(
-                    activity, R.color.message_translucent_dark_grey))
+                smsContainer.setBackgroundResource(R.color.colorPrimary)
             }
         }
     }
 
     override fun getItemViewType(i: Int): Int =
     // There are two different view types: one for incoming messages and
-    // one for outgoing messages
+        // one for outgoing messages
         if (messageItems[i].message.isIncoming) {
             R.layout.conversation_item_incoming
         } else {
@@ -322,8 +323,6 @@ class ConversationRecyclerViewAdapter(
 
     /**
      * Gets the number of items in the adapter that are checked.
-     *
-     * @return The number of items in the adapter that are checked.
      */
     fun getCheckedItemCount(): Int = messageItems.filter { it.checked }.size
 
@@ -337,40 +336,38 @@ class ConversationRecyclerViewAdapter(
     override fun getFilter(): Filter = object : Filter() {
         /**
          * Perform filtering using the specified filter constraint.
-         *
-         * @param constraint The specified constraint.
-         * @return The filtered objects.
          */
-        fun doFiltering(constraint: CharSequence): List<Message> {
+        fun doFiltering(constraint: CharSequence): ConversationFilter {
             // Get filtered messages
-            @Suppress("ConstantConditionIf")
-            return if (!demo) {
-                Database.getInstance(activity)
-                    .getMessagesConversationFiltered(
-                        conversationId,
-                        constraint.toString()
-                            .trim { it <= ' ' }
-                            .toLowerCase())
+            val resultsObject = ConversationFilter()
+            if (!demo) {
+                resultsObject.messages.addAll(Database.getInstance(activity)
+                                                  .getMessagesConversationFiltered(
+                                                      conversationId,
+                                                      constraint.toString()
+                                                          .trim { it <= ' ' }
+                                                          .toLowerCase()))
             } else {
-                getConversationDemoMessages()
+                resultsObject.messages.addAll(getConversationDemoMessages())
             }
+            return resultsObject
         }
 
         override fun performFiltering(
-            constraint: CharSequence): Filter.FilterResults = try {
-            val messages = doFiltering(constraint)
+            constraint: CharSequence): FilterResults = try {
+            val resultsObject = doFiltering(constraint)
 
             // Return filtered messages
-            val results = Filter.FilterResults()
-            results.count = messages.size
-            results.values = messages
+            val results = FilterResults()
+            results.count = resultsObject.messages.size
+            results.values = resultsObject
             results
         } catch (e: Exception) {
-            Filter.FilterResults()
+            FilterResults()
         }
 
         override fun publishResults(constraint: CharSequence,
-                                    results: Filter.FilterResults?) {
+                                    results: FilterResults?) {
             if (results?.values == null) {
                 showSnackbar(activity, R.id.coordinator_layout,
                              activity.getString(
@@ -384,8 +381,8 @@ class ConversationRecyclerViewAdapter(
 
             // The Android results interface uses type Any, so we have
             // no choice but to use an unchecked cast
-            @Suppress("UNCHECKED_CAST")
-            val newMessages = results.values as List<Message>
+            val resultsObject = results.values as ConversationFilter
+            val newMessages = resultsObject.messages
 
             // Create copy of current messages
             val oldMessages = mutableListOf<Message>()
@@ -486,46 +483,38 @@ class ConversationRecyclerViewAdapter(
 
     /**
      * Refreshes the adapter using the specified filter constraint.
-     *
-     * @param constraint The specified filter constraint.
      */
     fun refresh(constraint: String) = filter.filter(constraint)
 
     /**
+     * Helper class used to store messages.
+     */
+    class ConversationFilter {
+        internal val messages = mutableListOf<Message>()
+    }
+
+    /**
      * Returns true if the message at the specified position is the first
      * message in a group, which is a collection of messages that are
-     * spaced together.
+     * spaced together based on whether the message is incoming or outgoing,
+     * as well as the time between the messages.
      *
-     * @param i The position of the specified message.
-     * @return True if the message at the specified position is the first
-     * message in a group.
+     * @param position The position of the specified message.
+     * @param combineIncomingOutgoing If true, both incoming and outgoing
+     * messages are considered to be part of the same group.
      */
-    private fun isFirstMessageInGroup(i: Int): Boolean {
-        val message = _messageItems[i].message
-        val previousMessage: Message? = if (i > 0) {
-            _messageItems[i - 1].message
+    private fun isFirstMessageInGroup(
+        position: Int, combineIncomingOutgoing: Boolean): Boolean {
+        val message = _messageItems[position].message
+        val previousMessage: Message? = if (position > 0) {
+            _messageItems[position - 1].message
         } else {
             null
         }
         return previousMessage == null
-               || message.isIncoming != previousMessage.isIncoming
+               || (!combineIncomingOutgoing
+                   && message.isIncoming != previousMessage.isIncoming)
                || message.date.time - previousMessage.date.time > 60000
-    }
-
-    /**
-     * Returns true if the message at the specified position is the last
-     * message in a group, which is a collection of messages that are
-     * spaced together.
-     *
-     * @param i The position of the specified message.
-     * @return True if the message at the specified position is the last
-     * message in a group.
-     */
-    private fun isLastMessageInGroup(i: Int): Boolean {
-        if (i == _messageItems.size - 1) {
-            return true
-        }
-        return isFirstMessageInGroup(i + 1)
     }
 
     /**
@@ -542,12 +531,12 @@ class ConversationRecyclerViewAdapter(
         /**
          * Sets whether or not the message item is checked.
          *
-         * @param value True if checked, false if not.
+         * @param checked Whether the message item is checked.
          * @param position The position of the message item in the adapter.
          */
-        fun setChecked(value: Boolean, position: Int) {
+        fun setChecked(checked: Boolean, position: Int) {
             val previous = _checked
-            _checked = value
+            _checked = checked
 
             val holder = recyclerView.findViewHolderForAdapterPosition(position)
                 as MessageViewHolder?
@@ -575,7 +564,9 @@ class ConversationRecyclerViewAdapter(
      * @param itemView The primary view of the message item.
      */
     inner class MessageViewHolder internal constructor(
-        itemView: View, viewType: Int) : RecyclerView.ViewHolder(itemView) {
+        itemView: View,
+        viewType: Int) : RecyclerView.ViewHolder(
+        itemView) {
         // All configurable views on a message item
         internal val contactBadge: QuickContactBadge? =
             if (viewType == R.layout.conversation_item_incoming) {
@@ -595,6 +586,8 @@ class ConversationRecyclerViewAdapter(
             itemView.findViewById(R.id.message)
         internal val dateText: TextView =
             itemView.findViewById(R.id.date)
+        internal val topDateText: TextView =
+            itemView.findViewById(R.id.top_date)
 
         init {
             // Allow the message view itself to be selectable and add rounded

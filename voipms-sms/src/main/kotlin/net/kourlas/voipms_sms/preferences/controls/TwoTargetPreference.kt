@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017 The Android Open Source Project
- * Modifications copyright (C) 2017-2018 Michael Kourlas
+ * Modifications copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@
 package net.kourlas.voipms_sms.preferences.controls
 
 import android.content.Context
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceViewHolder
 import android.util.AttributeSet
 import android.view.View
+import androidx.preference.Preference
+import androidx.preference.PreferenceViewHolder
 import net.kourlas.voipms_sms.R
 
 open class TwoTargetPreference : Preference {

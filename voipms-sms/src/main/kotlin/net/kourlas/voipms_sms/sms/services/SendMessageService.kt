@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@ package net.kourlas.voipms_sms.sms.services
 
 import android.content.Context
 import android.content.Intent
-import android.support.v4.app.JobIntentService
-import android.support.v4.app.RemoteInput
 import android.util.Log
+import androidx.core.app.JobIntentService
+import androidx.core.app.RemoteInput
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
+import net.kourlas.voipms_sms.preferences.accountConfigured
+import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
-import net.kourlas.voipms_sms.preferences.isAccountActive
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.JobId
@@ -84,14 +85,16 @@ class SendMessageService : JobIntentService() {
                 return null
             }
 
-            // Terminate quietly if account inactive
-            if (!isAccountActive(applicationContext)) {
-                return null
-            }
-
             // Retrieve the DID, contact, and list of message texts from the
             // intent
             val (did, contact, messageTexts, databaseId) = getIntentData(intent)
+
+            // Terminate quietly if impossible to send message due to account
+            // configuration
+            if (!accountConfigured(applicationContext)
+                || did !in getDids(applicationContext)) {
+                return null
+            }
 
             val messages = mutableListOf<OutgoingMessage>()
             if (databaseId != null) {
@@ -111,31 +114,23 @@ class SendMessageService : JobIntentService() {
                 // Try adding the messages to the database; if this fails,
                 // terminate with a toast and try to remove existing added
                 // messages
-                for (messageText in messageTexts) {
-                    try {
-                        val newDatabaseId = Database.getInstance(
-                            applicationContext)
-                            .insertMessageDeliveryInProgress(
-                                ConversationId(did,
-                                               contact), messageText)
+                try {
+                    val newDatabaseIds = Database.getInstance(
+                        applicationContext)
+                        .insertMessageDeliveryInProgress(
+                            ConversationId(did,
+                                           contact), messageTexts)
+                    for ((messageText, newDatabaseId) in messageTexts.zip(
+                        newDatabaseIds)) {
                         messages.add(
                             OutgoingMessage(
                                 newDatabaseId, did,
                                 contact, messageText))
-                    } catch (e: Exception) {
-                        error = applicationContext.getString(
-                            R.string.send_message_error_database)
-                        for ((newDatabaseId) in messages) {
-                            try {
-                                Database.getInstance(
-                                    applicationContext)
-                                    .removeMessage(newDatabaseId)
-                            } catch (e: Exception) {
-                            }
-                        }
-                        return ConversationId(did,
-                                              contact)
                     }
+                } catch (e: Exception) {
+                    error = applicationContext.getString(
+                        R.string.send_message_error_database)
+                    return ConversationId(did, contact)
                 }
             }
 
@@ -185,10 +180,12 @@ class SendMessageService : JobIntentService() {
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
         messageText = remoteInput?.getCharSequence(
             applicationContext.getString(
-                R.string.notifications_reply_key))?.toString() ?: (intent.getStringExtra(
-            applicationContext.getString(R.string.send_message_text))
-                                                                   ?: throw Exception(
-                                                                       "Message text missing"))
+                R.string.notifications_reply_key))?.toString()
+                      ?: (intent.getStringExtra(
+                          applicationContext.getString(
+                              R.string.send_message_text))
+                          ?: throw Exception(
+                              "Message text missing"))
 
         // If the message text exceeds the maximum length of an SMS message,
         // split it into multiple message texts
@@ -284,8 +281,18 @@ class SendMessageService : JobIntentService() {
             return null
         }
         if (status != "success") {
-            error = applicationContext.getString(
-                R.string.send_message_error_api_error, status)
+            error = when (status) {
+                "invalid_credentials" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_invalid_credentials)
+                "invalid_dst" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_invalid_dst)
+                "limit_reached" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_limit_reached)
+                "sms_failed" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_sms_failed)
+                else -> applicationContext.getString(
+                    R.string.send_message_error_api_error, status)
+            }
             return null
         }
         val voipId = response.optLong("sms")
