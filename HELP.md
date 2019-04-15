@@ -12,23 +12,6 @@
 * [Reporting Bugs](#reporting-bugs)
 * [Contacting the Developer](#contacting-the-developer)
 
-# Quick Start
-
-1. Go to the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php) and open the configuration options for the phone numbers you wish to use with the app. Ensure that SMS is enabled for each phone number.
-2. Go to the VoIP.ms [API Configuration menu](https://www.voip.ms/m/api.php) and:
-    * enable API access for your VoIP.ms account;
-    * set an API password (which is **distinct** from your account password); and
-    * set the list of approved IP addresses to "0.0.0.0".
-3. Go the *Settings* page in the app and set:
-    * on the *Account* page:
-        * the *VoIP.ms account email address* field to the email you use to sign into the VoIP.ms portal (**not** your SIP username);
-        * the *VoIP.ms account password* field to the API password which you set above;
-    * on the *Synchronization* page:
-        * the *Synchronization start date* field to the date on which you started using VoIP.ms; and
-    * on the *Phone Numbers* page:
-        * the phone numbers (DIDs) you wish to use with the app.
-4. Go to the conversations list and swipe down to synchronize with VoIP.ms servers.
-
 # Settings
 
 ## Account
@@ -38,7 +21,7 @@ This app requires access to the VoIP.ms API in order to retrieve messages from y
     * set an API password (which is **distinct** from your account password); and
     * set the list of approved IP addresses to "0.0.0.0".
   
-The *VoIP.ms account email address* field should be set to the email you use to sign into the VoIP.ms portal (**not** your SIP username), while the *VoIP.ms account password* field should be set to the API password which you set above.
+When signing in, you must the email you use to sign into the VoIP.ms portal (**not** your SIP username) and the API password which you set above.
 
 ## Phone Numbers
 

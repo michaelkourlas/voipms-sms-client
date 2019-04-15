@@ -206,7 +206,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
         // We shouldn't show a conversation for a DID that is no longer
         // configured
-        if (did !in getDids(applicationContext)) {
+        if (did !in getDids(applicationContext) && !demo) {
             abortActivity(this, Exception("DID '$did' no longer exists"))
             return
         }
