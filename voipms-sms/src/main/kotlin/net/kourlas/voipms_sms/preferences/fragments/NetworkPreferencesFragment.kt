@@ -23,10 +23,10 @@ import androidx.preference.Preference
 import com.takisoft.preferencex.EditTextPreference
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.utils.preferences
 
 class NetworkPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
         // Add preferences
@@ -36,12 +36,14 @@ class NetworkPreferencesFragment : PreferenceFragmentCompat(),
         preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
 
+        // Update preferences summaries
         updateSummaries()
     }
 
     override fun onResume() {
         super.onResume()
 
+        // Update preferences summaries
         updateSummaries()
     }
 
@@ -49,11 +51,8 @@ class NetworkPreferencesFragment : PreferenceFragmentCompat(),
      * Updates the summary text for all preferences.
      */
     private fun updateSummaries() {
-        if (preferenceScreen != null) {
-            for (i in 0 until preferenceScreen.preferenceCount) {
-                val subPreference = preferenceScreen.getPreference(i)
-                updateSummaryTextForPreference(subPreference)
-            }
+        for (preference in preferenceScreen.preferences) {
+            updateSummaryTextForPreference(preference)
         }
     }
 
@@ -70,8 +69,6 @@ class NetworkPreferencesFragment : PreferenceFragmentCompat(),
 
     /**
      * Updates the summary text for the specified preference.
-     *
-     * @param preference The specified preference.
      */
     private fun updateSummaryTextForPreference(preference: Preference?) {
         if (preference is EditTextPreference) {

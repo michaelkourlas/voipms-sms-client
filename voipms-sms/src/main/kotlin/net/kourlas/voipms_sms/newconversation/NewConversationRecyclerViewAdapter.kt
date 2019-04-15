@@ -98,22 +98,20 @@ class NewConversationRecyclerViewAdapter(
             } else {
                 null
             }
+
+            val currentInitial = getContactInitial(contactItem.getSortingName())
             if (position == 0
                 || previousItem is TypedInContactItem
                 || (previousItem is ContactItem
-                    && getContactInitial(contactItem.name,
-                                         contactItem.primaryPhoneNumber)
-                    != getContactInitial(previousItem.name,
-                                         previousItem.primaryPhoneNumber))) {
-                holder.letterText.text = getContactInitial(
-                    contactItem.name, contactItem.primaryPhoneNumber)
+                    && currentInitial != getContactInitial(
+                    previousItem.getSortingName()))) {
+                holder.letterText.text = currentInitial
             } else {
                 holder.letterText.text = ""
             }
         } else {
             holder.letterText.text = ""
         }
-
     }
 
     /**
@@ -149,10 +147,17 @@ class NewConversationRecyclerViewAdapter(
                 // without bitmap
                 holder.contactBadge.setBackgroundColor(getMaterialDesignColour(
                     contactItem.primaryPhoneNumber))
-                holder.contactBadge.setImageResource(
-                    android.R.color.transparent)
-                holder.contactBadgeLetterText.text = getContactInitial(
-                    contactItem.name, contactItem.primaryPhoneNumber)
+                getContactInitial(contactItem.getSortingName()).let {
+                    if (it[0].isLetter()) {
+                        holder.contactBadgeLetterText.text = it
+                        holder.contactBadge.setImageResource(
+                            android.R.color.transparent)
+                    } else {
+                        holder.contactBadgeLetterText.text = ""
+                        holder.contactBadge.setImageResource(
+                            R.drawable.ic_account_circle_white_inverted_24dp)
+                    }
+                }
             }
         }
     }
@@ -177,14 +182,21 @@ class NewConversationRecyclerViewAdapter(
         }
 
         // Set phone number text
-        var text = contactItem.primaryPhoneNumber
         if (contactItem is ContactItem
-            && contactItem.secondaryPhoneNumbers.isNotEmpty()) {
-            // Add (+X) if there are secondary phone numbers
-            text += " (+${contactItem.secondaryPhoneNumbers.size})"
+            && !contactItem.showSeparateNameAndPhoneNumber()) {
+            holder.phoneNumberText.visibility = View.GONE
+        } else {
+            var text = contactItem.primaryPhoneNumber
+            if (contactItem is ContactItem
+                && contactItem.secondaryPhoneNumbers.isNotEmpty()) {
+                // Add (+X) if there are secondary phone numbers
+                text += " (+${contactItem.secondaryPhoneNumbers.size})"
 
+            }
+            holder.phoneNumberText.text = text
+            holder.phoneNumberText.visibility = View.VISIBLE
         }
-        holder.phoneNumberText.text = text
+
 
         // Set phone number type
         if (contactItem is ContactItem) {
@@ -203,8 +215,7 @@ class NewConversationRecyclerViewAdapter(
         // The typed in phone number item has no section title
         val contactItem = contactItems[position]
         return if (contactItem is ContactItem) {
-            getContactInitial(contactItem.name,
-                              contactItem.primaryPhoneNumber)
+            getContactInitial(contactItem.getSortingName())
         } else {
             ""
         }
@@ -252,17 +263,17 @@ class NewConversationRecyclerViewAdapter(
             val filteredContactItems = doFiltering(constraint)
 
             // Return the filtered results
-            val results = Filter.FilterResults()
+            val results = FilterResults()
             results.count = filteredContactItems.size
             results.values = filteredContactItems
             results
         } catch (e: Exception) {
             Crashlytics.logException(e)
-            Filter.FilterResults()
+            FilterResults()
         }
 
         override fun publishResults(constraint: CharSequence,
-                                    results: Filter.FilterResults?) {
+                                    results: FilterResults?) {
             if (results?.values == null) {
                 showSnackbar(activity, R.id.coordinator_layout,
                              activity.getString(
@@ -389,7 +400,6 @@ class NewConversationRecyclerViewAdapter(
      * Loads all contacts from the Android contacts provider.
      */
     private fun loadAllContactItems() {
-        @Suppress("ConstantConditionIf")
         if (demo) {
             allContactItems.addAll(getNewConversationContacts())
             return
@@ -456,6 +466,11 @@ class NewConversationRecyclerViewAdapter(
         } catch (ignored: SecurityException) {
             // Do nothing.
         }
+
+        // Sort contact items
+        allContactItems.sortBy {
+            it.getSortingName()
+        }
     }
 
     /**
@@ -491,35 +506,52 @@ class NewConversationRecyclerViewAdapter(
         }
     }
 
-    companion object {
+    /**
+     * Represents a contact item.
+     */
+    abstract class BaseContactItem(val primaryPhoneNumber: String)
+
+    /**
+     * Represents the contact item for a typed in phone number.
+     */
+    class TypedInContactItem(phoneNumber: String) :
+        BaseContactItem(phoneNumber)
+
+    /**
+     * Represents the contact item for a standard contact.
+     *
+     * @param id The ID of the contact from the Android contacts provider.
+     * @param name The name of the contact.
+     * @param primaryPhoneNumber The contact's primary phone number.
+     * @param secondaryPhoneNumbers Any additional contact phone numbers.
+     * @param phoneNumberType The type of the phone number if there is only one
+     * phone number, or "Multiple" otherwise.
+     * @param bitmap The photo of the contact.
+     */
+    class ContactItem(val id: Long,
+                      val name: String,
+                      primaryPhoneNumber: String,
+                      val secondaryPhoneNumbers: MutableList<String>,
+                      var phoneNumberType: String,
+                      val bitmap: Bitmap?) :
+        BaseContactItem(primaryPhoneNumber) {
         /**
-         * Represents a contact item.
+         * Returns true if the name and phone number are different.
          */
-        abstract class BaseContactItem(val primaryPhoneNumber: String)
+        fun showSeparateNameAndPhoneNumber(): Boolean {
+            return name != primaryPhoneNumber
+                   && name != getFormattedPhoneNumber(primaryPhoneNumber)
+        }
 
         /**
-         * Represents the contact item for a typed in phone number.
+         * Gets the name to be used for sorting.
          */
-        class TypedInContactItem(phoneNumber: String) :
-            BaseContactItem(phoneNumber)
-
-        /**
-         * Represents the contact item for a standard contact.
-         *
-         * @param id The ID of the contact from the Android contacts provider.
-         * @param name The name of the contact.
-         * @param primaryPhoneNumber The contact's primary phone number.
-         * @param secondaryPhoneNumbers Any additional contact phone numbers.
-         * @param phoneNumberType The type of the phone number if there is only one
-         * phone number, or "Multiple" otherwise.
-         * @param bitmap The photo of the contact.
-         */
-        class ContactItem(val id: Long,
-                          val name: String,
-                          primaryPhoneNumber: String,
-                          val secondaryPhoneNumbers: MutableList<String>,
-                          var phoneNumberType: String,
-                          val bitmap: Bitmap?) :
-            BaseContactItem(primaryPhoneNumber)
+        fun getSortingName(): String {
+            return if (showSeparateNameAndPhoneNumber()) {
+                name
+            } else {
+                getDigitsOfString(primaryPhoneNumber)
+            }
+        }
     }
 }

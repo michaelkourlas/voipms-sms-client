@@ -36,6 +36,7 @@
     <string name="preferences_dids_error_api_error">Phone number retrieval failed: VoIP.ms API returned error \'%1$s\'</string>
     <string name="preferences_dids_error_unknown">Phone number retrieval failed: unknown error</string>
     <string name="preferences_dids_fragment_retrieved_dids_key">voipms_dids</string>
+    <string name="preferences_dids_stored_locally">Stored locally but not found in VoIP.ms account</string>
     <string name="preferences_dids_fragment_database_dids_key">database_dids</string>
     <string name="preferences_did_did" translatable="false">did</string>
     <string name="preferences_did_show_in_conversations_view_key" translatable="false">preferences_did_%1$s_show_in_conversations_view</string>
@@ -92,12 +93,12 @@
     <string name="preferences_database_import_key" translatable="false">database_import</string>
     <string name="preferences_database_import_title">Import database</string>
     <string name="preferences_database_import_summary">Import raw SQLite database from a file</string>
+    <string name="preferences_database_import_success">Database imported</string>
     <string name="preferences_database_import_fail">Failed to import database: %1$s</string>
     <string name="preferences_database_export_key" translatable="false">database_export</string>
     <string name="preferences_database_export_title">Export database</string>
     <string name="preferences_database_export_summary">Export raw SQLite database to a file</string>
-    <string name="preferences_database_export_confirm_title">Export database?</string>
-    <string name="preferences_database_export_confirm_text">Database will be exported to a file called \'%1$s\' in the specified directory.</string>
+    <string name="preferences_database_export_success">Database exported</string>
     <string name="preferences_database_export_fail">Failed to export database: %1$s</string>
     <string name="preferences_database_clean_up_key" translatable="false">database_clean_up</string>
     <string name="preferences_database_clean_up_title">Clean up database</string>
@@ -115,6 +116,7 @@
     <string name="preferences_perm_denied_external_storage">External storage permission required to access ringtones</string>
     <string name="preferences_setup_completed_for_version_key" translatable="false">setup_completed_for_version</string>
     <string name="preferences_setup_completed_for_version_default_value" translatable="false">0</string>
+    <string name="preferences_first_sync_after_sign_in_key" translatable="false">first_sync_after_sign_in</string>
 
     <!-- ACTIVITIES -->
 
@@ -175,7 +177,8 @@
     <string name="conversations_action_chat">Chat</string>
     <string name="conversations_delete_confirm_title">Delete this conversation?</string>
     <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
-    <string name="conversations_no_messages">You have no messages.</string>
+    <string name="conversations_no_dids">You have no configured DIDs.</string>
+    <string name="conversations_no_messages">You have no messages associated with the selected DID.</string>
     <string name="conversations_no_results">No results found for \'%1$s\'</string>
     <string name="conversations_message_you">You:</string>
     <string name="conversations_message_sending">Sending…</string>
@@ -187,10 +190,11 @@
     <string name="conversations_text_hint">Search…</string>
     <string name="conversations_no_account">No account configured</string>
     <string name="conversations_fail_web_browser">Failed to launch web browser</string>
+    <string name="conversations_sync_date_suggestion">Synchronization start date is %1$s</string>
 
     <!-- ConversationsArchivedActivity -->
     <string name="conversations_archived_name">Archived</string>
-    <string name="conversations_archived_no_messages">You have no archived messages.</string>
+    <string name="conversations_archived_no_messages">You have no archived messages associated with the selected DID.</string>
 
     <!-- ConversationActivity -->
     <string name="conversation_did" translatable="false">did</string>
@@ -201,7 +205,7 @@
 
     <!-- SignInActivity -->
     <string name="sign_in_name">Sign in to the VoIP.ms SMS API</string>
-    <string name="sign_in_info">&lt;strong&gt;Please read these instructions carefully. The sign-in process for this app is not intuitive.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;A VoIP.ms account is required to use this app. Sign up for an account on the &lt;a href="https://www.voip.ms"&gt;VoIP.ms website&lt;/a&gt;. You must use the email address you use to log into the VoIP.ms website to log into this app.&lt;br&gt;&lt;br&gt;VoIP.ms API access is also required to use this app. Use the &lt;a href="https://www.voip.ms/m/api.php"&gt;VoIP.ms API configuration menu&lt;/a&gt; to enable API access, set an API password, and add "0.0.0.0" to the list of IP addresses approved for API access. You must use the API password to log into this app, not your normal account password.</string>
+    <string name="sign_in_info">&lt;strong&gt;Please read these instructions carefully.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;A VoIP.ms account is required to use this app. Sign up for an account on the &lt;a href="https://www.voip.ms"&gt;VoIP.ms website&lt;/a&gt;. You must use the email address you use to log into the VoIP.ms website to log into this app.&lt;br&gt;&lt;br&gt;VoIP.ms API access is also required to use this app. Use the &lt;a href="https://www.voip.ms/m/api.php"&gt;VoIP.ms API configuration menu&lt;/a&gt; to enable API access, set an API password, and add "0.0.0.0" to the list of IP addresses approved for API access. You must use the API password to log into this app, not your normal account password.</string>
     <string name="sign_in_email_hint">VoIP.ms account email address</string>
     <string name="sign_in_password_hint">VoIP.ms API password</string>
     <string name="sign_in_button">Sign in</string>
@@ -287,7 +291,7 @@
 
     <!-- Push notifications registration complete receiver -->
     <string name="push_notifications_reg_complete_action" translatable="false">push_notifications_reg_complete_action</string>
-    <string name="push_notifications_reg_complete_voip_ms_api_callback_failed_dids" translatable="false">voip_ms_api_callback_failed_dids</string>
+    <string name="push_notifications_reg_complete_failed_dids" translatable="false">push_notifications_reg_complete_failed_dids</string>
 
     <!-- DID retrieval complete receiver -->
     <string name="retrieve_dids_complete_action" translatable="false">retrieve_dids_complete_action</string>
@@ -333,11 +337,14 @@
     <string name="new_conversation_shortcut_short">Compose</string>
     <string name="new_conversation_shortcut_long">New conversation</string>
 
-    <!-- MISCELLANEOUS -->
-    <string name="app_name">VoIP.ms SMS</string>
+    <!-- LABELS -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
+    <string name="change">Change</string>
     <string name="settings">Settings</string>
-    <string name="toast_unknown_error">Unknown error: %1$s</string>
+
+    <!-- MISCELLANEOUS -->
+    <string name="app_name">VoIP.ms SMS</string>
+    <string name="toast_error">Error: %1$s</string>
 </resources>

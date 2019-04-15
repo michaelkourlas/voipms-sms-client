@@ -167,7 +167,7 @@ class Database private constructor(private val context: Context) {
      * Exports the database to the specified file descriptor.
      */
     fun export(exportFd: ParcelFileDescriptor) = synchronized(this) {
-        val dbFile = context.getDatabasePath(Database.DATABASE_NAME)
+        val dbFile = context.getDatabasePath(DATABASE_NAME)
 
         try {
             // Close database to persist it to disk before export
@@ -358,7 +358,7 @@ class Database private constructor(private val context: Context) {
      * Imports the database from the specified file descriptor.
      */
     fun import(importFd: ParcelFileDescriptor) = synchronized(this) {
-        val dbFile = context.getDatabasePath(Database.DATABASE_NAME)
+        val dbFile = context.getDatabasePath(DATABASE_NAME)
         val backupFile = File("${dbFile.absolutePath}.backup")
 
         try {
@@ -1199,7 +1199,7 @@ class Database private constructor(private val context: Context) {
             val contactBitmap = getContactPhotoBitmap(context, message.contact)
             val icon = if (contactBitmap == null) {
                 IconCompat.createWithResource(
-                    context, R.drawable.ic_shortcut_chat)
+                    context, R.drawable.ic_shortcut_account_circle)
             } else {
                 IconCompat.createWithBitmap(applyCircularMask(contactBitmap))
             }

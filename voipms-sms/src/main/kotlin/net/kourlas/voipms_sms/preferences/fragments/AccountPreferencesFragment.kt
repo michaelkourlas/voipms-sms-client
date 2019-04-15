@@ -35,7 +35,8 @@ class AccountPreferencesFragment : PreferenceFragmentCompat(),
     override fun onResume() {
         super.onResume()
 
-        updateSummaries()
+        // Update preference summaries and behaviours
+        updateSummariesAndHandlers()
     }
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
@@ -47,7 +48,8 @@ class AccountPreferencesFragment : PreferenceFragmentCompat(),
         preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
 
-        updateSummaries()
+        // Update preference summaries and behaviours
+        updateSummariesAndHandlers()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences,
@@ -56,37 +58,39 @@ class AccountPreferencesFragment : PreferenceFragmentCompat(),
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
         if (isAdded) {
-            // Update summary text for changed preference
-            updateSummaryTextForPreference(findPreference(key))
+            // Update preference summary and behaviour
+            updateSummaryAndHandlerForPreference(findPreference(key))
         }
     }
 
     /**
-     * Updates the summary text for all preferences.
+     * Updates the summary texts and behaviours for selected preferences.
      */
-    private fun updateSummaries() {
+    private fun updateSummariesAndHandlers() {
         if (preferenceScreen != null) {
             for (preference in preferenceScreen.preferences) {
-                updateSummaryTextForPreference(preference)
+                // Update preference summary and behaviour
+                updateSummaryAndHandlerForPreference(preference)
             }
         }
     }
 
     /**
-     * Updates the summary text for the specified preference.
-     *
-     * @param preference The specified preference.
+     * Updates the summary texts and behaviours for the specified preference.
      */
-    private fun updateSummaryTextForPreference(preference: Preference?) {
-        val context = context ?: return
-        if (preference?.key == getString(
-                R.string.preferences_account_sign_out_key)) {
-            preference.summary = getEmail(context)
-            preference.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-                setEmail(context, "")
-                setPassword(context, "")
-                activity?.finish()
-                true
+    private fun updateSummaryAndHandlerForPreference(
+        preference: Preference?) {
+        activity?.let { activity ->
+            if (preference?.key == getString(
+                    R.string.preferences_account_sign_out_key)) {
+                preference.summary = getEmail(activity)
+                preference.onPreferenceClickListener =
+                    Preference.OnPreferenceClickListener {
+                        setEmail(activity, "")
+                        setPassword(activity, "")
+                        activity.finish()
+                        true
+                    }
             }
         }
     }

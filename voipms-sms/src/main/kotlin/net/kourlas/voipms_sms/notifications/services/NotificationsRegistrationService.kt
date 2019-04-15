@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,7 @@ class NotificationsRegistrationService : IntentService(
         }
 
         // Terminate quietly if notifications are not enabled
-        if (!Notifications.getInstance(
-                application).getNotificationsEnabled()) {
+        if (!Notifications.getInstance(application).getNotificationsEnabled()) {
             return
         }
 
@@ -75,7 +74,7 @@ class NotificationsRegistrationService : IntentService(
                 R.string.push_notifications_reg_complete_action))
         registrationCompleteIntent.putStringArrayListExtra(
             getString(
-                R.string.push_notifications_reg_complete_voip_ms_api_callback_failed_dids),
+                R.string.push_notifications_reg_complete_failed_dids),
             if (callbackFailedDids != null)
                 ArrayList<String>(
                     callbackFailedDids.toList()) else null)

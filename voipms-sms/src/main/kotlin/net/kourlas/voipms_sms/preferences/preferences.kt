@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,29 +147,29 @@ fun getStartDate(context: Context): Date {
     val calendar = Calendar.getInstance()
     calendar.add(Calendar.DAY_OF_YEAR, -30)
 
-    return try {
-        try {
+    try {
+        return try {
             val dateString = getStringPreference(context, context.getString(
                 R.string.preferences_sync_start_date_key), "")
             if (dateString != "") {
-                val sdf = SimpleDateFormat("MM/dd/YYYY", Locale.US)
+                val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.US)
                 sdf.parse(dateString)
             } else {
                 setStartDate(context, calendar.time)
-                return calendar.time
+                calendar.time
             }
         } catch (_: ParseException) {
             setStartDate(context, calendar.time)
-            return calendar.time
+            calendar.time
         }
     } catch (_: ClassCastException) {
         val milliseconds = getLongPreference(context, context.getString(
             R.string.preferences_sync_start_date_key), Long.MIN_VALUE)
-        if (milliseconds != java.lang.Long.MIN_VALUE) {
+        return if (milliseconds != java.lang.Long.MIN_VALUE) {
             Date(milliseconds)
         } else {
             setStartDate(context, calendar.time)
-            return calendar.time
+            calendar.time
         }
     }
 }
@@ -188,6 +188,12 @@ fun getReadTimeout(context: Context): Int =
         context.getString(
             R.string.preferences_network_read_timeout_default_value))
         .toIntOrNull() ?: 0
+
+fun getFirstSyncAfterSignIn(context: Context): Boolean =
+    getBooleanPreference(
+        context,
+        context.getString(R.string.preferences_first_sync_after_sign_in_key),
+        false)
 
 fun accountConfigured(context: Context): Boolean =
     getEmail(context) != ""
@@ -307,7 +313,14 @@ fun setStartDate(context: Context, date: Date) {
     setStringPreference(
         context,
         context.getString(R.string.preferences_sync_start_date_key),
-        SimpleDateFormat("MM/dd/YYYY", Locale.US).format(date))
+        SimpleDateFormat("MM/dd/yyyy", Locale.US).format(date))
+}
+
+fun setFirstSyncAfterSignIn(context: Context, firstSyncAfterSignIn: Boolean) {
+    setBooleanPreference(
+        context,
+        context.getString(R.string.preferences_first_sync_after_sign_in_key),
+        firstSyncAfterSignIn)
 }
 
 private fun getBooleanPreference(context: Context, key: String,

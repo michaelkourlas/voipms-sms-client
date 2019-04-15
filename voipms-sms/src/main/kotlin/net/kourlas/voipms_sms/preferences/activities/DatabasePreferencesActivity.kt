@@ -19,7 +19,6 @@ package net.kourlas.voipms_sms.preferences.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.DatabasePreferencesFragment
 
@@ -38,14 +37,13 @@ class DatabasePreferencesActivity : AppCompatActivity() {
         setContentView(R.layout.preferences_database)
 
         // Configure toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
+        // Load preferences fragment
         if (savedInstanceState == null) {
             fragment = DatabasePreferencesFragment()
             supportFragmentManager.beginTransaction().replace(

@@ -51,12 +51,9 @@ import net.kourlas.voipms_sms.utils.*
 /**
  * Single-instance class used to send notifications when new SMS messages
  * are received.
- *
- * @param application This application.
  */
 class Notifications private constructor(
     private val application: CustomApplication) {
-
     // Helper variables
     private val context = application.applicationContext
 
@@ -339,7 +336,6 @@ class Notifications private constructor(
         val conversationId = messages[0].conversationId
         val did = conversationId.did
         val contact = conversationId.contact
-        @Suppress("ConstantConditionIf")
         var contactName = if (!demo) {
             getContactName(context, contact)
         } else {

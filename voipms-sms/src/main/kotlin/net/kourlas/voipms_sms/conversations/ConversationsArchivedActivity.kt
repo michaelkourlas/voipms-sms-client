@@ -33,11 +33,10 @@ class ConversationsArchivedActivity : ConversationsActivity() {
         super.setupToolbar()
 
         // Add title to bar and enable up button
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.title = getString(R.string.conversations_archived_name)
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.let {
+            it.title = getString(R.string.conversations_archived_name)
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
     }
 
@@ -84,9 +83,6 @@ class ConversationsArchivedActivity : ConversationsActivity() {
 
     /**
      * Handles the unarchive button.
-     *
-     * @param mode The action mode to use.
-     * @return Always returns true.
      */
     private fun unarchiveButtonHandler(mode: ActionMode): Boolean {
         runOnNewThread {

@@ -1,3 +1,20 @@
+/*
+ * VoIP.ms SMS
+ * Copyright (C) 2019 Michael Kourlas
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.kourlas.voipms_sms.signin
 
 import android.content.BroadcastReceiver
@@ -13,14 +30,11 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.preferences.accountConfigured
-import net.kourlas.voipms_sms.preferences.didsConfigured
-import net.kourlas.voipms_sms.preferences.setEmail
-import net.kourlas.voipms_sms.preferences.setPassword
+import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.services.RetrieveDidsService
 import net.kourlas.voipms_sms.sms.services.VerifyCredentialsService
@@ -35,7 +49,6 @@ class SignInActivity : AppCompatActivity() {
     private val verifyCredentialsCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                // Show error if one occurred
                 val valid = intent?.getBooleanExtra(
                     getString(
                         R.string.verify_credentials_complete_valid), false)
@@ -43,9 +56,9 @@ class SignInActivity : AppCompatActivity() {
                     getString(
                         R.string.verify_credentials_complete_error))
 
-
                 when {
                     error != null -> {
+                        // Show error if one occurred
                         toggleControls(enabled = true)
                         showSnackbar(
                             this@SignInActivity,
@@ -53,6 +66,7 @@ class SignInActivity : AppCompatActivity() {
                             error)
                     }
                     valid == false -> {
+                        // If valid is false, then some error occurred
                         toggleControls(enabled = true)
                         showSnackbar(
                             this@SignInActivity,
@@ -61,6 +75,9 @@ class SignInActivity : AppCompatActivity() {
                                 R.string.verify_credentials_error_unknown))
                     }
                     valid == true -> {
+                        // If we managed to verify the credentials, then we
+                        // save them and try to enable all of the DIDs in the
+                        // account
                         val username = findViewById<TextInputEditText>(
                             R.id.username)
                         val password = findViewById<TextInputEditText>(
@@ -69,6 +86,8 @@ class SignInActivity : AppCompatActivity() {
                                  username.text?.toString() ?: "")
                         setPassword(applicationContext,
                                     password.text?.toString() ?: "")
+
+                        setFirstSyncAfterSignIn(this@SignInActivity, true)
 
                         RetrieveDidsService.startService(
                             this@SignInActivity, autoAdd = true)
@@ -79,6 +98,8 @@ class SignInActivity : AppCompatActivity() {
     private val didRetrievalCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
+                // Regardless of whether this succeeded, we've successfully
+                // signed in, so we exit this activity
                 toggleControls(enabled = true)
                 finish()
             }
@@ -92,6 +113,14 @@ class SignInActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        // If an account is already configured, then go to the account screen
+        // instead
+        if (accountConfigured(this)) {
+            startActivity(Intent(this, AccountPreferencesActivity::class.java))
+            finish()
+            return
+        }
 
         // Register dynamic receivers for this fragment
         registerReceiver(
@@ -129,17 +158,18 @@ class SignInActivity : AppCompatActivity() {
      */
     private fun setupToolbar() {
         // Set up toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
             if (!blockFinish()) {
-                actionBar.setHomeButtonEnabled(true)
-                actionBar.setDisplayHomeAsUpEnabled(true)
+                it.setHomeButtonEnabled(true)
+                it.setDisplayHomeAsUpEnabled(true)
             }
         }
     }
 
+    /**
+     * Sets up the info text view.
+     */
     private fun setupTextView() {
         val textView = findViewById<TextView>(R.id.text_view)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -153,6 +183,9 @@ class SignInActivity : AppCompatActivity() {
         textView.movementMethod = LinkMovementMethod.getInstance()
     }
 
+    /**
+     * Sets up the sign-in button.
+     */
     private fun setupButton() {
         val button = findViewById<MaterialButton>(R.id.sign_in_button)
         button.setOnClickListener {
@@ -167,6 +200,9 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Enables and disables the controls during sign-in.
+     */
     fun toggleControls(enabled: Boolean) {
         val button = findViewById<MaterialButton>(R.id.sign_in_button)
         button.isEnabled = enabled
@@ -182,12 +218,16 @@ class SignInActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        // Block the back button if appropriate
         if (blockFinish()) {
             return
         }
         super.onBackPressed()
     }
 
+    /**
+     * Returns true if the user should not be allowed to leave this activity.
+     */
     private fun blockFinish(): Boolean {
         return !didsConfigured(applicationContext)
                && Database.getInstance(applicationContext).getDids().isEmpty()
@@ -197,6 +237,7 @@ class SignInActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
+                // Block the back button if appropriate
                 if (blockFinish()) {
                     return true
                 }

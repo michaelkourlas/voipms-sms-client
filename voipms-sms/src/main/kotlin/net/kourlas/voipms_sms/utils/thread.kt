@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,5 @@ package net.kourlas.voipms_sms.utils
 
 /**
  * Runs the specified block on a new thread
- *
- * @param block The specified block.
  */
 fun runOnNewThread(block: () -> Unit) = Thread(Runnable(block)).start()
-

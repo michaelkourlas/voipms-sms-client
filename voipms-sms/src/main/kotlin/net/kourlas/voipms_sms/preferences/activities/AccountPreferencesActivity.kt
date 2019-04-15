@@ -17,13 +17,13 @@
 
 package net.kourlas.voipms_sms.preferences.activities
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.AccountPreferencesFragment
-import net.kourlas.voipms_sms.utils.abortActivity
+import net.kourlas.voipms_sms.signin.SignInActivity
 
 /**
  * Activity that houses a PreferencesFragment that displays the account
@@ -40,14 +40,13 @@ class AccountPreferencesActivity : AppCompatActivity() {
         setContentView(R.layout.preferences_account)
 
         // Configure toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
+        // Load preferences fragment
         if (savedInstanceState == null) {
             fragment = AccountPreferencesFragment()
             supportFragmentManager.beginTransaction().replace(
@@ -58,8 +57,9 @@ class AccountPreferencesActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        if (!accountConfigured(applicationContext)) {
-            abortActivity(this, Exception("Account not configured"))
+        if (!accountConfigured(this)) {
+            startActivity(Intent(this, SignInActivity::class.java))
+            finish()
             return
         }
     }

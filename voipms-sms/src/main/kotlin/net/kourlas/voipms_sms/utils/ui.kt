@@ -144,11 +144,6 @@ fun showSnackbar(activity: FragmentActivity, viewId: Int,
 /**
  * Shows a snackbar requesting a permission with a button linking to the
  * application settings page.
- *
- * @param activity The activity to use.
- * @param viewId The ID of the view to add the snackbar to.
- * @param text The text to show.
- * @return The snackbar.
  */
 fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
                            text: String): Snackbar? {
@@ -171,11 +166,15 @@ fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
     return null
 }
 
+/**
+ * Shows a toast with the value of the specified exception and aborts the
+ * specified activity.
+ */
 fun abortActivity(activity: FragmentActivity, ex: Exception,
                   duration: Int = Toast.LENGTH_SHORT) {
     Crashlytics.logException(ex)
     Toast.makeText(activity,
-                   activity.getString(R.string.toast_unknown_error, ex.message),
+                   activity.getString(R.string.toast_error, ex.message),
                    duration).show()
     activity.finish()
 }
@@ -183,9 +182,6 @@ fun abortActivity(activity: FragmentActivity, ex: Exception,
 /**
  * Gets a deterministically selected material design colour associated with
  * the specified phone number.
- *
- * @param phoneNumber The specified phone number
- * @return The selected colour.
  */
 fun getMaterialDesignColour(phoneNumber: String): Int {
     val colours = listOf(rgb(0xd5, 0x00, 0x00), rgb(0xc5, 0x11, 0x62),

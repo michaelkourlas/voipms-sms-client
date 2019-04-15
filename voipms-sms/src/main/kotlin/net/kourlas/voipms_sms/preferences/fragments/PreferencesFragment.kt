@@ -28,6 +28,7 @@ import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.NotificationsPreferencesActivity
 import net.kourlas.voipms_sms.signin.SignInActivity
+import net.kourlas.voipms_sms.utils.preferences
 
 /**
  * Fragment used to display the app's preferences.
@@ -35,40 +36,44 @@ import net.kourlas.voipms_sms.signin.SignInActivity
 class PreferencesFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
-        val context = context ?: return
-
         // Populate fragment with preferences defined in XML file
         addPreferencesFromResource(R.xml.preferences)
 
-        for (i in 0 until preferenceScreen.preferenceCount) {
-            val preference = preferenceScreen.getPreference(i)
-            if (preference.title == getString(
-                    R.string.preferences_notifications_category_name)) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val activity = activity ?: return
-                    Notifications.getInstance(activity.application)
-                        .createDefaultNotificationChannel()
+        context?.let {
+            for (preference in preferenceScreen.preferences) {
+                if (preference.title == getString(
+                        R.string.preferences_notifications_category_name)) {
+                    // Set the behaviour of the notifications preference; this
+                    // is different depending on whether the system supports
+                    // notification customization natively
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val activity = activity ?: return
+                        Notifications.getInstance(activity.application)
+                            .createDefaultNotificationChannel()
 
-                    val intent = Intent(
-                        Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                    intent.putExtra(Settings.EXTRA_APP_PACKAGE,
-                                    context.packageName)
-                    intent.putExtra(Settings.EXTRA_CHANNEL_ID,
-                                    getString(
-                                        R.string.notifications_channel_default))
-                    preference.intent = intent
-                } else {
-                    preference.intent = Intent(
-                        context, NotificationsPreferencesActivity::class.java)
-                }
-            } else if (preference.title == getString(
-                    R.string.preferences_account_category_name)) {
-                if (accountConfigured(context)) {
-                    preference.intent = Intent(context,
-                                               AccountPreferencesActivity::class.java)
-                } else {
-                    preference.intent = Intent(context,
-                                               SignInActivity::class.java)
+                        val intent = Intent(
+                            Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                        intent.putExtra(Settings.EXTRA_APP_PACKAGE,
+                                        it.packageName)
+                        intent.putExtra(
+                            Settings.EXTRA_CHANNEL_ID,
+                            getString(R.string.notifications_channel_default))
+                        preference.intent = intent
+                    } else {
+                        preference.intent = Intent(
+                            context,
+                            NotificationsPreferencesActivity::class.java)
+                    }
+                } else if (preference.title == getString(
+                        R.string.preferences_account_category_name)) {
+                    // Set the behaviour of the account preference
+                    if (accountConfigured(it)) {
+                        preference.intent = Intent(
+                            context, AccountPreferencesActivity::class.java)
+                    } else {
+                        preference.intent = Intent(context,
+                                                   SignInActivity::class.java)
+                    }
                 }
             }
         }

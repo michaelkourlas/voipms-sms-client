@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,8 @@
 package net.kourlas.voipms_sms.utils
 
 /**
- * Returns true if [value] is 1 and false is [value] is 0. Throws an exception
+ * Returns true if the specified value is 1 and false if 0. Throws an exception
  * otherwise.
- *
- * @param value The value to convert.
- * @return The converted value.
  */
 fun toBoolean(value: Long): Boolean {
     if (value != 0L && value != 1L) {
@@ -32,11 +29,8 @@ fun toBoolean(value: Long): Boolean {
 }
 
 /**
- * Returns true if [value] is "1" and false is [value] is "0". Throws an
+ * Returns true if the specified value is "1" and false if "0". Throws an
  * exception otherwise.
- *
- * @param value The value to convert.
- * @return The converted value.
  */
 fun toBoolean(value: String): Boolean {
     if (value != "0" && value != "1") {

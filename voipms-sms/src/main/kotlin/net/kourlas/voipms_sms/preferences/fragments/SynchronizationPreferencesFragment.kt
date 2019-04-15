@@ -24,10 +24,18 @@ import androidx.preference.Preference
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.sms.services.SyncIntervalService
+import net.kourlas.voipms_sms.utils.preferences
 
 class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-
+    // Preference change handlers
+    private val syncIntervalPreferenceChangeListener =
+        Preference.OnPreferenceChangeListener { _, _ ->
+            activity?.let {
+                SyncIntervalService.startService(it)
+            }
+            true
+        }
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
@@ -38,25 +46,24 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
         preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
 
+        // Update preference summaries and handlers
         updateSummariesAndHandlers()
     }
 
     override fun onResume() {
         super.onResume()
 
+        // Update preference summaries and handlers
         updateSummariesAndHandlers()
     }
 
     /**
-     * Updates the summary text for all preferences.
+     * Updates the summaries and handlers for all preferences.
      */
     private fun updateSummariesAndHandlers() {
-        if (preferenceScreen != null) {
-            for (i in 0 until preferenceScreen.preferenceCount) {
-                val subPreference = preferenceScreen.getPreference(i)
-                updateSummaryTextForPreference(subPreference)
-                updateHandlersForPreference(subPreference)
-            }
+        for (preference in preferenceScreen.preferences) {
+            updateSummaryTextForPreference(preference)
+            updateHandlersForPreference(preference)
         }
     }
 
@@ -72,9 +79,7 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     /**
-     * Updates the summary text for the specified preference.
-     *
-     * @param preference The specified preference.
+     * Updates the summary text and handler for the specified preference.
      */
     private fun updateSummaryTextForPreference(preference: Preference?) {
         if (preference is ListPreference) {
@@ -83,20 +88,8 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
         }
     }
 
-    // Preference change handlers
-    private val syncIntervalPreferenceChangeListener =
-        Preference.OnPreferenceChangeListener { _, _ ->
-            val activity = activity
-            if (activity != null) {
-                SyncIntervalService.startService(activity.applicationContext)
-            }
-            true
-        }
-
     /**
      * Updates the handlers for the specified preference.
-     *
-     * @param preference The specified preference.
      */
     private fun updateHandlersForPreference(preference: Preference) {
         if (preference.key == getString(

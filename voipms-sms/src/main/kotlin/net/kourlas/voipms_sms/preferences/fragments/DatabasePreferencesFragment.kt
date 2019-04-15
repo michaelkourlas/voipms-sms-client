@@ -23,7 +23,6 @@ import android.content.Intent.CATEGORY_OPENABLE
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
-import androidx.documentfile.provider.DocumentFile
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.takisoft.preferencex.PreferenceFragmentCompat
@@ -39,6 +38,7 @@ import net.kourlas.voipms_sms.utils.showSnackbar
  * Fragment used to display the database preferences.
  */
 class DatabasePreferencesFragment : PreferenceFragmentCompat() {
+    // Preference listeners
     private val importListener = Preference.OnPreferenceClickListener {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.type = "*/*"
@@ -47,19 +47,17 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                                IMPORT_REQUEST_CODE)
         true
     }
-
     private val exportListener = Preference.OnPreferenceClickListener {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+        intent.type = "application/octet-stream"
         startActivityForResult(intent,
                                EXPORT_REQUEST_CODE)
         true
     }
-
     private val cleanUpListener = Preference.OnPreferenceClickListener {
         cleanUp()
         true
     }
-
     private val deleteListener = Preference.OnPreferenceClickListener {
         delete()
         true
@@ -74,99 +72,91 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
         for (preference in preferenceScreen.preferences) {
             when {
                 preference.key == getString(
-                    R.string.preferences_database_import_key) -> preference.onPreferenceClickListener = importListener
+                    R.string.preferences_database_import_key) ->
+                    preference.onPreferenceClickListener = importListener
                 preference.key == getString(
-                    R.string.preferences_database_export_key) -> preference.onPreferenceClickListener = exportListener
+                    R.string.preferences_database_export_key) ->
+                    preference.onPreferenceClickListener = exportListener
                 preference.key == getString(
-                    R.string.preferences_database_clean_up_key) -> preference.onPreferenceClickListener = cleanUpListener
+                    R.string.preferences_database_clean_up_key) ->
+                    preference.onPreferenceClickListener = cleanUpListener
                 preference.key == getString(
-                    R.string.preferences_database_delete_key) -> preference.onPreferenceClickListener = deleteListener
+                    R.string.preferences_database_delete_key) ->
+                    preference.onPreferenceClickListener = deleteListener
             }
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int,
                                   data: Intent?) {
-        val d = data?.data
-        if (requestCode == IMPORT_REQUEST_CODE) {
-            if (resultCode == RESULT_OK && d != null) {
-                import(d)
-            }
-        } else if (requestCode == EXPORT_REQUEST_CODE) {
-            if (resultCode == RESULT_OK && d != null) {
-                export(d)
+        // Handle ACTION_OPEN_DOCUMENT and ACTION_CREATE_DOCUMENT results
+        data?.data?.let {
+            if (requestCode == IMPORT_REQUEST_CODE
+                && resultCode == RESULT_OK) {
+                import(it)
+            } else if (requestCode == EXPORT_REQUEST_CODE
+                       && resultCode == RESULT_OK) {
+                export(it)
             }
         }
+
     }
 
     /**
      * Imports the database located at the specified URI.
      */
     private fun import(uri: Uri) {
-        val activity = activity ?: return
-        runOnNewThread {
-            try {
-                val importFd = activity.contentResolver.openFileDescriptor(
-                    uri, "r") ?: throw Exception("Could not open file")
-                Database.getInstance(activity).import(importFd)
-            } catch (e: Exception) {
-                activity.runOnUiThread {
-                    showSnackbar(
-                        activity,
-                        R.id.coordinator_layout,
-                        getString(
-                            R.string.preferences_database_import_fail,
-                            "${e.message} (${e.javaClass.simpleName})"))
+        activity?.let {
+            runOnNewThread {
+                try {
+                    val importFd = it.contentResolver.openFileDescriptor(
+                        uri, "r") ?: throw Exception("Could not open file")
+                    Database.getInstance(it).import(importFd)
+                    it.runOnUiThread {
+                        showSnackbar(it, R.id.coordinator_layout, it.getString(
+                            R.string.preferences_database_import_success))
+                    }
+                } catch (e: Exception) {
+                    it.runOnUiThread {
+                        showSnackbar(
+                            it,
+                            R.id.coordinator_layout,
+                            getString(
+                                R.string.preferences_database_import_fail,
+                                "${e.message} (${e.javaClass.simpleName})"))
+                    }
                 }
             }
         }
     }
 
     /**
-     * Exports the database to the directory at the specified URI.
+     * Exports the database to the specified URI.
      */
     private fun export(uri: Uri) {
-        val activity = activity ?: return
+        activity?.let {
+            runOnNewThread {
+                try {
+                    val exportFd = it.contentResolver.openFileDescriptor(
+                        uri, "w") ?: throw Exception("Could not open file")
+                    Database.getInstance(it).export(exportFd)
 
-        val exportFilename = "voipmssms-${System.currentTimeMillis()}"
-
-        showAlertDialog(
-            activity,
-            activity.getString(
-                R.string.preferences_database_export_confirm_title),
-            activity.getString(
-                R.string.preferences_database_export_confirm_text,
-                exportFilename),
-            activity.getString(R.string.ok),
-            DialogInterface.OnClickListener { _, _ ->
-                runOnNewThread {
-                    try {
-                        val directory = DocumentFile.fromTreeUri(
-                            activity, uri)
-                                        ?: throw Exception(
-                                            "Could not process directory")
-                        val file = directory.createFile(
-                            "text/plain",
-                            "voipmssms-${System.currentTimeMillis()}")
-                                   ?: throw Exception("Could not create file")
-                        val exportFd = activity.contentResolver
-                                           .openFileDescriptor(file.uri, "w")
-                                       ?: throw Exception("Could not open file")
-                        Database.getInstance(activity).export(exportFd)
-                    } catch (e: Exception) {
-                        activity.runOnUiThread {
-                            showSnackbar(
-                                activity,
-                                R.id.coordinator_layout,
-                                getString(
-                                    R.string.preferences_database_export_fail,
-                                    "${e.message} (${e.javaClass.simpleName})"))
-                        }
+                    it.runOnUiThread {
+                        showSnackbar(it, R.id.coordinator_layout, it.getString(
+                            R.string.preferences_database_export_success))
+                    }
+                } catch (e: Exception) {
+                    it.runOnUiThread {
+                        showSnackbar(
+                            it,
+                            R.id.coordinator_layout,
+                            getString(
+                                R.string.preferences_database_export_fail,
+                                "${e.message} (${e.javaClass.simpleName})"))
                     }
                 }
-            },
-            activity.getString(R.string.cancel),
-            null)
+            }
+        }
     }
 
     private fun cleanUp() {

@@ -26,6 +26,7 @@ import com.takisoft.preferencex.PreferenceFragmentCompat
 import com.takisoft.preferencex.RingtonePreference
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getNotificationSound
+import net.kourlas.voipms_sms.utils.preferences
 
 class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
@@ -38,12 +39,14 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
         preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
 
+        // Update preferences summaries
         updateSummaries()
     }
 
     override fun onResume() {
         super.onResume()
 
+        // Update preferences summaries
         updateSummaries()
     }
 
@@ -51,11 +54,8 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
      * Updates the summary text for all preferences.
      */
     fun updateSummaries() {
-        if (preferenceScreen != null) {
-            for (i in 0 until preferenceScreen.preferenceCount) {
-                val subPreference = preferenceScreen.getPreference(i)
-                updateSummaryTextForPreference(subPreference)
-            }
+        for (preference in preferenceScreen.preferences) {
+            updateSummaryTextForPreference(preference)
         }
     }
 
@@ -72,33 +72,31 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
 
     /**
      * Updates the summary text for the specified preference.
-     *
-     * @param preference The specified preference.
      */
     private fun updateSummaryTextForPreference(preference: Preference?) {
-        val context = context ?: return
-        if (preference is RingtonePreference) {
-            // Display selected notification sound as summary text for
-            // notification setting
-            @Suppress("DEPRECATION")
-            val notificationSound = getNotificationSound(
-                context)
-            if (notificationSound == "") {
-                preference.summary = "None"
-            } else {
-                try {
-                    val ringtone = RingtoneManager.getRingtone(
-                        activity, Uri.parse(notificationSound))
-                    if (ringtone != null) {
-                        preference.summary = ringtone.getTitle(
-                            activity)
-                    } else {
+        context?.let {
+            if (preference is RingtonePreference) {
+                // Display selected notification sound as summary text for
+                // notification setting
+                @Suppress("DEPRECATION")
+                val notificationSound = getNotificationSound(it)
+                if (notificationSound == "") {
+                    preference.summary = "None"
+                } else {
+                    try {
+                        val ringtone = RingtoneManager.getRingtone(
+                            activity, Uri.parse(notificationSound))
+                        if (ringtone != null) {
+                            preference.summary = ringtone.getTitle(
+                                activity)
+                        } else {
+                            preference.summary = getString(
+                                R.string.preferences_notifications_sound_unknown)
+                        }
+                    } catch (ex: SecurityException) {
                         preference.summary = getString(
-                            R.string.preferences_notifications_sound_unknown)
+                            R.string.preferences_notifications_sound_unknown_perm)
                     }
-                } catch (ex: SecurityException) {
-                    preference.summary = getString(
-                        R.string.preferences_notifications_sound_unknown_perm)
                 }
             }
         }

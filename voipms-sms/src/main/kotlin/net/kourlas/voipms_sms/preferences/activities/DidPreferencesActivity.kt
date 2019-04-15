@@ -50,10 +50,9 @@ class DidPreferencesActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.title = getFormattedPhoneNumber(did)
         setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
         // Load label and switch inside enabled toolbar
@@ -65,6 +64,7 @@ class DidPreferencesActivity : AppCompatActivity() {
         bundle.putString(getString(
             R.string.preferences_did_fragment_argument_did), did)
 
+        // Load preferences fragment
         if (savedInstanceState == null) {
             fragment = DidPreferencesFragment()
             fragment.arguments = bundle

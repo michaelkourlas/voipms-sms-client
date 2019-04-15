@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import net.kourlas.voipms_sms.preferences.getDids
 
 /**
  * Subscribes to FCM topics corresponding to the currently configured DIDs.
- *
- * @param context The context to use.
  */
 fun subscribeToDidTopics(context: Context) {
     // Do not subscribe to DID topics if Google Play Services is unavailable

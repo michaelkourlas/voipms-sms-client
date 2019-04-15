@@ -28,7 +28,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,7 +39,6 @@ import net.kourlas.voipms_sms.preferences.activities.DidsPreferencesActivity
 import net.kourlas.voipms_sms.preferences.didsConfigured
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.signin.SignInActivity
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.getDigitsOfString
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
@@ -53,7 +51,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     // UI elements
     private lateinit var adapter: NewConversationRecyclerViewAdapter
     private lateinit var recyclerView: RecyclerView
-    private var menu: Menu? = null
+    private lateinit var menu: Menu
 
     // Relay used to forward message text from intent to new conversation
     private var messageText: String? = null
@@ -66,17 +64,6 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-
-        // Perform special setup if there are no DIDs available or the user
-        // has not configured an account
-        if (!didsConfigured(applicationContext)) {
-            if (Database.getInstance(applicationContext).getDids().isEmpty()
-                && !accountConfigured(applicationContext)) {
-                startActivity(Intent(this, SignInActivity::class.java))
-            } else {
-                startActivity(Intent(this, DidsPreferencesActivity::class.java))
-            }
-        }
 
         getMessageTextFromIntent()
         setupToolbar()
@@ -103,57 +90,56 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
      */
     private fun setupToolbar() {
         // Set up toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
+            it.setDisplayShowTitleEnabled(false)
+            it.setCustomView(R.layout.new_conversation_toolbar)
+            it.setDisplayShowCustomEnabled(true)
 
-        val actionBar = supportActionBar ?: throw Exception(
-            "Action bar cannot be null")
-        actionBar.setHomeButtonEnabled(true)
-        actionBar.setDisplayHomeAsUpEnabled(true)
-        actionBar.setDisplayShowTitleEnabled(false)
-        actionBar.setCustomView(R.layout.new_conversation_toolbar)
-        actionBar.setDisplayShowCustomEnabled(true)
+            // Configure the search box to trigger adapter filtering when the
+            // text changes
+            val searchView = it.customView.findViewById<SearchView>(
+                R.id.search_view)
+            searchView.inputType = InputType.TYPE_TEXT_VARIATION_PERSON_NAME
+            searchView
+                .setOnQueryTextListener(
+                    object : SearchView.OnQueryTextListener {
+                        override fun onQueryTextSubmit(query: String): Boolean =
+                            false
 
-        // Configure the search box to trigger adapter filtering when the
-        // text changes
-        val searchView = actionBar.customView.findViewById<SearchView>(
-            R.id.search_view)
-        searchView.inputType = InputType.TYPE_TEXT_VARIATION_PERSON_NAME
-        searchView
-            .setOnQueryTextListener(
-                object : SearchView.OnQueryTextListener {
-                    override fun onQueryTextSubmit(query: String): Boolean =
-                        false
+                        override fun onQueryTextChange(
+                            newText: String): Boolean {
+                            val phoneNumber = newText.replace(
+                                "[^0-9]".toRegex(), "")
+                            adapter.typedInPhoneNumber = phoneNumber
+                            adapter.refresh(newText)
+                            return true
+                        }
+                    })
+            searchView.requestFocus()
 
-                    override fun onQueryTextChange(
-                        newText: String): Boolean {
-                        val phoneNumber = newText.replace(
-                            "[^0-9]".toRegex(), "")
-                        adapter.typedInPhoneNumber = phoneNumber
-                        adapter.refresh(newText)
-                        return true
-                    }
-                })
-        searchView.requestFocus()
+            // Hide search icon
+            val searchMagIcon = searchView.findViewById<ImageView>(
+                R.id.search_mag_icon)
+            searchMagIcon.layoutParams = LinearLayout.LayoutParams(0, 0)
 
-        // Hide search icon
-        val searchMagIcon = searchView.findViewById<ImageView>(
-            R.id.search_mag_icon)
-        searchMagIcon.layoutParams = LinearLayout.LayoutParams(0, 0)
-
-        // Set cursor color and hint text
-        val searchAutoComplete = searchView.findViewById<
-            SearchView.SearchAutoComplete>(
-            androidx.appcompat.R.id.search_src_text)
-        searchAutoComplete.hint = getString(R.string.new_conversation_text_hint)
-        searchAutoComplete.setHintTextColor(ContextCompat.getColor(
-            applicationContext, R.color.search_hint))
-        try {
-            val field = TextView::class.java.getDeclaredField(
-                "mCursorDrawableRes")
-            field.isAccessible = true
-            field.set(searchAutoComplete, R.drawable.search_cursor)
-        } catch (_: java.lang.Exception) {
+            // Set cursor color and hint text
+            val searchAutoComplete = searchView.findViewById<
+                SearchView.SearchAutoComplete>(
+                androidx.appcompat.R.id.search_src_text)
+            searchAutoComplete.hint = getString(
+                R.string.new_conversation_text_hint)
+            searchAutoComplete.setHintTextColor(ContextCompat.getColor(
+                applicationContext, R.color.search_hint))
+            try {
+                val field = TextView::class.java.getDeclaredField(
+                    "mCursorDrawableRes")
+                field.isAccessible = true
+                field.set(searchAutoComplete, R.drawable.search_cursor)
+            } catch (_: java.lang.Exception) {
+            }
         }
     }
 
@@ -170,8 +156,29 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        FastScroller.addTo(
-            recyclerView, FastScroller.POSITION_RIGHT_SIDE)
+        // Set up fast scroller
+        FastScroller.addTo(recyclerView, FastScroller.POSITION_RIGHT_SIDE)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Perform account and DID check
+        performAccountDidCheck()
+    }
+
+    /**
+     * Performs a check for a configured account and DIDs, and forces the user
+     * to configure an account or DIDs where appropriate.
+     */
+    private fun performAccountDidCheck() {
+        // If there are no DIDs available or the user has not configured an
+        // account, then force the user to configure an account or DIDs
+        if (!accountConfigured(applicationContext)) {
+            startActivity(Intent(this, SignInActivity::class.java))
+        } else if (!didsConfigured(applicationContext)) {
+            startActivity(Intent(this, DidsPreferencesActivity::class.java))
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -192,33 +199,29 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
 
     /**
      * Handles the dialpad button.
-     *
-     * @return Always returns true.
      */
     private fun onDialpadButtonClick(item: MenuItem): Boolean {
-        val actionBar = supportActionBar ?: throw Exception(
-            "Action bar cannot be null")
-        val searchView = actionBar.customView
-            .findViewById<SearchView>(R.id.search_view)
-        searchView.inputType = InputType.TYPE_CLASS_PHONE
-        item.isVisible = false
-        menu?.findItem(R.id.keyboard_button)?.isVisible = true
+        supportActionBar?.let {
+            val searchView = it.customView.findViewById<SearchView>(
+                R.id.search_view)
+            searchView.inputType = InputType.TYPE_CLASS_PHONE
+            item.isVisible = false
+            menu.findItem(R.id.keyboard_button)?.isVisible = true
+        }
         return true
     }
 
     /**
      * Handles the keyboard button.
-     *
-     * @return Always returns true.
      */
     private fun onKeyboardButtonClick(item: MenuItem): Boolean {
-        val actionBar = supportActionBar ?: throw Exception(
-            "Action bar cannot be null")
-        val searchView = actionBar.customView
-            .findViewById<SearchView>(R.id.search_view)
-        searchView.inputType = InputType.TYPE_TEXT_VARIATION_PERSON_NAME
-        item.isVisible = false
-        menu?.findItem(R.id.dialpad_button)?.isVisible = true
+        supportActionBar?.let {
+            val searchView = it.customView.findViewById<SearchView>(
+                R.id.search_view)
+            searchView.inputType = InputType.TYPE_TEXT_VARIATION_PERSON_NAME
+            item.isVisible = false
+            menu.findItem(R.id.dialpad_button)?.isVisible = true
+        }
         return true
     }
 
@@ -229,8 +232,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         val contactItem = adapter[position]
-        if (contactItem is
-                NewConversationRecyclerViewAdapter.Companion.ContactItem) {
+        if (contactItem is NewConversationRecyclerViewAdapter.ContactItem) {
             // If the selected contact has multiple phone numbers, allow the
             // user to select one of the numbers
             if (contactItem.secondaryPhoneNumbers.isNotEmpty()) {
@@ -259,7 +261,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 startConversationActivity(contactItem.primaryPhoneNumber)
             }
         } else if (contactItem is
-                NewConversationRecyclerViewAdapter.Companion.TypedInContactItem) {
+                NewConversationRecyclerViewAdapter.TypedInContactItem) {
             startConversationActivity(contactItem.primaryPhoneNumber)
         } else {
             throw Exception("Unrecognized contact item type")
@@ -268,8 +270,6 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
 
     /**
      * Starts a conversation activity with the specified contact.
-     *
-     * @param contact The specified contact.
      */
     private fun startConversationActivity(contact: String) {
         val intent = Intent(this, ConversationActivity::class.java)

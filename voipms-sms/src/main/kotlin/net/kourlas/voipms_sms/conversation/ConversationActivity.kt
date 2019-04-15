@@ -38,7 +38,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -72,12 +71,12 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ConversationRecyclerViewAdapter
     private lateinit var layoutManager: LinearLayoutManager
-    private var menu: Menu? = null
+    private lateinit var menu: Menu
     private var actionMode: ActionMode? = null
 
     // The DID and contact associated with this conversation
-    private var did: String = ""
-    private var contact: String = ""
+    private lateinit var did: String
+    private lateinit var contact: String
     val conversationId: ConversationId
         get() = ConversationId(did, contact)
 
@@ -90,39 +89,47 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private val syncCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                val error = intent?.getStringExtra(getString(
-                    R.string.sync_complete_error))
-                if (error != null) {
-                    // Show error in snackbar if one occurred
+                // Show error in snackbar if one occurred
+                intent?.getStringExtra(getString(
+                    R.string.sync_complete_error))?.let {
                     showSnackbar(this@ConversationActivity,
-                                 R.id.coordinator_layout, error)
+                                 R.id.coordinator_layout, it)
                 }
 
-                adapter.refresh()
+                // Refresh adapter to show new messages
+                if (::adapter.isInitialized) {
+                    adapter.refresh()
+                }
             }
         }
     private val sendingMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?,
-                               intent: Intent?) =
-        // Refresh adapter to show message being sent
-            adapter.refresh()
+                               intent: Intent?) {
+            // Refresh adapter to show message being sent
+            if (::adapter.isInitialized) {
+                adapter.refresh()
+            }
+        }
+
     }
     private val sentMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            val error = intent?.getStringExtra(getString(
-                R.string.sent_message_error))
-            if (error != null) {
-                // Show error in snackbar if one occurred
+            // Show error in snackbar if one occurred
+            intent?.getStringExtra(getString(
+                R.string.sent_message_error))?.let {
                 showSnackbar(this@ConversationActivity,
-                             R.id.coordinator_layout, error)
+                             R.id.coordinator_layout, it)
             }
 
-            adapter.refresh()
+            if (::adapter.isInitialized) {
+                // Refresh adapter to show message was sent
+                adapter.refresh()
 
-            // Scroll to the bottom of the adapter so that the message is in
-            // view
-            if (adapter.itemCount > 0) {
-                layoutManager.scrollToPosition(adapter.itemCount - 1)
+                // Scroll to the bottom of the adapter so that the message is
+                // in view
+                if (adapter.itemCount > 0) {
+                    layoutManager.scrollToPosition(adapter.itemCount - 1)
+                }
             }
         }
     }
@@ -135,9 +142,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-
         if (intent == null) {
-            abortActivity(this, Exception("Intent is null"))
+            abortActivity(this, Exception("No intent was provided"))
             return
         }
 
@@ -146,12 +152,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         setupRecyclerView()
         setupMessageText()
         setupSendButton()
-
-        @Suppress("ConstantConditionIf")
-        if (demo) {
-            Notifications.getInstance(application).showDemoNotification(
-                getDemoNotification())
-        }
+        setupDemo()
     }
 
     /**
@@ -203,18 +204,21 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             }
         }
 
+        // We shouldn't show a conversation for a DID that is no longer
+        // configured
         if (did !in getDids(applicationContext)) {
-            abortActivity(this, Exception("DID no longer exists"))
+            abortActivity(this, Exception("DID '$did' no longer exists"))
             return
         }
 
+        // Remove the leading one from a North American phone number
+        // (e.g. +1 (123) 555-4567)
         if (contact.length == 11 && contact[0] == '1') {
-            // Remove the leading one from a North American phone number
-            // (e.g. +1 (123) 555-4567)
             contact = contact.substring(1)
         }
-        // Get DID and contact name and photo for use in recycler view adapter
-        @Suppress("ConstantConditionIf")
+
+        // Get DID and contact name and photo for use in recycler view
+        // adapter
         contactName = if (!demo) {
             getContactName(this, contact)
         } else {
@@ -228,20 +232,21 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      */
     private fun setupToolbar() {
         // Set up toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar ?: throw Exception(
-            "Action bar cannot be null")
-        // Show phone number under contact name if there is a contact name;
-        // otherwise just show phone number
-        if (contactName != null) {
-            actionBar.title = contactName
-            actionBar.subtitle = getFormattedPhoneNumber(contact)
-        } else {
-            actionBar.title = getFormattedPhoneNumber(contact)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            // Show phone number under contact name if there is a contact name;
+            // otherwise just show phone number
+            contactName?.let { contactName ->
+                it.title = contactName
+                it.subtitle = getFormattedPhoneNumber(contact)
+            } ?: run {
+                it.title = getFormattedPhoneNumber(contact)
+            }
+
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
-        actionBar.setHomeButtonEnabled(true)
-        actionBar.setDisplayHomeAsUpEnabled(true)
+
         actionMode = null
     }
 
@@ -249,13 +254,13 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      * Sets up the activity recycler view.
      */
     private fun setupRecyclerView() {
-        // Set up recycler view
+        // Set up recycler view with most recent message at bottom of list
         layoutManager = LinearLayoutManager(this)
         layoutManager.orientation = RecyclerView.VERTICAL
-        // Most recent message at bottom of list
         layoutManager.stackFromEnd = true
         recyclerView = findViewById(R.id.list)
-        adapter = ConversationRecyclerViewAdapter(this, recyclerView,
+        adapter = ConversationRecyclerViewAdapter(this,
+                                                  recyclerView,
                                                   layoutManager,
                                                   conversationId,
                                                   contactName,
@@ -264,6 +269,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
+        // Set up fast scroller
         FastScroller.addTo(
             recyclerView, FastScroller.POSITION_RIGHT_SIDE)
     }
@@ -284,12 +290,10 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         messageEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int,
                                            count: Int,
-                                           after: Int) = // Do nothing.
-                Unit
+                                           after: Int) = Unit
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int,
-                                       count: Int) = // Do nothing.
-                Unit
+                                       count: Int) = Unit
 
             override fun afterTextChanged(s: Editable) =
                 onMessageTextChange(s.toString())
@@ -315,22 +319,20 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Called when the message text box text changes.
-
-     * @param str The new text.
      */
-    private fun onMessageTextChange(str: String) {
+    private fun onMessageTextChange(newText: String) {
         val maxLength = applicationContext.resources.getInteger(
             R.integer.sms_max_length)
         val charsRemainingTextView = findViewById<TextView>(
             R.id.chars_remaining_text)
 
-        if (str.length <= maxLength) {
-            if (str.length >= maxLength - 10) {
+        if (newText.length <= maxLength) {
+            if (newText.length >= maxLength - 10) {
                 // Show "N" when there are N characters left in the first
                 // message and N <= 10
                 charsRemainingTextView.visibility = View.VISIBLE
                 charsRemainingTextView.text =
-                    (maxLength - str.length).toString()
+                    (maxLength - newText.length).toString()
             } else {
                 // Show nothing
                 charsRemainingTextView.visibility = View.GONE
@@ -340,17 +342,18 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             // number of characters left in the current message
             charsRemainingTextView.visibility = View.VISIBLE
 
-            val charsRemaining = if (str.length % maxLength != 0) {
-                maxLength - str.length % maxLength
+            val charsRemaining = if (newText.length % maxLength != 0) {
+                maxLength - newText.length % maxLength
             } else 0
-            val numMessages = str.length / maxLength + 1
+            val numMessages = newText.length / maxLength + 1
             charsRemainingTextView.text = getString(
                 R.string.conversation_char_rem,
                 charsRemaining, numMessages)
         }
 
         runOnNewThread {
-            Database.getInstance(this).insertMessageDraft(conversationId, str)
+            Database.getInstance(this).insertMessageDraft(conversationId,
+                                                          newText)
         }
     }
 
@@ -362,6 +365,16 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         val sendButton = findViewById<ImageButton>(R.id.send_button)
         sendButton.setOnClickListener {
             this@ConversationActivity.sendMessage()
+        }
+    }
+
+    /**
+     * Sets up the conversation activity for demo mode.
+     */
+    private fun setupDemo() {
+        if (demo) {
+            Notifications.getInstance(application).showDemoNotification(
+                getDemoNotification())
         }
     }
 
@@ -493,6 +506,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         } catch (_: java.lang.Exception) {
         }
 
+        // Update the visible menu buttons to match whether or not the
+        // conversation is archived.
         updateButtons()
 
         return super.onCreateOptionsMenu(menu)
@@ -513,8 +528,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the up button.
-     *
-     * @return Always returns true.
      */
     private fun onUpButtonClick(): Boolean {
         // Override standard "up" behaviour because this activity
@@ -541,8 +554,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the call button.
-     *
-     * @return Always returns true.
      */
     private fun onCallButtonClick(): Boolean {
         val intent = Intent(Intent.ACTION_CALL)
@@ -572,8 +583,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the archive button.
-     *
-     * @return Always returns true.
      */
     private fun onArchiveButtonClick(): Boolean {
         runOnNewThread {
@@ -588,8 +597,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the unarchive button.
-     *
-     * @return Always returns true.
      */
     private fun onUnarchiveButtonClick(): Boolean {
         runOnNewThread {
@@ -605,8 +612,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the delete all messages button.
-     *
-     * @return Always returns true.
      */
     private fun onDeleteAllButtonClick(): Boolean {
         // Show a confirmation prompt; if the user accepts, delete all messages
@@ -631,8 +636,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the notifications button.
-     *
-     * @return Always returns true.
      */
     private fun onNotificationsButtonClick(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -656,6 +659,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         val inflater = mode.menuInflater
         inflater.inflate(R.menu.conversation_secondary, menu)
 
+        // Apply animation to status bar
         val colorAnimation = ValueAnimator.ofArgb(
             ContextCompat.getColor(applicationContext,
                                    R.color.colorPrimaryDark),
@@ -683,14 +687,17 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             R.id.share_button -> return onShareButtonClick(mode)
             R.id.delete_button -> return onDeleteButtonClick(mode)
         }
+
         return false
     }
 
-    override fun onDestroyActionMode(actionMode: ActionMode) {
+    override fun onDestroyActionMode(mode: ActionMode) {
+        // Uncheck all items
         for (i in 0 until adapter.itemCount) {
             adapter[i].setChecked(false, i)
         }
 
+        // Apply animation to status bar
         val colorAnimation = ValueAnimator.ofArgb(
             ContextCompat.getColor(applicationContext,
                                    R.color.colorSecondaryDark),
@@ -703,14 +710,11 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         }
         colorAnimation.start()
 
-        this.actionMode = null
+        actionMode = null
     }
 
     /**
      * Handles the resend button.
-     *
-     * @param mode The action mode to use.
-     * @return Always returns true.
      */
     private fun onResendButtonClick(mode: ActionMode): Boolean {
         // Resends all checked items
@@ -729,9 +733,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the info button.
-     *
-     * @param mode The action mode to use.
-     * @return Always returns true.
      */
     private fun onInfoButtonClick(mode: ActionMode): Boolean {
         // Get first checked item
@@ -784,9 +785,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the copy button.
-     *
-     * @param mode The action mode to use.
-     * @return Always returns true.
      */
     private fun onCopyButtonClick(mode: ActionMode): Boolean {
         // Get first checked item
@@ -808,9 +806,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the share button.
-     *
-     * @param mode The action mode to use.
-     * @return Always returns true.
      */
     private fun onShareButtonClick(mode: ActionMode): Boolean {
         // Get first checked item
@@ -820,9 +815,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
         // Send a share intent with the text of the message
         if (message != null) {
-            val intent = Intent(android.content.Intent.ACTION_SEND)
+            val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
-            intent.putExtra(android.content.Intent.EXTRA_TEXT,
+            intent.putExtra(Intent.EXTRA_TEXT,
                             message.text)
             startActivity(Intent.createChooser(intent, null))
         }
@@ -833,9 +828,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Handles the delete button.
-     *
-     * @param mode The action mode to use.
-     * @return Always returns true.
      */
     private fun onDeleteButtonClick(mode: ActionMode): Boolean {
         // Get the messages that are checked
@@ -879,11 +871,11 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     override fun onClick(view: View) {
         if (actionMode != null) {
             // Check or uncheck item when action mode is enabled
-            toggleItem(getRecyclerViewItem(view))
+            toggleItem(getRecyclerViewContainingItem(view))
         } else {
             // Resend message if has not yet been sent
             val position = recyclerView.getChildAdapterPosition(
-                getRecyclerViewItem(view))
+                getRecyclerViewContainingItem(view))
             if (position != RecyclerView.NO_POSITION) {
                 val messageItem = adapter[position]
                 val message = messageItem.message
@@ -893,8 +885,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 }
             }
 
-            val date = getRecyclerViewItem(view).findViewById<TextView>(
-                R.id.date)
+            // Toggle the date
+            val date = getRecyclerViewContainingItem(
+                view).findViewById<TextView>(R.id.date)
             if (date.visibility == View.GONE) {
                 date.visibility = View.VISIBLE
             } else {
@@ -905,20 +898,20 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     override fun onLongClick(view: View): Boolean {
         // On long click, toggle selected item
-        toggleItem(getRecyclerViewItem(view))
+        toggleItem(getRecyclerViewContainingItem(view))
         return true
     }
 
     override fun onBackPressed() {
         // Close action mode if visible
-        if (actionMode != null) {
-            actionMode?.finish()
+        actionMode?.let {
+            it.finish()
             return
         }
 
         // Close the search box if visible
-        menu?.let {
-            val searchItem = it.findItem(R.id.search_button)
+        if (::menu.isInitialized) {
+            val searchItem = menu.findItem(R.id.search_button)
             val searchView = searchItem.actionView as SearchView
             if (!searchView.isIconified) {
                 searchItem.collapseActionView()
@@ -956,8 +949,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
     /**
      * Toggles the checked status of the specified view.
-
-     * @param view The view to toggle.
      */
     private fun toggleItem(view: View) {
         // Inform the adapter that the item should be checked
@@ -991,18 +982,14 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 .isConversationArchived(conversationId)) {
             runOnUiThread {
                 // If conversation archived, only show unarchive button
-                menu?.let {
-                    it.findItem(R.id.archive_button).isVisible = false
-                    it.findItem(R.id.unarchive_button).isVisible = true
-                }
+                menu.findItem(R.id.archive_button).isVisible = false
+                menu.findItem(R.id.unarchive_button).isVisible = true
             }
         } else {
             runOnUiThread {
                 // If conversation unarchived, only show archive button
-                menu?.let {
-                    it.findItem(R.id.archive_button).isVisible = true
-                    it.findItem(R.id.unarchive_button).isVisible = false
-                }
+                menu.findItem(R.id.archive_button).isVisible = true
+                menu.findItem(R.id.unarchive_button).isVisible = false
             }
         }
     }
@@ -1012,38 +999,36 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      * items.
      */
     private fun updateActionModeButtons() {
-        val actionMode = actionMode ?: return
+        actionMode?.let {
+            // The resend button should only be visible if there is a single item
+            // checked and that item is in the failed to deliver state
+            val resendAction = it.menu.findItem(R.id.resend_button)
+            val count = adapter.getCheckedItemCount()
+            resendAction.isVisible = adapter.singleOrNull { item ->
+                item.checked && !item.message.isDelivered
+                && !item.message.isDeliveryInProgress
+            } != null
 
-        // The resend button should only be visible if there is a single item
-        // checked and that item is in the failed to deliver state
-        val resendAction = actionMode.menu.findItem(R.id.resend_button)
-        val count = adapter.getCheckedItemCount()
-        resendAction.isVisible = adapter.singleOrNull {
-            it.checked && !it.message.isDelivered
-            && !it.message.isDeliveryInProgress
-        } != null
+            // Certain buttons should not be visible if there is more than one
+            // item visible
+            val copyAction = it.menu.findItem(R.id.copy_button)
+            val shareAction = it.menu.findItem(R.id.share_button)
+            val infoAction = it.menu.findItem(R.id.info_button)
 
-        // Certain buttons should not be visible if there is more than one
-        // item visible
-        val copyAction = actionMode.menu.findItem(R.id.copy_button)
-        val shareAction = actionMode.menu.findItem(R.id.share_button)
-        val infoAction = actionMode.menu.findItem(R.id.info_button)
-        if (count >= 2) {
-            infoAction.isVisible = false
-            copyAction.isVisible = false
-            shareAction.isVisible = false
-        } else {
-            infoAction.isVisible = true
-            copyAction.isVisible = true
-            shareAction.isVisible = true
+            infoAction.isVisible = count < 2
+            copyAction.isVisible = count < 2
+            shareAction.isVisible = count < 2
         }
     }
 
-    private fun getRecyclerViewItem(view: View): View {
+    /**
+     * Gets the containing item for the specified view in the recycler view.
+     */
+    private fun getRecyclerViewContainingItem(view: View): View {
         return if (view.parent is RecyclerView) {
             view
         } else {
-            getRecyclerViewItem(view.parent as View)
+            getRecyclerViewContainingItem(view.parent as View)
         }
     }
 }

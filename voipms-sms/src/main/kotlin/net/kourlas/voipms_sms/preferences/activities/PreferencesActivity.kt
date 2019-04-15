@@ -19,17 +19,17 @@ package net.kourlas.voipms_sms.preferences.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.PreferencesFragment
 
 /**
- * Activity that houses a [PreferencesFragment] that displays the app's
+ * Activity that houses a PreferencesFragment that displays the app's
  * preferences.
  */
 class PreferencesActivity : AppCompatActivity(),
     ActivityCompat.OnRequestPermissionsResultCallback {
+    // Preferences fragment for this preferences activity
     private lateinit var fragment: PreferencesFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,15 +39,13 @@ class PreferencesActivity : AppCompatActivity(),
         setContentView(R.layout.preferences)
 
         // Configure toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
-        // Load instance of PreferencesFragment
+        // Load preferences fragment
         if (savedInstanceState == null) {
             fragment = PreferencesFragment()
             supportFragmentManager.beginTransaction().replace(

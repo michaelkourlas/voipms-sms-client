@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2018 Michael Kourlas
+ * Copyright (C) 2015-2019 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Returns a comparison value for two dates (excluding times).
- *
- * @param first The first date.
- * @param second The second date.
- * @return The difference between the dates' year, month, or day, whichever
+ * Returns the difference between two dates' year, month, or day, whichever
  * differs first.
  */
 private fun compareDateWithoutTime(first: Calendar, second: Calendar): Int {
@@ -43,9 +39,6 @@ private fun compareDateWithoutTime(first: Calendar, second: Calendar): Int {
 /**
  * Get the formatted date used for the scroll bar on the recycler view in the
  * conversation view.
- *
- * @param date The date to format.
- * @return The formatted date.
  */
 fun getScrollBarDate(date: Date): String {
     val calendar = Calendar.getInstance()
@@ -78,9 +71,6 @@ fun getScrollBarDate(date: Date): String {
 
 /**
  * Get the formatted date used for the conversations view.
- *
- * @param date The date to format.
- * @return The formatted date.
  */
 fun getConversationsViewDate(context: Context, date: Date): String {
     val calendar = Calendar.getInstance()
@@ -140,9 +130,6 @@ fun getConversationsViewDate(context: Context, date: Date): String {
 /**
  * Get the formatted date used for the start of a portion of a conversation in
  * the conversation view.
- *
- * @param date The date to format.
- * @return The formatted date.
  */
 fun getConversationViewTopDate(date: Date): String {
     val calendar = Calendar.getInstance()
@@ -185,9 +172,6 @@ fun getConversationViewTopDate(date: Date): String {
 /**
  * Get the formatted date used for an individual message in the conversation
  * view.
- *
- * @param date The date to format.
- * @return The formatted date.
  */
 fun getConversationViewDate(context: Context, date: Date): String {
     val calendar = Calendar.getInstance()

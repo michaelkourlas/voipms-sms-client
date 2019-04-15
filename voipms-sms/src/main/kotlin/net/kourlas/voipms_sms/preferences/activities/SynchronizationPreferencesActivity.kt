@@ -23,7 +23,6 @@ import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.SynchronizationPreferencesFragment
 
@@ -42,14 +41,13 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
         setContentView(R.layout.preferences_synchronization)
 
         // Configure toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
+        // Load info message
         val textView = findViewById<TextView>(R.id.info_text_view)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             textView.text = Html.fromHtml(
@@ -61,6 +59,7 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
         }
         textView.movementMethod = LinkMovementMethod.getInstance()
 
+        // Load preferences fragment
         if (savedInstanceState == null) {
             fragment = SynchronizationPreferencesFragment()
             supportFragmentManager.beginTransaction().replace(

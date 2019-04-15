@@ -24,7 +24,6 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.preference.PreferenceViewHolder
 import net.kourlas.voipms_sms.R
 
-@Suppress("unused")
 open class MasterSwitchPreference : TwoTargetPreference {
     private var switch: SwitchCompat? = null
     private var mChecked: Boolean = false
@@ -39,14 +38,17 @@ open class MasterSwitchPreference : TwoTargetPreference {
             }
         }
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet,
                 defStyleAttr: Int, defStyleRes: Int) : super(context, attrs,
                                                              defStyleAttr,
                                                              defStyleRes)
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet,
                 defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet) : super(context,
                                                                attrs)
 
@@ -78,6 +80,7 @@ open class MasterSwitchPreference : TwoTargetPreference {
         }
     }
 
+    @Suppress("unused")
     fun setSwitchEnabled(enabled: Boolean) {
         mEnableSwitch = enabled
         if (switch != null) {

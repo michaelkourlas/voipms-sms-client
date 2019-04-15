@@ -47,6 +47,8 @@
                 android:id="@+id/empty_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/margin"
+                android:layout_marginEnd="@dimen/margin"
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 

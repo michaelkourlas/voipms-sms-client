@@ -21,7 +21,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import net.kourlas.voipms_sms.R
@@ -43,14 +42,13 @@ class NotificationsPreferencesActivity : AppCompatActivity() {
         setContentView(R.layout.preferences_notifications)
 
         // Configure toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
+        // Load preferences fragment
         if (savedInstanceState == null) {
             fragment = NotificationsPreferencesFragment()
             supportFragmentManager.beginTransaction().replace(

@@ -23,9 +23,6 @@ import androidx.fragment.app.FragmentActivity
 /**
  * Unregisters the specified broadcast receiver from the specified activity.
  * Ignores IllegalArgumentExceptions.
- *
- * @param activity The specified activity.
- * @param receiver The specified broadcast receiver.
  */
 fun safeUnregisterReceiver(activity: FragmentActivity,
                            receiver: BroadcastReceiver) = try {
