@@ -1,6 +1,5 @@
 # Contents
 
-* [Quick Start](#quick-start)
 * [Settings](#settings)
   * [Account](#account)
   * [Phone Numbers](#phone-numbers)
