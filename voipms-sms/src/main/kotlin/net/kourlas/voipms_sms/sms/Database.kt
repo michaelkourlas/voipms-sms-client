@@ -21,13 +21,14 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.drawable.Icon
+import android.os.Build
 import android.os.ParcelFileDescriptor
-import androidx.core.content.pm.ShortcutInfoCompat
-import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.graphics.drawable.IconCompat
 import com.google.firebase.appindexing.FirebaseAppIndex
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
@@ -39,6 +40,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 /**
  * Provides access to the application's database.
@@ -1180,43 +1182,51 @@ class Database private constructor(private val context: Context) {
      * Update the app shortcuts.
      */
     private fun updateShortcuts(context: Context) {
-        // There is one static shortcut
-        val maxCount = ShortcutManagerCompat
-                           .getMaxShortcutCountPerActivity(context) - 1
-        val messages = getMessagesMostRecentFilteredWithoutLock(
-            net.kourlas.voipms_sms.preferences.getDids(
-                context, onlyShowInConversationsView = true))
-        val shortcutInfoList = messages.zip(0 until maxCount).map {
-            val message = it.first
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            val shortcutManager = context.getSystemService(
+                ShortcutManager::class.java)
 
-            val intent = Intent(context, ConversationActivity::class.java)
-            intent.action = "android.intent.action.VIEW"
-            intent.putExtra(context.getString(R.string.conversation_did),
-                            message.did)
-            intent.putExtra(context.getString(R.string.conversation_contact),
-                            message.contact)
+            // There is one static shortcut
+            val maxCount = shortcutManager.maxShortcutCountPerActivity - 1
 
-            val contactBitmap = getContactPhotoBitmap(context, message.contact)
-            val icon = if (contactBitmap == null) {
-                IconCompat.createWithResource(
-                    context, R.drawable.ic_shortcut_account_circle)
-            } else {
-                IconCompat.createWithBitmap(applyCircularMask(contactBitmap))
+            val messages = getMessagesMostRecentFilteredWithoutLock(
+                net.kourlas.voipms_sms.preferences.getDids(
+                    context, onlyShowInConversationsView = true))
+            val shortcutInfoList = messages.zip(0 until maxCount).map {
+                val message = it.first
+
+                val intent = Intent(context, ConversationActivity::class.java)
+                intent.action = "android.intent.action.VIEW"
+                intent.putExtra(
+                    context.getString(R.string.conversation_did),
+                    message.did)
+                intent.putExtra(
+                    context.getString(R.string.conversation_contact),
+                    message.contact)
+
+                val contactBitmap = getContactPhotoBitmap(context,
+                                                          message.contact)
+                val icon = if (contactBitmap == null) {
+                    Icon.createWithResource(
+                        context, R.drawable.ic_shortcut_account_circle)
+                } else {
+                    Icon.createWithBitmap(applyCircularMask(contactBitmap))
+                }
+
+                val label = getContactName(context, message.contact)
+                            ?: getFormattedPhoneNumber(message.contact)
+
+                ShortcutInfo.Builder(
+                    context, message.conversationId.getId())
+                    .setIcon(icon)
+                    .setIntent(intent)
+                    .setLongLabel(label)
+                    .setShortLabel(label.split(" ")[0])
+                    .build()
             }
-
-            val label = getContactName(context, message.contact)
-                        ?: getFormattedPhoneNumber(message.contact)
-
-            ShortcutInfoCompat.Builder(
-                context, message.conversationId.getId())
-                .setIcon(icon)
-                .setIntent(intent)
-                .setLongLabel(label)
-                .setShortLabel(label.split(" ")[0])
-                .build()
+            shortcutManager.removeAllDynamicShortcuts()
+            shortcutManager.addDynamicShortcuts(shortcutInfoList)
         }
-        ShortcutManagerCompat.removeAllDynamicShortcuts(context)
-        ShortcutManagerCompat.addDynamicShortcuts(context, shortcutInfoList)
     }
 
     /**

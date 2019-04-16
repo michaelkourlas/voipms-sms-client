@@ -30,9 +30,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary"
+            android:theme="@style/ToolbarTheme"
             app:title="@string/sign_in_name"
-            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+            app:titleTextColor="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
@@ -60,8 +60,6 @@
                 android:layout_marginBottom="@dimen/margin"
                 android:hint="@string/sign_in_email_hint">
 
-                <!-- app:passwordToggleDrawable="@null" is a temporary fix for
-                     the "res/drawable-v21/design_password_eye.xml" bug -->
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/username"
                     style="@style/ThemeOverlay.MaterialComponents.TextInputEditText.FilledBox"
@@ -70,7 +68,6 @@
                     android:autofillHints="username"
                     android:importantForAutofill="yes"
                     android:inputType="textEmailAddress"
-                    app:passwordToggleDrawable="@null"
                     tools:targetApi="o" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -81,8 +78,6 @@
                 android:layout_marginBottom="@dimen/margin"
                 android:hint="@string/sign_in_password_hint">
 
-                <!-- app:passwordToggleDrawable="@null" is a temporary fix for
-                     the "res/drawable-v21/design_password_eye.xml" bug -->
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/password"
                     style="@style/ThemeOverlay.MaterialComponents.TextInputEditText.FilledBox"
@@ -91,7 +86,6 @@
                     android:autofillHints="password"
                     android:importantForAutofill="yes"
                     android:inputType="textPassword"
-                    app:passwordToggleDrawable="@null"
                     tools:targetApi="o" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -104,7 +98,7 @@
                     android:id="@+id/progress_bar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:indeterminateTint="@color/colorPrimary"
+                    android:indeterminateTint="@color/colorSecondary"
                     android:theme="@android:style/Widget.Material.Light.ProgressBar.Small"
                     android:visibility="invisible" />
 

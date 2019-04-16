@@ -29,14 +29,14 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary" />
+            android:theme="@style/ToolbarTheme"
+            app:titleTextColor="@android:color/white" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/enabled_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorSecondaryVariant"
-            android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary"
             app:title="Enabled"
             app:titleMarginStart="@dimen/toolbar_left_margin" />
     </com.google.android.material.appbar.AppBarLayout>

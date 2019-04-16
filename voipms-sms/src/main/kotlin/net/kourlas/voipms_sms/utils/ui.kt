@@ -29,9 +29,9 @@ import android.view.ViewOutlineProvider
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.crashlytics.android.Crashlytics
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import net.kourlas.voipms_sms.R
 import java.lang.Math.abs
@@ -106,7 +106,7 @@ fun showAlertDialog(activity: FragmentActivity, title: String?, text: String?,
                     negativeButtonText: String? = null,
                     negativeButtonAction: DialogInterface.OnClickListener? = null): AlertDialog? {
     if (!activity.isFinishing) {
-        val builder = MaterialAlertDialogBuilder(activity)
+        val builder = AlertDialog.Builder(activity)
         builder.setMessage(text)
         builder.setTitle(title)
         builder.setPositiveButton(positiveButtonText, positiveButtonAction)
@@ -125,6 +125,8 @@ fun showSnackbar(activity: FragmentActivity, viewId: Int,
     if (!activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
         val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        snackbar.setActionTextColor(
+            ContextCompat.getColor(activity, android.R.color.white))
         snackbar.show()
         return snackbar
     }
@@ -141,6 +143,8 @@ fun showSnackbar(activity: FragmentActivity, viewId: Int,
     if (!activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
         val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        snackbar.setActionTextColor(
+            ContextCompat.getColor(activity, android.R.color.white))
         snackbar.setAction(buttonText, buttonAction)
         snackbar.show()
         return snackbar
@@ -167,6 +171,8 @@ fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
             intent.data = uri
             activity.startActivity(intent)
         }
+        snackbar.setActionTextColor(
+            ContextCompat.getColor(activity, android.R.color.white))
         snackbar.show()
         return snackbar
     }

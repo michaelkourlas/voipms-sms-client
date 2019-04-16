@@ -183,9 +183,9 @@ open class ConversationsActivity : AppCompatActivity(),
     open fun setupNewConversationButton() {
         findViewById<FloatingActionButton>(R.id.chat_button).let {
             if (!didsConfigured(applicationContext)) {
-                it.visibility = View.GONE
+                (it as View).visibility = View.GONE
             } else {
-                it.visibility = View.VISIBLE
+                (it as View).visibility = View.VISIBLE
             }
             it.setOnClickListener {
                 val newConversationIntent = Intent(
@@ -422,6 +422,8 @@ open class ConversationsActivity : AppCompatActivity(),
             SearchView.SearchAutoComplete>(
             androidx.appcompat.R.id.search_src_text)
         searchAutoComplete.hint = getString(R.string.conversations_text_hint)
+        searchAutoComplete.setTextColor(ContextCompat.getColor(
+            applicationContext, android.R.color.white))
         searchAutoComplete.setHintTextColor(ContextCompat.getColor(
             applicationContext, R.color.search_hint))
         try {
