@@ -30,9 +30,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary"
+            android:theme="@style/ToolbarTheme"
             app:title="@string/sign_in_name"
-            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+            app:titleTextColor="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
@@ -76,8 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin"
-                android:hint="@string/sign_in_password_hint"
-                app:passwordToggleEnabled="true">
+                android:hint="@string/sign_in_password_hint">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/password"
@@ -99,7 +98,8 @@
                     android:id="@+id/progress_bar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:indeterminateTint="@color/colorPrimary"
+                    android:indeterminateTintMode="src_in"
+                    android:indeterminateTint="@color/colorSecondary"
                     android:theme="@android:style/Widget.Material.Light.ProgressBar.Small"
                     android:visibility="invisible" />
 

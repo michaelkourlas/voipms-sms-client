@@ -23,7 +23,9 @@
         android:icon="@android:color/transparent"
         android:key="@string/preferences_sync_interval_key"
         android:title="@string/preferences_sync_interval_title" />
+    <!-- No default value should be necessary, but one seems to be required -->
     <com.takisoft.preferencex.DatePickerPreference
+        android:defaultValue="01/01/1970"
         android:icon="@android:color/transparent"
         android:key="@string/preferences_sync_start_date_key"
         android:numeric="integer"

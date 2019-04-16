@@ -1,3 +1,7 @@
+## 0.6.3 ##
+
+* Bug fixes
+
 ## 0.6.2 ##
 
 * New login screen to simplify authentication process

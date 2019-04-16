@@ -22,9 +22,9 @@ import android.content.Intent
 import android.content.Intent.CATEGORY_OPENABLE
 import android.net.Uri
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.preference.Preference
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getDids
@@ -171,7 +171,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
 
         // Ask user which kind of clean up is desired, and then perform that
         // clean up
-        MaterialAlertDialogBuilder(activity).apply {
+        AlertDialog.Builder(activity).apply {
             setTitle(context.getString(
                 R.string.preferences_database_clean_up_title))
             setMultiChoiceItems(

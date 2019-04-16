@@ -26,12 +26,12 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.preferences.accountConfigured
@@ -131,6 +131,8 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 androidx.appcompat.R.id.search_src_text)
             searchAutoComplete.hint = getString(
                 R.string.new_conversation_text_hint)
+            searchAutoComplete.setTextColor(ContextCompat.getColor(
+                applicationContext, android.R.color.white))
             searchAutoComplete.setHintTextColor(ContextCompat.getColor(
                 applicationContext, R.color.search_hint))
             try {
@@ -241,7 +243,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 phoneNumbers.addAll(contactItem.secondaryPhoneNumbers)
 
                 var selectedIndex = 0
-                MaterialAlertDialogBuilder(this).apply {
+                AlertDialog.Builder(this).apply {
                     setTitle("Select phone number")
                     setSingleChoiceItems(phoneNumbers.toTypedArray(),
                                          selectedIndex) { _, which ->
@@ -291,7 +293,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 return
             dids.size > 1 -> {
                 var selectedIndex = 0
-                MaterialAlertDialogBuilder(this).apply {
+                AlertDialog.Builder(this).apply {
                     setTitle("Select DID")
                     setSingleChoiceItems(
                         dids.map(::getFormattedPhoneNumber).toTypedArray(),

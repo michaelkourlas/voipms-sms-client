@@ -165,7 +165,9 @@ fun getStartDate(context: Context): Date {
         val milliseconds = getLongPreference(context, context.getString(
             R.string.preferences_sync_start_date_key), Long.MIN_VALUE)
         return if (milliseconds != java.lang.Long.MIN_VALUE) {
-            Date(milliseconds)
+            val date = Date(milliseconds)
+            setStartDate(context, date)
+            date
         } else {
             setStartDate(context, calendar.time)
             calendar.time

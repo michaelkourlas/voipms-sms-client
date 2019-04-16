@@ -56,6 +56,13 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
                                         rootKey: String?) {
         activity?.let {
+            // Set DID
+            did = arguments?.getString(getString(
+                R.string.preferences_did_fragment_argument_did)) ?: run {
+                abortActivity(it, Exception("Missing DID argument"))
+                return
+            }
+
             // Add preferences
             addPreferencesFromResource(R.xml.preferences_did)
 
@@ -74,6 +81,7 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
         super.onResume()
 
         activity?.let {
+            // Set DID
             did = arguments?.getString(getString(
                 R.string.preferences_did_fragment_argument_did)) ?: run {
                 abortActivity(it, Exception("Missing DID argument"))

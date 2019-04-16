@@ -17,30 +17,30 @@
 
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <androidx.preference.Preference
-        android:icon="@drawable/ic_account_box_primary_dark_24dp"
+        android:icon="@drawable/ic_account_box_secondary_24dp"
         android:title="@string/preferences_account_category_name">
         <intent android:action=".preferences.AccountPreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
-        android:icon="@drawable/ic_call_primary_dark_24dp"
+        android:icon="@drawable/ic_call_secondary_24dp"
         android:title="@string/preferences_dids_category_name">
         <intent android:action=".preferences.DidsPreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
-        android:icon="@drawable/ic_message_primary_dark_24dp"
+        android:icon="@drawable/ic_message_secondary_24dp"
         android:title="@string/preferences_notifications_category_name" />
     <androidx.preference.Preference
-        android:icon="@drawable/ic_sync_primary_dark_24dp"
+        android:icon="@drawable/ic_sync_secondary_24dp"
         android:title="@string/preferences_sync_category_name">
         <intent android:action=".preferences.SynchronizationPreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
-        android:icon="@drawable/ic_router_primary_dark_24dp"
+        android:icon="@drawable/ic_router_secondary_24dp"
         android:title="@string/preferences_network_category_name">
         <intent android:action=".preferences.NetworkPreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
-        android:icon="@drawable/ic_storage_primary_dark_24dp"
+        android:icon="@drawable/ic_storage_secondary_24dp"
         android:title="@string/preferences_database_category_name">
         <intent android:action=".preferences.DatabasePreferencesActivity" />
     </androidx.preference.Preference>

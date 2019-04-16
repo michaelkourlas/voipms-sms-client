@@ -28,7 +28,8 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary" />
+            android:theme="@style/ToolbarTheme"
+            app:titleTextColor="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
@@ -42,8 +43,7 @@
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/margin"
             android:layout_marginEnd="@dimen/margin"
-            android:gravity="center"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+            android:gravity="center" />
 
         <RelativeLayout
             android:layout_width="match_parent"

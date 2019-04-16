@@ -33,7 +33,7 @@
         android:background="?attr/selectableItemBackground"
         android:baselineAligned="false"
         android:gravity="start|center_vertical"
-        android:paddingStart="?attr/listPreferredItemPaddingStart"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         tools:ignore="RtlSymmetry">
 
         <LinearLayout
