@@ -98,6 +98,7 @@
                     android:id="@+id/progress_bar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:indeterminateTintMode="src_in"
                     android:indeterminateTint="@color/colorSecondary"
                     android:theme="@android:style/Widget.Material.Light.ProgressBar.Small"
                     android:visibility="invisible" />
