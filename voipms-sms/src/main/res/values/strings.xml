@@ -321,6 +321,7 @@
     <string name="notifications_channel_contact_prefix">channel_did_contact_</string>
     <string name="notifications_channel_contact">channel_did_contact_%1$s_%2$s</string>
     <string name="notifications_sync_message">Synchronizing with VoIP.ms</string>
+    <string name="notifications_security_error">Failed to launch notification due to lack of external storage permission</string>
 
     <!-- UTILS -->
     <string name="utils_date_just_now">Now</string>

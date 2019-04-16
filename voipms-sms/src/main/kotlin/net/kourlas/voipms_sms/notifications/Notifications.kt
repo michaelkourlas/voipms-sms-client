@@ -26,6 +26,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.core.app.*
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
@@ -507,7 +508,15 @@ class Notifications private constructor(
             notificationIds[conversationId] = id
         }
 
-        NotificationManagerCompat.from(context).notify(id, notification.build())
+        try {
+            NotificationManagerCompat.from(context).notify(
+                id, notification.build())
+        } catch (e: SecurityException) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.notifications_security_error),
+                Toast.LENGTH_LONG).show()
+        }
     }
 
     /**

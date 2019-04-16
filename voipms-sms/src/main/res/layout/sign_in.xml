@@ -60,6 +60,8 @@
                 android:layout_marginBottom="@dimen/margin"
                 android:hint="@string/sign_in_email_hint">
 
+                <!-- app:passwordToggleDrawable="@null" is a temporary fix for
+                     the "res/drawable-v21/design_password_eye.xml" bug -->
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/username"
                     style="@style/ThemeOverlay.MaterialComponents.TextInputEditText.FilledBox"
@@ -68,6 +70,7 @@
                     android:autofillHints="username"
                     android:importantForAutofill="yes"
                     android:inputType="textEmailAddress"
+                    app:passwordToggleDrawable="@null"
                     tools:targetApi="o" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -76,9 +79,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin"
-                android:hint="@string/sign_in_password_hint"
-                app:passwordToggleEnabled="true">
+                android:hint="@string/sign_in_password_hint">
 
+                <!-- app:passwordToggleDrawable="@null" is a temporary fix for
+                     the "res/drawable-v21/design_password_eye.xml" bug -->
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/password"
                     style="@style/ThemeOverlay.MaterialComponents.TextInputEditText.FilledBox"
@@ -87,6 +91,7 @@
                     android:autofillHints="password"
                     android:importantForAutofill="yes"
                     android:inputType="textPassword"
+                    app:passwordToggleDrawable="@null"
                     tools:targetApi="o" />
             </com.google.android.material.textfield.TextInputLayout>
 

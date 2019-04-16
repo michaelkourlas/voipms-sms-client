@@ -25,6 +25,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.fragments.SynchronizationPreferencesFragment
+import net.kourlas.voipms_sms.preferences.getStartDate
 
 /**
  * Activity that houses a PreferencesFragment that displays the
@@ -58,6 +59,9 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
                 getString(R.string.preferences_sync_info))
         }
         textView.movementMethod = LinkMovementMethod.getInstance()
+
+        // Force start date to be set to a string
+        getStartDate(this)
 
         // Load preferences fragment
         if (savedInstanceState == null) {
