@@ -120,10 +120,10 @@ fun showAlertDialog(activity: FragmentActivity, title: String?, text: String?,
  * Shows a generic snackbar.
  */
 fun showSnackbar(activity: FragmentActivity, viewId: Int,
-                 text: String): Snackbar? {
+                 text: String, length: Int = Snackbar.LENGTH_LONG): Snackbar? {
     if (!activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
-        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(view, text, length)
         snackbar.setActionTextColor(
             ContextCompat.getColor(activity, android.R.color.white))
         snackbar.show()
@@ -138,10 +138,11 @@ fun showSnackbar(activity: FragmentActivity, viewId: Int,
 fun showSnackbar(activity: FragmentActivity, viewId: Int,
                  text: String,
                  buttonText: String? = null,
-                 buttonAction: View.OnClickListener? = null): Snackbar? {
+                 buttonAction: View.OnClickListener? = null,
+                 length: Int = Snackbar.LENGTH_LONG): Snackbar? {
     if (!activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
-        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(view, text, length)
         snackbar.setActionTextColor(
             ContextCompat.getColor(activity, android.R.color.white))
         snackbar.setAction(buttonText, buttonAction)

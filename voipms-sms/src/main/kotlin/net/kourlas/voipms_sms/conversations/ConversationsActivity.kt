@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
@@ -287,7 +288,8 @@ open class ConversationsActivity : AppCompatActivity(),
                     startActivity(
                         Intent(this,
                                SynchronizationPreferencesActivity::class.java))
-                })
+                },
+                Snackbar.LENGTH_INDEFINITE)
 
             setFirstSyncAfterSignIn(this, false)
         }
