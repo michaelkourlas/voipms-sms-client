@@ -58,7 +58,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin"
-                android:hint="@string/sign_in_email_hint">
+                android:hint="@string/sign_in_email_hint"
+                app:passwordToggleDrawable="@null">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/username"
@@ -68,6 +69,7 @@
                     android:autofillHints="username"
                     android:importantForAutofill="yes"
                     android:inputType="textEmailAddress"
+                    app:passwordToggleDrawable="@null"
                     tools:targetApi="o" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -76,7 +78,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin"
-                android:hint="@string/sign_in_password_hint">
+                android:hint="@string/sign_in_password_hint"
+                app:passwordToggleDrawable="@null">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/password"
@@ -86,6 +89,7 @@
                     android:autofillHints="password"
                     android:importantForAutofill="yes"
                     android:inputType="textPassword"
+                    app:passwordToggleDrawable="@null"
                     tools:targetApi="o" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -98,8 +102,8 @@
                     android:id="@+id/progress_bar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:indeterminateTintMode="src_in"
                     android:indeterminateTint="@color/colorSecondary"
+                    android:indeterminateTintMode="src_in"
                     android:theme="@android:style/Widget.Material.Light.ProgressBar.Small"
                     android:visibility="invisible" />
 

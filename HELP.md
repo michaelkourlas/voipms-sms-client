@@ -16,9 +16,9 @@
 ## Account
 
 This app requires access to the VoIP.ms API in order to retrieve messages from your VoIP.ms account. To facilitate this, go to the VoIP.ms [API Configuration menu](https://www.voip.ms/m/api.php) and:
-    * enable API access for your VoIP.ms account;
-    * set an API password (which is **distinct** from your account password); and
-    * set the list of approved IP addresses to "0.0.0.0".
+* enable API access for your VoIP.ms account;
+* set an API password (which is **distinct** from your account password); and
+* set the list of approved IP addresses to "0.0.0.0".
   
 When signing in, you must the email you use to sign into the VoIP.ms portal (**not** your SIP username) and the API password which you set above.
 
@@ -37,9 +37,9 @@ You can hide messages from the conversations view, block the retrieval of messag
 This application supports push notifications using Firebase Cloud Messaging. Push notifications are automatically setup when selecting phone numbers if notifications are enabled.
 
 However, if setup fails for whatever reason, you can configure them manually by:
-    * accessing the settings for your phone numbers (DIDs) on the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php);
-    * enabling the *SMS URL Callback* option; and
-    * entering the following URL into the neighbouring field: [https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}](https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO})
+* accessing the settings for your phone numbers (DIDs) on the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php);
+* enabling the *SMS URL Callback* option; and
+* entering the following URL into the neighbouring field: [https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}](https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO})
 
 If push notifications are configured correctly, VoIP.ms will send a callback to Google when your phone number receives a text message. Google will then forward the callback to your device using Firebase Cloud Messaging. When the app receives the callback, it performs a synchronization with the VoIP.ms servers and retrieves the text message. 
 
