@@ -9,8 +9,8 @@ android {
         applicationId 'net.kourlas.voipms_sms'
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 121
-        versionName '0.6.3'
+        versionCode 122
+        versionName '0.6.4'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
