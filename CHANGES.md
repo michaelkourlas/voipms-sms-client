@@ -1,3 +1,7 @@
+## 0.6.5 ##
+
+* Bug fixes
+
 ## 0.6.4 ##
 
 * Bug fixes
