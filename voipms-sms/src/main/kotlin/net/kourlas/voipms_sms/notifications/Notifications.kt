@@ -483,8 +483,15 @@ class Notifications private constructor(
                 "group".hashCode(),
                 PendingIntent.FLAG_CANCEL_CURRENT))
 
-            NotificationManagerCompat.from(context).notify(
-                GROUP_NOTIFICATION_ID, groupNotification.build())
+            try {
+                NotificationManagerCompat.from(context).notify(
+                    GROUP_NOTIFICATION_ID, groupNotification.build())
+            } catch (e: SecurityException) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.notifications_security_error),
+                    Toast.LENGTH_LONG).show()
+            }
         }
 
         // Primary notification action
