@@ -110,6 +110,8 @@
     <string name="preferences_database_delete_summary">Delete all messages and associated metadata</string>
     <string name="preferences_database_delete_confirm_title">Delete database?</string>
     <string name="preferences_database_delete_confirm_message">This action cannot be undone.</string>
+    <string name="preferences_database_fail_create_document">No handler available to select database export location</string>
+    <string name="preferences_database_fail_open_document">No handler available to select database import location</string>
 
     <!-- Uncategorized -->
     <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>
@@ -189,7 +191,7 @@
     <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>
     <string name="conversations_text_hint">Search…</string>
     <string name="conversations_no_account">No account configured</string>
-    <string name="conversations_fail_web_browser">Failed to launch web browser</string>
+    <string name="conversations_fail_web_browser">No web browser installed</string>
     <string name="conversations_sync_date_suggestion">Synchronization start date is %1$s</string>
 
     <!-- ConversationsArchivedActivity -->

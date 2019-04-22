@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.preferences.fragments
 
+import android.content.ActivityNotFoundException
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.Intent.CATEGORY_OPENABLE
@@ -43,15 +44,33 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.type = "*/*"
         intent.addCategory(CATEGORY_OPENABLE)
-        startActivityForResult(intent,
-                               IMPORT_REQUEST_CODE)
+        try {
+            startActivityForResult(intent,
+                                   IMPORT_REQUEST_CODE)
+        } catch (_: ActivityNotFoundException) {
+            activity?.let {
+                showSnackbar(
+                    it, R.id.coordinator_layout,
+                    getString(
+                        R.string.preferences_database_fail_open_document))
+            }
+        }
         true
     }
     private val exportListener = Preference.OnPreferenceClickListener {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         intent.type = "application/octet-stream"
-        startActivityForResult(intent,
-                               EXPORT_REQUEST_CODE)
+        try {
+            startActivityForResult(intent,
+                                   EXPORT_REQUEST_CODE)
+        } catch (_: ActivityNotFoundException) {
+            activity?.let {
+                showSnackbar(
+                    it, R.id.coordinator_layout,
+                    getString(
+                        R.string.preferences_database_fail_create_document))
+            }
+        }
         true
     }
     private val cleanUpListener = Preference.OnPreferenceClickListener {
