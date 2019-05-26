@@ -7,7 +7,7 @@
 VoIP.ms SMS is an Android messaging app for VoIP.ms that seeks to replicate the
 aesthetic of [Google's official SMS app](https://play.google.com/store/apps/details?id=com.google.android.apps.messaging).
 
-<a href='https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="50"/></a><a href="https://f-droid.org/app/net.kourlas.voipms_sms"><img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="50"></a>
+<a href='https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="50"/></a><a href="https://f-droid.org/app/net.kourlas.voipms_sms"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="50"></a>
 
 ## Features ##
 
