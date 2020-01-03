@@ -22,8 +22,8 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.JobIntentService
 import androidx.core.app.RemoteInput
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.getDids
@@ -33,7 +33,7 @@ import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.getJson
-import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
+import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import org.json.JSONException
 import org.json.JSONObject
@@ -129,7 +129,7 @@ class SendMessageService : JobIntentService() {
                                 contact, messageText))
                     }
                 } catch (e: Exception) {
-                    Crashlytics.logException(e)
+                    logException(e)
                     error = applicationContext.getString(
                         R.string.send_message_error_database)
                     return ConversationId(did, contact)
@@ -150,7 +150,7 @@ class SendMessageService : JobIntentService() {
 
             return ConversationId(did, contact)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
             error = applicationContext.getString(
                 R.string.send_message_error_unknown)
         }
@@ -215,7 +215,8 @@ class SendMessageService : JobIntentService() {
      */
     private fun sendMessage(message: OutgoingMessage) {
         // Terminate if no network connection is available
-        if (!isNetworkConnectionAvailable(applicationContext)) {
+        if (!NetworkManager.getInstance().isNetworkConnectionAvailable(
+                applicationContext)) {
             error = applicationContext.getString(
                 R.string.send_message_error_network)
             Database.getInstance(
@@ -267,12 +268,12 @@ class SendMessageService : JobIntentService() {
                 R.string.send_message_error_api_request)
             return null
         } catch (e: JSONException) {
-            Crashlytics.logException(e)
+            logException(e)
             error = applicationContext.getString(
                 R.string.send_message_error_api_parse)
             return null
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
             error = applicationContext.getString(
                 R.string.send_message_error_unknown)
             return null

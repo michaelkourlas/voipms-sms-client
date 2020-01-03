@@ -29,10 +29,8 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.ParcelFileDescriptor
-import com.google.firebase.appindexing.FirebaseAppIndex
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
-import net.kourlas.voipms_sms.sms.services.AppIndexingService
 import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
 import java.io.File
@@ -68,8 +66,7 @@ class Database private constructor(private val context: Context) {
 
             database.setTransactionSuccessful()
 
-            FirebaseAppIndex.getInstance().remove(Message.getMessageUrl(
-                databaseId))
+            removeFromIndex(Message.getMessageUrl(databaseId))
             updateShortcuts(context)
         } finally {
             database.endTransaction()
@@ -121,7 +118,7 @@ class Database private constructor(private val context: Context) {
             database.setTransactionSuccessful()
 
             for (message in messages) {
-                FirebaseAppIndex.getInstance().remove(message.messageUrl)
+                removeFromIndex(message.messageUrl)
             }
             updateShortcuts(context)
         } finally {
@@ -158,7 +155,7 @@ class Database private constructor(private val context: Context) {
 
             database.setTransactionSuccessful()
 
-            FirebaseAppIndex.getInstance().removeAll()
+            removeAllFromIndex()
             updateShortcuts(context)
         } finally {
             database.endTransaction()
@@ -390,9 +387,7 @@ class Database private constructor(private val context: Context) {
                 // Try refreshing database
                 database = databaseHelper.writableDatabase
 
-                runOnNewThread {
-                    AppIndexingService.replaceIndex(context)
-                }
+                replaceIndexOnNewThread(context)
             } catch (e: Exception) {
                 backupFile.copyTo(dbFile, overwrite = true)
                 throw e
@@ -445,11 +440,7 @@ class Database private constructor(private val context: Context) {
             for (databaseId in databaseIds) {
                 val message = getMessageDatabaseIdWithoutLock(databaseId)
                 if (message != null) {
-                    runOnNewThread {
-                        FirebaseAppIndex.getInstance().update(
-                            AppIndexingService.getMessageBuilder(
-                                context, message).build())
-                    }
+                    addMessageToIndexOnNewThread(context, message)
                 }
             }
             updateShortcuts(context)
@@ -561,11 +552,7 @@ class Database private constructor(private val context: Context) {
             addedDatabaseIds
                 .mapNotNull { getMessageDatabaseIdWithoutLock(it) }
                 .forEach {
-                    runOnNewThread {
-                        FirebaseAppIndex.getInstance().update(
-                            AppIndexingService.getMessageBuilder(
-                                context, it).build())
-                    }
+                    addMessageToIndexOnNewThread(context, it)
                 }
             if (addedDatabaseIds.isNotEmpty()) {
                 updateShortcuts(context)
@@ -1006,7 +993,11 @@ class Database private constructor(private val context: Context) {
     private fun getMessagesDraftFiltered(
         dids: Set<String>, filterConstraint: String): List<Message> {
         return getMessagesDraft(dids)
-            .filter { it.text.toLowerCase().contains(filterConstraint) }
+            .filter {
+                it.text
+                    .toLowerCase(Locale.getDefault())
+                    .contains(filterConstraint)
+            }
             .toMutableList()
     }
 
@@ -1073,7 +1064,7 @@ class Database private constructor(private val context: Context) {
                         val contactName = getContactName(context,
                                                          it.contact,
                                                          contactNameCache)
-                        contactName?.toLowerCase()?.contains(
+                        contactName?.toLowerCase(Locale.getDefault())?.contains(
                             filterConstraint)
                         ?: false
                     })
@@ -1184,7 +1175,7 @@ class Database private constructor(private val context: Context) {
     private fun updateShortcuts(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             val shortcutManager = context.getSystemService(
-                ShortcutManager::class.java)
+                ShortcutManager::class.java)!!
 
             // There is one static shortcut
             val maxCount = shortcutManager.maxShortcutCountPerActivity - 1
@@ -1368,7 +1359,8 @@ class Database private constructor(private val context: Context) {
                 // EST/EDT; it is now four hours ahead of EST/EDT
                 // at all times
                 sdf.timeZone = TimeZone.getTimeZone("America/New_York")
-                dateObj = sdf.parse(dateString)
+                dateObj = sdf.parse(dateString) ?: throw Exception(
+                    "Could not parse date $dateString")
 
                 val calendar = Calendar.getInstance(
                     TimeZone.getTimeZone("America/New_York"), Locale.US)

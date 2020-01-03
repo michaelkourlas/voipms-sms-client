@@ -35,7 +35,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationDemoMessages
@@ -44,6 +43,7 @@ import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
+import java.util.*
 
 /**
  * Recycler view adapter used by [ConversationActivity].
@@ -201,8 +201,8 @@ class ConversationRecyclerViewAdapter(
 
         // Highlight text that matches filter
         if (currConstraint != "") {
-            val index = message.text.toLowerCase().indexOf(
-                currConstraint.toLowerCase())
+            val index = message.text.toLowerCase(Locale.getDefault()).indexOf(
+                currConstraint.toLowerCase(Locale.getDefault()))
             if (index != -1) {
                 messageTextBuilder.setSpan(
                     BackgroundColorSpan(
@@ -342,12 +342,13 @@ class ConversationRecyclerViewAdapter(
             // Get filtered messages
             val resultsObject = ConversationFilter()
             if (!demo) {
-                resultsObject.messages.addAll(Database.getInstance(activity)
-                                                  .getMessagesConversationFiltered(
-                                                      conversationId,
-                                                      constraint.toString()
-                                                          .trim { it <= ' ' }
-                                                          .toLowerCase()))
+                resultsObject.messages.addAll(
+                    Database.getInstance(activity)
+                        .getMessagesConversationFiltered(
+                            conversationId,
+                            constraint.toString()
+                                .trim { it <= ' ' }
+                                .toLowerCase(Locale.getDefault())))
             } else {
                 resultsObject.messages.addAll(getConversationDemoMessages())
             }
@@ -364,7 +365,7 @@ class ConversationRecyclerViewAdapter(
             results.values = resultsObject
             results
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
             FilterResults()
         }
 

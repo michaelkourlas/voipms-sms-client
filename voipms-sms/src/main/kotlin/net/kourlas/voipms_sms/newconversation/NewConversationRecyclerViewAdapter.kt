@@ -25,12 +25,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getNewConversationContacts
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
+import java.util.*
 
 /**
  * Recycler view adapter used by [NewConversationActivity].
@@ -242,10 +242,12 @@ class NewConversationRecyclerViewAdapter(
             val currConstraint = constraint.toString().trim { it <= ' ' }
             for (contactItem in allContactItems) {
                 val match =
-                    contactItem.name.toLowerCase().contains(
-                        currConstraint.toLowerCase())
-                    || contactItem.primaryPhoneNumber.toLowerCase()
-                        .contains(currConstraint.toLowerCase())
+                    contactItem.name.toLowerCase(Locale.getDefault()).contains(
+                        currConstraint.toLowerCase(Locale.getDefault()))
+                    || contactItem.primaryPhoneNumber
+                        .toLowerCase(Locale.getDefault())
+                        .contains(currConstraint.toLowerCase(
+                            Locale.getDefault()))
                     || (getDigitsOfString(currConstraint) != ""
                         && getDigitsOfString(
                         contactItem.primaryPhoneNumber).contains(
@@ -268,7 +270,7 @@ class NewConversationRecyclerViewAdapter(
             results.values = filteredContactItems
             results
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
             FilterResults()
         }
 

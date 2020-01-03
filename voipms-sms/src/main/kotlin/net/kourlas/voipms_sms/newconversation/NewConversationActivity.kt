@@ -38,7 +38,7 @@ import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.activities.DidsPreferencesActivity
 import net.kourlas.voipms_sms.preferences.didsConfigured
 import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.signin.SignInActivity
+import net.kourlas.voipms_sms.signIn.SignInActivity
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.getDigitsOfString
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber

@@ -23,17 +23,13 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import androidx.preference.Preference
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity
 import net.kourlas.voipms_sms.preferences.controls.MasterSwitchPreference
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
-import net.kourlas.voipms_sms.sms.services.AppIndexingService
 import net.kourlas.voipms_sms.utils.*
 
 class DidsPreferencesFragment : PreferenceFragmentCompat(),
@@ -186,20 +182,9 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
 
             if (dids.isNotEmpty()) {
                 // Re-register for push notifications when DIDs change
-                if (GoogleApiAvailability.getInstance()
-                        .isGooglePlayServicesAvailable(
-                            activity) != ConnectionResult.SUCCESS) {
-                    showSnackbar(
-                        it, R.id.coordinator_layout,
-                        it.getString(
-                            R.string.push_notifications_fail_google_play))
-                }
-                Notifications.getInstance(
-                    it.application).enablePushNotifications(it)
+                enablePushNotificationsWithGoogleCheck(it)
             }
-            runOnNewThread {
-                AppIndexingService.replaceIndex(it)
-            }
+            replaceIndexOnNewThread(it)
         }
 
         return true

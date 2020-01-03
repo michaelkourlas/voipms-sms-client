@@ -23,6 +23,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.ContactsContract
 import net.kourlas.voipms_sms.R
+import java.util.*
 
 /**
  * Gets the name of a contact from the Android contacts provider, given a
@@ -211,7 +212,7 @@ fun calculateInSampleSize(options: BitmapFactory.Options,
  * Gets the initial corresponding to the specified name.
  */
 fun getContactInitial(name: String?): String =
-    name?.toUpperCase()?.getOrNull(0)?.let {
+    name?.toUpperCase(Locale.getDefault())?.getOrNull(0)?.let {
         when {
             it.isLetter() -> it.toString()
             it.isDigit() -> "#"

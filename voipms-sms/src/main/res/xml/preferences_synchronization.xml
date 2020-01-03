@@ -28,7 +28,6 @@
         android:defaultValue="01/01/1970"
         android:icon="@android:color/transparent"
         android:key="@string/preferences_sync_start_date_key"
-        android:numeric="integer"
         android:title="@string/preferences_sync_start_date_title" />
     <androidx.preference.SwitchPreference
         android:defaultValue="@string/preferences_sync_retrieve_only_recent_messages_default_value"

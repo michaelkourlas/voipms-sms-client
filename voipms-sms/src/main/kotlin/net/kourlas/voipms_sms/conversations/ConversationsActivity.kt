@@ -38,8 +38,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
@@ -52,7 +50,7 @@ import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.PreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.SynchronizationPreferencesActivity
-import net.kourlas.voipms_sms.signin.SignInActivity
+import net.kourlas.voipms_sms.signIn.SignInActivity
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
@@ -248,9 +246,10 @@ open class ConversationsActivity : AppCompatActivity(),
         // Register dynamic receivers for this activity
         registerReceiver(syncCompleteReceiver,
                          IntentFilter(getString(R.string.sync_complete_action)))
-        registerReceiver(pushNotificationsRegistrationCompleteReceiver,
-                         IntentFilter(getString(
-                             R.string.push_notifications_reg_complete_action)))
+        registerReceiver(
+            pushNotificationsRegistrationCompleteReceiver,
+            IntentFilter(getString(
+                R.string.push_notifications_reg_complete_action)))
 
         // Perform initial setup as well as account and DID check
         performAccountDidCheck()
@@ -328,14 +327,7 @@ open class ConversationsActivity : AppCompatActivity(),
         // Perform special setup for version 114: need to re-enable push
         // notifications
         if (getSetupCompletedForVersion(this) < 114) {
-            if (GoogleApiAvailability.getInstance()
-                    .isGooglePlayServicesAvailable(
-                        this) != ConnectionResult.SUCCESS) {
-                showSnackbar(this, R.id.coordinator_layout,
-                             this.getString(
-                                 R.string.push_notifications_fail_google_play))
-            }
-            Notifications.getInstance(application).enablePushNotifications(this)
+            enablePushNotificationsWithGoogleCheck(this)
         }
     }
 
@@ -391,8 +383,10 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Unregister all dynamic receivers for this activity
         safeUnregisterReceiver(this, syncCompleteReceiver)
-        safeUnregisterReceiver(this,
-                               pushNotificationsRegistrationCompleteReceiver)
+        @Suppress("ConstantConditionIf")
+        safeUnregisterReceiver(
+            this,
+            pushNotificationsRegistrationCompleteReceiver)
 
         // Track number of activities
         (application as CustomApplication).conversationsActivityDecrementCount()

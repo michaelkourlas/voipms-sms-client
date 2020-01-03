@@ -18,7 +18,7 @@
 package net.kourlas.voipms_sms.preferences
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.text.ParseException
@@ -153,7 +153,8 @@ fun getStartDate(context: Context): Date {
                 R.string.preferences_sync_start_date_key), "")
             if (dateString != "") {
                 val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.US)
-                sdf.parse(dateString)
+                sdf.parse(dateString) ?: throw Exception(
+                    "Failed to parse date $dateString")
             } else {
                 setStartDate(context, calendar.time)
                 calendar.time

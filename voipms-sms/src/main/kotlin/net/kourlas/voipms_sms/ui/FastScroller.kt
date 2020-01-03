@@ -36,6 +36,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import net.kourlas.voipms_sms.R
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Adds a "fast-scroll" bar to the RecyclerView that shows the current position
@@ -266,7 +268,7 @@ class FastScroller private constructor(private val mRv: RecyclerView,
             return 1.0f
         }
         val scrollRange = range - extent
-        offset = Math.min(offset, scrollRange)
+        offset = min(offset, scrollRange)
         return offset / scrollRange.toFloat()
     }
 
@@ -288,8 +290,7 @@ class FastScroller private constructor(private val mRv: RecyclerView,
         // If the user presses down on the scroll thumb, we'll start
         // intercepting events from the RecyclerView so we can handle the move
         // events while they're dragging it up/down.
-        val action = e.actionMasked
-        when (action) {
+        when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> if (isInsideThumb(e.x, e.y)) {
                 startDrag()
                 return true
@@ -325,8 +326,7 @@ class FastScroller private constructor(private val mRv: RecyclerView,
         if (!mDragging) {
             return
         }
-        val action = e.actionMasked
-        when (action) {
+        when (e.actionMasked) {
             MotionEvent.ACTION_MOVE -> handleDragMove(e.y)
             MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP -> cancelDrag()
         }
@@ -350,8 +350,8 @@ class FastScroller private constructor(private val mRv: RecyclerView,
         // Convert the desired position from px to a scroll position in the
         // conversation.
         var dragScrollRatio = (y - verticalScrollStart) / verticalScrollLength
-        dragScrollRatio = Math.max(dragScrollRatio, 0.0f)
-        dragScrollRatio = Math.min(dragScrollRatio, 1.0f)
+        dragScrollRatio = max(dragScrollRatio, 0.0f)
+        dragScrollRatio = min(dragScrollRatio, 1.0f)
         // Scroll the RecyclerView to a new position.
         val itemCount = mRv.adapter!!.itemCount
         val itemPos = ((itemCount - 1) * dragScrollRatio).toInt()
@@ -380,7 +380,7 @@ class FastScroller private constructor(private val mRv: RecyclerView,
     }
 
     private fun layoutTrack() {
-        val trackHeight = Math.max(0, mContainer.height())
+        val trackHeight = max(0, mContainer.height())
         val widthMeasureSpec = MeasureSpec.makeMeasureSpec(
             mTrackWidth, MeasureSpec.EXACTLY)
         val heightMeasureSpec = MeasureSpec.makeMeasureSpec(

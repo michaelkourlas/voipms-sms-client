@@ -23,14 +23,14 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.getJson
-import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
+import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.toBoolean
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import org.json.JSONException
@@ -39,6 +39,7 @@ import java.io.IOException
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.ceil
 
 /**
  * Service used to synchronize the database with VoIP.ms.
@@ -109,7 +110,8 @@ class SyncService : IntentService(
                               ?: throw Exception("Force recent missing")
 
             // Terminate with a toast if no network connection is available
-            if (!isNetworkConnectionAvailable(applicationContext)) {
+            if (!NetworkManager.getInstance().isNetworkConnectionAvailable(
+                    applicationContext)) {
                 error = applicationContext.getString(
                     R.string.sync_error_network)
                 return
@@ -137,7 +139,7 @@ class SyncService : IntentService(
                     applicationContext)
             }
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
             error = applicationContext.getString(
                 R.string.sync_error_unknown)
         }
@@ -189,7 +191,7 @@ class SyncService : IntentService(
         nowCalendar.set(Calendar.SECOND, 0)
         nowCalendar.set(Calendar.MILLISECOND, 0)
         val now = nowCalendar.time
-        val daysDifference = Math.ceil(
+        val daysDifference = ceil(
             ((now.time - then.time) / (1000 * 60 * 60 * 24)).toDouble())
             .toLong()
 
@@ -250,7 +252,7 @@ class SyncService : IntentService(
     private fun processRequests(retrievalRequests: List<RetrievalRequest>,
                                 retrieveDeletedMessages: Boolean) {
         val incomingMessages = mutableListOf<IncomingMessage>()
-        for (i in 0 until retrievalRequests.size) {
+        for (i in retrievalRequests.indices) {
             val nextIncomingMessages = processRetrievalRequest(
                 retrievalRequests[i])
             if (nextIncomingMessages != null) {
@@ -273,7 +275,7 @@ class SyncService : IntentService(
                 .insertMessagesVoipMsApi(incomingMessages,
                                          retrieveDeletedMessages)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
             error = applicationContext.getString(
                 R.string.sync_error_database)
             return
@@ -331,14 +333,15 @@ class SyncService : IntentService(
                 try {
                     val incomingMessage = IncomingMessage(
                         rawSms.getString("id").toLong(),
-                        sdf.parse(rawDate),
+                        sdf.parse(rawDate) ?: throw Exception(
+                            "Failed to parse date $rawDate"),
                         toBoolean(rawSms.getString("type")),
                         rawSms.getString("did"),
                         rawSms.getString("contact"),
                         rawSms.getString("message"))
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
-                    Crashlytics.logException(e)
+                    logException(e)
                     error = applicationContext.getString(
                         R.string.sync_error_api_parse)
                     return null
@@ -362,11 +365,11 @@ class SyncService : IntentService(
                 R.string.sync_error_api_request)
             return null
         } catch (e: JSONException) {
-            Crashlytics.logException(e)
+            logException(e)
             error = applicationContext.getString(R.string.sync_error_api_parse)
             return null
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
             error = applicationContext.getString(R.string.sync_error_unknown)
             return null
         }

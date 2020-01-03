@@ -54,10 +54,9 @@
 * Conversation archival support
 * Notification inline reply support
 * Android Wear support
-* Firebase app indexing support
+* Firebase App Indexing support
 * Support for changing connection and read timeouts
 * Simplified push notification system
-* Firebase app indexing support
 * Miscellaneous UI improvements
 * Bug fixes and performance improvements
 * Removal of some synchronization features

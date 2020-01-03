@@ -31,10 +31,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import com.crashlytics.android.Crashlytics
 import com.google.android.material.snackbar.Snackbar
 import net.kourlas.voipms_sms.R
-import java.lang.Math.abs
+import kotlin.math.abs
 
 /**
  * Applies a circular mask to a bitmap.
@@ -186,7 +185,7 @@ fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
  */
 fun abortActivity(activity: FragmentActivity, ex: Exception,
                   duration: Int = Toast.LENGTH_SHORT) {
-    Crashlytics.logException(ex)
+    logException(ex)
     Toast.makeText(activity,
                    activity.getString(R.string.toast_error, ex.message),
                    duration).show()

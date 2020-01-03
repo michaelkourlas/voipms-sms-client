@@ -20,8 +20,8 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.sms.services.SyncIntervalService
+import net.kourlas.voipms_sms.utils.logException
 
 /**
  * Receiver called on system startup and used to set up the synchronization
@@ -39,7 +39,7 @@ class SyncBootReceiver : BroadcastReceiver() {
             }
             SyncIntervalService.startService(context)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
         }
     }
 }

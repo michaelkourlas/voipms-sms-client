@@ -26,7 +26,6 @@
 
     <!-- Phone numbers -->
     <string name="preferences_dids_category_name">Phone numbers</string>
-    <string name="preferences_dids_info">The phone numbers you wish to use with this app must have SMS enabled. Otherwise, they will not appear in this list. Use the VoIP.ms &lt;a href="https://voip.ms/m/managedid.php"&gt;phone number configuration menu&lt;/a&gt; to enable SMS for your phone numbers.&lt;br&gt;&lt;br&gt;This app uses the SMS URL callback feature for push notifications and attempts to configure it automatically. If you need to complete this step manually, use the VoIP.ms phone number configuration menu to enable the callback feature for your phone numbers, entering the following URL into the associated field: https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}</string>
     <string name="preferences_dids_did_key" translatable="false">did</string>
     <string name="preferences_dids_active_did_key" translatable="false">active_did</string>
     <string name="preferences_dids_key" translatable="false">dids</string>
@@ -49,7 +48,6 @@
 
     <!-- Synchronization -->
     <string name="preferences_sync_category_name">Synchronization</string>
-    <string name="preferences_sync_info">It is not necessary to set a synchronization interval simply to retrieve new messages. All new messages are downloaded automatically when the main conversations screen is loaded and when a push notification is received.</string>
     <string name="preferences_sync_interval_key" translatable="false">sync_interval</string>
     <string name="preferences_sync_interval_title">Synchronization interval</string>
     <string name="preferences_sync_interval_default_value" translatable="false">0</string>

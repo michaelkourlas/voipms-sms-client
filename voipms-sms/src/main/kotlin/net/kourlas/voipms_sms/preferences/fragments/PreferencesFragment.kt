@@ -27,7 +27,7 @@ import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.NotificationsPreferencesActivity
-import net.kourlas.voipms_sms.signin.SignInActivity
+import net.kourlas.voipms_sms.signIn.SignInActivity
 import net.kourlas.voipms_sms.utils.preferences
 
 /**

@@ -20,12 +20,12 @@ package net.kourlas.voipms_sms.sms.services
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.JobIntentService
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.JobId
+import net.kourlas.voipms_sms.utils.logException
 
 /**
  * Service used to mark the conversation defined by the specified contact
@@ -53,7 +53,7 @@ class MarkReadService : JobIntentService() {
             Notifications.getInstance(application).cancelNotification(
                 conversationId)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
         }
     }
 

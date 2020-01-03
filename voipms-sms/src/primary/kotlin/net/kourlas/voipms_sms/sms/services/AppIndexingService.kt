@@ -78,7 +78,7 @@ class AppIndexingService : JobIntentService() {
          */
         private fun updateIndex(indexables: List<Indexable>) {
             val max = Indexable.MAX_INDEXABLES_TO_BE_UPDATED_IN_ONE_CALL
-            (0 until indexables.size step max)
+            (indexables.indices step max)
                 .map {
                     indexables.subList(
                         it,

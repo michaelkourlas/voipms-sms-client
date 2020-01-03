@@ -20,9 +20,9 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.sms.services.SyncService
+import net.kourlas.voipms_sms.utils.logException
 
 /**
  * Receiver called when a database synchronization is requested, either
@@ -44,7 +44,7 @@ class SyncIntervalReceiver : BroadcastReceiver() {
                               ?: throw Exception("Force recent missing")
             SyncService.startService(context, forceRecent)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
         }
     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2019 Michael Kourlas
+  ~ Copyright (C) 2015-2020 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -188,7 +188,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".signin.SignInActivity"
+            android:name=".signIn.SignInActivity"
             android:label="@string/sign_in_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
@@ -199,14 +199,6 @@
 
         <!-- BROADCAST RECEIVERS -->
 
-        <receiver
-            android:name=".sms.receivers.AppIndexingReceiver"
-            android:exported="true"
-            android:permission="com.google.android.gms.permission.APPINDEXING">
-            <intent-filter>
-                <action android:name="com.google.firebase.appindexing.UPDATE_INDEX" />
-            </intent-filter>
-        </receiver>
         <receiver android:name=".sms.receivers.MarkReadReceiver" />
         <receiver android:name=".sms.receivers.SendMessageReceiver" />
         <receiver android:name=".sms.receivers.SyncBootReceiver">
@@ -219,18 +211,6 @@
 
         <!-- SERVICES -->
 
-        <service
-            android:name=".notifications.services.FcmListenerService"
-            android:exported="true"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-        <service android:name=".notifications.services.NotificationsRegistrationService" />
-        <service
-            android:name=".sms.services.AppIndexingService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".sms.services.MarkReadService"
             android:permission="android.permission.BIND_JOB_SERVICE" />

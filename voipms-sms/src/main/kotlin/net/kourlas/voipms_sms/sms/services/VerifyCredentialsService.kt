@@ -20,9 +20,9 @@ package net.kourlas.voipms_sms.sms.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.getJson
+import net.kourlas.voipms_sms.utils.logException
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -83,7 +83,7 @@ class VerifyCredentialsService : IntentService(
                 return verifyResponse(response)
             }
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
         }
         return false
     }
@@ -109,12 +109,12 @@ class VerifyCredentialsService : IntentService(
                 R.string.verify_credentials_error_api_request)
             return null
         } catch (e: JSONException) {
-            Crashlytics.logException(e)
+            logException(e)
             error = applicationContext.getString(
                 R.string.verify_credentials_error_api_parse)
             return null
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
             error = applicationContext.getString(
                 R.string.verify_credentials_error_unknown)
             return null
@@ -138,8 +138,7 @@ class VerifyCredentialsService : IntentService(
                 }
                 return false
             }
-
-            return response.getJSONArray("dids") != null
+            return true
         } catch (e: JSONException) {
             error = getString(
                 R.string.verify_credentials_error_api_parse)

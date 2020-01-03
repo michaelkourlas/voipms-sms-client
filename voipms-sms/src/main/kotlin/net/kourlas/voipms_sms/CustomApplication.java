@@ -18,7 +18,11 @@
 package net.kourlas.voipms_sms;
 
 import android.app.Application;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.os.Build;
 
+import net.kourlas.voipms_sms.network.NetworkManager;
 import net.kourlas.voipms_sms.sms.ConversationId;
 import net.kourlas.voipms_sms.sms.Database;
 
@@ -78,6 +82,19 @@ public class CustomApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Register for network callbacks
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            ConnectivityManager connectivityManager =
+                (ConnectivityManager) getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+            if (connectivityManager == null) {
+                throw new RuntimeException(
+                    "Connectivity manager does not exist");
+            }
+            connectivityManager.registerDefaultNetworkCallback(
+                NetworkManager.Companion.getInstance());
+        }
 
         // Open database
         Database.Companion.getInstance(getApplicationContext());

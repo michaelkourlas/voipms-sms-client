@@ -797,7 +797,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             val clipboard = getSystemService(
                 Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Text message", message.text)
-            clipboard.primaryClip = clip
+            clipboard.setPrimaryClip(clip)
         }
 
         mode.finish()

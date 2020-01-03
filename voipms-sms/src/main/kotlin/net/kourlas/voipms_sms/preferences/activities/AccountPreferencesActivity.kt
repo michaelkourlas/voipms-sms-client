@@ -23,7 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.AccountPreferencesFragment
-import net.kourlas.voipms_sms.signin.SignInActivity
+import net.kourlas.voipms_sms.signIn.SignInActivity
 
 /**
  * Activity that houses a PreferencesFragment that displays the account

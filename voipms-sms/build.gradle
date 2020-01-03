@@ -1,6 +1,9 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'io.fabric'
+
+if (!getGradle().getStartParameter().getTaskRequests().toString().contains("Fdroid")) {
+    apply plugin: 'io.fabric'
+}
 
 android {
     compileSdkVersion 29
@@ -16,9 +19,11 @@ android {
     productFlavors {
         primary {
             dimension "version"
+            buildConfigField 'boolean', 'IS_FDROID', 'false'
         }
         fdroid {
             versionNameSuffix "-fdroid"
+            buildConfigField 'boolean', 'IS_FDROID', 'true'
         }
     }
     compileOptions {
@@ -27,6 +32,8 @@ android {
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        primary.java.srcDirs += 'src/primary/kotlin'
+        fdroid.java.srcDirs += 'src/fdroid/kotlin'
     }
 }
 
@@ -45,16 +52,19 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
 
     // Firebase libraries
-    implementation 'com.google.firebase:firebase-appindexing:19.0.0'
-    implementation 'com.google.firebase:firebase-core:17.2.1'
-    implementation 'com.google.firebase:firebase-messaging:20.1.0'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    primaryImplementation 'com.google.firebase:firebase-appindexing:19.0.0'
+    primaryImplementation 'com.google.firebase:firebase-core:17.2.1'
+    primaryImplementation 'com.google.firebase:firebase-messaging:20.1.0'
+    primaryImplementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     // Additional libraries and fixes
-    implementation 'com.takisoft.preferencex:preferencex:1.0.0'
-    implementation 'com.takisoft.preferencex:preferencex-ringtone:1.0.0'
-    implementation 'com.takisoft.preferencex:preferencex-datetimepicker:1.0.0'
+    implementation 'com.takisoft.preferencex:preferencex:1.1.0'
+    implementation 'com.takisoft.preferencex:preferencex-ringtone:1.1.0'
+    implementation 'com.takisoft.preferencex:preferencex-datetimepicker:1.1.0'
 }
 
-apply plugin: 'com.google.gms.google-services'
+if (!getGradle().getStartParameter().getTaskRequests().toString().contains("Fdroid")) {
+    apply plugin: 'com.google.gms.google-services'
+}
+
 apply plugin: 'kotlin-android-extensions'

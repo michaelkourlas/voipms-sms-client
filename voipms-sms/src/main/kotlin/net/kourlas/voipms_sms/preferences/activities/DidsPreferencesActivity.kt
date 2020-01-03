@@ -29,11 +29,11 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.DidsPreferencesFragment
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.services.RetrieveDidsService
-import net.kourlas.voipms_sms.utils.isNetworkConnectionAvailable
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
@@ -132,7 +132,7 @@ class DidsPreferencesActivity : AppCompatActivity() {
             loadPreferences(null)
             return
         }
-        if (!isNetworkConnectionAvailable(this)) {
+        if (!NetworkManager.getInstance().isNetworkConnectionAvailable(this)) {
             showSnackbar(this, R.id.coordinator_layout, getString(
                 R.string.preferences_dids_error_network))
             loadPreferences(null)

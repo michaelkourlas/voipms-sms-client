@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.signin
+package net.kourlas.voipms_sms.signIn
 
 import android.content.BroadcastReceiver
 import android.content.Context

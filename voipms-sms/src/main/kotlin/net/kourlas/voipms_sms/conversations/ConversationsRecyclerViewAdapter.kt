@@ -33,7 +33,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
@@ -41,6 +40,7 @@ import net.kourlas.voipms_sms.preferences.getActiveDid
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.utils.*
+import java.util.*
 
 /**
  * Recycler view adapter used by [ConversationsActivity] and
@@ -152,8 +152,9 @@ class ConversationsRecyclerViewAdapter<T>(
 
         // Highlight text that matches filter
         if (currConstraint != "") {
-            val index = contactTextBuilder.toString().toLowerCase().indexOf(
-                currConstraint.toLowerCase())
+            val index = contactTextBuilder.toString()
+                .toLowerCase(Locale.getDefault())
+                .indexOf(currConstraint.toLowerCase(Locale.getDefault()))
             if (index != -1) {
                 contactTextBuilder.setSpan(
                     BackgroundColorSpan(
@@ -190,8 +191,8 @@ class ConversationsRecyclerViewAdapter<T>(
         val messageTextBuilder = SpannableStringBuilder()
 
         // Highlight text that matches filter
-        val index = message.text.toLowerCase().indexOf(
-            currConstraint.toLowerCase())
+        val index = message.text.toLowerCase(Locale.getDefault()).indexOf(
+            currConstraint.toLowerCase(Locale.getDefault()))
         if (currConstraint != "" && index != -1) {
             var nonMessageOffset = index
             if (message.isOutgoing) {
@@ -326,7 +327,7 @@ class ConversationsRecyclerViewAdapter<T>(
                                 setOf(activeDid),
                                 constraint.toString()
                                     .trim { it <= ' ' }
-                                    .toLowerCase()).filter {
+                                    .toLowerCase(Locale.getDefault())).filter {
                                 val archived = Database.getInstance(activity)
                                     .isConversationArchived(it.conversationId)
                                 if (activity is ConversationsArchivedActivity) {
@@ -377,7 +378,7 @@ class ConversationsRecyclerViewAdapter<T>(
             results.values = resultsObject
             results
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
             FilterResults()
         }
 

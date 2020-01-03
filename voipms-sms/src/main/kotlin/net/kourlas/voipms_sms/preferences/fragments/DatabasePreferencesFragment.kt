@@ -89,17 +89,17 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
 
         // Assign handlers to preferences
         for (preference in preferenceScreen.preferences) {
-            when {
-                preference.key == getString(
+            when (preference.key) {
+                getString(
                     R.string.preferences_database_import_key) ->
                     preference.onPreferenceClickListener = importListener
-                preference.key == getString(
+                getString(
                     R.string.preferences_database_export_key) ->
                     preference.onPreferenceClickListener = exportListener
-                preference.key == getString(
+                getString(
                     R.string.preferences_database_clean_up_key) ->
                     preference.onPreferenceClickListener = cleanUpListener
-                preference.key == getString(
+                getString(
                     R.string.preferences_database_delete_key) ->
                     preference.onPreferenceClickListener = deleteListener
             }

@@ -18,7 +18,6 @@
 package net.kourlas.voipms_sms.utils
 
 import android.content.Context
-import android.net.ConnectivityManager
 import net.kourlas.voipms_sms.preferences.getConnectTimeout
 import net.kourlas.voipms_sms.preferences.getReadTimeout
 import org.json.JSONObject
@@ -36,14 +35,4 @@ fun getJson(context: Context, url: String): JSONObject {
 
     val data = connection.inputStream.bufferedReader().readText()
     return JSONObject(data)
-}
-
-/**
- * Checks if the Internet connection is available.
- */
-fun isNetworkConnectionAvailable(context: Context): Boolean {
-    val connectivityManager = context.getSystemService(
-        Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val networkInfo = connectivityManager.activeNetworkInfo
-    return networkInfo != null && networkInfo.isConnected
 }

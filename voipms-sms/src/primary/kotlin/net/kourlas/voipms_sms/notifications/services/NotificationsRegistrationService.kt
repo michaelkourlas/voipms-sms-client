@@ -20,11 +20,11 @@ package net.kourlas.voipms_sms.notifications.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.crashlytics.android.Crashlytics
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.utils.getJson
+import net.kourlas.voipms_sms.utils.logException
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -65,7 +65,7 @@ class NotificationsRegistrationService : IntentService(
             callbackFailedDids = parseVoipMsApiCallbackResponses(dids,
                                                                  responses)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            logException(e)
         }
 
         // Send broadcast with DIDs that failed registration
@@ -110,9 +110,9 @@ class NotificationsRegistrationService : IntentService(
             } catch (e: IOException) {
                 // Do nothing.
             } catch (e: JSONException) {
-                Crashlytics.logException(e)
+                logException(e)
             } catch (e: Exception) {
-                Crashlytics.logException(e)
+                logException(e)
             }
         }
         return responses

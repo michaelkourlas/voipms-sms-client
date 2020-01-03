@@ -29,13 +29,13 @@ import net.kourlas.voipms_sms.sms.receivers.SyncIntervalReceiver
  * messages.
  */
 class FcmListenerService : FirebaseMessagingService() {
-    override fun onMessageReceived(message: RemoteMessage?) {
+    override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
         // Called when a FCM message is received; check to see if topic matches
         // a currently configured DID
         val dids = getDids(applicationContext, onlyShowNotifications = true)
-        val match = dids.any { message?.from == "/topics/did-$it" }
+        val match = dids.any { message.from == "/topics/did-$it" }
         if (match) {
             // If so, and if notifications are enabled, update the message
             // database and shows notifications for any new messages
@@ -47,7 +47,7 @@ class FcmListenerService : FirebaseMessagingService() {
             }
         } else {
             // Otherwise, unsubscribe from this topic
-            message?.from?.let {
+            message.from?.let {
                 if (it.startsWith("/topics/")) {
                     val topic = it.removePrefix("/topics/")
                     FirebaseMessaging.getInstance().unsubscribeFromTopic(topic)
