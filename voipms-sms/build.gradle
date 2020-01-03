@@ -1,9 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
-if (!getGradle().getStartParameter().getTaskRequests().toString().contains("Fdroid")) {
-    apply plugin: 'io.fabric'
-}
+// Should be removed in F-Droid builds
+apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 29
@@ -15,15 +14,14 @@ android {
         versionCode 123
         versionName '0.6.5'
     }
-    flavorDimensions "version"
+    flavorDimensions 'version'
     productFlavors {
         primary {
-            dimension "version"
-            buildConfigField 'boolean', 'IS_FDROID', 'false'
+            dimension 'version'
         }
         fdroid {
-            versionNameSuffix "-fdroid"
-            buildConfigField 'boolean', 'IS_FDROID', 'true'
+            dimension 'version'
+            versionNameSuffix '-fdroid'
         }
     }
     compileOptions {
@@ -63,8 +61,14 @@ dependencies {
     implementation 'com.takisoft.preferencex:preferencex-datetimepicker:1.1.0'
 }
 
-if (!getGradle().getStartParameter().getTaskRequests().toString().contains("Fdroid")) {
-    apply plugin: 'com.google.gms.google-services'
-}
-
 apply plugin: 'kotlin-android-extensions'
+
+// Should be removed in F-Droid builds
+tasks.whenTaskAdded {task ->
+    if (task.name.contains('Fdroid')
+        && (task.name.contains('GoogleServices')
+            || task.name.contains('fabric'))) {
+        task.enabled = false
+    }
+}
+apply plugin: 'com.google.gms.google-services'
