@@ -12,6 +12,15 @@ android {
         versionCode 123
         versionName '0.6.5'
     }
+    flavorDimensions "version"
+    productFlavors {
+        primary {
+            dimension "version"
+        }
+        fdroid {
+            versionNameSuffix "-fdroid"
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
         targetCompatibility JavaVersion.VERSION_1_6
