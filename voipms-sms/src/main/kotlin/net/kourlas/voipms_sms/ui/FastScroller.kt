@@ -99,7 +99,7 @@ class FastScroller private constructor(private val mRv: RecyclerView,
         mRv.addOnLayoutChangeListener(this)
         mRv.addOnScrollListener(this)
         mRv.addOnItemTouchListener(this)
-        mRv.adapter!!.registerAdapterDataObserver(
+        mRv.adapter?.registerAdapterDataObserver(
             object : AdapterDataObserver() {
                 override fun onChanged() {
                     updateScrollPos()
@@ -171,8 +171,8 @@ class FastScroller private constructor(private val mRv: RecyclerView,
     }
 
     private fun show() {
-        if (mHideAnimation != null && mHideAnimation!!.isRunning) {
-            mHideAnimation!!.cancel()
+        if (mHideAnimation?.isRunning == true) {
+            mHideAnimation?.cancel()
         }
         // Slide the scrollbar in from the side
         val trackSlide = ObjectAnimator.ofFloat<View>(
@@ -209,10 +209,11 @@ class FastScroller private constructor(private val mRv: RecyclerView,
             val thumbSlide = ObjectAnimator.ofFloat<View>(
                 mThumbImageView, View.TRANSLATION_X,
                 hiddenTranslationX.toFloat())
-            mHideAnimation = AnimatorSet()
-            mHideAnimation!!.playTogether(trackSlide, thumbSlide)
-            mHideAnimation!!.duration = HIDE_ANIMATION_DURATION_MS.toLong()
-            mHideAnimation!!.start()
+            mHideAnimation = AnimatorSet().also {
+                it.playTogether(trackSlide, thumbSlide)
+                it.duration = HIDE_ANIMATION_DURATION_MS.toLong()
+                it.start()
+            }
         } else {
             mTrackImageView.translationX = hiddenTranslationX.toFloat()
             mThumbImageView.translationX = hiddenTranslationX.toFloat()
@@ -221,17 +222,18 @@ class FastScroller private constructor(private val mRv: RecyclerView,
     }
 
     private fun showPreview() {
-        if (mHidePreviewAnimation != null && mHidePreviewAnimation!!.isRunning) {
-            mHidePreviewAnimation!!.cancel()
+        if (mHidePreviewAnimation?.isRunning == true) {
+            mHidePreviewAnimation?.cancel()
         }
         mPreviewTextView.alpha = 1f
     }
 
     private fun hidePreview() {
         mHidePreviewAnimation = ObjectAnimator.ofFloat(
-            mPreviewTextView, View.ALPHA, 0f)
-        mHidePreviewAnimation!!.duration = HIDE_ANIMATION_DURATION_MS.toLong()
-        mHidePreviewAnimation!!.start()
+            mPreviewTextView, View.ALPHA, 0f).also {
+            it.duration = HIDE_ANIMATION_DURATION_MS.toLong()
+            it.start()
+        }
     }
 
     override fun onScrolled(
@@ -273,13 +275,17 @@ class FastScroller private constructor(private val mRv: RecyclerView,
     }
 
     private fun updatePreviewText() {
-        val lm = mRv.layoutManager as LinearLayoutManager?
-        val pos = lm!!.findFirstVisibleItemPosition()
-        if (pos == RecyclerView.NO_POSITION) {
-            return
+        mRv.layoutManager.let {
+            it as LinearLayoutManager
+            val pos = it.findFirstVisibleItemPosition()
+            if (pos == RecyclerView.NO_POSITION) {
+                return
+            }
+            mRv.adapter?.let { provider ->
+                provider as SectionTitleProvider
+                mPreviewTextView.text = provider.getSectionTitle(pos)
+            }
         }
-        val provider = mRv.adapter as SectionTitleProvider?
-        mPreviewTextView.text = provider!!.getSectionTitle(pos)
     }
 
     override fun onInterceptTouchEvent(
@@ -353,9 +359,11 @@ class FastScroller private constructor(private val mRv: RecyclerView,
         dragScrollRatio = max(dragScrollRatio, 0.0f)
         dragScrollRatio = min(dragScrollRatio, 1.0f)
         // Scroll the RecyclerView to a new position.
-        val itemCount = mRv.adapter!!.itemCount
-        val itemPos = ((itemCount - 1) * dragScrollRatio).toInt()
-        mRv.scrollToPosition(itemPos)
+        mRv.adapter?.let {
+            val itemCount = it.itemCount
+            val itemPos = ((itemCount - 1) * dragScrollRatio).toInt()
+            mRv.scrollToPosition(itemPos)
+        }
     }
 
     private fun cancelDrag() {

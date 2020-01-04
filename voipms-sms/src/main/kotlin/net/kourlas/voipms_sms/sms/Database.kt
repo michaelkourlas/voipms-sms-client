@@ -1175,7 +1175,7 @@ class Database private constructor(private val context: Context) {
     private fun updateShortcuts(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             val shortcutManager = context.getSystemService(
-                ShortcutManager::class.java)!!
+                Context.SHORTCUT_SERVICE) as ShortcutManager
 
             // There is one static shortcut
             val maxCount = shortcutManager.maxShortcutCountPerActivity - 1
@@ -1602,20 +1602,17 @@ class Database private constructor(private val context: Context) {
         // It is not a leak to store an instance to the Application object,
         // since it has the same lifetime as the application itself
         @SuppressLint("StaticFieldLeak")
+        @Volatile
         private var instance: Database? = null
 
         /**
          * Gets the sole instance of the Database class. Initializes the
          * instance if it does not already exist.
-         *
-         * @param context The context used to initialize the database.
-         * @return The sole instance of the Database class.
          */
-        fun getInstance(context: Context): Database {
-            if (instance == null) {
-                instance = Database(context.applicationContext)
+        fun getInstance(context: Context): Database =
+            instance ?: synchronized(this) {
+                instance ?: Database(
+                    context.applicationContext).also { instance = it }
             }
-            return instance!!
-        }
     }
 }

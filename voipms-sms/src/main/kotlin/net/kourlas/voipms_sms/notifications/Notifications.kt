@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms.notifications
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -53,6 +54,8 @@ class Notifications private constructor(
     private val application: CustomApplication) {
     // Helper variables
     private val context = application.applicationContext
+    private val notificationManager = context.getSystemService(
+        Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // Information associated with active notifications
     private val notificationIds = mutableMapOf<ConversationId, Int>()
@@ -67,8 +70,6 @@ class Notifications private constructor(
             // Create the default notification channel if it doesn't already
             // exist
             createDefaultNotificationChannel()
-            val notificationManager = context.getSystemService(
-                NotificationManager::class.java)!!
             val defaultChannel = notificationManager.getNotificationChannel(
                 context.getString(R.string.notifications_channel_default))
 
@@ -121,8 +122,6 @@ class Notifications private constructor(
             channel.group = context.getString(
                 R.string.notifications_channel_group_other)
 
-            val notificationManager = context.getSystemService(
-                NotificationManager::class.java)!!
             notificationManager.createNotificationChannel(channel)
         }
     }
@@ -135,8 +134,6 @@ class Notifications private constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createOtherNotificationChannelGroup()
 
-            val notificationManager = context.getSystemService(
-                NotificationManager::class.java)!!
             val channel = NotificationChannel(
                 context.getString(R.string.notifications_channel_sync),
                 context.getString(R.string.notifications_channel_sync_title),
@@ -157,9 +154,6 @@ class Notifications private constructor(
                 context.getString(R.string.notifications_channel_group_other),
                 context.getString(
                     R.string.notifications_channel_group_other_title))
-
-            val notificationManager = context.getSystemService(
-                NotificationManager::class.java)!!
             notificationManager.createNotificationChannelGroup(channelGroup)
         }
     }
@@ -169,9 +163,6 @@ class Notifications private constructor(
      */
     fun renameNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = context.getSystemService(
-                NotificationManager::class.java)!!
-
             // Rename all channels
             for (channel in notificationManager.notificationChannels) {
                 if (channel.id.startsWith(context.getString(
@@ -192,9 +183,6 @@ class Notifications private constructor(
      */
     fun deleteNotificationChannelsAndGroups() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = context.getSystemService(
-                NotificationManager::class.java)!!
-
             // Remove any channel for which there is no conversation with
             // notifications enabled in the database
             val conversationIds = Database.getInstance(context)
@@ -348,8 +336,6 @@ class Notifications private constructor(
         val channel = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             context.getString(R.string.notifications_channel_default)
         } else {
-            val notificationManager = context.getSystemService(
-                NotificationManager::class.java)!!
             val channel = notificationManager.getNotificationChannel(
                 context.getString(R.string.notifications_channel_contact,
                                   did, contact))
@@ -504,10 +490,8 @@ class Notifications private constructor(
             PendingIntent.FLAG_CANCEL_CURRENT))
 
         // Notification ID
-        val id: Int
-        if (notificationIds[conversationId] != null) {
-            id = notificationIds[conversationId]!!
-        } else {
+        var id = notificationIds[conversationId]
+        if (id == null) {
             id = notificationIdCount++
             notificationIds[conversationId] = id
         }
@@ -531,8 +515,6 @@ class Notifications private constructor(
         NotificationManagerCompat.from(context).cancel(id)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val notificationManager = context.getSystemService(
-                NotificationManager::class.java)!!
             val activeNotifications = notificationManager.activeNotifications
             if ((activeNotifications.size == 1
                  && activeNotifications[0].id == GROUP_NOTIFICATION_ID)
@@ -581,15 +563,11 @@ class Notifications private constructor(
         /**
          * Gets the sole instance of the Notifications class. Initializes the
          * instance if it does not already exist.
-         *
-         * @param application The custom application used to initialize the
-         * object instance.
          */
-        fun getInstance(application: Application): Notifications {
-            if (instance == null) {
-                instance = Notifications(application as CustomApplication)
+        fun getInstance(application: Application): Notifications =
+            instance ?: synchronized(this) {
+                instance ?: Notifications(
+                    application as CustomApplication).also { instance = it }
             }
-            return instance!!
-        }
     }
 }

@@ -17,11 +17,16 @@
 
 package net.kourlas.voipms_sms.utils
 
+import android.util.Log
 import com.crashlytics.android.Crashlytics
 
 /**
  * Log the specified exception.
  */
 fun logException(e: Exception) {
+    // Log the exception locally
+    Log.e("logException", "exception", e)
+
+    // Log the exception remotely as well using Crashlytics
     Crashlytics.logException(e)
 }

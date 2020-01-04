@@ -29,6 +29,7 @@ import net.kourlas.voipms_sms.sms.Database;
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.kourlas.voipms_sms.utils.ExceptionsKt.logException;
 import static net.kourlas.voipms_sms.utils.FcmKt.subscribeToDidTopics;
 
 /**
@@ -89,8 +90,10 @@ public class CustomApplication extends Application {
                 (ConnectivityManager) getSystemService(
                     Context.CONNECTIVITY_SERVICE);
             if (connectivityManager == null) {
-                throw new RuntimeException(
+                RuntimeException e = new RuntimeException(
                     "Connectivity manager does not exist");
+                logException(e);
+                throw e;
             }
             connectivityManager.registerDefaultNetworkCallback(
                 NetworkManager.Companion.getInstance());

@@ -21,7 +21,6 @@ import android.content.Context
 import androidx.preference.PreferenceManager
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -159,7 +158,7 @@ fun getStartDate(context: Context): Date {
                 setStartDate(context, calendar.time)
                 calendar.time
             }
-        } catch (_: ParseException) {
+        } catch (_: Exception) {
             setStartDate(context, calendar.time)
             calendar.time
         }

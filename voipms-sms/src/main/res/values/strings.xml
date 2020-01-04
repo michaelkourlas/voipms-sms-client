@@ -29,11 +29,12 @@
     <string name="preferences_dids_did_key" translatable="false">did</string>
     <string name="preferences_dids_active_did_key" translatable="false">active_did</string>
     <string name="preferences_dids_key" translatable="false">dids</string>
-    <string name="preferences_dids_error_network">Phone number retrieval failed: no network connection available</string>
-    <string name="preferences_dids_error_api_request">Phone number retrieval failed: request to VoIP.ms API failed</string>
-    <string name="preferences_dids_error_api_parse">Phone number retrieval failed: VoIP.ms API response could not be parsed</string>
-    <string name="preferences_dids_error_api_error">Phone number retrieval failed: VoIP.ms API returned error \'%1$s\'</string>
-    <string name="preferences_dids_error_unknown">Phone number retrieval failed: unknown error</string>
+    <string name="preferences_dids_error_network">Retrieval failed: network unavailable</string>
+    <string name="preferences_dids_error_api_request">Retrieval failed: VoIP.ms unavailable</string>
+    <string name="preferences_dids_error_api_parse">Retrieval failed: corrupt response</string>
+    <string name="preferences_dids_error_api_error_invalid_credentials">Retrieval failed: invalid credentials</string>
+    <string name="preferences_dids_error_api_error">Retrieval failed: API error \'%1$s\'</string>
+    <string name="preferences_dids_error_unknown">Retrieval failed: unknown error</string>
     <string name="preferences_dids_fragment_retrieved_dids_key">voipms_dids</string>
     <string name="preferences_dids_stored_locally">Stored locally but not found in VoIP.ms account</string>
     <string name="preferences_dids_fragment_database_dids_key">database_dids</string>
@@ -222,9 +223,9 @@
 
     <!-- PushNotificationsRegistrationService -->
     <string name="push_notifications_reg_action" translatable="false">push_notifications_reg_action</string>
-    <string name="push_notifications_fail_register">Failed to register for notifications: VoIP.ms SMS URL callback registration failed</string>
-    <string name="push_notifications_fail_google_play">Failed to register for notifications: Google Play Services unavailable</string>
-    <string name="push_notifications_fail_unknown">Failed to register for notifications: unknown error</string>
+    <string name="push_notifications_fail_register">Register failed: VoIP.ms callback registration failed</string>
+    <string name="push_notifications_fail_google_play">Register failed: Google Play Services unavailable</string>
+    <string name="push_notifications_fail_unknown">Register failed: unknown error</string>
 
     <!-- RetrieveDidsService -->
     <string name="retrieve_dids_action" translatable="false">retrieve_dids_action</string>
@@ -232,31 +233,35 @@
 
     <!-- SendMessageService -->
     <string name="send_message_action" translatable="false">send_message_action</string>
-    <string name="send_message_did" translatable="false">send_message_did</string>
     <string name="send_message_contact" translatable="false">send_message_contact</string>
-    <string name="send_message_text" translatable="false">send_message_text</string>
     <string name="send_message_database_id" translatable="false">send_message_database_id</string>
-    <string name="send_message_error_network">Failed to send message: no network connection available</string>
-    <string name="send_message_error_api_request">Failed to send message: request to VoIP.ms API failed</string>
-    <string name="send_message_error_api_parse">Failed to send message: VoIP.ms API response could not be parsed</string>
-    <string name="send_message_error_api_error">Failed to send message: VoIP.ms API returned error \'%1$s\'</string>
-    <string name="send_message_error_api_error_invalid_credentials">Failed to send message: invalid VoIP.ms email or API password</string>
-    <string name="send_message_error_api_error_invalid_dst">Failed to send message: invalid destination phone number</string>
-    <string name="send_message_error_api_error_sms_failed">Failed to send message: contact VoIP.ms for assistance (provide error code "sms_failed")</string>
-    <string name="send_message_error_api_error_limit_reached">Failed to send message: contact VoIP.ms for assistance (provide error code "limit_reached")</string>
-    <string name="send_message_error_database">Failed to send message: unknown database error</string>
-    <string name="send_message_error_unknown">Failed to send message: unknown error</string>
+    <string name="send_message_did" translatable="false">send_message_did</string>
+    <string name="send_message_error_api_error">Not sent: API error \'%1$s\'</string>
+    <string name="send_message_error_api_error_invalid_credentials">Not sent: invalid credentials</string>
+    <string name="send_message_error_api_error_invalid_dst">Not sent: invalid phone number</string>
+    <string name="send_message_error_api_error_invalid_sms">Not sent: invalid SMS</string>
+    <string name="send_message_error_api_error_limit_reached">Not sent: contact VoIP.ms for help ("limit_reached")</string>
+    <string name="send_message_error_api_error_message_empty">Not sent: SMS empty</string>
+    <string name="send_message_error_api_error_missing_sms">Not sent: SMS missing</string>
+    <string name="send_message_error_api_error_sms_failed">Not sent: contact VoIP.ms for help ("sms_failed")</string>
+    <string name="send_message_error_api_error_sms_toolong">Not sent: SMS too long</string>
+    <string name="send_message_error_api_parse">Not sent: corrupt response</string>
+    <string name="send_message_error_api_request">Not sent: VoIP.ms unavailable</string>
+    <string name="send_message_error_database">Not sent: unknown DB error</string>
+    <string name="send_message_error_network">Not sent: network unavailable</string>
+    <string name="send_message_error_unknown">Not sent: unknown error</string>
+    <string name="send_message_text" translatable="false">send_message_text</string>
 
     <!-- SyncService -->
     <string name="sync_action" translatable="false">sync_action</string>
     <string name="sync_force_recent" translatable="false">sync_force_recent</string>
-    <string name="sync_error_network">Synchronization failed: no network connection available</string>
-    <string name="sync_error_api_request">Synchronization failed: request to VoIP.ms API failed</string>
-    <string name="sync_error_api_parse">Synchronization failed: VoIP.ms API response could not be parsed</string>
-    <string name="sync_error_api_error">Synchronization failed: VoIP.ms API returned error \'%1$s\'</string>
-    <string name="sync_error_api_error_invalid_credentials">Synchronization failed: invalid VoIP.ms email or API password</string>
-    <string name="sync_error_database">Synchronization failed: unknown database error</string>
-    <string name="sync_error_unknown">Synchronization failed: unknown error</string>
+    <string name="sync_error_network">Sync failed: network unavailable</string>
+    <string name="sync_error_api_request">Sync failed: VoIP.ms unavailable</string>
+    <string name="sync_error_api_parse">Sync failed: corrupt response</string>
+    <string name="sync_error_api_error">Sync failed: API error \'%1$s\'</string>
+    <string name="sync_error_api_error_invalid_credentials">Sync failed: invalid credentials</string>
+    <string name="sync_error_database">Sync failed: unknown DB error</string>
+    <string name="sync_error_unknown">Sync failed: unknown error</string>
 
     <!-- SyncIntervalService -->
     <string name="sync_interval_service_action" translatable="false">sync_interval_service_action</string>
@@ -265,10 +270,10 @@
     <string name="verify_credentials_action" translatable="false">verify_credentials_action</string>
     <string name="verify_credentials_email" translatable="false">verify_credentials_email</string>
     <string name="verify_credentials_password" translatable="false">verify_credentials_password</string>
-    <string name="verify_credentials_error_api_request">Sign-in failed: request to VoIP.ms API failed</string>
-    <string name="verify_credentials_error_api_parse">Sign-in failed: VoIP.ms API response could not be parsed</string>
-    <string name="verify_credentials_error_api_error">Sign-in failed: VoIP.ms API returned error \'%1$s\'</string>
-    <string name="verify_credentials_error_api_error_invalid_credentials">Sign-in failed: invalid VoIP.ms email or API password</string>
+    <string name="verify_credentials_error_api_request">Sign-in failed: VoIP.ms unavailable</string>
+    <string name="verify_credentials_error_api_parse">Sign-in failed: corrupt response</string>
+    <string name="verify_credentials_error_api_error">Sign-in failed: API error \'%1$s\'</string>
+    <string name="verify_credentials_error_api_error_invalid_credentials">Sign-in failed: invalid credentials</string>
     <string name="verify_credentials_error_unknown">Sign-in failed: unknown error</string>
 
     <!-- BROADCAST RECEIVERS -->

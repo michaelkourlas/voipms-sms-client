@@ -327,7 +327,8 @@ open class ConversationsActivity : AppCompatActivity(),
         // Perform special setup for version 114: need to re-enable push
         // notifications
         if (getSetupCompletedForVersion(this) < 114) {
-            enablePushNotificationsWithGoogleCheck(this)
+            enablePushNotifications(this.application,
+                                    activityToShowError = this)
         }
     }
 

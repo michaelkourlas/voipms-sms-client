@@ -151,8 +151,12 @@ class RetrieveDidsService : IntentService(
         try {
             val status = response.getString("status")
             if (status != "success") {
-                error = getString(
-                    R.string.preferences_dids_error_api_error, status)
+                error = when (status) {
+                    "invalid_credentials" -> applicationContext.getString(
+                        R.string.preferences_dids_error_api_error_invalid_credentials)
+                    else -> applicationContext.getString(
+                        R.string.preferences_dids_error_api_error, status)
+                }
                 return null
             }
 

@@ -83,7 +83,8 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
 
             if (dids.isNotEmpty()) {
                 // Re-register for push notifications when DIDs change
-                enablePushNotificationsWithGoogleCheck(it)
+                enablePushNotifications(it.application,
+                                        activityToShowError = it)
             }
             replaceIndexOnNewThread(it)
 

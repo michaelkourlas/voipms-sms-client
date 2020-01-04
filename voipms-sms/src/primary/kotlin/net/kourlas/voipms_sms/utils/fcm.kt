@@ -48,36 +48,29 @@ fun subscribeToDidTopics(context: Context) {
 }
 
 /**
- * Attempt to enable push notifications, checking beforehand whether Google
- * Play Services are available.
+ * Attempt to enable push notifications, with the option of showing an error
+ * using a snackbar on the specified activity if Google Play Services is
+ * unavailable.
  */
-fun enablePushNotificationsWithGoogleCheck(activity: FragmentActivity) {
-    if (GoogleApiAvailability.getInstance()
-            .isGooglePlayServicesAvailable(
-                activity) != ConnectionResult.SUCCESS) {
-        showSnackbar(activity, R.id.coordinator_layout,
-                     activity.getString(
-                         R.string.push_notifications_fail_google_play))
-    }
-    enablePushNotifications(activity.application)
-}
-
-/**
- * Attempt to enable push notifications.
- */
-fun enablePushNotifications(application: Application) {
-    // Check if DIDs are configured and that notifications are enabled,
-    // and silently quit if not
-    if (!didsConfigured(application)
-        || !Notifications.getInstance(application).getNotificationsEnabled()) {
-        setSetupCompletedForVersion(application, 114)
-        return
-    }
-
+fun enablePushNotifications(application: Application,
+                            activityToShowError: FragmentActivity? = null) {
     // Check if Google Play Services is available
     if (GoogleApiAvailability.getInstance()
             .isGooglePlayServicesAvailable(
                 application) != ConnectionResult.SUCCESS) {
+        if (activityToShowError != null) {
+            showSnackbar(activityToShowError, R.id.coordinator_layout,
+                         activityToShowError.getString(
+                             R.string.push_notifications_fail_google_play))
+        }
+        setSetupCompletedForVersion(application, 114)
+        return
+    }
+
+    // Check if DIDs are configured and that notifications are enabled,
+    // and silently quit if not
+    if (!didsConfigured(application)
+        || !Notifications.getInstance(application).getNotificationsEnabled()) {
         setSetupCompletedForVersion(application, 114)
         return
     }

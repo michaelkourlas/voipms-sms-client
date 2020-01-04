@@ -18,9 +18,8 @@
 package net.kourlas.voipms_sms.utils
 
 /**
- * Stub for F-Droid builds.
+ * Log the specified exception.
  */
-@Suppress("UNUSED_PARAMETER")
 fun logException(e: Exception) {
-    // Do nothing.
+    Log.e("", "exception", e)
 }

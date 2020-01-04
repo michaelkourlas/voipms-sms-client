@@ -292,10 +292,18 @@ class SendMessageService : JobIntentService() {
                     R.string.send_message_error_api_error_invalid_credentials)
                 "invalid_dst" -> applicationContext.getString(
                     R.string.send_message_error_api_error_invalid_dst)
+                "invalid_sms" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_invalid_sms)
                 "limit_reached" -> applicationContext.getString(
                     R.string.send_message_error_api_error_limit_reached)
+                "message_empty" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_message_empty)
+                "missing_sms" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_missing_sms)
                 "sms_failed" -> applicationContext.getString(
                     R.string.send_message_error_api_error_sms_failed)
+                "sms_toolong" -> applicationContext.getString(
+                    R.string.send_message_error_api_error_sms_toolong)
                 else -> applicationContext.getString(
                     R.string.send_message_error_api_error, status)
             }

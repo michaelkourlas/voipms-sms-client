@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017 The Android Open Source Project
- * Modifications copyright (C) 2017-2019 Michael Kourlas
+ * Modifications copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,10 @@ open class MasterSwitchPreference : TwoTargetPreference {
     private var mEnableSwitch = true
 
     var isChecked: Boolean
-        get() = switch != null && switch!!.isEnabled && mChecked
+        get() = switch?.isEnabled == true && mChecked
         set(checked) {
             mChecked = checked
-            if (switch != null) {
-                switch!!.isChecked = checked
-            }
+            switch?.isChecked = checked
         }
 
     @Suppress("unused")
@@ -61,7 +59,7 @@ open class MasterSwitchPreference : TwoTargetPreference {
         super.onBindViewHolder(holder)
         val widgetView = holder.findViewById(android.R.id.widget_frame)
         widgetView?.setOnClickListener(OnClickListener {
-            if (switch != null && !switch!!.isEnabled) {
+            if (switch?.isEnabled != true) {
                 return@OnClickListener
             }
             isChecked = !mChecked
@@ -73,18 +71,16 @@ open class MasterSwitchPreference : TwoTargetPreference {
         })
 
         switch = holder.findViewById(R.id.switch_widget) as SwitchCompat?
-        if (switch != null) {
-            switch!!.contentDescription = title
-            switch!!.isChecked = mChecked
-            switch!!.isEnabled = mEnableSwitch
+        switch?.let {
+            it.contentDescription = title
+            it.isChecked = mChecked
+            it.isEnabled = mEnableSwitch
         }
     }
 
     @Suppress("unused")
     fun setSwitchEnabled(enabled: Boolean) {
         mEnableSwitch = enabled
-        if (switch != null) {
-            switch!!.isEnabled = enabled
-        }
+        switch?.isEnabled = enabled
     }
 }
