@@ -33,8 +33,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
 import net.kourlas.voipms_sms.preferences.getActiveDid
 import net.kourlas.voipms_sms.sms.Database
@@ -318,7 +318,8 @@ class ConversationsRecyclerViewAdapter<T>(
         fun doFiltering(constraint: CharSequence): ConversationsFilter {
             val resultsObject = ConversationsFilter()
 
-            if (!demo) {
+            @Suppress("ConstantConditionIf")
+            if (!BuildConfig.IS_DEMO) {
                 val activeDid = getActiveDid(activity)
                 if (activeDid.isNotEmpty()) {
                     resultsObject.messages.addAll(
@@ -343,7 +344,8 @@ class ConversationsRecyclerViewAdapter<T>(
             }
 
             for (message in resultsObject.messages) {
-                val contactName = if (!demo) {
+                @Suppress("ConstantConditionIf")
+                val contactName = if (!BuildConfig.IS_DEMO) {
                     getContactName(activity,
                                    message.contact,
                                    contactNameCache)

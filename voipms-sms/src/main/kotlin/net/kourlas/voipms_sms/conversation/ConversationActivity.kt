@@ -43,11 +43,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.conversations.ConversationsArchivedActivity
-import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getDemoNotification
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.accountConfigured
@@ -206,7 +206,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
         // We shouldn't show a conversation for a DID that is no longer
         // configured
-        if (did !in getDids(applicationContext) && !demo) {
+        if (did !in getDids(applicationContext) && !BuildConfig.IS_DEMO) {
             abortActivity(this, Exception("DID '$did' no longer exists"))
             return
         }
@@ -219,7 +219,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
         // Get DID and contact name and photo for use in recycler view
         // adapter
-        contactName = if (!demo) {
+        @Suppress("ConstantConditionIf")
+        contactName = if (!BuildConfig.IS_DEMO) {
             getContactName(this, contact)
         } else {
             net.kourlas.voipms_sms.demo.getContactName(contact)
@@ -372,7 +373,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      * Sets up the conversation activity for demo mode.
      */
     private fun setupDemo() {
-        if (demo) {
+        @Suppress("ConstantConditionIf")
+        if (BuildConfig.IS_DEMO) {
             Notifications.getInstance(application).showDemoNotification(
                 getDemoNotification())
         }

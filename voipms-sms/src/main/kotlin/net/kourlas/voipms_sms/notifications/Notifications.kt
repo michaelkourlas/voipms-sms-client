@@ -30,11 +30,11 @@ import androidx.core.app.*
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.app.TaskStackBuilder
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
-import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
@@ -333,7 +333,8 @@ class Notifications private constructor(
         val conversationId = messages[0].conversationId
         val did = conversationId.did
         val contact = conversationId.contact
-        var contactName = if (!demo) {
+        @Suppress("ConstantConditionIf")
+        var contactName = if (!BuildConfig.IS_DEMO) {
             getContactName(context, contact)
         } else {
             net.kourlas.voipms_sms.demo.getContactName(contact)

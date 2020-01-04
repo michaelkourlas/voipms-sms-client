@@ -17,12 +17,10 @@
 
 package net.kourlas.voipms_sms.demo
 
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.newconversation.NewConversationRecyclerViewAdapter
 import net.kourlas.voipms_sms.sms.Message
 import java.util.*
-
-var demo = false
-var sending = false
 
 fun getConversationsDemoMessages(): List<Message> {
     val messages = mutableListOf<Message>()
@@ -76,7 +74,8 @@ fun getConversationDemoMessages(): List<Message> {
                          "5145553495",
                          "Sounds great!",
                          1, 1, 0))
-    if (sending) {
+    @Suppress("ConstantConditionIf")
+    if (BuildConfig.IS_DEMO_SENDING) {
         messages.add(Message(1, 1, Date().time / 1000, 0,
                              "6135559483",
                              "5145553495",

@@ -25,8 +25,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.demo.demo
 import net.kourlas.voipms_sms.demo.getNewConversationContacts
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
@@ -402,7 +402,8 @@ class NewConversationRecyclerViewAdapter(
      * Loads all contacts from the Android contacts provider.
      */
     private fun loadAllContactItems() {
-        if (demo) {
+        @Suppress("ConstantConditionIf")
+        if (BuildConfig.IS_DEMO) {
             allContactItems.addAll(getNewConversationContacts())
             return
         }
