@@ -44,7 +44,7 @@ import com.google.android.material.snackbar.Snackbar
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
-import net.kourlas.voipms_sms.newconversation.NewConversationActivity
+import net.kourlas.voipms_sms.newConversation.NewConversationActivity
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity

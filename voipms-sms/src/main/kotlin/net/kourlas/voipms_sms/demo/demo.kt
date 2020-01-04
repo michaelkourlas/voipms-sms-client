@@ -18,7 +18,7 @@
 package net.kourlas.voipms_sms.demo
 
 import net.kourlas.voipms_sms.BuildConfig
-import net.kourlas.voipms_sms.newconversation.NewConversationRecyclerViewAdapter
+import net.kourlas.voipms_sms.newConversation.NewConversationRecyclerViewAdapter
 import net.kourlas.voipms_sms.sms.Message
 import java.util.*
 

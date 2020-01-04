@@ -11,7 +11,7 @@
         tools:targetApi="n_mr1">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="net.kourlas.voipms_sms.newconversation.NewConversationActivity"
+            android:targetClass="net.kourlas.voipms_sms.newConversation.NewConversationActivity"
             android:targetPackage="net.kourlas.voipms_sms" />
         <categories android:name="android.shortcut.conversation" />
     </shortcut>

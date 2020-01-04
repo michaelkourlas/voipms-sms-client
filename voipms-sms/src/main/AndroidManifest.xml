@@ -111,7 +111,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".newconversation.NewConversationActivity"
+            android:name=".newConversation.NewConversationActivity"
             android:noHistory="true"
             android:parentActivityName=".conversations.ConversationsActivity">
             <intent-filter>

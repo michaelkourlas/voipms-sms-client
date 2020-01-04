@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.newconversation
+package net.kourlas.voipms_sms.newConversation
 
 import android.graphics.Bitmap
 import android.net.Uri

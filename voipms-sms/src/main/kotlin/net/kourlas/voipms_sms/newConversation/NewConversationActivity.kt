@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.newconversation
+package net.kourlas.voipms_sms.newConversation
 
 import android.content.Intent
 import android.os.Bundle
