@@ -273,6 +273,7 @@
     <string name="verify_credentials_error_api_request">Sign-in failed: VoIP.ms unavailable</string>
     <string name="verify_credentials_error_api_parse">Sign-in failed: corrupt response</string>
     <string name="verify_credentials_error_api_error">Sign-in failed: API error \'%1$s\'</string>
+    <string name="verify_credentials_error_api_error_missing_credentials">Sign-in failed: missing credentials</string>
     <string name="verify_credentials_error_api_error_invalid_credentials">Sign-in failed: invalid credentials</string>
     <string name="verify_credentials_error_unknown">Sign-in failed: unknown error</string>
 
