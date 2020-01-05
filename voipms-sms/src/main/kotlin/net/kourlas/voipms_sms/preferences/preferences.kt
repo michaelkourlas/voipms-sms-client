@@ -19,6 +19,7 @@ package net.kourlas.voipms_sms.preferences
 
 import android.content.Context
 import androidx.preference.PreferenceManager
+import de.adorsys.android.securestoragelibrary.SecurePreferences
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.text.SimpleDateFormat
@@ -63,11 +64,27 @@ fun getDids(context: Context,
     return set
 }
 
-fun getEmail(context: Context): String =
-    getStringPreference(context,
-                        context.getString(
-                            R.string.preferences_account_email_key),
-                        "")
+fun getEmail(context: Context): String {
+    val email = SecurePreferences.getStringValue(
+        context,
+        context.getString(R.string.preferences_account_email_key),
+        null) ?: ""
+    if (email == "") {
+        val emailAtOldStorageLocation = getStringPreference(
+            context,
+            context.getString(R.string.preferences_account_email_key),
+            "")
+        if (emailAtOldStorageLocation != "") {
+            // If the email is present at the old storage location, move it to
+            // the secure preferences (which use the Android keystore)
+            setEmail(context, emailAtOldStorageLocation)
+            removePreference(context, context.getString(
+                R.string.preferences_account_email_key))
+        }
+        return emailAtOldStorageLocation
+    }
+    return email
+}
 
 fun getLastCompleteSyncTime(context: Context): Long =
     getLongPreference(context,
@@ -108,11 +125,27 @@ fun getNotificationSound(context: Context): String =
         context.getString(
             R.string.preferences_notifications_sound_default_value))
 
-fun getPassword(context: Context): String =
-    getStringPreference(context,
-                        context.getString(
-                            R.string.preferences_account_password_key),
-                        "")
+fun getPassword(context: Context): String {
+    val password = SecurePreferences.getStringValue(
+        context,
+        context.getString(R.string.preferences_account_password_key),
+        null) ?: ""
+    if (password == "") {
+        val passwordAtOldStorageLocation = getStringPreference(
+            context,
+            context.getString(R.string.preferences_account_password_key),
+            "")
+        if (passwordAtOldStorageLocation != "") {
+            // If the password is present at the old storage location, move it
+            // to the secure preferences (which use the Android keystore)
+            setEmail(context, passwordAtOldStorageLocation)
+            removePreference(context, context.getString(
+                R.string.preferences_account_password_key))
+        }
+        return passwordAtOldStorageLocation
+    }
+    return password
+}
 
 fun getRetrieveDeletedMessages(context: Context): Boolean {
     val value: String = context.getString(
@@ -224,12 +257,12 @@ fun setDids(context: Context, dids: Set<String>) {
 }
 
 fun setEmail(context: Context, email: String) {
-    setStringPreference(context, context.getString(
+    SecurePreferences.setValue(context, context.getString(
         R.string.preferences_account_email_key), email)
 }
 
 fun setPassword(context: Context, password: String) {
-    setStringPreference(context, context.getString(
+    SecurePreferences.setValue(context, context.getString(
         R.string.preferences_account_password_key), password)
 }
 
@@ -392,6 +425,16 @@ private fun setStringSetPreference(context: Context, key: String,
     val editor = sharedPreferences.edit()
     with(editor) {
         putStringSet(key, value)
+        apply()
+    }
+}
+
+fun removePreference(context: Context, key: String) {
+    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+        context.applicationContext)
+    val editor = sharedPreferences.edit()
+    with(editor) {
+        editor.remove(key)
         apply()
     }
 }

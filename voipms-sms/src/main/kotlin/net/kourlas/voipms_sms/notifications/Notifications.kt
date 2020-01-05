@@ -264,6 +264,9 @@ class Notifications private constructor(
                     context).areNotificationsEnabled()) {
                 return false
             }
+        } else {
+            removePreference(context, context.getString(
+                R.string.preferences_notifications_enable_key))
         }
 
         // However, we do check to see if notifications are enabled for a
@@ -369,6 +372,11 @@ class Notifications private constructor(
             if (getNotificationVibrateEnabled(context)) {
                 notification.setVibrate(longArrayOf(0, 250, 250, 250))
             }
+        } else {
+            removePreference(context, context.getString(
+                R.string.preferences_notifications_sound_key))
+            removePreference(context, context.getString(
+                R.string.preferences_notifications_vibrate_key))
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             notification.setGroup(context.getString(

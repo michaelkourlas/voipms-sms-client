@@ -1,5 +1,5 @@
 VoIP.ms SMS  
-Copyright (C) 2015-2019 Michael Kourlas
+Copyright (C) 2015-2020 Michael Kourlas
 
 ## Apache License 2.0 ##
 
@@ -8,6 +8,8 @@ The following components are provided under the [Apache License 2.0](https://www
 * [material-design-icons](https://github.com/google/material-design-icons) from [Google](https://github.com/google)
 * [Bitmap loading code](https://developer.android.com/topic/performance/graphics/load-bitmap.html) from [Google](http://www.google.com)
 * [ConversationFastScroller](https://android.googlesource.com/platform/packages/apps/Messaging/+/master/src/com/android/messaging/ui/conversation/ConversationFastScroller.java) from [Google](http://www.google.com)
+* [secure-storage-android](https://github.com/adorsys/secure-storage-android) from [adorsys](https://github.com/adorsys)
+* [preferencex-android](https://github.com/takisoft/preferencex-android) from [takisoft](https://github.com/takisoft)
 
 The text of the Apache License 2.0 can be found in the LICENSE.md file.
 

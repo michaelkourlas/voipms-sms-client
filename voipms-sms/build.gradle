@@ -76,6 +76,7 @@ dependencies {
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
     implementation 'com.takisoft.preferencex:preferencex-ringtone:1.1.0'
     implementation 'com.takisoft.preferencex:preferencex-datetimepicker:1.1.0'
+    implementation 'de.adorsys.android:securestoragelibrary:1.2.2'
 }
 
 apply plugin: 'kotlin-android-extensions'
