@@ -33,14 +33,7 @@ fun subscribeToDidTopics(context: Context) {
  * Stub for F-Droid builds.
  */
 @Suppress("UNUSED_PARAMETER")
-fun enablePushNotificationsWithGoogleCheck(activity: FragmentActivity) {
-    // Do nothing.
-}
-
-/**
- * Stub for F-Droid builds.
- */
-@Suppress("UNUSED_PARAMETER")
-fun enablePushNotifications(application: Application) {
+fun enablePushNotifications(application: Application,
+                            activityToShowError: FragmentActivity? = null) {
     // Do nothing.
 }

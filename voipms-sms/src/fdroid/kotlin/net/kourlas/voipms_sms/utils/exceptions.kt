@@ -17,6 +17,8 @@
 
 package net.kourlas.voipms_sms.utils
 
+import android.util.Log
+
 /**
  * Log the specified exception.
  */
