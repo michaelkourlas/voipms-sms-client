@@ -10,6 +10,7 @@ The following components are provided under the [Apache License 2.0](https://www
 * [ConversationFastScroller](https://android.googlesource.com/platform/packages/apps/Messaging/+/master/src/com/android/messaging/ui/conversation/ConversationFastScroller.java) from [Google](http://www.google.com)
 * [secure-storage-android](https://github.com/adorsys/secure-storage-android) from [adorsys](https://github.com/adorsys)
 * [preferencex-android](https://github.com/takisoft/preferencex-android) from [takisoft](https://github.com/takisoft)
+* [Link movement code from Better-Link-Movement-Method](https://github.com/saket/Better-Link-Movement-Method) from [saket](https://github.com/saket)
 
 The text of the Apache License 2.0 can be found in the LICENSE.md file.
 

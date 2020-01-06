@@ -25,6 +25,7 @@ import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
+import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -221,6 +222,15 @@ class ConversationRecyclerViewAdapter(
             }
         }
         messageText.text = messageTextBuilder
+
+        Linkify.addLinks(messageText, Linkify.ALL)
+        messageText.movementMethod = null
+        (messageText as MessageTextView).messageLongClickListener = {
+            val pos = messageItems.indexOf(messageItem)
+            if (pos != -1) {
+                messageItem.toggle(pos)
+            }
+        }
     }
 
     /**

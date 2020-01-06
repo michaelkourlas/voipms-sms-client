@@ -67,26 +67,26 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     // Support libraries
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core:1.1.0'
     implementation 'androidx.core:core-ktx:1.1.0'
-    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'androidx.core:core:1.1.0'
     implementation 'androidx.preference:preference-ktx:1.1.0'
+    implementation 'androidx.preference:preference:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation 'com.google.android.material:material:1.2.0-alpha03'
 
     // Firebase libraries
+    primaryImplementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     primaryImplementation 'com.google.firebase:firebase-appindexing:19.0.0'
     primaryImplementation 'com.google.firebase:firebase-core:17.2.1'
     primaryImplementation 'com.google.firebase:firebase-messaging:20.1.0'
-    primaryImplementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     // Additional libraries and fixes
-    implementation 'com.takisoft.preferencex:preferencex:1.1.0'
-    implementation 'com.takisoft.preferencex:preferencex-ringtone:1.1.0'
     implementation 'com.takisoft.preferencex:preferencex-datetimepicker:1.1.0'
+    implementation 'com.takisoft.preferencex:preferencex-ringtone:1.1.0'
+    implementation 'com.takisoft.preferencex:preferencex:1.1.0'
     implementation 'de.adorsys.android:securestoragelibrary:1.2.2'
 }
 
