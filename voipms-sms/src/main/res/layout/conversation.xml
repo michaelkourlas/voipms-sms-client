@@ -32,6 +32,7 @@
             android:layout_height="wrap_content"
             android:theme="@style/ToolbarTheme"
             app:collapseIcon="@drawable/ic_close_toolbar_24dp"
+            app:subtitleTextColor="@android:color/white"
             app:titleTextColor="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
