@@ -125,7 +125,7 @@ class ConversationsRecyclerViewAdapter<T>(
                     } else {
                         holder.contactBadgeLetterText.text = ""
                         holder.contactBadge.setImageResource(
-                            R.drawable.ic_account_circle_white_inverted_24dp)
+                            R.drawable.ic_account_circle_inverted_toolbar_24dp)
                     }
                 }
             }
@@ -159,6 +159,13 @@ class ConversationsRecyclerViewAdapter<T>(
                 contactTextBuilder.setSpan(
                     BackgroundColorSpan(
                         ContextCompat.getColor(activity, R.color.highlight)),
+                    index,
+                    index + currConstraint.length,
+                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE)
+                contactTextBuilder.setSpan(
+                    ForegroundColorSpan(
+                        ContextCompat.getColor(
+                            activity, android.R.color.black)),
                     index,
                     index + currConstraint.length,
                     SpannableString.SPAN_INCLUSIVE_EXCLUSIVE)
@@ -222,6 +229,12 @@ class ConversationsRecyclerViewAdapter<T>(
             messageTextBuilder.setSpan(
                 BackgroundColorSpan(ContextCompat.getColor(activity,
                                                            R.color.highlight)),
+                nonMessageOffset - substringOffset,
+                nonMessageOffset - substringOffset + currConstraint.length,
+                SpannableString.SPAN_INCLUSIVE_EXCLUSIVE)
+            messageTextBuilder.setSpan(
+                ForegroundColorSpan(ContextCompat.getColor(
+                    activity, android.R.color.black)),
                 nonMessageOffset - substringOffset,
                 nonMessageOffset - substringOffset + currConstraint.length,
                 SpannableString.SPAN_INCLUSIVE_EXCLUSIVE)

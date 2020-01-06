@@ -19,12 +19,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/dialpad_button"
-        android:icon="@drawable/ic_dialpad_white_24dp"
+        android:icon="@drawable/ic_dialpad_toolbar_24dp"
         android:title="@string/new_conversation_action_dialpad"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/keyboard_button"
-        android:icon="@drawable/ic_keyboard_white_24dp"
+        android:icon="@drawable/ic_keyboard_toolbar_24dp"
         android:title="@string/new_conversation_action_keyboard"
         android:visible="false"
         app:showAsAction="ifRoom" />

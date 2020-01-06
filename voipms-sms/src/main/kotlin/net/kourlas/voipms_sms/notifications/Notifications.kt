@@ -225,7 +225,7 @@ class Notifications private constructor(
         val builder = NotificationCompat.Builder(
             context, context.getString(R.string.notifications_channel_sync))
         builder.setCategory(NotificationCompat.CATEGORY_PROGRESS)
-        builder.setSmallIcon(R.drawable.ic_message_sync_white_24dp)
+        builder.setSmallIcon(R.drawable.ic_message_sync_toolbar_24dp)
         builder.setContentTitle(context.getString(
             R.string.notifications_sync_message))
         builder.setContentText("$progress%")
@@ -352,7 +352,7 @@ class Notifications private constructor(
 
         // General notification properties
         val notification = NotificationCompat.Builder(context, channel)
-        notification.setSmallIcon(R.drawable.ic_chat_white_24dp)
+        notification.setSmallIcon(R.drawable.ic_chat_toolbar_24dp)
         notification.setLargeIcon(getLargeIconBitmap(contact))
         notification.setAutoCancel(true)
         notification.addPerson("tel:$contact")
@@ -430,7 +430,7 @@ class Notifications private constructor(
             .setLabel(context.getString(R.string.notifications_button_reply))
             .build()
         val replyActionBuilder = NotificationCompat.Action.Builder(
-            R.drawable.ic_reply_white_24dp,
+            R.drawable.ic_reply_toolbar_24dp,
             context.getString(R.string.notifications_button_reply),
             replyPendingIntent)
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
@@ -447,7 +447,7 @@ class Notifications private constructor(
             context, (did + contact).hashCode(),
             markReadIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         val markReadAction = NotificationCompat.Action.Builder(
-            R.drawable.ic_drafts_white_24dp,
+            R.drawable.ic_drafts_toolbar_24dp,
             context.getString(R.string.notifications_button_mark_read),
             markReadPendingIntent)
             .setSemanticAction(
@@ -459,7 +459,7 @@ class Notifications private constructor(
         // Group notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val groupNotification = NotificationCompat.Builder(context, channel)
-            groupNotification.setSmallIcon(R.drawable.ic_chat_white_24dp)
+            groupNotification.setSmallIcon(R.drawable.ic_chat_toolbar_24dp)
             groupNotification.setGroup(context.getString(
                 R.string.notifications_group_key))
             groupNotification.setGroupSummary(true)

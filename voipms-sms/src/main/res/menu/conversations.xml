@@ -19,7 +19,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/search_button"
-        android:icon="@drawable/ic_search_white_24dp"
+        android:icon="@drawable/ic_search_toolbar_24dp"
         android:title="@string/conversations_action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />

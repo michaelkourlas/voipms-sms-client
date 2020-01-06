@@ -19,7 +19,7 @@
     android:color="@android:color/darker_gray">
     <item>
         <shape android:shape="oval">
-            <solid android:color="@android:color/white" />
+            <solid android:color="@color/send_icon_background" />
         </shape>
     </item>
 </ripple>

@@ -98,7 +98,7 @@
                     android:id="@+id/progress_bar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:indeterminateTint="@color/colorSecondary"
+                    android:indeterminateTint="@color/sign_in_progress_bar"
                     android:indeterminateTintMode="src_in"
                     android:theme="@android:style/Widget.Material.Light.ProgressBar.Small"
                     android:visibility="invisible" />

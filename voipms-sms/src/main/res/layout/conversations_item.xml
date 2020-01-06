@@ -54,10 +54,10 @@
             android:id="@+id/conversations_photo_checked"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorPrimary"
+            android:background="@color/checked_conversation"
             android:contentDescription="@string/conversations_checked_content_description"
             android:scaleType="center"
-            app:srcCompat="@drawable/ic_check_white_24dp" />
+            app:srcCompat="@drawable/ic_check_toolbar_24dp" />
     </ViewSwitcher>
 
     <LinearLayout

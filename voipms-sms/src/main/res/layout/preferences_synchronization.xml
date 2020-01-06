@@ -60,7 +60,7 @@
                 android:layout_marginStart="@dimen/margin"
                 android:layout_marginEnd="@dimen/double_margin"
                 android:contentDescription="@null"
-                app:srcCompat="@drawable/ic_info_outline_secondary_24dp" />
+                app:srcCompat="@drawable/ic_info_outline_primary_surface_24dp" />
 
             <TextView
                 android:id="@+id/info_text_view"

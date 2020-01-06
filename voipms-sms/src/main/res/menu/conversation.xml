@@ -19,7 +19,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/call_button"
-        android:icon="@drawable/ic_call_white_24dp"
+        android:icon="@drawable/ic_call_toolbar_24dp"
         android:title="@string/conversation_action_call"
         app:showAsAction="ifRoom" />
     <item

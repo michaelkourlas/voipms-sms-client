@@ -131,9 +131,9 @@ class NewConversationRecyclerViewAdapter(
         if (contactItem is TypedInContactItem) {
             // Show dialpad for typed in phone number
             holder.contactBadge.scaleType = ImageView.ScaleType.CENTER
-            holder.contactBadge.setBackgroundResource(R.color.colorPrimary)
+            holder.contactBadge.setBackgroundResource(R.color.typed_in_contact)
             holder.contactBadge.setImageResource(
-                R.drawable.ic_dialpad_white_24dp)
+                R.drawable.ic_dialpad_toolbar_24dp)
             holder.contactBadgeLetterText.text = ""
         } else if (contactItem is ContactItem) {
             holder.contactBadge.scaleType = ImageView.ScaleType.CENTER_CROP
@@ -155,7 +155,7 @@ class NewConversationRecyclerViewAdapter(
                     } else {
                         holder.contactBadgeLetterText.text = ""
                         holder.contactBadge.setImageResource(
-                            R.drawable.ic_account_circle_white_inverted_24dp)
+                            R.drawable.ic_account_circle_inverted_toolbar_24dp)
                     }
                 }
             }

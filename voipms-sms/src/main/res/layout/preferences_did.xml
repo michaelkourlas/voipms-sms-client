@@ -36,8 +36,9 @@
             android:id="@+id/enabled_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorSecondaryVariant"
+            android:background="@color/did_secondary_toolbar_background"
             app:title="Enabled"
+            app:titleTextColor="@color/did_secondary_toolbar_text"
             app:titleMarginStart="@dimen/toolbar_left_margin" />
     </com.google.android.material.appbar.AppBarLayout>
 

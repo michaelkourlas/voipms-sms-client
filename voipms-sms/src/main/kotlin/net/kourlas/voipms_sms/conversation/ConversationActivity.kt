@@ -18,7 +18,6 @@
 package net.kourlas.voipms_sms.conversation
 
 import android.Manifest
-import android.animation.ValueAnimator
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -498,14 +497,20 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             SearchView.SearchAutoComplete>(
             androidx.appcompat.R.id.search_src_text)
         searchAutoComplete.hint = getString(R.string.conversation_action_search)
+        searchAutoComplete.setTextColor(ContextCompat.getColor(
+            applicationContext, android.R.color.white))
         searchAutoComplete.setHintTextColor(ContextCompat.getColor(
             applicationContext, R.color.search_hint))
-        try {
-            val field = TextView::class.java.getDeclaredField(
-                "mCursorDrawableRes")
-            field.isAccessible = true
-            field.set(searchAutoComplete, R.drawable.search_cursor)
-        } catch (_: java.lang.Exception) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            try {
+                val field = TextView::class.java.getDeclaredField(
+                    "mCursorDrawableRes")
+                field.isAccessible = true
+                field.set(searchAutoComplete, R.drawable.search_cursor)
+            } catch (_: java.lang.Exception) {
+            }
+        } else {
+            searchAutoComplete.setTextCursorDrawable(R.drawable.search_cursor)
         }
 
         // Update the visible menu buttons to match whether or not the
@@ -660,20 +665,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         val inflater = mode.menuInflater
         inflater.inflate(R.menu.conversation_secondary, menu)
-
-        // Apply animation to status bar
-        val colorAnimation = ValueAnimator.ofArgb(
-            ContextCompat.getColor(applicationContext,
-                                   R.color.colorPrimaryDark),
-            ContextCompat.getColor(applicationContext,
-                                   R.color.colorSecondaryDark))
-        colorAnimation.duration = applicationContext.resources.getInteger(
-            android.R.integer.config_longAnimTime).toLong()
-        colorAnimation.addUpdateListener { animator ->
-            window.statusBarColor = animator.animatedValue as Int
-        }
-        colorAnimation.start()
-
         return true
     }
 
@@ -698,20 +689,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         for (i in 0 until adapter.itemCount) {
             adapter[i].setChecked(false, i)
         }
-
-        // Apply animation to status bar
-        val colorAnimation = ValueAnimator.ofArgb(
-            ContextCompat.getColor(applicationContext,
-                                   R.color.colorSecondaryDark),
-            ContextCompat.getColor(applicationContext,
-                                   R.color.colorPrimaryDark))
-        colorAnimation.duration = applicationContext.resources.getInteger(
-            android.R.integer.config_longAnimTime).toLong()
-        colorAnimation.addUpdateListener { animator ->
-            window.statusBarColor = animator.animatedValue as Int
-        }
-        colorAnimation.start()
-
         actionMode = null
     }
 

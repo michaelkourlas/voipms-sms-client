@@ -35,7 +35,7 @@
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-            android:textColor="@color/colorPrimary" />
+            android:textColor="@color/new_conversation_letter" />
     </LinearLayout>
 
     <FrameLayout

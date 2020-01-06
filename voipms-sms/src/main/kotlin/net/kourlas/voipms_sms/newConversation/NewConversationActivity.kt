@@ -18,6 +18,7 @@
 package net.kourlas.voipms_sms.newConversation
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType
 import android.view.Menu
@@ -135,12 +136,17 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 applicationContext, android.R.color.white))
             searchAutoComplete.setHintTextColor(ContextCompat.getColor(
                 applicationContext, R.color.search_hint))
-            try {
-                val field = TextView::class.java.getDeclaredField(
-                    "mCursorDrawableRes")
-                field.isAccessible = true
-                field.set(searchAutoComplete, R.drawable.search_cursor)
-            } catch (_: java.lang.Exception) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                try {
+                    val field = TextView::class.java.getDeclaredField(
+                        "mCursorDrawableRes")
+                    field.isAccessible = true
+                    field.set(searchAutoComplete, R.drawable.search_cursor)
+                } catch (_: java.lang.Exception) {
+                }
+            } else {
+                searchAutoComplete.setTextCursorDrawable(
+                    R.drawable.search_cursor)
             }
         }
     }

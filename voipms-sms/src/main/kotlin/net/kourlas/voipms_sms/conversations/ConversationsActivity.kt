@@ -17,10 +17,10 @@
 
 package net.kourlas.voipms_sms.conversations
 
-import android.animation.ValueAnimator
 import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType
 import android.view.Menu
@@ -150,7 +150,7 @@ open class ConversationsActivity : AppCompatActivity(),
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.let {
             it.setDisplayHomeAsUpEnabled(true)
-            it.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
+            it.setHomeAsUpIndicator(R.drawable.ic_menu_toolbar_24dp)
         }
     }
 
@@ -173,7 +173,7 @@ open class ConversationsActivity : AppCompatActivity(),
             adapter.refresh()
             SyncService.startService(this, forceRecent = false)
         }
-        swipeRefreshLayout.setColorSchemeResources(R.color.colorSecondary)
+        swipeRefreshLayout.setColorSchemeResources(R.color.swipe_refresh_icon)
     }
 
     /**
@@ -423,12 +423,16 @@ open class ConversationsActivity : AppCompatActivity(),
             applicationContext, android.R.color.white))
         searchAutoComplete.setHintTextColor(ContextCompat.getColor(
             applicationContext, R.color.search_hint))
-        try {
-            val field = TextView::class.java.getDeclaredField(
-                "mCursorDrawableRes")
-            field.isAccessible = true
-            field.set(searchAutoComplete, R.drawable.search_cursor)
-        } catch (_: java.lang.Exception) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            try {
+                val field = TextView::class.java.getDeclaredField(
+                    "mCursorDrawableRes")
+                field.isAccessible = true
+                field.set(searchAutoComplete, R.drawable.search_cursor)
+            } catch (_: java.lang.Exception) {
+            }
+        } else {
+            searchAutoComplete.setTextCursorDrawable(R.drawable.search_cursor)
         }
 
         return super.onCreateOptionsMenu(menu)
@@ -524,20 +528,6 @@ open class ConversationsActivity : AppCompatActivity(),
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         val inflater = mode.menuInflater
         inflater.inflate(R.menu.conversations_secondary, menu)
-
-        // Apply animation to status bar
-        val colorAnimation = ValueAnimator.ofArgb(
-            ContextCompat.getColor(applicationContext,
-                                   R.color.colorPrimaryDark),
-            ContextCompat.getColor(applicationContext,
-                                   R.color.colorSecondaryDark))
-        colorAnimation.duration = applicationContext.resources.getInteger(
-            android.R.integer.config_longAnimTime).toLong()
-        colorAnimation.addUpdateListener { animator ->
-            window.statusBarColor = animator.animatedValue as Int
-        }
-        colorAnimation.start()
-
         return true
     }
 
@@ -560,20 +550,6 @@ open class ConversationsActivity : AppCompatActivity(),
         for (i in 0 until adapter.itemCount) {
             adapter[i].setChecked(false, i)
         }
-
-        // Apply animation to status bar
-        val colorAnimation = ValueAnimator.ofArgb(
-            ContextCompat.getColor(applicationContext,
-                                   R.color.colorSecondaryDark),
-            ContextCompat.getColor(applicationContext,
-                                   R.color.colorPrimaryDark))
-        colorAnimation.duration = applicationContext.resources.getInteger(
-            android.R.integer.config_longAnimTime).toLong()
-        colorAnimation.addUpdateListener { animator ->
-            window.statusBarColor = animator.animatedValue as Int
-        }
-        colorAnimation.start()
-
         actionMode = null
     }
 

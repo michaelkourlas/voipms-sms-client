@@ -18,6 +18,6 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
         android:angle="225"
-        android:endColor="@color/colorPrimaryVariant"
-        android:startColor="@color/colorPrimaryDark" />
+        android:endColor="@color/nav_view_header_gradient_end"
+        android:startColor="@color/nav_view_header_gradient_start" />
 </shape>

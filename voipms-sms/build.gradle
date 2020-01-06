@@ -41,6 +41,16 @@ android {
             buildConfigField 'boolean', 'IS_DEMO_SENDING', 'true'
         }
     }
+    variantFilter { variant ->
+        def names = variant.flavors*.name
+        def isDemo = (names.contains('demoSending')
+                      || names.contains('demoNotSending'))
+        def isRelease = variant.buildType.name == 'release'
+        def isPrimary = names.contains('primary')
+        if (isDemo && (isPrimary || isRelease)) {
+            variant.setIgnore(true)
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
         targetCompatibility JavaVersion.VERSION_1_6
@@ -64,7 +74,8 @@ dependencies {
     implementation 'androidx.preference:preference:1.1.0'
     implementation 'androidx.preference:preference-ktx:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+    implementation 'com.google.android.material:material:1.2.0-alpha03'
 
     // Firebase libraries
     primaryImplementation 'com.google.firebase:firebase-appindexing:19.0.0'

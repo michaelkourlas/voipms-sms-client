@@ -172,7 +172,7 @@ class ConversationRecyclerViewAdapter(
                         } else {
                             holder.contactBadgeLetterText.text = ""
                             holder.contactBadge.setImageResource(
-                                R.drawable.ic_account_circle_white_inverted_24dp)
+                                R.drawable.ic_account_circle_inverted_toolbar_24dp)
                         }
                     }
                 }
@@ -214,7 +214,7 @@ class ConversationRecyclerViewAdapter(
                 messageTextBuilder.setSpan(
                     ForegroundColorSpan(
                         ContextCompat.getColor(
-                            activity, R.color.dark_gray)),
+                            activity, android.R.color.black)),
                     index,
                     index + currConstraint.length,
                     SpannableString.SPAN_INCLUSIVE_EXCLUSIVE)
@@ -298,15 +298,17 @@ class ConversationRecyclerViewAdapter(
         val smsContainer = holder.smsContainer
         if (message.isIncoming) {
             if (messageItem.checked) {
-                smsContainer.setBackgroundResource(R.color.colorSecondaryDark)
+                smsContainer.setBackgroundResource(
+                    R.color.message_incoming_checked)
             } else {
-                smsContainer.setBackgroundResource(R.color.colorSecondary)
+                smsContainer.setBackgroundResource(R.color.message_incoming)
             }
         } else {
             if (messageItem.checked) {
-                smsContainer.setBackgroundResource(R.color.colorPrimaryDark)
+                smsContainer.setBackgroundResource(
+                    R.color.message_outgoing_checked)
             } else {
-                smsContainer.setBackgroundResource(R.color.colorPrimary)
+                smsContainer.setBackgroundResource(R.color.message_outgoing)
             }
         }
     }

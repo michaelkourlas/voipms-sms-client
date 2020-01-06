@@ -17,30 +17,33 @@
 
 <resources>
 
-    <style name="AppTheme" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Theme colours -->
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
         <item name="colorSecondary">@color/colorSecondary</item>
-        <item name="colorAccent">@color/colorSecondary</item>
+        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
 
         <!-- Force ActionMode to appear over toolbar -->
         <item name="windowActionModeOverlay">true</item>
 
         <!-- ActionMode background color -->
-        <item name="actionModeBackground">@color/colorSecondary</item>
+        <item name="actionModeBackground">@color/action_mode_background</item>
 
         <!-- ActionMode back button -->
-        <item name="actionModeCloseDrawable">
-            @drawable/ic_arrow_back_white_24dp
+        <item name="actionModeCloseDrawable">@drawable/ic_close_toolbar_24dp
         </item>
 
         <!-- Enable window transitions -->
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
-    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.ActionBar">
-        <!-- Toolbar back button colour -->
+    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <!-- Toolbar button colour -->
         <item name="colorControlNormal">@android:color/white</item>
     </style>
 </resources>

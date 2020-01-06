@@ -33,7 +33,7 @@
         android:layout_marginBottom="@dimen/margin"
         android:background="@android:color/transparent"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_account_circle_white_24dp"
+        android:src="@drawable/ic_account_circle_toolbar_24dp"
         tools:ignore="ContentDescription" />
 
     <TextView

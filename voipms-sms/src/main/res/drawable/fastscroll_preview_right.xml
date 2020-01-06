@@ -20,5 +20,5 @@
         android:bottomLeftRadius="@dimen/fastscroll_preview_corner_radius"
         android:topLeftRadius="@dimen/fastscroll_preview_corner_radius"
         android:topRightRadius="@dimen/fastscroll_preview_corner_radius" />
-    <solid android:color="@color/colorPrimaryDark" />
+    <solid android:color="@color/fastscroll_preview_color" />
 </shape>
