@@ -29,8 +29,8 @@
     <color name="highlight">#F3F315</color>
     <color name="launcher_icon">#B71C1C</color>
     <color name="message_hint">#AF000000</color>
-    <color name="message_incoming">#424242</color>
-    <color name="message_incoming_checked">#1B1B1B</color>
+    <color name="message_incoming">#616161</color>
+    <color name="message_incoming_checked">#373737</color>
     <color name="message_outgoing">@color/primary</color>
     <color name="message_outgoing_checked">@color/primary_variant</color>
     <color name="message_section">#FFFFFF</color>
