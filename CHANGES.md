@@ -1,5 +1,7 @@
-## 0.6.5 ##
+## 0.6.5 (not yet released) ##
 
+* Dark theme
+* Use Android keystore to store VoIP.ms email and password
 * Bug fixes
 
 ## 0.6.4 ##
