@@ -230,7 +230,10 @@
         <service
             android:name=".sms.services.SyncIntervalService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service android:name=".sms.services.SyncService" />
+        <service
+            android:name=".sms.services.SyncService"
+            android:foregroundServiceType="dataSync"
+            tools:targetApi="q" />
         <service android:name=".sms.services.VerifyCredentialsService" />
     </application>
 </manifest>
