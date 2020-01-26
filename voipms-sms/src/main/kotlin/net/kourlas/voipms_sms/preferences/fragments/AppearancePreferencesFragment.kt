@@ -107,9 +107,10 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
     }
 
     companion object {
-        const val DARK = "2"
-        const val LIGHT = "1"
-        // When changing the values of these constants, make sure to update arrays.xml
+        // When changing the values of these constants, make sure to update
+        // arrays.xml
         const val SYSTEM_DEFAULT = "0"
+        const val LIGHT = "1"
+        const val DARK = "2"
     }
 }
