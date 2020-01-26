@@ -78,6 +78,12 @@
     <string name="preferences_notifications_vibrate_title">Vibrate</string>
     <string name="preferences_notifications_vibrate_default_value" translatable="false">true</string>
 
+    <!-- Appearance -->
+    <string name="preferences_appearance_category_name">Appearance</string>
+    <string name="preferences_theme_key" translatable="false">theme</string>
+    <string name="preferences_theme_title">Theme</string>
+    <string name="preferences_theme_default_value" translatable="false">0</string>
+
     <!-- Network -->
     <string name="preferences_network_category_name">Network</string>
     <string name="preferences_network_connect_timeout_key" translatable="false">connect_timeout</string>

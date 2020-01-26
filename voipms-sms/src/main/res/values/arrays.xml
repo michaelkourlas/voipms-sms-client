@@ -42,4 +42,16 @@
         <item>30</item>
         <item>0</item>
     </string-array>
+    <string-array name="preferences_theme_entries">
+        <item>System default</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <!-- When changing the values of these constants, make sure to update
+         AppearancePreferencesFragment.kt -->
+    <string-array name="preferences_theme_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 </resources>

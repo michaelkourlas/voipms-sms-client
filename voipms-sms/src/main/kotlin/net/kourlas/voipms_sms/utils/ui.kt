@@ -29,7 +29,6 @@ import android.view.ViewOutlineProvider
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.snackbar.Snackbar
 import net.kourlas.voipms_sms.R
@@ -124,8 +123,6 @@ fun showSnackbar(activity: FragmentActivity, viewId: Int,
     if (!activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
         val snackbar = Snackbar.make(view, text, length)
-        snackbar.setActionTextColor(
-            ContextCompat.getColor(activity, android.R.color.white))
         snackbar.show()
         return snackbar
     }
@@ -143,8 +140,6 @@ fun showSnackbar(activity: FragmentActivity, viewId: Int,
     if (!activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
         val snackbar = Snackbar.make(view, text, length)
-        snackbar.setActionTextColor(
-            ContextCompat.getColor(activity, android.R.color.white))
         snackbar.setAction(buttonText, buttonAction)
         snackbar.show()
         return snackbar
@@ -171,8 +166,6 @@ fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
             intent.data = uri
             activity.startActivity(intent)
         }
-        snackbar.setActionTextColor(
-            ContextCompat.getColor(activity, android.R.color.white))
         snackbar.show()
         return snackbar
     }

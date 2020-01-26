@@ -152,6 +152,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".preferences.activities.AppearancePreferencesActivity"
+            android:label="@string/preferences_appearance_category_name"
+            android:parentActivityName=".preferences.activities.PreferencesActivity">
+            <intent-filter>
+                <action android:name=".preferences.AppearancePreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".preferences.activities.DatabasePreferencesActivity"
             android:label="@string/preferences_database_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">

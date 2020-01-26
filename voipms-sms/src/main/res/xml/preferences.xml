@@ -35,6 +35,11 @@
         <intent android:action=".preferences.SynchronizationPreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
+        android:icon="@drawable/ic_brush_settings_24dp"
+        android:title="@string/preferences_appearance_category_name">
+        <intent android:action=".preferences.AppearancePreferencesActivity" />
+    </androidx.preference.Preference>
+    <androidx.preference.Preference
         android:icon="@drawable/ic_router_settings_24dp"
         android:title="@string/preferences_network_category_name">
         <intent android:action=".preferences.NetworkPreferencesActivity" />
