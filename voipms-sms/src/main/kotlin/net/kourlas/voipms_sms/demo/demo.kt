@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,21 +94,35 @@ fun getDemoNotification(): Message = Message(1, 1, Date().time / 1000, 1,
 fun getNewConversationContacts(): List<NewConversationRecyclerViewAdapter.ContactItem> {
     val contactItems = mutableListOf<NewConversationRecyclerViewAdapter.ContactItem>()
     contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
-        1, "Craig Johnson", "4165550919",
-        mutableListOf(),
-        "Mobile", null))
+        1,
+        "Craig Johnson",
+        mutableListOf(
+            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                "4165550919", "Mobile")),
+        null))
     contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
-        3, "Jennifer Morris", "6135556019",
-        mutableListOf(),
-        "Work", null))
+        3,
+        "Jennifer Morris",
+        mutableListOf(
+            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                "6135556019", "Work")),
+        null))
     contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
-        4, "Martin Wheeler", "6135551242",
-        mutableListOf(),
-        "Home", null))
+        4,
+        "Martin Wheeler",
+        mutableListOf(
+            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                "6135551242", "Home")),
+        null))
     contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
-        2, "Monica Alexander", "5145553495",
-        mutableListOf("5145553496"),
-        "Multiple", null))
+        2,
+        "Monica Alexander",
+        mutableListOf(
+            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                "5145553495", "Home"),
+            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                "5145553496", "Work")),
+        null))
     return contactItems
 }
 

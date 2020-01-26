@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2019 Michael Kourlas
+ * Copyright (C) 2015-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,10 +243,13 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         if (contactItem is NewConversationRecyclerViewAdapter.ContactItem) {
             // If the selected contact has multiple phone numbers, allow the
             // user to select one of the numbers
-            if (contactItem.secondaryPhoneNumbers.isNotEmpty()) {
-                val phoneNumbers = mutableListOf<String>()
-                phoneNumbers.add(contactItem.primaryPhoneNumber)
-                phoneNumbers.addAll(contactItem.secondaryPhoneNumbers)
+            if (contactItem.phoneNumbersAndTypes.size > 1) {
+                val phoneNumbers = contactItem
+                    .phoneNumbersAndTypes
+                    .map { phoneNumberAndType ->
+                        "${phoneNumberAndType.phoneNumber} " +
+                        "(${phoneNumberAndType.type})"
+                    }
 
                 var selectedIndex = 0
                 AlertDialog.Builder(this).apply {

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,9 +188,9 @@ class NewConversationRecyclerViewAdapter(
         } else {
             var text = contactItem.primaryPhoneNumber
             if (contactItem is ContactItem
-                && contactItem.secondaryPhoneNumbers.isNotEmpty()) {
+                && contactItem.phoneNumbersAndTypes.size > 1) {
                 // Add (+X) if there are secondary phone numbers
-                text += " (+${contactItem.secondaryPhoneNumbers.size})"
+                text += " (+${contactItem.phoneNumbersAndTypes.size - 1})"
 
             }
             holder.phoneNumberText.text = text
@@ -200,7 +200,13 @@ class NewConversationRecyclerViewAdapter(
 
         // Set phone number type
         if (contactItem is ContactItem) {
-            holder.phoneNumberTypeText.text = contactItem.phoneNumberType
+            if (contactItem.phoneNumbersAndTypes.size == 1) {
+                holder.phoneNumberTypeText.text =
+                    contactItem.phoneNumbersAndTypes[0].type
+            } else {
+                holder.phoneNumberTypeText.text = activity.getString(
+                    R.string.new_conversation_multiple)
+            }
             holder.phoneNumberTypeText.visibility = View.VISIBLE
         } else {
             holder.phoneNumberTypeText.visibility = View.GONE
@@ -452,15 +458,24 @@ class NewConversationRecyclerViewAdapter(
                             }
                         // If multiple phone numbers, show "Multiple" as type
                         if (previousContactItem?.id == id) {
-                            previousContactItem.secondaryPhoneNumbers.add(
-                                phoneNumber)
-                            previousContactItem.phoneNumberType =
-                                activity.getString(
-                                    R.string.new_conversation_multiple)
+                            val phoneNumbers = previousContactItem
+                                .phoneNumbersAndTypes
+                                .map { phoneNumberAndType ->
+                                    phoneNumberAndType.phoneNumber
+                                }
+                            if (phoneNumber !in phoneNumbers) {
+                                previousContactItem.phoneNumbersAndTypes.add(
+                                    PhoneNumberAndType(
+                                        phoneNumber, phoneNumberType))
+                            }
                         } else {
                             allContactItems.add(ContactItem(
-                                id, contact, phoneNumber, mutableListOf(),
-                                phoneNumberType, bitmap))
+                                id,
+                                contact,
+                                mutableListOf(
+                                    PhoneNumberAndType(
+                                        phoneNumber, phoneNumberType)),
+                                bitmap))
                         }
                     }
                 }
@@ -521,23 +536,24 @@ class NewConversationRecyclerViewAdapter(
         BaseContactItem(phoneNumber)
 
     /**
+     * Represents a phone number and its type.
+     */
+    class PhoneNumberAndType(val phoneNumber: String, val type: String)
+
+    /**
      * Represents the contact item for a standard contact.
      *
      * @param id The ID of the contact from the Android contacts provider.
      * @param name The name of the contact.
-     * @param primaryPhoneNumber The contact's primary phone number.
-     * @param secondaryPhoneNumbers Any additional contact phone numbers.
-     * @param phoneNumberType The type of the phone number if there is only one
-     * phone number, or "Multiple" otherwise.
+     * @param phoneNumbersAndTypes The contact's phone numbers and
+     *                             corresponding types.
      * @param bitmap The photo of the contact.
      */
     class ContactItem(val id: Long,
                       val name: String,
-                      primaryPhoneNumber: String,
-                      val secondaryPhoneNumbers: MutableList<String>,
-                      var phoneNumberType: String,
+                      val phoneNumbersAndTypes: MutableList<PhoneNumberAndType>,
                       val bitmap: Bitmap?) :
-        BaseContactItem(primaryPhoneNumber) {
+        BaseContactItem(phoneNumbersAndTypes[0].phoneNumber) {
         /**
          * Returns true if the name and phone number are different.
          */
