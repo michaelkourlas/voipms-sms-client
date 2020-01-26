@@ -37,8 +37,7 @@ class MessageTextView @JvmOverloads constructor(
                                                ) : AppCompatTextView(context,
                                                                      attrs,
                                                                      defStyleAttr) {
-
-    var longClick = false
+    private var longClick = false
     var messageLongClickListener: (() -> Unit)? = null
 
     @SuppressLint("ClickableViewAccessibility")
