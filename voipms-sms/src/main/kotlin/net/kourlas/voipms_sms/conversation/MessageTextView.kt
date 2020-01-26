@@ -30,12 +30,13 @@ import android.util.AttributeSet
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.ViewConfiguration
-import android.widget.TextView
+import androidx.appcompat.widget.AppCompatTextView
 
 class MessageTextView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-                                               ) : TextView(context, attrs,
-                                                            defStyleAttr) {
+                                               ) : AppCompatTextView(context,
+                                                                     attrs,
+                                                                     defStyleAttr) {
 
     var longClick = false
     var messageLongClickListener: (() -> Unit)? = null
