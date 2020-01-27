@@ -128,34 +128,37 @@
     <!-- ACTIVITIES -->
 
     <!-- ConversationActivity -->
+    <string name="conversation_action_archive">Archive</string>
     <string name="conversation_action_call">Make a call</string>
+    <string name="conversation_action_copy">Copy text</string>
+    <string name="conversation_action_delete">Delete</string>
+    <string name="conversation_action_did">DID: %1$s</string>
+    <string name="conversation_action_info">View details</string>
     <string name="conversation_action_notifications">Notifications</string>
     <string name="conversation_action_resend">Resend</string>
-    <string name="conversation_action_did">DID: %1$s</string>
     <string name="conversation_action_search">Search</string>
-    <string name="conversation_action_delete">Delete</string>
-    <string name="conversation_action_archive">Archive</string>
-    <string name="conversation_action_unarchive">Unarchive</string>
     <string name="conversation_action_send">Send</string>
-    <string name="conversation_action_copy">Copy text</string>
     <string name="conversation_action_share">Share</string>
-    <string name="conversation_action_info">View details</string>
-    <string name="conversation_delete_confirm_title">Delete messages?</string>
+    <string name="conversation_action_unarchive">Unarchive</string>
+    <string name="conversation_char_rem">%1$d / %2$d</string>
+    <string name="conversation_contact_clipboard_description">Contact phone number</string>
+    <string name="conversation_copied_contact_toast_message">Copied phone number</string>
     <string name="conversation_delete_confirm_message">This action cannot be undone.</string>
-    <string name="conversation_info_title">Message details</string>
-    <string name="conversation_info_id">ID: %1$d</string>
-    <string name="conversation_info_to">To: %1$s</string>
-    <string name="conversation_info_from">From: %1$s</string>
+    <string name="conversation_delete_confirm_title">Delete messages?</string>
+    <string name="conversation_extra_focus" translatable="false">focus</string>
+    <string name="conversation_extra_message_text" translatable="false">messageText</string>
     <string name="conversation_info_date">Date: %1$s</string>
+    <string name="conversation_info_from">From: %1$s</string>
+    <string name="conversation_info_id">ID: %1$d</string>
+    <string name="conversation_info_title">Message details</string>
+    <string name="conversation_info_to">To: %1$s</string>
+    <string name="conversation_message_clipboard_description">Text message</string>
+    <string name="conversation_message_not_sent">Not sent. Touch to try again.</string>
+    <string name="conversation_message_sending">Sending…</string>
     <string name="conversation_no_messages">There are no messages in this conversation.</string>
     <string name="conversation_no_results">No results found for \'%1$s\'</string>
-    <string name="conversation_text_hint">Send message…</string>
-    <string name="conversation_message_sending">Sending…</string>
-    <string name="conversation_message_not_sent">Not sent. Touch to try again.</string>
-    <string name="conversation_extra_message_text" translatable="false">messageText</string>
-    <string name="conversation_extra_focus" translatable="false">focus</string>
     <string name="conversation_perm_denied_call">Phone permission required to make calls</string>
-    <string name="conversation_char_rem">%1$d / %2$d</string>
+    <string name="conversation_text_hint">Send message…</string>
 
     <!-- NewConversationActivity -->
     <string name="new_conversation_action_keyboard">Show keyboard</string>

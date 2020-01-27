@@ -30,13 +30,11 @@ import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -245,6 +243,20 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
             it.setHomeButtonEnabled(true)
             it.setDisplayHomeAsUpEnabled(true)
+        }
+
+        // Allow contact phone number to be copied by long clicking the toolbar
+        findViewById<Toolbar>(R.id.toolbar).setOnLongClickListener {
+            val clipboard = getSystemService(
+                Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText(
+                getString(R.string.conversation_contact_clipboard_description),
+                getFormattedPhoneNumber(contact))
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, getString(
+                R.string.conversation_copied_contact_toast_message),
+                           Toast.LENGTH_SHORT).show()
+            true
         }
 
         actionMode = null
@@ -775,7 +787,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         if (message != null) {
             val clipboard = getSystemService(
                 Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("Text message", message.text)
+            val clip = ClipData.newPlainText(
+                getString(R.string.conversation_message_clipboard_description),
+                message.text)
             clipboard.setPrimaryClip(clip)
         }
 
