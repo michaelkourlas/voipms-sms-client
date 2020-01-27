@@ -24,7 +24,6 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/did_button"
-        android:enabled="false"
         android:title="@string/conversation_action_did"
         app:showAsAction="never" />
     <item

@@ -475,6 +475,18 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         val didMenuItem = menu.findItem(R.id.did_button)
         didMenuItem.title = getString(R.string.conversation_action_did,
                                       getFormattedPhoneNumber(did))
+        didMenuItem.setOnMenuItemClickListener {
+            val clipboard = getSystemService(
+                Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText(
+                getString(R.string.conversation_did_clipboard_description),
+                getFormattedPhoneNumber(did))
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, getString(
+                R.string.conversation_copied_did_toast_message),
+                           Toast.LENGTH_SHORT).show()
+            true
+        }
 
         // Hide the call button on devices without telephony support
         if (!packageManager

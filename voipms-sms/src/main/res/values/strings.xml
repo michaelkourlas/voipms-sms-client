@@ -143,8 +143,10 @@
     <string name="conversation_char_rem">%1$d / %2$d</string>
     <string name="conversation_contact_clipboard_description">Contact phone number</string>
     <string name="conversation_copied_contact_toast_message">Copied phone number</string>
+    <string name="conversation_copied_did_toast_message">Copied DID</string>
     <string name="conversation_delete_confirm_message">This action cannot be undone.</string>
     <string name="conversation_delete_confirm_title">Delete messages?</string>
+    <string name="conversation_did_clipboard_description">DID</string>
     <string name="conversation_extra_focus" translatable="false">focus</string>
     <string name="conversation_extra_message_text" translatable="false">messageText</string>
     <string name="conversation_info_date">Date: %1$s</string>
