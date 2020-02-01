@@ -20,11 +20,10 @@ package net.kourlas.voipms_sms.sms.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
+import com.google.gson.JsonSyntaxException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.getJson
 import net.kourlas.voipms_sms.utils.logException
-import org.json.JSONException
-import org.json.JSONObject
 import java.io.IOException
 import java.net.URLEncoder
 
@@ -88,12 +87,15 @@ class VerifyCredentialsService : IntentService(
         return false
     }
 
+    data class VerifyCredentialsResponse(val status: String)
+
     /**
      * Verifies the response of a getDIDsInfo call to the VoIP.ms API.
      *
      * @return Null if an error occurred.
      */
-    private fun getApiResponse(email: String, password: String): JSONObject? {
+    private fun getApiResponse(email: String,
+                               password: String): VerifyCredentialsResponse? {
         val retrieveDidsUrl =
             "https://www.voip.ms/api/v1/rest.php?" +
             "api_username=" +
@@ -101,14 +103,13 @@ class VerifyCredentialsService : IntentService(
             "api_password=" +
             URLEncoder.encode(password, "UTF-8") + "&" +
             "method=getDIDsInfo"
-        val response: JSONObject
         try {
-            response = getJson(applicationContext, retrieveDidsUrl)
+            return getJson(applicationContext, retrieveDidsUrl)
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.verify_credentials_error_api_request)
             return null
-        } catch (e: JSONException) {
+        } catch (e: JsonSyntaxException) {
             logException(e)
             error = applicationContext.getString(
                 R.string.verify_credentials_error_api_parse)
@@ -119,33 +120,26 @@ class VerifyCredentialsService : IntentService(
                 R.string.verify_credentials_error_unknown)
             return null
         }
-        return response
     }
 
     /**
      * Parses the response of a getDIDsInfo from the VoIP.ms API to verify that
      * the response is valid.
      */
-    private fun verifyResponse(response: JSONObject): Boolean {
-        try {
-            val status = response.getString("status")
-            if (status != "success") {
-                error = when (status) {
-                    "invalid_credentials" -> getString(
-                        R.string.verify_credentials_error_api_error_invalid_credentials)
-                    "missing_credentials" -> getString(
-                        R.string.verify_credentials_error_api_error_missing_credentials)
-                    else -> getString(
-                        R.string.verify_credentials_error_api_error, status)
-                }
-                return false
+    private fun verifyResponse(response: VerifyCredentialsResponse): Boolean {
+        if (response.status != "success") {
+            error = when (response.status) {
+                "invalid_credentials" -> getString(
+                    R.string.verify_credentials_error_api_error_invalid_credentials)
+                "missing_credentials" -> getString(
+                    R.string.verify_credentials_error_api_error_missing_credentials)
+                else -> getString(
+                    R.string.verify_credentials_error_api_error,
+                    response.status)
             }
-            return true
-        } catch (e: JSONException) {
-            error = getString(
-                R.string.verify_credentials_error_api_parse)
             return false
         }
+        return true
     }
 
     companion object {

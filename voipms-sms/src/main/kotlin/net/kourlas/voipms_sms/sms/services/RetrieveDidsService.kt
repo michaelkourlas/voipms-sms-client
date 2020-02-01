@@ -20,6 +20,8 @@ package net.kourlas.voipms_sms.sms.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
+import com.google.gson.JsonSyntaxException
+import com.google.gson.annotations.SerializedName
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
@@ -29,8 +31,6 @@ import net.kourlas.voipms_sms.utils.enablePushNotifications
 import net.kourlas.voipms_sms.utils.getJson
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.replaceIndexOnNewThread
-import org.json.JSONException
-import org.json.JSONObject
 import java.io.IOException
 import java.net.URLEncoder
 
@@ -104,12 +104,21 @@ class RetrieveDidsService : IntentService(
         return dids
     }
 
+    data class DidResponse(
+        @SerializedName("sms_available") val smsAvailable: String,
+        @SerializedName("sms_enabled") val smsEnabled: String,
+        val did: String)
+
+    data class DidsResponse(
+        val status: String,
+        @Suppress("ArrayInDataClass") val dids: Array<DidResponse>)
+
     /**
      * Gets the response of a getDIDsInfo call to the VoIP.ms API.
      *
      * @return Null if an error occurred.
      */
-    private fun getApiResponse(): JSONObject? {
+    private fun getApiResponse(): DidsResponse? {
         val retrieveDidsUrl =
             "https://www.voip.ms/api/v1/rest.php?" +
             "api_username=" +
@@ -119,14 +128,13 @@ class RetrieveDidsService : IntentService(
             URLEncoder.encode(getPassword(applicationContext),
                               "UTF-8") + "&" +
             "method=getDIDsInfo"
-        val response: JSONObject
         try {
-            response = getJson(applicationContext, retrieveDidsUrl)
+            return getJson(applicationContext, retrieveDidsUrl)
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.preferences_dids_error_api_request)
             return null
-        } catch (e: JSONException) {
+        } catch (e: JsonSyntaxException) {
             logException(e)
             error = applicationContext.getString(
                 R.string.preferences_dids_error_api_parse)
@@ -137,7 +145,6 @@ class RetrieveDidsService : IntentService(
                 R.string.preferences_dids_error_unknown)
             return null
         }
-        return response
     }
 
     /**
@@ -146,35 +153,22 @@ class RetrieveDidsService : IntentService(
      *
      * @return Null if an error occurred.
      */
-    private fun getDidsFromResponse(response: JSONObject): Set<String>? {
-        val dids = mutableListOf<String>()
-        try {
-            val status = response.getString("status")
-            if (status != "success") {
-                error = when (status) {
-                    "invalid_credentials" -> applicationContext.getString(
-                        R.string.preferences_dids_error_api_error_invalid_credentials)
-                    else -> applicationContext.getString(
-                        R.string.preferences_dids_error_api_error, status)
-                }
-                return null
+    private fun getDidsFromResponse(response: DidsResponse): Set<String>? {
+        if (response.status != "success") {
+            error = when (response.status) {
+                "invalid_credentials" -> applicationContext.getString(
+                    R.string.preferences_dids_error_api_error_invalid_credentials)
+                else -> applicationContext.getString(
+                    R.string.preferences_dids_error_api_error,
+                    response.status)
             }
-
-            val rawDids = response.getJSONArray("dids")
-            (0 until rawDids.length())
-                .map { rawDids.getJSONObject(it) }
-                .filter {
-                    it.getString("sms_available") == "1"
-                    && it.getString("sms_enabled") == "1"
-                }
-                .mapTo(dids) { it.getString("did") }
-        } catch (e: JSONException) {
-            error = getString(
-                R.string.preferences_dids_error_api_parse)
             return null
         }
 
-        return dids.toSet()
+        return response.dids
+            .filter { it.smsAvailable == "1" && it.smsEnabled == "1" }
+            .map { it.did }
+            .toSet()
     }
 
     companion object {

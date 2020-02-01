@@ -22,6 +22,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.JobIntentService
 import androidx.core.app.RemoteInput
+import com.google.gson.JsonSyntaxException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -35,8 +36,6 @@ import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.getJson
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
-import org.json.JSONException
-import org.json.JSONObject
 import java.io.IOException
 import java.net.URLEncoder
 import java.util.*
@@ -241,6 +240,8 @@ class SendMessageService : JobIntentService() {
         }
     }
 
+    data class MessageResponse(val status: String, val sms: Long)
+
     /**
      * Sends the specified message using the VoIP.ms API
      *
@@ -260,14 +261,14 @@ class SendMessageService : JobIntentService() {
                              "api_username=$email&api_password=$password" +
                              "&method=sendSMS&did=$did&dst=$contact" +
                              "&message=$text"
-        val response: JSONObject
+        val response: MessageResponse?
         try {
             response = getJson(applicationContext, sendMessageUrl)
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.send_message_error_api_request)
             return null
-        } catch (e: JSONException) {
+        } catch (e: JsonSyntaxException) {
             logException(e)
             error = applicationContext.getString(
                 R.string.send_message_error_api_parse)
@@ -280,14 +281,13 @@ class SendMessageService : JobIntentService() {
         }
 
         // Get VoIP.ms ID from response
-        val status = response.getString("status")
-        if (status == "") {
+        if (response?.status == "") {
             error = applicationContext.getString(
                 R.string.send_message_error_api_parse)
             return null
         }
-        if (status != "success") {
-            error = when (status) {
+        if (response?.status != "success") {
+            error = when (response?.status) {
                 "invalid_credentials" -> applicationContext.getString(
                     R.string.send_message_error_api_error_invalid_credentials)
                 "invalid_dst" -> applicationContext.getString(
@@ -305,17 +305,16 @@ class SendMessageService : JobIntentService() {
                 "sms_toolong" -> applicationContext.getString(
                     R.string.send_message_error_api_error_sms_toolong)
                 else -> applicationContext.getString(
-                    R.string.send_message_error_api_error, status)
+                    R.string.send_message_error_api_error, response?.status)
             }
             return null
         }
-        val voipId = response.optLong("sms")
-        if (voipId == 0L) {
+        if (response.sms == 0L) {
             error = applicationContext.getString(
                 R.string.send_message_error_api_parse)
             return null
         }
-        return voipId
+        return response.sms
     }
 
     /**

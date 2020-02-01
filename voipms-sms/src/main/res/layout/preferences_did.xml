@@ -38,8 +38,8 @@
             android:layout_height="wrap_content"
             android:background="@color/did_secondary_toolbar_background"
             app:title="Enabled"
-            app:titleTextColor="@color/did_secondary_toolbar_text"
-            app:titleMarginStart="@dimen/toolbar_left_margin" />
+            app:titleMarginStart="@dimen/toolbar_left_margin"
+            app:titleTextColor="@color/did_secondary_toolbar_text" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout

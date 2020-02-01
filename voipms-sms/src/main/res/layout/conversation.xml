@@ -105,8 +105,8 @@
                 android:paddingEnd="@dimen/half_margin"
                 android:paddingBottom="@dimen/half_margin"
                 android:scrollbars="vertical"
-                android:textColorHint="@color/message_hint"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:textColorHint="@color/message_hint"
                 tools:targetApi="o" />
 
             <LinearLayout

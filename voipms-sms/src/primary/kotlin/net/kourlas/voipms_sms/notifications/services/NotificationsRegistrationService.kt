@@ -20,13 +20,12 @@ package net.kourlas.voipms_sms.notifications.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
+import com.google.gson.JsonSyntaxException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.utils.getJson
 import net.kourlas.voipms_sms.utils.logException
-import org.json.JSONException
-import org.json.JSONObject
 import java.io.IOException
 import java.net.URLEncoder
 
@@ -81,12 +80,14 @@ class NotificationsRegistrationService : IntentService(
         applicationContext.sendBroadcast(registrationCompleteIntent)
     }
 
+    data class RegisterResponse(val status: String)
+
     /**
      * Gets the response of a setSMS call to the VoIP.ms API for each DID.
      */
     private fun getVoipMsApiCallbackResponses(
-        dids: Set<String>): Map<String, JSONObject> {
-        val responses = mutableMapOf<String, JSONObject>()
+        dids: Set<String>): Map<String, RegisterResponse?> {
+        val responses = mutableMapOf<String, RegisterResponse?>()
         for (did in dids) {
             try {
                 val registerVoipCallbackUrl =
@@ -104,12 +105,11 @@ class NotificationsRegistrationService : IntentService(
                         "https://us-central1-voip-ms-sms-9ee2b" +
                         ".cloudfunctions.net/notify?did={TO}", "UTF-8") + "&" +
                     "url_callback_retry=0"
-                val response = getJson(applicationContext,
-                                       registerVoipCallbackUrl)
-                responses[did] = response
+                responses[did] = getJson(applicationContext,
+                                         registerVoipCallbackUrl)
             } catch (e: IOException) {
                 // Do nothing.
-            } catch (e: JSONException) {
+            } catch (e: JsonSyntaxException) {
                 logException(e)
             } catch (e: Exception) {
                 logException(e)
@@ -126,15 +126,11 @@ class NotificationsRegistrationService : IntentService(
      */
     private fun parseVoipMsApiCallbackResponses(
         dids: Set<String>,
-        responses: Map<String, JSONObject>): Set<String> {
+        responses: Map<String, RegisterResponse?>): Set<String> {
         val failedDids = mutableSetOf<String>()
         for (did in dids) {
-            try {
-                if (did !in responses
-                    || responses[did]?.getString("status") != "success") {
-                    failedDids.add(did)
-                }
-            } catch (e: JSONException) {
+            if (did !in responses
+                || responses[did]?.status != "success") {
                 failedDids.add(did)
             }
         }

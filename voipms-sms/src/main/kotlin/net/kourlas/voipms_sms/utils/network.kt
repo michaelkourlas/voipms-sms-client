@@ -18,21 +18,21 @@
 package net.kourlas.voipms_sms.utils
 
 import android.content.Context
+import com.google.gson.Gson
 import net.kourlas.voipms_sms.preferences.getConnectTimeout
 import net.kourlas.voipms_sms.preferences.getReadTimeout
-import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
 /**
  * Retrieves a JSON object from the specified URL.
  */
-fun getJson(context: Context, url: String): JSONObject {
+inline fun <reified T> getJson(context: Context, url: String): T? {
     val connection = URL(url).openConnection() as HttpURLConnection
     connection.readTimeout = getReadTimeout(context) * 1000
     connection.connectTimeout = getConnectTimeout(context) * 1000
     connection.connect()
 
     val data = connection.inputStream.bufferedReader().readText()
-    return JSONObject(data)
+    return Gson().fromJson(data, T::class.java)
 }

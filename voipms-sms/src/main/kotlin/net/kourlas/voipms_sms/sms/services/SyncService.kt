@@ -25,6 +25,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.google.gson.JsonSyntaxException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -35,8 +36,6 @@ import net.kourlas.voipms_sms.utils.getJson
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.toBoolean
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
-import org.json.JSONException
-import org.json.JSONObject
 import java.io.IOException
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
@@ -297,6 +296,18 @@ class SyncService : IntentService(
         }
     }
 
+    data class MessageResponse(
+        val date: String,
+        val id: String,
+        val type: String,
+        val did: String,
+        val contact: String,
+        val message: String)
+
+    data class MessagesResponse(
+        val status: String,
+        @Suppress("ArrayInDataClass") val sms: Array<MessageResponse>)
+
     /**
      * Processes the specified retrieval request using the VoIP.ms API.
      *
@@ -308,46 +319,31 @@ class SyncService : IntentService(
 
         // Extract messages from the VoIP.ms API response
         val incomingMessages = mutableListOf<IncomingMessage>()
-        val status = response.optString("status")
-        if (status != "success" && status != "no_sms") {
-            error = when (status) {
+        if (response.status != "success" && response.status != "no_sms") {
+            error = when (response.status) {
                 "invalid_credentials" -> applicationContext.getString(
                     R.string.sync_error_api_error_invalid_credentials)
                 else -> applicationContext.getString(
                     R.string.sync_error_api_error,
-                    status)
+                    response.status)
             }
             return null
         }
 
-        if (status != "no_sms") {
-            val rawMessages = response.optJSONArray("sms")
-            if (rawMessages == null) {
-                error = applicationContext.getString(
-                    R.string.sync_error_api_parse)
-                return null
-            }
-            for (i in 0 until rawMessages.length()) {
-                val rawSms = rawMessages.optJSONObject(i)
-                if (rawSms == null) {
-                    error = applicationContext.getString(
-                        R.string.sync_error_api_parse)
-                    return null
-                }
-
-                val rawDate = rawSms.getString("date")
+        if (response.status != "no_sms") {
+            for (message in response.sms) {
                 val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
                 sdf.timeZone = TimeZone.getTimeZone("America/New_York")
 
                 try {
                     val incomingMessage = IncomingMessage(
-                        rawSms.getString("id").toLong(),
-                        sdf.parse(rawDate) ?: throw Exception(
-                            "Failed to parse date $rawDate"),
-                        toBoolean(rawSms.getString("type")),
-                        rawSms.getString("did"),
-                        rawSms.getString("contact"),
-                        rawSms.getString("message"))
+                        message.id.toLong(),
+                        sdf.parse(message.date) ?: throw Exception(
+                            "Failed to parse date ${message.date}"),
+                        toBoolean(message.type),
+                        message.did,
+                        message.contact,
+                        message.message)
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
                     logException(e)
@@ -365,15 +361,14 @@ class SyncService : IntentService(
      * Performs a GET request using the specified url and parses the response
      * as JSON.
      */
-    private fun sendRequestWithVoipMsApi(url: String): JSONObject? {
-        val response: JSONObject
+    private fun sendRequestWithVoipMsApi(url: String): MessagesResponse? {
         try {
-            response = getJson(applicationContext, url)
+            return getJson(applicationContext, url)
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.sync_error_api_request)
             return null
-        } catch (e: JSONException) {
+        } catch (e: JsonSyntaxException) {
             logException(e)
             error = applicationContext.getString(R.string.sync_error_api_parse)
             return null
@@ -382,8 +377,6 @@ class SyncService : IntentService(
             error = applicationContext.getString(R.string.sync_error_unknown)
             return null
         }
-
-        return response
     }
 
     /**
