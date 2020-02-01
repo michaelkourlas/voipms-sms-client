@@ -1,4 +1,4 @@
-## 0.6.5 (not yet released) ##
+## 0.6.5 ##
 
 * Dark theme
 * Allow viewing all DIDs in conversations view
