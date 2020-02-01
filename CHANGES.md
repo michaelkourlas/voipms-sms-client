@@ -2,6 +2,9 @@
 
 * Dark theme
 * Allow viewing all DIDs in conversations view
+* Allow backing up a single conversation
+* Allow changing the maximum size of the message text box
+* Allow copying the DID and contact phone numbers from the conversation view
 * Use Android keystore to store VoIP.ms email and password
 * Bug fixes
 
