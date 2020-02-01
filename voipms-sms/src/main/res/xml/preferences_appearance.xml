@@ -23,4 +23,10 @@
         android:icon="@android:color/transparent"
         android:key="@string/preferences_theme_key"
         android:title="@string/preferences_theme_title" />
+    <com.takisoft.preferencex.EditTextPreference
+        android:defaultValue="@string/preferences_message_text_box_maximum_size_default_value"
+        android:icon="@android:color/transparent"
+        android:inputType="number"
+        android:key="@string/preferences_message_text_box_maximum_size_key"
+        android:title="@string/preferences_message_text_box_maximum_size_title" />
 </androidx.preference.PreferenceScreen>

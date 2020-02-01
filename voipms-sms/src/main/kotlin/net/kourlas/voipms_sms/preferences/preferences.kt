@@ -92,6 +92,15 @@ fun getLastCompleteSyncTime(context: Context): Long =
                           R.string.preferences_sync_last_complete_time_key),
                       0)
 
+fun getMessageTextBoxMaximumSize(context: Context): Int =
+    getStringPreference(
+        context,
+        context.getString(
+            R.string.preferences_message_text_box_maximum_size_key),
+        context.getString(
+            R.string.preferences_message_text_box_maximum_size_default_value))
+        .toIntOrNull() ?: 0
+
 @Deprecated(
     "Remove when Android versions earlier than Oreo are no longer supported.")
 fun getNotificationsEnabled(context: Context): Boolean {

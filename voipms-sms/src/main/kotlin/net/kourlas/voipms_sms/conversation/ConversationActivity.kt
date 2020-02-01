@@ -50,6 +50,7 @@ import net.kourlas.voipms_sms.demo.getDemoNotification
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.preferences.getMessageTextBoxMaximumSize
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
@@ -437,6 +438,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 }
             }
         }
+
+        // Set max lines
+        messageText.maxLines = getMessageTextBoxMaximumSize(this)
 
         // Mark the conversation as read and remove any open notifications
         // related to this conversation

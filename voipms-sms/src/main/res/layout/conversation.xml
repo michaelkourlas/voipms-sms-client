@@ -99,7 +99,6 @@
                 android:importantForAutofill="no"
                 android:inputType="textMultiLine|textCapSentences|textAutoCorrect|textShortMessage"
                 android:isScrollContainer="true"
-                android:maxLines="@integer/message_text_height"
                 android:paddingStart="@dimen/margin"
                 android:paddingTop="@dimen/half_margin"
                 android:paddingEnd="@dimen/half_margin"

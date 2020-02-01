@@ -83,6 +83,9 @@
     <string name="preferences_theme_key" translatable="false">theme</string>
     <string name="preferences_theme_title">Theme</string>
     <string name="preferences_theme_default_value" translatable="false">0</string>
+    <string name="preferences_message_text_box_maximum_size_key" translatable="false">message_text_box_maximum_size</string>
+    <string name="preferences_message_text_box_maximum_size_title">Message text box maximum size</string>
+    <string name="preferences_message_text_box_maximum_size_default_value" translatable="false">4</string>
 
     <!-- Network -->
     <string name="preferences_network_category_name">Network</string>

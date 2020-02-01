@@ -22,6 +22,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.ListPreference
 import androidx.preference.Preference
+import com.takisoft.preferencex.EditTextPreference
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.preferences
@@ -92,6 +93,14 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
         if (preference is ListPreference) {
             // Display value of selected element as summary text
             preference.summary = preference.entry
+        } else if (preference is EditTextPreference) {
+            // Display value of preference as summary text
+            if (preference.key == getString(
+                    R.string.preferences_message_text_box_maximum_size_key)) {
+                preference.summary = preference.text + " lines"
+            } else {
+                preference.summary = preference.text
+            }
         }
     }
 
