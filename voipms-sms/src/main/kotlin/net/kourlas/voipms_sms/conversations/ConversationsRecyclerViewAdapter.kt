@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2019 Michael Kourlas
+ * Copyright (C) 2015-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
 import net.kourlas.voipms_sms.preferences.getActiveDid
+import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.utils.*
@@ -334,23 +335,24 @@ class ConversationsRecyclerViewAdapter<T>(
             @Suppress("ConstantConditionIf")
             if (!BuildConfig.IS_DEMO) {
                 val activeDid = getActiveDid(activity)
-                if (activeDid.isNotEmpty()) {
-                    resultsObject.messages.addAll(
-                        Database.getInstance(activity)
-                            .getMessagesMostRecentFiltered(
-                                setOf(activeDid),
-                                constraint.toString()
-                                    .trim { it <= ' ' }
-                                    .toLowerCase(Locale.getDefault())).filter {
-                                val archived = Database.getInstance(activity)
-                                    .isConversationArchived(it.conversationId)
-                                if (activity is ConversationsArchivedActivity) {
-                                    archived
-                                } else {
-                                    !archived
-                                }
-                            })
-                }
+                resultsObject.messages.addAll(
+                    Database.getInstance(activity)
+                        .getMessagesMostRecentFiltered(
+                            if (activeDid == "")
+                                getDids(activity,
+                                        onlyShowInConversationsView = true)
+                            else setOf(activeDid),
+                            constraint.toString()
+                                .trim { it <= ' ' }
+                                .toLowerCase(Locale.getDefault())).filter {
+                            val archived = Database.getInstance(activity)
+                                .isConversationArchived(it.conversationId)
+                            if (activity is ConversationsArchivedActivity) {
+                                archived
+                            } else {
+                                !archived
+                            }
+                        })
             } else {
                 resultsObject.messages.addAll(
                     getConversationsDemoMessages())
@@ -501,8 +503,8 @@ class ConversationsRecyclerViewAdapter<T>(
             if (conversationItems.isEmpty()) {
                 if (currConstraint == "") {
                     when {
-                        getActiveDid(
-                            activity) == "" ->
+                        getDids(activity,
+                                onlyShowInConversationsView = true).isEmpty() ->
                             emptyTextView.text = activity.getString(
                                 R.string.conversations_no_dids)
                         activity is ConversationsArchivedActivity ->

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2019 Michael Kourlas
+  ~ Copyright (C) 2015-2020 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -173,36 +173,37 @@
     <string name="new_conversation_error_refresh">New conversation view refresh failed; please restart the app</string>
 
     <!-- ConversationsActivity -->
-    <string name="conversations_action_search">Search</string>
-    <string name="conversations_action_archived">Archived</string>
-    <string name="conversations_action_settings">Settings</string>
-    <string name="conversations_action_help">Help</string>
-    <string name="conversations_action_privacy">Privacy</string>
-    <string name="conversations_action_license">License</string>
-    <string name="conversations_action_credits">Credits</string>
-    <string name="conversations_action_donate">Donate</string>
     <string name="conversations_action_archive">Archive</string>
-    <string name="conversations_action_unarchive">Unarchive</string>
+    <string name="conversations_action_archived">Archived</string>
+    <string name="conversations_action_chat">Chat</string>
+    <string name="conversations_action_credits">Credits</string>
+    <string name="conversations_action_delete">Delete</string>
+    <string name="conversations_action_donate">Donate</string>
+    <string name="conversations_action_help">Help</string>
+    <string name="conversations_action_license">License</string>
     <string name="conversations_action_mark_read">Mark read</string>
     <string name="conversations_action_mark_unread">Mark unread</string>
-    <string name="conversations_action_delete">Delete</string>
-    <string name="conversations_action_chat">Chat</string>
-    <string name="conversations_delete_confirm_title">Delete this conversation?</string>
+    <string name="conversations_action_privacy">Privacy</string>
+    <string name="conversations_action_search">Search</string>
+    <string name="conversations_action_settings">Settings</string>
+    <string name="conversations_action_unarchive">Unarchive</string>
+    <string name="conversations_all_dids">All</string>
+    <string name="conversations_checked_content_description">Checked</string>
     <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
+    <string name="conversations_delete_confirm_title">Delete this conversation?</string>
+    <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>
+    <string name="conversations_fail_web_browser">No web browser installed</string>
+    <string name="conversations_message_draft">Draft</string>
+    <string name="conversations_message_not_sent">Not sent.</string>
+    <string name="conversations_message_sending">Sending…</string>
+    <string name="conversations_message_you">You:</string>
+    <string name="conversations_no_account">No account configured</string>
     <string name="conversations_no_dids">You have no configured DIDs.</string>
     <string name="conversations_no_messages">You have no messages associated with the selected DID.</string>
     <string name="conversations_no_results">No results found for \'%1$s\'</string>
-    <string name="conversations_message_you">You:</string>
-    <string name="conversations_message_sending">Sending…</string>
-    <string name="conversations_message_not_sent">Not sent.</string>
-    <string name="conversations_message_draft">Draft</string>
-    <string name="conversations_checked_content_description">Checked</string>
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>
-    <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>
-    <string name="conversations_text_hint">Search…</string>
-    <string name="conversations_no_account">No account configured</string>
-    <string name="conversations_fail_web_browser">No web browser installed</string>
     <string name="conversations_sync_date_suggestion">Synchronization start date is %1$s</string>
+    <string name="conversations_text_hint">Search…</string>
 
     <!-- ConversationsArchivedActivity -->
     <string name="conversations_archived_name">Archived</string>

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -361,13 +361,14 @@ open class ConversationsActivity : AppCompatActivity(),
         if (dids.isNotEmpty()) {
             var activeDid = getActiveDid(applicationContext)
             if (activeDid !in dids) {
-                activeDid = dids.first()
+                activeDid = ""
                 setActiveDid(applicationContext, activeDid)
             }
 
-            for (did in dids) {
+            for (did in listOf("").union(dids)) {
                 val menuItem = navigationView.menu.add(
-                    getFormattedPhoneNumber(did))
+                    if (did == "") getString(R.string.conversations_all_dids)
+                    else getFormattedPhoneNumber(did))
                 navViewMenuItemDidMap[menuItem] = did
                 menuItem.isCheckable = true
                 if (activeDid == did) {
