@@ -1,6 +1,7 @@
 ## 0.6.5 (not yet released) ##
 
 * Dark theme
+* Allow viewing all DIDs in conversations view
 * Use Android keystore to store VoIP.ms email and password
 * Bug fixes
 
