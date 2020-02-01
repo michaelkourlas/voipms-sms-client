@@ -48,4 +48,8 @@
         android:id="@+id/notifications_button"
         android:title="@string/conversation_action_notifications"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/export_button"
+        android:title="@string/conversation_action_export"
+        app:showAsAction="never" />
 </menu>

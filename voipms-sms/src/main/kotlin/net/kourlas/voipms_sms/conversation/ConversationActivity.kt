@@ -40,6 +40,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
@@ -552,6 +553,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             R.id.unarchive_button -> return onUnarchiveButtonClick()
             R.id.delete_button -> return onDeleteAllButtonClick()
             R.id.notifications_button -> return onNotificationsButtonClick()
+            R.id.export_button -> return onExportButtonClick()
         }
 
         return super.onOptionsItemSelected(item)
@@ -683,6 +685,23 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                                 did, contact))
             startActivity(intent)
         }
+        return true
+    }
+
+    /**
+     * Handles the export button.
+     */
+    private fun onExportButtonClick(): Boolean {
+        val json = Gson().toJson(adapter.messageItems.map { it.message })
+        val clipboard = getSystemService(
+            Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText(
+            getString(R.string.conversation_conversation_clipboard_description),
+            json)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(this, getString(
+            R.string.conversation_copied_conversation_toast_message),
+                       Toast.LENGTH_SHORT).show()
         return true
     }
 
