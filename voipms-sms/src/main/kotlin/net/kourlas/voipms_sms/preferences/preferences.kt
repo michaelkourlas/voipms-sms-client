@@ -147,7 +147,7 @@ fun getPassword(context: Context): String {
         if (passwordAtOldStorageLocation != "") {
             // If the password is present at the old storage location, move it
             // to the secure preferences (which use the Android keystore)
-            setEmail(context, passwordAtOldStorageLocation)
+            setPassword(context, passwordAtOldStorageLocation)
             removePreference(context, context.getString(
                 R.string.preferences_account_password_key))
         }
