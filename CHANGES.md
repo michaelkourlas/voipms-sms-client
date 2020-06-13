@@ -1,3 +1,7 @@
+## 0.6.6 ##
+
+* Bug fixes
+
 ## 0.6.5 ##
 
 * Dark theme
