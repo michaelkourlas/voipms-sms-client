@@ -91,9 +91,11 @@ dependencies {
 
 apply plugin: 'kotlin-android-extensions'
 
-if (!getGradle().getStartParameter().getTaskRequests()
-        .toString().contains("Fdroid"))
-{
-    apply plugin: 'com.google.gms.google-services'
-    apply plugin: 'com.google.firebase.crashlytics'
+// Remove from F-Droid builds
+tasks.whenTaskAdded {task ->
+    if (task.name.contains('Fdroid') && task.name.contains('GoogleServices')) {
+        task.enabled = false
+    }
 }
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
