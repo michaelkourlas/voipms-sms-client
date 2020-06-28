@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,31 +178,36 @@ class SendMessageService : JobIntentService() {
 
         // Extract the message text provided by inline reply if it exists;
         // otherwise, use the manually specified message text
-        var messageText: String
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
-        messageText = remoteInput?.getCharSequence(
+        val messageText = remoteInput?.getCharSequence(
             applicationContext.getString(
                 R.string.notifications_reply_key))?.toString()
-                      ?: (intent.getStringExtra(
-                          applicationContext.getString(
-                              R.string.send_message_text))
-                          ?: throw Exception(
-                              "Message text missing"))
+                          ?: (intent.getStringExtra(
+                              applicationContext.getString(
+                                  R.string.send_message_text))
+                              ?: throw Exception(
+                                  "Message text missing"))
 
         // If the message text exceeds the maximum length of an SMS message,
         // split it into multiple message texts
-        val length = applicationContext.resources.getInteger(
+        val maxLength = applicationContext.resources.getInteger(
             R.integer.sms_max_length)
         val messageTexts = mutableListOf<String>()
+
+        // VoIP.ms uses UTF-8 encoding for text messages; any message
+        // exceeding N bytes when encoded using UTF-8 is too long
+        var bytes = messageText.toByteArray(Charsets.UTF_8).toList()
         do {
-            val sublength: Int = if (messageText.length > length) {
-                length
+            val sublength: Int = if (bytes.size > maxLength) {
+                maxLength
             } else {
-                messageText.length
+                bytes.size
             }
-            messageTexts.add(messageText.substring(0, sublength))
-            messageText = messageText.substring(sublength)
-        } while (messageText.isNotEmpty())
+            messageTexts.add(
+                String(bytes.slice(0 until sublength).toByteArray(),
+                       Charsets.UTF_8))
+            bytes = bytes.slice(sublength until bytes.size)
+        } while (bytes.isNotEmpty())
 
         return IntentData(
             did, contact, messageTexts, null)

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2019 Michael Kourlas
+ * Copyright (C) 2015-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -340,13 +340,17 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         val charsRemainingTextView = findViewById<TextView>(
             R.id.chars_remaining_text)
 
-        if (newText.length <= maxLength) {
-            if (newText.length >= maxLength - 10) {
+        // VoIP.ms uses UTF-8 encoding for text messages; any message
+        // exceeding N bytes when encoded using UTF-8 is too long
+        val bytes = newText.toByteArray(Charsets.UTF_8)
+
+        if (bytes.size <= maxLength) {
+            if (bytes.size >= maxLength - 10) {
                 // Show "N" when there are N characters left in the first
                 // message and N <= 10
                 charsRemainingTextView.visibility = View.VISIBLE
                 charsRemainingTextView.text =
-                    (maxLength - newText.length).toString()
+                    (maxLength - bytes.size).toString()
             } else {
                 // Show nothing
                 charsRemainingTextView.visibility = View.GONE
@@ -356,10 +360,10 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             // number of characters left in the current message
             charsRemainingTextView.visibility = View.VISIBLE
 
-            val charsRemaining = if (newText.length % maxLength != 0) {
-                maxLength - newText.length % maxLength
+            val charsRemaining = if (bytes.size % maxLength != 0) {
+                maxLength - bytes.size % maxLength
             } else 0
-            val numMessages = newText.length / maxLength + 1
+            val numMessages = bytes.size / maxLength + 1
             charsRemainingTextView.text = getString(
                 R.string.conversation_char_rem,
                 charsRemaining, numMessages)
