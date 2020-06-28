@@ -107,6 +107,12 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             // Refresh adapter to show message being sent
             if (::adapter.isInitialized) {
                 adapter.refresh()
+
+                // Scroll to the bottom of the adapter so that the message is
+                // in view
+                if (adapter.itemCount > 0) {
+                    layoutManager.scrollToPosition(adapter.itemCount - 1)
+                }
             }
         }
 
