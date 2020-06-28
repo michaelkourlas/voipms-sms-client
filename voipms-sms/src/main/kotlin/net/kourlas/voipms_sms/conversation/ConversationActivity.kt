@@ -57,6 +57,7 @@ import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.services.SendMessageService
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
+import java.text.BreakIterator
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -348,15 +349,31 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
 
         // VoIP.ms uses UTF-8 encoding for text messages; any message
         // exceeding N bytes when encoded using UTF-8 is too long
-        val bytes = newText.toByteArray(Charsets.UTF_8)
+        var msgsCount = 1
+        var bytesCount = 0
+        val boundary = BreakIterator.getCharacterInstance(Locale.getDefault())
+        boundary.setText(newText)
+        var current = boundary.first()
+        var next = boundary.next()
+        while (next != BreakIterator.DONE) {
+            val cluster = newText.substring(current, next)
+            val clusterBytes = cluster.toByteArray(Charsets.UTF_8)
+            if (bytesCount + clusterBytes.size > maxLength) {
+                msgsCount += 1
+                bytesCount = 0
+            }
+            bytesCount += clusterBytes.size
+            current = next
+            next = boundary.next()
+        }
 
-        if (bytes.size <= maxLength) {
-            if (bytes.size >= maxLength - 10) {
+        if (msgsCount == 1) {
+            if (bytesCount >= maxLength - 10) {
                 // Show "N" when there are N characters left in the first
                 // message and N <= 10
                 charsRemainingTextView.visibility = View.VISIBLE
                 charsRemainingTextView.text =
-                    (maxLength - bytes.size).toString()
+                    (maxLength - bytesCount).toString()
             } else {
                 // Show nothing
                 charsRemainingTextView.visibility = View.GONE
@@ -365,14 +382,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             // Show "N / M" when there are M messages and M >= 2; N is the
             // number of characters left in the current message
             charsRemainingTextView.visibility = View.VISIBLE
-
-            val charsRemaining = if (bytes.size % maxLength != 0) {
-                maxLength - bytes.size % maxLength
-            } else 0
-            val numMessages = bytes.size / maxLength + 1
             charsRemainingTextView.text = getString(
                 R.string.conversation_char_rem,
-                charsRemaining, numMessages)
+                maxLength - bytesCount, msgsCount)
         }
 
         runOnNewThread {

@@ -38,6 +38,7 @@ import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import java.io.IOException
 import java.net.URLEncoder
+import java.text.BreakIterator
 import java.util.*
 
 /**
@@ -196,19 +197,23 @@ class SendMessageService : JobIntentService() {
 
         // VoIP.ms uses UTF-8 encoding for text messages; any message
         // exceeding N bytes when encoded using UTF-8 is too long
-        var bytes = messageText.toByteArray(Charsets.UTF_8).toList()
-        do {
-            val sublength: Int = if (bytes.size > maxLength) {
-                maxLength
-            } else {
-                bytes.size
+        val bytes = mutableListOf<Byte>()
+        val boundary = BreakIterator.getCharacterInstance(Locale.getDefault())
+        boundary.setText(messageText)
+        var current = boundary.first()
+        var next = boundary.next()
+        while (next != BreakIterator.DONE) {
+            val cluster = messageText.substring(current, next)
+            val clusterBytes = cluster.toByteArray(Charsets.UTF_8)
+            if (bytes.size + clusterBytes.size > maxLength) {
+                messageTexts.add(String(bytes.toByteArray(), Charsets.UTF_8))
+                bytes.clear()
             }
-            messageTexts.add(
-                String(bytes.slice(0 until sublength).toByteArray(),
-                       Charsets.UTF_8))
-            bytes = bytes.slice(sublength until bytes.size)
-        } while (bytes.isNotEmpty())
-
+            bytes.addAll(clusterBytes.toList())
+            current = next
+            next = boundary.next()
+        }
+        messageTexts.add(String(bytes.toByteArray(), Charsets.UTF_8))
         return IntentData(
             did, contact, messageTexts, null)
     }
