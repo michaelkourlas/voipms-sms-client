@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,12 @@ import net.kourlas.voipms_sms.sms.Database;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
+import static net.kourlas.voipms_sms.preferences.PreferencesKt.getAppTheme;
+import static net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment.DARK;
+import static net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment.LIGHT;
+import static net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment.SYSTEM_DEFAULT;
 import static net.kourlas.voipms_sms.utils.ExceptionsKt.logException;
 import static net.kourlas.voipms_sms.utils.FcmKt.subscribeToDidTopics;
 
@@ -83,6 +89,19 @@ public class CustomApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Update theme
+        String theme = getAppTheme(getApplicationContext());
+        if (theme.equals(SYSTEM_DEFAULT)) {
+            AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        } else if (theme.equals(LIGHT)) {
+            AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_NO);
+        } else if (theme.equals(DARK)) {
+            AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_YES);
+        }
 
         // Register for network callbacks
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

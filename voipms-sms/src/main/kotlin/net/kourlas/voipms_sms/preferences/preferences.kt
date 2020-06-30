@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,24 @@ import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.text.SimpleDateFormat
 import java.util.*
 
+fun accountConfigured(context: Context): Boolean =
+    getEmail(context) != ""
+    && getPassword(context) != ""
+
+fun didsConfigured(context: Context): Boolean = getDids(context).isNotEmpty()
+
+fun getActiveDid(context: Context): String =
+    getStringPreference(context,
+                        context.getString(
+                            R.string.preferences_dids_active_did_key),
+                        "")
+
+fun getAppTheme(context: Context): String =
+    getStringPreference(
+        context,
+        context.getString(R.string.preferences_theme_key),
+        context.getString(R.string.preferences_theme_default_value))
+
 fun getConnectTimeout(context: Context): Int =
     getStringPreference(
         context,
@@ -32,12 +50,6 @@ fun getConnectTimeout(context: Context): Int =
         context.getString(
             R.string.preferences_network_connect_timeout_default_value))
         .toIntOrNull() ?: 0
-
-fun getActiveDid(context: Context): String =
-    getStringPreference(context,
-                        context.getString(
-                            R.string.preferences_dids_active_did_key),
-                        "")
 
 fun getDids(context: Context,
             onlyShowInConversationsView: Boolean = false,
@@ -85,6 +97,12 @@ fun getEmail(context: Context): String {
     }
     return email
 }
+
+fun getFirstSyncAfterSignIn(context: Context): Boolean =
+    getBooleanPreference(
+        context,
+        context.getString(R.string.preferences_first_sync_after_sign_in_key),
+        false)
 
 fun getLastCompleteSyncTime(context: Context): Long =
     getLongPreference(context,
@@ -156,6 +174,14 @@ fun getPassword(context: Context): String {
     return password
 }
 
+fun getReadTimeout(context: Context): Int =
+    getStringPreference(
+        context,
+        context.getString(R.string.preferences_network_read_timeout_key),
+        context.getString(
+            R.string.preferences_network_read_timeout_default_value))
+        .toIntOrNull() ?: 0
+
 fun getRetrieveDeletedMessages(context: Context): Boolean {
     val value: String = context.getString(
         R.string.preferences_sync_retrieve_deleted_messages_default_value)
@@ -224,27 +250,6 @@ fun getSyncInterval(context: Context): Double =
                             R.string.preferences_sync_interval_key),
                         "0").toDouble()
 
-
-fun getReadTimeout(context: Context): Int =
-    getStringPreference(
-        context,
-        context.getString(R.string.preferences_network_read_timeout_key),
-        context.getString(
-            R.string.preferences_network_read_timeout_default_value))
-        .toIntOrNull() ?: 0
-
-fun getFirstSyncAfterSignIn(context: Context): Boolean =
-    getBooleanPreference(
-        context,
-        context.getString(R.string.preferences_first_sync_after_sign_in_key),
-        false)
-
-fun accountConfigured(context: Context): Boolean =
-    getEmail(context) != ""
-    && getPassword(context) != ""
-
-fun didsConfigured(context: Context): Boolean = getDids(context).isNotEmpty()
-
 fun setActiveDid(context: Context, did: String) {
     setStringPreference(context, context.getString(
         R.string.preferences_dids_active_did_key), did)
@@ -265,14 +270,24 @@ fun setDids(context: Context, dids: Set<String>) {
     subscribeToDidTopics(context)
 }
 
-fun setEmail(context: Context, email: String) {
-    SecurePreferences.setValue(context, context.getString(
-        R.string.preferences_account_email_key), email)
+fun setDidRetrieveMessages(context: Context, did: String, value: Boolean) {
+    setBooleanPreference(context,
+                         context.getString(
+                             R.string.preferences_did_retrieve_messages_key,
+                             did),
+                         value)
 }
 
-fun setPassword(context: Context, password: String) {
-    SecurePreferences.setValue(context, context.getString(
-        R.string.preferences_account_password_key), password)
+fun getDidRetrieveMessages(context: Context, did: String): Boolean {
+    if (did !in getDids(context)) {
+        return false
+    }
+
+    return getBooleanPreference(
+        context,
+        context.getString(
+            R.string.preferences_did_retrieve_messages_key, did),
+        true)
 }
 
 fun setDidShowInConversationsView(context: Context, did: String,
@@ -297,26 +312,6 @@ fun getDidShowInConversationsView(context: Context, did: String): Boolean {
         true)
 }
 
-fun setDidRetrieveMessages(context: Context, did: String, value: Boolean) {
-    setBooleanPreference(context,
-                         context.getString(
-                             R.string.preferences_did_retrieve_messages_key,
-                             did),
-                         value)
-}
-
-fun getDidRetrieveMessages(context: Context, did: String): Boolean {
-    if (did !in getDids(context)) {
-        return false
-    }
-
-    return getBooleanPreference(
-        context,
-        context.getString(
-            R.string.preferences_did_retrieve_messages_key, did),
-        true)
-}
-
 fun setDidShowNotifications(context: Context, did: String, value: Boolean) {
     setBooleanPreference(context, context.getString(
         R.string.preferences_did_show_notifications_key, did), value)
@@ -332,6 +327,18 @@ fun getDidShowNotifications(context: Context, did: String): Boolean {
         context.getString(
             R.string.preferences_did_show_notifications_key, did),
         true)
+}
+
+fun setEmail(context: Context, email: String) {
+    SecurePreferences.setValue(context, context.getString(
+        R.string.preferences_account_email_key), email)
+}
+
+fun setFirstSyncAfterSignIn(context: Context, firstSyncAfterSignIn: Boolean) {
+    setBooleanPreference(
+        context,
+        context.getString(R.string.preferences_first_sync_after_sign_in_key),
+        firstSyncAfterSignIn)
 }
 
 fun setLastCompleteSyncTime(context: Context,
@@ -353,18 +360,16 @@ fun setSetupCompletedForVersion(context: Context, version: Long) {
     }
 }
 
+fun setPassword(context: Context, password: String) {
+    SecurePreferences.setValue(context, context.getString(
+        R.string.preferences_account_password_key), password)
+}
+
 fun setStartDate(context: Context, date: Date) {
     setStringPreference(
         context,
         context.getString(R.string.preferences_sync_start_date_key),
         SimpleDateFormat("MM/dd/yyyy", Locale.US).format(date))
-}
-
-fun setFirstSyncAfterSignIn(context: Context, firstSyncAfterSignIn: Boolean) {
-    setBooleanPreference(
-        context,
-        context.getString(R.string.preferences_first_sync_after_sign_in_key),
-        firstSyncAfterSignIn)
 }
 
 private fun getBooleanPreference(context: Context, key: String,
