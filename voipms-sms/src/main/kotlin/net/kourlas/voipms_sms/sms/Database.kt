@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,9 +200,7 @@ class Database private constructor(private val context: Context) {
     fun getConversationIds(
         dids: Set<String>): Set<ConversationId> = synchronized(this)
     {
-        return getMessagesMostRecentFilteredWithoutLock(dids)
-            .map { it.conversationId }
-            .toSet()
+        return getConversationIdsWithoutLock(dids)
     }
 
     /**
@@ -256,7 +254,8 @@ class Database private constructor(private val context: Context) {
                 dids.joinToString(" OR ") { "$COLUMN_DID=?" },
                 dids.toTypedArray(),
                 null, null,
-                "$COLUMN_DATE DESC", "1"))
+                "$COLUMN_DATE DESC, $COLUMN_VOIP_ID DESC,"
+                + " $COLUMN_DATABASE_ID DESC", "1"))
         if (messages.size > 0) {
             return messages[0]
         }
@@ -275,7 +274,7 @@ class Database private constructor(private val context: Context) {
                 dids.joinToString(" OR ") { "$COLUMN_DID=?" },
                 dids.toTypedArray(),
                 null, null,
-                "$COLUMN_DATABASE_ID DESC"))
+                "$COLUMN_VOIP_ID DESC, $COLUMN_DATABASE_ID DESC"))
     }
 
     /**
@@ -296,7 +295,8 @@ class Database private constructor(private val context: Context) {
                 arrayOf(conversationId.did, conversationId.contact,
                         "%$filterConstraint%"),
                 null, null,
-                "$COLUMN_DATE ASC, $COLUMN_DATABASE_ID DESC"))
+                "$COLUMN_DATE ASC, $COLUMN_VOIP_ID ASC,"
+                + " $COLUMN_DATABASE_ID ASC"))
     }
 
     /**
@@ -349,7 +349,7 @@ class Database private constructor(private val context: Context) {
             + " AND $COLUMN_UNREAD=1",
             arrayOf(conversationId.did, conversationId.contact),
             null, null,
-            "$COLUMN_DATE ASC, $COLUMN_DATABASE_ID DESC")
+            "$COLUMN_DATE ASC, $COLUMN_VOIP_ID ASC, $COLUMN_DATABASE_ID ASC")
         return getMessagesCursor(cursor)
     }
 
@@ -794,6 +794,34 @@ class Database private constructor(private val context: Context) {
     }
 
     /**
+     * Gets all conversation IDs in the database associated with the specified
+     * DIDs.
+     *
+     * This method intentionally does not use lock semantics; this is a
+     * responsibility of the caller.
+     */
+    private fun getConversationIdsWithoutLock(
+        dids: Set<String>): Set<ConversationId> {
+        val conversationIds = mutableSetOf<ConversationId>()
+        for (did in dids) {
+            val cursor = database.query(
+                true, TABLE_MESSAGE, arrayOf(COLUMN_CONTACT),
+                "$COLUMN_DID=?", arrayOf(did), null, null, null, null)
+            cursor.moveToFirst()
+            while (!cursor.isAfterLast) {
+                conversationIds.add(
+                    ConversationId(
+                        did,
+                        cursor.getString(
+                            cursor.getColumnIndexOrThrow(COLUMN_CONTACT))))
+                cursor.moveToNext()
+            }
+            cursor.close()
+        }
+        return conversationIds
+    }
+
+    /**
      * Gets the database ID for the row in the draft table for the specified
      * conversation.
      *
@@ -924,32 +952,42 @@ class Database private constructor(private val context: Context) {
         val messages = mutableListOf<Message>()
         cursor.moveToFirst()
         while (!cursor.isAfterLast) {
-            val message = Message(
-                cursor.getLong(
-                    cursor.getColumnIndexOrThrow(
-                        COLUMN_DATABASE_ID)),
-                if (cursor.isNull(
-                        cursor.getColumnIndexOrThrow(
-                            COLUMN_VOIP_ID))) {
-                    null
-                } else {
-                    cursor.getLong(cursor.getColumnIndex(COLUMN_VOIP_ID))
-                },
-                cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_INCOMING)),
-                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
-                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
-                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
-                cursor.getLong(
-                    cursor.getColumnIndexOrThrow(
-                        COLUMN_DELIVERY_IN_PROGRESS)))
+            val message = getMessageCursor(cursor)
             messages.add(message)
             cursor.moveToNext()
         }
         cursor.close()
         return messages
+    }
+
+    /**
+     * Retrieves the message currently pointed to by the specified cursor.
+     *
+     * This method intentionally does not use lock semantics; this is a
+     * responsibility of the caller.
+     */
+    private fun getMessageCursor(cursor: Cursor): Message {
+        return Message(
+            cursor.getLong(
+                cursor.getColumnIndexOrThrow(
+                    COLUMN_DATABASE_ID)),
+            if (cursor.isNull(
+                    cursor.getColumnIndexOrThrow(
+                        COLUMN_VOIP_ID))) {
+                null
+            } else {
+                cursor.getLong(cursor.getColumnIndex(COLUMN_VOIP_ID))
+            },
+            cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
+            cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_INCOMING)),
+            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)),
+            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
+            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE)),
+            cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_UNREAD)),
+            cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DELIVERED)),
+            cursor.getLong(
+                cursor.getColumnIndexOrThrow(
+                    COLUMN_DELIVERY_IN_PROGRESS)))
     }
 
     /**
@@ -1005,6 +1043,9 @@ class Database private constructor(private val context: Context) {
      * Gets the most recent message in each conversation associated with the
      * specified DIDs that matches a specified filter constraint. The resulting
      * list is sorted by date, from most recent to least recent.
+     *
+     * This method intentionally does not use lock semantics; this is a
+     * responsibility of the caller.
      */
     private fun getMessagesMostRecentFilteredWithoutLock(
         dids: Set<String>,
@@ -1023,53 +1064,67 @@ class Database private constructor(private val context: Context) {
             ""
         }
 
-        var allMessages = mutableListOf<Message>()
-        for (did in dids) {
-            // First, retrieve the most recent message for each
-            // conversation, filtering only on the DID phone number,
-            // contact phone number and message text
-            var query = ("SELECT * FROM $TABLE_MESSAGE a INNER JOIN"
-                         + " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT,"
-                         + " MAX($COLUMN_DATE)"
-                         + " AS $COLUMN_DATE FROM $TABLE_MESSAGE"
-                         + " WHERE ($COLUMN_MESSAGE LIKE ?"
-                         + " COLLATE NOCASE $numericFilterStringQuery)"
-                         + " AND $COLUMN_DID=? GROUP BY $COLUMN_CONTACT)"
-                         + " b on a.$COLUMN_DATABASE_ID=b.$COLUMN_DATABASE_ID"
-                         + " AND a.$COLUMN_DATE=b.$COLUMN_DATE"
-                         + " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID"
-                         + " DESC")
-            var cursor = database.rawQuery(query,
-                                           queryParams.plus(did).toTypedArray())
-            val messages = getMessagesCursor(cursor)
+        var messages = mutableListOf<Message>()
+        for (conversationId in getConversationIdsWithoutLock(dids)) {
+            // If we are using filters, first check to see if our filter
+            // matches the the DID phone number, contact phone number and
+            // message text, since we can check those using SQL
+            if (filterConstraint.isNotEmpty()) {
+                val cursor = database.query(
+                    TABLE_MESSAGE, messageColumns,
+                    "$COLUMN_DID=? AND $COLUMN_CONTACT=?"
+                    + " AND ($COLUMN_MESSAGE LIKE ? COLLATE NOCASE"
+                    + " $numericFilterStringQuery)",
+                    listOf(conversationId.did, conversationId.contact)
+                        .plus(queryParams).toTypedArray(),
+                    null, null,
+                    "$COLUMN_DATE DESC, $COLUMN_VOIP_ID DESC,"
+                    + " $COLUMN_DATABASE_ID DESC",
+                    "1")
+                cursor.moveToFirst()
+                if (!cursor.isAfterLast) {
+                    messages.add(getMessageCursor(cursor))
+                    cursor.close()
+                    continue
+                }
+            }
 
-            // Then, retrieve the most recent message for each conversation
-            // without filtering; if any conversation present in the second
-            // list is not present in the first list, filter the message in
-            // the second list on contact name and add it to the first list
-            // if there is a match
-            query = ("SELECT * FROM $TABLE_MESSAGE a INNER JOIN"
-                     + " (SELECT $COLUMN_DATABASE_ID, $COLUMN_CONTACT,"
-                     + " MAX($COLUMN_DATE)"
-                     + " AS $COLUMN_DATE FROM $TABLE_MESSAGE"
-                     + " WHERE $COLUMN_DID=? GROUP BY $COLUMN_CONTACT)"
-                     + " b on a.$COLUMN_DATABASE_ID=b.$COLUMN_DATABASE_ID"
-                     + " AND a.$COLUMN_DATE=b.$COLUMN_DATE"
-                     + " ORDER BY $COLUMN_DATE DESC, $COLUMN_DATABASE_ID DESC")
-            cursor = database.rawQuery(query, arrayOf(did))
-            messages.addAll(
-                getMessagesCursor(cursor)
-                    .filterNot { it.contact in messages.map { it2 -> it2.contact } }
-                    .filter {
-                        val contactName = getContactName(context,
-                                                         it.contact,
-                                                         contactNameCache)
-                        contactName?.toLowerCase(Locale.getDefault())?.contains(
-                            filterConstraint)
-                        ?: false
-                    })
+            // Otherwise, simply get the most recent message for the
+            // conversation without using any filters
+            val cursor = database.query(
+                TABLE_MESSAGE, messageColumns,
+                "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                arrayOf(conversationId.did, conversationId.contact),
+                null, null,
+                "$COLUMN_DATE DESC, $COLUMN_VOIP_ID DESC,"
+                + " $COLUMN_DATABASE_ID DESC",
+                "1")
+            cursor.moveToFirst()
+            if (cursor.isAfterLast) {
+                cursor.close()
+                continue
+            }
+            val message = getMessageCursor(cursor)
+            cursor.close()
 
-            allMessages.addAll(messages)
+            // If no filter constraint was provided, just add the message
+            // to the list
+            if (filterConstraint.isEmpty()) {
+                messages.add(message)
+                continue
+            }
+
+            // Otherwise, check if the message matches our contact name
+            // filter; we could not check this as part of the first SQL
+            // query, since it requires an external lookup
+            val contactName = getContactName(context,
+                                             message.contact,
+                                             contactNameCache)
+            val lowercaseContactName = contactName?.toLowerCase(
+                Locale.getDefault())
+            if (lowercaseContactName?.contains(filterConstraint) == true) {
+                messages.add(message)
+            }
         }
 
         // Replace messages with any applicable draft messages
@@ -1077,7 +1132,7 @@ class Database private constructor(private val context: Context) {
                                                      filterConstraint)
         for (draftMessage in draftMessages) {
             var added = false
-            allMessages = allMessages.map {
+            messages = messages.map {
                 if (it.conversationId == draftMessage.conversationId) {
                     added = true
                     draftMessage
@@ -1086,12 +1141,12 @@ class Database private constructor(private val context: Context) {
                 }
             }.toMutableList()
             if (!added && draftMessage.did in dids) {
-                allMessages.add(0, draftMessage)
+                messages.add(0, draftMessage)
             }
         }
 
-        allMessages.sort()
-        return allMessages
+        messages.sort()
+        return messages
     }
 
     /**
