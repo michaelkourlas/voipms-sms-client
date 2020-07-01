@@ -1,5 +1,6 @@
 ## 0.6.6 ##
 
+* Restore pre-0.6.2 font kerning
 * Bug fixes
 
 ## 0.6.5 ##

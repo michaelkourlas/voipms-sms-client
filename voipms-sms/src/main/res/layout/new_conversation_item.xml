@@ -34,7 +34,7 @@
             android:layout_width="@dimen/contact_badge"
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+            android:textAppearance="@style/Subtitle1"
             android:textColor="@color/new_conversation_letter" />
     </LinearLayout>
 
@@ -54,7 +54,7 @@
             android:layout_width="@dimen/contact_badge"
             android:layout_height="@dimen/contact_badge"
             android:gravity="center"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+            android:textAppearance="@style/Headline5"
             android:textColor="@android:color/white" />
 
     </FrameLayout>
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+            android:textAppearance="@style/Subtitle1" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -84,7 +84,7 @@
                 android:layout_alignParentStart="true"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+                android:textAppearance="@style/Body2" />
 
             <TextView
                 android:id="@+id/phone_number_type"
@@ -95,7 +95,7 @@
                 android:ellipsize="end"
                 android:gravity="end"
                 android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                android:textAppearance="@style/Caption" />
         </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

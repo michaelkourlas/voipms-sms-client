@@ -84,7 +84,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/conversations_nav_header"
-        app:itemTextAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        app:itemTextAppearance="@style/Body1"
         app:menu="@menu/conversations_nav" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

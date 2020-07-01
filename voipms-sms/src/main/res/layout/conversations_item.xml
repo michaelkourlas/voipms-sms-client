@@ -46,7 +46,7 @@
                 android:layout_width="@dimen/contact_badge"
                 android:layout_height="@dimen/contact_badge"
                 android:gravity="center"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                android:textAppearance="@style/Headline5"
                 android:textColor="@android:color/white" />
         </FrameLayout>
 
@@ -78,7 +78,7 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                android:textAppearance="@style/Body1" />
 
             <TextView
                 android:id="@+id/date"
@@ -87,7 +87,7 @@
                 android:ellipsize="end"
                 android:gravity="end|top"
                 android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                android:textAppearance="@style/Caption" />
         </LinearLayout>
 
         <LinearLayout
@@ -102,7 +102,7 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+                android:textAppearance="@style/Body2" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

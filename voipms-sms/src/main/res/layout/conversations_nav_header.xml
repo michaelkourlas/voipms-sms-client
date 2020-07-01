@@ -42,6 +42,6 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:text="@string/conversations_no_account"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:textAppearance="@style/Body2"
         android:textColor="@android:color/white" />
 </LinearLayout>

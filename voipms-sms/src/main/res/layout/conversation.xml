@@ -104,7 +104,7 @@
                 android:paddingEnd="@dimen/half_margin"
                 android:paddingBottom="@dimen/half_margin"
                 android:scrollbars="vertical"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:textAppearance="@style/Body1"
                 android:textColorHint="@color/message_hint"
                 tools:targetApi="o" />
 
@@ -124,7 +124,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:gravity="center"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                    android:textAppearance="@style/Caption"
                     android:visibility="gone" />
 
                 <ImageButton
