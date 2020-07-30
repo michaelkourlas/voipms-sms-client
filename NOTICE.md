@@ -23,9 +23,13 @@ The following components are provided under the [Apache License 2.0](https://www
 
     Copyright 2018 Saket Narayan.
 
-[Gson](https://github.com/google/gson) from [Google](https://github.com/google)
+[Moshi](https://github.com/square/moshi) from [Square](https://github.com/square)
 
-    Copyright 2008 Google Inc.
+    Copyright 2015 Square, Inc.
+    
+[OkHttp](https://github.com/square/okhttp) from [Square](https://github.com/square)
+
+    Copyright 2019 Square, Inc.
 
 The text of the Apache License 2.0 can be found in the LICENSE.md file.
 

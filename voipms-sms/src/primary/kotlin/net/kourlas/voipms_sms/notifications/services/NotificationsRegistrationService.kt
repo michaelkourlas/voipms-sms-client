@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,16 @@ package net.kourlas.voipms_sms.notifications.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.google.gson.JsonSyntaxException
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.Moshi
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
-import net.kourlas.voipms_sms.utils.getJson
+import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
+import okhttp3.OkHttpClient
 import java.io.IOException
-import java.net.URLEncoder
 
 /**
  * Service that registers a VoIP.ms callback for each DID.
@@ -37,6 +39,9 @@ import java.net.URLEncoder
  */
 class NotificationsRegistrationService : IntentService(
     NotificationsRegistrationService::class.java.name) {
+    private val okHttp = OkHttpClient()
+    private val moshi: Moshi = Moshi.Builder().build()
+
     override fun onHandleIntent(intent: Intent?) {
         // Terminate quietly if intent does not exist or does not contain
         // the correct action
@@ -80,6 +85,7 @@ class NotificationsRegistrationService : IntentService(
         applicationContext.sendBroadcast(registrationCompleteIntent)
     }
 
+    @JsonClass(generateAdapter = true)
     data class RegisterResponse(val status: String)
 
     /**
@@ -90,26 +96,22 @@ class NotificationsRegistrationService : IntentService(
         val responses = mutableMapOf<String, RegisterResponse?>()
         for (did in dids) {
             try {
-                val registerVoipCallbackUrl =
-                    "https://www.voip.ms/api/v1/rest.php?" +
-                    "api_username=" + URLEncoder.encode(
-                        getEmail(applicationContext), "UTF-8") + "&" +
-                    "api_password=" + URLEncoder.encode(
-                        getPassword(applicationContext), "UTF-8") + "&" +
-                    "method=setSMS" + "&" +
-                    "did=" + URLEncoder.encode(
-                        did, "UTF-8") + "&" +
-                    "enable=1" + "&" +
-                    "url_callback_enable=1" + "&" +
-                    "url_callback=" + URLEncoder.encode(
-                        "https://us-central1-voip-ms-sms-9ee2b" +
-                        ".cloudfunctions.net/notify?did={TO}", "UTF-8") + "&" +
-                    "url_callback_retry=0"
-                responses[did] = getJson(applicationContext,
-                                         registerVoipCallbackUrl)
+                responses[did] = httpPostWithMultipartFormData(
+                    applicationContext, okHttp, moshi,
+                    "https://www.voip.ms/api/v1/rest.php",
+                    mapOf("api_username" to getEmail(applicationContext),
+                          "api_password" to getPassword(applicationContext),
+                          "method" to "setSMS",
+                          "did" to did,
+                          "enable" to "1",
+                          "url_callback_enable" to "1",
+                          ("url_callback"
+                              to "https://us-central1-voip-ms-sms-9ee2b"
+                              + ".cloudfunctions.net/notify?did={TO}"),
+                          "url_callback_retry" to "0"))
             } catch (e: IOException) {
                 // Do nothing.
-            } catch (e: JsonSyntaxException) {
+            } catch (e: JsonDataException) {
                 logException(e)
             } catch (e: Exception) {
                 logException(e)

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2019 Michael Kourlas
+ * Copyright (C) 2019-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ package net.kourlas.voipms_sms.sms.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.google.gson.JsonSyntaxException
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.Moshi
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.utils.getJson
+import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
+import okhttp3.OkHttpClient
 import java.io.IOException
-import java.net.URLEncoder
 
 /**
  * Service used to test credentials for a particular account from VoIP.ms.
@@ -35,6 +37,8 @@ import java.net.URLEncoder
  */
 class VerifyCredentialsService : IntentService(
     VerifyCredentialsService::class.java.name) {
+    private val okHttp = OkHttpClient()
+    private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
@@ -87,6 +91,7 @@ class VerifyCredentialsService : IntentService(
         return false
     }
 
+    @JsonClass(generateAdapter = true)
     data class VerifyCredentialsResponse(val status: String)
 
     /**
@@ -96,20 +101,18 @@ class VerifyCredentialsService : IntentService(
      */
     private fun getApiResponse(email: String,
                                password: String): VerifyCredentialsResponse? {
-        val retrieveDidsUrl =
-            "https://www.voip.ms/api/v1/rest.php?" +
-            "api_username=" +
-            URLEncoder.encode(email, "UTF-8") + "&" +
-            "api_password=" +
-            URLEncoder.encode(password, "UTF-8") + "&" +
-            "method=getDIDsInfo"
         try {
-            return getJson(applicationContext, retrieveDidsUrl)
+            return httpPostWithMultipartFormData(
+                applicationContext, okHttp, moshi,
+                "https://www.voip.ms/api/v1/rest.php",
+                mapOf("api_username" to email,
+                      "api_password" to password,
+                      "method" to "getDIDsInfo"))
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.verify_credentials_error_api_request)
             return null
-        } catch (e: JsonSyntaxException) {
+        } catch (e: JsonDataException) {
             logException(e)
             error = applicationContext.getString(
                 R.string.verify_credentials_error_api_parse)

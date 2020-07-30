@@ -25,17 +25,20 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.google.gson.JsonSyntaxException
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.Moshi
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.utils.getJson
+import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.toBoolean
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
+import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
@@ -52,6 +55,8 @@ import kotlin.math.ceil
  */
 class SyncService : IntentService(
     SyncService::class.java.name) {
+    private val okHttp = OkHttpClient()
+    private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
@@ -166,10 +171,6 @@ class SyncService : IntentService(
 
         val dids = getDids(applicationContext, onlyRetrieveMessages = true)
 
-        val encodedEmail = URLEncoder.encode(getEmail(applicationContext),
-                                             "UTF-8")
-        val encodedPassword = URLEncoder.encode(getPassword(applicationContext),
-                                                "UTF-8")
         val encodedDids = dids.map { URLEncoder.encode(it, "UTF-8") }
 
         // Get number of days between now and the message retrieval start
@@ -228,22 +229,19 @@ class SyncService : IntentService(
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         sdf.timeZone = TimeZone.getTimeZone("America/New_York")
         for (period in periods) {
-            val encodedDateFrom = URLEncoder.encode(sdf.format(period.first),
-                                                    "UTF-8")
-            val encodedDateTo = URLEncoder.encode(sdf.format(period.second),
-                                                  "UTF-8")
             encodedDids
                 .map {
-                    "https://www.voip.ms/api/v1/rest.php?" +
-                    "api_username=$encodedEmail" +
-                    "&api_password=$encodedPassword&method=getSMS" +
-                    "&did=$it&limit=1000000" +
-                    "&from=$encodedDateFrom&to=$encodedDateTo" +
-                    "&timezone=-5" // -5 corresponds to EDT
+                    mapOf("api_username" to getEmail(applicationContext),
+                          "api_password" to getPassword(applicationContext),
+                          "method" to "getSMS",
+                          "did" to it,
+                          "limit" to "1000000",
+                          "from" to sdf.format(period.first),
+                          "to" to sdf.format(period.second),
+                          "timezone" to "-5") // -5 corresponds to EDT
                 }
                 .mapTo(retrievalRequests) {
-                    RetrievalRequest(
-                        it, period)
+                    RetrievalRequest(it, period)
                 }
         }
 
@@ -296,6 +294,7 @@ class SyncService : IntentService(
         }
     }
 
+    @JsonClass(generateAdapter = true)
     data class MessageResponse(
         val date: String,
         val id: String,
@@ -304,9 +303,10 @@ class SyncService : IntentService(
         val contact: String,
         val message: String)
 
+    @JsonClass(generateAdapter = true)
     data class MessagesResponse(
         val status: String,
-        @Suppress("ArrayInDataClass") val sms: Array<MessageResponse>)
+        @Suppress("ArrayInDataClass") val sms: List<MessageResponse>?)
 
     /**
      * Processes the specified retrieval request using the VoIP.ms API.
@@ -315,7 +315,7 @@ class SyncService : IntentService(
      */
     private fun processRetrievalRequest(
         request: RetrievalRequest): List<IncomingMessage>? {
-        val response = sendRequestWithVoipMsApi(request.url) ?: return null
+        val response = sendRequestWithVoipMsApi(request) ?: return null
 
         // Extract messages from the VoIP.ms API response
         val incomingMessages = mutableListOf<IncomingMessage>()
@@ -331,7 +331,7 @@ class SyncService : IntentService(
         }
 
         if (response.status != "no_sms") {
-            for (message in response.sms) {
+            for (message in response.sms ?: emptyList()) {
                 val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
                 sdf.timeZone = TimeZone.getTimeZone("America/New_York")
 
@@ -361,14 +361,18 @@ class SyncService : IntentService(
      * Performs a GET request using the specified url and parses the response
      * as JSON.
      */
-    private fun sendRequestWithVoipMsApi(url: String): MessagesResponse? {
+    private fun sendRequestWithVoipMsApi(
+        request: RetrievalRequest): MessagesResponse? {
         try {
-            return getJson(applicationContext, url)
+            return httpPostWithMultipartFormData(
+                applicationContext, okHttp, moshi,
+                "https://www.voip.ms/api/v1/rest.php",
+                request.formData)
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.sync_error_api_request)
             return null
-        } catch (e: JsonSyntaxException) {
+        } catch (e: JsonDataException) {
             logException(e)
             error = applicationContext.getString(R.string.sync_error_api_parse)
             return null
@@ -403,7 +407,7 @@ class SyncService : IntentService(
      * A request to the VoIP.ms API to retrieve the messages from the specified
      * period using the specified URL.
      */
-    data class RetrievalRequest(val url: String,
+    data class RetrievalRequest(val formData: Map<String, String>,
                                 private val period: Pair<Date, Date>)
 
     companion object {

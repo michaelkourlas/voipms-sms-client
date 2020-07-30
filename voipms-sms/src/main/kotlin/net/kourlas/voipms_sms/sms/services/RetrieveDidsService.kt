@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,21 @@ package net.kourlas.voipms_sms.sms.services
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.google.gson.JsonSyntaxException
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.Moshi
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.utils.enablePushNotifications
-import net.kourlas.voipms_sms.utils.getJson
+import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.replaceIndexOnNewThread
+import okhttp3.OkHttpClient
 import java.io.IOException
-import java.net.URLEncoder
 
 /**
  * Service used to retrieve DIDs for a particular account from VoIP.ms.
@@ -42,6 +44,8 @@ import java.net.URLEncoder
  */
 class RetrieveDidsService : IntentService(
     RetrieveDidsService::class.java.name) {
+    private val okHttp = OkHttpClient()
+    private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
     override fun onHandleIntent(intent: Intent?) {
@@ -104,14 +108,16 @@ class RetrieveDidsService : IntentService(
         return dids
     }
 
+    @JsonClass(generateAdapter = true)
     data class DidResponse(
-        @SerializedName("sms_available") val smsAvailable: String,
-        @SerializedName("sms_enabled") val smsEnabled: String,
+        @Json(name = "sms_available") val smsAvailable: String,
+        @Json(name = "sms_enabled") val smsEnabled: String?,
         val did: String)
 
+    @JsonClass(generateAdapter = true)
     data class DidsResponse(
         val status: String,
-        @Suppress("ArrayInDataClass") val dids: Array<DidResponse>)
+        @Suppress("ArrayInDataClass") val dids: List<DidResponse>?)
 
     /**
      * Gets the response of a getDIDsInfo call to the VoIP.ms API.
@@ -119,22 +125,18 @@ class RetrieveDidsService : IntentService(
      * @return Null if an error occurred.
      */
     private fun getApiResponse(): DidsResponse? {
-        val retrieveDidsUrl =
-            "https://www.voip.ms/api/v1/rest.php?" +
-            "api_username=" +
-            URLEncoder.encode(getEmail(applicationContext),
-                              "UTF-8") + "&" +
-            "api_password=" +
-            URLEncoder.encode(getPassword(applicationContext),
-                              "UTF-8") + "&" +
-            "method=getDIDsInfo"
         try {
-            return getJson(applicationContext, retrieveDidsUrl)
+            return httpPostWithMultipartFormData(
+                applicationContext, okHttp, moshi,
+                "https://www.voip.ms/api/v1/rest.php",
+                mapOf("api_username" to getEmail(applicationContext),
+                      "api_password" to getPassword(applicationContext),
+                      "method" to "getDIDsInfo"))
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.preferences_dids_error_api_request)
             return null
-        } catch (e: JsonSyntaxException) {
+        } catch (e: JsonDataException) {
             logException(e)
             error = applicationContext.getString(
                 R.string.preferences_dids_error_api_parse)
@@ -166,9 +168,9 @@ class RetrieveDidsService : IntentService(
         }
 
         return response.dids
-            .filter { it.smsAvailable == "1" && it.smsEnabled == "1" }
-            .map { it.did }
-            .toSet()
+            ?.filter { it.smsAvailable == "1" && it.smsEnabled == "1" }
+            ?.map { it.did }
+            ?.toSet()
     }
 
     companion object {

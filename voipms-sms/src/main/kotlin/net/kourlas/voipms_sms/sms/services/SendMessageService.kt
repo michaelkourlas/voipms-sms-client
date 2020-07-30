@@ -22,7 +22,9 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.JobIntentService
 import androidx.core.app.RemoteInput
-import com.google.gson.JsonSyntaxException
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.Moshi
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -33,11 +35,11 @@ import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.JobId
-import net.kourlas.voipms_sms.utils.getJson
+import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
+import okhttp3.OkHttpClient
 import java.io.IOException
-import java.net.URLEncoder
 import java.text.BreakIterator
 import java.util.*
 
@@ -46,6 +48,8 @@ import java.util.*
  * specified DID with the VoIP.ms API.
  */
 class SendMessageService : JobIntentService() {
+    private val okHttp = OkHttpClient()
+    private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
     override fun onHandleWork(intent: Intent) {
@@ -250,7 +254,8 @@ class SendMessageService : JobIntentService() {
         }
     }
 
-    data class MessageResponse(val status: String, val sms: Long)
+    @JsonClass(generateAdapter = true)
+    data class MessageResponse(val status: String, val sms: Long?)
 
     /**
      * Sends the specified message using the VoIP.ms API
@@ -258,27 +263,23 @@ class SendMessageService : JobIntentService() {
      * @return Null if the message could not be sent.
      */
     private fun sendMessageWithVoipMsApi(message: OutgoingMessage): Long? {
-        // Get encoded versions of URI values
-        val email = URLEncoder.encode(getEmail(applicationContext), "UTF-8")
-        val password = URLEncoder.encode(getPassword(applicationContext),
-                                         "UTF-8")
-        val did = URLEncoder.encode(message.did, "UTF-8")
-        val contact = URLEncoder.encode(message.contact, "UTF-8")
-        val text = URLEncoder.encode(message.text, "UTF-8")
-
         // Get JSON response from API
-        val sendMessageUrl = "https://www.voip.ms/api/v1/rest.php?" +
-                             "api_username=$email&api_password=$password" +
-                             "&method=sendSMS&did=$did&dst=$contact" +
-                             "&message=$text"
         val response: MessageResponse?
         try {
-            response = getJson(applicationContext, sendMessageUrl)
+            response = httpPostWithMultipartFormData(
+                applicationContext, okHttp, moshi,
+                "https://www.voip.ms/api/v1/rest.php",
+                mapOf("api_username" to getEmail(applicationContext),
+                      "api_password" to getPassword(applicationContext),
+                      "method" to "sendSMS",
+                      "did" to message.did,
+                      "dst" to message.contact,
+                      "message" to message.text))
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.send_message_error_api_request)
             return null
-        } catch (e: JsonSyntaxException) {
+        } catch (e: JsonDataException) {
             logException(e)
             error = applicationContext.getString(
                 R.string.send_message_error_api_parse)

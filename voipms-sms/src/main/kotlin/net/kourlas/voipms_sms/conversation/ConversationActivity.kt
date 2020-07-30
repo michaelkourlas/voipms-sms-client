@@ -40,7 +40,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
@@ -718,7 +719,13 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      * Handles the export button.
      */
     private fun onExportButtonClick(): Boolean {
-        val json = Gson().toJson(adapter.messageItems.map { it.message })
+        val listOfMessagesType = Types.newParameterizedType(List::class.java,
+                                                            Message::class.java)
+        val messages = adapter.messageItems.map { it.message }
+        val json = Moshi.Builder()
+            .build()
+            .adapter<List<Message>>(listOfMessagesType)
+            .toJson(messages)
         val clipboard = getSystemService(
             Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText(

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2019 Michael Kourlas
+ * Copyright (C) 2015-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,46 @@
 package net.kourlas.voipms_sms.utils
 
 import android.content.Context
-import com.google.gson.Gson
+import com.squareup.moshi.Moshi
 import net.kourlas.voipms_sms.preferences.getConnectTimeout
 import net.kourlas.voipms_sms.preferences.getReadTimeout
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 /**
- * Retrieves a JSON object from the specified URL.
+ * Sends a POST request with a multipart/form-data encoded request body to the
+ * specified URL, and retrieves a JSON response body.
  */
-inline fun <reified T> getJson(context: Context, url: String): T? {
-    val connection = URL(url).openConnection() as HttpURLConnection
-    connection.readTimeout = getReadTimeout(context) * 1000
-    connection.connectTimeout = getConnectTimeout(context) * 1000
-    connection.connect()
+inline fun <reified T> httpPostWithMultipartFormData(
+    context: Context, okHttp: OkHttpClient, moshi: Moshi, url: String,
+    formData: Map<String, String> = emptyMap()): T? {
+    val requestBodyBuilder = MultipartBody.Builder()
+    requestBodyBuilder.setType(MultipartBody.FORM)
+    for ((key, value) in formData) {
+        requestBodyBuilder.addFormDataPart(key, value)
+    }
+    val requestBody = requestBodyBuilder.build()
 
-    val data = connection.inputStream.bufferedReader().readText()
-    return Gson().fromJson(data, T::class.java)
+    val request = Request.Builder()
+        .url(url)
+        .post(requestBody)
+        .build()
+
+    val requestClient = okHttp.newBuilder()
+        .readTimeout(getReadTimeout(context) * 1000L, TimeUnit.MILLISECONDS)
+        .connectTimeout(getConnectTimeout(context) * 1000L,
+                        TimeUnit.MILLISECONDS)
+        .build()
+
+    val adapter = moshi.adapter(T::class.java)
+    requestClient.newCall(request).execute().use { response ->
+        if (!response.isSuccessful) {
+            throw IOException("Unexpected code $response")
+        }
+
+        return adapter.fromJson(response.body!!.source())
+    }
 }
