@@ -33,7 +33,7 @@ The text of the Apache License 2.0 can be found in the LICENSE.md file.
 
 The following components are provided under the [ISC License](https://opensource.org/licenses/ISC):
 
-[material-colors](https://github.com/shuhei/material-colors) from [shuhei](https://opensource.org/licenses/ISC)
+[material-colors](https://github.com/shuhei/material-colors) from [shuhei](https://github.com/shuhei)
 
     Copyright 2014 Shuhei Kagawa
 
