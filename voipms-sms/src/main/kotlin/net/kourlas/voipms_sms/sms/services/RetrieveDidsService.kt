@@ -110,7 +110,6 @@ class RetrieveDidsService : IntentService(
 
     @JsonClass(generateAdapter = true)
     data class DidResponse(
-        @Json(name = "sms_available") val smsAvailable: String,
         @Json(name = "sms_enabled") val smsEnabled: String?,
         val did: String)
 
@@ -168,7 +167,7 @@ class RetrieveDidsService : IntentService(
         }
 
         return response.dids
-            ?.filter { it.smsAvailable == "1" && it.smsEnabled == "1" }
+            ?.filter { it.smsEnabled == "1" }
             ?.map { it.did }
             ?.toSet()
     }
