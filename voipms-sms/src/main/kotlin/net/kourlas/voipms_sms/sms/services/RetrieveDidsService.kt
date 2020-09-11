@@ -17,9 +17,9 @@
 
 package net.kourlas.voipms_sms.sms.services
 
-import android.app.IntentService
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.JobIntentService
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
@@ -29,26 +29,19 @@ import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.preferences.setDids
-import net.kourlas.voipms_sms.utils.enablePushNotifications
-import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
-import net.kourlas.voipms_sms.utils.logException
-import net.kourlas.voipms_sms.utils.replaceIndexOnNewThread
+import net.kourlas.voipms_sms.utils.*
 import okhttp3.OkHttpClient
 import java.io.IOException
 
 /**
  * Service used to retrieve DIDs for a particular account from VoIP.ms.
- *
- * This service is an IntentService rather than a JobIntentService because it
- * does not need to be run in the background.
  */
-class RetrieveDidsService : IntentService(
-    RetrieveDidsService::class.java.name) {
+class RetrieveDidsService : JobIntentService() {
     private val okHttp = OkHttpClient()
     private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
-    override fun onHandleIntent(intent: Intent?) {
+    override fun onHandleWork(intent: Intent) {
         // Retrieve DIDs
         val dids = handleRetrieveDids(intent)
 
@@ -70,13 +63,13 @@ class RetrieveDidsService : IntentService(
      *
      * @return Null if an error occurred.
      */
-    private fun handleRetrieveDids(intent: Intent?): Set<String>? {
+    private fun handleRetrieveDids(intent: Intent): Set<String>? {
         // Retrieve DIDs from VoIP.ms API
         var dids: Set<String>? = null
         try {
             // Terminate quietly if intent does not exist or does not contain
             // the send SMS action
-            if (intent == null || intent.action != applicationContext.getString(
+            if (intent.action != applicationContext.getString(
                     R.string.retrieve_dids_action)) {
                 return dids
             }
@@ -182,7 +175,8 @@ class RetrieveDidsService : IntentService(
             intent.putExtra(context.getString(R.string.retrieve_dids_auto_add),
                             autoAdd)
 
-            context.startService(intent)
+            enqueueWork(context, RetrieveDidsService::class.java,
+                        JobId.RetrieveDidsService.ordinal, intent)
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import androidx.core.app.*
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.app.TaskStackBuilder
+import androidx.work.WorkManager
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
@@ -45,6 +46,7 @@ import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
 import net.kourlas.voipms_sms.sms.services.MarkReadService
 import net.kourlas.voipms_sms.sms.services.SendMessageService
 import net.kourlas.voipms_sms.utils.*
+import java.util.*
 
 /**
  * Single-instance class used to send notifications when new SMS messages
@@ -219,7 +221,7 @@ class Notifications private constructor(
     /**
      * Gets the notification displayed during database synchronization.
      */
-    fun getSyncNotification(progress: Int = 0): Notification {
+    fun getSyncNotification(id: UUID, progress: Int = 0): Notification {
         createSyncNotificationChannel()
 
         val builder = NotificationCompat.Builder(
@@ -234,6 +236,17 @@ class Notifications private constructor(
             @Suppress("DEPRECATION")
             builder.priority = Notification.PRIORITY_LOW
         }
+
+        // Cancel button
+        val cancelIntent = WorkManager.getInstance(
+            context).createCancelPendingIntent(id)
+        val cancelAction = NotificationCompat.Action.Builder(
+            R.drawable.ic_delete_toolbar_24dp,
+            context.getString(R.string.notifications_button_cancel),
+            cancelIntent)
+            .setShowsUserInterface(false)
+            .build()
+        builder.addAction(cancelAction)
 
         // Primary notification action
         val intent = Intent(context, ConversationsActivity::class.java)
@@ -324,6 +337,7 @@ class Notifications private constructor(
         val conversationId = messages[0].conversationId
         val did = conversationId.did
         val contact = conversationId.contact
+
         @Suppress("ConstantConditionIf")
         var contactName = if (!BuildConfig.IS_DEMO) {
             getContactName(context, contact)

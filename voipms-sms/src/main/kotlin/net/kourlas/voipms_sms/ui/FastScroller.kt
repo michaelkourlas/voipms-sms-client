@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 The Android Open Source Project
- * Modifications copyright (C) 2019 Michael Kourlas
+ * Modifications copyright (C) 2019-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.graphics.drawable.StateListDrawable
 import android.os.Handler
+import android.os.Looper
 import android.util.StateSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -32,6 +33,7 @@ import android.view.View.MeasureSpec
 import android.view.View.OnLayoutChangeListener
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
@@ -62,17 +64,22 @@ class FastScroller private constructor(private val mRv: RecyclerView,
     private val mPreviewMarginLeftRight: Int
     private val mTouchSlop: Int
     private val mContainer = Rect()
-    private val mHandler = Handler()
+    private val mHandler = Handler(Looper.myLooper()!!)
+
     // Whether to render the scrollbar on the right side (otherwise it'll be
     // on the left).
     private val mPosRight: Boolean
+
     // Whether the scrollbar is currently visible (it may still be animating).
     private var mVisible = false
+
     // Whether we are waiting to hide the scrollbar (i.e. scrolling has
     // stopped).
     private var mPendingHide = false
+
     // Whether the user is currently dragging the thumb up or down.
     private var mDragging = false
+
     // Animations responsible for hiding the scrollbar & preview. May be null.
     private var mHideAnimation: AnimatorSet? = null
     private val mHideTrackRunnable = Runnable {
@@ -144,15 +151,20 @@ class FastScroller private constructor(private val mRv: RecyclerView,
 
     private fun refreshConversationThemeColor() {
         mPreviewTextView.background = if (mPosRight)
-            mContext.getDrawable(R.drawable.fastscroll_preview_right)
+            ContextCompat.getDrawable(mContext,
+                                      R.drawable.fastscroll_preview_right)
         else
-            mContext.getDrawable(R.drawable.fastscroll_preview_left)
+            ContextCompat.getDrawable(mContext,
+                                      R.drawable.fastscroll_preview_left)
         val drawable = StateListDrawable()
-        drawable.addState(intArrayOf(android.R.attr.state_pressed),
-                          mContext.getDrawable(
-                              R.drawable.fastscroll_thumb_pressed))
-        drawable.addState(StateSet.WILD_CARD,
-                          mContext.getDrawable(R.drawable.fastscroll_thumb))
+        drawable.addState(
+            intArrayOf(android.R.attr.state_pressed),
+            ContextCompat.getDrawable(mContext,
+                                      R.drawable.fastscroll_thumb_pressed))
+        drawable.addState(
+            StateSet.WILD_CARD,
+            ContextCompat.getDrawable(mContext,
+                                      R.drawable.fastscroll_thumb))
         mThumbImageView.setImageDrawable(drawable)
     }
 

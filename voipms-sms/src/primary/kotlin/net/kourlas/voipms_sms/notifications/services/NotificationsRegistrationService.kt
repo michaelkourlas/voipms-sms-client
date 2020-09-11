@@ -17,9 +17,9 @@
 
 package net.kourlas.voipms_sms.notifications.services
 
-import android.app.IntentService
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.JobIntentService
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
@@ -33,19 +33,15 @@ import java.io.IOException
 
 /**
  * Service that registers a VoIP.ms callback for each DID.
- *
- * This service is an IntentService rather than a JobIntentService because it
- * does not need to be run in the background.
  */
-class NotificationsRegistrationService : IntentService(
-    NotificationsRegistrationService::class.java.name) {
+class NotificationsRegistrationService : JobIntentService() {
     private val okHttp = OkHttpClient()
     private val moshi: Moshi = Moshi.Builder().build()
 
-    override fun onHandleIntent(intent: Intent?) {
+    override fun onHandleWork(intent: Intent) {
         // Terminate quietly if intent does not exist or does not contain
         // the correct action
-        if (intent == null || intent.action != applicationContext.getString(
+        if (intent.action != applicationContext.getString(
                 R.string.push_notifications_reg_action)) {
             return
         }

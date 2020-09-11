@@ -38,6 +38,8 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
@@ -52,7 +54,7 @@ import net.kourlas.voipms_sms.preferences.activities.PreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.SynchronizationPreferencesActivity
 import net.kourlas.voipms_sms.signIn.SignInActivity
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.sms.services.SyncService
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -74,31 +76,6 @@ open class ConversationsActivity : AppCompatActivity(),
     // Mapping between items in the navigation menu and their corresponding DIDs
     private lateinit var navViewMenuItemDidMap: HashMap<MenuItem, String>
 
-    // Broadcast receivers
-    private val syncCompleteReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                // Show error in snackbar if one occurred
-                intent?.getStringExtra(getString(
-                    R.string.sync_complete_error))?.let {
-                    showSnackbar(this@ConversationsActivity,
-                                 R.id.coordinator_layout, it)
-                }
-
-                // Turn off refresh icon if this was a complete sync
-                if (intent?.getBooleanExtra(getString(
-                        R.string.sync_complete_full), false) == true) {
-                    val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
-                        R.id.swipe_refresh_layout)
-                    swipeRefreshLayout.isRefreshing = false
-                }
-
-                // Refresh adapter to show new messages
-                if (::adapter.isInitialized) {
-                    adapter.refresh()
-                }
-            }
-        }
     private val pushNotificationsRegistrationCompleteReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -171,7 +148,7 @@ open class ConversationsActivity : AppCompatActivity(),
             R.id.swipe_refresh_layout)
         swipeRefreshLayout.setOnRefreshListener {
             adapter.refresh()
-            SyncService.startService(this, forceRecent = false)
+            SyncWorker.startWorker(this, forceRecent = false)
         }
         swipeRefreshLayout.setColorSchemeResources(R.color.swipe_refresh_icon)
     }
@@ -244,8 +221,9 @@ open class ConversationsActivity : AppCompatActivity(),
         (application as CustomApplication).conversationsActivityIncrementCount()
 
         // Register dynamic receivers for this activity
-        registerReceiver(syncCompleteReceiver,
-                         IntentFilter(getString(R.string.sync_complete_action)))
+        WorkManager.getInstance(applicationContext)
+            .getWorkInfosByTagLiveData(getString(R.string.sync_tag))
+            .observe(this, { onSyncComplete(it) })
         registerReceiver(
             pushNotificationsRegistrationCompleteReceiver,
             IntentFilter(getString(
@@ -257,7 +235,7 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Refresh and perform limited synchronization
         adapter.refresh()
-        SyncService.startService(this, forceRecent = true)
+        SyncWorker.startWorker(this, forceRecent = true)
 
         // Refresh on resume just in case the contacts permission was newly
         // granted and we need to add the contact names and photos
@@ -305,7 +283,7 @@ open class ConversationsActivity : AppCompatActivity(),
             val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
                 R.id.swipe_refresh_layout)
             swipeRefreshLayout.isRefreshing = true
-            SyncService.startService(this, forceRecent = false)
+            SyncWorker.startWorker(this, forceRecent = false)
 
             val format = SimpleDateFormat("MMM d, yyyy",
                                           Locale.getDefault())
@@ -314,7 +292,7 @@ open class ConversationsActivity : AppCompatActivity(),
                 this, R.id.coordinator_layout,
                 getString(R.string.conversations_sync_date_suggestion, date),
                 getString(R.string.change),
-                View.OnClickListener {
+                {
                     startActivity(
                         Intent(this,
                                SynchronizationPreferencesActivity::class.java))
@@ -384,7 +362,6 @@ open class ConversationsActivity : AppCompatActivity(),
         super.onPause()
 
         // Unregister all dynamic receivers for this activity
-        safeUnregisterReceiver(this, syncCompleteReceiver)
         @Suppress("ConstantConditionIf")
         safeUnregisterReceiver(
             this,
@@ -631,7 +608,7 @@ open class ConversationsActivity : AppCompatActivity(),
             getString(R.string.conversations_delete_confirm_title),
             getString(R.string.conversations_delete_confirm_message),
             getString(R.string.delete),
-            DialogInterface.OnClickListener { _, _ ->
+            { _, _ ->
                 runOnNewThread {
                     for (message in messages) {
                         Database.getInstance(applicationContext)
@@ -780,6 +757,43 @@ open class ConversationsActivity : AppCompatActivity(),
             // Otherwise, show mark read button
             markReadButton.isVisible = true
             markUnreadButton.isVisible = false
+        }
+    }
+
+    /**
+     * Called when a synchronization completes.
+     */
+    private fun onSyncComplete(workInfos: MutableList<WorkInfo>?) {
+        if (workInfos != null) {
+            for (workInfo in workInfos) {
+                if (workInfo.state != WorkInfo.State.SUCCEEDED
+                    && workInfo.state != WorkInfo.State.FAILED
+                    && workInfo.state != WorkInfo.State.CANCELLED) {
+                    continue
+                }
+
+                // Show error in snackbar if one occurred
+                if (workInfo.state == WorkInfo.State.FAILED) {
+                    workInfo.outputData.getString(getString(
+                        R.string.sync_error_key))?.let {
+                        showSnackbar(this@ConversationsActivity,
+                                     R.id.coordinator_layout, it)
+                    }
+                }
+
+                // Turn off refresh icon if this was a complete sync
+                if (!workInfo.tags.contains(
+                        getString(R.string.sync_force_recent_tag))) {
+                    val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
+                        R.id.swipe_refresh_layout)
+                    swipeRefreshLayout.isRefreshing = false
+                }
+
+                // Refresh adapter to show new messages
+                if (::adapter.isInitialized) {
+                    adapter.refresh()
+                }
+            }
         }
     }
 

@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion '29.0.2'
     defaultConfig {
         applicationId 'net.kourlas.voipms_sms'
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 124
         versionName '0.6.6'
     }
@@ -31,12 +31,14 @@ android {
             applicationId 'net.kourlas.voipms_sms.demo'
             buildConfigField 'boolean', 'IS_DEMO', 'true'
             buildConfigField 'boolean', 'IS_DEMO_SENDING', 'false'
+            versionNameSuffix '-demo'
         }
         demoSending {
             dimension 'demo'
             applicationId 'net.kourlas.voipms_sms.demo'
             buildConfigField 'boolean', 'IS_DEMO', 'true'
             buildConfigField 'boolean', 'IS_DEMO_SENDING', 'true'
+            versionNameSuffix '-demo'
         }
     }
     variantFilter { variant ->
@@ -50,8 +52,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_6
-        targetCompatibility JavaVersion.VERSION_1_6
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -65,22 +70,26 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     // Support libraries
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.core:core-ktx:1.3.1'
     implementation 'androidx.core:core:1.3.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.2.0'
     implementation 'androidx.preference:preference-ktx:1.1.1'
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.work:work-runtime-ktx:2.4.0'
+    implementation 'androidx.work:work-runtime:2.4.0'
     implementation 'com.google.android.material:material:1.3.0-alpha02'
 
     // Firebase libraries
-    primaryImplementation 'com.google.firebase:firebase-analytics:17.4.4'
+    primaryImplementation 'com.google.firebase:firebase-analytics:17.5.0'
     primaryImplementation 'com.google.firebase:firebase-appindexing:19.1.0'
-    primaryImplementation 'com.google.firebase:firebase-core:17.4.4'
-    primaryImplementation 'com.google.firebase:firebase-crashlytics:17.1.1'
-    primaryImplementation 'com.google.firebase:firebase-messaging:20.2.3'
+    primaryImplementation 'com.google.firebase:firebase-core:17.5.0'
+    primaryImplementation 'com.google.firebase:firebase-crashlytics:17.2.1'
+    primaryImplementation 'com.google.firebase:firebase-messaging:20.2.4'
 
     // Additional libraries and fixes
     implementation 'com.squareup.moshi:moshi:1.9.3'

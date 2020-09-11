@@ -270,17 +270,6 @@
     <string name="send_message_error_unknown">Not sent: unknown error</string>
     <string name="send_message_text" translatable="false">send_message_text</string>
 
-    <!-- SyncService -->
-    <string name="sync_action" translatable="false">sync_action</string>
-    <string name="sync_force_recent" translatable="false">sync_force_recent</string>
-    <string name="sync_error_network">Sync failed: network unavailable</string>
-    <string name="sync_error_api_request">Sync failed: VoIP.ms unavailable</string>
-    <string name="sync_error_api_parse">Sync failed: corrupt response</string>
-    <string name="sync_error_api_error">Sync failed: API error \'%1$s\'</string>
-    <string name="sync_error_api_error_invalid_credentials">Sync failed: invalid credentials</string>
-    <string name="sync_error_database">Sync failed: unknown DB error</string>
-    <string name="sync_error_unknown">Sync failed: unknown error</string>
-
     <!-- SyncIntervalService -->
     <string name="sync_interval_service_action" translatable="false">sync_interval_service_action</string>
 
@@ -295,11 +284,22 @@
     <string name="verify_credentials_error_api_error_invalid_credentials">Sign-in failed: invalid credentials</string>
     <string name="verify_credentials_error_unknown">Sign-in failed: unknown error</string>
 
-    <!-- BROADCAST RECEIVERS -->
+    <!-- WORKERS -->
 
-    <!-- SyncIntervalReceiver -->
-    <string name="sync_interval_action" translatable="false">sync_interval_action</string>
-    <string name="sync_interval_force_recent" translatable="false">sync_interval_force_recent</string>
+    <!-- SyncWorker -->
+    <string name="sync_tag" translatable="false">sync_tag</string>
+    <string name="sync_periodic_tag" translatable="false">sync_periodic_tag</string>
+    <string name="sync_force_recent_tag" translatable="false">sync_force_recent_tag</string>
+    <string name="sync_error_key" translatable="false">sync_error_key</string>
+    <string name="sync_error_network">Sync failed: network unavailable</string>
+    <string name="sync_error_api_request">Sync failed: VoIP.ms unavailable</string>
+    <string name="sync_error_api_parse">Sync failed: corrupt response</string>
+    <string name="sync_error_api_error">Sync failed: API error \'%1$s\'</string>
+    <string name="sync_error_api_error_invalid_credentials">Sync failed: invalid credentials</string>
+    <string name="sync_error_database">Sync failed: unknown DB error</string>
+    <string name="sync_error_unknown">Sync failed: unknown error</string>
+
+    <!-- BROADCAST RECEIVERS -->
 
     <!-- Sending message receiver -->
     <string name="sending_message_action" translatable="false">sending_message_action_%1$s_%2$s</string>
@@ -307,11 +307,6 @@
     <!-- Sent message receiver -->
     <string name="sent_message_action" translatable="false">sent_message_action_%1$s_%2$s</string>
     <string name="sent_message_error" translatable="false">sent_message_error</string>
-
-    <!-- Sync complete receiver -->
-    <string name="sync_complete_action" translatable="false">sync_complete_action</string>
-    <string name="sync_complete_error" translatable="false">sync_complete_error</string>
-    <string name="sync_complete_full" translatable="false">sync_complete_full</string>
 
     <!-- Push notifications registration complete receiver -->
     <string name="push_notifications_reg_complete_action" translatable="false">push_notifications_reg_complete_action</string>
@@ -333,6 +328,7 @@
     <string name="notifications_current_user">Me</string>
     <string name="notifications_group_key" translatable="false">group</string>
     <string name="notifications_reply_key" translatable="false">notification_reply</string>
+    <string name="notifications_button_cancel">Cancel</string>
     <string name="notifications_button_reply">Reply</string>
     <string name="notifications_button_mark_read">Mark Read</string>
     <string name="notifications_channel_group_other">channel_group_other</string>

@@ -31,7 +31,7 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
-import net.kourlas.voipms_sms.sms.services.SyncService
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.*
 import java.io.File
 import java.io.FileInputStream
@@ -484,7 +484,7 @@ class Database private constructor(private val context: Context) {
      * @return The conversation IDs associated with the newly added messages.
      */
     fun insertMessagesVoipMsApi(
-        incomingMessages: List<SyncService.IncomingMessage>,
+        incomingMessages: List<SyncWorker.IncomingMessage>,
         retrieveDeletedMessages: Boolean)
         : Set<ConversationId> = synchronized(this)
     {
@@ -1295,7 +1295,7 @@ class Database private constructor(private val context: Context) {
      *
      * @param context The context to be used by SQLiteOpenHelper.
      */
-    private inner class DatabaseHelper internal constructor(
+    private inner class DatabaseHelper(
         context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null,
                                              DATABASE_VERSION) {
         override fun onCreate(db: SQLiteDatabase) {

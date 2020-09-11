@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import net.kourlas.voipms_sms.sms.services.SyncIntervalService
+import androidx.work.ExistingWorkPolicy
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.logException
 
 /**
@@ -37,7 +38,11 @@ class SyncBootReceiver : BroadcastReceiver() {
                 && intent.action != "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED") {
                 return
             }
-            SyncIntervalService.startService(context)
+
+            // We want to start the periodic synchronization if it hasn't
+            // already
+            SyncWorker.startPeriodicWorker(
+                context, existingWorkPolicy = ExistingWorkPolicy.KEEP)
         } catch (e: Exception) {
             logException(e)
         }

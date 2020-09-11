@@ -17,13 +17,14 @@
 
 package net.kourlas.voipms_sms.sms.services
 
-import android.app.IntentService
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.JobIntentService
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import okhttp3.OkHttpClient
@@ -31,17 +32,13 @@ import java.io.IOException
 
 /**
  * Service used to test credentials for a particular account from VoIP.ms.
- *
- * This service is an IntentService rather than a JobIntentService because it
- * does not need to be run in the background.
  */
-class VerifyCredentialsService : IntentService(
-    VerifyCredentialsService::class.java.name) {
+class VerifyCredentialsService : JobIntentService() {
     private val okHttp = OkHttpClient()
     private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
-    override fun onHandleIntent(intent: Intent?) {
+    override fun onHandleWork(intent: Intent) {
         // Verify that credentials are valid
         val credentialsValid = handleVerifyCredentials(intent)
 
@@ -61,12 +58,12 @@ class VerifyCredentialsService : IntentService(
      * Verifies the credentials of the VoIP.ms account using the parameters
      * from the specified intent.
      */
-    private fun handleVerifyCredentials(intent: Intent?): Boolean {
+    private fun handleVerifyCredentials(intent: Intent): Boolean {
         // Retrieve DIDs from VoIP.ms API
         try {
             // Terminate quietly if intent does not exist or does not contain
             // the sync action
-            if (intent == null || intent.action != applicationContext.getString(
+            if (intent.action != applicationContext.getString(
                     R.string.verify_credentials_action)) {
                 return false
             }
@@ -158,7 +155,9 @@ class VerifyCredentialsService : IntentService(
             intent.putExtra(
                 context.getString(R.string.verify_credentials_password),
                 password)
-            context.startService(intent)
+
+            enqueueWork(context, VerifyCredentialsService::class.java,
+                        JobId.VerifyCredentialsService.ordinal, intent)
         }
     }
 }

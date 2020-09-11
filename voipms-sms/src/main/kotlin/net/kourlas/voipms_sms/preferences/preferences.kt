@@ -104,12 +104,6 @@ fun getFirstSyncAfterSignIn(context: Context): Boolean =
         context.getString(R.string.preferences_first_sync_after_sign_in_key),
         false)
 
-fun getLastCompleteSyncTime(context: Context): Long =
-    getLongPreference(context,
-                      context.getString(
-                          R.string.preferences_sync_last_complete_time_key),
-                      0)
-
 fun getMessageTextBoxMaximumSize(context: Context): Int =
     getStringPreference(
         context,

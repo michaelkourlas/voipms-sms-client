@@ -25,11 +25,13 @@ import android.os.Build;
 import net.kourlas.voipms_sms.network.NetworkManager;
 import net.kourlas.voipms_sms.sms.ConversationId;
 import net.kourlas.voipms_sms.sms.Database;
+import net.kourlas.voipms_sms.sms.workers.SyncWorker;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.work.ExistingWorkPolicy;
 
 import static net.kourlas.voipms_sms.preferences.PreferencesKt.getAppTheme;
 import static net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment.DARK;
@@ -45,9 +47,14 @@ import static net.kourlas.voipms_sms.utils.FcmKt.subscribeToDidTopics;
  * this class is implemented in plain old Java.
  */
 public class CustomApplication extends Application {
-    private final Map<ConversationId, Integer> conversationActivitiesVisible =
-        new HashMap<ConversationId, Integer>();
+    private static CustomApplication instance;
     private int conversationsActivitiesVisible = 0;
+    private final Map<ConversationId, Integer> conversationActivitiesVisible =
+        new HashMap<>();
+
+    public static CustomApplication getInstance() {
+        return instance;
+    }
 
     @SuppressWarnings("UnusedReturnValue")
     public boolean conversationsActivityVisible() {
@@ -90,17 +97,23 @@ public class CustomApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        instance = this;
+
         // Update theme
         String theme = getAppTheme(getApplicationContext());
-        if (theme.equals(SYSTEM_DEFAULT)) {
-            AppCompatDelegate.setDefaultNightMode(
-                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        } else if (theme.equals(LIGHT)) {
-            AppCompatDelegate.setDefaultNightMode(
-                AppCompatDelegate.MODE_NIGHT_NO);
-        } else if (theme.equals(DARK)) {
-            AppCompatDelegate.setDefaultNightMode(
-                AppCompatDelegate.MODE_NIGHT_YES);
+        switch (theme) {
+            case SYSTEM_DEFAULT:
+                AppCompatDelegate.setDefaultNightMode(
+                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+            case LIGHT:
+                AppCompatDelegate.setDefaultNightMode(
+                    AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            case DARK:
+                AppCompatDelegate.setDefaultNightMode(
+                    AppCompatDelegate.MODE_NIGHT_YES);
+                break;
         }
 
         // Register for network callbacks
@@ -123,5 +136,10 @@ public class CustomApplication extends Application {
 
         // Subscribe to topics for current DIDs
         subscribeToDidTopics(getApplicationContext());
+
+        // We want to start the periodic synchronization if it hasn't
+        // already
+        SyncWorker.Companion.startPeriodicWorker(
+            this, /*existingWorkPolicy=*/ExistingWorkPolicy.KEEP);
     }
 }
