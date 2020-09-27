@@ -24,20 +24,19 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.utils.*
-import okhttp3.OkHttpClient
 import java.io.IOException
 
 /**
  * Service used to retrieve DIDs for a particular account from VoIP.ms.
  */
 class RetrieveDidsService : JobIntentService() {
-    private val okHttp = OkHttpClient()
     private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
@@ -119,7 +118,8 @@ class RetrieveDidsService : JobIntentService() {
     private fun getApiResponse(): DidsResponse? {
         try {
             return httpPostWithMultipartFormData(
-                applicationContext, okHttp, moshi,
+                applicationContext,
+                (application as CustomApplication).okHttpClient, moshi,
                 "https://www.voip.ms/api/v1/rest.php",
                 mapOf("api_username" to getEmail(applicationContext),
                       "api_password" to getPassword(applicationContext),

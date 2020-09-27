@@ -25,6 +25,7 @@ import androidx.core.app.RemoteInput
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -38,7 +39,6 @@ import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
-import okhttp3.OkHttpClient
 import java.io.IOException
 import java.text.BreakIterator
 import java.util.*
@@ -48,7 +48,6 @@ import java.util.*
  * specified DID with the VoIP.ms API.
  */
 class SendMessageService : JobIntentService() {
-    private val okHttp = OkHttpClient()
     private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
@@ -267,7 +266,8 @@ class SendMessageService : JobIntentService() {
         val response: MessageResponse?
         try {
             response = httpPostWithMultipartFormData(
-                applicationContext, okHttp, moshi,
+                applicationContext,
+                (application as CustomApplication).okHttpClient, moshi,
                 "https://www.voip.ms/api/v1/rest.php",
                 mapOf("api_username" to getEmail(applicationContext),
                       "api_password" to getPassword(applicationContext),

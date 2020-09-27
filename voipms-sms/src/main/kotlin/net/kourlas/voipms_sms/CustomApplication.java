@@ -32,6 +32,7 @@ import java.util.Map;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.work.ExistingWorkPolicy;
+import okhttp3.OkHttpClient;
 
 import static net.kourlas.voipms_sms.preferences.PreferencesKt.getAppTheme;
 import static net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment.DARK;
@@ -51,6 +52,7 @@ public class CustomApplication extends Application {
     private int conversationsActivitiesVisible = 0;
     private final Map<ConversationId, Integer> conversationActivitiesVisible =
         new HashMap<>();
+    private OkHttpClient okHttpClient;
 
     public static CustomApplication getInstance() {
         return instance;
@@ -93,11 +95,17 @@ public class CustomApplication extends Application {
         conversationActivitiesVisible.put(conversationId, count - 1);
     }
 
+    public OkHttpClient getOkHttpClient() {
+        return okHttpClient;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
 
         instance = this;
+
+        okHttpClient = new OkHttpClient();
 
         // Update theme
         String theme = getAppTheme(getApplicationContext());

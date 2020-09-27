@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
 import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
@@ -36,7 +37,6 @@ import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.toBoolean
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
-import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
@@ -50,7 +50,6 @@ import kotlin.math.ceil
 class SyncWorker(applicationContext: Context,
                  workerParams: WorkerParameters) : CoroutineWorker(
     applicationContext, workerParams) {
-    private val okHttp = OkHttpClient()
     private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
@@ -60,7 +59,7 @@ class SyncWorker(applicationContext: Context,
 
         // Show notification during synchronization to prevent phone from
         // going to sleep
-        showOrUpdateNotification()
+        showNotification()
 
         // Extract the boolean properties from the input data
         val forceRecent = tags.contains(applicationContext.getString(
@@ -104,11 +103,11 @@ class SyncWorker(applicationContext: Context,
     }
 
     /**
-     * Shows or updates the synchronization notification.
+     * Shows the synchronization notification for the first time.
      */
-    private suspend fun showOrUpdateNotification(progress: Int = 0) {
+    private suspend fun showNotification() {
         val notification = Notifications.getInstance(
-            CustomApplication.getInstance()).getSyncNotification(id, progress)
+            CustomApplication.getInstance()).getSyncNotification(id, 0)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             setForeground(ForegroundInfo(
                 Notifications.SYNC_NOTIFICATION_ID, notification,
@@ -120,9 +119,19 @@ class SyncWorker(applicationContext: Context,
     }
 
     /**
+     * Updates the synchronization notification.
+     */
+    private fun updateNotification(progress: Int) {
+        val notification = Notifications.getInstance(
+            CustomApplication.getInstance()).getSyncNotification(id, progress)
+        NotificationManagerCompat.from(applicationContext).notify(
+            Notifications.SYNC_NOTIFICATION_ID, notification)
+    }
+
+    /**
      * Perform synchronization.
      */
-    private suspend fun handleSync(forceRecent: Boolean) {
+    private fun handleSync(forceRecent: Boolean) {
         try {
             // Terminate quietly if account inactive
             if (!accountConfigured(applicationContext) || !didsConfigured(
@@ -254,7 +263,7 @@ class SyncWorker(applicationContext: Context,
      * @param retrieveDeletedMessages If true, messages are retrieved from
      * VoIP.ms even after being deleted locally.
      */
-    private suspend fun processRequests(
+    private fun processRequests(
         retrievalRequests: List<RetrievalRequest>,
         retrieveDeletedMessages: Boolean) {
         val incomingMessages = mutableListOf<IncomingMessage>()
@@ -266,7 +275,7 @@ class SyncWorker(applicationContext: Context,
             } else {
                 return
             }
-            showOrUpdateNotification(((i + 1) * 100) / retrievalRequests.size)
+            updateNotification(((i + 1) * 100) / retrievalRequests.size)
         }
 
         // Add new messages from the server
@@ -362,7 +371,8 @@ class SyncWorker(applicationContext: Context,
         request: RetrievalRequest): MessagesResponse? {
         try {
             return httpPostWithMultipartFormData(
-                applicationContext, okHttp, moshi,
+                applicationContext,
+                CustomApplication.getInstance().okHttpClient, moshi,
                 "https://www.voip.ms/api/v1/rest.php",
                 request.formData)
         } catch (e: IOException) {

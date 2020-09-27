@@ -23,18 +23,17 @@ import androidx.core.app.JobIntentService
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
-import okhttp3.OkHttpClient
 import java.io.IOException
 
 /**
  * Service used to test credentials for a particular account from VoIP.ms.
  */
 class VerifyCredentialsService : JobIntentService() {
-    private val okHttp = OkHttpClient()
     private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
 
@@ -100,7 +99,8 @@ class VerifyCredentialsService : JobIntentService() {
                                password: String): VerifyCredentialsResponse? {
         try {
             return httpPostWithMultipartFormData(
-                applicationContext, okHttp, moshi,
+                applicationContext,
+                (application as CustomApplication).okHttpClient, moshi,
                 "https://www.voip.ms/api/v1/rest.php",
                 mapOf("api_username" to email,
                       "api_password" to password,
