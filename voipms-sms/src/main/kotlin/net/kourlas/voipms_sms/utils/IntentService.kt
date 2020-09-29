@@ -24,7 +24,7 @@ import androidx.annotation.WorkerThread
 
 abstract class IntentService(private val mName: String) : Service() {
     @Volatile
-    private var mServiceLooper: Looper? = null
+    private lateinit var mServiceLooper: Looper
 
     @Volatile
     private lateinit var mServiceHandler: ServiceHandler
@@ -38,6 +38,7 @@ abstract class IntentService(private val mName: String) : Service() {
         }
     }
 
+    @Suppress("unused")
     fun setIntentRedelivery(enabled: Boolean) {
         mRedelivery = enabled
     }
@@ -65,7 +66,7 @@ abstract class IntentService(private val mName: String) : Service() {
     }
 
     override fun onDestroy() {
-        mServiceLooper!!.quit()
+        mServiceLooper.quit()
     }
 
     override fun onBind(intent: Intent): IBinder? {
