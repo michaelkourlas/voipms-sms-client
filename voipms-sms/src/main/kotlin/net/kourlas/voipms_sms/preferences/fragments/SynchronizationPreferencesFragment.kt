@@ -21,10 +21,9 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.preference.ListPreference
 import androidx.preference.Preference
-import androidx.work.ExistingWorkPolicy
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.sms.workers.SyncWorker
+import net.kourlas.voipms_sms.sms.services.SyncIntervalService
 import net.kourlas.voipms_sms.utils.preferences
 
 class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
@@ -33,10 +32,7 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
     private val syncIntervalPreferenceChangeListener =
         Preference.OnPreferenceChangeListener { _, _ ->
             activity?.let {
-                // We just changed our rules, so we need to replace the
-                // existing work
-                SyncWorker.startPeriodicWorker(
-                    it, existingWorkPolicy = ExistingWorkPolicy.REPLACE)
+                SyncIntervalService.startService(it)
             }
             true
         }

@@ -216,6 +216,8 @@
                 <action android:name="android.intent.action.ACTION_LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".sms.receivers.SyncCancelReceiver" />
+        <receiver android:name=".sms.receivers.SyncIntervalReceiver" />
 
         <!-- SERVICES -->
 
@@ -229,10 +231,9 @@
             android:name=".sms.services.SendMessageService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
-            android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="dataSync"
-            tools:ignore="Instantiatable"
-            tools:node="merge" />
+            android:name=".sms.services.SyncIntervalService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service android:name=".sms.services.SyncService" />
         <service
             android:name=".sms.services.VerifyCredentialsService"
             android:permission="android.permission.BIND_JOB_SERVICE" />

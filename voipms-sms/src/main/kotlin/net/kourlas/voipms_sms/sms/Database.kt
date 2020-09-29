@@ -31,7 +31,7 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
-import net.kourlas.voipms_sms.sms.workers.SyncWorker
+import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
 import java.io.File
 import java.io.FileInputStream
@@ -484,7 +484,7 @@ class Database private constructor(private val context: Context) {
      * @return The conversation IDs associated with the newly added messages.
      */
     fun insertMessagesVoipMsApi(
-        incomingMessages: List<SyncWorker.IncomingMessage>,
+        incomingMessages: List<SyncService.IncomingMessage>,
         retrieveDeletedMessages: Boolean)
         : Set<ConversationId> = synchronized(this)
     {

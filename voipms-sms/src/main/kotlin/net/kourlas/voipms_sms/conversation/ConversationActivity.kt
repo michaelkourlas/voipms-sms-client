@@ -40,8 +40,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import net.kourlas.voipms_sms.BuildConfig
@@ -89,6 +87,22 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private var contactBitmap: Bitmap? = null
 
     // Broadcast receivers
+    private val syncCompleteReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                // Show error in snackbar if one occurred
+                intent?.getStringExtra(getString(
+                    R.string.sync_complete_error))?.let {
+                    showSnackbar(this@ConversationActivity,
+                                 R.id.coordinator_layout, it)
+                }
+
+                // Refresh adapter to show new messages
+                if (::adapter.isInitialized) {
+                    adapter.refresh()
+                }
+            }
+        }
     private val sendingMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?,
                                intent: Intent?) {
@@ -425,9 +439,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         super.onResume()
 
         // Register all dynamic receivers for this activity
-        WorkManager.getInstance(applicationContext)
-            .getWorkInfosByTagLiveData(getString(R.string.sync_tag))
-            .observe(this, { onSyncComplete(it) })
+        registerReceiver(syncCompleteReceiver,
+                         IntentFilter(getString(R.string.sync_complete_action)))
         registerReceiver(sendingMessageReceiver,
                          IntentFilter(applicationContext.getString(
                              R.string.sending_message_action, did, contact)))
@@ -471,6 +484,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         super.onPause()
 
         // Unregister all dynamic receivers for this activity
+        safeUnregisterReceiver(this, syncCompleteReceiver)
         safeUnregisterReceiver(this, sendingMessageReceiver)
         safeUnregisterReceiver(this, sentMessageReceiver)
 
@@ -1072,35 +1086,6 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             view
         } else {
             getRecyclerViewContainingItem(view.parent as View)
-        }
-    }
-
-    /**
-     * Called when a synchronization completes.
-     */
-    private fun onSyncComplete(workInfos: MutableList<WorkInfo>?) {
-        if (workInfos != null) {
-            for (workInfo in workInfos) {
-                if (workInfo.state != WorkInfo.State.SUCCEEDED
-                    && workInfo.state != WorkInfo.State.FAILED
-                    && workInfo.state != WorkInfo.State.CANCELLED) {
-                    continue
-                }
-
-                // Show error in snackbar if one occurred
-                if (workInfo.state == WorkInfo.State.FAILED) {
-                    workInfo.outputData.getString(getString(
-                        R.string.sync_error_key))?.let {
-                        showSnackbar(this@ConversationActivity,
-                                     R.id.coordinator_layout, it)
-                    }
-                }
-
-                // Refresh adapter to show new messages
-                if (::adapter.isInitialized) {
-                    adapter.refresh()
-                }
-            }
         }
     }
 }

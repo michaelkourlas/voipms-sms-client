@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2020 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,24 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import net.kourlas.voipms_sms.sms.services.SyncIntervalService
+import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.logException
 
 /**
- * Receiver called on system startup and used to set up the synchronization
- * interval.
+ * Broadcast receiver used to cancel a pending synchronization.
  */
-class SyncBootReceiver : BroadcastReceiver() {
+class SyncCancelReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             if (context == null || intent == null) {
                 return
             }
-            if (intent.action != "android.intent.action.BOOT_COMPLETED"
-                && intent.action != "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED") {
+            if (intent.action != context.getString(
+                    R.string.sync_cancel_action)) {
                 return
             }
-            SyncIntervalService.startService(context)
+            SyncService.requestCancellation()
         } catch (e: Exception) {
             logException(e)
         }

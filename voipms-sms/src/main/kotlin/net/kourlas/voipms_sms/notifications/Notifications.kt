@@ -31,7 +31,6 @@ import androidx.core.app.*
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.app.TaskStackBuilder
-import androidx.work.WorkManager
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
@@ -43,10 +42,11 @@ import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.receivers.MarkReadReceiver
 import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
+import net.kourlas.voipms_sms.sms.receivers.SyncCancelReceiver
 import net.kourlas.voipms_sms.sms.services.MarkReadService
 import net.kourlas.voipms_sms.sms.services.SendMessageService
+import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
-import java.util.*
 
 /**
  * Single-instance class used to send notifications when new SMS messages
@@ -221,7 +221,7 @@ class Notifications private constructor(
     /**
      * Gets the notification displayed during database synchronization.
      */
-    fun getSyncNotification(id: UUID, progress: Int = 0): Notification {
+    fun getSyncNotification(progress: Int = 0): Notification {
         createSyncNotificationChannel()
 
         val builder = NotificationCompat.Builder(
@@ -237,13 +237,17 @@ class Notifications private constructor(
             builder.priority = Notification.PRIORITY_LOW
         }
 
-        // Cancel button
-        val cancelIntent = WorkManager.getInstance(
-            context).createCancelPendingIntent(id)
+        // Cancel action
+        val cancelIntent = SyncService.getCancelIntent(context)
+        cancelIntent.component = ComponentName(
+            context, SyncCancelReceiver::class.java)
+        val cancelPendingIntent = PendingIntent.getBroadcast(
+            context, SyncCancelReceiver::class.java.toString().hashCode(),
+            cancelIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         val cancelAction = NotificationCompat.Action.Builder(
             R.drawable.ic_delete_toolbar_24dp,
             context.getString(R.string.notifications_button_cancel),
-            cancelIntent)
+            cancelPendingIntent)
             .setShowsUserInterface(false)
             .build()
         builder.addAction(cancelAction)

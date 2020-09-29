@@ -25,13 +25,11 @@ import android.os.Build;
 import net.kourlas.voipms_sms.network.NetworkManager;
 import net.kourlas.voipms_sms.sms.ConversationId;
 import net.kourlas.voipms_sms.sms.Database;
-import net.kourlas.voipms_sms.sms.workers.SyncWorker;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.work.ExistingWorkPolicy;
 import okhttp3.OkHttpClient;
 
 import static net.kourlas.voipms_sms.preferences.PreferencesKt.getAppTheme;
@@ -144,10 +142,5 @@ public class CustomApplication extends Application {
 
         // Subscribe to topics for current DIDs
         subscribeToDidTopics(getApplicationContext());
-
-        // We want to start the periodic synchronization if it hasn't
-        // already
-        SyncWorker.Companion.startPeriodicWorker(
-            this, /*existingWorkPolicy=*/ExistingWorkPolicy.KEEP);
     }
 }

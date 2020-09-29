@@ -25,5 +25,6 @@ enum class JobId {
     MarkReadService,
     RetrieveDidsService,
     SendMessageService,
+    SyncIntervalService,
     VerifyCredentialsService,
 }
