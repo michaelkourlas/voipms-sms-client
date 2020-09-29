@@ -30,8 +30,7 @@ abstract class IntentService(private val mName: String) : Service() {
     private lateinit var mServiceHandler: ServiceHandler
     private var mRedelivery = false
 
-    private inner class ServiceHandler(looper: Looper?) : Handler(
-        looper!!) {
+    private inner class ServiceHandler(looper: Looper) : Handler(looper) {
         override fun handleMessage(msg: Message) {
             onHandleIntent(msg.obj as Intent)
             stopSelf(msg.arg1)
