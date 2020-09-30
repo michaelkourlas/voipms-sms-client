@@ -154,7 +154,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             return
         }
 
-        setupDidAndContact(intent)
+        if (!setupDidAndContact(intent)) {
+            return
+        }
         setupToolbar()
         setupRecyclerView()
         setupMessageText()
@@ -168,7 +170,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      *
      * @param intent The intent that this activity was launched with.
      */
-    private fun setupDidAndContact(intent: Intent) {
+    private fun setupDidAndContact(intent: Intent): Boolean {
         val action = intent.action
         val data = intent.dataString
         if (Intent.ACTION_VIEW == action && data != null) {
@@ -183,7 +185,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                     .getMessageDatabaseId(id.toLong())
                 if (message == null) {
                     abortActivity(this, Exception("Invalid URI: '$data'"))
-                    return
+                    return false
                 } else {
                     did = message.did
                     contact = message.contact
@@ -194,7 +196,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 contact = contactDid
             } else {
                 abortActivity(this, Exception("Invalid URI: '$data'"))
-                return
+                return false
             }
         } else {
             // Standard intent
@@ -204,7 +206,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             if (d == null || c == null) {
                 abortActivity(this, Exception("No DID or contact specified:" +
                                               " did: '$d', contact: '$c'"))
-                return
+                return false
             } else {
                 did = d
                 contact = c
@@ -215,7 +217,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         // configured
         if (did !in getDids(applicationContext) && !BuildConfig.IS_DEMO) {
             abortActivity(this, Exception("DID '$did' no longer exists"))
-            return
+            return false
         }
 
         // Remove the leading one from a North American phone number
@@ -233,6 +235,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             net.kourlas.voipms_sms.demo.getContactName(contact)
         }
         contactBitmap = getContactPhotoBitmap(this, contact)
+
+        return true
     }
 
     /**
