@@ -2,6 +2,8 @@
  * VoIP.ms SMS
  * Copyright (C) 2017-2020 Michael Kourlas
  *
+ * Portions Copyright (C) 2008 The Android Open Source Project
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +19,13 @@
 
 package net.kourlas.voipms_sms.sms.services
 
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.os.Build
+import android.os.*
 import android.util.Log
+import androidx.annotation.WorkerThread
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.squareup.moshi.JsonClass
@@ -34,43 +38,102 @@ import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
+import net.kourlas.voipms_sms.utils.logException
+import net.kourlas.voipms_sms.utils.toBoolean
+import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import java.io.IOException
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.ceil
 
 /**
  * Service used to synchronize the database with VoIP.ms.
  *
- * SyncService is an IntentService rather than a JobIntentService because
+ * SyncService is an Service rather than a JobIntentService because
  * it is a foreground service that uses a notification to indicate
  * synchronization progress. This is mainly to prevent Android from killing
  * the service.
  */
-class SyncService : IntentService(
-    SyncService::class.java.name) {
+class SyncService : Service() {
+    @Volatile
+    private lateinit var serviceLooper: Looper
+
+    @Volatile
+    private lateinit var serviceHandler: ServiceHandler
+
     private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
+    private var progress: Int = 0
 
-    override fun onHandleIntent(intent: Intent?) {
-        val rand = Random().nextInt().toString(16)
-        Log.i(SyncService::class.java.name, "[$rand] starting synchronization")
+    private inner class ServiceHandler(looper: Looper) : Handler(looper) {
+        override fun handleMessage(msg: Message) {
+            onHandleIntent(msg.obj as Intent)
+            stopSelfResult(msg.arg1)
+        }
+    }
 
-        requestCancellation = false
+    override fun onCreate() {
+        super.onCreate()
+        val thread = HandlerThread(SyncService::class.java.name)
+        thread.start()
+        serviceLooper = thread.looper
+        serviceHandler = ServiceHandler(serviceLooper)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int,
+                                startId: Int): Int {
+        // Void any pending cancellation request
+        requestCancellation.set(false)
 
         // Show notification during synchronization to prevent phone from
         // going to sleep
-        val notification = Notifications.getInstance(application)
-            .getSyncNotification()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                Notifications.SYNC_NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-        } else {
-            startForeground(Notifications.SYNC_NOTIFICATION_ID, notification)
+        synchronized(this) {
+            // Use the existing progress value since the service may already
+            // be running
+            val notification = Notifications.getInstance(application)
+                .getSyncNotification(progress)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    Notifications.SYNC_NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            } else {
+                startForeground(
+                    Notifications.SYNC_NOTIFICATION_ID,
+                    notification)
+            }
+        }
+
+        val msg: Message = serviceHandler.obtainMessage()
+        msg.arg1 = startId
+        msg.obj = intent
+        serviceHandler.sendMessage(msg)
+
+        return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        serviceLooper.quit()
+    }
+
+    override fun onBind(intent: Intent): IBinder? {
+        return null
+    }
+
+    @WorkerThread
+    fun onHandleIntent(intent: Intent?) {
+        val rand = Random().nextInt().toString(16)
+        Log.i(SyncService::class.java.name, "[$rand] starting synchronization")
+
+        synchronized(this) {
+            progress = 0
+            val notification = Notifications.getInstance(application)
+                .getSyncNotification(progress)
+            NotificationManagerCompat.from(applicationContext).notify(
+                Notifications.SYNC_NOTIFICATION_ID, notification)
         }
 
         // Perform synchronization
@@ -92,7 +155,7 @@ class SyncService : IntentService(
 
         Log.i(SyncService::class.java.name, "[$rand] completed synchronization")
 
-        stopForeground(true)
+        progress = 0
     }
 
     /**
@@ -113,7 +176,7 @@ class SyncService : IntentService(
                 return
             }
 
-            // Extract the boolean properties from the intent
+            // Extract the properties from the intent
             val forceRecent = intent.extras?.get(
                 applicationContext.getString(R.string.sync_force_recent))
                                   as Boolean?
@@ -256,7 +319,7 @@ class SyncService : IntentService(
                                 retrieveDeletedMessages: Boolean) {
         val incomingMessages = mutableListOf<IncomingMessage>()
         for (i in retrievalRequests.indices) {
-            if (requestCancellation) {
+            if (requestCancellation.get()) {
                 break
             }
 
@@ -268,10 +331,13 @@ class SyncService : IntentService(
                 return
             }
 
-            val notification = Notifications.getInstance(application)
-                .getSyncNotification(((i + 1) * 100) / retrievalRequests.size)
-            NotificationManagerCompat.from(applicationContext).notify(
-                Notifications.SYNC_NOTIFICATION_ID, notification)
+            synchronized(this) {
+                progress = ((i + 1) * 100) / retrievalRequests.size
+                val notification = Notifications.getInstance(application)
+                    .getSyncNotification(progress)
+                NotificationManagerCompat.from(applicationContext).notify(
+                    Notifications.SYNC_NOTIFICATION_ID, notification)
+            }
         }
 
         // Add new messages from the server
@@ -413,8 +479,7 @@ class SyncService : IntentService(
                                 private val period: Pair<Date, Date>)
 
     companion object {
-        @Volatile
-        private var requestCancellation = false
+        private val requestCancellation: AtomicBoolean = AtomicBoolean(false)
 
         /**
          * Synchronize the database with VoIP.ms.
@@ -427,7 +492,6 @@ class SyncService : IntentService(
             intent.action = context.getString(R.string.sync_action)
             intent.putExtra(context.getString(R.string.sync_force_recent),
                             forceRecent)
-
             ContextCompat.startForegroundService(context, intent)
         }
 
@@ -445,7 +509,7 @@ class SyncService : IntentService(
          * Requests that the current synchronization be cancelled.
          */
         fun requestCancellation() {
-            requestCancellation = true
+            requestCancellation.set(true)
         }
     }
 }

@@ -61,7 +61,7 @@ class Notifications private constructor(
 
     // Information associated with active notifications
     private val notificationIds = mutableMapOf<ConversationId, Int>()
-    private var notificationIdCount = 3
+    private var notificationIdCount = MESSAGE_START_NOTIFICATION_ID
 
     /**
      * Attempts to create a notification channel for the specified DID.
@@ -519,6 +519,9 @@ class Notifications private constructor(
         var id = notificationIds[conversationId]
         if (id == null) {
             id = notificationIdCount++
+            if (notificationIdCount == Int.MAX_VALUE) {
+                notificationIdCount = MESSAGE_START_NOTIFICATION_ID
+            }
             notificationIds[conversationId] = id
         }
 
@@ -541,15 +544,13 @@ class Notifications private constructor(
         NotificationManagerCompat.from(context).cancel(id)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val activeNotifications = notificationManager.activeNotifications
-            if ((activeNotifications.size == 1
-                 && activeNotifications[0].id == GROUP_NOTIFICATION_ID)
-                || (activeNotifications.size == 2
-                    && activeNotifications[0].id == GROUP_NOTIFICATION_ID
-                    && activeNotifications[1].id == SYNC_NOTIFICATION_ID)
-                || (activeNotifications.size == 2
-                    && activeNotifications[0].id == SYNC_NOTIFICATION_ID
-                    && activeNotifications[1].id == GROUP_NOTIFICATION_ID)) {
+            val noOtherNotifications = notificationManager.activeNotifications
+                .filter {
+                    id != GROUP_NOTIFICATION_ID
+                    && id != SYNC_NOTIFICATION_ID
+                }
+                .none()
+            if (noOtherNotifications) {
                 NotificationManagerCompat.from(context).cancel(
                     GROUP_NOTIFICATION_ID)
             }
@@ -585,6 +586,9 @@ class Notifications private constructor(
         // Notification ID for the group notification, which contains all other
         // notifications
         const val GROUP_NOTIFICATION_ID = 2
+
+        // Starting notification ID for ordinary message notifications
+        const val MESSAGE_START_NOTIFICATION_ID = GROUP_NOTIFICATION_ID + 1
 
         /**
          * Gets the sole instance of the Notifications class. Initializes the
