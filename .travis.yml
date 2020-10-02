@@ -7,6 +7,9 @@ android:
   - android-30
 before_install:
 - openssl aes-256-cbc
-  -K $encrypted_f761570c4ae9_key -iv $encrypted_f761570c4ae9_iv
-  -in google-services.json.enc -out google-services.json -d
+  -K $encrypted_f761570c4ae9_key
+  -iv $encrypted_f761570c4ae9_iv
+  -in voipms-sms/src/primary/google-services.json.enc
+  -out voipms-sms/src/primary/google-services.json
+  -d
 - yes | sdkmanager "platforms;android-30"
