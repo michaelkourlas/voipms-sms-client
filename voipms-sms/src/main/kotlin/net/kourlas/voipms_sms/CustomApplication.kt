@@ -14,116 +14,84 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.kourlas.voipms_sms
 
-package net.kourlas.voipms_sms;
+import android.app.Application
+import android.net.ConnectivityManager
+import android.os.Build
+import androidx.appcompat.app.AppCompatDelegate
+import net.kourlas.voipms_sms.network.NetworkManager.Companion.getInstance
+import net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment
+import net.kourlas.voipms_sms.preferences.getAppTheme
+import net.kourlas.voipms_sms.sms.ConversationId
+import net.kourlas.voipms_sms.sms.Database.Companion.getInstance
+import net.kourlas.voipms_sms.utils.subscribeToDidTopics
+import java.util.*
 
-import android.app.Application;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.os.Build;
+class CustomApplication : Application() {
+    private var conversationsActivitiesVisible = 0
+    private val conversationActivitiesVisible: MutableMap<ConversationId, Int> = HashMap()
 
-import net.kourlas.voipms_sms.network.NetworkManager;
-import net.kourlas.voipms_sms.sms.ConversationId;
-import net.kourlas.voipms_sms.sms.Database;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import androidx.appcompat.app.AppCompatDelegate;
-
-import static net.kourlas.voipms_sms.preferences.PreferencesKt.getAppTheme;
-import static net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment.DARK;
-import static net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment.LIGHT;
-import static net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment.SYSTEM_DEFAULT;
-import static net.kourlas.voipms_sms.utils.ExceptionsKt.logException;
-import static net.kourlas.voipms_sms.utils.FcmKt.subscribeToDidTopics;
-
-/**
- * Custom application implementation that keeps track of visible activities.
- * <p>
- * Kotlin doesn't seem to work at this level in older versions of Android, so
- * this class is implemented in plain old Java.
- */
-public class CustomApplication extends Application {
-    private int conversationsActivitiesVisible = 0;
-    private final Map<ConversationId, Integer> conversationActivitiesVisible =
-        new HashMap<>();
-
-    public boolean conversationsActivityVisible() {
-        return conversationsActivitiesVisible > 0;
+    fun conversationsActivityVisible(): Boolean {
+        return conversationsActivitiesVisible > 0
     }
 
-    public void conversationsActivityIncrementCount() {
-        conversationsActivitiesVisible++;
+    fun conversationsActivityIncrementCount() {
+        conversationsActivitiesVisible++
     }
 
-    public void conversationsActivityDecrementCount() {
-        conversationsActivitiesVisible--;
+    fun conversationsActivityDecrementCount() {
+        conversationsActivitiesVisible--
     }
 
-    public boolean conversationActivityVisible(ConversationId conversationId) {
-        Integer count = conversationActivitiesVisible.get(conversationId);
-        return count != null && count > 0;
+    fun conversationActivityVisible(conversationId: ConversationId): Boolean {
+        val count = conversationActivitiesVisible[conversationId]
+        return count != null && count > 0
     }
 
-    public void conversationActivityIncrementCount(
-        ConversationId conversationId) {
-        Integer count = conversationActivitiesVisible.get(conversationId);
+    fun conversationActivityIncrementCount(
+        conversationId: ConversationId) {
+        var count = conversationActivitiesVisible[conversationId]
         if (count == null) {
-            count = 0;
+            count = 0
         }
-        conversationActivitiesVisible.put(conversationId, count + 1);
+        conversationActivitiesVisible[conversationId] = count + 1
     }
 
-    public void conversationActivityDecrementCount(
-        ConversationId conversationId) {
-        Integer count = conversationActivitiesVisible.get(conversationId);
+    fun conversationActivityDecrementCount(
+        conversationId: ConversationId) {
+        var count = conversationActivitiesVisible[conversationId]
         if (count == null) {
-            count = 0;
+            count = 0
         }
-        conversationActivitiesVisible.put(conversationId, count - 1);
+        conversationActivitiesVisible[conversationId] = count - 1
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    override fun onCreate() {
+        super.onCreate()
 
         // Update theme
-        String theme = getAppTheme(getApplicationContext());
-        switch (theme) {
-            case SYSTEM_DEFAULT:
-                AppCompatDelegate.setDefaultNightMode(
-                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                break;
-            case LIGHT:
-                AppCompatDelegate.setDefaultNightMode(
-                    AppCompatDelegate.MODE_NIGHT_NO);
-                break;
-            case DARK:
-                AppCompatDelegate.setDefaultNightMode(
-                    AppCompatDelegate.MODE_NIGHT_YES);
-                break;
+        when (getAppTheme(applicationContext)) {
+            AppearancePreferencesFragment.SYSTEM_DEFAULT -> AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            AppearancePreferencesFragment.LIGHT -> AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_NO)
+            AppearancePreferencesFragment.DARK -> AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_YES)
         }
 
         // Register for network callbacks
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            ConnectivityManager connectivityManager =
-                (ConnectivityManager) getSystemService(
-                    Context.CONNECTIVITY_SERVICE);
-            if (connectivityManager == null) {
-                RuntimeException e = new RuntimeException(
-                    "Connectivity manager does not exist");
-                logException(e);
-                throw e;
-            }
+            val connectivityManager = getSystemService(
+                CONNECTIVITY_SERVICE) as ConnectivityManager
             connectivityManager.registerDefaultNetworkCallback(
-                NetworkManager.Companion.getInstance());
+                getInstance())
         }
 
         // Open database
-        Database.Companion.getInstance(getApplicationContext());
+        getInstance(applicationContext)
 
         // Subscribe to topics for current DIDs
-        subscribeToDidTopics(getApplicationContext());
+        subscribeToDidTopics(applicationContext)
     }
 }
