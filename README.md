@@ -1,6 +1,6 @@
 # VoIP.ms SMS #
 
-<a href="https://travis-ci.org/michaelkourlas/voipms-sms-client"><img src="https://travis-ci.org/michaelkourlas/voipms-sms-client.svg?branch=master" alt="Build Status" height="20"></a>
+[![Build Status](https://travis-ci.com/michaelkourlas/voipms-sms-client.svg?branch=master)](https://travis-ci.com/michaelkourlas/voipms-sms-client)
 
 ## Overview ##
 
