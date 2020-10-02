@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import androidx.appcompat.app.AppCompatDelegate;
-import okhttp3.OkHttpClient;
 
 import static net.kourlas.voipms_sms.preferences.PreferencesKt.getAppTheme;
 import static net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment.DARK;
@@ -46,17 +45,10 @@ import static net.kourlas.voipms_sms.utils.FcmKt.subscribeToDidTopics;
  * this class is implemented in plain old Java.
  */
 public class CustomApplication extends Application {
-    private static CustomApplication instance;
     private int conversationsActivitiesVisible = 0;
     private final Map<ConversationId, Integer> conversationActivitiesVisible =
         new HashMap<>();
-    private OkHttpClient okHttpClient;
 
-    public static CustomApplication getInstance() {
-        return instance;
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
     public boolean conversationsActivityVisible() {
         return conversationsActivitiesVisible > 0;
     }
@@ -69,7 +61,6 @@ public class CustomApplication extends Application {
         conversationsActivitiesVisible--;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
     public boolean conversationActivityVisible(ConversationId conversationId) {
         Integer count = conversationActivitiesVisible.get(conversationId);
         return count != null && count > 0;
@@ -93,17 +84,9 @@ public class CustomApplication extends Application {
         conversationActivitiesVisible.put(conversationId, count - 1);
     }
 
-    public OkHttpClient getOkHttpClient() {
-        return okHttpClient;
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
-
-        instance = this;
-
-        okHttpClient = new OkHttpClient();
 
         // Update theme
         String theme = getAppTheme(getApplicationContext());

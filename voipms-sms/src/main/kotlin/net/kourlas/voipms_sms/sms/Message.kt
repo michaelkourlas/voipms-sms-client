@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.sms
 
+import com.squareup.moshi.JsonClass
 import net.kourlas.voipms_sms.utils.toBoolean
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import java.util.*
@@ -42,6 +43,7 @@ import java.util.*
  * the process of being delivered (1 for true, 0 for false).
  * @param isDraft Whether or not the message is a draft.
  */
+@JsonClass(generateAdapter = true)
 class Message(val databaseId: Long, val voipId: Long?, date: Long,
               isIncoming: Long, val did: String, val contact: String,
               var text: String, isUnread: Long, isDelivered: Long,

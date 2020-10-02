@@ -22,8 +22,6 @@ import android.content.Intent
 import androidx.core.app.JobIntentService
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.Moshi
-import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
@@ -35,8 +33,6 @@ import java.io.IOException
  * Service that registers a VoIP.ms callback for each DID.
  */
 class NotificationsRegistrationService : JobIntentService() {
-    private val moshi: Moshi = Moshi.Builder().build()
-
     override fun onHandleWork(intent: Intent) {
         // Terminate quietly if intent does not exist or does not contain
         // the correct action
@@ -93,7 +89,6 @@ class NotificationsRegistrationService : JobIntentService() {
             try {
                 responses[did] = httpPostWithMultipartFormData(
                     applicationContext,
-                    (application as CustomApplication).okHttpClient, moshi,
                     "https://www.voip.ms/api/v1/rest.php",
                     mapOf("api_username" to getEmail(applicationContext),
                           "api_password" to getPassword(applicationContext),

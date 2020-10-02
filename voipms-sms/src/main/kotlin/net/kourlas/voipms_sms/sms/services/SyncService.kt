@@ -31,7 +31,6 @@ import androidx.core.content.ContextCompat
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
-import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -433,7 +432,6 @@ class SyncService : Service() {
         try {
             return httpPostWithMultipartFormData(
                 applicationContext,
-                (application as CustomApplication).okHttpClient, moshi,
                 "https://www.voip.ms/api/v1/rest.php",
                 request.formData)
         } catch (e: IOException) {

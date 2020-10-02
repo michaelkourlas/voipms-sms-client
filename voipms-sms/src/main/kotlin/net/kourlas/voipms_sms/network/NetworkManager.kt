@@ -37,7 +37,7 @@ class NetworkManager : ConnectivityManager.NetworkCallback() {
         private var instance: NetworkManager? = null
 
         /**
-         * Gets the sole instance of the NetworkCallback class. Initializes the
+         * Gets the sole instance of the NetworkManager class. Initializes the
          * instance if it does not already exist.
          */
         fun getInstance(): NetworkManager = instance ?: synchronized(this) {
