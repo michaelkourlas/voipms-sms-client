@@ -38,6 +38,9 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 
 /**
@@ -46,14 +49,14 @@ import java.util.*
 class Database private constructor(private val context: Context) {
     private val databaseHelper = DatabaseHelper(context)
     private var database = databaseHelper.writableDatabase
+    private val importExportLock = ReentrantReadWriteLock()
 
     /**
      * Deletes the message with the specified DID, database ID, and optionally
      * VoIP.ms ID from the database.
      */
     fun deleteMessage(did: String, databaseId: Long,
-                      voipId: Long?): Unit = synchronized(this)
-    {
+                      voipId: Long?) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -76,7 +79,7 @@ class Database private constructor(private val context: Context) {
     /**
      * Deletes all messages that are not associated with the specified DIDs.
      */
-    fun deleteMessages(dids: Set<String>) = synchronized(this) {
+    fun deleteMessages(dids: Set<String>) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -97,7 +100,7 @@ class Database private constructor(private val context: Context) {
      * Deletes the messages in the specified conversation from the database.
      * Also deletes any draft message if one exists.
      */
-    fun deleteMessages(conversationId: ConversationId) = synchronized(this) {
+    fun deleteMessages(conversationId: ConversationId) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -129,7 +132,7 @@ class Database private constructor(private val context: Context) {
     /**
      * Deletes all rows in the deleted messages table from the database.
      */
-    fun deleteTableDeleted() = synchronized(this) {
+    fun deleteTableDeleted() = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -144,7 +147,7 @@ class Database private constructor(private val context: Context) {
     /**
      * Deletes all rows in all tables in the database.
      */
-    fun deleteTablesAll(): Unit = synchronized(this) {
+    fun deleteTablesAll() = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -165,7 +168,7 @@ class Database private constructor(private val context: Context) {
     /**
      * Exports the database to the specified file descriptor.
      */
-    fun export(exportFd: ParcelFileDescriptor) = synchronized(this) {
+    fun export(exportFd: ParcelFileDescriptor) = importExportLock.write {
         val dbFile = context.getDatabasePath(DATABASE_NAME)
 
         try {
@@ -198,15 +201,14 @@ class Database private constructor(private val context: Context) {
      * DIDs.
      */
     fun getConversationIds(
-        dids: Set<String>): Set<ConversationId> = synchronized(this)
-    {
+        dids: Set<String>): Set<ConversationId> = importExportLock.read {
         return getConversationIdsWithoutLock(dids)
     }
 
     /**
      * Gets all DIDs used in the database.
      */
-    fun getDids(): Set<String> = synchronized(this) {
+    fun getDids(): Set<String> = importExportLock.read {
         val cursor = database.query(
             true, TABLE_MESSAGE, arrayOf(COLUMN_DID),
             null, null, null, null, null, null)
@@ -225,7 +227,8 @@ class Database private constructor(private val context: Context) {
      *
      * @return Null if the message does not exist.
      */
-    fun getMessageDatabaseId(databaseId: Long): Message? = synchronized(this) {
+    fun getMessageDatabaseId(
+        databaseId: Long): Message? = importExportLock.read {
         return getMessageDatabaseIdWithoutLock(databaseId)
     }
 
@@ -235,8 +238,7 @@ class Database private constructor(private val context: Context) {
      * @return Null if the message does not exist.
      */
     fun getMessageDraft(
-        conversationId: ConversationId): Message? = synchronized(this)
-    {
+        conversationId: ConversationId): Message? = importExportLock.read {
         return getMessageDraftWithoutLock(conversationId)
     }
 
@@ -246,7 +248,8 @@ class Database private constructor(private val context: Context) {
      *
      * @return Null if the message does not exist.
      */
-    fun getMessageMostRecent(dids: Set<String>): Message? = synchronized(this) {
+    fun getMessageMostRecent(
+        dids: Set<String>): Message? = importExportLock.read {
         val messages = getMessagesCursor(
             database.query(
                 TABLE_MESSAGE,
@@ -266,7 +269,8 @@ class Database private constructor(private val context: Context) {
      * Gets all of the messages in the message table with the specified DIDs.
      * The resulting list is sorted by database ID in descending order.
      */
-    fun getMessagesAll(dids: Set<String>): List<Message> = synchronized(this) {
+    fun getMessagesAll(
+        dids: Set<String>): List<Message> = importExportLock.read {
         return getMessagesCursor(
             database.query(
                 TABLE_MESSAGE,
@@ -284,8 +288,7 @@ class Database private constructor(private val context: Context) {
      */
     fun getMessagesConversationFiltered(
         conversationId: ConversationId,
-        filterConstraint: String): List<Message> = synchronized(this)
-    {
+        filterConstraint: String): List<Message> = importExportLock.read {
         return getMessagesCursor(
             database.query(
                 TABLE_MESSAGE,
@@ -308,8 +311,7 @@ class Database private constructor(private val context: Context) {
         dids: Set<String>,
         filterConstraint: String,
         contactNameCache: MutableMap<String,
-            String>? = null): List<Message> = synchronized(this)
-    {
+            String>? = null): List<Message> = importExportLock.read {
         return getMessagesMostRecentFilteredWithoutLock(dids, filterConstraint,
                                                         contactNameCache)
     }
@@ -321,8 +323,7 @@ class Database private constructor(private val context: Context) {
      * The resulting list is sorted by date, from least recent to most recent.
      */
     fun getMessagesUnread(
-        conversationId: ConversationId): List<Message> = synchronized(this)
-    {
+        conversationId: ConversationId): List<Message> = importExportLock.read {
         // Retrieve the most recent outgoing message
         var cursor = database.query(
             TABLE_MESSAGE,
@@ -356,7 +357,7 @@ class Database private constructor(private val context: Context) {
     /**
      * Imports the database from the specified file descriptor.
      */
-    fun import(importFd: ParcelFileDescriptor) = synchronized(this) {
+    fun import(importFd: ParcelFileDescriptor) = importExportLock.write {
         val dbFile = context.getDatabasePath(DATABASE_NAME)
         val backupFile = File("${dbFile.absolutePath}.backup")
 
@@ -410,8 +411,7 @@ class Database private constructor(private val context: Context) {
      */
     fun insertMessageDeliveryInProgress(
         conversationId: ConversationId,
-        texts: List<String>): List<Long> = synchronized(this)
-    {
+        texts: List<String>): List<Long> = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -460,8 +460,7 @@ class Database private constructor(private val context: Context) {
      * message is removed from the database.
      */
     fun insertMessageDraft(conversationId: ConversationId,
-                           text: String) = synchronized(this)
-    {
+                           text: String) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -486,8 +485,7 @@ class Database private constructor(private val context: Context) {
     fun insertMessagesVoipMsApi(
         incomingMessages: List<SyncService.IncomingMessage>,
         retrieveDeletedMessages: Boolean)
-        : Set<ConversationId> = synchronized(this)
-    {
+        : Set<ConversationId> = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -568,8 +566,7 @@ class Database private constructor(private val context: Context) {
      * Returns whether the specified conversation is archived.
      */
     fun isConversationArchived(
-        conversationId: ConversationId): Boolean = synchronized(this)
-    {
+        conversationId: ConversationId): Boolean = importExportLock.read {
         val cursor = database.query(TABLE_ARCHIVED,
                                     archivedColumns,
                                     "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
@@ -586,8 +583,7 @@ class Database private constructor(private val context: Context) {
      * Returns whether the specified conversation has any messages or drafts.
      */
     fun isConversationEmpty(
-        conversationId: ConversationId): Boolean = synchronized(this)
-    {
+        conversationId: ConversationId): Boolean = importExportLock.read {
         val cursor = database.query(TABLE_MESSAGE,
                                     messageColumns,
                                     "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
@@ -606,8 +602,7 @@ class Database private constructor(private val context: Context) {
      * Marks the specified conversation as archived.
      */
     fun markConversationArchived(
-        conversationId: ConversationId) = synchronized(this)
-    {
+        conversationId: ConversationId) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -633,8 +628,7 @@ class Database private constructor(private val context: Context) {
      * Marks the specified conversation as read.
      **/
     fun markConversationRead(
-        conversationId: ConversationId) = synchronized(this)
-    {
+        conversationId: ConversationId) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -656,8 +650,7 @@ class Database private constructor(private val context: Context) {
      * Marks the specified conversation as unarchived.
      */
     fun markConversationUnarchived(
-        conversationId: ConversationId) = synchronized(this)
-    {
+        conversationId: ConversationId) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -675,8 +668,7 @@ class Database private constructor(private val context: Context) {
      * Marks the specified conversation as unread.
      */
     fun markConversationUnread(
-        conversationId: ConversationId) = synchronized(this)
-    {
+        conversationId: ConversationId) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -698,7 +690,8 @@ class Database private constructor(private val context: Context) {
      * Marks the message with the specified database ID as in the process of
      * being delivered.
      */
-    fun markMessageDeliveryInProgress(databaseId: Long) = synchronized(this) {
+    fun markMessageDeliveryInProgress(
+        databaseId: Long) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -721,7 +714,7 @@ class Database private constructor(private val context: Context) {
      * Marks the message with the specified database ID as having failed to
      * be sent.
      */
-    fun markMessageNotSent(databaseId: Long) = synchronized(this) {
+    fun markMessageNotSent(databaseId: Long) = importExportLock.read {
         try {
             database.beginTransaction()
 
@@ -744,7 +737,8 @@ class Database private constructor(private val context: Context) {
      * Marks the message with the specified database ID as having been sent.
      * In addition, adds the specified VoIP.ms ID to the message.
      */
-    fun markMessageSent(databaseId: Long, voipId: Long) = synchronized(this) {
+    fun markMessageSent(databaseId: Long,
+                        voipId: Long) = importExportLock.read {
         try {
             database.beginTransaction()
 
