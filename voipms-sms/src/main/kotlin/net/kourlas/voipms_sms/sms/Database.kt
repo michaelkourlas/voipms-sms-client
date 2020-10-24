@@ -48,8 +48,13 @@ import kotlin.concurrent.write
  */
 class Database private constructor(private val context: Context) {
     private val databaseHelper = DatabaseHelper(context)
-    private var database = databaseHelper.writableDatabase
+    private var database: SQLiteDatabase
     private val importExportLock = ReentrantReadWriteLock()
+
+    init {
+        databaseHelper.setWriteAheadLoggingEnabled(true)
+        database = databaseHelper.writableDatabase
+    }
 
     /**
      * Deletes the message with the specified DID, database ID, and optionally
@@ -58,7 +63,7 @@ class Database private constructor(private val context: Context) {
     fun deleteMessage(did: String, databaseId: Long,
                       voipId: Long?) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             if (voipId != null) {
                 insertVoipIdDeleted(did, voipId)
@@ -81,7 +86,7 @@ class Database private constructor(private val context: Context) {
      */
     fun deleteMessages(dids: Set<String>) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val query = dids.joinToString(" AND ") { "$COLUMN_DID!=?" }
             val queryArgs = dids.toTypedArray()
@@ -102,7 +107,7 @@ class Database private constructor(private val context: Context) {
      */
     fun deleteMessages(conversationId: ConversationId) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val messages = getMessagesConversation(conversationId)
             for (message in messages) {
@@ -134,7 +139,7 @@ class Database private constructor(private val context: Context) {
      */
     fun deleteTableDeleted() = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             database.delete(TABLE_DELETED, null, null)
 
@@ -149,7 +154,7 @@ class Database private constructor(private val context: Context) {
      */
     fun deleteTablesAll() = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             database.delete(TABLE_MESSAGE, null, null)
             database.delete(TABLE_DELETED, null, null)
@@ -413,7 +418,7 @@ class Database private constructor(private val context: Context) {
         conversationId: ConversationId,
         texts: List<String>): List<Long> = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val databaseIds = texts.map {
                 val values = ContentValues()
@@ -462,7 +467,7 @@ class Database private constructor(private val context: Context) {
     fun insertMessageDraft(conversationId: ConversationId,
                            text: String) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             insertMessageDraftWithoutLock(conversationId, text)
 
@@ -487,7 +492,7 @@ class Database private constructor(private val context: Context) {
         retrieveDeletedMessages: Boolean)
         : Set<ConversationId> = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val addedConversationIds = mutableSetOf<ConversationId>()
             val addedDatabaseIds = mutableListOf<Long>()
@@ -604,7 +609,7 @@ class Database private constructor(private val context: Context) {
     fun markConversationArchived(
         conversationId: ConversationId) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val databaseId = getArchivedDatabaseIdConversation(conversationId)
 
@@ -630,7 +635,7 @@ class Database private constructor(private val context: Context) {
     fun markConversationRead(
         conversationId: ConversationId) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val contentValues = ContentValues()
             contentValues.put(COLUMN_UNREAD, "0")
@@ -652,7 +657,7 @@ class Database private constructor(private val context: Context) {
     fun markConversationUnarchived(
         conversationId: ConversationId) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             database.delete(TABLE_ARCHIVED,
                             "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
@@ -670,7 +675,7 @@ class Database private constructor(private val context: Context) {
     fun markConversationUnread(
         conversationId: ConversationId) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val contentValues = ContentValues()
             contentValues.put(COLUMN_UNREAD, "1")
@@ -693,7 +698,7 @@ class Database private constructor(private val context: Context) {
     fun markMessageDeliveryInProgress(
         databaseId: Long) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val contentValues = ContentValues()
             contentValues.put(COLUMN_DELIVERED, "0")
@@ -716,7 +721,7 @@ class Database private constructor(private val context: Context) {
      */
     fun markMessageNotSent(databaseId: Long) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val contentValues = ContentValues()
             contentValues.put(COLUMN_DELIVERED, "0")
@@ -740,7 +745,7 @@ class Database private constructor(private val context: Context) {
     fun markMessageSent(databaseId: Long,
                         voipId: Long) = importExportLock.read {
         try {
-            database.beginTransaction()
+            database.beginTransactionNonExclusive()
 
             val contentValues = ContentValues()
             contentValues.put(COLUMN_VOIP_ID, voipId)
@@ -1294,7 +1299,7 @@ class Database private constructor(private val context: Context) {
                                              DATABASE_VERSION) {
         override fun onCreate(db: SQLiteDatabase) {
             try {
-                db.beginTransaction()
+                db.beginTransactionNonExclusive()
 
                 db.execSQL(DATABASE_MESSAGE_TABLE_CREATE)
                 db.execSQL(DATABASE_DELETED_TABLE_CREATE)
@@ -1313,7 +1318,7 @@ class Database private constructor(private val context: Context) {
                 // For version 5 and below, the database was nothing more
                 // than a cache so it can simply be dropped
                 try {
-                    db.beginTransaction()
+                    db.beginTransactionNonExclusive()
 
                     db.execSQL("DROP TABLE IF EXISTS sms")
 
@@ -1329,7 +1334,7 @@ class Database private constructor(private val context: Context) {
             // After version 5, the database must be converted; it cannot
             // be simply dropped
             try {
-                db.beginTransaction()
+                db.beginTransactionNonExclusive()
 
                 if (oldVersion <= 6) {
                     handleTimeConversion6(db)
