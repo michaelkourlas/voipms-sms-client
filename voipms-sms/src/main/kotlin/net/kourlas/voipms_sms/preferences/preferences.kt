@@ -25,6 +25,11 @@ import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.text.SimpleDateFormat
 import java.util.*
 
+fun firstRun(context: Context): Boolean = getBooleanPreference(context,
+                                                               context.getString(
+                                                                   R.string.preferences_first_run),
+                                                               true)
+
 fun accountConfigured(context: Context): Boolean =
     getEmail(context) != ""
     && getPassword(context) != ""
@@ -249,6 +254,12 @@ fun getSyncInterval(context: Context): Double =
                         context.getString(
                             R.string.preferences_sync_interval_key),
                         "0").toDouble()
+
+fun setFirstRun(context: Context, firstRun: Boolean) {
+    setBooleanPreference(context,
+                         context.getString(R.string.preferences_first_run),
+                         firstRun)
+}
 
 fun setActiveDid(context: Context, did: String) {
     setStringPreference(context, context.getString(

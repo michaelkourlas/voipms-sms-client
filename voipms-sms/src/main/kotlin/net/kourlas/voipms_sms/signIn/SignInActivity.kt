@@ -101,6 +101,7 @@ class SignInActivity : AppCompatActivity() {
                 // Regardless of whether this succeeded, we've successfully
                 // signed in, so we exit this activity
                 toggleControls(enabled = true)
+                setFirstRun(applicationContext, false)
                 finish()
             }
         }
@@ -118,6 +119,7 @@ class SignInActivity : AppCompatActivity() {
         // instead
         if (accountConfigured(this)) {
             startActivity(Intent(this, AccountPreferencesActivity::class.java))
+            setFirstRun(applicationContext, false)
             finish()
             return
         }
@@ -198,6 +200,15 @@ class SignInActivity : AppCompatActivity() {
                 username.text?.toString() ?: "",
                 password.text?.toString() ?: "")
         }
+
+        val skipButton = findViewById<MaterialButton>(R.id.skip_button)
+        skipButton.setOnClickListener {
+            setFirstRun(applicationContext, false)
+            finish()
+        }
+        if (!blockFinish()) {
+            skipButton.visibility = View.GONE
+        }
     }
 
     /**
@@ -232,6 +243,7 @@ class SignInActivity : AppCompatActivity() {
         return !didsConfigured(applicationContext)
                && Database.getInstance(applicationContext).getDids().isEmpty()
                && !accountConfigured(applicationContext)
+               && firstRun(applicationContext)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

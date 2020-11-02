@@ -290,7 +290,8 @@ open class ConversationsActivity : AppCompatActivity(),
         // account, then force the user to configure an account
         if (!didsConfigured(applicationContext)
             && Database.getInstance(applicationContext).getDids().isEmpty()
-            && !accountConfigured(applicationContext)) {
+            && !accountConfigured(applicationContext)
+            && firstRun(applicationContext)) {
             startActivity(Intent(this, SignInActivity::class.java))
         }
     }

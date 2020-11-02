@@ -127,6 +127,7 @@
     <string name="preferences_setup_completed_for_version_key" translatable="false">setup_completed_for_version</string>
     <string name="preferences_setup_completed_for_version_default_value" translatable="false">0</string>
     <string name="preferences_first_sync_after_sign_in_key" translatable="false">first_sync_after_sign_in</string>
+    <string name="preferences_first_run" translatable="false">first_run</string>
 
     <!-- ACTIVITIES -->
 
@@ -228,6 +229,7 @@
     <string name="sign_in_email_hint">VoIP.ms account email address</string>
     <string name="sign_in_password_hint">VoIP.ms API password</string>
     <string name="sign_in_button">Sign in</string>
+    <string name="skip_button">Skip</string>
 
     <!-- DidsPreferencesActivity -->
     <string name="preferences_did_name">Phone numbers</string>

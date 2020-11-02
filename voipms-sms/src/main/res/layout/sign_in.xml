@@ -109,6 +109,14 @@
                     android:layout_weight="1" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/skip_button"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/half_margin"
+                    android:text="@string/skip_button" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/sign_in_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
