@@ -1270,7 +1270,15 @@ class Database private constructor(private val context: Context) {
                     .build()
             }
             shortcutManager.removeAllDynamicShortcuts()
-            shortcutManager.addDynamicShortcuts(shortcutInfoList)
+            try {
+                shortcutManager.addDynamicShortcuts(shortcutInfoList)
+            } catch (e: Exception) {
+                // Occasionally this will fail because the maximum number of
+                // dynamic shortcuts was exceeded? There's nothing we can do
+                // about this, since we are following
+                // getMaxShortcutCountPerActivity().
+                logException(e)
+            }
         }
     }
 
