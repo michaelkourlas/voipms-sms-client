@@ -52,8 +52,10 @@ class MessageTextView @JvmOverloads constructor(
 
         val x = event.x.toInt() - totalPaddingLeft + scrollX
         val y = event.y.toInt() - totalPaddingTop + scrollY
-        val line = layout.getLineForVertical(y)
-        val off = layout.getOffsetForHorizontal(line, x.toFloat())
+        val line = layout?.getLineForVertical(y)
+                   ?: return super.onTouchEvent(event)
+        val off = layout?.getOffsetForHorizontal(line, x.toFloat())
+                  ?: return super.onTouchEvent(event)
 
         val buffer = text
         if (buffer !is Spannable) {
