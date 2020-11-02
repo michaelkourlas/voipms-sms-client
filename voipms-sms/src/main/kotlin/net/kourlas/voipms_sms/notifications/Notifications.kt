@@ -529,10 +529,7 @@ class Notifications private constructor(
             NotificationManagerCompat.from(context).notify(
                 id, notification.build())
         } catch (e: SecurityException) {
-            Toast.makeText(
-                context,
-                context.getString(R.string.notifications_security_error),
-                Toast.LENGTH_LONG).show()
+            logException(e)
         }
     }
 
