@@ -1,6 +1,6 @@
 ## 0.6.10 ##
 
-* Bug fixes
+* Bug fixes and performance improvements
 
 ## 0.6.9 ##
 

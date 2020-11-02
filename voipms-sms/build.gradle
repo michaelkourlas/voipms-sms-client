@@ -81,21 +81,21 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
 
     // Firebase libraries
-    primaryImplementation 'com.google.firebase:firebase-analytics:17.6.0'
+    primaryImplementation 'com.google.firebase:firebase-analytics:18.0.0'
     primaryImplementation 'com.google.firebase:firebase-appindexing:19.1.0'
-    primaryImplementation 'com.google.firebase:firebase-core:17.5.1'
+    primaryImplementation 'com.google.firebase:firebase-core:18.0.0'
     primaryImplementation 'com.google.firebase:firebase-crashlytics:17.2.2'
-    primaryImplementation 'com.google.firebase:firebase-messaging:20.3.0'
+    primaryImplementation 'com.google.firebase:firebase-messaging:21.0.0'
 
     // Additional libraries and fixes
-    implementation 'com.squareup.moshi:moshi:1.10.0'
-    implementation 'com.squareup.moshi:moshi-adapters:1.10.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.8.0'
+    implementation 'com.squareup.moshi:moshi:1.11.0'
+    implementation 'com.squareup.moshi:moshi-adapters:1.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.takisoft.preferencex:preferencex-datetimepicker:1.1.0'
     implementation 'com.takisoft.preferencex:preferencex-ringtone:1.1.0'
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
     implementation 'de.adorsys.android:securestoragelibrary:1.2.2'
-    kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.9.3'
+    kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.11.0'
 }
 
 apply plugin: 'kotlin-android-extensions'
