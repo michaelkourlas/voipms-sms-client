@@ -124,6 +124,9 @@ class VerifyCredentialsService : JobIntentService() {
      */
     private fun verifyResponse(response: VerifyCredentialsResponse): Boolean {
         if (response.status != "success") {
+            if (response.status == "no_did") {
+                return true
+            }
             error = when (response.status) {
                 "invalid_credentials" -> getString(
                     R.string.verify_credentials_error_api_error_invalid_credentials)

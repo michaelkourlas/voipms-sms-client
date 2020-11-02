@@ -112,7 +112,7 @@
     <string name="preferences_database_clean_up_title">Clean up database</string>
     <string name="preferences_database_clean_up_summary">Remove outdated information from database</string>
     <string name="preferences_database_clean_up_deleted_messages">Metadata associated with deleted messages</string>
-    <string name="preferences_database_clean_up_removed_dids">Messages and metadata associated with removed DIDs</string>
+    <string name="preferences_database_clean_up_removed_dids">Messages and metadata associated with removed phone numbers</string>
     <string name="preferences_database_delete_key" translatable="false">database_delete</string>
     <string name="preferences_database_delete_title">Delete database</string>
     <string name="preferences_database_delete_summary">Delete all messages and associated metadata</string>
@@ -149,7 +149,7 @@
     <string name="conversation_conversation_clipboard_description">Conversation</string>
     <string name="conversation_copied_contact_toast_message">Copied phone number</string>
     <string name="conversation_copied_conversation_toast_message">Copied conversation as JSON</string>
-    <string name="conversation_copied_did_toast_message">Copied DID</string>
+    <string name="conversation_copied_did_toast_message">Copied phone number</string>
     <string name="conversation_delete_confirm_message">This action cannot be undone.</string>
     <string name="conversation_delete_confirm_title">Delete messages?</string>
     <string name="conversation_did_clipboard_description">DID</string>
@@ -204,8 +204,8 @@
     <string name="conversations_message_sending">Sending…</string>
     <string name="conversations_message_you">You:</string>
     <string name="conversations_no_account">No account configured</string>
-    <string name="conversations_no_dids">You have no configured DIDs.</string>
-    <string name="conversations_no_messages">You have no messages associated with the selected DID.</string>
+    <string name="conversations_no_dids">You have no configured phone numbers.</string>
+    <string name="conversations_no_messages">You have no messages associated with the selected phone number.</string>
     <string name="conversations_no_results">No results found for \'%1$s\'</string>
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>
     <string name="conversations_sync_date_suggestion">Synchronization start date is %1$s</string>
@@ -213,7 +213,7 @@
 
     <!-- ConversationsArchivedActivity -->
     <string name="conversations_archived_name">Archived</string>
-    <string name="conversations_archived_no_messages">You have no archived messages associated with the selected DID.</string>
+    <string name="conversations_archived_no_messages">You have no archived messages associated with the selected phone number.</string>
 
     <!-- ConversationActivity -->
     <string name="conversation_did" translatable="false">did</string>
@@ -223,7 +223,7 @@
     <string name="preferences_name">Settings</string>
 
     <!-- SignInActivity -->
-    <string name="sign_in_name">Sign in to the VoIP.ms SMS API</string>
+    <string name="sign_in_name">Sign in to the VoIP.ms API</string>
     <string name="sign_in_info">&lt;strong&gt;Please read these instructions carefully.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;A VoIP.ms account is required to use this app. Sign up for an account on the &lt;a href="https://www.voip.ms"&gt;VoIP.ms website&lt;/a&gt;. You must use the email address you use to log into the VoIP.ms website to log into this app.&lt;br&gt;&lt;br&gt;VoIP.ms API access is also required to use this app. Use the &lt;a href="https://www.voip.ms/m/api.php"&gt;VoIP.ms API configuration menu&lt;/a&gt; to enable API access, set an API password, and add "0.0.0.0" to the list of IP addresses approved for API access. You must use the API password to log into this app, not your normal account password.</string>
     <string name="sign_in_email_hint">VoIP.ms account email address</string>
     <string name="sign_in_password_hint">VoIP.ms API password</string>

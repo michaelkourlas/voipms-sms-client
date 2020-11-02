@@ -145,6 +145,9 @@ class RetrieveDidsService : JobIntentService() {
      */
     private fun getDidsFromResponse(response: DidsResponse): Set<String>? {
         if (response.status != "success") {
+            if (response.status == "no_did") {
+                return emptySet()
+            }
             error = when (response.status) {
                 "invalid_credentials" -> applicationContext.getString(
                     R.string.preferences_dids_error_api_error_invalid_credentials)
