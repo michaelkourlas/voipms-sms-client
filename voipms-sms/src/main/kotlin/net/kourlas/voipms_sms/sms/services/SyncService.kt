@@ -51,7 +51,7 @@ import kotlin.math.ceil
 /**
  * Service used to synchronize the database with VoIP.ms.
  *
- * SyncService is an Service rather than a JobIntentService because
+ * SyncService is a Service rather than a JobIntentService because
  * it is a foreground service that uses a notification to indicate
  * synchronization progress. This is mainly to prevent Android from killing
  * the service.
