@@ -25,6 +25,8 @@ import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.text.SimpleDateFormat
 import java.util.*
 
+private val securePreferencesLock = Object()
+
 fun firstRun(context: Context): Boolean = getBooleanPreference(context,
                                                                context.getString(
                                                                    R.string.preferences_first_run),
@@ -82,7 +84,7 @@ fun getDids(context: Context,
 }
 
 fun getEmail(context: Context): String {
-    val email = SecurePreferences.getStringValue(
+    val email = getSecureStringPreference(
         context,
         context.getString(R.string.preferences_account_email_key),
         null) ?: ""
@@ -158,7 +160,7 @@ fun getNotificationSound(context: Context): String =
             R.string.preferences_notifications_sound_default_value))
 
 fun getPassword(context: Context): String {
-    val password = SecurePreferences.getStringValue(
+    val password = getSecureStringPreference(
         context,
         context.getString(R.string.preferences_account_password_key),
         null) ?: ""
@@ -341,7 +343,7 @@ fun getDidShowNotifications(context: Context, did: String): Boolean {
 }
 
 fun setEmail(context: Context, email: String) {
-    SecurePreferences.setValue(context, context.getString(
+    setSecureStringPreference(context, context.getString(
         R.string.preferences_account_email_key), email)
 }
 
@@ -372,7 +374,7 @@ fun setSetupCompletedForVersion(context: Context, version: Long) {
 }
 
 fun setPassword(context: Context, password: String) {
-    SecurePreferences.setValue(context, context.getString(
+    setSecureStringPreference(context, context.getString(
         R.string.preferences_account_password_key), password)
 }
 
@@ -381,6 +383,14 @@ fun setStartDate(context: Context, date: Date) {
         context,
         context.getString(R.string.preferences_sync_start_date_key),
         SimpleDateFormat("MM/dd/yyyy", Locale.US).format(date))
+}
+
+@Suppress("SameParameterValue")
+private fun getSecureStringPreference(context: Context, key: String,
+                                      default: String?): String? {
+    synchronized(securePreferencesLock) {
+        return SecurePreferences.getStringValue(context, key, default)
+    }
 }
 
 private fun getBooleanPreference(context: Context, key: String,
@@ -419,6 +429,13 @@ private fun setBooleanPreference(context: Context, key: String,
     with(editor) {
         putBoolean(key, value)
         apply()
+    }
+}
+
+private fun setSecureStringPreference(context: Context, key: String,
+                                      value: String) {
+    synchronized(securePreferencesLock) {
+        SecurePreferences.setValue(context, key, value)
     }
 }
 
