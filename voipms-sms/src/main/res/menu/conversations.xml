@@ -47,8 +47,4 @@
         android:id="@+id/credits_button"
         android:title="@string/conversations_action_credits"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/donate_button"
-        android:title="@string/conversations_action_donate"
-        app:showAsAction="never" />
 </menu>

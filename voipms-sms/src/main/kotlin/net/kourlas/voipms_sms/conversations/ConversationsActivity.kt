@@ -294,6 +294,15 @@ open class ConversationsActivity : AppCompatActivity(),
             && firstRun(applicationContext)) {
             startActivity(Intent(this, SignInActivity::class.java))
         }
+
+        // Update chat button visibility
+        findViewById<FloatingActionButton>(R.id.chat_button).let {
+            if (!didsConfigured(applicationContext)) {
+                (it as View).visibility = View.GONE
+            } else {
+                (it as View).visibility = View.VISIBLE
+            }
+        }
     }
 
     /**
@@ -502,19 +511,6 @@ open class ConversationsActivity : AppCompatActivity(),
                     val intent = Intent(Intent.ACTION_VIEW,
                                         Uri.parse(getString(
                                             R.string.credits_url)))
-                    startActivity(intent)
-                } catch (_: ActivityNotFoundException) {
-                    showSnackbar(this, R.id.coordinator_layout,
-                                 getString(
-                                     R.string.conversations_fail_web_browser))
-                }
-                return true
-            }
-            R.id.donate_button -> {
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW,
-                                        Uri.parse(getString(
-                                            R.string.donate_url)))
                     startActivity(intent)
                 } catch (_: ActivityNotFoundException) {
                     showSnackbar(this, R.id.coordinator_layout,

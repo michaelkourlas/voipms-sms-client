@@ -55,7 +55,6 @@ class ConversationsArchivedActivity : ConversationsActivity() {
         menu.findItem(R.id.privacy_button).isVisible = false
         menu.findItem(R.id.license_button).isVisible = false
         menu.findItem(R.id.credits_button).isVisible = false
-        menu.findItem(R.id.donate_button).isVisible = false
 
         return ret
     }

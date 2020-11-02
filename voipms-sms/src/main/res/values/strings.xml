@@ -185,7 +185,6 @@
     <string name="conversations_action_chat">Chat</string>
     <string name="conversations_action_credits">Credits</string>
     <string name="conversations_action_delete">Delete</string>
-    <string name="conversations_action_donate">Donate</string>
     <string name="conversations_action_help">Help</string>
     <string name="conversations_action_license">License</string>
     <string name="conversations_action_mark_read">Mark read</string>
