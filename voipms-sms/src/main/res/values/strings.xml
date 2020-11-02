@@ -150,6 +150,7 @@
     <string name="conversation_conversation_clipboard_description">Conversation</string>
     <string name="conversation_copied_contact_toast_message">Copied phone number</string>
     <string name="conversation_copied_conversation_toast_message">Copied conversation as JSON</string>
+    <string name="conversation_copied_conversation_fail_toast_message">Failed to copy conversation (too large?)</string>
     <string name="conversation_copied_did_toast_message">Copied phone number</string>
     <string name="conversation_delete_confirm_message">This action cannot be undone.</string>
     <string name="conversation_delete_confirm_title">Delete messages?</string>

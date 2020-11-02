@@ -722,19 +722,26 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      * Handles the export button.
      */
     private fun onExportButtonClick(): Boolean {
-        val messages = adapter.messageItems.map { it.message }
-        val json = JsonParserManager.getInstance().parser.adapter(
-            ExportableMessages::class.java)
-            .toJson(ExportableMessages(messages))
-        val clipboard = getSystemService(
-            Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText(
-            getString(R.string.conversation_conversation_clipboard_description),
-            json)
-        clipboard.setPrimaryClip(clip)
-        Toast.makeText(this, getString(
-            R.string.conversation_copied_conversation_toast_message),
-                       Toast.LENGTH_SHORT).show()
+        try {
+            val messages = adapter.messageItems.map { it.message }
+            val json = JsonParserManager.getInstance().parser.adapter(
+                ExportableMessages::class.java)
+                .toJson(ExportableMessages(messages))
+            val clipboard = getSystemService(
+                Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText(
+                getString(
+                    R.string.conversation_conversation_clipboard_description),
+                json)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, getString(
+                R.string.conversation_copied_conversation_toast_message),
+                           Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, getString(
+                R.string.conversation_copied_conversation_fail_toast_message),
+                           Toast.LENGTH_SHORT).show()
+        }
         return true
     }
 
