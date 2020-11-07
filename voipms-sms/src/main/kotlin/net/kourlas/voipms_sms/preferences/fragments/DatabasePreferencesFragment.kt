@@ -18,7 +18,6 @@
 package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.ActivityNotFoundException
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.Intent.CATEGORY_OPENABLE
 import android.net.Uri
@@ -234,7 +233,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                             R.string.preferences_database_delete_confirm_message),
                         activity.applicationContext
                             .getString(R.string.delete),
-                        DialogInterface.OnClickListener { _, _ ->
+                        { _, _ ->
                             runOnNewThread {
                                 Database.getInstance(
                                     activity.applicationContext)

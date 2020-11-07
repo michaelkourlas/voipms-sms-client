@@ -187,9 +187,9 @@ class FastScroller private constructor(private val mRv: RecyclerView,
             mHideAnimation?.cancel()
         }
         // Slide the scrollbar in from the side
-        val trackSlide = ObjectAnimator.ofFloat<View>(
+        val trackSlide = ObjectAnimator.ofFloat(
             mTrackImageView, View.TRANSLATION_X, 0f)
-        val thumbSlide = ObjectAnimator.ofFloat<View>(
+        val thumbSlide = ObjectAnimator.ofFloat(
             mThumbImageView, View.TRANSLATION_X, 0f)
         val animation = AnimatorSet()
         animation.playTogether(trackSlide, thumbSlide)
@@ -215,10 +215,10 @@ class FastScroller private constructor(private val mRv: RecyclerView,
         val hiddenTranslationX = if (mPosRight) mTrackWidth else -mTrackWidth
         if (animate) {
             // Slide the scrollbar off to the side
-            val trackSlide = ObjectAnimator.ofFloat<View>(
+            val trackSlide = ObjectAnimator.ofFloat(
                 mTrackImageView, View.TRANSLATION_X,
                 hiddenTranslationX.toFloat())
-            val thumbSlide = ObjectAnimator.ofFloat<View>(
+            val thumbSlide = ObjectAnimator.ofFloat(
                 mThumbImageView, View.TRANSLATION_X,
                 hiddenTranslationX.toFloat())
             mHideAnimation = AnimatorSet().also {
