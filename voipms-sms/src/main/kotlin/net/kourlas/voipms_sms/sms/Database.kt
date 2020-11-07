@@ -214,16 +214,17 @@ class Database private constructor(private val context: Context) {
      * Gets all DIDs used in the database.
      */
     fun getDids(): Set<String> = importExportLock.read {
-        val cursor = database.query(
-            true, TABLE_MESSAGE, arrayOf(COLUMN_DID),
-            null, null, null, null, null, null)
         val dids = mutableListOf<String>()
-        cursor.moveToFirst()
-        while (!cursor.isAfterLast) {
-            dids.add(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)))
-            cursor.moveToNext()
+        database.query(
+            true, TABLE_MESSAGE, arrayOf(COLUMN_DID),
+            null, null, null, null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            while (!cursor.isAfterLast) {
+                dids.add(
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)))
+                cursor.moveToNext()
+            }
         }
-        cursor.close()
         return dids.toSet()
     }
 
@@ -330,22 +331,22 @@ class Database private constructor(private val context: Context) {
     fun getMessagesUnread(
         conversationId: ConversationId): List<Message> = importExportLock.read {
         // Retrieve the most recent outgoing message
-        var cursor = database.query(
+        var date: Long = 0
+        database.query(
             TABLE_MESSAGE,
             arrayOf("COALESCE(MAX($COLUMN_DATE), 0) AS $COLUMN_DATE"),
             "$COLUMN_DID=? AND $COLUMN_CONTACT=? AND $COLUMN_INCOMING=0",
             arrayOf(conversationId.did, conversationId.contact),
-            null, null, null)
-        cursor.moveToFirst()
-        var date: Long = 0
-        if (!cursor.isAfterLast) {
-            date = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE))
+            null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            if (!cursor.isAfterLast) {
+                date = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE))
+            }
         }
-        cursor.close()
 
         // Retrieve all unread messages with a date equal to or after the
         // most recent outgoing message
-        cursor = database.query(
+        return getMessagesCursor(database.query(
             TABLE_MESSAGE,
             messageColumns,
             "$COLUMN_DID=?"
@@ -355,8 +356,7 @@ class Database private constructor(private val context: Context) {
             + " AND $COLUMN_UNREAD=1",
             arrayOf(conversationId.did, conversationId.contact),
             null, null,
-            "$COLUMN_DATE ASC, $COLUMN_VOIP_ID ASC, $COLUMN_DATABASE_ID ASC")
-        return getMessagesCursor(cursor)
+            "$COLUMN_DATE ASC, $COLUMN_VOIP_ID ASC, $COLUMN_DATABASE_ID ASC"))
     }
 
     /**
@@ -572,16 +572,15 @@ class Database private constructor(private val context: Context) {
      */
     fun isConversationArchived(
         conversationId: ConversationId): Boolean = importExportLock.read {
-        val cursor = database.query(TABLE_ARCHIVED,
-                                    archivedColumns,
-                                    "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                                    arrayOf(conversationId.did,
-                                            conversationId.contact),
-                                    null, null, null)
-        cursor.moveToFirst()
-        val archived = !cursor.isAfterLast
-        cursor.close()
-        return archived
+        return database.query(TABLE_ARCHIVED,
+                              archivedColumns,
+                              "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                              arrayOf(conversationId.did,
+                                      conversationId.contact),
+                              null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            !cursor.isAfterLast
+        }
     }
 
     /**
@@ -589,18 +588,16 @@ class Database private constructor(private val context: Context) {
      */
     fun isConversationEmpty(
         conversationId: ConversationId): Boolean = importExportLock.read {
-        val cursor = database.query(TABLE_MESSAGE,
-                                    messageColumns,
-                                    "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                                    arrayOf(conversationId.did,
-                                            conversationId.contact),
-                                    null, null, null)
-        cursor.moveToFirst()
-        val hasMessages =
-            !cursor.isAfterLast
-            || getMessageDraftWithoutLock(conversationId) != null
-        cursor.close()
-        return hasMessages
+        return database.query(TABLE_MESSAGE,
+                              messageColumns,
+                              "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                              arrayOf(conversationId.did,
+                                      conversationId.contact),
+                              null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            !cursor.isAfterLast || getMessageDraftWithoutLock(
+                conversationId) != null
+        }
     }
 
     /**
@@ -775,21 +772,19 @@ class Database private constructor(private val context: Context) {
      */
     private fun getArchivedDatabaseIdConversation(
         conversationId: ConversationId): Long? {
-        val cursor = database.query(TABLE_ARCHIVED,
-                                    archivedColumns,
-                                    "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                                    arrayOf(conversationId.did,
-                                            conversationId.contact),
-                                    null, null, null)
-        if (cursor.moveToFirst()) {
-            val databaseId = cursor.getLong(
-                cursor.getColumnIndexOrThrow(
-                    COLUMN_DATABASE_ID))
-            cursor.close()
-            return databaseId
+        database.query(TABLE_ARCHIVED,
+                       archivedColumns,
+                       "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                       arrayOf(conversationId.did,
+                               conversationId.contact),
+                       null, null, null).use { cursor ->
+            if (cursor.moveToFirst()) {
+                return cursor.getLong(
+                    cursor.getColumnIndexOrThrow(
+                        COLUMN_DATABASE_ID))
+            }
+            return null
         }
-        cursor.close()
-        return null
     }
 
     /**
@@ -803,19 +798,20 @@ class Database private constructor(private val context: Context) {
         dids: Set<String>): Set<ConversationId> {
         val conversationIds = mutableSetOf<ConversationId>()
         for (did in dids) {
-            val cursor = database.query(
+            database.query(
                 true, TABLE_MESSAGE, arrayOf(COLUMN_CONTACT),
-                "$COLUMN_DID=?", arrayOf(did), null, null, null, null)
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                conversationIds.add(
-                    ConversationId(
-                        did,
-                        cursor.getString(
-                            cursor.getColumnIndexOrThrow(COLUMN_CONTACT))))
-                cursor.moveToNext()
+                "$COLUMN_DID=?", arrayOf(did), null, null, null,
+                null).use { cursor ->
+                cursor.moveToFirst()
+                while (!cursor.isAfterLast) {
+                    conversationIds.add(
+                        ConversationId(
+                            did,
+                            cursor.getString(
+                                cursor.getColumnIndexOrThrow(COLUMN_CONTACT))))
+                    cursor.moveToNext()
+                }
             }
-            cursor.close()
         }
         return conversationIds
     }
@@ -831,21 +827,22 @@ class Database private constructor(private val context: Context) {
      */
     private fun getDraftDatabaseIdConversation(
         conversationId: ConversationId): Long? {
-        val cursor = database.query(TABLE_DRAFT,
-                                    draftColumns,
-                                    "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                                    arrayOf(conversationId.did,
-                                            conversationId.contact),
-                                    null, null, null)
-        if (cursor.moveToFirst()) {
-            val databaseId = cursor.getLong(
-                cursor.getColumnIndexOrThrow(
-                    COLUMN_DATABASE_ID))
-            cursor.close()
-            return databaseId
+        return database.query(TABLE_DRAFT,
+                              draftColumns,
+                              "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                              arrayOf(conversationId.did,
+                                      conversationId.contact),
+                              null, null, null).use { cursor ->
+            if (cursor.moveToFirst()) {
+                val databaseId = cursor.getLong(
+                    cursor.getColumnIndexOrThrow(
+                        COLUMN_DATABASE_ID))
+                databaseId
+            } else {
+                null
+            }
         }
-        cursor.close()
-        return null
+
     }
 
     /**
@@ -858,20 +855,19 @@ class Database private constructor(private val context: Context) {
      * @return Null if the row does not exist.
      */
     private fun getMessageDatabaseIdVoipId(did: String, voipId: Long): Long? {
-        val cursor = database.query(TABLE_MESSAGE,
-                                    messageColumns,
-                                    "$COLUMN_DID=? AND $COLUMN_VOIP_ID=?",
-                                    arrayOf(did, voipId.toString()),
-                                    null, null, null)
-        if (cursor.moveToFirst()) {
-            val databaseId = cursor.getLong(
-                cursor.getColumnIndexOrThrow(
-                    COLUMN_DATABASE_ID))
-            cursor.close()
-            return databaseId
+        return database.query(TABLE_MESSAGE,
+                              messageColumns,
+                              "$COLUMN_DID=? AND $COLUMN_VOIP_ID=?",
+                              arrayOf(did, voipId.toString()),
+                              null, null, null).use { cursor ->
+            if (cursor.moveToFirst()) {
+                cursor.getLong(
+                    cursor.getColumnIndexOrThrow(
+                        COLUMN_DATABASE_ID))
+            } else {
+                null
+            }
         }
-        cursor.close()
-        return null
     }
 
     /**
@@ -883,12 +879,13 @@ class Database private constructor(private val context: Context) {
      * @return Null if the message does not exist.
      */
     private fun getMessageDatabaseIdWithoutLock(databaseId: Long): Message? {
-        val cursor = database.query(TABLE_MESSAGE,
-                                    messageColumns,
-                                    "$COLUMN_DATABASE_ID=?",
-                                    arrayOf(databaseId.toString()),
-                                    null, null, null)
-        val messages = getMessagesCursor(cursor)
+        val messages = getMessagesCursor(
+            database.query(TABLE_MESSAGE,
+                           messageColumns,
+                           "$COLUMN_DATABASE_ID=?",
+                           arrayOf(
+                               databaseId.toString()),
+                           null, null, null))
         if (messages.size > 0) {
             return messages[0]
         }
@@ -903,24 +900,24 @@ class Database private constructor(private val context: Context) {
      */
     private fun getMessageDraftWithoutLock(
         conversationId: ConversationId): Message? {
-        val cursor = database.query(
+        return database.query(
             TABLE_DRAFT, draftColumns,
             "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
             arrayOf(conversationId.did, conversationId.contact),
-            null, null, null)
-        cursor.moveToFirst()
-        var message: Message? = null
-        if (!cursor.isAfterLast) {
-            message = Message(
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_DID)),
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_CONTACT)),
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_MESSAGE)))
+            null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            var message: Message? = null
+            if (!cursor.isAfterLast) {
+                message = Message(
+                    cursor.getString(cursor.getColumnIndexOrThrow(
+                        COLUMN_DID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(
+                        COLUMN_CONTACT)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(
+                        COLUMN_MESSAGE)))
+            }
+            message
         }
-        cursor.close()
-        return message
     }
 
     /**
@@ -931,13 +928,12 @@ class Database private constructor(private val context: Context) {
      */
     private fun getMessagesConversation(
         conversationId: ConversationId): List<Message> {
-        val cursor = database.query(
+        return getMessagesCursor(database.query(
             TABLE_MESSAGE,
             messageColumns,
             "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
             arrayOf(conversationId.did, conversationId.contact),
-            null, null, null)
-        return getMessagesCursor(cursor)
+            null, null, null))
     }
 
     /**
@@ -949,13 +945,15 @@ class Database private constructor(private val context: Context) {
      */
     private fun getMessagesCursor(cursor: Cursor): MutableList<Message> {
         val messages = mutableListOf<Message>()
-        cursor.moveToFirst()
-        while (!cursor.isAfterLast) {
-            val message = getMessageCursor(cursor)
-            messages.add(message)
-            cursor.moveToNext()
+        cursor.use {
+            it.moveToFirst()
+            while (!it.isAfterLast) {
+                val message = getMessageCursor(it)
+                messages.add(message)
+                it.moveToNext()
+            }
+            it.close()
         }
-        cursor.close()
         return messages
     }
 
@@ -997,26 +995,26 @@ class Database private constructor(private val context: Context) {
      * responsibility of the caller.
      */
     private fun getMessagesDraft(dids: Set<String>): List<Message> {
-        val cursor = database.query(
+        val messages = mutableListOf<Message>()
+        database.query(
             TABLE_DRAFT,
             draftColumns,
             dids.joinToString(" OR ") { "$COLUMN_DID=?" },
             dids.toTypedArray(),
             null, null,
-            "$COLUMN_DID DESC, $COLUMN_CONTACT DESC")
-        cursor.moveToFirst()
-        val messages = mutableListOf<Message>()
-        while (!cursor.isAfterLast) {
-            messages.add(Message(
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_DID)),
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_CONTACT)),
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                    COLUMN_MESSAGE))))
-            cursor.moveToNext()
+            "$COLUMN_DID DESC, $COLUMN_CONTACT DESC").use { cursor ->
+            cursor.moveToFirst()
+            while (!cursor.isAfterLast) {
+                messages.add(Message(
+                    cursor.getString(cursor.getColumnIndexOrThrow(
+                        COLUMN_DID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(
+                        COLUMN_CONTACT)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(
+                        COLUMN_MESSAGE))))
+                cursor.moveToNext()
+            }
         }
-        cursor.close()
         return messages
     }
 
@@ -1069,7 +1067,8 @@ class Database private constructor(private val context: Context) {
             // matches the the DID phone number, contact phone number and
             // message text, since we can check those using SQL
             if (filterConstraint.isNotEmpty()) {
-                val cursor = database.query(
+                var emptyCursor = true
+                database.query(
                     TABLE_MESSAGE, messageColumns,
                     "$COLUMN_DID=? AND $COLUMN_CONTACT=?"
                     + " AND ($COLUMN_MESSAGE LIKE ? COLLATE NOCASE"
@@ -1079,32 +1078,35 @@ class Database private constructor(private val context: Context) {
                     null, null,
                     "$COLUMN_DATE DESC, $COLUMN_VOIP_ID DESC,"
                     + " $COLUMN_DATABASE_ID DESC",
-                    "1")
-                cursor.moveToFirst()
-                if (!cursor.isAfterLast) {
-                    messages.add(getMessageCursor(cursor))
-                    cursor.close()
+                    "1").use { cursor ->
+                    cursor.moveToFirst()
+                    if (!cursor.isAfterLast) {
+                        messages.add(getMessageCursor(cursor))
+                        emptyCursor = false
+                    }
+                }
+                if (!emptyCursor) {
                     continue
                 }
             }
 
             // Otherwise, simply get the most recent message for the
             // conversation without using any filters
-            val cursor = database.query(
+            val message = database.query(
                 TABLE_MESSAGE, messageColumns,
                 "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
                 arrayOf(conversationId.did, conversationId.contact),
                 null, null,
                 "$COLUMN_DATE DESC, $COLUMN_VOIP_ID DESC,"
                 + " $COLUMN_DATABASE_ID DESC",
-                "1")
-            cursor.moveToFirst()
-            if (cursor.isAfterLast) {
-                cursor.close()
-                continue
-            }
-            val message = getMessageCursor(cursor)
-            cursor.close()
+                "1").use { cursor ->
+                cursor.moveToFirst()
+                if (!cursor.isAfterLast) {
+                    getMessageCursor(cursor)
+                } else {
+                    null
+                }
+            } ?: continue
 
             // If no filter constraint was provided, just add the message
             // to the list
@@ -1212,15 +1214,14 @@ class Database private constructor(private val context: Context) {
      * responsibility of the caller.
      */
     private fun isVoipIdDeleted(did: String, voipId: Long): Boolean {
-        val cursor = database.query(TABLE_DELETED,
-                                    deletedColumns,
-                                    "$COLUMN_DID=? AND $COLUMN_VOIP_ID=?",
-                                    arrayOf(did, voipId.toString()),
-                                    null, null, null)
-        cursor.moveToFirst()
-        val deleted = !cursor.isAfterLast
-        cursor.close()
-        return deleted
+        return database.query(TABLE_DELETED,
+                              deletedColumns,
+                              "$COLUMN_DID=? AND $COLUMN_VOIP_ID=?",
+                              arrayOf(did, voipId.toString()),
+                              null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            !cursor.isAfterLast
+        }
     }
 
     /**
@@ -1378,76 +1379,76 @@ class Database private constructor(private val context: Context) {
                                   "Type", "Did", "Contact", "Text",
                                   "Unread", "Deleted", "Delivered",
                                   "DeliveryInProgress")
-            val cursor = db.query(table, columns, null, null, null,
-                                  null,
-                                  null)
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                val databaseId = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(columns[0]))
-                val voipId = if (cursor.isNull(cursor.getColumnIndexOrThrow(
-                        columns[1]))) null else cursor.getLong(
-                    cursor.getColumnIndex(columns[1]))
-                var date = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(columns[2]))
-                val type = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(columns[3]))
-                val did = cursor.getString(
-                    cursor.getColumnIndexOrThrow(columns[4]))
-                val contact = cursor.getString(
-                    cursor.getColumnIndexOrThrow(columns[5]))
-                val text = cursor.getString(
-                    cursor.getColumnIndexOrThrow(columns[6]))
-                val unread = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(columns[7]))
-                val deleted = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(columns[8]))
-                val delivered = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(columns[9]))
-                val deliveryInProgress = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(columns[10]))
+            db.query(table, columns, null, null, null,
+                     null,
+                     null).use { cursor ->
+                cursor.moveToFirst()
+                while (!cursor.isAfterLast) {
+                    val databaseId = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(columns[0]))
+                    val voipId = if (cursor.isNull(cursor.getColumnIndexOrThrow(
+                            columns[1]))) null else cursor.getLong(
+                        cursor.getColumnIndex(columns[1]))
+                    var date = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(columns[2]))
+                    val type = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(columns[3]))
+                    val did = cursor.getString(
+                        cursor.getColumnIndexOrThrow(columns[4]))
+                    val contact = cursor.getString(
+                        cursor.getColumnIndexOrThrow(columns[5]))
+                    val text = cursor.getString(
+                        cursor.getColumnIndexOrThrow(columns[6]))
+                    val unread = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(columns[7]))
+                    val deleted = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(columns[8]))
+                    val delivered = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(columns[9]))
+                    val deliveryInProgress = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(columns[10]))
 
-                // Incorrect date has an hour removed outside of
-                // daylight savings time
-                var dateObj = Date(date * 1000)
+                    // Incorrect date has an hour removed outside of
+                    // daylight savings time
+                    var dateObj = Date(date * 1000)
 
-                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-                sdf.timeZone = TimeZone.getTimeZone("UTC")
-                // Incorrect date converted to UTC with an hour
-                // removed outside of daylight savings time
-                val dateString = sdf.format(dateObj)
+                    val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                    sdf.timeZone = TimeZone.getTimeZone("UTC")
+                    // Incorrect date converted to UTC with an hour
+                    // removed outside of daylight savings time
+                    val dateString = sdf.format(dateObj)
 
-                // Incorrect date string is parsed as if it were
-                // EST/EDT; it is now four hours ahead of EST/EDT
-                // at all times
-                sdf.timeZone = TimeZone.getTimeZone("America/New_York")
-                dateObj = sdf.parse(dateString) ?: throw Exception(
-                    "Could not parse date $dateString")
+                    // Incorrect date string is parsed as if it were
+                    // EST/EDT; it is now four hours ahead of EST/EDT
+                    // at all times
+                    sdf.timeZone = TimeZone.getTimeZone("America/New_York")
+                    dateObj = sdf.parse(dateString) ?: throw Exception(
+                        "Could not parse date $dateString")
 
-                val calendar = Calendar.getInstance(
-                    TimeZone.getTimeZone("America/New_York"), Locale.US)
-                calendar.time = dateObj
-                calendar.add(Calendar.HOUR_OF_DAY, -4)
-                // Date is now stored correctly
-                date = calendar.time.time / 1000L
+                    val calendar = Calendar.getInstance(
+                        TimeZone.getTimeZone("America/New_York"), Locale.US)
+                    calendar.time = dateObj
+                    calendar.add(Calendar.HOUR_OF_DAY, -4)
+                    // Date is now stored correctly
+                    date = calendar.time.time / 1000L
 
-                val values = ContentValues()
-                values.put(columns[0], databaseId)
-                values.put(columns[1], voipId)
-                values.put(columns[2], date)
-                values.put(columns[3], type)
-                values.put(columns[4], did)
-                values.put(columns[5], contact)
-                values.put(columns[6], text)
-                values.put(columns[7], unread)
-                values.put(columns[8], deleted)
-                values.put(columns[9], delivered)
-                values.put(columns[10], deliveryInProgress)
+                    val values = ContentValues()
+                    values.put(columns[0], databaseId)
+                    values.put(columns[1], voipId)
+                    values.put(columns[2], date)
+                    values.put(columns[3], type)
+                    values.put(columns[4], did)
+                    values.put(columns[5], contact)
+                    values.put(columns[6], text)
+                    values.put(columns[7], unread)
+                    values.put(columns[8], deleted)
+                    values.put(columns[9], delivered)
+                    values.put(columns[10], deliveryInProgress)
 
-                db.replace(table, null, values)
-                cursor.moveToNext()
+                    db.replace(table, null, values)
+                    cursor.moveToNext()
+                }
             }
-            cursor.close()
         }
 
         /**
@@ -1477,24 +1478,25 @@ class Database private constructor(private val context: Context) {
                                   "Type", "Did", "Contact", "Text",
                                   "Unread", "Deleted", "Delivered",
                                   "DeliveryInProgress", "Draft")
-            val cursor = db.query(table, columns, "Deleted=1",
-                                  null, null, null, null)
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                val voipId = (if (cursor.isNull(cursor.getColumnIndexOrThrow(
-                        columns[1]))) null else cursor.getLong(
-                    cursor.getColumnIndex(columns[1]))) ?: continue
-                val did = cursor.getString(cursor.getColumnIndexOrThrow(
-                    columns[4]))
+            db.query(table, columns, "Deleted=1",
+                     null, null, null, null).use { cursor ->
+                cursor.moveToFirst()
+                while (!cursor.isAfterLast) {
+                    val voipId = (if (cursor.isNull(
+                            cursor.getColumnIndexOrThrow(
+                                columns[1]))) null else cursor.getLong(
+                        cursor.getColumnIndex(columns[1]))) ?: continue
+                    val did = cursor.getString(cursor.getColumnIndexOrThrow(
+                        columns[4]))
 
-                val values = ContentValues()
-                values.put(COLUMN_VOIP_ID, voipId)
-                values.put(COLUMN_DID, did)
-                db.replaceOrThrow(TABLE_DELETED, null, values)
+                    val values = ContentValues()
+                    values.put(COLUMN_VOIP_ID, voipId)
+                    values.put(COLUMN_DID, did)
+                    db.replaceOrThrow(TABLE_DELETED, null, values)
 
-                cursor.moveToNext()
+                    cursor.moveToNext()
+                }
             }
-            cursor.close()
             db.delete(table, "Deleted=1", null)
         }
 
@@ -1517,28 +1519,28 @@ class Database private constructor(private val context: Context) {
                                   "Type", "Did", "Contact", "Text",
                                   "Unread", "Deleted", "Delivered",
                                   "DeliveryInProgress", "Draft")
-            val cursor = db.query(table, columns, "Draft=1",
-                                  null, null, null, null)
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                val did = cursor.getString(cursor.getColumnIndexOrThrow(
-                    columns[4]))
-                val contact = cursor.getString(cursor.getColumnIndexOrThrow(
-                    columns[5]))
-                val text = cursor.getString(cursor.getColumnIndexOrThrow(
-                    columns[6]))
+            db.query(table, columns, "Draft=1",
+                     null, null, null, null).use { cursor ->
+                cursor.moveToFirst()
+                while (!cursor.isAfterLast) {
+                    val did = cursor.getString(cursor.getColumnIndexOrThrow(
+                        columns[4]))
+                    val contact = cursor.getString(cursor.getColumnIndexOrThrow(
+                        columns[5]))
+                    val text = cursor.getString(cursor.getColumnIndexOrThrow(
+                        columns[6]))
 
-                if (text != "") {
-                    val values = ContentValues()
-                    values.put(COLUMN_DID, did)
-                    values.put(COLUMN_CONTACT, contact)
-                    values.put(COLUMN_MESSAGE, text)
-                    db.replaceOrThrow(TABLE_DRAFT, null, values)
+                    if (text != "") {
+                        val values = ContentValues()
+                        values.put(COLUMN_DID, did)
+                        values.put(COLUMN_CONTACT, contact)
+                        values.put(COLUMN_MESSAGE, text)
+                        db.replaceOrThrow(TABLE_DRAFT, null, values)
+                    }
+
+                    cursor.moveToNext()
                 }
-
-                cursor.moveToNext()
             }
-            cursor.close()
             db.delete(table, "Draft=1", null)
         }
 
