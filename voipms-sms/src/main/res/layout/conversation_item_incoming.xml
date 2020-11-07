@@ -44,7 +44,7 @@
             android:layout_gravity="bottom"
             android:layout_marginEnd="@dimen/margin">
 
-            <QuickContactBadge
+            <net.kourlas.voipms_sms.ui.CustomQuickContactBadge
                 android:id="@+id/photo"
                 android:layout_width="@dimen/contact_badge"
                 android:layout_height="@dimen/contact_badge"

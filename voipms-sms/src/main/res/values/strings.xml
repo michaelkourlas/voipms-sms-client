@@ -211,6 +211,7 @@
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>
     <string name="conversations_sync_date_suggestion">Synchronization start date is %1$s</string>
     <string name="conversations_text_hint">Search…</string>
+    <string name="conversations_no_contact_app">Failed to open contacts</string>
 
     <!-- ConversationsArchivedActivity -->
     <string name="conversations_archived_name">Archived</string>
