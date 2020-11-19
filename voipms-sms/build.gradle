@@ -9,7 +9,7 @@ android {
         applicationId 'net.kourlas.voipms_sms'
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 128
+        versionCode 129
         versionName '0.6.10'
     }
     flavorDimensions 'version', 'demo'
