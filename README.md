@@ -1,6 +1,6 @@
 # VoIP.ms SMS #
 
-[![Build Status](https://travis-ci.com/michaelkourlas/voipms-sms-client.svg?branch=master)](https://travis-ci.com/michaelkourlas/voipms-sms-client)
+![Android CI](https://github.com/michaelkourlas/voipms-sms-client/workflows/Android%20CI/badge.svg)
 
 ## Overview ##
 
