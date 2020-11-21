@@ -17,5 +17,9 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - name: Decrypt google-services.json
+      env: # Or as an environment variable
+        google_services_key: ${{ secrets.GOOGLE_SERVICES_KEY }}
+      run: openssl aes-256-cbc -k $google_services_key -pbkdf2 -in voipms-sms/src/primary/google-services.json.enc -out voipms-sms/src/primary/google-services.json -d
     - name: Build with Gradle
       run: ./gradlew build
