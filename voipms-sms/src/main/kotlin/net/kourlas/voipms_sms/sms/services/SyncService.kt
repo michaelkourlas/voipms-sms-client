@@ -30,7 +30,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.Moshi
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -63,7 +62,6 @@ class SyncService : Service() {
     @Volatile
     private lateinit var serviceHandler: ServiceHandler
 
-    private val moshi: Moshi = Moshi.Builder().build()
     private var error: String? = null
     private var progress: Int = 0
 
@@ -367,7 +365,7 @@ class SyncService : Service() {
         val type: String,
         val did: String,
         val contact: String,
-        val message: String)
+        val message: String?)
 
     @JsonClass(generateAdapter = true)
     data class MessagesResponse(
@@ -402,6 +400,11 @@ class SyncService : Service() {
                 sdf.timeZone = TimeZone.getTimeZone("America/New_York")
 
                 try {
+                    if (message.message == null) {
+                        // This is probably an MMS message, which we don't
+                        // support yet.
+                        continue
+                    }
                     val incomingMessage = IncomingMessage(
                         message.id.toLong(),
                         sdf.parse(message.date) ?: throw Exception(

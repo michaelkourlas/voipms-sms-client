@@ -96,8 +96,6 @@ dependencies {
     kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.11.0'
 }
 
-apply plugin: 'kotlin-android-extensions'
-
 // Remove from F-Droid builds
 tasks.whenTaskAdded {task ->
     if (task.name.contains('Fdroid') && task.name.contains('GoogleServices')) {
