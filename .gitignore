@@ -8,5 +8,6 @@
 captures/
 build/
 release/
+testing/
 local.properties
 google-services.json
