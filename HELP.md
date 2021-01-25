@@ -11,9 +11,7 @@
 * [Reporting Bugs](#reporting-bugs)
 * [Contacting the Developer](#contacting-the-developer)
 
-# Settings
-
-## Account
+# Account
 
 This app requires access to the VoIP.ms API in order to retrieve messages from your VoIP.ms account. To facilitate this, go to the VoIP.ms [API Configuration menu](https://www.voip.ms/m/api.php) and:
 * enable API access for your VoIP.ms account;
@@ -22,7 +20,7 @@ This app requires access to the VoIP.ms API in order to retrieve messages from y
   
 When signing in, you must the email you use to sign into the VoIP.ms portal (**not** your SIP username) and the API password which you set above.
 
-## Phone Numbers
+# Phone Numbers
 
 The phone numbers (DIDs) you wish to use with the app must have the SMS function enabled. To verify this, go to the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php) and open the configuration options for the phone numbers you wish to use with the app. Ensure that SMS is enabled for each phone number.
 
@@ -30,9 +28,9 @@ This app can send and receive messages from multiple phone numbers in your accou
 
 You can hide messages from the conversations view, block the retrieval of messages, and block notifications on a per-phone number basis.
 
-## Notifications
+# Notifications
 
-### Push notifications
+## Push notifications
 
 This application supports push notifications using Firebase Cloud Messaging. Push notifications are automatically setup when selecting phone numbers if notifications are enabled.
 
@@ -45,13 +43,13 @@ If push notifications are configured correctly, VoIP.ms will send a callback to 
 
 To protect your privacy, the callback is configured to **only** include your phone number. It does not include the text of individual messages.
 
-### Regular notifications
+## Regular notifications
 
 If push notifications could not be enabled or if you are using the F-Droid version of the app, you will still receive notifications whenever a new message is received during synchronization with the VoIP.ms servers if notifications are enabled. 
 
 This can be a reasonable substitute for push notifications if automatic synchronization is enabled, though obviously this solution consumes more battery life.
 
-## Synchronization
+# Synchronization
 
 You can initiate a synchronization with the VoIP.ms servers by swiping down on the conversations list. Synchronization uses up a lot of data, so you should minimize how often you do it.
 
@@ -59,7 +57,7 @@ It is not necessary to perform a synchronization simply to retrieve new messages
 
 In general, it is only necessary to synchronize when you want to download messages from VoIP.ms dated before the most recent message stored locally, such as when you are first setting up the app.
 
-### Synchronization interval
+## Synchronization interval
 
 You can configure the app to schedule automatic synchronizations. Smaller intervals consume more battery life.
 
@@ -67,43 +65,43 @@ It is not necessary to schedule automatic synchronizations simply to retrieve ne
 
 In general, it is only necessary to schedule automatic synchronizations when you cannot use push notifications, such as when you are using the F-Droid version of the app.
 
-### Synchronization start date
+## Synchronization start date
 
 When the app synchronizes with the VoIP.ms servers, it only retrieves messages on or after the synchronization start date.
 
 By default, this date is set to the date you installed the app. It is recommended that you set this to the date on which you created your VoIP.ms account and then perform a synchronization, so that all of your messages will be downloaded.
 
-### Retrieve only recent messages
+## Retrieve only recent messages
 
 Normally, synchronization retrieves all messages dated on or after the synchronization start date. You can configure synchronization to retrieve only those messages from the VoIP.ms servers that are dated after the date of the most recent message that is stored locally by enabling this option.
 
 This option significantly reduces the amount of data that synchronization uses.
 
-### Retrieve deleted messages
+## Retrieve deleted messages
 
 Normally, synchronization does not retrieve messages that have been deleted locally. You can choose to restore these messages during synchronization by enabling this option.
 
-## Network
+# Network
 
 You can configure certain network settings such as the timeout for establishing connections and for reading data from established connections.
 
-## Database
+# Database
 
-### Import database
+## Import database
 
 This option imports the database from a specified file. The database must be in the standard SQLite binary database format and must have the database name and tables required by the app.
 
-### Export database
+## Export database
 
 This option exports the database to a specified file. This allows you to make backups of the database in case you delete messages from the VoIP.ms servers or simply want to avoid re-downloading them all from the servers after resetting your phone.
 
-### Clean up database
+## Clean up database
 
 This option allows you to remove certain data from the database that might be considered outdated or no longer useful, such as:
 * metadata associated with deleted messages, which is stored to prevent the app from downloading deleted messages again; and
 * messages and metadata associated with a phone number (DID) you no longer use, which is stored in case you start using this phone number again.
 
-### Delete database
+## Delete database
 
 This option deletes the entire database.
 

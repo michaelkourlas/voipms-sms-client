@@ -34,7 +34,7 @@ possible with a dedicated app.
 
 ## Installation ##
 
-The standard version of the application uses closed-source Firebase libraries
+The standard version of the app uses closed-source Firebase libraries
 to support push notifications and facilitate crash reporting and analytics,
 among other purposes. A version of the application that is completely open
 source is available from F-Droid.
@@ -42,7 +42,10 @@ source is available from F-Droid.
 Both versions are available from the [Releases section](https://github.com/michaelkourlas/voipms-sms-client/releases)
 of the GitHub repository.
 
+## Documentation ##
+
+The app's documentation is available in the [HELP.md file](https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md).
+
 ## License ##
 
 VoIP.ms SMS is licensed under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
-Please see the LICENSE.md file for more information.
