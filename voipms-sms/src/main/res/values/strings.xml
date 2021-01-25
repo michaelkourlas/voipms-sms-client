@@ -359,8 +359,8 @@
     <!-- URLS -->
     <string name="help_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md</string>
     <string name="privacy_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/PRIVACY.md</string>
-    <string name="license_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE.md</string>
-    <string name="credits_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE.md</string>
+    <string name="license_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE</string>
+    <string name="credits_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE</string>
 
     <!-- SHORTCUTS -->
     <string name="new_conversation_shortcut_short">Compose</string>
