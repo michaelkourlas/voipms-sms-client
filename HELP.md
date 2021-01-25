@@ -1,15 +1,14 @@
 # Contents
 
-* [Settings](#settings)
-  * [Account](#account)
-  * [Phone Numbers](#phone-numbers)
-  * [Notifications](#notifications)
-  * [Synchronization](#synchronization)
-  * [Network](#network)
-  * [Database](#database)
+* [Account](#account)
+* [Phone numbers](#phone-numbers)
+* [Notifications](#notifications)
+* [Synchronization](#synchronization)
+* [Network](#network)
+* [Database](#database)
 * [Donations](#donations)
-* [Reporting Bugs](#reporting-bugs)
-* [Contacting the Developer](#contacting-the-developer)
+* [Reporting bugs](#reporting-bugs)
+* [Contacting the developer](#contacting-the-developer)
 
 # Account
 
@@ -20,7 +19,7 @@ This app requires access to the VoIP.ms API in order to retrieve messages from y
   
 When signing in, you must the email you use to sign into the VoIP.ms portal (**not** your SIP username) and the API password which you set above.
 
-# Phone Numbers
+# Phone numbers
 
 The phone numbers (DIDs) you wish to use with the app must have the SMS function enabled. To verify this, go to the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php) and open the configuration options for the phone numbers you wish to use with the app. Ensure that SMS is enabled for each phone number.
 
@@ -109,10 +108,10 @@ This option deletes the entire database.
 
 If you'd like, you can make a donation to the developer using [PayPal](https://paypal.me/kourlas). Note that making a donation does not unlock any additional features.
 
-# Reporting Bugs
+# Reporting bugs
 
 If you believe you've found a bug, feel free to file a report at the project's GitHub repository [here](https://github.com/michaelkourlas/voipms-sms-client/issues).
 
-# Contacting the Developer
+# Contacting the developer
 
 If you have any further questions, feel free to contact the developer at [michael@kourlas.com](mailto:michael@kourlas.com).
