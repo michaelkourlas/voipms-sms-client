@@ -418,31 +418,13 @@ class Notifications private constructor(
         notification.setStyle(style)
 
         // Reply button
-        val replyPendingIntent: PendingIntent
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // Send reply string directly to SendMessageService
-            val replyIntent = SendMessageService.getIntent(
-                context, did, contact)
-            replyIntent.component = ComponentName(
-                context, SendMessageReceiver::class.java)
-            replyPendingIntent = PendingIntent.getBroadcast(
-                context, (did + contact).hashCode(),
-                replyIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        } else {
-            // Inline reply is not supported, so just show the conversation
-            // activity
-            val replyIntent = Intent(context, ConversationActivity::class.java)
-            replyIntent.putExtra(context.getString(
-                R.string.conversation_did), did)
-            replyIntent.putExtra(context.getString(
-                R.string.conversation_contact), contact)
-            replyIntent.putExtra(context.getString(
-                R.string.conversation_extra_focus), true)
-            replyIntent.flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-            replyPendingIntent = PendingIntent.getActivity(
-                context, (did + contact + "reply").hashCode(),
-                replyIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        }
+        val replyIntent = SendMessageService.getIntent(
+            context, did, contact)
+        replyIntent.component = ComponentName(
+            context, SendMessageReceiver::class.java)
+        val replyPendingIntent = PendingIntent.getBroadcast(
+            context, (did + contact + "reply").hashCode(),
+            replyIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         val remoteInput = RemoteInput.Builder(context.getString(
             R.string.notifications_reply_key))
             .setLabel(context.getString(R.string.notifications_button_reply))
@@ -455,14 +437,43 @@ class Notifications private constructor(
             .setShowsUserInterface(false)
             .setAllowGeneratedReplies(true)
             .addRemoteInput(remoteInput)
-        notification.addAction(replyActionBuilder.build())
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            notification.addAction(replyActionBuilder.build())
+        } else {
+            notification.addInvisibleAction(replyActionBuilder.build())
+
+            // Inline reply is not supported, so just show the conversation
+            // activity
+            val visibleReplyIntent = Intent(context,
+                                            ConversationActivity::class.java)
+            visibleReplyIntent.putExtra(context.getString(
+                R.string.conversation_did), did)
+            visibleReplyIntent.putExtra(context.getString(
+                R.string.conversation_contact), contact)
+            visibleReplyIntent.putExtra(context.getString(
+                R.string.conversation_extra_focus), true)
+            visibleReplyIntent.flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+            val visibleReplyPendingIntent = PendingIntent.getActivity(
+                context, (did + contact + "replyVisible").hashCode(),
+                visibleReplyIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+            val visibleReplyActionBuilder = NotificationCompat.Action.Builder(
+                R.drawable.ic_reply_toolbar_24dp,
+                context.getString(R.string.notifications_button_reply),
+                visibleReplyPendingIntent)
+                .setSemanticAction(
+                    NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
+                .setShowsUserInterface(true)
+                .addRemoteInput(remoteInput)
+            notification.addAction(visibleReplyActionBuilder.build())
+        }
 
         // Mark as read button
         val markReadIntent = MarkReadService.getIntent(context, did, contact)
         markReadIntent.component = ComponentName(
             context, MarkReadReceiver::class.java)
         val markReadPendingIntent = PendingIntent.getBroadcast(
-            context, (did + contact).hashCode(),
+            context, (did + contact + "markRead").hashCode(),
             markReadIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         val markReadAction = NotificationCompat.Action.Builder(
             R.drawable.ic_drafts_toolbar_24dp,

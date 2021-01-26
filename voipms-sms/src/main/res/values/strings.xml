@@ -253,7 +253,7 @@
     <string name="retrieve_dids_auto_add" translatable="false">retrieve_dids_auto_add</string>
 
     <!-- SendMessageService -->
-    <string name="send_message_action" translatable="false">send_message_action</string>
+    <string name="send_message_action" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_ACTION</string>
     <string name="send_message_contact" translatable="false">send_message_contact</string>
     <string name="send_message_database_id" translatable="false">send_message_database_id</string>
     <string name="send_message_did" translatable="false">send_message_did</string>
