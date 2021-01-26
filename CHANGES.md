@@ -1,3 +1,18 @@
+## 0.6.13 ##
+
+* Bug fixes
+* Removed Android Auto support
+
+### Why was Android Auto support removed?
+
+Because of Google. Each time I submit the app for approval, I am told either
+that I have not provided test VoIP.ms credentials (I have, and at my own
+expense) or that the app does not display notifications correctly on Android 
+Auto (it does, based on my own testing). 
+
+If Google wants developers to create apps for the Android Auto platform, it
+needs to do better than this. I'm out.
+
 ## 0.6.12 ##
 
 * Bug fixes
