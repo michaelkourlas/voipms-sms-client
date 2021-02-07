@@ -12,7 +12,7 @@ aesthetic of [Google's official SMS app](https://play.google.com/store/apps/deta
 ## Features ##
 
 * Material design
-* Push notifications
+* Push notifications (if using the Google Play version of the app)
 * Synchronization with device contacts
 * Message search
 * Comprehensive support for synchronization with VoIP.ms

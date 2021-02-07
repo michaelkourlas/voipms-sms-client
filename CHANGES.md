@@ -1,5 +1,6 @@
 ## 0.6.14 ##
 
+* Bug fixes
 * Switch cloud functions provider to IBM
 
 ## 0.6.13 ##

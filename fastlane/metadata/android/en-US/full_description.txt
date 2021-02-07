@@ -1,0 +1,32 @@
+VoIP.ms SMS is an Android messaging app for VoIP.ms that seeks to replicate the aesthetic of Google's official SMS app.
+
+FEATURES
+
+• Material design
+• Push notifications (if using the Google Play version of the app)
+• Synchronization with device contacts
+• Message search
+• Comprehensive support for synchronization with VoIP.ms
+• Completely free
+
+RATIONALE
+
+A number of people use VoIP.ms as a cheaper alternative to subscribing to a voice plan for their mobile devices.
+
+Unfortunately, this can make sending text messages rather difficult, as the VoIP.ms SMS Message Center is clearly built as a diagnostic tool for use in desktop browsers, not as an easy way to send and receive messages on a mobile device.
+
+VoIP.ms does provide a mobile version of this interface with an improved UI, but it still lacks important features that are only possible with a dedicated app.
+
+INSTALLATION
+
+The standard version of the app uses closed-source Firebase libraries to support push notifications and facilitate crash reporting and analytics, among other purposes. A version of the application that is completely open source is available from F-Droid.
+
+Both versions are available from the Releases section of the GitHub repository at https://github.com/michaelkourlas/voipms-sms-client/releases.
+
+DOCUMENTATION
+
+The app's documentation is available in the HELP.md file at https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md
+
+LICENSE
+
+VoIP.ms SMS is licensed under the Apache License 2.0: http://www.apache.org/licenses/LICENSE-2.0.
