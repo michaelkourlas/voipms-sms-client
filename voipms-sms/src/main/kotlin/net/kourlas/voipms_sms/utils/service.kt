@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018-2020 Michael Kourlas
+ * Copyright (C) 2018-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package net.kourlas.voipms_sms.utils
 enum class JobId {
     AppIndexingService,
     MarkReadService,
+    NotificationsRegistrationService,
     RetrieveDidsService,
     SendMessageService,
     SyncIntervalService,

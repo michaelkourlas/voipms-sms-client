@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2020 Michael Kourlas
+  ~ Copyright (C) 2015-2021 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -42,7 +42,9 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".notifications.services.NotificationsRegistrationService" />
+        <service
+            android:name=".notifications.services.NotificationsRegistrationService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".sms.services.AppIndexingService"
             android:permission="android.permission.BIND_JOB_SERVICE" />

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import com.squareup.moshi.JsonDataException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import java.io.IOException
@@ -42,7 +43,8 @@ class NotificationsRegistrationService : JobIntentService() {
         }
 
         // Terminate quietly if notifications are not enabled
-        if (!Notifications.getInstance(application).getNotificationsEnabled()) {
+        if (!Notifications.getInstance(applicationContext)
+                .getNotificationsEnabled()) {
             return
         }
 
@@ -83,11 +85,25 @@ class NotificationsRegistrationService : JobIntentService() {
      * Gets the response of a setSMS call to the VoIP.ms API for each DID.
      */
     private fun getVoipMsApiCallbackResponses(
-        dids: Set<String>): Map<String, RegisterResponse?> {
-        val responses = mutableMapOf<String, RegisterResponse?>()
+        dids: Set<String>): Map<String, List<RegisterResponse?>> {
+        val responses = mutableMapOf<String, MutableList<RegisterResponse?>>()
         for (did in dids) {
             try {
-                responses[did] = httpPostWithMultipartFormData(
+                // Work around a bug in the VoIP.ms API by disabling SMS for
+                // the DID before changing the URL callback.
+                val didResponses = mutableListOf<RegisterResponse?>()
+                didResponses.add(httpPostWithMultipartFormData(
+                    applicationContext,
+                    "https://www.voip.ms/api/v1/rest.php",
+                    mapOf("api_username" to getEmail(applicationContext),
+                          "api_password" to getPassword(applicationContext),
+                          "method" to "setSMS",
+                          "did" to did,
+                          "enable" to "0",
+                          "url_callback_enable" to "0",
+                          "url_callback" to "",
+                          "url_callback_retry" to "0")))
+                didResponses.add(httpPostWithMultipartFormData(
                     applicationContext,
                     "https://www.voip.ms/api/v1/rest.php",
                     mapOf("api_username" to getEmail(applicationContext),
@@ -100,7 +116,8 @@ class NotificationsRegistrationService : JobIntentService() {
                               to "https://us-south.functions.appdomain.cloud/"
                               + "api/v1/web/michael%40kourlas.com_dev/default/"
                               + "voipmssms-notify?did={TO}"),
-                          "url_callback_retry" to "0"))
+                          "url_callback_retry" to "0")))
+                responses[did] = didResponses
             } catch (e: IOException) {
                 // Do nothing.
             } catch (e: JsonDataException) {
@@ -120,12 +137,22 @@ class NotificationsRegistrationService : JobIntentService() {
      */
     private fun parseVoipMsApiCallbackResponses(
         dids: Set<String>,
-        responses: Map<String, RegisterResponse?>): Set<String> {
+        responses: Map<String, List<RegisterResponse?>>): Set<String> {
         val failedDids = mutableSetOf<String>()
         for (did in dids) {
-            if (did !in responses
-                || responses[did]?.status != "success") {
+            if (did !in responses) {
                 failedDids.add(did)
+                continue
+            }
+
+            val didResponses = responses[did]
+            if (didResponses != null) {
+                for (response in didResponses) {
+                    if (response == null || response.status != "success") {
+                        failedDids.add(did)
+                        continue
+                    }
+                }
             }
         }
         return failedDids
@@ -141,7 +168,9 @@ class NotificationsRegistrationService : JobIntentService() {
                 NotificationsRegistrationService::class.java)
             intent.action = context.getString(
                 R.string.push_notifications_reg_action)
-            context.startService(intent)
+
+            enqueueWork(context, NotificationsRegistrationService::class.java,
+                        JobId.NotificationsRegistrationService.ordinal, intent)
         }
     }
 }
