@@ -554,8 +554,8 @@ class Notifications private constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val noOtherNotifications = notificationManager.activeNotifications
                 .filter {
-                    id != GROUP_NOTIFICATION_ID
-                    && id != SYNC_NOTIFICATION_ID
+                    it.id != GROUP_NOTIFICATION_ID
+                    && it.id != SYNC_NOTIFICATION_ID
                 }
                 .none()
             if (noOtherNotifications) {
