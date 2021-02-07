@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 package net.kourlas.voipms_sms.utils
 
-import android.app.Application
 import android.content.Context
 import androidx.fragment.app.FragmentActivity
 
@@ -33,7 +32,7 @@ fun subscribeToDidTopics(context: Context) {
  * Stub for F-Droid builds.
  */
 @Suppress("UNUSED_PARAMETER")
-fun enablePushNotifications(application: Application,
+fun enablePushNotifications(context: Context,
                             activityToShowError: FragmentActivity? = null) {
     // Do nothing.
 }

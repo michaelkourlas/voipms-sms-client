@@ -3,6 +3,8 @@
 * Bug fixes
 * Switch cloud functions provider to IBM
 * Support for notification bubbles
+* Support for direct share
+* Properly support direct reply in notifications
 
 ## 0.6.13 ##
 
