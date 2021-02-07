@@ -16,6 +16,7 @@
   -->
 
 <resources>
+
     <style name="AppTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Theme colours -->
         <item name="colorAccent">@color/colorAccent</item>

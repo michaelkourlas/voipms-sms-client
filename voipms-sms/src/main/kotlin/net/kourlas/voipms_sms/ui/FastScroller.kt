@@ -260,7 +260,8 @@ class FastScroller private constructor(private val mRv: RecyclerView,
         val verticalScrollLength = mContainer.height() - mThumbHeight
         val verticalScrollStart = mContainer.top + mThumbHeight / 2
         val scrollRatio = computeScrollRatio()
-        val thumbCenterY = verticalScrollStart + (verticalScrollLength * scrollRatio).toInt()
+        val thumbCenterY =
+            verticalScrollStart + (verticalScrollLength * scrollRatio).toInt()
         layoutThumb(thumbCenterY)
         if (mDragging) {
             updatePreviewText()
