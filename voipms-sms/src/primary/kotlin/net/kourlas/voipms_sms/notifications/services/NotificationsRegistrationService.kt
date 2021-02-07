@@ -97,8 +97,9 @@ class NotificationsRegistrationService : JobIntentService() {
                           "enable" to "1",
                           "url_callback_enable" to "1",
                           ("url_callback"
-                              to "https://us-central1-voip-ms-sms-9ee2b"
-                              + ".cloudfunctions.net/notify?did={TO}"),
+                              to "https://us-south.functions.appdomain.cloud/"
+                              + "api/v1/web/michael%40kourlas.com_dev/default/"
+                              + "voipmssms-notify?did={TO}"),
                           "url_callback_retry" to "0"))
             } catch (e: IOException) {
                 // Do nothing.

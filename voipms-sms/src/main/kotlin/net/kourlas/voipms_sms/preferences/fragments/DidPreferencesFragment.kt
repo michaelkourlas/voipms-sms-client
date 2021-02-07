@@ -59,7 +59,7 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
 
                         // Regardless of whether an error occurred, mark setup
                         // as complete
-                        setSetupCompletedForVersion(activity, 114)
+                        setSetupCompletedForVersion(activity, 134)
                     }
                 }
             }

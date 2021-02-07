@@ -63,7 +63,7 @@ fun enablePushNotifications(application: Application,
                          activityToShowError.getString(
                              R.string.push_notifications_fail_google_play))
         }
-        setSetupCompletedForVersion(application, 114)
+        setSetupCompletedForVersion(application, 134)
         return
     }
 
@@ -71,7 +71,7 @@ fun enablePushNotifications(application: Application,
     // and silently quit if not
     if (!didsConfigured(application)
         || !Notifications.getInstance(application).getNotificationsEnabled()) {
-        setSetupCompletedForVersion(application, 114)
+        setSetupCompletedForVersion(application, 134)
         return
     }
 

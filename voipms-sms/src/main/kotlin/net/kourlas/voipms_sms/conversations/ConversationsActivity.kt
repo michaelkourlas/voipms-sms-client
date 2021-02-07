@@ -122,7 +122,7 @@ open class ConversationsActivity : AppCompatActivity(),
 
                 // Regardless of whether an error occurred, mark setup as
                 // complete
-                setSetupCompletedForVersion(this@ConversationsActivity, 114)
+                setSetupCompletedForVersion(this@ConversationsActivity, 134)
             }
         }
 
@@ -336,7 +336,7 @@ open class ConversationsActivity : AppCompatActivity(),
 
         // Perform special setup for version 114: need to re-enable push
         // notifications
-        if (getSetupCompletedForVersion(this) < 114) {
+        if (getSetupCompletedForVersion(this) < 134) {
             enablePushNotifications(this.application,
                                     activityToShowError = this)
         }

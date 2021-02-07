@@ -36,9 +36,9 @@ This application supports push notifications using Firebase Cloud Messaging. Pus
 However, if setup fails for whatever reason, you can configure them manually by:
 * accessing the settings for your phone numbers (DIDs) on the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php);
 * enabling the *SMS URL Callback* option; and
-* entering the following URL into the neighbouring field: [https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO}](https://us-central1-voip-ms-sms-9ee2b.cloudfunctions.net/notify?did={TO})
+* entering the following URL into the neighbouring field: [https://us-south.functions.appdomain.cloud/api/v1/web/michael%40kourlas.com_dev/default/voipmssms-notify?did={TO}](https://us-south.functions.appdomain.cloud/api/v1/web/michael%40kourlas.com_dev/default/voipmssms-notify?did={TO})
 
-If push notifications are configured correctly, VoIP.ms will send a callback to Google when your phone number receives a text message. Google will then forward the callback to your device using Firebase Cloud Messaging. When the app receives the callback, it performs a synchronization with the VoIP.ms servers and retrieves the text message. 
+If push notifications are configured correctly, VoIP.ms will send a callback to an IBM Cloud Function maintained by me when your phone number receives a text message. The Cloud Function will then forward the callback to your device using Firebase Cloud Messaging. When the app receives the callback, it performs a synchronization with the VoIP.ms servers and retrieves the text message. 
 
 To protect your privacy, the callback is configured to **only** include your phone number. It does not include the text of individual messages.
 
