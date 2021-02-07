@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,12 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.widget.CompoundButton
 import androidx.appcompat.widget.SwitchCompat
+import androidx.preference.Preference
 import androidx.preference.SwitchPreference
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.*
 
 class DidPreferencesFragment : PreferenceFragmentCompat(),
@@ -83,7 +85,7 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
 
             if (dids.isNotEmpty()) {
                 // Re-register for push notifications when DIDs change
-                enablePushNotifications(it.application,
+                enablePushNotifications(it.applicationContext,
                                         activityToShowError = it)
             }
             replaceIndexOnNewThread(it)
@@ -171,6 +173,16 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
         showNotificationsPreference.key =
             getString(
                 R.string.preferences_did_show_notifications_key, did)
+        showNotificationsPreference.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _, _ ->
+                context?.let {
+                    runOnNewThread {
+                        Database.getInstance(it).updateShortcuts()
+                    }
+                    replaceIndexOnNewThread(it)
+                }
+                true
+            }
     }
 
     /**

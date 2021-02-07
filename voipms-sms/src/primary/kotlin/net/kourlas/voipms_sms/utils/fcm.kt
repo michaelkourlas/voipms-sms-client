@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 package net.kourlas.voipms_sms.utils
 
-import android.app.Application
 import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.common.ConnectionResult
@@ -52,32 +51,32 @@ fun subscribeToDidTopics(context: Context) {
  * using a snackbar on the specified activity if Google Play Services is
  * unavailable.
  */
-fun enablePushNotifications(application: Application,
+fun enablePushNotifications(context: Context,
                             activityToShowError: FragmentActivity? = null) {
     // Check if Google Play Services is available
     if (GoogleApiAvailability.getInstance()
             .isGooglePlayServicesAvailable(
-                application) != ConnectionResult.SUCCESS) {
+                context) != ConnectionResult.SUCCESS) {
         if (activityToShowError != null) {
             showSnackbar(activityToShowError, R.id.coordinator_layout,
                          activityToShowError.getString(
                              R.string.push_notifications_fail_google_play))
         }
-        setSetupCompletedForVersion(application, 134)
+        setSetupCompletedForVersion(context, 134)
         return
     }
 
     // Check if DIDs are configured and that notifications are enabled,
     // and silently quit if not
-    if (!didsConfigured(application)
-        || !Notifications.getInstance(application).getNotificationsEnabled()) {
-        setSetupCompletedForVersion(application, 134)
+    if (!didsConfigured(context)
+        || !Notifications.getInstance(context).getNotificationsEnabled()) {
+        setSetupCompletedForVersion(context, 134)
         return
     }
 
     // Subscribe to DID topics
-    subscribeToDidTopics(application)
+    subscribeToDidTopics(context)
 
     // Start push notifications registration service
-    NotificationsRegistrationService.startService(application)
+    NotificationsRegistrationService.startService(context)
 }

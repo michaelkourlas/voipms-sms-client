@@ -2,6 +2,7 @@
 
 * Bug fixes
 * Switch cloud functions provider to IBM
+* Support for notification bubbles
 
 ## 0.6.13 ##
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2019 Michael Kourlas
+  ~ Copyright (C) 2015-2021 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@
     <dimen name="conversation_item_margin_top_primary">16dp</dimen>
     <dimen name="conversation_item_margin_top_secondary">2dp</dimen>
     <dimen name="contact_badge">40dp</dimen>
+    <dimen name="adaptive_icon_drawable_outer">108dp</dimen>
+    <dimen name="adaptive_icon_drawable_inner">72dp</dimen>
+    <dimen name="adaptive_icon_drawable_inner_circle">52dp</dimen>
     <dimen name="send_message_elevation">4dp</dimen>
     <dimen name="toolbar_left_margin">72dp</dimen>
 

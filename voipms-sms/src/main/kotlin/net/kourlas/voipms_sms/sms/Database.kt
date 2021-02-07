@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ShortcutInfo
-import android.content.pm.ShortcutManager
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import androidx.core.app.Person
+import androidx.core.content.LocusIdCompat
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.sms.services.SyncService
@@ -75,7 +77,7 @@ class Database private constructor(private val context: Context) {
             database.setTransactionSuccessful()
 
             removeFromIndex(Message.getMessageUrl(databaseId))
-            updateShortcuts(context)
+            updateShortcuts()
         } finally {
             database.endTransaction()
         }
@@ -128,7 +130,7 @@ class Database private constructor(private val context: Context) {
             for (message in messages) {
                 removeFromIndex(message.messageUrl)
             }
-            updateShortcuts(context)
+            updateShortcuts()
         } finally {
             database.endTransaction()
         }
@@ -164,7 +166,7 @@ class Database private constructor(private val context: Context) {
             database.setTransactionSuccessful()
 
             removeAllFromIndex()
-            updateShortcuts(context)
+            updateShortcuts()
         } finally {
             database.endTransaction()
         }
@@ -448,7 +450,7 @@ class Database private constructor(private val context: Context) {
                     addMessageToIndexOnNewThread(context, message)
                 }
             }
-            updateShortcuts(context)
+            updateShortcuts()
 
             return databaseIds
         } finally {
@@ -473,7 +475,7 @@ class Database private constructor(private val context: Context) {
 
             database.setTransactionSuccessful()
 
-            updateShortcuts(context)
+            updateShortcuts()
         } finally {
             database.endTransaction()
         }
@@ -558,7 +560,7 @@ class Database private constructor(private val context: Context) {
                     addMessageToIndexOnNewThread(context, it)
                 }
             if (addedDatabaseIds.isNotEmpty()) {
-                updateShortcuts(context)
+                updateShortcuts()
             }
 
             return addedConversationIds
@@ -1227,58 +1229,89 @@ class Database private constructor(private val context: Context) {
     /**
      * Update the app shortcuts.
      */
-    private fun updateShortcuts(context: Context) {
+    fun updateShortcuts() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            val shortcutManager = context.getSystemService(
-                Context.SHORTCUT_SERVICE) as ShortcutManager
+            // There is one static shortcut, which reduces the number of
+            // dynamic shortcut slots available.
+            val maxCount = ShortcutManagerCompat.getMaxShortcutCountPerActivity(
+                context) - 1
 
-            // There is one static shortcut
-            val maxCount = shortcutManager.maxShortcutCountPerActivity - 1
-
+            // Update the dynamic shortcuts.
             val messages = getMessagesMostRecentFilteredWithoutLock(
                 net.kourlas.voipms_sms.preferences.getDids(
                     context, onlyShowInConversationsView = true))
-            val shortcutInfoList = messages.zip(0 until maxCount).map {
-                val message = it.first
-
+            val conversationIdStrings =
+                messages.map { it.conversationId.getId() }
+            val shortcutInfoList = messages.map {
                 val intent = Intent(context, ConversationActivity::class.java)
                 intent.action = "android.intent.action.VIEW"
                 intent.putExtra(
                     context.getString(R.string.conversation_did),
-                    message.did)
+                    it.did)
                 intent.putExtra(
                     context.getString(R.string.conversation_contact),
-                    message.contact)
+                    it.contact)
 
-                val contactBitmap = getContactPhotoBitmap(context,
-                                                          message.contact)
-                val icon = if (contactBitmap == null) {
-                    Icon.createWithResource(
-                        context, R.drawable.ic_shortcut_account_circle)
-                } else {
-                    Icon.createWithBitmap(applyCircularMask(contactBitmap))
-                }
-
-                val label = getContactName(context, message.contact)
-                            ?: getFormattedPhoneNumber(message.contact)
-
-                ShortcutInfo.Builder(
-                    context, message.conversationId.getId())
+                val contactName = getContactName(context, it.contact)
+                val label = contactName ?: getFormattedPhoneNumber(it.contact)
+                val icon = IconCompat.createWithAdaptiveBitmap(
+                    getContactPhotoAdaptiveBitmap(context, contactName,
+                                                  it.contact))
+                ShortcutInfoCompat.Builder(
+                    context, it.conversationId.getId())
                     .setIcon(icon)
                     .setIntent(intent)
+                    .setPerson(Person.Builder()
+                                   .setName(label)
+                                   .setKey(it.contact)
+                                   .setIcon(icon)
+                                   .setUri("tel:${it.contact}")
+                                   .build())
                     .setLongLabel(label)
                     .setShortLabel(label.split(" ")[0])
+                    .setLongLived(true)
+                    .setLocusId(LocusIdCompat(it.conversationId.getId()))
+                    .setCategories(setOf("existing_conversation_target"))
+                    .setRank(0)
                     .build()
             }
-            shortcutManager.removeAllDynamicShortcuts()
+            val dynamicShortcutInfoList =
+                shortcutInfoList.zip(0 until maxCount).map { it.first }
             try {
-                shortcutManager.addDynamicShortcuts(shortcutInfoList)
+                ShortcutManagerCompat.updateShortcuts(context, shortcutInfoList)
+                ShortcutManagerCompat.setDynamicShortcuts(
+                    context, dynamicShortcutInfoList)
             } catch (e: Exception) {
                 // Occasionally this will fail because the maximum number of
                 // dynamic shortcuts was exceeded? There's nothing we can do
                 // about this, since we are following
                 // getMaxShortcutCountPerActivity().
                 logException(e)
+            }
+
+            // Look at our existing list of cached and pinned shortcuts to make
+            // sure they still exist. If not, delete or remove them.
+            val existingPinnedShortcutInfoList =
+                ShortcutManagerCompat.getShortcuts(
+                    context,
+                    ShortcutManagerCompat.FLAG_MATCH_PINNED)
+            for (shortcutInfo in existingPinnedShortcutInfoList) {
+                if (shortcutInfo.id !in conversationIdStrings) {
+                    ShortcutManagerCompat.disableShortcuts(context, listOf(
+                        shortcutInfo.id), context.getString(
+                        R.string.pinned_shortcut_disable_error))
+                }
+            }
+            val existingCachedShortcutInfoList =
+                ShortcutManagerCompat.getShortcuts(
+                    context,
+                    ShortcutManagerCompat.FLAG_MATCH_CACHED)
+            for (shortcutInfo in existingCachedShortcutInfoList) {
+                if (shortcutInfo.id !in conversationIdStrings) {
+                    ShortcutManagerCompat.removeLongLivedShortcuts(
+                        context,
+                        listOf(shortcutInfo.id))
+                }
             }
         }
     }

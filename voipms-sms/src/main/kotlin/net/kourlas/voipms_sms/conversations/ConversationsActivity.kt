@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -270,11 +270,11 @@ open class ConversationsActivity : AppCompatActivity(),
         // Delete any notification channels and groups that are no longer
         // needed and rename existing channels if necessary
         runOnNewThread {
-            Notifications.getInstance(application)
+            Notifications.getInstance(applicationContext)
                 .createDefaultNotificationChannel()
-            Notifications.getInstance(application)
+            Notifications.getInstance(applicationContext)
                 .deleteNotificationChannelsAndGroups()
-            Notifications.getInstance(application).renameNotificationChannels()
+            Notifications.getInstance(applicationContext).renameNotificationChannels()
         }
 
         // Update navigation view
@@ -337,7 +337,7 @@ open class ConversationsActivity : AppCompatActivity(),
         // Perform special setup for version 114: need to re-enable push
         // notifications
         if (getSetupCompletedForVersion(this) < 134) {
-            enablePushNotifications(this.application,
+            enablePushNotifications(this.applicationContext,
                                     activityToShowError = this)
         }
     }
@@ -707,6 +707,10 @@ open class ConversationsActivity : AppCompatActivity(),
                         // If the permission request was granted, try refreshing
                         // and loading the contact name and photo
                         adapter.notifyItemRangeChanged(0, adapter.itemCount)
+                        runOnNewThread {
+                            Database.getInstance(applicationContext)
+                                .updateShortcuts()
+                        }
                     } else {
                         // Otherwise, show a warning
                         showPermissionSnackbar(

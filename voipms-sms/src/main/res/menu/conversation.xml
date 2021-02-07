@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2019 Michael Kourlas
+  ~ Copyright (C) 2015-2021 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -47,6 +47,10 @@
     <item
         android:id="@+id/notifications_button"
         android:title="@string/conversation_action_notifications"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/bubble_button"
+        android:title="@string/conversation_action_bubble"
         app:showAsAction="never" />
     <item
         android:id="@+id/export_button"

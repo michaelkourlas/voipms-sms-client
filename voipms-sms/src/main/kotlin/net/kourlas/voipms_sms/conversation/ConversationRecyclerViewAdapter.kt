@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2019 Michael Kourlas
+ * Copyright (C) 2015-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class ConversationRecyclerViewAdapter(
     private val layoutManager: LinearLayoutManager,
     private val conversationId: ConversationId,
     private val contactName: String?,
-    private val contactBitmap: Bitmap?) :
+    private val contactBitmap: Bitmap) :
     RecyclerView.Adapter<ConversationRecyclerViewAdapter.MessageViewHolder>(),
     Filterable,
     Iterable<ConversationRecyclerViewAdapter.MessageItem>,
@@ -145,41 +145,15 @@ class ConversationRecyclerViewAdapter(
         val message = messageItem.message
 
         val contactBadge = holder.contactBadge
-        val contactBadgeLetterText = holder.contactBadgeLetterText
-        if (contactBadge != null && contactBadgeLetterText != null) {
+        if (contactBadge != null) {
             // Show contact badge if first message in group
             if (isFirstMessageInGroup(position,
                                       combineIncomingOutgoing = false)) {
                 holder.contactBadge.visibility = View.VISIBLE
-                holder.contactBadgeLetterText.visibility = View.VISIBLE
-
                 contactBadge.assignContactFromPhone(message.contact, true)
-                if (contactBitmap != null) {
-                    // Show bitmap for contact with bitmap
-                    holder.contactBadge.setBackgroundResource(0)
-                    contactBadge.setImageBitmap(contactBitmap)
-                    holder.contactBadgeLetterText.text = ""
-                } else {
-                    // Show material design color and first letter for contact
-                    // without bitmap
-                    holder.contactBadge.setBackgroundColor(
-                        getMaterialDesignColour(
-                            message.contact))
-                    getContactInitial(contactName).let {
-                        if (it[0].isLetter()) {
-                            holder.contactBadgeLetterText.text = it
-                            holder.contactBadge.setImageResource(
-                                android.R.color.transparent)
-                        } else {
-                            holder.contactBadgeLetterText.text = ""
-                            holder.contactBadge.setImageResource(
-                                R.drawable.ic_account_circle_inverted_toolbar_24dp)
-                        }
-                    }
-                }
+                contactBadge.setImageBitmap(contactBitmap)
             } else {
                 holder.contactBadge.visibility = View.INVISIBLE
-                holder.contactBadgeLetterText.visibility = View.INVISIBLE
             }
         }
     }
@@ -587,12 +561,6 @@ class ConversationRecyclerViewAdapter(
         internal val contactBadge: QuickContactBadge? =
             if (viewType == R.layout.conversation_item_incoming) {
                 itemView.findViewById(R.id.photo)
-            } else {
-                null
-            }
-        internal val contactBadgeLetterText: TextView? =
-            if (viewType == R.layout.conversation_item_incoming) {
-                itemView.findViewById(R.id.photo_letter)
             } else {
                 null
             }

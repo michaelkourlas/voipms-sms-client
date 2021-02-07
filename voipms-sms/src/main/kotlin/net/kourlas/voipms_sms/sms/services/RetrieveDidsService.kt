@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ class RetrieveDidsService : JobIntentService() {
             if (autoAdd && dids?.isNotEmpty() == true) {
                 setDids(applicationContext,
                         getDids(applicationContext).plus(dids))
-                enablePushNotifications(application)
+                enablePushNotifications(applicationContext)
                 replaceIndexOnNewThread(applicationContext)
             }
         } catch (e: Exception) {

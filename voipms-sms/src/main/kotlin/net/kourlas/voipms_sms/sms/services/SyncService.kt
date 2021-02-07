@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Portions Copyright (C) 2008 The Android Open Source Project
  *
@@ -30,6 +30,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -90,7 +91,7 @@ class SyncService : Service() {
         synchronized(this) {
             // Use the existing progress value since the service may already
             // be running
-            val notification = Notifications.getInstance(application)
+            val notification = Notifications.getInstance(applicationContext)
                 .getSyncNotification(progress)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(
@@ -127,7 +128,7 @@ class SyncService : Service() {
 
         synchronized(this) {
             progress = 0
-            val notification = Notifications.getInstance(application)
+            val notification = Notifications.getInstance(applicationContext)
                 .getSyncNotification(progress)
             NotificationManagerCompat.from(applicationContext).notify(
                 Notifications.SYNC_NOTIFICATION_ID, notification)
@@ -330,7 +331,7 @@ class SyncService : Service() {
 
             synchronized(this) {
                 progress = ((i + 1) * 100) / retrievalRequests.size
-                val notification = Notifications.getInstance(application)
+                val notification = Notifications.getInstance(applicationContext)
                     .getSyncNotification(progress)
                 NotificationManagerCompat.from(applicationContext).notify(
                     Notifications.SYNC_NOTIFICATION_ID, notification)
@@ -353,7 +354,8 @@ class SyncService : Service() {
 
         // Show notifications for new messages
         if (newConversationIds.isNotEmpty()) {
-            Notifications.getInstance(application).showNotifications(
+            Notifications.getInstance(applicationContext).showNotifications(
+                application as CustomApplication,
                 newConversationIds)
         }
     }

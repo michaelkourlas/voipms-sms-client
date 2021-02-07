@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,16 +48,13 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                     // notification customization natively
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         val activity = activity ?: return
-                        Notifications.getInstance(activity.application)
+                        Notifications.getInstance(activity.applicationContext)
                             .createDefaultNotificationChannel()
 
                         val intent = Intent(
-                            Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                            Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                         intent.putExtra(Settings.EXTRA_APP_PACKAGE,
                                         it.packageName)
-                        intent.putExtra(
-                            Settings.EXTRA_CHANNEL_ID,
-                            getString(R.string.notifications_channel_default))
                         preference.intent = intent
                     } else {
                         preference.intent = Intent(

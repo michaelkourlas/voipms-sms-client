@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2020 Michael Kourlas
+ * Copyright (C) 2015-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.kourlas.voipms_sms.R
@@ -71,6 +72,10 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         setupRecyclerView()
 
         adapter.refresh()
+
+        ShortcutManagerCompat.reportShortcutUsed(
+            applicationContext,
+            "new_conversation")
     }
 
     /**

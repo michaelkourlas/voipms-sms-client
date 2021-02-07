@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2020 Michael Kourlas
+ * Copyright (C) 2015-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -47,8 +48,10 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.conversations.ConversationsArchivedActivity
 import net.kourlas.voipms_sms.demo.getDemoNotification
+import net.kourlas.voipms_sms.newConversation.NewConversationActivity
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.accountConfigured
+import net.kourlas.voipms_sms.preferences.getDidShowInConversationsView
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getMessageTextBoxMaximumSize
 import net.kourlas.voipms_sms.sms.ConversationId
@@ -64,7 +67,8 @@ import java.util.*
 /**
  * Activity used to display messages in a single conversation.
  */
-class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
+open class ConversationActivity(val bubble: Boolean = false) :
+    AppCompatActivity(), ActionMode.Callback,
     View.OnLongClickListener, View.OnClickListener,
     ActivityCompat.OnRequestPermissionsResultCallback {
     // UI elements
@@ -83,7 +87,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     // Additional metadata associated with the DID and contact, including the
     // name and photo of the person associated with the DID or contact
     private var contactName: String? = null
-    private var contactBitmap: Bitmap? = null
+    private lateinit var contactBitmap: Bitmap
 
     // Broadcast receivers
     private val syncCompleteReceiver =
@@ -159,8 +163,12 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         setupToolbar()
         setupRecyclerView()
         setupMessageText()
+        getMessageTextFromIntent()
         setupSendButton()
         setupDemo()
+
+        ShortcutManagerCompat.reportShortcutUsed(applicationContext,
+                                                 conversationId.getId())
     }
 
     /**
@@ -170,11 +178,43 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      * @param intent The intent that this activity was launched with.
      */
     private fun setupDidAndContact(intent: Intent): Boolean {
-        val action = intent.action
-        val data = intent.dataString
-        if (Intent.ACTION_VIEW == action && data != null) {
+        if (Intent.ACTION_SEND == intent.action
+            && "text/plain" == intent.type
+            && intent.getStringExtra(Intent.EXTRA_TEXT) != null) {
+            // Generic text share; forward to NewConversationActivity
+            val shortcutId =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    intent.getStringExtra(Intent.EXTRA_SHORTCUT_ID)
+                } else {
+                    null
+                }
+            if (shortcutId == null) {
+                val newIntent = Intent()
+                newIntent.action = Intent.ACTION_SEND
+                newIntent.type = "text/plain"
+                newIntent.putExtra(Intent.EXTRA_TEXT,
+                                   intent.getStringExtra(Intent.EXTRA_TEXT))
+                newIntent.component = ComponentName(
+                    applicationContext,
+                    NewConversationActivity::class.java)
+                startActivity(newIntent)
+                finish()
+                return false
+            } else {
+                val components = shortcutId.split("_")
+                if (components.size != 2) {
+                    abortActivity(
+                        this,
+                        Exception("Invalid shortcut ID: '$shortcutId'"))
+                    return false
+                }
+                did = components[0]
+                contact = components[1]
+            }
+        } else if (Intent.ACTION_VIEW == intent.action
+                   && intent.dataString != null) {
             // Firebase URL intent
-            val uri = Uri.parse(data)
+            val uri = Uri.parse(intent.dataString)
             val id = uri.getQueryParameter("id")
             val uriDid = uri.getQueryParameter("did")
             val contactDid = uri.getQueryParameter("contact")
@@ -183,7 +223,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 val message = Database.getInstance(this)
                     .getMessageDatabaseId(id.toLong())
                 if (message == null) {
-                    abortActivity(this, Exception("Invalid URI: '$data'"))
+                    abortActivity(
+                        this,
+                        Exception("Invalid URI: '$intent.dataString'"))
                     return false
                 } else {
                     did = message.did
@@ -194,17 +236,21 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                 did = uriDid
                 contact = contactDid
             } else {
-                abortActivity(this, Exception("Invalid URI: '$data'"))
+                abortActivity(
+                    this,
+                    Exception("Invalid URI: '$intent.dataString'"))
                 return false
             }
         } else {
             // Standard intent
-            val d = intent.getStringExtra(getString(R.string.conversation_did))
+            val d =
+                intent.getStringExtra(getString(R.string.conversation_did))
             val c = intent.getStringExtra(getString(
                 R.string.conversation_contact))
             if (d == null || c == null) {
-                abortActivity(this, Exception("No DID or contact specified:" +
-                                              " did: '$d', contact: '$c'"))
+                abortActivity(this,
+                              Exception("No DID or contact specified:" +
+                                        " did: '$d', contact: '$c'"))
                 return false
             } else {
                 did = d
@@ -216,6 +262,15 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         // configured
         if (did !in getDids(applicationContext) && !BuildConfig.IS_DEMO) {
             abortActivity(this, Exception("DID '$did' no longer exists"))
+            return false
+        }
+
+        // We shouldn't show a conversation for a DID that is not configured to
+        // be displayed in the conversation view
+        if (!getDidShowInConversationsView(applicationContext, did)) {
+            abortActivity(
+                this,
+                Exception("DID '$did' not displayed in conversation view"))
             return false
         }
 
@@ -233,7 +288,12 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         } else {
             net.kourlas.voipms_sms.demo.getContactName(contact)
         }
-        contactBitmap = getContactPhotoBitmap(this, contact)
+        contactBitmap = getContactPhotoBitmap(
+            this,
+            contactName,
+            contact,
+            resources.getDimensionPixelSize(
+                R.dimen.contact_badge))
 
         return true
     }
@@ -241,7 +301,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     /**
      * Sets up the activity toolbar.
      */
-    private fun setupToolbar() {
+    open fun setupToolbar() {
         // Set up toolbar
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.let {
@@ -343,6 +403,22 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     }
 
     /**
+     * Retrieves and stores the message text from the intent.
+     */
+    private fun getMessageTextFromIntent() {
+        if (Intent.ACTION_SEND == intent.action
+            && "text/plain" == intent.type) {
+            val messageText = findViewById<EditText>(
+                R.id.message_edit_text)
+            if (intent.getStringExtra(Intent.EXTRA_TEXT) != null) {
+                messageText.setText(intent.getStringExtra(Intent.EXTRA_TEXT))
+                messageText.requestFocus()
+                messageText.setSelection(messageText.text.length)
+            }
+        }
+    }
+
+    /**
      * Called when the message text box text changes.
      */
     private fun onMessageTextChange(newText: String) {
@@ -414,7 +490,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
     private fun setupDemo() {
         @Suppress("ConstantConditionIf")
         if (BuildConfig.IS_DEMO) {
-            Notifications.getInstance(application).showDemoNotification(
+            Notifications.getInstance(applicationContext).showDemoNotification(
                 getDemoNotification())
         }
     }
@@ -431,7 +507,8 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             && accountConfigured(applicationContext)
             && did in getDids(applicationContext)) {
             // Send the message using the SendMessageService
-            SendMessageService.startService(this, did, contact, messageText)
+            SendMessageService.startService(
+                this, did, contact, messageText, bubble)
 
             // Clear the message text box
             messageEditText.setText("")
@@ -468,10 +545,18 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         // Set max lines
         messageText.maxLines = getMessageTextBoxMaximumSize(this)
 
-        // Mark the conversation as read and remove any open notifications
-        // related to this conversation
-        Notifications.getInstance(application).cancelNotification(
-            conversationId)
+        // Mark the conversation as read and cancel any open notifications
+        // related to this conversation (unless we are displaying in bubble
+        // mode)
+        if (!bubble) {
+            Notifications.getInstance(applicationContext).cancelNotification(
+                conversationId)
+        } else {
+            // If this is a bubble, still clear the notification state.
+            Notifications.getInstance(applicationContext)
+                .clearNotificationState(
+                    conversationId)
+        }
         runOnNewThread {
             Database.getInstance(applicationContext).markConversationRead(
                 conversationId)
@@ -479,8 +564,10 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         adapter.refresh()
 
         // Track number of activities
-        (application as CustomApplication).conversationActivityIncrementCount(
-            conversationId)
+        if (!bubble) {
+            (application as CustomApplication)
+                .conversationActivityIncrementCount(conversationId)
+        }
     }
 
     override fun onPause() {
@@ -492,8 +579,10 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         safeUnregisterReceiver(this, sentMessageReceiver)
 
         // Track number of activities
-        (application as CustomApplication).conversationActivityDecrementCount(
-            conversationId)
+        if (!bubble) {
+            (application as CustomApplication)
+                .conversationActivityDecrementCount(conversationId)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -531,6 +620,15 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             val notificationsItem = menu.findItem(R.id.notifications_button)
             notificationsItem.isVisible = false
+        }
+
+        // Hide the bubble button if we cannot bubble this conversation, or we
+        // are already in a bubble.
+        if (bubble
+            || !Notifications.getInstance(applicationContext)
+                .canBubble(did, contact)) {
+            val bubbleItem = menu.findItem(R.id.bubble_button)
+            bubbleItem.isVisible = false
         }
 
         // Configure the search box to trigger adapter filtering when the
@@ -583,6 +681,7 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
             R.id.unarchive_button -> return onUnarchiveButtonClick()
             R.id.delete_button -> return onDeleteAllButtonClick()
             R.id.notifications_button -> return onNotificationsButtonClick()
+            R.id.bubble_button -> return onBubbleButtonClick()
             R.id.export_button -> return onExportButtonClick()
         }
 
@@ -702,8 +801,9 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
      */
     private fun onNotificationsButtonClick(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notifications.getInstance(application).createDidNotificationChannel(
-                did, contact)
+            Notifications.getInstance(applicationContext)
+                .createDidNotificationChannel(
+                    did, contact)
 
             val intent = Intent(
                 Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
@@ -714,6 +814,22 @@ class ConversationActivity : AppCompatActivity(), ActionMode.Callback,
                                 R.string.notifications_channel_contact,
                                 did, contact))
             startActivity(intent)
+        }
+
+        return true
+    }
+
+    /**
+     * Handles the bubble button.
+     */
+    private fun onBubbleButtonClick(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            moveTaskToBack(true)
+            Notifications.getInstance(applicationContext)
+                .showNotifications(application as CustomApplication,
+                                   setOf(conversationId),
+                                   bubbleOnly = true,
+                                   autoLaunchBubble = true)
         }
         return true
     }

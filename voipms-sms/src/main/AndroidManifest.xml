@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2020 Michael Kourlas
+  ~ Copyright (C) 2015-2021 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -103,16 +103,21 @@
                     android:host="message"
                     android:scheme="voipmssms" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".newConversation.NewConversationActivity"
-            android:noHistory="true"
-            android:parentActivityName=".conversations.ConversationsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".conversation.ConversationBubbleActivity"
+            android:allowEmbedded="true"
+            android:resizeableActivity="true"
+            tools:targetApi="n" />
+        <activity
+            android:name=".newConversation.NewConversationActivity"
+            android:noHistory="true"
+            android:parentActivityName=".conversations.ConversationsActivity">
         </activity>
         <activity
             android:name=".preferences.activities.PreferencesActivity"

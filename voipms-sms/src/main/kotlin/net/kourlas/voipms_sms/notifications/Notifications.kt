@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import android.app.*
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
@@ -31,10 +30,13 @@ import androidx.core.app.*
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.app.TaskStackBuilder
+import androidx.core.content.LocusIdCompat
+import androidx.core.graphics.drawable.IconCompat
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
+import net.kourlas.voipms_sms.conversation.ConversationBubbleActivity
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
@@ -47,25 +49,26 @@ import net.kourlas.voipms_sms.sms.services.MarkReadService
 import net.kourlas.voipms_sms.sms.services.SendMessageService
 import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
+import java.util.*
 
 /**
  * Single-instance class used to send notifications when new SMS messages
  * are received.
  */
-class Notifications private constructor(
-    private val application: CustomApplication) {
+class Notifications private constructor(private val context: Context) {
     // Helper variables
-    private val context = application.applicationContext
     private val notificationManager = context.getSystemService(
         Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // Information associated with active notifications
     private val notificationIds = mutableMapOf<ConversationId, Int>()
+    private val notificationMessages =
+        mutableMapOf<ConversationId,
+            List<NotificationCompat.MessagingStyle.Message>>()
     private var notificationIdCount = MESSAGE_START_NOTIFICATION_ID
 
     /**
      * Attempts to create a notification channel for the specified DID.
-     * Does nothing if this channel does not already exist.
      */
     fun createDidNotificationChannel(did: String, contact: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -87,6 +90,11 @@ class Notifications private constructor(
                                   did, contact),
                 contactName ?: getFormattedPhoneNumber(contact),
                 defaultChannel.importance)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                channel.setConversationId(
+                    context.getString(R.string.notifications_channel_default),
+                    ConversationId(did, contact).getId())
+            }
             channel.enableLights(defaultChannel.shouldShowLights())
             channel.lightColor = defaultChannel.lightColor
             channel.enableVibration(defaultChannel.shouldVibrate())
@@ -99,14 +107,16 @@ class Notifications private constructor(
             channel.group = context.getString(
                 R.string.notifications_channel_group_did,
                 did)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                channel.setAllowBubbles(true)
+            }
 
             notificationManager.createNotificationChannel(channel)
         }
     }
 
     /**
-     * Attempts to create the default notification channel. This does nothing
-     * if the channel already exists.
+     * Attempts to create the default notification channel.
      */
     fun createDefaultNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -123,6 +133,9 @@ class Notifications private constructor(
             channel.setShowBadge(true)
             channel.group = context.getString(
                 R.string.notifications_channel_group_other)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                channel.setAllowBubbles(true)
+            }
 
             notificationManager.createNotificationChannel(channel)
         }
@@ -193,11 +206,12 @@ class Notifications private constructor(
             for (channel in notificationManager.notificationChannels) {
                 if (channel.id.startsWith(context.getString(
                         R.string.notifications_channel_contact_prefix))) {
-                    val splitId = channel.id.split("_")
+                    val splitId = channel.id.split(":")[0].trim().split("_")
                     val conversationId = ConversationId(splitId[3], splitId[4])
                     if (conversationId !in conversationIds) {
                         notificationManager.deleteNotificationChannel(
                             channel.id)
+                        validateGroupNotification()
                     }
                 }
             }
@@ -212,6 +226,7 @@ class Notifications private constructor(
                     if (did !in dids) {
                         notificationManager.deleteNotificationChannelGroup(
                             group.id)
+                        validateGroupNotification()
                     }
                 }
             }
@@ -301,22 +316,42 @@ class Notifications private constructor(
     /**
      * Show notifications for new messages for the specified conversations.
      */
-    fun showNotifications(conversationIds: Set<ConversationId>) {
-        // Do not show notifications when the conversations view is open
-        if (application.conversationsActivityVisible()) {
+    fun showNotifications(
+        application: CustomApplication,
+        conversationIds: Set<ConversationId>,
+        bubbleOnly: Boolean = false,
+        autoLaunchBubble: Boolean = false,
+        inlineReplyMessages: List<SendMessageService.OutgoingMessage>
+        = emptyList()) {
+        // Do not show notifications when the conversations view is open,
+        // unless this is for a bubble only.
+        if (application.conversationsActivityVisible() && !bubbleOnly) {
             return
         }
 
         runOnNewThread {
             for (conversationId in conversationIds) {
+                // Do not show notifications when notifications are disabled.
+                if (!getNotificationsEnabled(conversationId)) {
+                    continue
+                }
+
+                // Do not show notifications when the conversation view is
+                // open, unless this is for a bubble only.
                 if (application.conversationActivityVisible(conversationId)
-                    || !getNotificationsEnabled(conversationId)) {
+                    && !bubbleOnly) {
                     continue
                 }
 
                 showNotification(
-                    Database.getInstance(context).getMessagesUnread(
-                        conversationId))
+                    conversationId,
+                    if (bubbleOnly || inlineReplyMessages.isNotEmpty())
+                        emptyList()
+                    else Database.getInstance(context)
+                        .getMessagesUnread(conversationId),
+                    inlineReplyMessages,
+                    bubbleOnly,
+                    autoLaunchBubble)
             }
         }
     }
@@ -326,54 +361,98 @@ class Notifications private constructor(
      * checks. Only used for demo purposes.
      */
     fun showDemoNotification(message: Message) = showNotification(
-        listOf(message))
+        message.conversationId,
+        listOf(message),
+        inlineReplyMessages = emptyList(),
+        bubbleOnly = false,
+        autoLaunchBubble = false)
+
+    /**
+     * Returns true if a notification for the provided DID and contact would
+     * be allowed to bubble.
+     */
+    fun canBubble(did: String, contact: String): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val channel = getNotificationChannelId(did, contact)
+            val notificationManager: NotificationManager =
+                context.getSystemService(
+                    Context.NOTIFICATION_SERVICE) as NotificationManager
+            if (!notificationManager.areBubblesAllowed()) {
+                val notificationChannel =
+                    notificationManager.getNotificationChannel(channel)
+                return notificationChannel != null
+                       && notificationChannel.canBubble()
+            }
+            return true
+        }
+        return false
+    }
 
     /**
      * Shows a notification with the specified messages.
      */
-    private fun showNotification(messages: List<Message>) {
-        // Do not show notification if there are no messages
-        if (messages.isEmpty()) {
+    private fun showNotification(
+        conversationId: ConversationId,
+        messages: List<Message>,
+        inlineReplyMessages: List<SendMessageService.OutgoingMessage>,
+        bubbleOnly: Boolean,
+        autoLaunchBubble: Boolean) {
+        // Do not show notification if there are no messages, unless this is
+        // for a bubble notification.
+        if (messages.isEmpty()
+            && inlineReplyMessages.isEmpty()
+            && !bubbleOnly) {
+            return
+        }
+
+        // However, if this is not Android Q or later, there is no such thing
+        // as a "bubble only" notification, so we should just return.
+        if (bubbleOnly && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             return
         }
 
         // Notification metadata
-        val conversationId = messages[0].conversationId
         val did = conversationId.did
         val contact = conversationId.contact
 
+        // Do not show bubble-only notifications if we're not allowed to
+        // bubble.
+        if (bubbleOnly && !canBubble(did, contact)) {
+            return
+        }
+
         @Suppress("ConstantConditionIf")
-        var contactName = if (!BuildConfig.IS_DEMO) {
-            getContactName(context, contact)
+        val contactName = if (!BuildConfig.IS_DEMO) {
+            getContactName(context, contact) ?: getFormattedPhoneNumber(contact)
         } else {
             net.kourlas.voipms_sms.demo.getContactName(contact)
         }
-        if (contactName == null) {
-            contactName = getFormattedPhoneNumber(contact)
-        }
+
+        val largeIcon = applyCircularMask(
+            getContactPhotoBitmap(
+                context,
+                contactName,
+                contact,
+                context.resources.getDimensionPixelSize(
+                    android.R.dimen.notification_large_icon_height)))
+        val adaptiveIcon = IconCompat.createWithAdaptiveBitmap(
+            getContactPhotoAdaptiveBitmap(context, contactName, contact))
 
         // Notification channel
-        createDefaultNotificationChannel()
-        val channel = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            context.getString(R.string.notifications_channel_default)
-        } else {
-            val channel = notificationManager.getNotificationChannel(
-                context.getString(R.string.notifications_channel_contact,
-                                  did, contact))
-            if (channel == null) {
-                context.getString(R.string.notifications_channel_default)
-            } else {
-                context.getString(R.string.notifications_channel_contact,
-                                  did, contact)
-            }
-        }
+        val channel = getNotificationChannelId(did, contact)
 
         // General notification properties
         val notification = NotificationCompat.Builder(context, channel)
         notification.setSmallIcon(R.drawable.ic_chat_toolbar_24dp)
-        notification.setLargeIcon(getLargeIconBitmap(contact))
+        notification.setLargeIcon(largeIcon)
         notification.setAutoCancel(true)
-        notification.addPerson("tel:$contact")
+        notification.addPerson(
+            Person.Builder()
+                .setName(contactName)
+                .setKey(contact)
+                .setIcon(adaptiveIcon)
+                .setUri("tel:${contact}")
+                .build())
         notification.setCategory(Notification.CATEGORY_MESSAGE)
         notification.color = 0xFFAA0000.toInt()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -402,20 +481,83 @@ class Notifications private constructor(
         }
         notification.setGroupAlertBehavior(
             NotificationCompat.GROUP_ALERT_CHILDREN)
+        notification.setShortcutId(conversationId.getId())
+        notification.setLocusId(LocusIdCompat(conversationId.getId()))
+        if (bubbleOnly || inlineReplyMessages.isNotEmpty()) {
+            // This means no new messages were received, so we should avoid
+            // notifying the user if we can.
+            notification.setOnlyAlertOnce(true)
+        }
 
         // Notification text
         val person = Person.Builder().setName(
             context.getString(R.string.notifications_current_user)).build()
         val style = NotificationCompat.MessagingStyle(person)
-        for (message in messages) {
-            style.addMessage(
-                message.text,
-                message.date.time,
-                if (message.isIncoming)
-                    Person.Builder().setName(contactName).build()
-                else null)
+        val existingMessages =
+            notificationMessages[conversationId] ?: emptyList()
+        for (existingMessage in existingMessages) {
+            style.addHistoricMessage(existingMessage)
         }
+
+        val messagesToAdd = mutableListOf<Message>()
+        if (messages.isNotEmpty()) {
+            for (message in messages.reversed()) {
+                if (existingMessages.isNotEmpty()
+                    && existingMessages.last().text == message.text
+                    && existingMessages.last().person != null
+                    && existingMessages.last().timestamp == message.date.time) {
+                    break
+                }
+                messagesToAdd.add(message)
+            }
+            messagesToAdd.reverse()
+        }
+
+        if (inlineReplyMessages.isNotEmpty()) {
+            for (message in inlineReplyMessages) {
+                style.addMessage(message.text, Date().time, null as Person?)
+            }
+        } else if (messagesToAdd.isNotEmpty()) {
+            val notificationMessages = messagesToAdd.map {
+                NotificationCompat.MessagingStyle.Message(
+                    it.text,
+                    it.date.time,
+                    if (it.isIncoming)
+                        Person.Builder()
+                            .setName(contactName)
+                            .setKey(contact)
+                            .setIcon(adaptiveIcon)
+                            .setUri("tel:${it.contact}")
+                            .build()
+                    else null)
+            }
+            for (message in notificationMessages) {
+                style.addMessage(message)
+            }
+            notification.setShowWhen(true)
+            notification.setWhen(messagesToAdd.last().date.time)
+        }
+        notificationMessages[conversationId] =
+            (style.historicMessages.toMutableList()
+             + style.messages.toMutableList())
         notification.setStyle(style)
+
+        // Mark as read button
+        val markReadIntent = MarkReadService.getIntent(context, did, contact)
+        markReadIntent.component = ComponentName(
+            context, MarkReadReceiver::class.java)
+        val markReadPendingIntent = PendingIntent.getBroadcast(
+            context, (did + contact + "markRead").hashCode(),
+            markReadIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val markReadAction = NotificationCompat.Action.Builder(
+            R.drawable.ic_drafts_toolbar_24dp,
+            context.getString(R.string.notifications_button_mark_read),
+            markReadPendingIntent)
+            .setSemanticAction(
+                NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
+            .setShowsUserInterface(false)
+            .build()
+        notification.addAction(markReadAction)
 
         // Reply button
         val replyIntent = SendMessageService.getIntent(
@@ -468,23 +610,6 @@ class Notifications private constructor(
             notification.addAction(visibleReplyActionBuilder.build())
         }
 
-        // Mark as read button
-        val markReadIntent = MarkReadService.getIntent(context, did, contact)
-        markReadIntent.component = ComponentName(
-            context, MarkReadReceiver::class.java)
-        val markReadPendingIntent = PendingIntent.getBroadcast(
-            context, (did + contact + "markRead").hashCode(),
-            markReadIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        val markReadAction = NotificationCompat.Action.Builder(
-            R.drawable.ic_drafts_toolbar_24dp,
-            context.getString(R.string.notifications_button_mark_read),
-            markReadPendingIntent)
-            .setSemanticAction(
-                NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
-            .setShowsUserInterface(false)
-            .build()
-        notification.addAction(markReadAction)
-
         // Group notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val groupNotification = NotificationCompat.Builder(context, channel)
@@ -526,6 +651,26 @@ class Notifications private constructor(
             (did + contact).hashCode(),
             PendingIntent.FLAG_CANCEL_CURRENT))
 
+        // Bubble
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val bubbleIntent = Intent(context,
+                                      ConversationBubbleActivity::class.java)
+            bubbleIntent.putExtra(context.getString(
+                R.string.conversation_did), did)
+            bubbleIntent.putExtra(context.getString(
+                R.string.conversation_contact), contact)
+            val bubblePendingIntent = PendingIntent.getActivity(context, 0,
+                                                                bubbleIntent, 0)
+            val bubbleMetadata =
+                NotificationCompat.BubbleMetadata.Builder(bubblePendingIntent,
+                                                          adaptiveIcon)
+                    .setDesiredHeight(600)
+                    .setSuppressNotification(bubbleOnly)
+                    .setAutoExpandBubble(autoLaunchBubble)
+                    .build()
+            notification.bubbleMetadata = bubbleMetadata
+        }
+
         // Notification ID
         var id = notificationIds[conversationId]
         if (id == null) {
@@ -546,11 +691,59 @@ class Notifications private constructor(
 
     /**
      * Cancels the notification associated with the specified conversation ID.
+     * Re-issues it as bubble only instead if asked.
      */
     fun cancelNotification(conversationId: ConversationId) {
         val id = notificationIds[conversationId] ?: return
         NotificationManagerCompat.from(context).cancel(id)
+        clearNotificationState(conversationId)
+    }
 
+    /**
+     * Clears our internal state associated with a notification, cancelling
+     * the group notification if required.
+     */
+    fun clearNotificationState(conversationId: ConversationId) {
+        notificationMessages.remove(conversationId)
+        validateGroupNotification()
+    }
+
+    /**
+     * Gets the notification channel ID for the provided DID and contact. The
+     * channel is guaranteed to exist.
+     */
+    private fun getNotificationChannelId(did: String, contact: String): String {
+        createDefaultNotificationChannel()
+        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            // Prior to Android O, this doesn't matter.
+            context.getString(R.string.notifications_channel_default)
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            // Prior to Android R, conversations did not have a separate
+            // section in the notification settings, so we only create the
+            // conversation specific channel if the user requested it.
+            val channel = notificationManager.getNotificationChannel(
+                context.getString(R.string.notifications_channel_contact,
+                                  did, contact))
+            if (channel == null) {
+                context.getString(R.string.notifications_channel_default)
+            } else {
+                context.getString(R.string.notifications_channel_contact,
+                                  did, contact)
+            }
+        } else {
+            // As of Android R, conversations have a separate section in the
+            // notification settings, so we always create the conversation
+            // specific channel.
+            createDidNotificationChannel(did, contact)
+            context.getString(R.string.notifications_channel_contact,
+                              did, contact)
+        }
+    }
+
+    /**
+     * Cancels the group notification if required.
+     */
+    private fun validateGroupNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val noOtherNotifications = notificationManager.activeNotifications
                 .filter {
@@ -565,25 +758,8 @@ class Notifications private constructor(
         }
     }
 
-    /**
-     * Get the large icon bitmap for the specified contact.
-     */
-    private fun getLargeIconBitmap(contact: String): Bitmap? = try {
-        var largeIconBitmap = getContactPhotoBitmap(context, contact)
-        if (largeIconBitmap != null) {
-            largeIconBitmap = Bitmap.createScaledBitmap(largeIconBitmap,
-                                                        256, 256, false)
-            largeIconBitmap = applyCircularMask(largeIconBitmap)
-            largeIconBitmap
-        } else {
-            null
-        }
-    } catch (_: Exception) {
-        null
-    }
-
     companion object {
-        // It is not a leak to store an instance to the Application object,
+        // It is not a leak to store an instance to the application context,
         // since it has the same lifetime as the application itself
         @SuppressLint("StaticFieldLeak")
         private var instance: Notifications? = null
@@ -602,10 +778,10 @@ class Notifications private constructor(
          * Gets the sole instance of the Notifications class. Initializes the
          * instance if it does not already exist.
          */
-        fun getInstance(application: Application): Notifications =
+        fun getInstance(context: Context): Notifications =
             instance ?: synchronized(this) {
                 instance ?: Notifications(
-                    application as CustomApplication).also { instance = it }
+                    context.applicationContext).also { instance = it }
             }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ class MarkReadService : JobIntentService() {
                 conversationId)
 
             // Cancel existing notification
-            Notifications.getInstance(application).cancelNotification(
+            Notifications.getInstance(applicationContext).cancelNotification(
                 conversationId)
         } catch (e: Exception) {
             logException(e)

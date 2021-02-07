@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ class NewConversationRecyclerViewAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup,
-                                    viewType: Int): ContactViewHolder = // There is only one item view type
+                                    viewType: Int): ContactViewHolder =
+        // There is only one item view type
         ContactViewHolder(LayoutInflater.from(parent.context)
                               .inflate(R.layout.new_conversation_item,
                                        parent, false))
@@ -134,31 +135,10 @@ class NewConversationRecyclerViewAdapter(
             holder.contactBadge.setBackgroundResource(R.color.typed_in_contact)
             holder.contactBadge.setImageResource(
                 R.drawable.ic_dialpad_toolbar_24dp)
-            holder.contactBadgeLetterText.text = ""
         } else if (contactItem is ContactItem) {
             holder.contactBadge.scaleType = ImageView.ScaleType.CENTER_CROP
-            if (contactItem.bitmap != null) {
-                // Show bitmap for contact with bitmap
-                holder.contactBadge.setBackgroundResource(0)
-                holder.contactBadge.setImageBitmap(contactItem.bitmap)
-                holder.contactBadgeLetterText.text = ""
-            } else {
-                // Show material design color and first letter for contact
-                // without bitmap
-                holder.contactBadge.setBackgroundColor(getMaterialDesignColour(
-                    contactItem.primaryPhoneNumber))
-                getContactInitial(contactItem.getSortingName()).let {
-                    if (it[0].isLetter()) {
-                        holder.contactBadgeLetterText.text = it
-                        holder.contactBadge.setImageResource(
-                            android.R.color.transparent)
-                    } else {
-                        holder.contactBadgeLetterText.text = ""
-                        holder.contactBadge.setImageResource(
-                            R.drawable.ic_account_circle_inverted_toolbar_24dp)
-                    }
-                }
-            }
+            holder.contactBadge.setBackgroundResource(0)
+            holder.contactBadge.setImageBitmap(contactItem.bitmap)
         }
     }
 
@@ -410,7 +390,7 @@ class NewConversationRecyclerViewAdapter(
     private fun loadAllContactItems() {
         @Suppress("ConstantConditionIf")
         if (BuildConfig.IS_DEMO) {
-            allContactItems.addAll(getNewConversationContacts())
+            allContactItems.addAll(getNewConversationContacts(activity))
             return
         }
 
@@ -444,11 +424,20 @@ class NewConversationRecyclerViewAdapter(
                         val photoUri = cursor.getString(
                             cursor.getColumnIndex(
                                 ContactsContract.Contacts.PHOTO_URI))
-                        val bitmap = if (photoUri != null) {
-                            getBitmapFromUri(activity, Uri.parse(photoUri))
-                        } else {
-                            null
-                        }
+                        val bitmap = photoUri?.let {
+                            getBitmapFromUri(
+                                activity,
+                                Uri.parse(it),
+                                activity.resources.getDimensionPixelSize(
+                                    R.dimen.contact_badge))
+                        } ?: getGenericContactPhotoBitmap(
+                            activity,
+                            cursor.getString(
+                                cursor.getColumnIndex(
+                                    ContactsContract.Contacts.DISPLAY_NAME)),
+                            phoneNumber,
+                            activity.resources.getDimensionPixelSize(
+                                R.dimen.contact_badge))
 
                         val previousContactItem =
                             if (allContactItems.size > 0) {
@@ -503,8 +492,6 @@ class NewConversationRecyclerViewAdapter(
             itemView.findViewById(R.id.letter)
         internal val contactBadge: QuickContactBadge =
             itemView.findViewById(R.id.photo)
-        internal val contactBadgeLetterText: TextView =
-            itemView.findViewById(R.id.photo_letter)
         internal val contactText: TextView =
             itemView.findViewById(R.id.contact)
         internal val phoneNumberText: TextView =
@@ -552,7 +539,7 @@ class NewConversationRecyclerViewAdapter(
     class ContactItem(val id: Long,
                       val name: String,
                       val phoneNumbersAndTypes: MutableList<PhoneNumberAndType>,
-                      val bitmap: Bitmap?) :
+                      val bitmap: Bitmap) :
         BaseContactItem(phoneNumbersAndTypes[0].phoneNumber) {
         /**
          * Returns true if the name and phone number are different.

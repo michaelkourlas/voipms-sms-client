@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import net.kourlas.voipms_sms.preferences.controls.MasterSwitchPreference
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
+import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.*
 
 class DidsPreferencesFragment : PreferenceFragmentCompat(),
@@ -182,9 +183,11 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
 
             if (dids.isNotEmpty()) {
                 // Re-register for push notifications when DIDs change
-                enablePushNotifications(it.application,
+                enablePushNotifications(it.applicationContext,
                                         activityToShowError = it)
             }
+
+            runOnNewThread { Database.getInstance(it).updateShortcuts() }
             replaceIndexOnNewThread(it)
         }
 

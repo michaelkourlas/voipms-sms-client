@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2021 Michael Kourlas
+ * Copyright (C) 2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,6 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.sms
+package net.kourlas.voipms_sms.conversation
 
-/**
- * A conversation is uniquely identified by its participants, which are
- * represented by a DID and a contact phone number.
- *
- * @param did The DID associated with the conversation.
- * @param contact The contact associated with the conversation.
- */
-data class ConversationId(val did: String, val contact: String) {
-    /**
-     * Gets a unique identifier for this conversation.
-     */
-    fun getId(): String {
-        return "${did}_${contact}"
-    }
-}
+class ConversationBubbleActivity: ConversationActivity(bubble = true)

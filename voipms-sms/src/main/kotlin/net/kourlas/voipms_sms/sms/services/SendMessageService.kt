@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import androidx.core.app.JobIntentService
 import androidx.core.app.RemoteInput
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -56,10 +57,6 @@ class SendMessageService : JobIntentService() {
 
         val conversationId = handleSendMessage(intent) ?: return
 
-        // Cancel any existing notification with this conversation ID
-        Notifications.getInstance(application)
-            .cancelNotification(conversationId)
-
         // Send a broadcast indicating that the messages have been sent
         // (or that an attempt to send them has been made)
         val sentMessageBroadcastIntent = Intent(
@@ -88,7 +85,8 @@ class SendMessageService : JobIntentService() {
 
             // Retrieve the DID, contact, and list of message texts from the
             // intent
-            val (did, contact, messageTexts, databaseId) = getIntentData(intent)
+            val (did, contact, messageTexts, databaseId, bubble) =
+                getIntentData(intent)
 
             // Terminate quietly if impossible to send message due to account
             // configuration
@@ -148,7 +146,25 @@ class SendMessageService : JobIntentService() {
                 sendMessage(message)
             }
 
-            return ConversationId(did, contact)
+            val conversationId = ConversationId(did, contact)
+
+            // Issue the notification again to follow inline reply convention,
+            // if applicable; otherwise, suppress the notification
+            val remoteInput = RemoteInput.getResultsFromIntent(intent)
+            if (messages.isNotEmpty() && remoteInput?.getCharSequence(
+                    applicationContext.getString(
+                        R.string.notifications_reply_key))
+                    ?.toString() != null) {
+                Notifications.getInstance(applicationContext).showNotifications(
+                    application as CustomApplication,
+                    setOf(conversationId),
+                    inlineReplyMessages = messages)
+            } else if (!bubble) {
+                Notifications.getInstance(applicationContext)
+                    .cancelNotification(conversationId)
+            }
+
+            return conversationId
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(
@@ -169,12 +185,14 @@ class SendMessageService : JobIntentService() {
         val contact = intent.getStringExtra(
             applicationContext.getString(R.string.send_message_contact))
                       ?: throw Exception("Contact phone number missing")
+        val bubble = intent.getBooleanExtra(
+            applicationContext.getString(R.string.send_message_bubble), false)
 
         val databaseId = intent.getLongExtra(getString(
             R.string.send_message_database_id), -1)
         if (databaseId != -1L) {
             return IntentData(
-                did, contact, null, databaseId)
+                did, contact, null, databaseId, bubble)
         }
 
         // Extract the message text provided by inline reply if it exists;
@@ -215,7 +233,7 @@ class SendMessageService : JobIntentService() {
         }
         messageTexts.add(String(bytes.toByteArray(), Charsets.UTF_8))
         return IntentData(
-            did, contact, messageTexts, null)
+            did, contact, messageTexts, null, bubble)
     }
 
     /**
@@ -327,9 +345,11 @@ class SendMessageService : JobIntentService() {
     /**
      * Represents the data in the intent sent to this service.
      */
-    data class IntentData(val did: String, val contact: String,
+    data class IntentData(val did: String,
+                          val contact: String,
                           val messageTexts: List<String>?,
-                          val databaseId: Long?)
+                          val databaseId: Long?,
+                          val bubble: Boolean)
 
     /**
      * Represents a message that has been input into the database but has not
@@ -362,11 +382,16 @@ class SendMessageService : JobIntentService() {
          * Sends the specified message to the specified contact and from the
          * specified DID.
          */
-        fun startService(context: Context, did: String, contact: String,
-                         text: String) {
+        fun startService(context: Context,
+                         did: String,
+                         contact: String,
+                         text: String,
+                         bubble: Boolean = false) {
             val intent = getIntent(
                 context, did, contact)
             intent.putExtra(context.getString(R.string.send_message_text), text)
+            intent.putExtra(context.getString(R.string.send_message_bubble),
+                            bubble)
             startService(
                 context, intent)
         }

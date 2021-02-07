@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ VoIP.ms SMS
-  ~ Copyright (C) 2015-2020 Michael Kourlas
+  ~ Copyright (C) 2015-2021 Michael Kourlas
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -140,6 +140,7 @@
     <string name="conversation_action_export">Export</string>
     <string name="conversation_action_info">View details</string>
     <string name="conversation_action_notifications">Notifications</string>
+    <string name="conversation_action_bubble">Show as bubble</string>
     <string name="conversation_action_resend">Resend</string>
     <string name="conversation_action_search">Search</string>
     <string name="conversation_action_send">Send</string>
@@ -257,6 +258,7 @@
     <string name="send_message_contact" translatable="false">send_message_contact</string>
     <string name="send_message_database_id" translatable="false">send_message_database_id</string>
     <string name="send_message_did" translatable="false">send_message_did</string>
+    <string name="send_message_bubble" translatable="false">send_message_bubble</string>
     <string name="send_message_error_api_error">Not sent: API error \'%1$s\'</string>
     <string name="send_message_error_api_error_invalid_credentials">Not sent: invalid credentials</string>
     <string name="send_message_error_api_error_invalid_dst">Not sent: invalid phone number</string>
@@ -334,12 +336,12 @@
     <!-- SINGLETONS -->
 
     <!-- Notifications -->
-    <string name="notifications_current_user">Me</string>
+    <string name="notifications_current_user">You</string>
     <string name="notifications_group_key" translatable="false">group</string>
     <string name="notifications_reply_key" translatable="false">notification_reply</string>
     <string name="notifications_button_cancel">Cancel</string>
     <string name="notifications_button_reply">Reply</string>
-    <string name="notifications_button_mark_read">Mark Read</string>
+    <string name="notifications_button_mark_read">Mark as read</string>
     <string name="notifications_channel_group_other">channel_group_other</string>
     <string name="notifications_channel_group_other_title">Other</string>
     <string name="notifications_channel_group_did">channel_group_did_%1$s</string>
@@ -365,6 +367,7 @@
     <!-- SHORTCUTS -->
     <string name="new_conversation_shortcut_short">Compose</string>
     <string name="new_conversation_shortcut_long">New conversation</string>
+    <string name="pinned_shortcut_disable_error">This conversation no longer exists.</string>
 
     <!-- LABELS -->
     <string name="ok">OK</string>

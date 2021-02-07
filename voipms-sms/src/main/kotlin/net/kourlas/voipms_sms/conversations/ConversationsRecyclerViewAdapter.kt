@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2020 Michael Kourlas
+ * Copyright (C) 2015-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,29 +107,8 @@ class ConversationsRecyclerViewAdapter<T>(
             if (conversationItem.checked) 1 else 0
         if (!conversationItem.checked) {
             holder.contactBadge.assignContactFromPhone(message.contact, true)
-            if (conversationItem.contactBitmap != null) {
-                // Show bitmap for contact with bitmap
-                holder.contactBadge.setBackgroundResource(0)
-                holder.contactBadge.setImageBitmap(
-                    conversationItem.contactBitmap)
-                holder.contactBadgeLetterText.text = ""
-            } else {
-                // Show material design color and first letter for contact
-                // without bitmap
-                holder.contactBadge.setBackgroundColor(getMaterialDesignColour(
-                    message.contact))
-                getContactInitial(conversationItem.contactName).let {
-                    if (it[0].isLetter()) {
-                        holder.contactBadgeLetterText.text = it
-                        holder.contactBadge.setImageResource(
-                            android.R.color.transparent)
-                    } else {
-                        holder.contactBadgeLetterText.text = ""
-                        holder.contactBadge.setImageResource(
-                            R.drawable.ic_account_circle_inverted_toolbar_24dp)
-                    }
-                }
-            }
+            holder.contactBadge.setImageBitmap(
+                conversationItem.contactBitmap)
         }
     }
 
@@ -373,13 +352,14 @@ class ConversationsRecyclerViewAdapter<T>(
                         contactName
                 }
 
-                val bitmap = getContactPhotoBitmap(activity,
-                                                   message.contact,
-                                                   contactBitmapCache)
-                if (bitmap != null) {
-                    resultsObject.contactBitmaps[message.contact] =
-                        bitmap
-                }
+                val bitmap = getContactPhotoBitmap(
+                    activity,
+                    contactName,
+                    message.contact,
+                    activity.resources.getDimensionPixelSize(
+                        R.dimen.contact_badge),
+                    contactBitmapCache)
+                resultsObject.contactBitmaps[message.contact] = bitmap
             }
 
             return resultsObject
@@ -456,11 +436,10 @@ class ConversationsRecyclerViewAdapter<T>(
                         val contact = newMessages[newIdx].contact
                         _conversationItems.add(
                             newIdx,
-                            ConversationItem(newMessages[newIdx],
-                                             resultsObject.contactNames[
-                                                 contact],
-                                             resultsObject.contactBitmaps[
-                                                 contact]))
+                            ConversationItem(
+                                newMessages[newIdx],
+                                resultsObject.contactNames[contact],
+                                resultsObject.contactBitmaps[contact]!!))
                         notifyItemInserted(newIdx)
                         newIdx += 1
                     }
@@ -558,7 +537,7 @@ class ConversationsRecyclerViewAdapter<T>(
      * @param contactBitmap The photo of the displayed contact.
      */
     inner class ConversationItem(var message: Message, val contactName: String?,
-                                 val contactBitmap: Bitmap?) {
+                                 val contactBitmap: Bitmap) {
         private var _checked = false
         val checked: Boolean
             get() = _checked
@@ -605,8 +584,6 @@ class ConversationsRecyclerViewAdapter<T>(
             itemView.findViewById(R.id.view_switcher)
         internal val contactBadge: QuickContactBadge =
             itemView.findViewById(R.id.photo)
-        internal val contactBadgeLetterText: TextView =
-            itemView.findViewById(R.id.photo_letter)
         internal val contactTextView: TextView =
             itemView.findViewById(R.id.contact)
         internal val messageTextView: TextView =
