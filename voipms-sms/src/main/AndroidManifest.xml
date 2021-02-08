@@ -108,6 +108,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.service.chooser.chooser_target_service"
+                android:value="androidx.sharetarget.ChooserTargetServiceCompat" />
         </activity>
         <activity
             android:name=".conversation.ConversationBubbleActivity"
@@ -117,8 +121,7 @@
         <activity
             android:name=".newConversation.NewConversationActivity"
             android:noHistory="true"
-            android:parentActivityName=".conversations.ConversationsActivity">
-        </activity>
+            android:parentActivityName=".conversations.ConversationsActivity" />
         <activity
             android:name=".preferences.activities.PreferencesActivity"
             android:label="@string/preferences_name"
