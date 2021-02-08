@@ -22,6 +22,7 @@ import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.newConversation.NewConversationRecyclerViewAdapter
 import net.kourlas.voipms_sms.sms.Message
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 import net.kourlas.voipms_sms.utils.getGenericContactPhotoBitmap
 import java.util.*
 
@@ -156,5 +157,5 @@ fun getContactName(phoneNumber: String): String = when (phoneNumber) {
     "5145553495" -> "Monica Alexander"
     "6135556019" -> "Jennifer Morris"
     "6135551242" -> "Martin Wheeler"
-    else -> phoneNumber
+    else -> getFormattedPhoneNumber(phoneNumber)
 }
