@@ -36,6 +36,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
+import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
@@ -631,6 +632,21 @@ open class ConversationActivity(val bubble: Boolean = false) :
             bubbleItem.isVisible = false
         }
 
+        // Hide certain menu options if we are in a bubble, but show a menu
+        // option that opens the full view.
+        if (bubble) {
+            val archiveItem = menu.findItem(R.id.archive_button)
+            archiveItem.isVisible = false
+            val unarchiveItem = menu.findItem(R.id.unarchive_button)
+            unarchiveItem.isVisible = false
+            val deleteItem = menu.findItem(R.id.delete_button)
+            deleteItem.isVisible = false
+            val notificationItem = menu.findItem(R.id.notifications_button)
+            notificationItem.isVisible = false
+            val exportItem = menu.findItem(R.id.export_button)
+            exportItem.isVisible = false
+        }
+
         // Configure the search box to trigger adapter filtering when the
         // text changes
         val searchView = menu.findItem(
@@ -692,6 +708,19 @@ open class ConversationActivity(val bubble: Boolean = false) :
      * Handles the up button.
      */
     private fun onUpButtonClick(): Boolean {
+        // Launch the conversation if we are in a bubble.
+        if (bubble) {
+            val intent = Intent(this, ConversationActivity::class.java)
+            intent.putExtra(getString(
+                R.string.conversation_did), did)
+            intent.putExtra(getString(
+                R.string.conversation_contact), contact)
+            val stackBuilder = TaskStackBuilder.create(this)
+            stackBuilder.addNextIntentWithParentStack(intent)
+            stackBuilder.startActivities()
+            return false
+        }
+
         // Override standard "up" behaviour because this activity
         // has multiple parents
         runOnNewThread {
@@ -1158,6 +1187,11 @@ open class ConversationActivity(val bubble: Boolean = false) :
      * is archived.
      */
     private fun updateButtons() = runOnNewThread {
+        // These buttons are never shown in a bubble.
+        if (bubble) {
+            return@runOnNewThread
+        }
+
         if (Database.getInstance(this)
                 .isConversationArchived(conversationId)) {
             runOnUiThread {
