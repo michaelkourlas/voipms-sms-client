@@ -4,6 +4,7 @@
 * Support for notification bubbles
 * Support for direct share
 * Improvements to notification direct reply
+* Allow swiping to archive or delete items
 * Use undo snackbars instead of dialogs where possible
 * Switch cloud functions provider to IBM
 

@@ -17,4 +17,7 @@
 
 package net.kourlas.voipms_sms.conversation
 
+/**
+ * Activity used to display messages in a single conversation in a bubble.
+ */
 class ConversationBubbleActivity: ConversationActivity(bubble = true)

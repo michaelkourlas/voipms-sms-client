@@ -87,13 +87,14 @@ dependencies {
     primaryImplementation 'com.google.firebase:firebase-messaging:21.0.1'
 
     // Additional libraries and fixes
-    implementation 'com.squareup.moshi:moshi:1.11.0'
     implementation 'com.squareup.moshi:moshi-adapters:1.11.0'
+    implementation 'com.squareup.moshi:moshi:1.11.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.takisoft.preferencex:preferencex-datetimepicker:1.1.0'
     implementation 'com.takisoft.preferencex:preferencex-ringtone:1.1.0'
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
     implementation 'de.adorsys.android:securestoragelibrary:1.2.2'
+    implementation 'it.xabaras.android:recyclerview-swipedecorator:1.2.3'
     kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.11.0'
 }
 

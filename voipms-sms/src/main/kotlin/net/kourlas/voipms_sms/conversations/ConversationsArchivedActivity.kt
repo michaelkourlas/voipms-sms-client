@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,85 +17,7 @@
 
 package net.kourlas.voipms_sms.conversations
 
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import androidx.appcompat.view.ActionMode
-import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.utils.runOnNewThread
-
 /**
  * Activity that contains a list of archived conversations.
  */
-class ConversationsArchivedActivity : ConversationsActivity() {
-    override fun setupToolbar() {
-        super.setupToolbar()
-
-        // Add title to bar and enable up button
-        supportActionBar?.let {
-            it.title = getString(R.string.conversations_archived_name)
-            it.setHomeButtonEnabled(true)
-            it.setDisplayHomeAsUpEnabled(true)
-        }
-    }
-
-    override fun setupNewConversationButton() {
-        // Remove new conversation button
-        findViewById<View>(R.id.chat_button).visibility = View.GONE
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val ret = super.onCreateOptionsMenu(menu)
-
-        // Disable most of the menu
-        menu.findItem(R.id.archived_button).isVisible = false
-        menu.findItem(R.id.preferences_button).isVisible = false
-        menu.findItem(R.id.help_button).isVisible = false
-        menu.findItem(R.id.privacy_button).isVisible = false
-        menu.findItem(R.id.license_button).isVisible = false
-        menu.findItem(R.id.credits_button).isVisible = false
-
-        return ret
-    }
-
-    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        val ret = super.onCreateActionMode(mode, menu)
-
-        // Remove the archive button and replace it with an unarchive button
-        menu.findItem(R.id.archive_button).isVisible = false
-        menu.findItem(R.id.unarchive_button).isVisible = true
-
-        return ret
-    }
-
-    override fun onActionItemClicked(mode: ActionMode,
-                                     item: MenuItem): Boolean {
-        // Only handle the unarchive button; the rest are handled by the
-        // superclass
-        when (item.itemId) {
-            R.id.unarchive_button -> return unarchiveButtonHandler(mode)
-        }
-
-        return super.onActionItemClicked(mode, item)
-    }
-
-    /**
-     * Handles the unarchive button.
-     */
-    private fun unarchiveButtonHandler(mode: ActionMode): Boolean {
-        runOnNewThread {
-            adapter
-                .filter { it.checked }
-                .forEach {
-                    Database.getInstance(applicationContext)
-                        .markConversationUnarchived(it.message.conversationId)
-                }
-            runOnUiThread {
-                mode.finish()
-                adapter.refresh()
-            }
-        }
-        return true
-    }
-}
+class ConversationsArchivedActivity : ConversationsActivity(archived = true)

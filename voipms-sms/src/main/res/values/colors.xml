@@ -49,6 +49,8 @@
     <color name="swipe_refresh_icon">@color/primary</color>
     <color name="toolbar_icon">@color/primary_text</color>
     <color name="typed_in_contact">@color/primary</color>
+    <color name="delete_swipe">@color/primary_variant</color>
+    <color name="archive_swipe">#188038</color>
 
     <!-- Material design colors -->
     <color name="colorAccent">@color/primary</color>

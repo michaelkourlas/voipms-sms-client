@@ -19,6 +19,7 @@ package net.kourlas.voipms_sms.conversations
 
 import android.content.*
 import android.content.pm.PackageManager
+import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -35,12 +36,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
@@ -62,7 +65,8 @@ import java.util.*
 /**
  * Activity that contains a generic list of conversations.
  */
-open class ConversationsActivity : AppCompatActivity(),
+open class ConversationsActivity(val archived: Boolean = false) :
+    AppCompatActivity(),
     ActionMode.Callback, View.OnClickListener,
     View.OnLongClickListener,
     ActivityCompat.OnRequestPermissionsResultCallback {
@@ -148,10 +152,13 @@ open class ConversationsActivity : AppCompatActivity(),
     /**
      * Sets up the activity toolbar.
      */
-    open fun setupToolbar() {
+    fun setupToolbar() {
         // Set up toolbar
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.let {
+            if (archived) {
+                it.title = getString(R.string.conversations_archived_name)
+            }
             it.setDisplayHomeAsUpEnabled(true)
             it.setHomeAsUpIndicator(R.drawable.ic_menu_toolbar_24dp)
         }
@@ -170,6 +177,67 @@ open class ConversationsActivity : AppCompatActivity(),
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
+        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+            0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onChildDraw(c: Canvas, recyclerView: RecyclerView,
+                                     viewHolder: RecyclerView.ViewHolder,
+                                     dX: Float, dY: Float, actionState: Int,
+                                     isCurrentlyActive: Boolean) {
+                RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder,
+                                                   dX, dY, actionState,
+                                                   isCurrentlyActive)
+                    .addSwipeLeftBackgroundColor(
+                        ContextCompat.getColor(applicationContext,
+                                               R.color.archive_swipe))
+                    .addSwipeLeftActionIcon(
+                        if (archived) R.drawable.ic_unarchive_toolbar_24dp
+                        else R.drawable.ic_archive_toolbar_24dp)
+                    .addSwipeRightBackgroundColor(
+                        ContextCompat.getColor(applicationContext,
+                                               R.color.delete_swipe))
+                    .addSwipeRightActionIcon(R.drawable.ic_delete_toolbar_24dp)
+                    .create()
+                    .decorate()
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY,
+                                  actionState, isCurrentlyActive)
+            }
+
+            override fun onMove(recyclerView: RecyclerView,
+                                viewHolder: RecyclerView.ViewHolder,
+                                target: RecyclerView.ViewHolder): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder,
+                                  direction: Int) {
+                if (viewHolder.adapterPosition == RecyclerView.NO_POSITION) {
+                    return
+                }
+                when (direction) {
+                    ItemTouchHelper.LEFT -> runOnNewThread {
+                        if (archived) {
+                            Database.getInstance(applicationContext)
+                                .markConversationUnarchived(
+                                    adapter[viewHolder.adapterPosition].message
+                                        .conversationId)
+                        } else {
+                            Database.getInstance(applicationContext)
+                                .markConversationArchived(
+                                    adapter[viewHolder.adapterPosition].message
+                                        .conversationId)
+                        }
+                        runOnUiThread {
+                            adapter.refresh()
+                        }
+                    }
+                    ItemTouchHelper.RIGHT -> deleteConversations(
+                        listOf(adapter[viewHolder.adapterPosition].message))
+                }
+            }
+        }
+        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(
+            recyclerView)
+
         val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
             R.id.swipe_refresh_layout)
         swipeRefreshLayout.setOnRefreshListener {
@@ -182,17 +250,22 @@ open class ConversationsActivity : AppCompatActivity(),
     /**
      * Sets up the new conversation floating action button.
      */
-    open fun setupNewConversationButton() {
-        findViewById<FloatingActionButton>(R.id.chat_button).let {
-            if (!didsConfigured(applicationContext)) {
-                (it as View).visibility = View.GONE
-            } else {
-                (it as View).visibility = View.VISIBLE
-            }
-            it.setOnClickListener {
-                val newConversationIntent = Intent(
-                    this, NewConversationActivity::class.java)
-                startActivity(newConversationIntent)
+    private fun setupNewConversationButton() {
+        if (archived) {
+            // Remove new conversation button
+            findViewById<View>(R.id.chat_button).visibility = View.GONE
+        } else {
+            findViewById<FloatingActionButton>(R.id.chat_button).let {
+                if (!didsConfigured(applicationContext)) {
+                    (it as View).visibility = View.GONE
+                } else {
+                    (it as View).visibility = View.VISIBLE
+                }
+                it.setOnClickListener {
+                    val newConversationIntent = Intent(
+                        this, NewConversationActivity::class.java)
+                    startActivity(newConversationIntent)
+                }
             }
         }
     }
@@ -453,6 +526,15 @@ open class ConversationsActivity : AppCompatActivity(),
             searchAutoComplete.setTextCursorDrawable(R.drawable.search_cursor)
         }
 
+        if (archived) {
+            menu.findItem(R.id.archived_button).isVisible = false
+            menu.findItem(R.id.preferences_button).isVisible = false
+            menu.findItem(R.id.help_button).isVisible = false
+            menu.findItem(R.id.privacy_button).isVisible = false
+            menu.findItem(R.id.license_button).isVisible = false
+            menu.findItem(R.id.credits_button).isVisible = false
+        }
+
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -533,6 +615,13 @@ open class ConversationsActivity : AppCompatActivity(),
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         val inflater = mode.menuInflater
         inflater.inflate(R.menu.conversations_secondary, menu)
+
+        if (archived) {
+            // Remove the archive button and replace it with an unarchive button
+            menu.findItem(R.id.archive_button).isVisible = false
+            menu.findItem(R.id.unarchive_button).isVisible = true
+        }
+
         return true
     }
 
@@ -543,9 +632,10 @@ open class ConversationsActivity : AppCompatActivity(),
                                      item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.archive_button -> return onArchiveButtonClick(mode)
+            R.id.unarchive_button -> return onUnarchiveButtonClick(mode)
             R.id.mark_read_button -> return onMarkReadButtonClick(mode)
             R.id.mark_unread_button -> return onMarkUnreadButtonClick(mode)
-            R.id.delete_button -> return onDeleteButtonClick(mode)
+            R.id.delete_button -> return onDeleteButtonClick()
         }
         return false
     }
@@ -624,75 +714,29 @@ open class ConversationsActivity : AppCompatActivity(),
     /**
      * Handles the delete button.
      */
-    private fun onDeleteButtonClick(mode: ActionMode): Boolean {
+    private fun onDeleteButtonClick(): Boolean {
         val messages = adapter
             .filter { it.checked }
             .map { it.message }
 
-        runOnNewThread {
-            // Collect existing state in case we need to undo this.
-            val conversations = messages.map {
-                Database.getInstance(applicationContext)
-                    .getMessagesConversation(it.conversationId)
-            }
-            val archived = mutableMapOf<ConversationId, Boolean>()
-            for (message in messages) {
-                archived[message.conversationId] =
-                    Database.getInstance(applicationContext)
-                        .isConversationArchived(message.conversationId)
-            }
-            val drafts = mutableMapOf<ConversationId, Message?>()
-            for (message in messages) {
-                drafts[message.conversationId] =
-                    Database.getInstance(applicationContext)
-                        .getMessageDraft(message.conversationId)
-            }
+        deleteConversations(messages)
+        return true
+    }
 
-            // Delete the conversations.
-            for (message in messages) {
-                Database.getInstance(applicationContext)
-                    .deleteMessages(message.conversationId)
-            }
+    /**
+     * Handles the unarchive button.
+     */
+    private fun onUnarchiveButtonClick(mode: ActionMode): Boolean {
+        runOnNewThread {
+            adapter
+                .filter { it.checked }
+                .forEach {
+                    Database.getInstance(applicationContext)
+                        .markConversationUnarchived(it.message.conversationId)
+                }
             runOnUiThread {
                 mode.finish()
                 adapter.refresh()
-
-                // Show a snackbar
-                showSnackbar(
-                    this,
-                    R.id.coordinator_layout,
-                    if (messages.size > 1)
-                        getString(R.string.conversations_deleted_multiple)
-                    else
-                        getString(R.string.conversations_deleted),
-                    getString(R.string.undo),
-                    {
-                        runOnNewThread {
-                            // Restore the conversations.
-                            for (conversation in conversations) {
-                                Database.getInstance(applicationContext)
-                                    .insertMessages(conversation)
-                            }
-                            for ((conversationId, isArchived) in archived) {
-                                if (isArchived) {
-                                    Database.getInstance(applicationContext)
-                                        .markConversationArchived(
-                                            conversationId)
-                                }
-                            }
-                            for ((conversationId, draft) in drafts) {
-                                if (draft != null) {
-                                    Database.getInstance(applicationContext)
-                                        .insertMessageDraft(conversationId,
-                                                            draft.text)
-                                }
-                            }
-
-                            runOnUiThread {
-                                adapter.refresh()
-                            }
-                        }
-                    })
             }
         }
         return true
@@ -774,6 +818,79 @@ open class ConversationsActivity : AppCompatActivity(),
                                 R.string.conversations_perm_denied_contacts))
                     }
                 }
+        }
+    }
+
+    /**
+     * Deletes the conversations represented by the specified messages.
+     */
+    private fun deleteConversations(messages: List<Message>,
+                                    mode: ActionMode? = null) {
+        runOnNewThread {
+            // Collect existing state in case we need to undo this.
+            val conversations = messages.map {
+                Database.getInstance(applicationContext)
+                    .getMessagesConversation(it.conversationId)
+            }
+            val archived = mutableMapOf<ConversationId, Boolean>()
+            for (message in messages) {
+                archived[message.conversationId] =
+                    Database.getInstance(applicationContext)
+                        .isConversationArchived(message.conversationId)
+            }
+            val drafts = mutableMapOf<ConversationId, Message?>()
+            for (message in messages) {
+                drafts[message.conversationId] =
+                    Database.getInstance(applicationContext)
+                        .getMessageDraft(message.conversationId)
+            }
+
+            // Delete the conversations.
+            for (message in messages) {
+                Database.getInstance(applicationContext)
+                    .deleteMessages(message.conversationId)
+            }
+            runOnUiThread {
+                mode?.finish()
+                adapter.refresh()
+
+                // Show a snackbar
+                showSnackbar(
+                    this,
+                    R.id.coordinator_layout,
+                    if (messages.size > 1)
+                        getString(R.string.conversations_deleted_multiple)
+                    else
+                        getString(R.string.conversations_deleted),
+                    getString(R.string.undo),
+                    {
+                        runOnNewThread {
+                            // Restore the conversations.
+                            for (conversation in conversations) {
+                                Database.getInstance(applicationContext)
+                                    .insertMessages(conversation)
+                            }
+                            for ((conversationId, isArchived) in archived) {
+                                if (isArchived) {
+                                    Database.getInstance(applicationContext)
+                                        .markConversationArchived(
+                                            conversationId)
+                                }
+                            }
+                            for ((conversationId, draft) in drafts) {
+                                if (draft != null) {
+                                    Database.getInstance(applicationContext)
+                                        .insertMessageDraft(conversationId,
+                                                            draft.text)
+                                }
+                            }
+
+                            runOnUiThread {
+                                adapter.refresh()
+                            }
+                        }
+                    })
+            }
         }
     }
 
