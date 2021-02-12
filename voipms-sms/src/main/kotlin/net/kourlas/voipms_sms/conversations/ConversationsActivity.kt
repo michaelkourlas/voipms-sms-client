@@ -268,6 +268,9 @@ open class ConversationsActivity : AppCompatActivity(),
                 this, android.Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED) {
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
+            runOnNewThread {
+                Database.getInstance(applicationContext).updateShortcuts()
+            }
         }
 
         // Delete any notification channels and groups that are no longer

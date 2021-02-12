@@ -620,6 +620,8 @@ class Database private constructor(private val context: Context) {
             }
 
             database.setTransactionSuccessful()
+
+            updateShortcuts()
         } finally {
             database.endTransaction()
         }

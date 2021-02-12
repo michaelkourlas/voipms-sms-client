@@ -691,7 +691,6 @@ class Notifications private constructor(private val context: Context) {
 
     /**
      * Cancels the notification associated with the specified conversation ID.
-     * Re-issues it as bubble only instead if asked.
      */
     fun cancelNotification(conversationId: ConversationId) {
         val id = notificationIds[conversationId] ?: return
