@@ -6,6 +6,7 @@
 * Improvements to notification direct reply
 * Allow swiping to archive or delete items
 * Use undo snackbars instead of dialogs where possible
+* Restore Android Auto support
 * Switch cloud functions provider to IBM
 
 ## 0.6.13 ##
