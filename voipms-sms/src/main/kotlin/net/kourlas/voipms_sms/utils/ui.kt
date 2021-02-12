@@ -98,11 +98,14 @@ private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
 /**
  * Shows an alert dialog with the specified title, text, and buttons.
  */
-fun showAlertDialog(activity: FragmentActivity, title: String?, text: String?,
-                    positiveButtonText: String? = null,
-                    positiveButtonAction: DialogInterface.OnClickListener? = null,
-                    negativeButtonText: String? = null,
-                    negativeButtonAction: DialogInterface.OnClickListener? = null): AlertDialog? {
+fun showAlertDialog(
+    activity: FragmentActivity,
+    title: String?,
+    text: String?,
+    positiveButtonText: String? = null,
+    positiveButtonAction: DialogInterface.OnClickListener? = null,
+    negativeButtonText: String? = null,
+    negativeButtonAction: DialogInterface.OnClickListener? = null): AlertDialog? {
     if (!activity.isFinishing) {
         val builder = AlertDialog.Builder(activity)
         builder.setMessage(text)

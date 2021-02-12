@@ -695,7 +695,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
             R.id.call_button -> return onCallButtonClick()
             R.id.archive_button -> return onArchiveButtonClick()
             R.id.unarchive_button -> return onUnarchiveButtonClick()
-            R.id.delete_button -> return onDeleteAllButtonClick()
             R.id.notifications_button -> return onNotificationsButtonClick()
             R.id.bubble_button -> return onBubbleButtonClick()
             R.id.export_button -> return onExportButtonClick()
@@ -798,30 +797,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 updateButtons()
             }
         }
-        return true
-    }
-
-    /**
-     * Handles the delete all messages button.
-     */
-    private fun onDeleteAllButtonClick(): Boolean {
-        // Show a confirmation prompt; if the user accepts, delete all messages
-        // and return to the previous activity
-        showAlertDialog(
-            this,
-            getString(R.string.conversation_delete_confirm_title),
-            getString(R.string.conversation_delete_confirm_message),
-            getString(R.string.delete),
-            { _, _ ->
-                runOnNewThread {
-                    Database.getInstance(this).deleteMessages(conversationId)
-                    runOnUiThread {
-                        finish()
-                    }
-                }
-            },
-            getString(R.string.cancel), null)
-
         return true
     }
 
@@ -1039,41 +1014,46 @@ open class ConversationActivity(val bubble: Boolean = false) :
      * Handles the delete button.
      */
     private fun onDeleteButtonClick(mode: ActionMode): Boolean {
-        // Get the messages that are checked
+        // Get the messages that are checked.
         val messages = adapter.messageItems
             .filter { it.checked }
             .map { it.message }
 
-        // Show a confirmation dialog
-        showAlertDialog(
-            this,
-            getString(R.string.conversation_delete_confirm_title),
-            getString(R.string.conversation_delete_confirm_message),
-            getString(R.string.delete),
-            { _, _ ->
-                runOnNewThread {
-                    // Delete each message
-                    for (message in messages) {
-                        Database.getInstance(applicationContext)
-                            .deleteMessage(message.did, message.databaseId,
-                                           message.voipId)
-                    }
+        runOnNewThread {
+            // Delete each message.
+            for (message in messages) {
+                Database.getInstance(applicationContext)
+                    .deleteMessage(message.did, message.databaseId,
+                                   message.voipId)
+            }
 
-                    // Go back to the previous activity if no messages remain
-                    if (!Database.getInstance(applicationContext)
-                            .isConversationEmpty(conversationId)) {
-                        runOnUiThread {
-                            finish()
+            runOnUiThread {
+                adapter.refresh()
+                mode.finish()
+
+                showSnackbar(
+                    this,
+                    R.id.coordinator_layout,
+                    if (messages.size > 1)
+                        getString(
+                            R.string.conversation_message_deleted_multiple)
+                    else
+                        getString(R.string.conversation_message_deleted),
+                    getString(R.string.undo),
+                    {
+                        runOnNewThread {
+                            // Restore the messages.
+                            Database.getInstance(applicationContext)
+                                .insertMessages(messages)
+
+                            runOnUiThread {
+                                adapter.refresh()
+                            }
                         }
-                    } else {
-                        runOnUiThread {
-                            adapter.refresh()
-                            mode.finish()
-                        }
-                    }
-                }
-            },
-            getString(R.string.cancel), null)
+                    })
+            }
+        }
+
         return true
     }
 

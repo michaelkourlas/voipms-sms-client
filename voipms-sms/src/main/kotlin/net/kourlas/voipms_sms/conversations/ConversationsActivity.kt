@@ -51,7 +51,9 @@ import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.PreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.SynchronizationPreferencesActivity
 import net.kourlas.voipms_sms.signIn.SignInActivity
+import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
+import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
 import java.text.SimpleDateFormat
@@ -103,16 +105,17 @@ open class ConversationsActivity : AppCompatActivity(),
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 intent?.getStringArrayListExtra(getString(
-                    R.string.push_notifications_reg_complete_failed_dids))?.let {
-                    if (it.isNotEmpty()) {
-                        // Some DIDs failed registration
-                        showSnackbar(
-                            this@ConversationsActivity,
-                            R.id.coordinator_layout,
-                            getString(
-                                R.string.push_notifications_fail_register))
-                    }
-                } ?: run {
+                    R.string.push_notifications_reg_complete_failed_dids))
+                    ?.let {
+                        if (it.isNotEmpty()) {
+                            // Some DIDs failed registration
+                            showSnackbar(
+                                this@ConversationsActivity,
+                                R.id.coordinator_layout,
+                                getString(
+                                    R.string.push_notifications_fail_register))
+                        }
+                    } ?: run {
                     // Unknown error
                     showSnackbar(
                         this@ConversationsActivity,
@@ -274,7 +277,8 @@ open class ConversationsActivity : AppCompatActivity(),
                 .createDefaultNotificationChannel()
             Notifications.getInstance(applicationContext)
                 .deleteNotificationChannelsAndGroups()
-            Notifications.getInstance(applicationContext).renameNotificationChannels()
+            Notifications.getInstance(applicationContext)
+                .renameNotificationChannels()
         }
 
         // Update navigation view
@@ -622,25 +626,72 @@ open class ConversationsActivity : AppCompatActivity(),
             .filter { it.checked }
             .map { it.message }
 
-        // Request confirmation before deleting
-        showAlertDialog(
-            this,
-            getString(R.string.conversations_delete_confirm_title),
-            getString(R.string.conversations_delete_confirm_message),
-            getString(R.string.delete),
-            { _, _ ->
-                runOnNewThread {
-                    for (message in messages) {
-                        Database.getInstance(applicationContext)
-                            .deleteMessages(message.conversationId)
-                    }
-                    runOnUiThread {
-                        mode.finish()
-                        adapter.refresh()
-                    }
-                }
-            },
-            getString(R.string.cancel), null)
+        runOnNewThread {
+            // Collect existing state in case we need to undo this.
+            val conversations = messages.map {
+                Database.getInstance(applicationContext)
+                    .getMessagesConversation(it.conversationId)
+            }
+            val archived = mutableMapOf<ConversationId, Boolean>()
+            for (message in messages) {
+                archived[message.conversationId] =
+                    Database.getInstance(applicationContext)
+                        .isConversationArchived(message.conversationId)
+            }
+            val drafts = mutableMapOf<ConversationId, Message?>()
+            for (message in messages) {
+                drafts[message.conversationId] =
+                    Database.getInstance(applicationContext)
+                        .getMessageDraft(message.conversationId)
+            }
+
+            // Delete the conversations.
+            for (message in messages) {
+                Database.getInstance(applicationContext)
+                    .deleteMessages(message.conversationId)
+            }
+            runOnUiThread {
+                mode.finish()
+                adapter.refresh()
+
+                // Show a snackbar
+                showSnackbar(
+                    this,
+                    R.id.coordinator_layout,
+                    if (messages.size > 1)
+                        getString(R.string.conversations_deleted_multiple)
+                    else
+                        getString(R.string.conversations_deleted),
+                    getString(R.string.undo),
+                    {
+                        runOnNewThread {
+                            // Restore the conversations.
+                            for (conversation in conversations) {
+                                Database.getInstance(applicationContext)
+                                    .insertMessages(conversation)
+                            }
+                            for ((conversationId, isArchived) in archived) {
+                                if (isArchived) {
+                                    Database.getInstance(applicationContext)
+                                        .markConversationArchived(
+                                            conversationId)
+                                }
+                            }
+                            for ((conversationId, draft) in drafts) {
+                                if (draft != null) {
+                                    Database.getInstance(applicationContext)
+                                        .insertMessageDraft(conversationId,
+                                                            draft.text)
+                                }
+                            }
+
+                            runOnUiThread {
+                                adapter.refresh()
+                            }
+                        }
+                    })
+            }
+        }
         return true
     }
 

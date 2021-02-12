@@ -1,10 +1,11 @@
 ## 0.6.14 ##
 
 * Bug fixes
-* Switch cloud functions provider to IBM
 * Support for notification bubbles
 * Support for direct share
-* Properly support direct reply in notifications
+* Improvements to notification direct reply
+* Use undo snackbars instead of dialogs where possible
+* Switch cloud functions provider to IBM
 
 ## 0.6.13 ##
 

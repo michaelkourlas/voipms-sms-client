@@ -111,7 +111,7 @@ class Database private constructor(private val context: Context) {
         try {
             database.beginTransactionNonExclusive()
 
-            val messages = getMessagesConversation(conversationId)
+            val messages = getMessagesConversationWithoutLock(conversationId)
             for (message in messages) {
                 if (message.voipId != null) {
                     insertVoipIdDeleted(conversationId.did, message.voipId)
@@ -287,6 +287,15 @@ class Database private constructor(private val context: Context) {
                 dids.toTypedArray(),
                 null, null,
                 "$COLUMN_VOIP_ID DESC, $COLUMN_DATABASE_ID DESC"))
+    }
+
+    /**
+     * Gets all messages in a specified conversation. The resulting list is
+     * sorted by date, from least recent to most recent.
+     */
+    fun getMessagesConversation(
+        conversationId: ConversationId): List<Message> = importExportLock.read {
+        return getMessagesConversationWithoutLock(conversationId)
     }
 
     /**
@@ -564,6 +573,53 @@ class Database private constructor(private val context: Context) {
             }
 
             return addedConversationIds
+        } finally {
+            database.endTransaction()
+        }
+    }
+
+    /**
+     * Inserts messages originally taken from the database.
+     */
+    fun insertMessages(messages: List<Message>) = importExportLock.read {
+        try {
+            database.beginTransactionNonExclusive()
+
+            for (message in messages) {
+                if (message.voipId != null) {
+                    val databaseId = getMessageDatabaseIdVoipId(
+                        message.did, message.voipId)
+                    if (databaseId != null) {
+                        // Don't add the message if it already exists in our
+                        // database
+                        continue
+                    }
+                }
+
+                // Add new message to database
+                val values = ContentValues()
+                values.put(COLUMN_VOIP_ID, message.voipId)
+                values.put(COLUMN_DATE, message.date.time / 1000L)
+                values.put(COLUMN_INCOMING,
+                           if (message.isIncoming) 1L else 0L)
+                values.put(COLUMN_DID, message.did)
+                values.put(COLUMN_CONTACT, message.contact)
+                values.put(COLUMN_MESSAGE, message.text)
+                values.put(COLUMN_UNREAD,
+                           if (message.isIncoming) 1L else 0L)
+                values.put(COLUMN_DELIVERED,
+                           if (message.isDelivered) 1L else 0L)
+                values.put(COLUMN_DELIVERY_IN_PROGRESS,
+                           if (message.isDeliveryInProgress) 1L else 0L)
+
+                val newId = database.insertOrThrow(TABLE_MESSAGE, null,
+                                                   values)
+                if (newId == -1L) {
+                    throw Exception("Returned database ID was -1")
+                }
+            }
+
+            database.setTransactionSuccessful()
         } finally {
             database.endTransaction()
         }
@@ -1018,7 +1074,7 @@ class Database private constructor(private val context: Context) {
      * This method intentionally does not use lock semantics; this is a
      * responsibility of the caller.
      */
-    private fun getMessagesConversation(
+    private fun getMessagesConversationWithoutLock(
         conversationId: ConversationId): List<Message> {
         return getMessagesCursor(database.query(
             TABLE_MESSAGE,
