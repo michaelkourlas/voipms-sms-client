@@ -337,7 +337,8 @@ class ConversationRecyclerViewAdapter(
                                 .trim { it <= ' ' }
                                 .toLowerCase(Locale.getDefault())))
             } else {
-                resultsObject.messages.addAll(getConversationDemoMessages())
+                resultsObject.messages.addAll(getConversationDemoMessages(
+                    activity.bubble))
             }
             return resultsObject
         }

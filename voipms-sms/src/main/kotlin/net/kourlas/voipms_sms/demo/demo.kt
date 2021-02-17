@@ -33,7 +33,7 @@ fun getConversationsDemoMessages(): List<Message> {
                          "6135556019",
                          "Have you considered asking him whether they...",
                          0, 1, 0, true))
-    messages.add(Message(1, 1, 1436976420 + 60093664, 1,
+    messages.add(Message(1, 1, Date().time / 1000, 1,
                          "6135559483",
                          "5145553495",
                          "Sounds great!",
@@ -56,7 +56,11 @@ fun getConversationsDemoMessages(): List<Message> {
     return messages
 }
 
-fun getConversationDemoMessages(): List<Message> {
+fun getConversationDemoMessages(bubble: Boolean): List<Message> {
+    if (bubble) {
+        return listOf(getDemoNotification())
+    }
+
     val messages = mutableListOf<Message>()
     messages.add(Message(1, 1, Date().time / 1000 - 120, 1,
                          "6135559483",
@@ -89,11 +93,12 @@ fun getConversationDemoMessages(): List<Message> {
     return messages
 }
 
-fun getDemoNotification(): Message = Message(1, 1, Date().time / 1000, 1,
-                                             "6135559483",
-                                             "6135551242",
-                                             "Where are you?",
-                                             1, 1, 0)
+fun getDemoNotification(): Message = Message(
+    1, 1, Date().time / 1000, 1,
+    "6135559483",
+    "6135551242",
+    "Hey, how are you? Haven't seen you in a while.",
+    1, 1, 0)
 
 fun getNewConversationContacts(
     context: Context): List<NewConversationRecyclerViewAdapter.ContactItem> {

@@ -22,7 +22,9 @@ import android.graphics.*
 import android.net.Uri
 import android.provider.ContactsContract
 import androidx.core.content.ContextCompat
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.demo.getNewConversationContacts
 import java.util.*
 
 /**
@@ -34,6 +36,14 @@ fun getContactName(context: Context, phoneNumber: String,
     try {
         if (contactNameCache != null && phoneNumber in contactNameCache) {
             return contactNameCache[phoneNumber]
+        }
+        if (BuildConfig.IS_DEMO) {
+            for (contactItem in getNewConversationContacts(context)) {
+                if (contactItem.primaryPhoneNumber == phoneNumber) {
+                    return contactItem.name
+                }
+            }
+            return null
         }
 
         val uri = Uri.withAppendedPath(
@@ -106,7 +116,7 @@ fun getGenericContactPhotoBitmap(context: Context,
                                  phoneNumber: String,
                                  size: Int): Bitmap {
     val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-    bitmap.eraseColor(getMaterialDesignColour(phoneNumber))
+    bitmap.eraseColor(getMaterialDesignColour(getDigitsOfString(phoneNumber)))
     val canvas = Canvas(bitmap)
 
     val initial = getContactInitial(name)

@@ -31,8 +31,10 @@ import androidx.core.content.LocusIdCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
+import net.kourlas.voipms_sms.demo.getDemoNotification
 import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
 import java.io.File
@@ -606,7 +608,7 @@ class Database private constructor(private val context: Context) {
                 values.put(COLUMN_CONTACT, message.contact)
                 values.put(COLUMN_MESSAGE, message.text)
                 values.put(COLUMN_UNREAD,
-                           if (message.isIncoming) 1L else 0L)
+                           if (message.isUnread) 1L else 0L)
                 values.put(COLUMN_DELIVERED,
                            if (message.isDelivered) 1L else 0L)
                 values.put(COLUMN_DELIVERY_IN_PROGRESS,
@@ -832,9 +834,13 @@ class Database private constructor(private val context: Context) {
                 context) - 1
 
             // Update the dynamic shortcuts.
-            val messages = getMessagesMostRecentFilteredWithoutLock(
-                net.kourlas.voipms_sms.preferences.getDids(
-                    context, onlyShowInConversationsView = true))
+            val messages = if (BuildConfig.IS_DEMO) {
+                listOf(getDemoNotification())
+            } else {
+                getMessagesMostRecentFilteredWithoutLock(
+                    net.kourlas.voipms_sms.preferences.getDids(
+                        context, onlyShowInConversationsView = true))
+            }
             val conversationIdStrings =
                 messages.map { it.conversationId.getId() }
             val shortcutInfoList = messages.map {
@@ -863,7 +869,8 @@ class Database private constructor(private val context: Context) {
                                    .setUri("tel:${it.contact}")
                                    .build())
                     .setLongLabel(label)
-                    .setShortLabel(label.split(" ")[0])
+                    .setShortLabel(
+                        if (contactName != null) label.split(" ")[0] else label)
                     .setLongLived(true)
                     .setLocusId(LocusIdCompat(it.conversationId.getId()))
                     .setCategories(setOf("existing_conversation_target"))

@@ -32,15 +32,6 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="never|collapseActionView" />
     <item
-        android:id="@+id/archive_button"
-        android:title="@string/conversation_action_archive"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/unarchive_button"
-        android:title="@string/conversation_action_unarchive"
-        android:visible="false"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/notifications_button"
         android:title="@string/conversation_action_notifications"
         app:showAsAction="never" />

@@ -34,6 +34,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.preferences.accountConfigured
@@ -187,9 +188,10 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     private fun performAccountDidCheck() {
         // If there are no DIDs available or the user has not configured an
         // account, then force the user to configure an account or DIDs
-        if (!accountConfigured(applicationContext)) {
+        if (!accountConfigured(applicationContext) && !BuildConfig.IS_DEMO) {
             startActivity(Intent(this, SignInActivity::class.java))
-        } else if (!didsConfigured(applicationContext)) {
+        } else if (!didsConfigured(
+                applicationContext) && !BuildConfig.IS_DEMO) {
             startActivity(Intent(this, DidsPreferencesActivity::class.java))
         }
     }

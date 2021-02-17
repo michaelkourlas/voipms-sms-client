@@ -153,8 +153,8 @@
     <string name="conversation_copied_conversation_toast_message">Copied conversation as JSON</string>
     <string name="conversation_copied_conversation_fail_toast_message">Failed to copy conversation (too large?)</string>
     <string name="conversation_copied_did_toast_message">Copied phone number</string>
-    <string name="conversation_message_deleted">Message deleted</string>
-    <string name="conversation_message_deleted_multiple">Messages deleted</string>
+    <string name="conversation_message_deleted">1 message deleted</string>
+    <string name="conversation_message_deleted_multiple">%1$d messages deleted</string>
     <string name="conversation_did_clipboard_description">DID</string>
     <string name="conversation_extra_focus" translatable="false">focus</string>
     <string name="conversation_extra_message_text" translatable="false">messageText</string>
@@ -197,8 +197,12 @@
     <string name="conversations_action_unarchive">Unarchive</string>
     <string name="conversations_all_dids">All</string>
     <string name="conversations_checked_content_description">Checked</string>
-    <string name="conversations_deleted">Conversation deleted</string>
-    <string name="conversations_deleted_multiple">Conversations deleted</string>
+    <string name="conversations_deleted">1 conversation deleted</string>
+    <string name="conversations_deleted_multiple">%1$d conversations deleted</string>
+    <string name="conversations_archived">1 conversation archived</string>
+    <string name="conversations_archived_multiple">%1$d conversations archived</string>
+    <string name="conversations_unarchived">1 conversation unarchived</string>
+    <string name="conversations_unarchived_multiple">%1$d conversations unarchived</string>
     <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
     <string name="conversations_delete_confirm_title">Delete this conversation?</string>
     <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>

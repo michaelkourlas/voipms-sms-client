@@ -1,7 +1,7 @@
 ## 0.6.14 ##
 
 * Bug fixes
-* Support for notification bubbles
+* Support for notification bubbles in Android 11
 * Support for direct share
 * Improvements to notification direct reply
 * Allow swiping to archive or delete items

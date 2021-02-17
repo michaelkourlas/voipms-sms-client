@@ -107,7 +107,7 @@ class Notifications private constructor(private val context: Context) {
             channel.group = context.getString(
                 R.string.notifications_channel_group_did,
                 did)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 channel.setAllowBubbles(true)
             }
 
@@ -133,7 +133,7 @@ class Notifications private constructor(private val context: Context) {
             channel.setShowBadge(true)
             channel.group = context.getString(
                 R.string.notifications_channel_group_other)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 channel.setAllowBubbles(true)
             }
 
@@ -372,7 +372,7 @@ class Notifications private constructor(private val context: Context) {
      * be allowed to bubble.
      */
     fun canBubble(did: String, contact: String): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val channel = getNotificationChannelId(did, contact)
             val notificationManager: NotificationManager =
                 context.getSystemService(
@@ -405,9 +405,9 @@ class Notifications private constructor(private val context: Context) {
             return
         }
 
-        // However, if this is not Android Q or later, there is no such thing
+        // However, if this is not Android R or later, there is no such thing
         // as a "bubble only" notification, so we should just return.
-        if (bubbleOnly && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        if (bubbleOnly && Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             return
         }
 
@@ -652,7 +652,7 @@ class Notifications private constructor(private val context: Context) {
             PendingIntent.FLAG_CANCEL_CURRENT))
 
         // Bubble
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val bubbleIntent = Intent(context,
                                       ConversationBubbleActivity::class.java)
             bubbleIntent.putExtra(context.getString(

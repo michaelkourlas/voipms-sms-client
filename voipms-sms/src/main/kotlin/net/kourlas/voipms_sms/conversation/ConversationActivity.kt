@@ -187,7 +187,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     intent.getStringExtra(Intent.EXTRA_SHORTCUT_ID)
                 } else {
-                    null
+                    intent.getStringExtra("android.intent.extra.shortcut.ID")
                 }
             if (shortcutId == null) {
                 val newIntent = Intent()
@@ -268,7 +268,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // We shouldn't show a conversation for a DID that is not configured to
         // be displayed in the conversation view
-        if (!getDidShowInConversationsView(applicationContext, did)) {
+        if (!getDidShowInConversationsView(applicationContext,
+                                           did) && !BuildConfig.IS_DEMO) {
             abortActivity(
                 this,
                 Exception("DID '$did' not displayed in conversation view"))
@@ -635,10 +636,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Hide certain menu options if we are in a bubble, but show a menu
         // option that opens the full view.
         if (bubble) {
-            val archiveItem = menu.findItem(R.id.archive_button)
-            archiveItem.isVisible = false
-            val unarchiveItem = menu.findItem(R.id.unarchive_button)
-            unarchiveItem.isVisible = false
             val notificationItem = menu.findItem(R.id.notifications_button)
             notificationItem.isVisible = false
             val exportItem = menu.findItem(R.id.export_button)
@@ -680,10 +677,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
             searchAutoComplete.setTextCursorDrawable(R.drawable.search_cursor)
         }
 
-        // Update the visible menu buttons to match whether or not the
-        // conversation is archived.
-        updateButtons()
-
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -691,8 +684,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
         when (item.itemId) {
             android.R.id.home -> return onUpButtonClick()
             R.id.call_button -> return onCallButtonClick()
-            R.id.archive_button -> return onArchiveButtonClick()
-            R.id.unarchive_button -> return onUnarchiveButtonClick()
             R.id.notifications_button -> return onNotificationsButtonClick()
             R.id.bubble_button -> return onBubbleButtonClick()
             R.id.export_button -> return onExportButtonClick()
@@ -770,35 +761,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
     }
 
     /**
-     * Handles the archive button.
-     */
-    private fun onArchiveButtonClick(): Boolean {
-        runOnNewThread {
-            Database.getInstance(applicationContext)
-                .markConversationArchived(conversationId)
-            runOnUiThread {
-                finish()
-            }
-        }
-        return true
-    }
-
-    /**
-     * Handles the unarchive button.
-     */
-    private fun onUnarchiveButtonClick(): Boolean {
-        runOnNewThread {
-            Database.getInstance(applicationContext)
-                .markConversationUnarchived(conversationId)
-            runOnUiThread {
-                adapter.refresh()
-                updateButtons()
-            }
-        }
-        return true
-    }
-
-    /**
      * Handles the notifications button.
      */
     private fun onNotificationsButtonClick(): Boolean {
@@ -825,7 +787,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
      * Handles the bubble button.
      */
     private fun onBubbleButtonClick(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             moveTaskToBack(true)
             Notifications.getInstance(applicationContext)
                 .showNotifications(application as CustomApplication,
@@ -1034,7 +996,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     R.id.coordinator_layout,
                     if (messages.size > 1)
                         getString(
-                            R.string.conversation_message_deleted_multiple)
+                            R.string.conversation_message_deleted_multiple,
+                            messages.size)
                     else
                         getString(R.string.conversation_message_deleted),
                     getString(R.string.undo),
@@ -1158,32 +1121,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // If the action mode is enabled, update the visible buttons to match
         // the number of checked items
         updateActionModeButtons()
-    }
-
-    /**
-     * Update the visible menu buttons to match whether or not the conversation
-     * is archived.
-     */
-    private fun updateButtons() = runOnNewThread {
-        // These buttons are never shown in a bubble.
-        if (bubble) {
-            return@runOnNewThread
-        }
-
-        if (Database.getInstance(this)
-                .isConversationArchived(conversationId)) {
-            runOnUiThread {
-                // If conversation archived, only show unarchive button
-                menu.findItem(R.id.archive_button).isVisible = false
-                menu.findItem(R.id.unarchive_button).isVisible = true
-            }
-        } else {
-            runOnUiThread {
-                // If conversation unarchived, only show archive button
-                menu.findItem(R.id.archive_button).isVisible = true
-                menu.findItem(R.id.unarchive_button).isVisible = false
-            }
-        }
     }
 
     /**
