@@ -156,8 +156,8 @@
     <string name="conversation_message_deleted">1 message deleted</string>
     <string name="conversation_message_deleted_multiple">%1$d messages deleted</string>
     <string name="conversation_did_clipboard_description">DID</string>
-    <string name="conversation_extra_focus" translatable="false">focus</string>
-    <string name="conversation_extra_message_text" translatable="false">messageText</string>
+    <string name="conversation_extra_focus" translatable="false">net.kourlas.voipms_sms.CONVERSATION_EXTRA_FOCUS</string>
+    <string name="conversation_extra_message_text" translatable="false">net.kourlas.voipms_sms.CONVERSATION_EXTRA_MESSAGE_TEXT</string>
     <string name="conversation_info_date">Date: %1$s</string>
     <string name="conversation_info_from">From: %1$s</string>
     <string name="conversation_info_id">ID: %1$d</string>
@@ -245,26 +245,25 @@
     <!-- SERVICES -->
 
     <!-- MarkReadService -->
-    <string name="mark_read_action" translatable="false">mark_read_action</string>
-    <string name="mark_read_did" translatable="false">mark_read_did</string>
-    <string name="mark_read_contact" translatable="false">mark_read_contact</string>
+    <string name="mark_read_action" translatable="false">net.kourlas.voipms_sms.MARK_READ_ACTION</string>
+    <string name="mark_read_did" translatable="false">net.kourlas.voipms_sms.MARK_READ_DID</string>
+    <string name="mark_read_contact" translatable="false">net.kourlas.voipms_sms.MARK_READ_CONTACT</string>
 
     <!-- PushNotificationsRegistrationService -->
-    <string name="push_notifications_reg_action" translatable="false">push_notifications_reg_action</string>
+    <string name="push_notifications_reg_action" translatable="false">net.kourlas.voipms_sms.PUSH_NOTIFICATIONS_REG_ACTION</string>
     <string name="push_notifications_fail_register">Register failed: VoIP.ms callback registration failed</string>
     <string name="push_notifications_fail_google_play">Register failed: Google Play Services unavailable</string>
     <string name="push_notifications_fail_unknown">Register failed: unknown error</string>
 
     <!-- RetrieveDidsService -->
-    <string name="retrieve_dids_action" translatable="false">retrieve_dids_action</string>
-    <string name="retrieve_dids_auto_add" translatable="false">retrieve_dids_auto_add</string>
+    <string name="retrieve_dids_action" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_ACTION</string>
+    <string name="retrieve_dids_auto_add" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_AUTO_ADD</string>
 
     <!-- SendMessageService -->
     <string name="send_message_action" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_ACTION</string>
-    <string name="send_message_contact" translatable="false">send_message_contact</string>
-    <string name="send_message_database_id" translatable="false">send_message_database_id</string>
-    <string name="send_message_did" translatable="false">send_message_did</string>
-    <string name="send_message_inline_reply" translatable="false">send_message_inline_reply</string>
+    <string name="send_message_contact" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_CONTACT</string>
+    <string name="send_message_did" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_DID</string>
+    <string name="send_message_inline_reply" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY</string>
     <string name="send_message_error_api_error">Not sent: API error \'%1$s\'</string>
     <string name="send_message_error_api_error_invalid_credentials">Not sent: invalid credentials</string>
     <string name="send_message_error_api_error_invalid_dst">Not sent: invalid phone number</string>
@@ -281,12 +280,12 @@
     <string name="send_message_error_unknown">Not sent: unknown error</string>
 
     <!-- SyncIntervalService -->
-    <string name="sync_interval_service_action" translatable="false">sync_interval_service_action</string>
+    <string name="sync_interval_service_action" translatable="false">net.kourlas.voipms_sms.SYNC_INTERVAL_SERVICE_ACTION</string>
 
     <!-- SyncService -->
-    <string name="sync_action" translatable="false">sync_action</string>
-    <string name="sync_cancel_action" translatable="false">sync_cancel_action</string>
-    <string name="sync_force_recent" translatable="false">sync_force_recent</string>
+    <string name="sync_action" translatable="false">net.kourlas.voipms_sms.SYNC_ACTION</string>
+    <string name="sync_cancel_action" translatable="false">net.kourlas.voipms_sms.SYNC_CANCEL_ACTION</string>
+    <string name="sync_force_recent" translatable="false">net.kourlas.voipms_sms.SYNC_FORCE_RECENT</string>
     <string name="sync_error_network">Sync failed: network unavailable</string>
     <string name="sync_error_api_request">Sync failed: VoIP.ms unavailable</string>
     <string name="sync_error_api_parse">Sync failed: corrupt response</string>
@@ -296,9 +295,9 @@
     <string name="sync_error_unknown">Sync failed: unknown error</string>
 
     <!-- VerifyCredentialsService -->
-    <string name="verify_credentials_action" translatable="false">verify_credentials_action</string>
-    <string name="verify_credentials_email" translatable="false">verify_credentials_email</string>
-    <string name="verify_credentials_password" translatable="false">verify_credentials_password</string>
+    <string name="verify_credentials_action" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_ACTION</string>
+    <string name="verify_credentials_email" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_EMAIL</string>
+    <string name="verify_credentials_password" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_PASSWORD</string>
     <string name="verify_credentials_error_api_request">Sign-in failed: VoIP.ms unavailable</string>
     <string name="verify_credentials_error_api_parse">Sign-in failed: corrupt response</string>
     <string name="verify_credentials_error_api_error">Sign-in failed: API error \'%1$s\'</string>
@@ -314,50 +313,50 @@
     <string name="send_message_receiver_did" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_RECEIVER_DID</string>
 
     <!-- SyncIntervalReceiver -->
-    <string name="sync_interval_action" translatable="false">sync_interval_action</string>
-    <string name="sync_interval_force_recent" translatable="false">sync_interval_force_recent</string>
+    <string name="sync_interval_action" translatable="false">net.kourlas.voipms_sms.SYNC_INTERVAL_ACTION</string>
+    <string name="sync_interval_force_recent" translatable="false">net.kourlas.voipms_sms.SYNC_INTERVAL_FORCE_RECENT</string>
 
     <!-- Sent message receiver -->
-    <string name="sent_message_action" translatable="false">sent_message_action_%1$s_%2$s</string>
-    <string name="sent_message_error" translatable="false">sent_message_error</string>
+    <string name="sent_message_action" translatable="false">net.kourlas.voipms_sms.SENT_MESSAGE_ACTION_%1$s_%2$s</string>
+    <string name="sent_message_error" translatable="false">net.kourlas.voipms_sms.SENT_MESSAGE_ERROR</string>
 
     <!-- Sync complete receiver -->
-    <string name="sync_complete_action" translatable="false">sync_complete_action</string>
-    <string name="sync_complete_error" translatable="false">sync_complete_error</string>
-    <string name="sync_complete_full" translatable="false">sync_complete_full</string>
+    <string name="sync_complete_action" translatable="false">net.kourlas.voipms_sms.SYNC_COMPLETE_ACTION</string>
+    <string name="sync_complete_error" translatable="false">net.kourlas.voipms_sms.SYNC_COMPLETE_ERROR</string>
+    <string name="sync_complete_full" translatable="false">net.kourlas.voipms_sms.SYNC_COMPLETE_FULL</string>
 
     <!-- Push notifications registration complete receiver -->
-    <string name="push_notifications_reg_complete_action" translatable="false">push_notifications_reg_complete_action</string>
-    <string name="push_notifications_reg_complete_failed_dids" translatable="false">push_notifications_reg_complete_failed_dids</string>
+    <string name="push_notifications_reg_complete_action" translatable="false">net.kourlas.voipms_sms.PUSH_NOTIFICATIONS_REG_COMPLETE_ACTION</string>
+    <string name="push_notifications_reg_complete_failed_dids" translatable="false">net.kourlas.voipms_sms.PUSH_NOTIFICATIONS_REG_COMPLETE_FAILED_DIDS</string>
 
     <!-- DID retrieval complete receiver -->
-    <string name="retrieve_dids_complete_action" translatable="false">retrieve_dids_complete_action</string>
-    <string name="retrieve_dids_complete_dids" translatable="false">retrieve_dids_complete_dids</string>
-    <string name="retrieve_dids_complete_error" translatable="false">retrieve_dids_complete_error</string>
+    <string name="retrieve_dids_complete_action" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_COMPLETE_ACTION</string>
+    <string name="retrieve_dids_complete_dids" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_COMPLETE_DIDS</string>
+    <string name="retrieve_dids_complete_error" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_COMPLETE_ERROR</string>
 
     <!-- Verify credentials complete receiver -->
-    <string name="verify_credentials_complete_action" translatable="false">verify_credentials_complete_action</string>
-    <string name="verify_credentials_complete_valid" translatable="false">verify_credentials_complete_valid</string>
-    <string name="verify_credentials_complete_error" translatable="false">verify_credentials_complete_error</string>
+    <string name="verify_credentials_complete_action" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_COMPLETE_ACTION</string>
+    <string name="verify_credentials_complete_valid" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_COMPLETE_VALID</string>
+    <string name="verify_credentials_complete_error" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_COMPLETE_ERROR</string>
 
     <!-- SINGLETONS -->
 
     <!-- Notifications -->
     <string name="notifications_current_user">You</string>
-    <string name="notifications_group_key" translatable="false">group</string>
-    <string name="notifications_reply_key" translatable="false">notification_reply</string>
+    <string name="notifications_group_key" translatable="false">net.kourlas.voipms_sms.NOTIFICATIONS_GROUP</string>
+    <string name="notifications_reply_key" translatable="false">net.kourlas.voipms_sms.NOTIFICATIONS_REPLY</string>
     <string name="notifications_button_cancel">Cancel</string>
     <string name="notifications_button_reply">Reply</string>
     <string name="notifications_button_mark_read">Mark as read</string>
-    <string name="notifications_channel_group_other">channel_group_other</string>
+    <string name="notifications_channel_group_other" translatable="false">channel_group_other</string>
     <string name="notifications_channel_group_other_title">Other</string>
-    <string name="notifications_channel_group_did">channel_group_did_%1$s</string>
-    <string name="notifications_channel_sync">channel_sync</string>
+    <string name="notifications_channel_group_did" translatable="false">channel_group_did_%1$s</string>
+    <string name="notifications_channel_sync" translatable="false">channel_sync</string>
     <string name="notifications_channel_sync_title">Synchronization</string>
-    <string name="notifications_channel_default">channel_default</string>
+    <string name="notifications_channel_default" translatable="false">channel_default</string>
     <string name="notifications_channel_default_title">Default</string>
-    <string name="notifications_channel_contact_prefix">channel_did_contact_</string>
-    <string name="notifications_channel_contact">channel_did_contact_%1$s_%2$s</string>
+    <string name="notifications_channel_contact_prefix" translatable="false">channel_did_contact_</string>
+    <string name="notifications_channel_contact" translatable="false">channel_did_contact_%1$s_%2$s</string>
     <string name="notifications_sync_message">Synchronizing with VoIP.ms</string>
     <string name="notifications_security_error">Failed to launch notification due to lack of external storage permission</string>
 
@@ -366,10 +365,10 @@
     <string name="utils_date_minutes_ago">min</string>
 
     <!-- URLS -->
-    <string name="help_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md</string>
-    <string name="privacy_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/PRIVACY.md</string>
-    <string name="license_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE</string>
-    <string name="credits_url">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE</string>
+    <string name="help_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md</string>
+    <string name="privacy_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/PRIVACY.md</string>
+    <string name="license_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE</string>
+    <string name="credits_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE</string>
 
     <!-- SHORTCUTS -->
     <string name="new_conversation_shortcut_short">Compose</string>
