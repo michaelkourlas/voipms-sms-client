@@ -9,8 +9,8 @@ android {
         applicationId 'net.kourlas.voipms_sms'
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 134
-        versionName '0.6.14'
+        versionCode 135
+        versionName '0.6.15'
     }
     flavorDimensions 'version', 'demo'
     productFlavors {
@@ -81,7 +81,7 @@ dependencies {
 
     // Firebase libraries
     primaryImplementation 'com.google.firebase:firebase-analytics:18.0.2'
-    primaryImplementation 'com.google.firebase:firebase-appindexing:19.1.0'
+    primaryImplementation 'com.google.firebase:firebase-appindexing:19.2.0'
     primaryImplementation 'com.google.firebase:firebase-core:18.0.2'
     primaryImplementation 'com.google.firebase:firebase-crashlytics:17.3.1'
     primaryImplementation 'com.google.firebase:firebase-messaging:21.0.1'

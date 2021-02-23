@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.JobIntentService
-import androidx.core.app.RemoteInput
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import net.kourlas.voipms_sms.CustomApplication
@@ -34,12 +33,11 @@ import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
+import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
-import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import java.io.IOException
-import java.text.BreakIterator
 import java.util.*
 
 /**
@@ -83,10 +81,9 @@ class SendMessageService : JobIntentService() {
                 return null
             }
 
-            // Retrieve the DID, contact, and list of message texts from the
-            // intent
-            val (did, contact, messageTexts, databaseId, bubble) =
-                getIntentData(intent)
+            // Retrieve the DID and contact from the intent, as well as whether
+            // or not this came from a notification inline reply.
+            val (did, contact, inlineReply) = getIntentData(intent)
 
             // Terminate quietly if impossible to send message due to account
             // configuration
@@ -95,53 +92,16 @@ class SendMessageService : JobIntentService() {
                 return null
             }
 
-            val messages = mutableListOf<OutgoingMessage>()
-            if (databaseId != null) {
-                val message = Database.getInstance(
-                    applicationContext)
-                                  .getMessageDatabaseId(databaseId)
-                              ?: throw Exception("No message with database" +
-                                                 " ID found")
-                Database.getInstance(
-                    applicationContext)
-                    .markMessageDeliveryInProgress(databaseId)
-                messages.add(
-                    OutgoingMessage(
-                        databaseId, did, contact,
-                        message.text))
-            } else if (messageTexts != null) {
-                // Try adding the messages to the database; if this fails,
-                // terminate with a toast and try to remove existing added
-                // messages
-                try {
-                    val newDatabaseIds = Database.getInstance(
-                        applicationContext)
-                        .insertMessageDeliveryInProgress(
-                            ConversationId(did,
-                                           contact), messageTexts)
-                    for ((messageText, newDatabaseId) in messageTexts.zip(
-                        newDatabaseIds)) {
-                        messages.add(
-                            OutgoingMessage(
-                                newDatabaseId, did,
-                                contact, messageText))
-                    }
-                } catch (e: Exception) {
-                    logException(e)
-                    error = applicationContext.getString(
-                        R.string.send_message_error_database)
-                    return ConversationId(did, contact)
-                }
+            // Check whether there are any pending messages.
+            val messages = Database.getInstance(applicationContext)
+                .getMessagesConversationDeliveryInProgress(
+                    ConversationId(did, contact))
+            if (messages.isEmpty()) {
+                // If not, just return immediately.
+                return null
             }
 
-            // Send a broadcast indicating that the messages are about to be
-            // sent
-            val sendingMessageBroadcastIntent = Intent(
-                applicationContext.getString(
-                    R.string.sending_message_action, did, contact))
-            applicationContext.sendBroadcast(sendingMessageBroadcastIntent)
-
-            // Send each message using the VoIP.ms API
+            // Send all pending messages using the VoIP.ms API
             for (message in messages) {
                 sendMessage(message)
             }
@@ -149,19 +109,12 @@ class SendMessageService : JobIntentService() {
             val conversationId = ConversationId(did, contact)
 
             // Issue the notification again to follow inline reply convention,
-            // if applicable; otherwise, suppress the notification
-            val remoteInput = RemoteInput.getResultsFromIntent(intent)
-            if (messages.isNotEmpty() && remoteInput?.getCharSequence(
-                    applicationContext.getString(
-                        R.string.notifications_reply_key))
-                    ?.toString() != null) {
+            // if applicable.
+            if (messages.isNotEmpty() && inlineReply) {
                 Notifications.getInstance(applicationContext).showNotifications(
                     application as CustomApplication,
                     setOf(conversationId),
                     inlineReplyMessages = messages)
-            } else if (!bubble) {
-                Notifications.getInstance(applicationContext)
-                    .cancelNotification(conversationId)
             }
 
             return conversationId
@@ -175,72 +128,28 @@ class SendMessageService : JobIntentService() {
     }
 
     /**
-     * Extracts the DID, contact, and message texts from the specified intent.
+     * Extracts the DID, contact, and inline reply status from the specified
+     * intent.
      */
     private fun getIntentData(intent: Intent): IntentData {
-        // Extract the DID and contact from the intent
         val did = intent.getStringExtra(
             applicationContext.getString(R.string.send_message_did))
                   ?: throw Exception("DID missing")
         val contact = intent.getStringExtra(
             applicationContext.getString(R.string.send_message_contact))
                       ?: throw Exception("Contact phone number missing")
-        val bubble = intent.getBooleanExtra(
-            applicationContext.getString(R.string.send_message_bubble), false)
+        val inlineReply = intent.getBooleanExtra(
+            applicationContext.getString(R.string.send_message_inline_reply),
+            false)
 
-        val databaseId = intent.getLongExtra(getString(
-            R.string.send_message_database_id), -1)
-        if (databaseId != -1L) {
-            return IntentData(
-                did, contact, null, databaseId, bubble)
-        }
-
-        // Extract the message text provided by inline reply if it exists;
-        // otherwise, use the manually specified message text
-        val remoteInput = RemoteInput.getResultsFromIntent(intent)
-        val messageText = remoteInput?.getCharSequence(
-            applicationContext.getString(
-                R.string.notifications_reply_key))?.toString()
-                          ?: (intent.getStringExtra(
-                              applicationContext.getString(
-                                  R.string.send_message_text))
-                              ?: throw Exception(
-                                  "Message text missing"))
-
-        // If the message text exceeds the maximum length of an SMS message,
-        // split it into multiple message texts
-        val maxLength = applicationContext.resources.getInteger(
-            R.integer.sms_max_length)
-        val messageTexts = mutableListOf<String>()
-
-        // VoIP.ms uses UTF-8 encoding for text messages; any message
-        // exceeding N bytes when encoded using UTF-8 is too long
-        val bytes = mutableListOf<Byte>()
-        val boundary = BreakIterator.getCharacterInstance(Locale.getDefault())
-        boundary.setText(messageText)
-        var current = boundary.first()
-        var next = boundary.next()
-        while (next != BreakIterator.DONE) {
-            val cluster = messageText.substring(current, next)
-            val clusterBytes = cluster.toByteArray(Charsets.UTF_8)
-            if (bytes.size + clusterBytes.size > maxLength) {
-                messageTexts.add(String(bytes.toByteArray(), Charsets.UTF_8))
-                bytes.clear()
-            }
-            bytes.addAll(clusterBytes.toList())
-            current = next
-            next = boundary.next()
-        }
-        messageTexts.add(String(bytes.toByteArray(), Charsets.UTF_8))
-        return IntentData(
-            did, contact, messageTexts, null, bubble)
+        return IntentData(did, contact, inlineReply)
     }
 
     /**
      * Sends the specified message using the VoIP.ms API and updates the
      * database accordingly.
      */
-    private fun sendMessage(message: OutgoingMessage) {
+    private fun sendMessage(message: Message) {
         // Terminate if no network connection is available
         if (!NetworkManager.getInstance().isNetworkConnectionAvailable(
                 applicationContext)) {
@@ -276,7 +185,7 @@ class SendMessageService : JobIntentService() {
      *
      * @return Null if the message could not be sent.
      */
-    private fun sendMessageWithVoipMsApi(message: OutgoingMessage): Long? {
+    private fun sendMessageWithVoipMsApi(message: Message): Long? {
         // Get JSON response from API
         val response: MessageResponse?
         try {
@@ -347,75 +256,25 @@ class SendMessageService : JobIntentService() {
      */
     data class IntentData(val did: String,
                           val contact: String,
-                          val messageTexts: List<String>?,
-                          val databaseId: Long?,
-                          val bubble: Boolean)
-
-    /**
-     * Represents a message that has been input into the database but has not
-     * yet been sent.
-     */
-    data class OutgoingMessage(val databaseId: Long, val did: String,
-                               val contact: String, val text: String) {
-        init {
-            validatePhoneNumber(did)
-            validatePhoneNumber(contact)
-        }
-    }
+                          val inlineReply: Boolean)
 
     companion object {
-        /**
-         * Gets an intent which can be used to send a message to the
-         * specified contact and from the specified DID.
-         */
-        fun getIntent(context: Context, did: String, contact: String): Intent {
-            val intent = Intent()
-            intent.action = context.getString(R.string.send_message_action)
-            intent.putExtra(context.getString(
-                R.string.send_message_did), did)
-            intent.putExtra(context.getString(
-                R.string.send_message_contact), contact)
-            return intent
-        }
-
-        /**
-         * Sends the specified message to the specified contact and from the
-         * specified DID.
-         */
-        fun startService(context: Context,
-                         did: String,
-                         contact: String,
-                         text: String,
-                         bubble: Boolean = false) {
-            val intent = getIntent(
-                context, did, contact)
-            intent.putExtra(context.getString(R.string.send_message_text), text)
-            intent.putExtra(context.getString(R.string.send_message_bubble),
-                            bubble)
-            startService(
-                context, intent)
-        }
-
         /**
          * Sends the message associated with the specified database ID to the
          * contact and from the DID associated with the specified conversation
          * ID.
          */
         fun startService(context: Context, conversationId: ConversationId,
-                         databaseId: Long) {
-            val intent = getIntent(
-                context, conversationId.did,
-                conversationId.contact)
+                         inlineReply: Boolean = false) {
+            val intent = Intent()
+            intent.action = context.getString(R.string.send_message_action)
             intent.putExtra(context.getString(
-                R.string.send_message_database_id), databaseId)
-            startService(
-                context, intent)
-        }
-
-        /**
-         * Sends a message.
-         */
-        fun startService(context: Context, intent: Intent) {
+                R.string.send_message_did), conversationId.did)
+            intent.putExtra(context.getString(
+                R.string.send_message_contact), conversationId.contact)
+            intent.putExtra(
+                context.getString(R.string.send_message_inline_reply),
+                inlineReply)
             enqueueWork(context, SendMessageService::class.java,
                         JobId.SendMessageService.ordinal, intent)
         }

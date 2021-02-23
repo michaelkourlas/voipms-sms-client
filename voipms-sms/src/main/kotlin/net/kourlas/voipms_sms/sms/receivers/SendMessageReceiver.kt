@@ -20,9 +20,14 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.RemoteInput
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.sms.ConversationId
+import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.services.SendMessageService
+import net.kourlas.voipms_sms.utils.getMessageTexts
 import net.kourlas.voipms_sms.utils.logException
+import net.kourlas.voipms_sms.utils.runOnNewThread
 
 /**
  * Broadcast receiver used to forward send message requests from a PendingIntent
@@ -35,13 +40,51 @@ class SendMessageReceiver : BroadcastReceiver() {
                 return
             }
             if (intent.action != context.getString(
-                    R.string.send_message_action)) {
+                    R.string.send_message_receiver_action)) {
                 return
             }
-            intent.setClass(context, SendMessageService::class.java)
-            SendMessageService.startService(context, intent)
+
+            val did = intent.getStringExtra(context.getString(
+                R.string.send_message_receiver_did)) ?: return
+            val contact = intent.getStringExtra(context.getString(
+                R.string.send_message_receiver_contact)) ?: return
+
+            val remoteInput = RemoteInput.getResultsFromIntent(intent)
+            val messageText = remoteInput?.getCharSequence(
+                context.getString(
+                    R.string.notifications_reply_key))?.toString()
+                              ?: throw Exception(
+                                  "Message text missing")
+
+            runOnNewThread {
+                Database.getInstance(context)
+                    .insertMessageDeliveryInProgress(
+                        ConversationId(did, contact),
+                        getMessageTexts(context, messageText))
+                SendMessageService.startService(context,
+                                                ConversationId(did, contact),
+                                                inlineReply = true)
+            }
         } catch (e: Exception) {
             logException(e)
+        }
+    }
+
+
+    companion object {
+        /**
+         * Gets an intent which can be used to send a message to the
+         * specified contact and from the specified DID.
+         */
+        fun getIntent(context: Context, did: String, contact: String): Intent {
+            val intent = Intent()
+            intent.action =
+                context.getString(R.string.send_message_receiver_action)
+            intent.putExtra(context.getString(
+                R.string.send_message_receiver_did), did)
+            intent.putExtra(context.getString(
+                R.string.send_message_receiver_contact), contact)
+            return intent
         }
     }
 }

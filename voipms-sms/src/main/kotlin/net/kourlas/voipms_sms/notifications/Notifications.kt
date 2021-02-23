@@ -46,7 +46,6 @@ import net.kourlas.voipms_sms.sms.receivers.MarkReadReceiver
 import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
 import net.kourlas.voipms_sms.sms.receivers.SyncCancelReceiver
 import net.kourlas.voipms_sms.sms.services.MarkReadService
-import net.kourlas.voipms_sms.sms.services.SendMessageService
 import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
 import java.util.*
@@ -321,7 +320,7 @@ class Notifications private constructor(private val context: Context) {
         conversationIds: Set<ConversationId>,
         bubbleOnly: Boolean = false,
         autoLaunchBubble: Boolean = false,
-        inlineReplyMessages: List<SendMessageService.OutgoingMessage>
+        inlineReplyMessages: List<Message>
         = emptyList()) {
         // Do not show notifications when the conversations view is open,
         // unless this is for a bubble only.
@@ -394,7 +393,7 @@ class Notifications private constructor(private val context: Context) {
     private fun showNotification(
         conversationId: ConversationId,
         messages: List<Message>,
-        inlineReplyMessages: List<SendMessageService.OutgoingMessage>,
+        inlineReplyMessages: List<Message>,
         bubbleOnly: Boolean,
         autoLaunchBubble: Boolean) {
         // Do not show notification if there are no messages, unless this is
@@ -560,7 +559,7 @@ class Notifications private constructor(private val context: Context) {
         notification.addAction(markReadAction)
 
         // Reply button
-        val replyIntent = SendMessageService.getIntent(
+        val replyIntent = SendMessageReceiver.getIntent(
             context, did, contact)
         replyIntent.component = ComponentName(
             context, SendMessageReceiver::class.java)

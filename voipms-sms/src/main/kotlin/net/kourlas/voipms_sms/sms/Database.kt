@@ -267,7 +267,9 @@ class Database private constructor(private val context: Context) {
                 dids.joinToString(" OR ") { "$COLUMN_DID=?" },
                 dids.toTypedArray(),
                 null, null,
-                "$COLUMN_DATE DESC, $COLUMN_VOIP_ID DESC,"
+                "$COLUMN_DELIVERY_IN_PROGRESS DESC,"
+                + " $COLUMN_DATE DESC,"
+                + " $COLUMN_VOIP_ID DESC,"
                 + " $COLUMN_DATABASE_ID DESC", "1"))
         if (messages.size > 0) {
             return messages[0]
@@ -317,7 +319,28 @@ class Database private constructor(private val context: Context) {
                 arrayOf(conversationId.did, conversationId.contact,
                         "%$filterConstraint%"),
                 null, null,
-                "$COLUMN_DATE ASC, $COLUMN_VOIP_ID ASC,"
+                "$COLUMN_DELIVERY_IN_PROGRESS ASC,"
+                + " $COLUMN_DATE ASC,"
+                + " $COLUMN_VOIP_ID ASC,"
+                + " $COLUMN_DATABASE_ID ASC"))
+    }
+
+    /**
+     * Gets all messages in a specified conversation that match a specified
+     * filter constraint. The resulting list is sorted by date, from least
+     * recent to most recent.
+     */
+    fun getMessagesConversationDeliveryInProgress(
+        conversationId: ConversationId): List<Message> = importExportLock.read {
+        return getMessagesCursor(
+            database.query(
+                TABLE_MESSAGE,
+                messageColumns,
+                "$COLUMN_DID=? AND $COLUMN_CONTACT=?"
+                + " AND $COLUMN_DELIVERY_IN_PROGRESS = 1",
+                arrayOf(conversationId.did, conversationId.contact),
+                null, null,
+                " $COLUMN_DATE ASC,"
                 + " $COLUMN_DATABASE_ID ASC"))
     }
 
@@ -369,7 +392,10 @@ class Database private constructor(private val context: Context) {
             + " AND $COLUMN_UNREAD=1",
             arrayOf(conversationId.did, conversationId.contact),
             null, null,
-            "$COLUMN_DATE ASC, $COLUMN_VOIP_ID ASC, $COLUMN_DATABASE_ID ASC"))
+            "$COLUMN_DELIVERY_IN_PROGRESS ASC,"
+            + " $COLUMN_DATE ASC,"
+            + " $COLUMN_VOIP_ID ASC,"
+            + " $COLUMN_DATABASE_ID ASC"))
     }
 
     /**
@@ -1233,7 +1259,9 @@ class Database private constructor(private val context: Context) {
                     listOf(conversationId.did, conversationId.contact)
                         .plus(queryParams).toTypedArray(),
                     null, null,
-                    "$COLUMN_DATE DESC, $COLUMN_VOIP_ID DESC,"
+                    "$COLUMN_DELIVERY_IN_PROGRESS DESC,"
+                    + " $COLUMN_DATE DESC,"
+                    + " $COLUMN_VOIP_ID DESC,"
                     + " $COLUMN_DATABASE_ID DESC",
                     "1").use { cursor ->
                     cursor.moveToFirst()
@@ -1254,7 +1282,9 @@ class Database private constructor(private val context: Context) {
                 "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
                 arrayOf(conversationId.did, conversationId.contact),
                 null, null,
-                "$COLUMN_DATE DESC, $COLUMN_VOIP_ID DESC,"
+                "$COLUMN_DELIVERY_IN_PROGRESS DESC,"
+                + " $COLUMN_DATE DESC,"
+                + " $COLUMN_VOIP_ID DESC,"
                 + " $COLUMN_DATABASE_ID DESC",
                 "1").use { cursor ->
                 cursor.moveToFirst()

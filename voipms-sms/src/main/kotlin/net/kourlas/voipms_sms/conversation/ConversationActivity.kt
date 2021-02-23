@@ -107,22 +107,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 }
             }
         }
-    private val sendingMessageReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?,
-                               intent: Intent?) {
-            // Refresh adapter to show message being sent
-            if (::adapter.isInitialized) {
-                adapter.refresh()
-
-                // Scroll to the bottom of the adapter so that the message is
-                // in view
-                if (adapter.itemCount > 0) {
-                    layoutManager.scrollToPosition(adapter.itemCount - 1)
-                }
-            }
-        }
-
-    }
     private val sentMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             // Show error in snackbar if one occurred
@@ -508,12 +492,31 @@ open class ConversationActivity(val bubble: Boolean = false) :
         if (messageText.trim() != ""
             && accountConfigured(applicationContext)
             && did in getDids(applicationContext)) {
-            // Send the message using the SendMessageService
-            SendMessageService.startService(
-                this, did, contact, messageText, bubble)
-
-            // Clear the message text box
+            // Clear the message text box.
             messageEditText.setText("")
+
+            // Send the message using the SendMessageService.
+            runOnNewThread {
+                Database.getInstance(
+                    applicationContext)
+                    .insertMessageDeliveryInProgress(
+                        ConversationId(did,
+                                       contact),
+                        getMessageTexts(applicationContext, messageText))
+                SendMessageService.startService(
+                    this, ConversationId(did, contact))
+
+                runOnUiThread {
+                    // Refresh adapter to show message being sent.
+                    adapter.refresh()
+
+                    // Scroll to the bottom of the adapter so that the message
+                    // is in view.
+                    if (adapter.itemCount > 0) {
+                        layoutManager.scrollToPosition(adapter.itemCount - 1)
+                    }
+                }
+            }
         }
     }
 
@@ -523,9 +526,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Register all dynamic receivers for this activity
         registerReceiver(syncCompleteReceiver,
                          IntentFilter(getString(R.string.sync_complete_action)))
-        registerReceiver(sendingMessageReceiver,
-                         IntentFilter(applicationContext.getString(
-                             R.string.sending_message_action, did, contact)))
         registerReceiver(sentMessageReceiver,
                          IntentFilter(applicationContext.getString(
                              R.string.sent_message_action, did, contact)))
@@ -577,7 +577,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // Unregister all dynamic receivers for this activity
         safeUnregisterReceiver(this, syncCompleteReceiver)
-        safeUnregisterReceiver(this, sendingMessageReceiver)
         safeUnregisterReceiver(this, sentMessageReceiver)
 
         // Track number of activities
@@ -860,13 +859,15 @@ open class ConversationActivity(val bubble: Boolean = false) :
      */
     private fun onResendButtonClick(mode: ActionMode): Boolean {
         // Resends all checked items
-        for (messageItem in adapter.messageItems) {
-            if (messageItem.checked) {
-                SendMessageService.startService(
-                    applicationContext, conversationId,
-                    messageItem.message.databaseId)
-                break
+
+        val databaseIds = adapter.messageItems.filter { it.checked }
+            .map { it.message.databaseId }
+        runOnNewThread {
+            for (databaseId in databaseIds) {
+                Database.getInstance(this)
+                    .markMessageDeliveryInProgress(databaseId)
             }
+            SendMessageService.startService(applicationContext, conversationId)
         }
 
         mode.finish()
@@ -1030,8 +1031,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 val messageItem = adapter[position]
                 val message = messageItem.message
                 if (!message.isDelivered && !message.isDeliveryInProgress) {
-                    SendMessageService.startService(
-                        this, conversationId, message.databaseId)
+                    runOnNewThread {
+                        Database.getInstance(this)
+                            .markMessageDeliveryInProgress(
+                                messageItem.message.databaseId)
+                        SendMessageService.startService(this, conversationId)
+                    }
                 }
             }
 
