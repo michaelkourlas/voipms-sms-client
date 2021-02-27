@@ -37,7 +37,7 @@ import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.demo.getDemoNotification
-import net.kourlas.voipms_sms.sms.services.SyncService
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.*
 import java.io.File
 import java.io.FileInputStream
@@ -562,7 +562,7 @@ class Database private constructor(private val context: Context) {
      * @return The conversation IDs associated with the newly added messages.
      */
     suspend fun insertMessagesVoipMsApi(
-        incomingMessages: List<SyncService.IncomingMessage>,
+        incomingMessages: List<SyncWorker.IncomingMessage>,
         retrieveDeletedMessages: Boolean)
         : Set<ConversationId> = withContext(Dispatchers.IO) {
         importExportLock.read {

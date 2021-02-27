@@ -2,8 +2,6 @@
  * VoIP.ms SMS
  * Copyright (C) 2017-2021 Michael Kourlas
  *
- * Portions Copyright (C) 2008 The Android Open Source Project
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,26 +15,25 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.sms.services
+package net.kourlas.voipms_sms.sms.workers
 
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.os.*
-import android.util.Log
-import androidx.annotation.WorkerThread
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
+import android.os.Build
+import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ensureActive
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
+import net.kourlas.voipms_sms.sms.services.SyncIntervalService
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.toBoolean
@@ -45,144 +42,71 @@ import java.io.IOException
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.ceil
 
 /**
- * Service used to synchronize the database with VoIP.ms.
- *
- * SyncService is a Service rather than a JobIntentService because
- * it is a foreground service that uses a notification to indicate
- * synchronization progress. This is mainly to prevent Android from killing
- * the service.
+ * Worker used to synchronize the database with VoIP.ms.
  */
-class SyncService : Service() {
-    @Volatile
-    private lateinit var serviceLooper: Looper
-
-    @Volatile
-    private lateinit var serviceHandler: ServiceHandler
-
+class SyncWorker(context: Context, params: WorkerParameters) :
+    CoroutineWorker(context, params) {
     private var error: String? = null
     private var progress: Int = 0
 
-    private inner class ServiceHandler(looper: Looper) : Handler(looper) {
-        override fun handleMessage(msg: Message) {
-            onHandleIntent(msg.obj as Intent)
-            stopSelfResult(msg.arg1)
-        }
-    }
+    override suspend fun doWork(): Result {
+        // Make this a foreground service to ensure immediate execution.
+        // This will be changed to setExpedited in Android 12.
+        setForeground(getForegroundInfo())
 
-    override fun onCreate() {
-        super.onCreate()
-        val thread = HandlerThread(SyncService::class.java.name)
-        thread.start()
-        serviceLooper = thread.looper
-        serviceHandler = ServiceHandler(serviceLooper)
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int,
-                                startId: Int): Int {
-        // Void any pending cancellation request
-        requestCancellation.set(false)
-
-        // Show notification during synchronization to prevent phone from
-        // going to sleep
-        synchronized(this) {
-            // Use the existing progress value since the service may already
-            // be running
-            val notification = Notifications.getInstance(applicationContext)
-                .getSyncDatabaseNotification(progress)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(
-                    Notifications.SYNC_DATABASE_NOTIFICATION_ID,
-                    notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-            } else {
-                startForeground(
-                    Notifications.SYNC_DATABASE_NOTIFICATION_ID,
-                    notification)
-            }
-        }
-
-        val msg: Message = serviceHandler.obtainMessage()
-        msg.arg1 = startId
-        msg.obj = intent
-        serviceHandler.sendMessage(msg)
-
-        return START_NOT_STICKY
-    }
-
-    override fun onDestroy() {
-        serviceLooper.quit()
-    }
-
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-
-    @WorkerThread
-    fun onHandleIntent(intent: Intent?) {
-        val rand = Random().nextInt().toString(16)
-        Log.i(SyncService::class.java.name, "[$rand] starting synchronization")
-
-        synchronized(this) {
-            progress = 0
-            val notification = Notifications.getInstance(applicationContext)
-                .getSyncDatabaseNotification(progress)
-            NotificationManagerCompat.from(applicationContext).notify(
-                Notifications.SYNC_DATABASE_NOTIFICATION_ID, notification)
-        }
-
-        // Perform synchronization
-        runBlocking {
-            handleSync(intent)
-        }
+        // Perform database synchronization.
+        handleSync()
 
         // Send a broadcast indicating that the database has been
-        // synchronized (or an attempt has been made to synchronize it)
+        // synchronized or an attempt has been made to synchronize it.
         val syncCompleteBroadcastIntent = Intent(
             applicationContext.getString(
                 R.string.sync_complete_action))
-        syncCompleteBroadcastIntent.putExtra(getString(
+        syncCompleteBroadcastIntent.putExtra(applicationContext.getString(
             R.string.sync_complete_error), error)
-        if (intent?.extras?.get(getString(
-                R.string.sync_force_recent)) != true) {
-            syncCompleteBroadcastIntent.putExtra(getString(
+        if (!inputData.getBoolean(applicationContext.getString(
+                R.string.sync_force_recent), false)) {
+            syncCompleteBroadcastIntent.putExtra(applicationContext.getString(
                 R.string.sync_complete_full), true)
         }
         applicationContext.sendBroadcast(syncCompleteBroadcastIntent)
 
-        Log.i(SyncService::class.java.name, "[$rand] completed synchronization")
+        return if (error != null) {
+            Result.success()
+        } else {
+            Result.failure()
+        }
+    }
 
-        progress = 0
+    private fun getForegroundInfo(): ForegroundInfo {
+        val notification = Notifications.getInstance(applicationContext)
+            .getSyncDatabaseNotification(id, progress)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(Notifications.SYNC_DATABASE_NOTIFICATION_ID,
+                           notification,
+                           ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(Notifications.SYNC_DATABASE_NOTIFICATION_ID,
+                           notification)
+        }
     }
 
     /**
      * Perform synchronization.
      */
-    private suspend fun handleSync(intent: Intent?) {
+    private suspend fun handleSync() {
         try {
-            // Terminate quietly if intent does not exist or does not contain
-            // the sync action
-            if (intent == null || intent.action != applicationContext.getString(
-                    R.string.sync_action)) {
-                return
-            }
-
-            // Terminate quietly if account inactive
+            // Terminate quietly if it is impossible to sync due to account
+            // configuration.
             if (!accountConfigured(applicationContext) || !didsConfigured(
                     applicationContext)) {
                 return
             }
 
-            // Extract the properties from the intent
-            val forceRecent = intent.extras?.get(
-                applicationContext.getString(R.string.sync_force_recent))
-                                  as Boolean?
-                              ?: throw Exception("Force recent missing")
-
-            // Terminate with a toast if no network connection is available
+            // Terminate if no network connection is available.
             if (!NetworkManager.getInstance().isNetworkConnectionAvailable(
                     applicationContext)) {
                 error = applicationContext.getString(
@@ -192,6 +116,8 @@ class SyncService : Service() {
 
             // Retrieve all messages from VoIP.ms, or only those messages
             // dated after the most recent message stored locally
+            val forceRecent = inputData.getBoolean(
+                applicationContext.getString(R.string.sync_force_recent), false)
             val retrieveOnlyRecentMessages =
                 forceRecent || getRetrieveOnlyRecentMessages(applicationContext)
             // Retrieve messages from VoIP.ms that were deleted locally
@@ -211,6 +137,8 @@ class SyncService : Service() {
                 SyncIntervalService.startService(
                     applicationContext)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(
@@ -317,28 +245,21 @@ class SyncService : Service() {
      */
     private suspend fun processRequests(
         retrievalRequests: List<RetrievalRequest>,
-        retrieveDeletedMessages: Boolean) {
+        retrieveDeletedMessages: Boolean) = coroutineScope {
         val incomingMessages = mutableListOf<IncomingMessage>()
         for (i in retrievalRequests.indices) {
-            if (requestCancellation.get()) {
-                break
-            }
+            ensureActive()
 
             val nextIncomingMessages = processRetrievalRequest(
                 retrievalRequests[i])
             if (nextIncomingMessages != null) {
                 incomingMessages.addAll(nextIncomingMessages)
             } else {
-                return
+                return@coroutineScope
             }
 
-            synchronized(this) {
-                progress = ((i + 1) * 100) / retrievalRequests.size
-                val notification = Notifications.getInstance(applicationContext)
-                    .getSyncDatabaseNotification(progress)
-                NotificationManagerCompat.from(applicationContext).notify(
-                    Notifications.SYNC_DATABASE_NOTIFICATION_ID, notification)
-            }
+            progress = ((i + 1) * 100) / retrievalRequests.size
+            setForeground(getForegroundInfo())
         }
 
         // Add new messages from the server
@@ -352,7 +273,7 @@ class SyncService : Service() {
             logException(e)
             error = applicationContext.getString(
                 R.string.sync_error_database)
-            return
+            return@coroutineScope
         }
 
         // Show notifications for new messages
@@ -484,37 +405,21 @@ class SyncService : Service() {
                                 private val period: Pair<Date, Date>)
 
     companion object {
-        private val requestCancellation: AtomicBoolean = AtomicBoolean(false)
-
         /**
          * Synchronize the database with VoIP.ms.
          *
          * @param forceRecent If true, retrieves only the most recent messages
          * regardless of the app configuration.
          */
-        fun startService(context: Context, forceRecent: Boolean = false) {
-            val intent = Intent(context, SyncService::class.java)
-            intent.action = context.getString(R.string.sync_action)
-            intent.putExtra(context.getString(R.string.sync_force_recent),
-                            forceRecent)
-            ContextCompat.startForegroundService(context, intent)
-        }
-
-        /**
-         * Gets an intent which can be used to cancel the current
-         * synchronization.
-         */
-        fun getCancelIntent(context: Context): Intent {
-            val intent = Intent()
-            intent.action = context.getString(R.string.sync_cancel_action)
-            return intent
-        }
-
-        /**
-         * Requests that the current synchronization be cancelled.
-         */
-        fun requestCancellation() {
-            requestCancellation.set(true)
+        fun performSynchronization(context: Context,
+                                   forceRecent: Boolean = false) {
+            val work = OneTimeWorkRequestBuilder<SyncWorker>()
+                .setInputData(
+                    workDataOf(
+                        context.getString(
+                            R.string.sync_force_recent) to forceRecent))
+                .build()
+            WorkManager.getInstance(context).enqueue(work)
         }
     }
 }

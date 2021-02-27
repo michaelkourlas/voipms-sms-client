@@ -32,6 +32,7 @@ import androidx.core.app.RemoteInput
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.LocusIdCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.work.WorkManager
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
@@ -44,8 +45,6 @@ import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.receivers.MarkReadReceiver
 import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
-import net.kourlas.voipms_sms.sms.receivers.SyncCancelReceiver
-import net.kourlas.voipms_sms.sms.services.SyncService
 import net.kourlas.voipms_sms.utils.*
 import java.util.*
 
@@ -234,7 +233,7 @@ class Notifications private constructor(private val context: Context) {
     /**
      * Gets the notification displayed during synchronization.
      */
-    fun getSyncDatabaseNotification(progress: Int = 0): Notification {
+    fun getSyncDatabaseNotification(id: UUID, progress: Int = 0): Notification {
         createSyncNotificationChannel()
 
         val builder = NotificationCompat.Builder(
@@ -245,18 +244,15 @@ class Notifications private constructor(private val context: Context) {
             R.string.notifications_sync_database_message))
         builder.setContentText("$progress%")
         builder.setProgress(100, progress, false)
+        builder.setOngoing(true)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             @Suppress("DEPRECATION")
             builder.priority = Notification.PRIORITY_LOW
         }
 
         // Cancel action
-        val cancelIntent = SyncService.getCancelIntent(context)
-        cancelIntent.component = ComponentName(
-            context, SyncCancelReceiver::class.java)
-        val cancelPendingIntent = PendingIntent.getBroadcast(
-            context, SyncCancelReceiver::class.java.toString().hashCode(),
-            cancelIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val cancelPendingIntent =
+            WorkManager.getInstance(context).createCancelPendingIntent(id)
         val cancelAction = NotificationCompat.Action.Builder(
             R.drawable.ic_delete_toolbar_24dp,
             context.getString(R.string.notifications_button_cancel),
@@ -280,6 +276,7 @@ class Notifications private constructor(private val context: Context) {
         builder.setSmallIcon(R.drawable.ic_message_sync_toolbar_24dp)
         builder.setContentTitle(context.getString(
             R.string.notifications_sync_send_message_message))
+        builder.setOngoing(true)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             @Suppress("DEPRECATION")
             builder.priority = Notification.PRIORITY_LOW

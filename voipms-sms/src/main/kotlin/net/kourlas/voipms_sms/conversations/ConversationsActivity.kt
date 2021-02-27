@@ -63,7 +63,7 @@ import net.kourlas.voipms_sms.signIn.SignInActivity
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
-import net.kourlas.voipms_sms.sms.services.SyncService
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -239,7 +239,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
             R.id.swipe_refresh_layout)
         swipeRefreshLayout.setOnRefreshListener {
             adapter.refresh()
-            SyncService.startService(this, forceRecent = false)
+            SyncWorker.performSynchronization(this, forceRecent = false)
         }
         swipeRefreshLayout.setColorSchemeResources(R.color.swipe_refresh_icon)
     }
@@ -331,7 +331,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
 
         // Refresh and perform limited synchronization
         adapter.refresh()
-        SyncService.startService(this, forceRecent = true)
+        SyncWorker.performSynchronization(this, forceRecent = true)
 
         // Refresh on resume just in case the contacts permission was newly
         // granted and we need to add the contact names and photos
@@ -396,7 +396,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
             val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
                 R.id.swipe_refresh_layout)
             swipeRefreshLayout.isRefreshing = true
-            SyncService.startService(this, forceRecent = false)
+            SyncWorker.performSynchronization(this, forceRecent = false)
 
             val format = SimpleDateFormat("MMM d, yyyy",
                                           Locale.getDefault())

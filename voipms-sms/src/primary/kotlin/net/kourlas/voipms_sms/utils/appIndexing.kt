@@ -33,8 +33,8 @@ import net.kourlas.voipms_sms.sms.Message
 /**
  * Adds the specified message to the app index.
  */
-@Suppress("BlockingMethodInNonBlockingContext")
-suspend fun addMessageToIndex(context: Context, message: Message): Void =
+@Suppress("BlockingMethodInNonBlockingContext", "HasPlatformType")
+suspend fun addMessageToIndex(context: Context, message: Message) =
     withContext(Dispatchers.IO) {
         Tasks.await(FirebaseAppIndex.getInstance(context).update(
             getMessageBuilder(
@@ -44,8 +44,8 @@ suspend fun addMessageToIndex(context: Context, message: Message): Void =
 /**
  * Remove the entry with the specified URI from the app index.
  */
-@Suppress("BlockingMethodInNonBlockingContext")
-suspend fun removeFromIndex(context: Context, string: String): Void =
+@Suppress("BlockingMethodInNonBlockingContext", "HasPlatformType")
+suspend fun removeFromIndex(context: Context, string: String) =
     withContext(Dispatchers.IO) {
         Tasks.await(FirebaseAppIndex.getInstance(context).remove(string))
     }
@@ -53,8 +53,8 @@ suspend fun removeFromIndex(context: Context, string: String): Void =
 /**
  * Remove the all entries from the app index.
  */
-@Suppress("BlockingMethodInNonBlockingContext")
-suspend fun removeAllFromIndex(context: Context): Void =
+@Suppress("BlockingMethodInNonBlockingContext", "HasPlatformType")
+suspend fun removeAllFromIndex(context: Context) =
     withContext(Dispatchers.IO) {
         Tasks.await(FirebaseAppIndex.getInstance(context).removeAll())
     }

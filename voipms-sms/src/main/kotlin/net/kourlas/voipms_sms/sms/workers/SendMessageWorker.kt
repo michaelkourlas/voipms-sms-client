@@ -19,6 +19,8 @@ package net.kourlas.voipms_sms.sms.workers
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
@@ -102,8 +104,14 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
     private fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncMessageSendNotification()
-        return ForegroundInfo(Notifications.SYNC_SEND_MESSAGE_NOTIFICATION_ID,
-                              notification)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(Notifications.SYNC_SEND_MESSAGE_NOTIFICATION_ID,
+                           notification,
+                           ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(Notifications.SYNC_SEND_MESSAGE_NOTIFICATION_ID,
+                           notification)
+        }
     }
 
     /**
@@ -127,7 +135,7 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                 return
             }
 
-            // Terminate if no network connection is available
+            // Terminate if no network connection is available.
             if (!NetworkManager.getInstance().isNetworkConnectionAvailable(
                     applicationContext)) {
                 error = applicationContext.getString(

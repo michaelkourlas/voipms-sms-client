@@ -21,7 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.sms.services.SyncService
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.logException
 
 /**
@@ -42,7 +42,7 @@ class SyncIntervalReceiver : BroadcastReceiver() {
                 context.getString(
                     R.string.sync_interval_force_recent)) as Boolean?
                               ?: throw Exception("Force recent missing")
-            SyncService.startService(context, forceRecent)
+            SyncWorker.performSynchronization(context, forceRecent)
         } catch (e: Exception) {
             logException(e)
         }
