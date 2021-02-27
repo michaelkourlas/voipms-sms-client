@@ -22,6 +22,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
+import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
@@ -340,12 +341,13 @@ class Database private constructor(private val context: Context) {
 
     /**
      * Gets all messages in a specified conversation that match a specified
-     * filter constraint. The resulting list is sorted by date, from least
-     * recent to most recent.
+     * filter constraint. The resulting list is sorted by date, from most
+     * recent to least recent.
      */
     suspend fun getMessagesConversationFiltered(
         conversationId: ConversationId,
-        filterConstraint: String): List<Message> = withContext(Dispatchers.IO) {
+        filterConstraint: String,
+        itemLimit: Long?): List<Message> = withContext(Dispatchers.IO) {
         importExportLock.read {
             return@read getMessagesCursor(
                 database.query(
@@ -356,10 +358,29 @@ class Database private constructor(private val context: Context) {
                     arrayOf(conversationId.did, conversationId.contact,
                             "%$filterConstraint%"),
                     null, null,
-                    "$COLUMN_DELIVERY_IN_PROGRESS ASC,"
-                    + " $COLUMN_DATE ASC,"
-                    + " $COLUMN_VOIP_ID ASC,"
-                    + " $COLUMN_DATABASE_ID ASC"))
+                    "$COLUMN_DELIVERY_IN_PROGRESS DESC,"
+                    + " $COLUMN_DATE DESC,"
+                    + " $COLUMN_VOIP_ID DESC,"
+                    + " $COLUMN_DATABASE_ID DESC",
+                    itemLimit.toString()))
+        }
+    }
+
+    /**
+     * Gets the number of messages in a specified conversation that match a
+     * specified filter constraint.
+     */
+    suspend fun getMessagesConversationFilteredCount(
+        conversationId: ConversationId,
+        filterConstraint: String): Long = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            DatabaseUtils.queryNumEntries(
+                database,
+                TABLE_MESSAGE,
+                "$COLUMN_DID=? AND $COLUMN_CONTACT=?"
+                + " AND $COLUMN_MESSAGE LIKE ?",
+                arrayOf(conversationId.did, conversationId.contact,
+                        "%$filterConstraint%"))
         }
     }
 

@@ -343,6 +343,19 @@ open class ConversationActivity(val bubble: Boolean = false) :
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
+        recyclerView.addOnScrollListener(object :
+                                             RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int,
+                                    dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (!adapter.loadingMoreItems
+                    && layoutManager.findFirstVisibleItemPosition()
+                    <= ConversationRecyclerViewAdapter.START_LOAD_INDEX) {
+                    adapter.loadMoreItems()
+                }
+            }
+
+        })
 
         // Set up fast scroller
         FastScroller.addTo(

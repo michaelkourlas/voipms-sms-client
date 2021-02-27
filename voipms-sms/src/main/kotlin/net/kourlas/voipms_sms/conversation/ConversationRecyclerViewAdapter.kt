@@ -71,14 +71,22 @@ class ConversationRecyclerViewAdapter(
     FastScroller.SectionTitleProvider {
 
     // List of items shown by the adapter; the index of each item
-    // corresponds to the location of each item in the adapter
+    // corresponds to the location of each item in the adapter.
     private val _messageItems = mutableListOf<MessageItem>()
     val messageItems: List<MessageItem>
         get() = _messageItems
 
-    // Current and previous filter constraint
+    // Current and previous filter constraint.
     private var currConstraint: String = ""
     private var prevConstraint: String = ""
+
+    // The total number of items that can be retrieved and which have been
+    // retrieved.
+    private var maxLimit = 0L
+    private var currLimit = ADDITIONAL_ITEMS_INCREMENT
+
+    // Whether the adapter is currently loading additional items.
+    var loadingMoreItems = false
 
     override fun onCreateViewHolder(parent: ViewGroup,
                                     viewType: Int): MessageViewHolder {
@@ -331,13 +339,21 @@ class ConversationRecyclerViewAdapter(
             @Suppress("ConstantConditionIf")
             if (!BuildConfig.IS_DEMO) {
                 runBlocking {
+                    val filterString = constraint.toString()
+                        .trim { it <= ' ' }
+                        .toLowerCase(Locale.getDefault())
+                    maxLimit = Database.getInstance(activity)
+                        .getMessagesConversationFilteredCount(
+                            conversationId, filterString)
+                    if (currLimit > maxLimit) {
+                        currLimit = maxLimit
+                    }
                     resultsObject.messages.addAll(
                         Database.getInstance(activity)
                             .getMessagesConversationFiltered(
                                 conversationId,
-                                constraint.toString()
-                                    .trim { it <= ' ' }
-                                    .toLowerCase(Locale.getDefault())))
+                                filterString,
+                                currLimit).asReversed())
                 }
             } else {
                 resultsObject.messages.addAll(getConversationDemoMessages(
@@ -467,6 +483,8 @@ class ConversationRecyclerViewAdapter(
                     layoutManager.scrollToPosition(messageItems.size - 1)
                 }
             }
+
+            loadingMoreItems = false
         }
     }
 
@@ -479,6 +497,17 @@ class ConversationRecyclerViewAdapter(
      * Refreshes the adapter using the specified filter constraint.
      */
     fun refresh(constraint: String) = filter.filter(constraint)
+
+    /**
+     * Loads additional items from the database.
+     */
+    fun loadMoreItems() {
+        if (currLimit + ADDITIONAL_ITEMS_INCREMENT <= maxLimit) {
+            loadingMoreItems = true
+            currLimit += ADDITIONAL_ITEMS_INCREMENT
+            refresh()
+        }
+    }
 
     /**
      * Helper class used to store messages.
@@ -593,5 +622,15 @@ class ConversationRecyclerViewAdapter(
                 contactBadge.setOverlay(null)
             }
         }
+    }
+
+    companion object {
+        // The number of additional items to retrieve when loadMoreItems is
+        // called.
+        private const val ADDITIONAL_ITEMS_INCREMENT = 100L
+
+        // When the message with this index is shown, we should start to load
+        // more items.
+        const val START_LOAD_INDEX = ADDITIONAL_ITEMS_INCREMENT / 4
     }
 }
