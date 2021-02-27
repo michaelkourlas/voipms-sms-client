@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2018 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,15 @@
 
 package net.kourlas.voipms_sms.sms.receivers
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.AlarmManagerCompat
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.getLastCompleteSyncTime
+import net.kourlas.voipms_sms.preferences.getSyncInterval
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.logException
 
@@ -50,17 +55,41 @@ class SyncIntervalReceiver : BroadcastReceiver() {
 
     companion object {
         /**
-         * Gets an intent which can be used to trigger this receiver.
-         *
-         * @param forceRecent If true, retrieves only the most recent messages
-         * regardless of the app configuration.
+         * Set up an alarm to trigger database synchronization.
          */
-        fun getIntent(context: Context, forceRecent: Boolean = true): Intent {
+        fun setInterval(context: Context) {
+            val alarmManager = context.getSystemService(
+                Context.ALARM_SERVICE) as AlarmManager
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, SyncIntervalReceiver::class.java.hashCode(),
+                getIntent(context),
+                0)
+            alarmManager.cancel(pendingIntent)
+
+            val syncInterval = (getSyncInterval(context)
+                                * (24 * 60 * 60 * 1000)).toLong()
+            // Only setup interval if periodic synchronization is enabled
+            if (syncInterval != 0L) {
+                val nextSyncTime = getLastCompleteSyncTime(context) +
+                                   syncInterval
+
+                val now = System.currentTimeMillis()
+                if (nextSyncTime <= now) {
+                    pendingIntent.send()
+                } else {
+                    AlarmManagerCompat.setAndAllowWhileIdle(
+                        alarmManager, AlarmManager.RTC_WAKEUP, nextSyncTime,
+                        pendingIntent)
+                }
+            }
+        }
+
+        /**
+         * Gets an intent which can be used to trigger this receiver.
+         */
+        private fun getIntent(context: Context): Intent {
             val intent = Intent(context, SyncIntervalReceiver::class.java)
             intent.action = context.getString(R.string.sync_interval_action)
-            intent.putExtra(context.getString(
-                R.string.sync_interval_force_recent),
-                            forceRecent)
             return intent
         }
     }

@@ -23,7 +23,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.sms.services.SyncIntervalService
+import net.kourlas.voipms_sms.sms.receivers.SyncIntervalReceiver
 import net.kourlas.voipms_sms.utils.preferences
 
 class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
@@ -32,7 +32,7 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
     private val syncIntervalPreferenceChangeListener =
         Preference.OnPreferenceChangeListener { _, _ ->
             activity?.let {
-                SyncIntervalService.startService(it)
+                SyncIntervalReceiver.setInterval(it)
             }
             true
         }

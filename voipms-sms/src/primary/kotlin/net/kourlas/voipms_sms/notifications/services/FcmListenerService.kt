@@ -23,7 +23,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.sms.receivers.SyncIntervalReceiver
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 
 /**
  * Service that processes FCM messages by showing notifications for new SMS
@@ -43,9 +43,8 @@ class FcmListenerService : FirebaseMessagingService() {
             // database and shows notifications for any new messages
             if (Notifications.getInstance(
                     application).getNotificationsEnabled()) {
-                val intent = SyncIntervalReceiver.getIntent(
-                    applicationContext, forceRecent = true)
-                sendBroadcast(intent)
+                SyncWorker.performSynchronization(applicationContext,
+                                                  forceRecent = true)
             }
         } else {
             // Otherwise, unsubscribe from this topic

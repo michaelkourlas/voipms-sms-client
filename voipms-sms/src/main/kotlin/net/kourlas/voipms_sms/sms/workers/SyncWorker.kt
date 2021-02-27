@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.util.Log
 import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
@@ -33,7 +34,7 @@ import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.sms.services.SyncIntervalService
+import net.kourlas.voipms_sms.sms.receivers.SyncIntervalReceiver
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.toBoolean
@@ -55,7 +56,11 @@ class SyncWorker(context: Context, params: WorkerParameters) :
     override suspend fun doWork(): Result {
         // Make this a foreground service to ensure immediate execution.
         // This will be changed to setExpedited in Android 12.
-        setForeground(getForegroundInfo())
+        try {
+            setForeground(getForegroundInfo())
+        } catch (e: Exception) {
+            throw e
+        }
 
         // Perform database synchronization.
         handleSync()
@@ -74,9 +79,10 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         }
         applicationContext.sendBroadcast(syncCompleteBroadcastIntent)
 
-        return if (error != null) {
+        return if (error == null) {
             Result.success()
         } else {
+            Log.w("tag", error ?: "")
             Result.failure()
         }
     }
@@ -134,8 +140,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             if (!forceRecent) {
                 setLastCompleteSyncTime(applicationContext,
                                         System.currentTimeMillis())
-                SyncIntervalService.startService(
-                    applicationContext)
+                SyncIntervalReceiver.setInterval(applicationContext)
             }
         } catch (e: CancellationException) {
             throw e
@@ -302,7 +307,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      *
      * @return Null if the request failed.
      */
-    private fun processRetrievalRequest(
+    private suspend fun processRetrievalRequest(
         request: RetrievalRequest): List<IncomingMessage>? {
         val response = sendRequestWithVoipMsApi(request) ?: return null
 
@@ -355,7 +360,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      * Performs a GET request using the specified url and parses the response
      * as JSON.
      */
-    private fun sendRequestWithVoipMsApi(
+    private suspend fun sendRequestWithVoipMsApi(
         request: RetrievalRequest): MessagesResponse? {
         try {
             return httpPostWithMultipartFormData(

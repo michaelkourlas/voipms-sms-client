@@ -34,7 +34,7 @@ import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.DidsPreferencesFragment
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.sms.services.RetrieveDidsService
+import net.kourlas.voipms_sms.sms.workers.RetrieveDidsWorker
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
@@ -123,7 +123,7 @@ class DidsPreferencesActivity : AppCompatActivity() {
     }
 
     /**
-     * Starts the [RetrieveDidsService], which will retrieve the DIDs to
+     * Starts the [RetrieveDidsWorker], which will retrieve the DIDs to
      * show in this activity.
      */
     private fun retrieveDids() {
@@ -141,7 +141,7 @@ class DidsPreferencesActivity : AppCompatActivity() {
         }
 
         // Pass control to RetrieveDidsService
-        RetrieveDidsService.startService(this)
+        RetrieveDidsWorker.retrieveDids(this)
     }
 
     /**

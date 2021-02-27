@@ -15,45 +15,76 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.sms.services
+package net.kourlas.voipms_sms.sms.workers
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.JobIntentService
+import android.content.pm.ServiceInfo
+import android.os.Build
+import androidx.work.*
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.preferences.setDids
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.enablePushNotifications
+import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
+import net.kourlas.voipms_sms.utils.logException
+import net.kourlas.voipms_sms.utils.replaceIndex
 import java.io.IOException
 
 /**
- * Service used to retrieve DIDs for a particular account from VoIP.ms.
+ * Worker used to retrieve DIDs for a particular account from VoIP.ms.
  */
-class RetrieveDidsService : JobIntentService() {
+class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
+    CoroutineWorker(context, params) {
     private var error: String? = null
 
-    override fun onHandleWork(intent: Intent) {
-        // Retrieve DIDs
-        val dids = handleRetrieveDids(intent)
+    override suspend fun doWork(): Result {
+        // Make this a foreground service to ensure immediate execution.
+        // This will be changed to setExpedited in Android 12.
+        setForeground(getForegroundInfo())
 
-        // Send broadcast with DIDs
+        // Retrieve DIDs.
+        val dids = retrieveDids()
+
+        // Send broadcast with DIDs.
         val retrieveDidsCompleteIntent = Intent(
             applicationContext.getString(
                 R.string.retrieve_dids_complete_action))
-        retrieveDidsCompleteIntent.putExtra(getString(
+        retrieveDidsCompleteIntent.putExtra(applicationContext.getString(
             R.string.retrieve_dids_complete_error), error)
         retrieveDidsCompleteIntent.putStringArrayListExtra(
-            getString(R.string.retrieve_dids_complete_dids),
+            applicationContext.getString(R.string.retrieve_dids_complete_dids),
             if (dids != null) ArrayList<String>(dids.toList()) else null)
         applicationContext.sendBroadcast(retrieveDidsCompleteIntent)
+
+        return if (error == null) {
+            Result.success()
+        } else {
+            Result.failure()
+        }
+    }
+
+    private fun getForegroundInfo(): ForegroundInfo {
+        val notification = Notifications.getInstance(applicationContext)
+            .getSyncRetrieveDidsNotification()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(Notifications.SYNC_RETRIEVE_DIDS_NOTIFICATION_ID,
+                           notification,
+                           ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(Notifications.SYNC_RETRIEVE_DIDS_NOTIFICATION_ID,
+                           notification)
+        }
     }
 
     /**
@@ -62,18 +93,11 @@ class RetrieveDidsService : JobIntentService() {
      *
      * @return Null if an error occurred.
      */
-    private fun handleRetrieveDids(intent: Intent): Set<String>? {
+    private suspend fun retrieveDids(): Set<String>? {
         // Retrieve DIDs from VoIP.ms API
         var dids: Set<String>? = null
         try {
-            // Terminate quietly if intent does not exist or does not contain
-            // the send SMS action
-            if (intent.action != applicationContext.getString(
-                    R.string.retrieve_dids_action)) {
-                return dids
-            }
-
-            // Terminate quietly if email and password are undefined
+            // Terminate quietly if email and password are undefined.
             if (getEmail(applicationContext) == ""
                 || getPassword(applicationContext) == "") {
                 return dids
@@ -84,10 +108,9 @@ class RetrieveDidsService : JobIntentService() {
                 dids = getDidsFromResponse(response)
             }
 
-            val autoAdd = intent.extras?.get(
-                applicationContext.getString(R.string.retrieve_dids_auto_add))
-                              as Boolean?
-                          ?: throw Exception("Auto add missing")
+            val autoAdd = inputData.getBoolean(
+                applicationContext.getString(R.string.retrieve_dids_auto_add),
+                false)
             if (autoAdd && dids?.isNotEmpty() == true) {
                 setDids(applicationContext,
                         getDids(applicationContext).plus(dids))
@@ -96,6 +119,8 @@ class RetrieveDidsService : JobIntentService() {
                     replaceIndex(applicationContext)
                 }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logException(e)
         }
@@ -117,7 +142,7 @@ class RetrieveDidsService : JobIntentService() {
      *
      * @return Null if an error occurred.
      */
-    private fun getApiResponse(): DidsResponse? {
+    private suspend fun getApiResponse(): DidsResponse? {
         try {
             return httpPostWithMultipartFormData(
                 applicationContext,
@@ -125,6 +150,8 @@ class RetrieveDidsService : JobIntentService() {
                 mapOf("api_username" to getEmail(applicationContext),
                       "api_password" to getPassword(applicationContext),
                       "method" to "getDIDsInfo"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.preferences_dids_error_api_request)
@@ -173,14 +200,14 @@ class RetrieveDidsService : JobIntentService() {
         /**
          * Retrieve DIDs for a particular account from VoIP.ms.
          */
-        fun startService(context: Context, autoAdd: Boolean = false) {
-            val intent = Intent(context, RetrieveDidsService::class.java)
-            intent.action = context.getString(R.string.retrieve_dids_action)
-            intent.putExtra(context.getString(R.string.retrieve_dids_auto_add),
-                            autoAdd)
-
-            enqueueWork(context, RetrieveDidsService::class.java,
-                        JobId.RetrieveDidsService.ordinal, intent)
+        fun retrieveDids(context: Context, autoAdd: Boolean = false) {
+            val work = OneTimeWorkRequestBuilder<RetrieveDidsWorker>()
+                .setInputData(
+                    workDataOf(
+                        context.getString(
+                            R.string.retrieve_dids_auto_add) to autoAdd))
+                .build()
+            WorkManager.getInstance(context).enqueue(work)
         }
     }
 }

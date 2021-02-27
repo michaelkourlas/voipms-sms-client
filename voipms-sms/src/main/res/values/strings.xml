@@ -242,45 +242,12 @@
     <!-- DidsPreferencesActivity -->
     <string name="preferences_did_name">Phone numbers</string>
 
-    <!-- SERVICES -->
+    <!-- WORKERS -->
 
-    <!-- PushNotificationsRegistrationService -->
-    <string name="push_notifications_reg_action" translatable="false">net.kourlas.voipms_sms.PUSH_NOTIFICATIONS_REG_ACTION</string>
+    <!-- PushNotificationsRegistrationWorker -->
     <string name="push_notifications_fail_register">Register failed: VoIP.ms callback registration failed</string>
     <string name="push_notifications_fail_google_play">Register failed: Google Play Services unavailable</string>
     <string name="push_notifications_fail_unknown">Register failed: unknown error</string>
-
-    <!-- RetrieveDidsService -->
-    <string name="retrieve_dids_action" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_ACTION</string>
-    <string name="retrieve_dids_auto_add" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_AUTO_ADD</string>
-
-    <!-- SyncIntervalService -->
-    <string name="sync_interval_service_action" translatable="false">net.kourlas.voipms_sms.SYNC_INTERVAL_SERVICE_ACTION</string>
-
-    <!-- SyncService -->
-    <string name="sync_action" translatable="false">net.kourlas.voipms_sms.SYNC_ACTION</string>
-    <string name="sync_cancel_action" translatable="false">net.kourlas.voipms_sms.SYNC_CANCEL_ACTION</string>
-    <string name="sync_force_recent" translatable="false">net.kourlas.voipms_sms.SYNC_FORCE_RECENT</string>
-    <string name="sync_error_network">Sync failed: network unavailable</string>
-    <string name="sync_error_api_request">Sync failed: VoIP.ms unavailable</string>
-    <string name="sync_error_api_parse">Sync failed: corrupt response</string>
-    <string name="sync_error_api_error">Sync failed: API error \'%1$s\'</string>
-    <string name="sync_error_api_error_invalid_credentials">Sync failed: invalid credentials</string>
-    <string name="sync_error_database">Sync failed: unknown DB error</string>
-    <string name="sync_error_unknown">Sync failed: unknown error</string>
-
-    <!-- VerifyCredentialsService -->
-    <string name="verify_credentials_action" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_ACTION</string>
-    <string name="verify_credentials_email" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_EMAIL</string>
-    <string name="verify_credentials_password" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_PASSWORD</string>
-    <string name="verify_credentials_error_api_request">Sign-in failed: VoIP.ms unavailable</string>
-    <string name="verify_credentials_error_api_parse">Sign-in failed: corrupt response</string>
-    <string name="verify_credentials_error_api_error">Sign-in failed: API error \'%1$s\'</string>
-    <string name="verify_credentials_error_api_error_missing_credentials">Sign-in failed: missing credentials</string>
-    <string name="verify_credentials_error_api_error_invalid_credentials">Sign-in failed: invalid credentials</string>
-    <string name="verify_credentials_error_unknown">Sign-in failed: unknown error</string>
-
-    <!-- WORKERS -->
 
     <!-- SendMessageWorker -->
     <string name="send_message_database_id" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_DATABASE_ID</string>
@@ -301,6 +268,30 @@
     <string name="send_message_error_database">Not sent: unknown DB error</string>
     <string name="send_message_error_network">Not sent: network unavailable</string>
     <string name="send_message_error_unknown">Not sent: unknown error</string>
+
+    <!-- RetrieveDidsWorker -->
+    <string name="retrieve_dids_auto_add" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_AUTO_ADD</string>
+
+    <!-- SyncWorker -->
+    <string name="sync_cancel_action" translatable="false">net.kourlas.voipms_sms.SYNC_CANCEL_ACTION</string>
+    <string name="sync_force_recent" translatable="false">net.kourlas.voipms_sms.SYNC_FORCE_RECENT</string>
+    <string name="sync_error_network">Sync failed: network unavailable</string>
+    <string name="sync_error_api_request">Sync failed: VoIP.ms unavailable</string>
+    <string name="sync_error_api_parse">Sync failed: corrupt response</string>
+    <string name="sync_error_api_error">Sync failed: API error \'%1$s\'</string>
+    <string name="sync_error_api_error_invalid_credentials">Sync failed: invalid credentials</string>
+    <string name="sync_error_database">Sync failed: unknown DB error</string>
+    <string name="sync_error_unknown">Sync failed: unknown error</string>
+
+    <!-- VerifyCredentialsWorker -->
+    <string name="verify_credentials_email" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_EMAIL</string>
+    <string name="verify_credentials_password" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_PASSWORD</string>
+    <string name="verify_credentials_error_api_request">Sign-in failed: VoIP.ms unavailable</string>
+    <string name="verify_credentials_error_api_parse">Sign-in failed: corrupt response</string>
+    <string name="verify_credentials_error_api_error">Sign-in failed: API error \'%1$s\'</string>
+    <string name="verify_credentials_error_api_error_missing_credentials">Sign-in failed: missing credentials</string>
+    <string name="verify_credentials_error_api_error_invalid_credentials">Sign-in failed: invalid credentials</string>
+    <string name="verify_credentials_error_unknown">Sign-in failed: unknown error</string>
 
     <!-- BROADCAST RECEIVERS -->
 
@@ -361,6 +352,9 @@
     <string name="notifications_channel_contact" translatable="false">channel_did_contact_%1$s_%2$s</string>
     <string name="notifications_sync_database_message">Synchronizing database with VoIP.ms</string>
     <string name="notifications_sync_send_message_message">Sending message using VoIP.ms</string>
+    <string name="notifications_sync_verify_credentials_message">Verifying credentials with VoIP.ms</string>
+    <string name="notifications_sync_retrieve_dids_message">Retrieving DIDs from VoIP.ms</string>
+    <string name="notifications_sync_register_push_message">Registering for push notifications with VoIP.ms</string>
     <string name="notifications_security_error">Failed to launch notification due to lack of external storage permission</string>
 
     <!-- UTILS -->

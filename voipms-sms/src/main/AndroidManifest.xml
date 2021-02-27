@@ -227,19 +227,11 @@
         <receiver android:name=".sms.receivers.SyncIntervalReceiver" />
 
         <!-- SERVICES -->
+
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"
             tools:ignore="Instantiatable"
             tools:node="merge" />
-        <service
-            android:name=".sms.services.RetrieveDidsService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name=".sms.services.SyncIntervalService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name=".sms.services.VerifyCredentialsService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 </manifest>

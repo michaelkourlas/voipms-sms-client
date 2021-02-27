@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2020 Michael Kourlas
+ * Copyright (C) 2015-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
 package net.kourlas.voipms_sms.utils
 
 import android.content.Context
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.kourlas.voipms_sms.preferences.getConnectTimeout
 import net.kourlas.voipms_sms.preferences.getReadTimeout
 import okhttp3.MultipartBody
@@ -29,7 +31,8 @@ import java.util.concurrent.TimeUnit
  * Sends a POST request with a multipart/form-data encoded request body to the
  * specified URL, and retrieves a JSON response body.
  */
-inline fun <reified T> httpPostWithMultipartFormData(
+@Suppress("BlockingMethodInNonBlockingContext")
+suspend inline fun <reified T> httpPostWithMultipartFormData(
     context: Context, url: String,
     formData: Map<String, String> = emptyMap()): T? {
     val requestBodyBuilder = MultipartBody.Builder()
@@ -51,11 +54,13 @@ inline fun <reified T> httpPostWithMultipartFormData(
         .build()
 
     val adapter = JsonParserManager.getInstance().parser.adapter(T::class.java)
-    requestClient.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) {
-            throw IOException("Unexpected code $response")
-        }
+    return withContext(Dispatchers.IO) {
+        requestClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IOException("Unexpected code $response")
+            }
 
-        return adapter.fromJson(response.body!!.source())
+            return@use adapter.fromJson(response.body!!.source())
+        }
     }
 }

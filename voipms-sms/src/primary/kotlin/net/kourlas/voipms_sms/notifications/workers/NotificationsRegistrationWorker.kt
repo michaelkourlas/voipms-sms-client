@@ -15,17 +15,19 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.notifications.services
+package net.kourlas.voipms_sms.notifications.workers
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.JobIntentService
+import android.content.pm.ServiceInfo
+import android.os.Build
+import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
-import net.kourlas.voipms_sms.utils.JobId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import java.io.IOException
@@ -33,25 +35,25 @@ import java.io.IOException
 /**
  * Service that registers a VoIP.ms callback for each DID.
  */
-class NotificationsRegistrationService : JobIntentService() {
-    override fun onHandleWork(intent: Intent) {
-        // Terminate quietly if intent does not exist or does not contain
-        // the correct action
-        if (intent.action != applicationContext.getString(
-                R.string.push_notifications_reg_action)) {
-            return
-        }
+class NotificationsRegistrationWorker(context: Context,
+                                      params: WorkerParameters) :
+    CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        // Make this a foreground service to ensure immediate execution.
+        // This will be changed to setExpedited in Android 12.
+        setForeground(getForegroundInfo())
 
         // Terminate quietly if notifications are not enabled
         if (!Notifications.getInstance(applicationContext)
                 .getNotificationsEnabled()) {
-            return
+            return Result.success()
         }
 
         // Terminate quietly if account or DIDs are not configured
         if (!didsConfigured(applicationContext)
             || !accountConfigured(applicationContext)) {
-            return
+            return Result.success()
         }
 
         val dids = getDids(applicationContext, onlyShowNotifications = true)
@@ -61,6 +63,8 @@ class NotificationsRegistrationService : JobIntentService() {
             val responses = getVoipMsApiCallbackResponses(dids)
             callbackFailedDids = parseVoipMsApiCallbackResponses(dids,
                                                                  responses)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logException(e)
         }
@@ -70,12 +74,27 @@ class NotificationsRegistrationService : JobIntentService() {
             applicationContext.getString(
                 R.string.push_notifications_reg_complete_action))
         registrationCompleteIntent.putStringArrayListExtra(
-            getString(
+            applicationContext.getString(
                 R.string.push_notifications_reg_complete_failed_dids),
             if (callbackFailedDids != null)
                 ArrayList<String>(
                     callbackFailedDids.toList()) else null)
         applicationContext.sendBroadcast(registrationCompleteIntent)
+
+        return Result.success()
+    }
+
+    private fun getForegroundInfo(): ForegroundInfo {
+        val notification = Notifications.getInstance(applicationContext)
+            .getSyncRegisterPushNotificationsNotification()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(Notifications.SYNC_REGISTER_PUSH_NOTIFICATION_ID,
+                           notification,
+                           ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(Notifications.SYNC_REGISTER_PUSH_NOTIFICATION_ID,
+                           notification)
+        }
     }
 
     @JsonClass(generateAdapter = true)
@@ -84,7 +103,7 @@ class NotificationsRegistrationService : JobIntentService() {
     /**
      * Gets the response of a setSMS call to the VoIP.ms API for each DID.
      */
-    private fun getVoipMsApiCallbackResponses(
+    private suspend fun getVoipMsApiCallbackResponses(
         dids: Set<String>): Map<String, List<RegisterResponse?>> {
         val responses = mutableMapOf<String, MutableList<RegisterResponse?>>()
         for (did in dids) {
@@ -118,6 +137,8 @@ class NotificationsRegistrationService : JobIntentService() {
                               + "voipmssms-notify?did={TO}"),
                           "url_callback_retry" to "0")))
                 responses[did] = didResponses
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: IOException) {
                 // Do nothing.
             } catch (e: JsonDataException) {
@@ -162,15 +183,11 @@ class NotificationsRegistrationService : JobIntentService() {
         /**
          * Registers a VoIP.ms callback for each DID.
          */
-        fun startService(context: Context) {
-            val intent = Intent(
-                context,
-                NotificationsRegistrationService::class.java)
-            intent.action = context.getString(
-                R.string.push_notifications_reg_action)
-
-            enqueueWork(context, NotificationsRegistrationService::class.java,
-                        JobId.NotificationsRegistrationService.ordinal, intent)
+        fun registerForPushNotifications(context: Context) {
+            val work =
+                OneTimeWorkRequestBuilder<NotificationsRegistrationWorker>()
+                    .build()
+            WorkManager.getInstance(context).enqueue(work)
         }
     }
 }

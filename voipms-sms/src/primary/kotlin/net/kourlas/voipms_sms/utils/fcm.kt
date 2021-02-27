@@ -24,7 +24,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.notifications.services.NotificationsRegistrationService
+import net.kourlas.voipms_sms.notifications.workers.NotificationsRegistrationWorker
 import net.kourlas.voipms_sms.preferences.didsConfigured
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
@@ -78,5 +78,5 @@ fun enablePushNotifications(context: Context,
     subscribeToDidTopics(context)
 
     // Start push notifications registration service
-    NotificationsRegistrationService.startService(context)
+    NotificationsRegistrationWorker.registerForPushNotifications(context)
 }

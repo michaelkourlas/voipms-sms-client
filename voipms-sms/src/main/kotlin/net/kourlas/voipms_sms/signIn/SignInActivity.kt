@@ -37,8 +37,8 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.sms.services.RetrieveDidsService
-import net.kourlas.voipms_sms.sms.services.VerifyCredentialsService
+import net.kourlas.voipms_sms.sms.workers.RetrieveDidsWorker
+import net.kourlas.voipms_sms.sms.workers.VerifyCredentialsWorker
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
@@ -90,7 +90,7 @@ class SignInActivity : AppCompatActivity() {
 
                         setFirstSyncAfterSignIn(this@SignInActivity, true)
 
-                        RetrieveDidsService.startService(
+                        RetrieveDidsWorker.retrieveDids(
                             this@SignInActivity, autoAdd = true)
                     }
                 }
@@ -201,7 +201,7 @@ class SignInActivity : AppCompatActivity() {
 
             val username = findViewById<TextInputEditText>(R.id.username)
             val password = findViewById<TextInputEditText>(R.id.password)
-            VerifyCredentialsService.startService(
+            VerifyCredentialsWorker.verifyCredentials(
                 applicationContext,
                 username.text?.toString() ?: "",
                 password.text?.toString() ?: "")

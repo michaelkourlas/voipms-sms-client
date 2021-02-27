@@ -15,7 +15,6 @@
   ~ limitations under the License.
   -->
 
-<!--suppress XmlUnusedNamespaceDeclaration -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="net.kourlas.voipms_sms">
@@ -42,8 +41,5 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service
-            android:name=".notifications.services.NotificationsRegistrationService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 </manifest>

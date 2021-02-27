@@ -24,8 +24,7 @@ import android.os.Build
 import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -176,6 +175,8 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                     setOf(ConversationId(inlineReplyDid, inlineReplyContact)),
                     inlineReplyMessages = listOf(message))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(
@@ -195,18 +196,15 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
         // Get JSON response from API
         val response: MessageResponse?
         try {
-            withContext(Dispatchers.IO) {
-                response = httpPostWithMultipartFormData(
-                    applicationContext,
-                    "https://www.voip.ms/api/v1/rest.php",
-                    mapOf("api_username" to getEmail(applicationContext),
-                          "api_password" to getPassword(applicationContext),
-                          "method" to "sendSMS",
-                          "did" to message.did,
-                          "dst" to message.contact,
-                          "message" to message.text))
-            }
-
+            response = httpPostWithMultipartFormData(
+                applicationContext,
+                "https://www.voip.ms/api/v1/rest.php",
+                mapOf("api_username" to getEmail(applicationContext),
+                      "api_password" to getPassword(applicationContext),
+                      "method" to "sendSMS",
+                      "did" to message.did,
+                      "dst" to message.contact,
+                      "message" to message.text))
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.send_message_error_api_request)

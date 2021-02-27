@@ -286,6 +286,69 @@ class Notifications private constructor(private val context: Context) {
     }
 
     /**
+     * Gets the notification displayed during verification of credentials.
+     */
+    fun getSyncVerifyCredentialsNotification(): Notification {
+        createSyncNotificationChannel()
+
+        val builder = NotificationCompat.Builder(
+            context, context.getString(R.string.notifications_channel_sync))
+        builder.setCategory(NotificationCompat.CATEGORY_SERVICE)
+        builder.setSmallIcon(R.drawable.ic_message_sync_toolbar_24dp)
+        builder.setContentTitle(context.getString(
+            R.string.notifications_sync_verify_credentials_message))
+        builder.setOngoing(true)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            @Suppress("DEPRECATION")
+            builder.priority = Notification.PRIORITY_LOW
+        }
+
+        return builder.build()
+    }
+
+    /**
+     * Gets the notification displayed during verification of credentials.
+     */
+    fun getSyncRetrieveDidsNotification(): Notification {
+        createSyncNotificationChannel()
+
+        val builder = NotificationCompat.Builder(
+            context, context.getString(R.string.notifications_channel_sync))
+        builder.setCategory(NotificationCompat.CATEGORY_SERVICE)
+        builder.setSmallIcon(R.drawable.ic_message_sync_toolbar_24dp)
+        builder.setContentTitle(context.getString(
+            R.string.notifications_sync_retrieve_dids_message))
+        builder.setOngoing(true)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            @Suppress("DEPRECATION")
+            builder.priority = Notification.PRIORITY_LOW
+        }
+
+        return builder.build()
+    }
+
+    /**
+     * Gets the notification displayed during verification of credentials.
+     */
+    fun getSyncRegisterPushNotificationsNotification(): Notification {
+        createSyncNotificationChannel()
+
+        val builder = NotificationCompat.Builder(
+            context, context.getString(R.string.notifications_channel_sync))
+        builder.setCategory(NotificationCompat.CATEGORY_SERVICE)
+        builder.setSmallIcon(R.drawable.ic_message_sync_toolbar_24dp)
+        builder.setContentTitle(context.getString(
+            R.string.notifications_sync_register_push_message))
+        builder.setOngoing(true)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            @Suppress("DEPRECATION")
+            builder.priority = Notification.PRIORITY_LOW
+        }
+
+        return builder.build()
+    }
+
+    /**
      * Returns whether notifications are enabled globally and for the
      * conversation ID if one is specified.
      */
@@ -754,6 +817,9 @@ class Notifications private constructor(private val context: Context) {
                 .filter {
                     it.id != SYNC_DATABASE_NOTIFICATION_ID
                     && it.id != SYNC_SEND_MESSAGE_NOTIFICATION_ID
+                    && it.id != SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID
+                    && it.id != SYNC_RETRIEVE_DIDS_NOTIFICATION_ID
+                    && it.id != SYNC_REGISTER_PUSH_NOTIFICATION_ID
                     && it.id != GROUP_NOTIFICATION_ID
                 }
                 .none()
@@ -774,11 +840,24 @@ class Notifications private constructor(private val context: Context) {
         const val SYNC_DATABASE_NOTIFICATION_ID = 1
 
         // Notification ID for the send message notification.
-        const val SYNC_SEND_MESSAGE_NOTIFICATION_ID = 2
+        const val SYNC_SEND_MESSAGE_NOTIFICATION_ID =
+            SYNC_DATABASE_NOTIFICATION_ID + 1
+
+        // Notification ID for the verify credentials notification.
+        const val SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID =
+            SYNC_SEND_MESSAGE_NOTIFICATION_ID + 1
+
+        // Notification ID for the retrieve DIDs notification.
+        const val SYNC_RETRIEVE_DIDS_NOTIFICATION_ID =
+            SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID + 1
+
+        // Notification ID for the register for push notifications notification.
+        const val SYNC_REGISTER_PUSH_NOTIFICATION_ID =
+            SYNC_RETRIEVE_DIDS_NOTIFICATION_ID + 1
 
         // Notification ID for the group notification, which contains all other
         // notifications
-        const val GROUP_NOTIFICATION_ID = 3
+        const val GROUP_NOTIFICATION_ID = SYNC_REGISTER_PUSH_NOTIFICATION_ID + 1
 
         // Starting notification ID for ordinary message notifications
         const val MESSAGE_START_NOTIFICATION_ID = GROUP_NOTIFICATION_ID + 1

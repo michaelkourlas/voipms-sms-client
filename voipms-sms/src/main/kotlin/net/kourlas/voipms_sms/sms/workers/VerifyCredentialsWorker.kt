@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2019-2020 Michael Kourlas
+ * Copyright (C) 2019-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,59 +15,82 @@
  * limitations under the License.
  */
 
-package net.kourlas.voipms_sms.sms.services
+package net.kourlas.voipms_sms.sms.workers
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.JobIntentService
+import android.content.pm.ServiceInfo
+import android.os.Build
+import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.utils.JobId
+import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import java.io.IOException
 
 /**
- * Service used to test credentials for a particular account from VoIP.ms.
+ * Worker used to test credentials for a particular account from VoIP.ms.
  */
-class VerifyCredentialsService : JobIntentService() {
+class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
+    CoroutineWorker(context, params) {
     private var error: String? = null
 
-    override fun onHandleWork(intent: Intent) {
-        // Verify that credentials are valid
-        val credentialsValid = handleVerifyCredentials(intent)
+    override suspend fun doWork(): Result {
+        // Make this a foreground service to ensure immediate execution.
+        // This will be changed to setExpedited in Android 12.
+        setForeground(getForegroundInfo())
 
-        // Send broadcast
+        // Verify that credentials are valid.
+        val valid = verifyCredentials()
+
+        // Send broadcast.
         val verifyCredentialsCompleteIntent = Intent(
             applicationContext.getString(
                 R.string.verify_credentials_complete_action))
-        verifyCredentialsCompleteIntent.putExtra(getString(
+        verifyCredentialsCompleteIntent.putExtra(applicationContext.getString(
             R.string.verify_credentials_complete_error), error)
         verifyCredentialsCompleteIntent.putExtra(
-            getString(R.string.verify_credentials_complete_valid),
-            credentialsValid)
+            applicationContext.getString(
+                R.string.verify_credentials_complete_valid),
+            valid)
         applicationContext.sendBroadcast(verifyCredentialsCompleteIntent)
+
+        return if (error == null) {
+            Result.success()
+        } else {
+            Result.failure()
+        }
+    }
+
+    private fun getForegroundInfo(): ForegroundInfo {
+        val notification = Notifications.getInstance(applicationContext)
+            .getSyncVerifyCredentialsNotification()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(
+                Notifications.SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(
+                Notifications.SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID,
+                notification)
+        }
     }
 
     /**
      * Verifies the credentials of the VoIP.ms account using the parameters
      * from the specified intent.
      */
-    private fun handleVerifyCredentials(intent: Intent): Boolean {
-        // Retrieve DIDs from VoIP.ms API
+    private suspend fun verifyCredentials(): Boolean {
+        // Retrieve DIDs from VoIP.ms API.
         try {
-            // Terminate quietly if intent does not exist or does not contain
-            // the sync action
-            if (intent.action != applicationContext.getString(
-                    R.string.verify_credentials_action)) {
-                return false
-            }
-
-            val email = intent.extras?.getString(
+            val email = inputData.getString(
                 applicationContext.getString(
                     R.string.verify_credentials_email))
-            val password = intent.extras?.getString(
+            val password = inputData.getString(
                 applicationContext.getString(
                     R.string.verify_credentials_password))
             if (email == null || password == null) {
@@ -78,6 +101,8 @@ class VerifyCredentialsService : JobIntentService() {
             if (response != null) {
                 return verifyResponse(response)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logException(e)
         }
@@ -92,8 +117,8 @@ class VerifyCredentialsService : JobIntentService() {
      *
      * @return Null if an error occurred.
      */
-    private fun getApiResponse(email: String,
-                               password: String): VerifyCredentialsResponse? {
+    private suspend fun getApiResponse(email: String,
+                                       password: String): VerifyCredentialsResponse? {
         try {
             return httpPostWithMultipartFormData(
                 applicationContext,
@@ -101,6 +126,8 @@ class VerifyCredentialsService : JobIntentService() {
                 mapOf("api_username" to email,
                       "api_password" to password,
                       "method" to "getDIDsInfo"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.verify_credentials_error_api_request)
@@ -128,11 +155,11 @@ class VerifyCredentialsService : JobIntentService() {
                 return true
             }
             error = when (response.status) {
-                "invalid_credentials" -> getString(
+                "invalid_credentials" -> applicationContext.getString(
                     R.string.verify_credentials_error_api_error_invalid_credentials)
-                "missing_credentials" -> getString(
+                "missing_credentials" -> applicationContext.getString(
                     R.string.verify_credentials_error_api_error_missing_credentials)
-                else -> getString(
+                else -> applicationContext.getString(
                     R.string.verify_credentials_error_api_error,
                     response.status)
             }
@@ -145,18 +172,17 @@ class VerifyCredentialsService : JobIntentService() {
         /**
          * Verify credentials for a VoIP.ms account.
          */
-        fun startService(context: Context, email: String, password: String) {
-            val intent = Intent(context, VerifyCredentialsService::class.java)
-            intent.action = context.getString(
-                R.string.verify_credentials_action)
-            intent.putExtra(
-                context.getString(R.string.verify_credentials_email), email)
-            intent.putExtra(
-                context.getString(R.string.verify_credentials_password),
-                password)
-
-            enqueueWork(context, VerifyCredentialsService::class.java,
-                        JobId.VerifyCredentialsService.ordinal, intent)
+        fun verifyCredentials(context: Context, email: String,
+                              password: String) {
+            val work = OneTimeWorkRequestBuilder<RetrieveDidsWorker>()
+                .setInputData(
+                    workDataOf(
+                        context.getString(
+                            R.string.verify_credentials_email) to email,
+                        context.getString(
+                            R.string.verify_credentials_password) to password))
+                .build()
+            WorkManager.getInstance(context).enqueue(work)
         }
     }
 }
