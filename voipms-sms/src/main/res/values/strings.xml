@@ -132,7 +132,6 @@
     <!-- ACTIVITIES -->
 
     <!-- ConversationActivity -->
-    <string name="conversation_action_archive">Archive</string>
     <string name="conversation_action_call">Make a call</string>
     <string name="conversation_action_copy">Copy text</string>
     <string name="conversation_action_delete">Delete</string>
@@ -145,7 +144,6 @@
     <string name="conversation_action_search">Search</string>
     <string name="conversation_action_send">Send</string>
     <string name="conversation_action_share">Share</string>
-    <string name="conversation_action_unarchive">Unarchive</string>
     <string name="conversation_char_rem">%1$d / %2$d</string>
     <string name="conversation_contact_clipboard_description">Contact phone number</string>
     <string name="conversation_conversation_clipboard_description">Conversation</string>
@@ -153,8 +151,10 @@
     <string name="conversation_copied_conversation_toast_message">Copied conversation as JSON</string>
     <string name="conversation_copied_conversation_fail_toast_message">Failed to copy conversation (too large?)</string>
     <string name="conversation_copied_did_toast_message">Copied phone number</string>
-    <string name="conversation_message_deleted">1 message deleted</string>
-    <string name="conversation_message_deleted_multiple">%1$d messages deleted</string>
+    <plurals name="conversation_message_deleted">
+        <item quantity="one">%1$d message deleted</item>
+        <item quantity="other">%1$d messages deleted</item>
+    </plurals>
     <string name="conversation_did_clipboard_description">DID</string>
     <string name="conversation_extra_focus" translatable="false">net.kourlas.voipms_sms.CONVERSATION_EXTRA_FOCUS</string>
     <string name="conversation_extra_message_text" translatable="false">net.kourlas.voipms_sms.CONVERSATION_EXTRA_MESSAGE_TEXT</string>
@@ -197,14 +197,18 @@
     <string name="conversations_action_unarchive">Unarchive</string>
     <string name="conversations_all_dids">All</string>
     <string name="conversations_checked_content_description">Checked</string>
-    <string name="conversations_deleted">1 conversation deleted</string>
-    <string name="conversations_deleted_multiple">%1$d conversations deleted</string>
-    <string name="conversations_archived">1 conversation archived</string>
-    <string name="conversations_archived_multiple">%1$d conversations archived</string>
-    <string name="conversations_unarchived">1 conversation unarchived</string>
-    <string name="conversations_unarchived_multiple">%1$d conversations unarchived</string>
-    <string name="conversations_delete_confirm_message">This action cannot be undone.</string>
-    <string name="conversations_delete_confirm_title">Delete this conversation?</string>
+    <plurals name="conversations_deleted">
+        <item quantity="one">%1$d conversation deleted</item>
+        <item quantity="other">%1$d conversations deleted</item>
+    </plurals>
+    <plurals name="conversations_archived">
+        <item quantity="one">%1$d conversation archived</item>
+        <item quantity="other">%1$d conversations archived</item>
+    </plurals>
+    <plurals name="conversations_unarchived">
+        <item quantity="one">%1$d conversation unarchived</item>
+        <item quantity="other">%1$d conversations unarchived</item>
+    </plurals>
     <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>
     <string name="conversations_fail_web_browser">No web browser installed</string>
     <string name="conversations_message_draft">Draft</string>
@@ -245,9 +249,7 @@
     <!-- WORKERS -->
 
     <!-- PushNotificationsRegistrationWorker -->
-    <string name="push_notifications_work_id">net.kourlas.voipms_sms.PUSH_NOTIF_WORK_ID</string>
     <string name="push_notifications_fail_register">Register failed: VoIP.ms callback registration failed</string>
-    <string name="push_notifications_fail_google_play">Register failed: Google Play Services unavailable</string>
     <string name="push_notifications_fail_unknown">Register failed: unknown error</string>
 
     <!-- SendMessageWorker -->
@@ -267,7 +269,6 @@
     <string name="send_message_error_api_error_sms_toolong">Not sent: SMS too long</string>
     <string name="send_message_error_api_parse">Not sent: corrupt response</string>
     <string name="send_message_error_api_request">Not sent: VoIP.ms unavailable</string>
-    <string name="send_message_error_database">Not sent: unknown DB error</string>
     <string name="send_message_error_network">Not sent: network unavailable</string>
     <string name="send_message_error_unknown">Not sent: unknown error</string>
 
@@ -277,7 +278,6 @@
 
     <!-- SyncWorker -->
     <string name="sync_work_id" translatable="false">net.kourlas.voipms_sms.SYNC_WORK_ID</string>
-    <string name="sync_cancel_action" translatable="false">net.kourlas.voipms_sms.SYNC_CANCEL_ACTION</string>
     <string name="sync_force_recent" translatable="false">net.kourlas.voipms_sms.SYNC_FORCE_RECENT</string>
     <string name="sync_error_network">Sync failed: network unavailable</string>
     <string name="sync_error_api_request">Sync failed: VoIP.ms unavailable</string>

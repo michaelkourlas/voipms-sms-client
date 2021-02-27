@@ -23,4 +23,10 @@
 
     <!-- Synchronization -->
     <string name="preferences_sync_info">It is not necessary to set a synchronization interval simply to retrieve new messages. All new messages are downloaded automatically when the main conversations screen is loaded and when a push notification is received.</string>
+
+    <!-- WORKERS -->
+
+    <!-- PushNotificationsRegistrationWorker -->
+    <string name="push_notifications_work_id">net.kourlas.voipms_sms.PUSH_NOTIF_WORK_ID</string>
+    <string name="push_notifications_fail_google_play">Register failed: Google Play Services unavailable</string>
 </resources>

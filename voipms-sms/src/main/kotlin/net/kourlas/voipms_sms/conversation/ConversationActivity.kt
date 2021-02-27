@@ -1023,12 +1023,9 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 showSnackbar(
                     this@ConversationActivity,
                     R.id.coordinator_layout,
-                    if (messages.size > 1)
-                        getString(
-                            R.string.conversation_message_deleted_multiple,
-                            messages.size)
-                    else
-                        getString(R.string.conversation_message_deleted),
+                    resources.getQuantityString(
+                        R.plurals.conversation_message_deleted,
+                        messages.size),
                     getString(R.string.undo),
                     {
                         lifecycleScope.launch(Dispatchers.IO) {

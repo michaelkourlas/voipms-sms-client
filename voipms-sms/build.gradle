@@ -4,7 +4,7 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    buildToolsVersion '31.0.0 rc1'
     defaultConfig {
         applicationId 'net.kourlas.voipms_sms'
         minSdkVersion 21
@@ -72,7 +72,7 @@ dependencies {
     // Support libraries
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.core:core-ktx:1.5.0-beta01'
+    implementation 'androidx.core:core-ktx:1.5.0-beta02'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0'
     implementation 'androidx.preference:preference-ktx:1.1.1'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'

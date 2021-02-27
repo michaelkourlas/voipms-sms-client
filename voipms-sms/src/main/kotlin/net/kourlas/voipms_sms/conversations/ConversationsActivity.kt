@@ -158,7 +158,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
     /**
      * Sets up the activity toolbar.
      */
-    fun setupToolbar() {
+    private fun setupToolbar() {
         // Set up toolbar
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.let {
@@ -833,11 +833,9 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 showSnackbar(
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
-                    if (messages.size > 1)
-                        getString(R.string.conversations_archived_multiple,
-                                  messages.size)
-                    else
-                        getString(R.string.conversations_archived),
+                    resources.getQuantityString(
+                        R.plurals.conversations_archived,
+                        messages.size),
                     getString(R.string.undo),
                     {
                         lifecycleScope.launch(Dispatchers.IO) {
@@ -879,11 +877,9 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 showSnackbar(
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
-                    if (messages.size > 1)
-                        getString(R.string.conversations_unarchived_multiple,
-                                  messages.size)
-                    else
-                        getString(R.string.conversations_unarchived),
+                    resources.getQuantityString(
+                        R.plurals.conversations_unarchived,
+                        messages.size),
                     getString(R.string.undo),
                     {
                         lifecycleScope.launch(Dispatchers.IO) {
@@ -944,11 +940,8 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 showSnackbar(
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
-                    if (messages.size > 1)
-                        getString(R.string.conversations_deleted_multiple,
-                                  messages.size)
-                    else
-                        getString(R.string.conversations_deleted),
+                    resources.getQuantityString(R.plurals.conversations_deleted,
+                                                messages.size),
                     getString(R.string.undo),
                     {
                         lifecycleScope.launch(Dispatchers.IO) {

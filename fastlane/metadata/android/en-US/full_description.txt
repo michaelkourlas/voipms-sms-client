@@ -1,6 +1,6 @@
-<h2 id="overview">Overview</h2>
+<b>Overview</b>
 <p>VoIP.ms SMS is an Android messaging app for VoIP.ms that seeks to replicate the aesthetic of <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.messaging">Google&#39;s official SMS app</a>.</p>
-<h2 id="features">Features</h2>
+<b>Features</b>
 <ul>
 <li>Material design</li>
 <li>Push notifications (if using the Google Play version of the app)</li>
@@ -9,14 +9,14 @@
 <li>Comprehensive support for synchronization with VoIP.ms</li>
 <li>Completely free</li>
 </ul>
-<h2 id="rationale">Rationale</h2>
+<b>Rationale</b>
 <p>A number of people use VoIP.ms as a cheaper alternative to subscribing to a voice plan for their mobile devices.</p>
 <p>Unfortunately, this can make sending text messages rather difficult, as the <a href="https://voip.ms/m/sms.php">VoIP.ms SMS Message Center</a> is clearly built as a diagnostic tool for use in desktop browsers, not as an easy way to send and receive messages on a mobile device.</p>
 <p>VoIP.ms does provide a <a href="https://sms.voip.ms/">mobile version</a> of this interface with an improved UI, but it still lacks important features that are only possible with a dedicated app.</p>
-<h2 id="installation">Installation</h2>
+<b>Installation</b>
 <p>The standard version of the app uses closed-source Firebase libraries to support push notifications and facilitate crash reporting and analytics, among other purposes. A version of the application that is completely open source is available from F-Droid.</p>
 <p>Both versions are available from the <a href="https://github.com/michaelkourlas/voipms-sms-client/releases">Releases section</a> of the GitHub repository.</p>
-<h2 id="documentation">Documentation</h2>
+<b>Documentation</b>
 <p>The app&#39;s documentation is available in the <a href="https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md">HELP.md file</a>.</p>
-<h2 id="license">License</h2>
+<b>License</b>
 <p>VoIP.ms SMS is licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>.</p>
