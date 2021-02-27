@@ -58,7 +58,7 @@ import net.kourlas.voipms_sms.preferences.getMessageTextBoxMaximumSize
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
-import net.kourlas.voipms_sms.sms.services.SendMessageService
+import net.kourlas.voipms_sms.sms.workers.SendMessageWorker
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
 import java.text.BreakIterator
@@ -497,14 +497,15 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
             // Send the message using the SendMessageService.
             runOnNewThread {
-                Database.getInstance(
+                val ids = Database.getInstance(
                     applicationContext)
                     .insertMessageDeliveryInProgress(
                         ConversationId(did,
                                        contact),
                         getMessageTexts(applicationContext, messageText))
-                SendMessageService.startService(
-                    this, ConversationId(did, contact))
+                for (id in ids) {
+                    SendMessageWorker.sendMessage(applicationContext, id)
+                }
 
                 runOnUiThread {
                     // Refresh adapter to show message being sent.
@@ -789,8 +790,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             moveTaskToBack(true)
             Notifications.getInstance(applicationContext)
-                .showNotifications(application as CustomApplication,
-                                   setOf(conversationId),
+                .showNotifications(setOf(conversationId),
                                    bubbleOnly = true,
                                    autoLaunchBubble = true)
         }
@@ -866,8 +866,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
             for (databaseId in databaseIds) {
                 Database.getInstance(this)
                     .markMessageDeliveryInProgress(databaseId)
+                SendMessageWorker.sendMessage(applicationContext, databaseId)
             }
-            SendMessageService.startService(applicationContext, conversationId)
         }
 
         mode.finish()
@@ -1035,7 +1035,9 @@ open class ConversationActivity(val bubble: Boolean = false) :
                         Database.getInstance(this)
                             .markMessageDeliveryInProgress(
                                 messageItem.message.databaseId)
-                        SendMessageService.startService(this, conversationId)
+                        SendMessageWorker.sendMessage(
+                            applicationContext,
+                            messageItem.message.databaseId)
                     }
                 }
             }

@@ -51,6 +51,7 @@ class AppIndexingService : JobIntentService() {
          * Replace the app index with the conversations in the database.
          */
         fun replaceIndex(context: Context) {
+            val applicationContext = context.applicationContext
             val indexables = mutableListOf<Indexable>()
 
             // Create message indexables
@@ -67,16 +68,16 @@ class AppIndexingService : JobIntentService() {
             }
 
             // Delete app index and update index with indexables
-            FirebaseAppIndex.getInstance().removeAll().addOnCompleteListener {
-                updateIndex(
-                    indexables)
-            }
+            FirebaseAppIndex.getInstance(applicationContext).removeAll()
+                .addOnCompleteListener {
+                    updateIndex(applicationContext, indexables)
+                }
         }
 
         /**
          * Update the app index with the specified indexables.
          */
-        private fun updateIndex(indexables: List<Indexable>) {
+        private fun updateIndex(context: Context, indexables: List<Indexable>) {
             val max = Indexable.MAX_INDEXABLES_TO_BE_UPDATED_IN_ONE_CALL
             (indexables.indices step max)
                 .map {
@@ -86,7 +87,7 @@ class AppIndexingService : JobIntentService() {
                         else indexables.size - 1)
                 }
                 .forEach {
-                    FirebaseAppIndex.getInstance().update(
+                    FirebaseAppIndex.getInstance(context).update(
                         *it.toTypedArray())
                 }
         }

@@ -259,26 +259,6 @@
     <string name="retrieve_dids_action" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_ACTION</string>
     <string name="retrieve_dids_auto_add" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_AUTO_ADD</string>
 
-    <!-- SendMessageService -->
-    <string name="send_message_action" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_ACTION</string>
-    <string name="send_message_contact" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_CONTACT</string>
-    <string name="send_message_did" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_DID</string>
-    <string name="send_message_inline_reply" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY</string>
-    <string name="send_message_error_api_error">Not sent: API error \'%1$s\'</string>
-    <string name="send_message_error_api_error_invalid_credentials">Not sent: invalid credentials</string>
-    <string name="send_message_error_api_error_invalid_dst">Not sent: invalid phone number</string>
-    <string name="send_message_error_api_error_invalid_sms">Not sent: invalid SMS</string>
-    <string name="send_message_error_api_error_limit_reached">Not sent: contact VoIP.ms for help ("limit_reached")</string>
-    <string name="send_message_error_api_error_message_empty">Not sent: SMS empty</string>
-    <string name="send_message_error_api_error_missing_sms">Not sent: SMS missing</string>
-    <string name="send_message_error_api_error_sms_failed">Not sent: contact VoIP.ms for help ("sms_failed")</string>
-    <string name="send_message_error_api_error_sms_toolong">Not sent: SMS too long</string>
-    <string name="send_message_error_api_parse">Not sent: corrupt response</string>
-    <string name="send_message_error_api_request">Not sent: VoIP.ms unavailable</string>
-    <string name="send_message_error_database">Not sent: unknown DB error</string>
-    <string name="send_message_error_network">Not sent: network unavailable</string>
-    <string name="send_message_error_unknown">Not sent: unknown error</string>
-
     <!-- SyncIntervalService -->
     <string name="sync_interval_service_action" translatable="false">net.kourlas.voipms_sms.SYNC_INTERVAL_SERVICE_ACTION</string>
 
@@ -304,6 +284,28 @@
     <string name="verify_credentials_error_api_error_missing_credentials">Sign-in failed: missing credentials</string>
     <string name="verify_credentials_error_api_error_invalid_credentials">Sign-in failed: invalid credentials</string>
     <string name="verify_credentials_error_unknown">Sign-in failed: unknown error</string>
+
+    <!-- WORKERS -->
+
+    <!-- SendMessageWorker -->
+    <string name="send_message_database_id" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_DATABASE_ID</string>
+    <string name="send_message_inline_reply" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY</string>
+    <string name="send_message_inline_reply_contact" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY_CONTACT</string>
+    <string name="send_message_inline_reply_did" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY_DID</string>
+    <string name="send_message_error_api_error">Not sent: API error \'%1$s\'</string>
+    <string name="send_message_error_api_error_invalid_credentials">Not sent: invalid credentials</string>
+    <string name="send_message_error_api_error_invalid_dst">Not sent: invalid phone number</string>
+    <string name="send_message_error_api_error_invalid_sms">Not sent: invalid SMS</string>
+    <string name="send_message_error_api_error_limit_reached">Not sent: contact VoIP.ms for help ("limit_reached")</string>
+    <string name="send_message_error_api_error_message_empty">Not sent: SMS empty</string>
+    <string name="send_message_error_api_error_missing_sms">Not sent: SMS missing</string>
+    <string name="send_message_error_api_error_sms_failed">Not sent: contact VoIP.ms for help ("sms_failed")</string>
+    <string name="send_message_error_api_error_sms_toolong">Not sent: SMS too long</string>
+    <string name="send_message_error_api_parse">Not sent: corrupt response</string>
+    <string name="send_message_error_api_request">Not sent: VoIP.ms unavailable</string>
+    <string name="send_message_error_database">Not sent: unknown DB error</string>
+    <string name="send_message_error_network">Not sent: network unavailable</string>
+    <string name="send_message_error_unknown">Not sent: unknown error</string>
 
     <!-- BROADCAST RECEIVERS -->
 
@@ -357,7 +359,8 @@
     <string name="notifications_channel_default_title">Default</string>
     <string name="notifications_channel_contact_prefix" translatable="false">channel_did_contact_</string>
     <string name="notifications_channel_contact" translatable="false">channel_did_contact_%1$s_%2$s</string>
-    <string name="notifications_sync_message">Synchronizing with VoIP.ms</string>
+    <string name="notifications_sync_database_message">Synchronizing database with VoIP.ms</string>
+    <string name="notifications_sync_send_message_message">Sending message using VoIP.ms</string>
     <string name="notifications_security_error">Failed to launch notification due to lack of external storage permission</string>
 
     <!-- UTILS -->

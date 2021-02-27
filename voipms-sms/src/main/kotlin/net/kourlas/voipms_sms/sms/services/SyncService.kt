@@ -30,7 +30,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -92,15 +91,15 @@ class SyncService : Service() {
             // Use the existing progress value since the service may already
             // be running
             val notification = Notifications.getInstance(applicationContext)
-                .getSyncNotification(progress)
+                .getSyncDatabaseNotification(progress)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(
-                    Notifications.SYNC_NOTIFICATION_ID,
+                    Notifications.SYNC_DATABASE_NOTIFICATION_ID,
                     notification,
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
             } else {
                 startForeground(
-                    Notifications.SYNC_NOTIFICATION_ID,
+                    Notifications.SYNC_DATABASE_NOTIFICATION_ID,
                     notification)
             }
         }
@@ -129,9 +128,9 @@ class SyncService : Service() {
         synchronized(this) {
             progress = 0
             val notification = Notifications.getInstance(applicationContext)
-                .getSyncNotification(progress)
+                .getSyncDatabaseNotification(progress)
             NotificationManagerCompat.from(applicationContext).notify(
-                Notifications.SYNC_NOTIFICATION_ID, notification)
+                Notifications.SYNC_DATABASE_NOTIFICATION_ID, notification)
         }
 
         // Perform synchronization
@@ -332,9 +331,9 @@ class SyncService : Service() {
             synchronized(this) {
                 progress = ((i + 1) * 100) / retrievalRequests.size
                 val notification = Notifications.getInstance(applicationContext)
-                    .getSyncNotification(progress)
+                    .getSyncDatabaseNotification(progress)
                 NotificationManagerCompat.from(applicationContext).notify(
-                    Notifications.SYNC_NOTIFICATION_ID, notification)
+                    Notifications.SYNC_DATABASE_NOTIFICATION_ID, notification)
             }
         }
 
@@ -355,7 +354,6 @@ class SyncService : Service() {
         // Show notifications for new messages
         if (newConversationIds.isNotEmpty()) {
             Notifications.getInstance(applicationContext).showNotifications(
-                application as CustomApplication,
                 newConversationIds)
         }
     }

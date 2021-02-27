@@ -233,9 +233,9 @@ class Notifications private constructor(private val context: Context) {
     }
 
     /**
-     * Gets the notification displayed during database synchronization.
+     * Gets the notification displayed during synchronization.
      */
-    fun getSyncNotification(progress: Int = 0): Notification {
+    fun getSyncDatabaseNotification(progress: Int = 0): Notification {
         createSyncNotificationChannel()
 
         val builder = NotificationCompat.Builder(
@@ -243,7 +243,7 @@ class Notifications private constructor(private val context: Context) {
         builder.setCategory(NotificationCompat.CATEGORY_PROGRESS)
         builder.setSmallIcon(R.drawable.ic_message_sync_toolbar_24dp)
         builder.setContentTitle(context.getString(
-            R.string.notifications_sync_message))
+            R.string.notifications_sync_database_message))
         builder.setContentText("$progress%")
         builder.setProgress(100, progress, false)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -266,13 +266,25 @@ class Notifications private constructor(private val context: Context) {
             .build()
         builder.addAction(cancelAction)
 
-        // Primary notification action
-        val intent = Intent(context, ConversationsActivity::class.java)
-        val stackBuilder = TaskStackBuilder.create(context)
-        stackBuilder.addNextIntentWithParentStack(intent)
-        builder.setContentIntent(stackBuilder.getPendingIntent(
-            ConversationsActivity::class.java.hashCode(),
-            PendingIntent.FLAG_CANCEL_CURRENT))
+        return builder.build()
+    }
+
+    /**
+     * Gets the notification displayed during message sending.
+     */
+    fun getSyncMessageSendNotification(): Notification {
+        createSyncNotificationChannel()
+
+        val builder = NotificationCompat.Builder(
+            context, context.getString(R.string.notifications_channel_sync))
+        builder.setCategory(NotificationCompat.CATEGORY_SERVICE)
+        builder.setSmallIcon(R.drawable.ic_message_sync_toolbar_24dp)
+        builder.setContentTitle(context.getString(
+            R.string.notifications_sync_send_message_message))
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            @Suppress("DEPRECATION")
+            builder.priority = Notification.PRIORITY_LOW
+        }
 
         return builder.build()
     }
@@ -316,7 +328,6 @@ class Notifications private constructor(private val context: Context) {
      * Show notifications for new messages for the specified conversations.
      */
     fun showNotifications(
-        application: CustomApplication,
         conversationIds: Set<ConversationId>,
         bubbleOnly: Boolean = false,
         autoLaunchBubble: Boolean = false,
@@ -324,7 +335,8 @@ class Notifications private constructor(private val context: Context) {
         = emptyList()) {
         // Do not show notifications when the conversations view is open,
         // unless this is for a bubble only.
-        if (application.conversationsActivityVisible() && !bubbleOnly) {
+        if (CustomApplication.getApplication()
+                .conversationsActivityVisible() && !bubbleOnly) {
             return
         }
 
@@ -337,7 +349,8 @@ class Notifications private constructor(private val context: Context) {
 
                 // Do not show notifications when the conversation view is
                 // open, unless this is for a bubble only.
-                if (application.conversationActivityVisible(conversationId)
+                if (CustomApplication.getApplication()
+                        .conversationActivityVisible(conversationId)
                     && !bubbleOnly) {
                     continue
                 }
@@ -745,8 +758,9 @@ class Notifications private constructor(private val context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val noOtherNotifications = notificationManager.activeNotifications
                 .filter {
-                    it.id != GROUP_NOTIFICATION_ID
-                    && it.id != SYNC_NOTIFICATION_ID
+                    it.id != SYNC_DATABASE_NOTIFICATION_ID
+                    && it.id != SYNC_SEND_MESSAGE_NOTIFICATION_ID
+                    && it.id != GROUP_NOTIFICATION_ID
                 }
                 .none()
             if (noOtherNotifications) {
@@ -762,12 +776,15 @@ class Notifications private constructor(private val context: Context) {
         @SuppressLint("StaticFieldLeak")
         private var instance: Notifications? = null
 
-        // Notification ID for the database synchronization notification
-        const val SYNC_NOTIFICATION_ID = 1
+        // Notification ID for the database synchronization notification.
+        const val SYNC_DATABASE_NOTIFICATION_ID = 1
+
+        // Notification ID for the send message notification.
+        const val SYNC_SEND_MESSAGE_NOTIFICATION_ID = 2
 
         // Notification ID for the group notification, which contains all other
         // notifications
-        const val GROUP_NOTIFICATION_ID = 2
+        const val GROUP_NOTIFICATION_ID = 3
 
         // Starting notification ID for ordinary message notifications
         const val MESSAGE_START_NOTIFICATION_ID = GROUP_NOTIFICATION_ID + 1

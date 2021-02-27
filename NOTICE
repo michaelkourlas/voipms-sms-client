@@ -13,9 +13,6 @@ Copyright (C) 2015 The Android Open Source Project
 MasterSwitchPreference (https://android.googlesource.com/platform/packages/apps/Settings/+/master/src/com/android/settings/widget/MasterSwitchPreference.java)
 Copyright (C) 2017 The Android Open Source Project
 
-IntentService (https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/app/IntentService.java)
-Copyright (C) 2008 The Android Open Source Project
-
 secure-storage-android (https://github.com/adorsys/secure-storage-android)
 
 preferencex-android (https://github.com/takisoft/preferencex-android)

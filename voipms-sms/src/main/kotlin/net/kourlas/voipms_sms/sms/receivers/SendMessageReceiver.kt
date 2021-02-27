@@ -24,7 +24,7 @@ import androidx.core.app.RemoteInput
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.sms.services.SendMessageService
+import net.kourlas.voipms_sms.sms.workers.SendMessageWorker
 import net.kourlas.voipms_sms.utils.getMessageTexts
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.runOnNewThread
@@ -57,13 +57,16 @@ class SendMessageReceiver : BroadcastReceiver() {
                                   "Message text missing")
 
             runOnNewThread {
-                Database.getInstance(context)
+                val databaseIds = Database.getInstance(context)
                     .insertMessageDeliveryInProgress(
                         ConversationId(did, contact),
                         getMessageTexts(context, messageText))
-                SendMessageService.startService(context,
-                                                ConversationId(did, contact),
-                                                inlineReply = true)
+                for (id in databaseIds) {
+                    SendMessageWorker.sendMessage(
+                        context, id,
+                        inlineReplyConversationId = ConversationId(
+                            did, contact))
+                }
             }
         } catch (e: Exception) {
             logException(e)

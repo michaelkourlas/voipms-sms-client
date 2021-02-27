@@ -78,7 +78,7 @@ class Database private constructor(private val context: Context) {
 
             database.setTransactionSuccessful()
 
-            removeFromIndex(Message.getMessageUrl(databaseId))
+            removeFromIndex(context, Message.getMessageUrl(databaseId))
             updateShortcuts()
         } finally {
             database.endTransaction()
@@ -130,7 +130,7 @@ class Database private constructor(private val context: Context) {
             database.setTransactionSuccessful()
 
             for (message in messages) {
-                removeFromIndex(message.messageUrl)
+                removeFromIndex(context, message.messageUrl)
             }
             updateShortcuts()
         } finally {
@@ -167,7 +167,7 @@ class Database private constructor(private val context: Context) {
 
             database.setTransactionSuccessful()
 
-            removeAllFromIndex()
+            removeAllFromIndex(context)
             updateShortcuts()
         } finally {
             database.endTransaction()
@@ -326,20 +326,15 @@ class Database private constructor(private val context: Context) {
     }
 
     /**
-     * Gets all messages in a specified conversation that match a specified
-     * filter constraint. The resulting list is sorted by date, from least
-     * recent to most recent.
+     * Gets all messages that are pending delivery.
      */
-    fun getMessagesConversationDeliveryInProgress(
-        conversationId: ConversationId): List<Message> = importExportLock.read {
+    fun getMessagesDeliveryInProgress(): List<Message> = importExportLock.read {
         return getMessagesCursor(
             database.query(
                 TABLE_MESSAGE,
                 messageColumns,
-                "$COLUMN_DID=? AND $COLUMN_CONTACT=?"
-                + " AND $COLUMN_DELIVERY_IN_PROGRESS = 1",
-                arrayOf(conversationId.did, conversationId.contact),
-                null, null,
+                "$COLUMN_DELIVERY_IN_PROGRESS = 1",
+                null, null, null,
                 " $COLUMN_DATE ASC,"
                 + " $COLUMN_DATABASE_ID ASC"))
     }

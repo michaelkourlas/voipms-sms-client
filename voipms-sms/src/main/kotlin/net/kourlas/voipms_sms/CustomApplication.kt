@@ -70,6 +70,9 @@ class CustomApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // Create static reference to self.
+        self = this
+
         // Update theme
         when (getAppTheme(applicationContext)) {
             AppearancePreferencesFragment.SYSTEM_DEFAULT -> AppCompatDelegate.setDefaultNightMode(
@@ -93,5 +96,13 @@ class CustomApplication : Application() {
 
         // Subscribe to topics for current DIDs
         subscribeToDidTopics(applicationContext)
+    }
+
+    companion object {
+        private lateinit var self: CustomApplication
+
+        fun getApplication(): CustomApplication {
+            return self
+        }
     }
 }

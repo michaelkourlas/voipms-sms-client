@@ -26,30 +26,32 @@ import net.kourlas.voipms_sms.sms.services.AppIndexingService
  * Adds the specified message to the app index.
  */
 fun addMessageToIndexOnNewThread(context: Context, message: Message) {
-    FirebaseAppIndex.getInstance().update(
+    val applicationContext = context.applicationContext
+    FirebaseAppIndex.getInstance(applicationContext).update(
         AppIndexingService.getMessageBuilder(
-            context, message).build())
+            applicationContext, message).build())
 }
 
 /**
  * Remove the entry with the specified URI from the app index.
  */
-fun removeFromIndex(string: String) {
-    FirebaseAppIndex.getInstance().remove(string)
+fun removeFromIndex(context: Context, string: String) {
+    FirebaseAppIndex.getInstance(context).remove(string)
 }
 
 /**
  * Remove the all entries from the app index.
  */
-fun removeAllFromIndex() {
-    FirebaseAppIndex.getInstance().removeAll()
+fun removeAllFromIndex(context: Context) {
+    FirebaseAppIndex.getInstance(context).removeAll()
 }
 
 /**
  * Replace the app index with the conversations in the database.
  */
 fun replaceIndexOnNewThread(context: Context) {
+    val applicationContext = context.applicationContext
     runOnNewThread {
-        AppIndexingService.replaceIndex(context)
+        AppIndexingService.replaceIndex(applicationContext)
     }
 }
