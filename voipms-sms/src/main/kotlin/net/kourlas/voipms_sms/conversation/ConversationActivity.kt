@@ -514,7 +514,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
                 ensureActive()
 
-                lifecycleScope.launch(Dispatchers.Default) {
+                lifecycleScope.launch(Dispatchers.Main) {
                     // Refresh adapter to show message being sent.
                     adapter.refresh()
 

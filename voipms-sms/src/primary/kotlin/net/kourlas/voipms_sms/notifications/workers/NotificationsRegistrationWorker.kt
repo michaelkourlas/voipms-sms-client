@@ -187,7 +187,9 @@ class NotificationsRegistrationWorker(context: Context,
             val work =
                 OneTimeWorkRequestBuilder<NotificationsRegistrationWorker>()
                     .build()
-            WorkManager.getInstance(context).enqueue(work)
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                context.getString(R.string.push_notifications_work_id),
+                ExistingWorkPolicy.REPLACE, work)
         }
     }
 }

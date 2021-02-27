@@ -279,7 +279,9 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                             R.string.send_message_inline_reply_contact)
                             to inlineReplyConversationId?.contact))
                 .build()
-            WorkManager.getInstance(context).enqueue(work)
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                context.getString(R.string.send_message_work_id),
+                ExistingWorkPolicy.APPEND_OR_REPLACE, work)
         }
     }
 }

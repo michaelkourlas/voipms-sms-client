@@ -245,11 +245,13 @@
     <!-- WORKERS -->
 
     <!-- PushNotificationsRegistrationWorker -->
+    <string name="push_notifications_work_id">net.kourlas.voipms_sms.PUSH_NOTIF_WORK_ID</string>
     <string name="push_notifications_fail_register">Register failed: VoIP.ms callback registration failed</string>
     <string name="push_notifications_fail_google_play">Register failed: Google Play Services unavailable</string>
     <string name="push_notifications_fail_unknown">Register failed: unknown error</string>
 
     <!-- SendMessageWorker -->
+    <string name="send_message_work_id" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_WORK_ID</string>
     <string name="send_message_database_id" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_DATABASE_ID</string>
     <string name="send_message_inline_reply" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY</string>
     <string name="send_message_inline_reply_contact" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY_CONTACT</string>
@@ -270,9 +272,11 @@
     <string name="send_message_error_unknown">Not sent: unknown error</string>
 
     <!-- RetrieveDidsWorker -->
+    <string name="retrieve_dids_work_id" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_WORK_ID</string>
     <string name="retrieve_dids_auto_add" translatable="false">net.kourlas.voipms_sms.RETRIEVE_DIDS_AUTO_ADD</string>
 
     <!-- SyncWorker -->
+    <string name="sync_work_id" translatable="false">net.kourlas.voipms_sms.SYNC_WORK_ID</string>
     <string name="sync_cancel_action" translatable="false">net.kourlas.voipms_sms.SYNC_CANCEL_ACTION</string>
     <string name="sync_force_recent" translatable="false">net.kourlas.voipms_sms.SYNC_FORCE_RECENT</string>
     <string name="sync_error_network">Sync failed: network unavailable</string>
@@ -284,6 +288,7 @@
     <string name="sync_error_unknown">Sync failed: unknown error</string>
 
     <!-- VerifyCredentialsWorker -->
+    <string name="verify_credentials_work_id" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_WORK_ID</string>
     <string name="verify_credentials_email" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_EMAIL</string>
     <string name="verify_credentials_password" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_PASSWORD</string>
     <string name="verify_credentials_error_api_request">Sign-in failed: VoIP.ms unavailable</string>

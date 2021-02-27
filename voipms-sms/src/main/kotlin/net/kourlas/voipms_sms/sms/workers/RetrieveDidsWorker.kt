@@ -207,7 +207,9 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                         context.getString(
                             R.string.retrieve_dids_auto_add) to autoAdd))
                 .build()
-            WorkManager.getInstance(context).enqueue(work)
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                context.getString(R.string.retrieve_dids_work_id),
+                ExistingWorkPolicy.REPLACE, work)
         }
     }
 }

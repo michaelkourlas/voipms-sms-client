@@ -424,7 +424,14 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                         context.getString(
                             R.string.sync_force_recent) to forceRecent))
                 .build()
-            WorkManager.getInstance(context).enqueue(work)
+            WorkManager.getInstance(context)
+                .enqueueUniqueWork(
+                    context.getString(R.string.sync_work_id),
+                    if (forceRecent)
+                        ExistingWorkPolicy.KEEP
+                    else
+                        ExistingWorkPolicy.REPLACE,
+                    work)
         }
     }
 }

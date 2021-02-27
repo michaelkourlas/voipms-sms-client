@@ -182,7 +182,9 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
                         context.getString(
                             R.string.verify_credentials_password) to password))
                 .build()
-            WorkManager.getInstance(context).enqueue(work)
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                context.getString(R.string.verify_credentials_work_id),
+                ExistingWorkPolicy.REPLACE, work)
         }
     }
 }

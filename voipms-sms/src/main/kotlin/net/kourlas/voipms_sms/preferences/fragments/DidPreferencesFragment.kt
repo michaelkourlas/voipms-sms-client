@@ -91,7 +91,7 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
                 enablePushNotifications(it.applicationContext,
                                         activityToShowError = it)
             }
-            lifecycleScope.launch(Dispatchers.Default) {
+            lifecycleScope.launch(Dispatchers.IO) {
                 replaceIndex(it)
             }
 
