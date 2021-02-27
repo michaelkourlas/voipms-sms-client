@@ -63,6 +63,9 @@ android {
         primary.java.srcDirs += 'src/primary/kotlin'
         fdroid.java.srcDirs += 'src/fdroid/kotlin'
     }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
