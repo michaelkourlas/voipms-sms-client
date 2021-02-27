@@ -4,7 +4,7 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion '31.0.0 rc1'
+    buildToolsVersion '30.0.3'
     defaultConfig {
         applicationId 'net.kourlas.voipms_sms'
         minSdkVersion 21
