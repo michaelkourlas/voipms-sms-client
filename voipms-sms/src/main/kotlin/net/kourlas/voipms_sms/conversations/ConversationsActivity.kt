@@ -327,11 +327,13 @@ open class ConversationsActivity(val archived: Boolean = false) :
 
         // Perform initial setup as well as account and DID check
         performAccountDidCheck()
-        performInitialSetup()
+        val firstSyncRequired = performInitialSetup()
 
-        // Refresh and perform limited synchronization
-        adapter.refresh()
-        SyncWorker.performSynchronization(this, forceRecent = true)
+        // Refresh and perform limited synchronization\
+        if (!firstSyncRequired) {
+            adapter.refresh()
+            SyncWorker.performSynchronization(this, forceRecent = true)
+        }
 
         // Refresh on resume just in case the contacts permission was newly
         // granted and we need to add the contact names and photos
@@ -389,14 +391,19 @@ open class ConversationsActivity(val archived: Boolean = false) :
     /**
      * Performs initial setup following sign-in or upgrade.
      */
-    private fun performInitialSetup() {
+    private fun performInitialSetup(): Boolean {
         // After the user configures an account, do an initial synchronization
         // with the SwipeRefreshLayout refresh icon
+        val firstSyncRequired = getFirstSyncAfterSignIn(this)
         if (getFirstSyncAfterSignIn(this)) {
             val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
                 R.id.swipe_refresh_layout)
             swipeRefreshLayout.isRefreshing = true
             SyncWorker.performSynchronization(this, forceRecent = false)
+
+            val emptyTextView = findViewById<TextView>(
+                R.id.empty_text)
+            emptyTextView.text = getString(R.string.conversations_first_sync)
 
             val format = SimpleDateFormat("MMM d, yyyy",
                                           Locale.getDefault())
@@ -421,6 +428,8 @@ open class ConversationsActivity(val archived: Boolean = false) :
             enablePushNotifications(this.applicationContext,
                                     activityToShowError = this)
         }
+
+        return firstSyncRequired
     }
 
     /**
@@ -835,6 +844,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     R.id.coordinator_layout,
                     resources.getQuantityString(
                         R.plurals.conversations_archived,
+                        messages.size,
                         messages.size),
                     getString(R.string.undo),
                     {
@@ -879,6 +889,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     R.id.coordinator_layout,
                     resources.getQuantityString(
                         R.plurals.conversations_unarchived,
+                        messages.size,
                         messages.size),
                     getString(R.string.undo),
                     {
@@ -941,6 +952,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
                     resources.getQuantityString(R.plurals.conversations_deleted,
+                                                messages.size,
                                                 messages.size),
                     getString(R.string.undo),
                     {

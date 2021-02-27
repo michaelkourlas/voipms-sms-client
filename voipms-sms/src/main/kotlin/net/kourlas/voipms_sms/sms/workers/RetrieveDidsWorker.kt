@@ -26,9 +26,6 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getDids
@@ -115,9 +112,7 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 setDids(applicationContext,
                         getDids(applicationContext).plus(dids))
                 enablePushNotifications(applicationContext)
-                GlobalScope.launch(Dispatchers.Default) {
-                    replaceIndex(applicationContext)
-                }
+                replaceIndex(applicationContext)
             }
         } catch (e: CancellationException) {
             throw e

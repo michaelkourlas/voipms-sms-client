@@ -174,7 +174,7 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
          */
         fun verifyCredentials(context: Context, email: String,
                               password: String) {
-            val work = OneTimeWorkRequestBuilder<RetrieveDidsWorker>()
+            val work = OneTimeWorkRequestBuilder<VerifyCredentialsWorker>()
                 .setInputData(
                     workDataOf(
                         context.getString(

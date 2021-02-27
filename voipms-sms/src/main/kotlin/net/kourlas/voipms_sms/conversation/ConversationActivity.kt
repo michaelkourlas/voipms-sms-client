@@ -1025,6 +1025,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     R.id.coordinator_layout,
                     resources.getQuantityString(
                         R.plurals.conversation_message_deleted,
+                        messages.size,
                         messages.size),
                     getString(R.string.undo),
                     {

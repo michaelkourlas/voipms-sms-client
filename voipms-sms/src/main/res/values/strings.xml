@@ -217,6 +217,7 @@
     <string name="conversations_message_you">You:</string>
     <string name="conversations_no_account">No account configured</string>
     <string name="conversations_no_dids">You have no configured phone numbers.</string>
+    <string name="conversations_first_sync">Please wait for the first synchronization to complete…</string>
     <string name="conversations_no_messages">You have no messages associated with the selected phone number.</string>
     <string name="conversations_no_results">No results found for \'%1$s\'</string>
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>
