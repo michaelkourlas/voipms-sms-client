@@ -244,11 +244,6 @@
 
     <!-- SERVICES -->
 
-    <!-- MarkReadService -->
-    <string name="mark_read_action" translatable="false">net.kourlas.voipms_sms.MARK_READ_ACTION</string>
-    <string name="mark_read_did" translatable="false">net.kourlas.voipms_sms.MARK_READ_DID</string>
-    <string name="mark_read_contact" translatable="false">net.kourlas.voipms_sms.MARK_READ_CONTACT</string>
-
     <!-- PushNotificationsRegistrationService -->
     <string name="push_notifications_reg_action" translatable="false">net.kourlas.voipms_sms.PUSH_NOTIFICATIONS_REG_ACTION</string>
     <string name="push_notifications_fail_register">Register failed: VoIP.ms callback registration failed</string>
@@ -308,6 +303,11 @@
     <string name="send_message_error_unknown">Not sent: unknown error</string>
 
     <!-- BROADCAST RECEIVERS -->
+
+    <!-- MarkReadReceiver -->
+    <string name="mark_read_receiver_action" translatable="false">net.kourlas.voipms_sms.MARK_READ_ACTION</string>
+    <string name="mark_read_receiver_did" translatable="false">net.kourlas.voipms_sms.MARK_READ_DID</string>
+    <string name="mark_read_receiver_contact" translatable="false">net.kourlas.voipms_sms.MARK_READ_CONTACT</string>
 
     <!-- SendMessageReceiver -->
     <string name="send_message_receiver_action" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_RECEIVER_ACTION</string>

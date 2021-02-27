@@ -21,58 +21,69 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.workers.SendMessageWorker
 import net.kourlas.voipms_sms.utils.getMessageTexts
 import net.kourlas.voipms_sms.utils.logException
-import net.kourlas.voipms_sms.utils.runOnNewThread
 
 /**
- * Broadcast receiver used to forward send message requests from a PendingIntent
- * to the SendMessageService.
+ * Broadcast receiver used to forward send message requests from a notification
+ * PendingIntent to a SendMessageWorker.
  */
 class SendMessageReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
+            // Collect the required state.
             if (context == null || intent == null) {
-                return
+                throw Exception("No context or intent provided")
             }
             if (intent.action != context.getString(
                     R.string.send_message_receiver_action)) {
-                return
+                throw Exception("Unrecognized action " + intent.action)
             }
-
             val did = intent.getStringExtra(context.getString(
-                R.string.send_message_receiver_did)) ?: return
+                R.string.send_message_receiver_did)) ?: throw Exception(
+                "No DID provided")
             val contact = intent.getStringExtra(context.getString(
-                R.string.send_message_receiver_contact)) ?: return
-
+                R.string.send_message_receiver_contact)) ?: throw Exception(
+                "No contact provided")
             val remoteInput = RemoteInput.getResultsFromIntent(intent)
             val messageText = remoteInput?.getCharSequence(
                 context.getString(
                     R.string.notifications_reply_key))?.toString()
-                              ?: throw Exception(
-                                  "Message text missing")
+                              ?: throw Exception("No message text provided")
 
-            runOnNewThread {
-                val databaseIds = Database.getInstance(context)
-                    .insertMessageDeliveryInProgress(
-                        ConversationId(did, contact),
-                        getMessageTexts(context, messageText))
-                for (id in databaseIds) {
-                    SendMessageWorker.sendMessage(
-                        context, id,
-                        inlineReplyConversationId = ConversationId(
-                            did, contact))
+            val pendingResult =
+                goAsync() ?: throw Exception("No PendingResult returned")
+            GlobalScope.launch(Dispatchers.IO) {
+                // Insert the messages into the database, then tell the
+                // SendMessageWorker to send them.
+                try {
+                    val databaseIds = Database.getInstance(context)
+                        .insertMessageDeliveryInProgress(
+                            ConversationId(did, contact),
+                            getMessageTexts(context, messageText))
+                    for (id in databaseIds) {
+                        SendMessageWorker.sendMessage(
+                            context, id,
+                            inlineReplyConversationId = ConversationId(
+                                did, contact))
+                    }
+                } catch (e: Exception) {
+                    logException(e)
+                } finally {
+                    pendingResult.finish()
                 }
             }
         } catch (e: Exception) {
             logException(e)
         }
     }
-
 
     companion object {
         /**
