@@ -24,7 +24,7 @@ import net.kourlas.voipms_sms.sms.Message
  * Stub for F-Droid builds.
  */
 @Suppress("UNUSED_PARAMETER")
-fun addMessageToIndexOnNewThread(context: Context, message: Message) {
+fun addMessageToIndex(context: Context, message: Message) {
     // Do nothing.
 }
 
@@ -32,7 +32,7 @@ fun addMessageToIndexOnNewThread(context: Context, message: Message) {
  * Stub for F-Droid builds.
  */
 @Suppress("UNUSED_PARAMETER")
-fun removeFromIndex(string: String) {
+fun removeFromIndex(context: Context, string: String) {
     // Do nothing.
 }
 
@@ -40,7 +40,7 @@ fun removeFromIndex(string: String) {
  * Stub for F-Droid builds.
  */
 @Suppress("UNUSED_PARAMETER")
-fun removeAllFromIndex() {
+fun removeAllFromIndex(context: Context) {
     // Do nothing.
 }
 
@@ -48,6 +48,6 @@ fun removeAllFromIndex() {
  * Stub for F-Droid builds.
  */
 @Suppress("UNUSED_PARAMETER")
-fun replaceIndexOnNewThread(context: Context) {
+fun replaceIndex(context: Context) {
     // Do nothing.
 }

@@ -28,6 +28,7 @@ import android.text.method.LinkMovementMethod
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.preferences.accountConfigured
@@ -164,8 +165,10 @@ class DidsPreferencesActivity : AppCompatActivity() {
             R.string
                 .preferences_dids_fragment_retrieved_dids_key),
                                   retrievedDids)
-        val databaseDids = Database.getInstance(applicationContext)
-            .getDids()
+        val databaseDids = runBlocking {
+            Database.getInstance(applicationContext)
+                .getDids()
+        }
         bundle.putStringArrayList(getString(
             R.string
                 .preferences_dids_fragment_database_dids_key),

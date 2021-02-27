@@ -22,8 +22,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import com.takisoft.preferencex.PreferenceFragmentCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity
 import net.kourlas.voipms_sms.preferences.controls.MasterSwitchPreference
@@ -34,7 +37,8 @@ import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.*
 
 class DidsPreferencesFragment : PreferenceFragmentCompat(),
-    Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
+    Preference.OnPreferenceChangeListener,
+    Preference.OnPreferenceClickListener {
     // Sentinel used to prevent preferences from being loaded twice (once on
     // creation, once on resumption)
     private var beforeFirstPreferenceLoad: Boolean = true
@@ -55,15 +59,16 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
                 activity?.let { activity ->
                     // Show error if one occurred
                     intent?.getStringArrayListExtra(getString(
-                        R.string.push_notifications_reg_complete_failed_dids))?.let {
-                        if (it.isNotEmpty()) {
-                            // Some DIDs failed registration
-                            showSnackbar(
-                                activity, R.id.coordinator_layout,
-                                getString(
-                                    R.string.push_notifications_fail_register))
-                        }
-                    } ?: run {
+                        R.string.push_notifications_reg_complete_failed_dids))
+                        ?.let {
+                            if (it.isNotEmpty()) {
+                                // Some DIDs failed registration
+                                showSnackbar(
+                                    activity, R.id.coordinator_layout,
+                                    getString(
+                                        R.string.push_notifications_fail_register))
+                            }
+                        } ?: run {
                         // Unknown error
                         showSnackbar(
                             activity, R.id.coordinator_layout,
@@ -187,8 +192,10 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
                                         activityToShowError = it)
             }
 
-            runOnNewThread { Database.getInstance(it).updateShortcuts() }
-            replaceIndexOnNewThread(it)
+            lifecycleScope.launch(Dispatchers.IO) {
+                Database.getInstance(it).updateShortcuts()
+                replaceIndex(it)
+            }
         }
 
         return true

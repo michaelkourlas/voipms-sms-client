@@ -36,6 +36,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.getConversationDemoMessages
@@ -329,13 +330,15 @@ class ConversationRecyclerViewAdapter(
             val resultsObject = ConversationFilter()
             @Suppress("ConstantConditionIf")
             if (!BuildConfig.IS_DEMO) {
-                resultsObject.messages.addAll(
-                    Database.getInstance(activity)
-                        .getMessagesConversationFiltered(
-                            conversationId,
-                            constraint.toString()
-                                .trim { it <= ' ' }
-                                .toLowerCase(Locale.getDefault())))
+                runBlocking {
+                    resultsObject.messages.addAll(
+                        Database.getInstance(activity)
+                            .getMessagesConversationFiltered(
+                                conversationId,
+                                constraint.toString()
+                                    .trim { it <= ' ' }
+                                    .toLowerCase(Locale.getDefault())))
+                }
             } else {
                 resultsObject.messages.addAll(getConversationDemoMessages(
                     activity.bubble))

@@ -24,13 +24,17 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import com.takisoft.preferencex.PreferenceFragmentCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.preferences
-import net.kourlas.voipms_sms.utils.runOnNewThread
 import net.kourlas.voipms_sms.utils.showAlertDialog
 import net.kourlas.voipms_sms.utils.showSnackbar
 
@@ -125,17 +129,15 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
      */
     private fun import(uri: Uri) {
         activity?.let {
-            runOnNewThread {
+            lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val importFd = it.contentResolver.openFileDescriptor(
                         uri, "r") ?: throw Exception("Could not open file")
                     Database.getInstance(it).import(importFd)
-                    it.runOnUiThread {
-                        showSnackbar(it, R.id.coordinator_layout, it.getString(
-                            R.string.preferences_database_import_success))
-                    }
                 } catch (e: Exception) {
-                    it.runOnUiThread {
+                    ensureActive()
+
+                    lifecycleScope.launch(Dispatchers.Main) {
                         showSnackbar(
                             it,
                             R.id.coordinator_layout,
@@ -143,6 +145,14 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                                 R.string.preferences_database_import_fail,
                                 "${e.message} (${e.javaClass.simpleName})"))
                     }
+                    return@launch
+                }
+
+                ensureActive()
+
+                lifecycleScope.launch(Dispatchers.Main) {
+                    showSnackbar(it, R.id.coordinator_layout, it.getString(
+                        R.string.preferences_database_import_success))
                 }
             }
         }
@@ -153,25 +163,32 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
      */
     private fun export(uri: Uri) {
         activity?.let {
-            runOnNewThread {
+            lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val exportFd = it.contentResolver.openFileDescriptor(
                         uri, "w") ?: throw Exception("Could not open file")
                     Database.getInstance(it).export(exportFd)
-
-                    it.runOnUiThread {
-                        showSnackbar(it, R.id.coordinator_layout, it.getString(
-                            R.string.preferences_database_export_success))
-                    }
                 } catch (e: Exception) {
-                    it.runOnUiThread {
+                    ensureActive()
+
+                    withContext(Dispatchers.Default) {
                         showSnackbar(
                             it,
                             R.id.coordinator_layout,
                             getString(
                                 R.string.preferences_database_export_fail,
                                 "${e.message} (${e.javaClass.simpleName})"))
+
                     }
+                    return@launch
+                }
+
+                ensureActive()
+
+                withContext(Dispatchers.Default) {
+                    showSnackbar(it, R.id.coordinator_layout, it.getString(
+                        R.string.preferences_database_export_success))
+
                 }
             }
         }
@@ -205,7 +222,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 val deletedMessages = selectedOptions.contains(0)
                 val removedDids = selectedOptions.contains(1)
 
-                runOnNewThread {
+                lifecycleScope.launch(Dispatchers.IO) {
                     if (deletedMessages) {
                         Database.getInstance(context).deleteTableDeleted()
                     }
@@ -234,7 +251,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                         activity.applicationContext
                             .getString(R.string.delete),
                         { _, _ ->
-                            runOnNewThread {
+                            lifecycleScope.launch(Dispatchers.IO) {
                                 Database.getInstance(
                                     activity.applicationContext)
                                     .deleteTablesAll()

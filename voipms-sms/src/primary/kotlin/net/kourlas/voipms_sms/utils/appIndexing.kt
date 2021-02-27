@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2020 Michael Kourlas
+ * Copyright (C) 2020-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,40 +18,178 @@
 package net.kourlas.voipms_sms.utils
 
 import android.content.Context
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.appindexing.FirebaseAppIndex
+import com.google.firebase.appindexing.Indexable
+import com.google.firebase.appindexing.builders.Indexables
+import com.google.firebase.appindexing.builders.MessageBuilder
+import com.google.firebase.appindexing.builders.PersonBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
-import net.kourlas.voipms_sms.sms.services.AppIndexingService
 
 /**
  * Adds the specified message to the app index.
  */
-fun addMessageToIndexOnNewThread(context: Context, message: Message) {
-    val applicationContext = context.applicationContext
-    FirebaseAppIndex.getInstance(applicationContext).update(
-        AppIndexingService.getMessageBuilder(
-            applicationContext, message).build())
-}
+@Suppress("BlockingMethodInNonBlockingContext")
+suspend fun addMessageToIndex(context: Context, message: Message): Void =
+    withContext(Dispatchers.IO) {
+        Tasks.await(FirebaseAppIndex.getInstance(context).update(
+            getMessageBuilder(
+                context, message).build()))
+    }
 
 /**
  * Remove the entry with the specified URI from the app index.
  */
-fun removeFromIndex(context: Context, string: String) {
-    FirebaseAppIndex.getInstance(context).remove(string)
-}
+@Suppress("BlockingMethodInNonBlockingContext")
+suspend fun removeFromIndex(context: Context, string: String): Void =
+    withContext(Dispatchers.IO) {
+        Tasks.await(FirebaseAppIndex.getInstance(context).remove(string))
+    }
 
 /**
  * Remove the all entries from the app index.
  */
-fun removeAllFromIndex(context: Context) {
-    FirebaseAppIndex.getInstance(context).removeAll()
-}
+@Suppress("BlockingMethodInNonBlockingContext")
+suspend fun removeAllFromIndex(context: Context): Void =
+    withContext(Dispatchers.IO) {
+        Tasks.await(FirebaseAppIndex.getInstance(context).removeAll())
+    }
 
 /**
  * Replace the app index with the conversations in the database.
  */
-fun replaceIndexOnNewThread(context: Context) {
+@Suppress("BlockingMethodInNonBlockingContext")
+suspend fun replaceIndex(context: Context) = withContext(Dispatchers.IO) {
     val applicationContext = context.applicationContext
-    runOnNewThread {
-        AppIndexingService.replaceIndex(applicationContext)
+    val indexables = mutableListOf<Indexable>()
+
+    // Create message indexables
+    val contactNameCache = mutableMapOf<String, String>()
+    val contactPhotoUriCache = mutableMapOf<String, String>()
+    val messages = Database.getInstance(
+        context).getMessagesAll(
+        getDids(context, onlyShowInConversationsView = true))
+    messages.mapTo(indexables) {
+        getMessageBuilder(
+            context, it,
+            contactNameCache,
+            contactPhotoUriCache).build()
     }
+
+    // Delete app index and update index with indexables
+    Tasks.await(FirebaseAppIndex.getInstance(applicationContext).removeAll())
+    val max = Indexable.MAX_INDEXABLES_TO_BE_UPDATED_IN_ONE_CALL
+    (indexables.indices step max)
+        .map {
+            indexables.subList(
+                it,
+                if (indexables.size > it + max) it + max - 1
+                else indexables.size - 1)
+        }
+        .forEach {
+            FirebaseAppIndex.getInstance(context).update(
+                *it.toTypedArray())
+        }
+}
+
+/**
+ * Gets a message builder based on the specified message. Certain data is
+ * retrieved from the specified caches to avoid repeated requests.
+ */
+private fun getMessageBuilder(
+    context: Context, message: Message,
+    contactNameCache: MutableMap<String, String> =
+        mutableMapOf(),
+    contactPhotoUriCache: MutableMap<String, String> =
+        mutableMapOf()): MessageBuilder {
+    val messageBuilder = Indexables.messageBuilder()
+        .setUrl(message.messageUrl)
+        .setName(message.text)
+        .setIsPartOf(Indexables.conversationBuilder()
+                         .setUrl(message.conversationUrl)
+                         .setId("${message.did},${message.contact}"))
+
+    val contactBuilder = getContactBuilder(
+        context,
+        message, contactNameCache,
+        contactPhotoUriCache)
+    val didBuilder = getDidBuilder(
+        context,
+        message, contactNameCache,
+        contactPhotoUriCache)
+
+    if (message.isIncoming) {
+        messageBuilder.setDateReceived(message.date)
+        messageBuilder.setSender(contactBuilder)
+        messageBuilder.setRecipient(didBuilder)
+    } else {
+        messageBuilder.setDateSent(message.date)
+        messageBuilder.setSender(didBuilder)
+        messageBuilder.setRecipient(contactBuilder)
+    }
+
+    return messageBuilder
+}
+
+/**
+ * Gets a person builder based on the contact in the specified message. Certain
+ * data is retrieved from the specified caches to avoid repeated requests.
+ */
+private fun getContactBuilder(
+    context: Context, message: Message,
+    contactNameCache: MutableMap<String, String>,
+    contactPhotoUriCache: MutableMap<String, String>): PersonBuilder {
+    val contactBuilder = Indexables.personBuilder()
+        .setTelephone(message.contact)
+        .setUrl(message.conversationUrl)
+
+    // Set contact photo URI
+    val contactPhotoUri = getContactPhotoUri(
+        context, message.contact, contactPhotoUriCache)
+    if (contactPhotoUri != null) {
+        contactBuilder.setImage(contactPhotoUri)
+    }
+
+    // Set contact name
+    val contactName = getContactName(
+        context, message.contact, contactNameCache)
+    if (contactName != null) {
+        contactBuilder.setName(contactName)
+    }
+
+    return contactBuilder
+}
+
+/**
+ * Gets a person builder based on the DID in the specified message. Certain
+ * data is retrieved from the specified caches to avoid repeated requests.
+ */
+private fun getDidBuilder(
+    context: Context, message: Message,
+    contactNameCache: MutableMap<String, String>,
+    contactPhotoUriCache: MutableMap<String, String>): PersonBuilder {
+    val didBuilder = Indexables.personBuilder()
+        .setTelephone(message.did)
+        .setUrl(message.conversationUrl)
+        .setIsSelf(true)
+
+    // Set DID photo URI
+    val didPhotoUri = getContactPhotoUri(
+        context, message.did, contactPhotoUriCache)
+    if (didPhotoUri != null) {
+        didBuilder.setImage(didPhotoUri)
+    }
+
+    // Set DID name
+    val didName = getContactName(
+        context, message.did, contactNameCache)
+    if (didName != null) {
+        didBuilder.setName(didName)
+    }
+
+    return didBuilder
 }

@@ -31,6 +31,8 @@ import androidx.core.content.LocusIdCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
@@ -64,172 +66,196 @@ class Database private constructor(private val context: Context) {
      * Deletes the message with the specified DID, database ID, and optionally
      * VoIP.ms ID from the database.
      */
-    fun deleteMessage(did: String, databaseId: Long,
-                      voipId: Long?) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun deleteMessage(did: String, databaseId: Long, voipId: Long?) =
+        withContext(Dispatchers.IO) {
+            importExportLock.read {
+                try {
+                    database.beginTransactionNonExclusive()
 
-            if (voipId != null) {
-                insertVoipIdDeleted(did, voipId)
+                    if (voipId != null) {
+                        insertVoipIdDeleted(did, voipId)
+                    }
+                    database.delete(TABLE_MESSAGE,
+                                    "$COLUMN_DATABASE_ID=?",
+                                    arrayOf(databaseId.toString()))
+
+                    database.setTransactionSuccessful()
+
+                    removeFromIndex(context, Message.getMessageUrl(databaseId))
+                    updateShortcuts()
+                } finally {
+                    database.endTransaction()
+                }
             }
-            database.delete(TABLE_MESSAGE,
-                            "$COLUMN_DATABASE_ID=?",
-                            arrayOf(databaseId.toString()))
-
-            database.setTransactionSuccessful()
-
-            removeFromIndex(context, Message.getMessageUrl(databaseId))
-            updateShortcuts()
-        } finally {
-            database.endTransaction()
         }
-    }
 
     /**
      * Deletes all messages that are not associated with the specified DIDs.
      */
-    fun deleteMessages(dids: Set<String>) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun deleteMessages(dids: Set<String>) =
+        withContext(Dispatchers.IO) {
+            importExportLock.read {
+                try {
+                    database.beginTransactionNonExclusive()
 
-            val query = dids.joinToString(" AND ") { "$COLUMN_DID!=?" }
-            val queryArgs = dids.toTypedArray()
-            database.delete(TABLE_MESSAGE, query, queryArgs)
-            database.delete(TABLE_DELETED, query, queryArgs)
-            database.delete(TABLE_DRAFT, query, queryArgs)
-            database.delete(TABLE_ARCHIVED, query, queryArgs)
+                    val query = dids.joinToString(" AND ") { "$COLUMN_DID!=?" }
+                    val queryArgs = dids.toTypedArray()
+                    database.delete(TABLE_MESSAGE, query, queryArgs)
+                    database.delete(TABLE_DELETED, query, queryArgs)
+                    database.delete(TABLE_DRAFT, query, queryArgs)
+                    database.delete(TABLE_ARCHIVED, query, queryArgs)
 
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
+                    database.setTransactionSuccessful()
+                } finally {
+                    database.endTransaction()
+                }
+            }
         }
-    }
 
     /**
      * Deletes the messages in the specified conversation from the database.
      * Also deletes any draft message if one exists.
      */
-    fun deleteMessages(conversationId: ConversationId) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun deleteMessages(conversationId: ConversationId) =
+        withContext(Dispatchers.IO) {
+            importExportLock.read {
+                try {
+                    database.beginTransactionNonExclusive()
 
-            val messages = getMessagesConversationWithoutLock(conversationId)
-            for (message in messages) {
-                if (message.voipId != null) {
-                    insertVoipIdDeleted(conversationId.did, message.voipId)
+                    val messages =
+                        getMessagesConversationWithoutLock(conversationId)
+                    for (message in messages) {
+                        if (message.voipId != null) {
+                            insertVoipIdDeleted(conversationId.did,
+                                                message.voipId)
+                        }
+                    }
+                    val where = "$COLUMN_DID=? AND $COLUMN_CONTACT=?"
+                    val whereArgs =
+                        arrayOf(conversationId.did, conversationId.contact)
+                    database.delete(TABLE_MESSAGE, where, whereArgs)
+                    database.delete(TABLE_DRAFT, where, whereArgs)
+                    database.delete(TABLE_ARCHIVED, where, whereArgs)
+
+                    insertMessageDraftWithoutLock(conversationId, "")
+
+                    database.setTransactionSuccessful()
+
+                    for (message in messages) {
+                        removeFromIndex(context, message.messageUrl)
+                    }
+                    updateShortcuts()
+                } finally {
+                    database.endTransaction()
                 }
             }
-            val where = "$COLUMN_DID=? AND $COLUMN_CONTACT=?"
-            val whereArgs = arrayOf(conversationId.did, conversationId.contact)
-            database.delete(TABLE_MESSAGE, where, whereArgs)
-            database.delete(TABLE_DRAFT, where, whereArgs)
-            database.delete(TABLE_ARCHIVED, where, whereArgs)
-
-            insertMessageDraftWithoutLock(conversationId, "")
-
-            database.setTransactionSuccessful()
-
-            for (message in messages) {
-                removeFromIndex(context, message.messageUrl)
-            }
-            updateShortcuts()
-        } finally {
-            database.endTransaction()
         }
-    }
 
     /**
      * Deletes all rows in the deleted messages table from the database.
      */
-    fun deleteTableDeleted() = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun deleteTableDeleted() = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            database.delete(TABLE_DELETED, null, null)
+                database.delete(TABLE_DELETED, null, null)
 
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 
     /**
      * Deletes all rows in all tables in the database.
      */
-    fun deleteTablesAll() = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun deleteTablesAll() = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            database.delete(TABLE_MESSAGE, null, null)
-            database.delete(TABLE_DELETED, null, null)
-            database.delete(TABLE_DRAFT, null, null)
-            database.delete(TABLE_ARCHIVED, null, null)
+                database.delete(TABLE_MESSAGE, null, null)
+                database.delete(TABLE_DELETED, null, null)
+                database.delete(TABLE_DRAFT, null, null)
+                database.delete(TABLE_ARCHIVED, null, null)
 
-            database.setTransactionSuccessful()
+                database.setTransactionSuccessful()
 
-            removeAllFromIndex(context)
-            updateShortcuts()
-        } finally {
-            database.endTransaction()
+                removeAllFromIndex(context)
+                updateShortcuts()
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 
     /**
      * Exports the database to the specified file descriptor.
      */
-    fun export(exportFd: ParcelFileDescriptor) = importExportLock.write {
-        val dbFile = context.getDatabasePath(DATABASE_NAME)
+    @Suppress("BlockingMethodInNonBlockingContext")
+    suspend fun export(exportFd: ParcelFileDescriptor) =
+        withContext(Dispatchers.IO) {
+            importExportLock.write {
+                val dbFile = context.getDatabasePath(DATABASE_NAME)
 
-        try {
-            // Close database to persist it to disk before export
-            database.close()
+                try {
+                    // Close database to persist it to disk before export
+                    database.close()
 
-            val exportStream = FileOutputStream(exportFd.fileDescriptor)
-            val dbStream = FileInputStream(dbFile)
-            exportStream.channel.truncate(0)
-            val buffer = ByteArray(1024)
-            do {
-                val length = dbStream.read(buffer)
-                if (length > 0) {
-                    exportStream.write(buffer, 0, length)
-                } else {
-                    break
+                    val exportStream = FileOutputStream(exportFd.fileDescriptor)
+                    val dbStream = FileInputStream(dbFile)
+                    exportStream.channel.truncate(0)
+                    val buffer = ByteArray(1024)
+                    do {
+                        val length = dbStream.read(buffer)
+                        if (length > 0) {
+                            exportStream.write(buffer, 0, length)
+                        } else {
+                            break
+                        }
+                    } while (true)
+                    exportStream.close()
+                    dbStream.close()
+                } finally {
+                    // Refresh database after export
+                    database.close()
+                    database = databaseHelper.writableDatabase
                 }
-            } while (true)
-            exportStream.close()
-            dbStream.close()
-        } finally {
-            // Refresh database after export
-            database.close()
-            database = databaseHelper.writableDatabase
+            }
         }
-    }
 
     /**
      * Gets all conversation IDs in the database associated with the specified
      * DIDs.
      */
-    fun getConversationIds(
-        dids: Set<String>): Set<ConversationId> = importExportLock.read {
-        return getConversationIdsWithoutLock(dids)
+    suspend fun getConversationIds(
+        dids: Set<String>): Set<ConversationId> = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            return@read getConversationIdsWithoutLock(dids)
+        }
     }
 
     /**
      * Gets all DIDs used in the database.
      */
-    fun getDids(): Set<String> = importExportLock.read {
-        val dids = mutableListOf<String>()
-        database.query(
-            true, TABLE_MESSAGE, arrayOf(COLUMN_DID),
-            null, null, null, null, null, null).use { cursor ->
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                dids.add(
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DID)))
-                cursor.moveToNext()
+    suspend fun getDids(): Set<String> = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            val dids = mutableListOf<String>()
+            database.query(
+                true, TABLE_MESSAGE, arrayOf(COLUMN_DID),
+                null, null, null, null, null, null).use { cursor ->
+                cursor.moveToFirst()
+                while (!cursor.isAfterLast) {
+                    dids.add(
+                        cursor.getString(
+                            cursor.getColumnIndexOrThrow(COLUMN_DID)))
+                    cursor.moveToNext()
+                }
             }
+            return@read dids.toSet()
         }
-        return dids.toSet()
     }
 
     /**
@@ -237,9 +263,11 @@ class Database private constructor(private val context: Context) {
      *
      * @return Null if the message does not exist.
      */
-    fun getMessageDatabaseId(
-        databaseId: Long): Message? = importExportLock.read {
-        return getMessageDatabaseIdWithoutLock(databaseId)
+    suspend fun getMessageDatabaseId(
+        databaseId: Long): Message? = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            return@read getMessageDatabaseIdWithoutLock(databaseId)
+        }
     }
 
     /**
@@ -247,10 +275,13 @@ class Database private constructor(private val context: Context) {
      *
      * @return Null if the message does not exist.
      */
-    fun getMessageDraft(
-        conversationId: ConversationId): Message? = importExportLock.read {
-        return getMessageDraftWithoutLock(conversationId)
-    }
+    suspend fun getMessageDraft(
+        conversationId: ConversationId): Message? =
+        withContext(Dispatchers.IO) {
+            importExportLock.read {
+                return@read getMessageDraftWithoutLock(conversationId)
+            }
+        }
 
     /**
      * Gets the most recent message in the set of messages associated with the
@@ -281,62 +312,55 @@ class Database private constructor(private val context: Context) {
      * Gets all of the messages in the message table with the specified DIDs.
      * The resulting list is sorted by database ID in descending order.
      */
-    fun getMessagesAll(
-        dids: Set<String>): List<Message> = importExportLock.read {
-        return getMessagesCursor(
-            database.query(
-                TABLE_MESSAGE,
-                messageColumns,
-                dids.joinToString(" OR ") { "$COLUMN_DID=?" },
-                dids.toTypedArray(),
-                null, null,
-                "$COLUMN_VOIP_ID DESC, $COLUMN_DATABASE_ID DESC"))
+    suspend fun getMessagesAll(
+        dids: Set<String>): List<Message> = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            return@read getMessagesCursor(
+                database.query(
+                    TABLE_MESSAGE,
+                    messageColumns,
+                    dids.joinToString(" OR ") { "$COLUMN_DID=?" },
+                    dids.toTypedArray(),
+                    null, null,
+                    "$COLUMN_VOIP_ID DESC, $COLUMN_DATABASE_ID DESC"))
+        }
     }
 
     /**
      * Gets all messages in a specified conversation. The resulting list is
      * sorted by date, from least recent to most recent.
      */
-    fun getMessagesConversation(
-        conversationId: ConversationId): List<Message> = importExportLock.read {
-        return getMessagesConversationWithoutLock(conversationId)
-    }
+    suspend fun getMessagesConversation(
+        conversationId: ConversationId): List<Message> =
+        withContext(Dispatchers.IO) {
+            importExportLock.read {
+                return@read getMessagesConversationWithoutLock(conversationId)
+            }
+        }
 
     /**
      * Gets all messages in a specified conversation that match a specified
      * filter constraint. The resulting list is sorted by date, from least
      * recent to most recent.
      */
-    fun getMessagesConversationFiltered(
+    suspend fun getMessagesConversationFiltered(
         conversationId: ConversationId,
-        filterConstraint: String): List<Message> = importExportLock.read {
-        return getMessagesCursor(
-            database.query(
-                TABLE_MESSAGE,
-                messageColumns,
-                "$COLUMN_DID=? AND $COLUMN_CONTACT=?"
-                + " AND $COLUMN_MESSAGE LIKE ?",
-                arrayOf(conversationId.did, conversationId.contact,
-                        "%$filterConstraint%"),
-                null, null,
-                "$COLUMN_DELIVERY_IN_PROGRESS ASC,"
-                + " $COLUMN_DATE ASC,"
-                + " $COLUMN_VOIP_ID ASC,"
-                + " $COLUMN_DATABASE_ID ASC"))
-    }
-
-    /**
-     * Gets all messages that are pending delivery.
-     */
-    fun getMessagesDeliveryInProgress(): List<Message> = importExportLock.read {
-        return getMessagesCursor(
-            database.query(
-                TABLE_MESSAGE,
-                messageColumns,
-                "$COLUMN_DELIVERY_IN_PROGRESS = 1",
-                null, null, null,
-                " $COLUMN_DATE ASC,"
-                + " $COLUMN_DATABASE_ID ASC"))
+        filterConstraint: String): List<Message> = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            return@read getMessagesCursor(
+                database.query(
+                    TABLE_MESSAGE,
+                    messageColumns,
+                    "$COLUMN_DID=? AND $COLUMN_CONTACT=?"
+                    + " AND $COLUMN_MESSAGE LIKE ?",
+                    arrayOf(conversationId.did, conversationId.contact,
+                            "%$filterConstraint%"),
+                    null, null,
+                    "$COLUMN_DELIVERY_IN_PROGRESS ASC,"
+                    + " $COLUMN_DATE ASC,"
+                    + " $COLUMN_VOIP_ID ASC,"
+                    + " $COLUMN_DATABASE_ID ASC"))
+        }
     }
 
     /**
@@ -344,13 +368,16 @@ class Database private constructor(private val context: Context) {
      * specified DIDs that matches a specified filter constraint. The resulting
      * list is sorted by date, from most recent to least recent.
      */
-    fun getMessagesMostRecentFiltered(
+    suspend fun getMessagesMostRecentFiltered(
         dids: Set<String>,
         filterConstraint: String,
         contactNameCache: MutableMap<String,
-            String>? = null): List<Message> = importExportLock.read {
-        return getMessagesMostRecentFilteredWithoutLock(dids, filterConstraint,
-                                                        contactNameCache)
+            String>? = null): List<Message> = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            return@read getMessagesMostRecentFilteredWithoutLock(dids,
+                                                                 filterConstraint,
+                                                                 contactNameCache)
+        }
     }
 
     /**
@@ -359,87 +386,96 @@ class Database private constructor(private val context: Context) {
      *
      * The resulting list is sorted by date, from least recent to most recent.
      */
-    fun getMessagesUnread(
-        conversationId: ConversationId): List<Message> = importExportLock.read {
-        // Retrieve the most recent outgoing message
-        var date: Long = 0
-        database.query(
-            TABLE_MESSAGE,
-            arrayOf("COALESCE(MAX($COLUMN_DATE), 0) AS $COLUMN_DATE"),
-            "$COLUMN_DID=? AND $COLUMN_CONTACT=? AND $COLUMN_INCOMING=0",
-            arrayOf(conversationId.did, conversationId.contact),
-            null, null, null).use { cursor ->
-            cursor.moveToFirst()
-            if (!cursor.isAfterLast) {
-                date = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE))
+    suspend fun getMessagesUnread(
+        conversationId: ConversationId): List<Message> =
+        withContext(Dispatchers.IO) {
+            importExportLock.read {
+                // Retrieve the most recent outgoing message
+                var date: Long = 0
+                database.query(
+                    TABLE_MESSAGE,
+                    arrayOf("COALESCE(MAX($COLUMN_DATE), 0) AS $COLUMN_DATE"),
+                    "$COLUMN_DID=? AND $COLUMN_CONTACT=? AND $COLUMN_INCOMING=0",
+                    arrayOf(conversationId.did, conversationId.contact),
+                    null, null, null).use { cursor ->
+                    cursor.moveToFirst()
+                    if (!cursor.isAfterLast) {
+                        date = cursor.getLong(
+                            cursor.getColumnIndexOrThrow(COLUMN_DATE))
+                    }
+                }
+
+                // Retrieve all unread messages with a date equal to or after the
+                // most recent outgoing message
+                return@read getMessagesCursor(database.query(
+                    TABLE_MESSAGE,
+                    messageColumns,
+                    "$COLUMN_DID=?"
+                    + " AND $COLUMN_CONTACT=?"
+                    + " AND $COLUMN_INCOMING=1"
+                    + " AND $COLUMN_DATE>=$date"
+                    + " AND $COLUMN_UNREAD=1",
+                    arrayOf(conversationId.did, conversationId.contact),
+                    null, null,
+                    "$COLUMN_DELIVERY_IN_PROGRESS ASC,"
+                    + " $COLUMN_DATE ASC,"
+                    + " $COLUMN_VOIP_ID ASC,"
+                    + " $COLUMN_DATABASE_ID ASC"))
             }
         }
-
-        // Retrieve all unread messages with a date equal to or after the
-        // most recent outgoing message
-        return getMessagesCursor(database.query(
-            TABLE_MESSAGE,
-            messageColumns,
-            "$COLUMN_DID=?"
-            + " AND $COLUMN_CONTACT=?"
-            + " AND $COLUMN_INCOMING=1"
-            + " AND $COLUMN_DATE>=$date"
-            + " AND $COLUMN_UNREAD=1",
-            arrayOf(conversationId.did, conversationId.contact),
-            null, null,
-            "$COLUMN_DELIVERY_IN_PROGRESS ASC,"
-            + " $COLUMN_DATE ASC,"
-            + " $COLUMN_VOIP_ID ASC,"
-            + " $COLUMN_DATABASE_ID ASC"))
-    }
 
     /**
      * Imports the database from the specified file descriptor.
      */
-    fun import(importFd: ParcelFileDescriptor) = importExportLock.write {
-        val dbFile = context.getDatabasePath(DATABASE_NAME)
-        val backupFile = File("${dbFile.absolutePath}.backup")
+    @Suppress("BlockingMethodInNonBlockingContext")
+    suspend fun import(importFd: ParcelFileDescriptor) =
+        withContext(Dispatchers.IO) {
+            importExportLock.write {
+                val dbFile = context.getDatabasePath(DATABASE_NAME)
+                val backupFile = File("${dbFile.absolutePath}.backup")
 
-        try {
-            // Close database to persist it to disk before import
-            database.close()
+                try {
+                    // Close database to persist it to disk before import
+                    database.close()
 
-            // Try importing database, but restore from backup on failure
-            dbFile.copyTo(backupFile, overwrite = true)
-            try {
-                val importStream = FileInputStream(importFd.fileDescriptor)
-                val dbStream = FileOutputStream(dbFile)
+                    // Try importing database, but restore from backup on failure
+                    dbFile.copyTo(backupFile, overwrite = true)
+                    try {
+                        val importStream =
+                            FileInputStream(importFd.fileDescriptor)
+                        val dbStream = FileOutputStream(dbFile)
 
-                dbStream.channel.truncate(0)
+                        dbStream.channel.truncate(0)
 
-                val buffer = ByteArray(1024)
-                do {
-                    val length = importStream.read(buffer)
-                    if (length > 0) {
-                        dbStream.write(buffer, 0, length)
-                    } else {
-                        break
+                        val buffer = ByteArray(1024)
+                        do {
+                            val length = importStream.read(buffer)
+                            if (length > 0) {
+                                dbStream.write(buffer, 0, length)
+                            } else {
+                                break
+                            }
+                        } while (true)
+                        importStream.close()
+                        dbStream.close()
+
+                        // Try refreshing database
+                        database = databaseHelper.writableDatabase
+
+                        replaceIndex(context)
+                    } catch (e: Exception) {
+                        backupFile.copyTo(dbFile, overwrite = true)
+                        throw e
                     }
-                } while (true)
-                importStream.close()
-                dbStream.close()
+                } finally {
+                    // Refresh database
+                    database.close()
+                    database = databaseHelper.writableDatabase
 
-                // Try refreshing database
-                database = databaseHelper.writableDatabase
-
-                replaceIndexOnNewThread(context)
-            } catch (e: Exception) {
-                backupFile.copyTo(dbFile, overwrite = true)
-                throw e
+                    backupFile.delete()
+                }
             }
-        } finally {
-            // Refresh database
-            database.close()
-            database = databaseHelper.writableDatabase
-
-            backupFile.delete()
         }
-    }
 
     /**
      * Inserts a new outgoing message into the database with the specified
@@ -448,45 +484,47 @@ class Database private constructor(private val context: Context) {
      *
      * @return The database ID of the inserted message.
      */
-    fun insertMessageDeliveryInProgress(
+    suspend fun insertMessageDeliveryInProgress(
         conversationId: ConversationId,
-        texts: List<String>): List<Long> = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+        texts: List<String>): List<Long> = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            val databaseIds = texts.map {
-                val values = ContentValues()
-                values.putNull(COLUMN_VOIP_ID)
-                values.put(COLUMN_DATE, Date().time / 1000L)
-                values.put(COLUMN_INCOMING, 0L)
-                values.put(COLUMN_DID, conversationId.did)
-                values.put(COLUMN_CONTACT, conversationId.contact)
-                values.put(COLUMN_MESSAGE, it)
-                values.put(COLUMN_UNREAD, 0L)
-                values.put(COLUMN_DELIVERED, 0L)
-                values.put(COLUMN_DELIVERY_IN_PROGRESS, 1L)
+                val databaseIds = texts.map {
+                    val values = ContentValues()
+                    values.putNull(COLUMN_VOIP_ID)
+                    values.put(COLUMN_DATE, Date().time / 1000L)
+                    values.put(COLUMN_INCOMING, 0L)
+                    values.put(COLUMN_DID, conversationId.did)
+                    values.put(COLUMN_CONTACT, conversationId.contact)
+                    values.put(COLUMN_MESSAGE, it)
+                    values.put(COLUMN_UNREAD, 0L)
+                    values.put(COLUMN_DELIVERED, 0L)
+                    values.put(COLUMN_DELIVERY_IN_PROGRESS, 1L)
 
-                val databaseId = database.insertOrThrow(TABLE_MESSAGE, null,
-                                                        values)
-                if (databaseId == -1L) {
-                    throw Exception("Returned database ID was -1")
+                    val databaseId = database.insertOrThrow(TABLE_MESSAGE, null,
+                                                            values)
+                    if (databaseId == -1L) {
+                        throw Exception("Returned database ID was -1")
+                    }
+                    databaseId
                 }
-                databaseId
-            }
 
-            database.setTransactionSuccessful()
+                database.setTransactionSuccessful()
 
-            for (databaseId in databaseIds) {
-                val message = getMessageDatabaseIdWithoutLock(databaseId)
-                if (message != null) {
-                    addMessageToIndexOnNewThread(context, message)
+                for (databaseId in databaseIds) {
+                    val message = getMessageDatabaseIdWithoutLock(databaseId)
+                    if (message != null) {
+                        addMessageToIndex(context, message)
+                    }
                 }
-            }
-            updateShortcuts()
+                updateShortcuts()
 
-            return databaseIds
-        } finally {
-            database.endTransaction()
+                return@read databaseIds
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 
@@ -498,18 +536,20 @@ class Database private constructor(private val context: Context) {
      * automatically removed. If an empty message is inserted, any existing
      * message is removed from the database.
      */
-    fun insertMessageDraft(conversationId: ConversationId,
-                           text: String) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun insertMessageDraft(conversationId: ConversationId,
+                                   text: String) = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            insertMessageDraftWithoutLock(conversationId, text)
+                insertMessageDraftWithoutLock(conversationId, text)
 
-            database.setTransactionSuccessful()
+                database.setTransactionSuccessful()
 
-            updateShortcuts()
-        } finally {
-            database.endTransaction()
+                updateShortcuts()
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 
@@ -521,253 +561,255 @@ class Database private constructor(private val context: Context) {
      * marked as not deleted.
      * @return The conversation IDs associated with the newly added messages.
      */
-    fun insertMessagesVoipMsApi(
+    suspend fun insertMessagesVoipMsApi(
         incomingMessages: List<SyncService.IncomingMessage>,
         retrieveDeletedMessages: Boolean)
-        : Set<ConversationId> = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+        : Set<ConversationId> = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            val addedConversationIds = mutableSetOf<ConversationId>()
-            val addedDatabaseIds = mutableListOf<Long>()
-            for (incomingMessage in incomingMessages) {
-                if (retrieveDeletedMessages) {
-                    // Retrieve deleted messages is true, so we should
-                    // remove this message from our list of deleted messages
-                    removeDeletedVoipId(setOf(incomingMessage.did),
-                                        incomingMessage.voipId)
-                } else if (isVoipIdDeleted(incomingMessage.did,
-                                           incomingMessage.voipId)) {
-                    // Retrieve deleted messages is not true and this
-                    // message has been previously deleted, so we
-                    // shouldn't add it back
-                    continue
+                val addedConversationIds = mutableSetOf<ConversationId>()
+                val addedDatabaseIds = mutableListOf<Long>()
+                for (incomingMessage in incomingMessages) {
+                    if (retrieveDeletedMessages) {
+                        // Retrieve deleted messages is true, so we should
+                        // remove this message from our list of deleted messages
+                        removeDeletedVoipId(setOf(incomingMessage.did),
+                                            incomingMessage.voipId)
+                    } else if (isVoipIdDeleted(incomingMessage.did,
+                                               incomingMessage.voipId)) {
+                        // Retrieve deleted messages is not true and this
+                        // message has been previously deleted, so we
+                        // shouldn't add it back
+                        continue
+                    }
+
+                    val databaseId = getMessageDatabaseIdVoipId(
+                        incomingMessage.did, incomingMessage.voipId)
+                    if (databaseId != null) {
+                        // Don't add the message if it already exists in our
+                        // database
+                        continue
+                    }
+
+                    // Add new message to database
+                    val values = ContentValues()
+                    values.put(COLUMN_VOIP_ID, incomingMessage.voipId)
+                    values.put(COLUMN_DATE, incomingMessage.date.time / 1000L)
+                    values.put(COLUMN_INCOMING,
+                               if (incomingMessage.isIncoming) 1L else 0L)
+                    values.put(COLUMN_DID, incomingMessage.did)
+                    values.put(COLUMN_CONTACT, incomingMessage.contact)
+                    values.put(COLUMN_MESSAGE, incomingMessage.text)
+                    values.put(COLUMN_UNREAD,
+                               if (incomingMessage.isIncoming) 1L else 0L)
+                    values.put(COLUMN_DELIVERED, 1L)
+                    values.put(COLUMN_DELIVERY_IN_PROGRESS, 0L)
+
+                    val newId = database.insertOrThrow(TABLE_MESSAGE, null,
+                                                       values)
+                    if (newId == -1L) {
+                        throw Exception("Returned database ID was -1")
+                    }
+                    addedConversationIds.add(
+                        ConversationId(
+                            incomingMessage.did,
+                            incomingMessage.contact))
+                    addedDatabaseIds.add(newId)
+
+                    // Mark conversation as unarchived
+                    database.delete(TABLE_ARCHIVED,
+                                    "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                                    arrayOf(incomingMessage.did,
+                                            incomingMessage.contact))
                 }
 
-                val databaseId = getMessageDatabaseIdVoipId(
-                    incomingMessage.did, incomingMessage.voipId)
-                if (databaseId != null) {
-                    // Don't add the message if it already exists in our
-                    // database
-                    continue
+                database.setTransactionSuccessful()
+
+                addedDatabaseIds
+                    .mapNotNull { getMessageDatabaseIdWithoutLock(it) }
+                    .forEach {
+                        addMessageToIndex(context, it)
+                    }
+                if (addedDatabaseIds.isNotEmpty()) {
+                    updateShortcuts()
                 }
 
-                // Add new message to database
-                val values = ContentValues()
-                values.put(COLUMN_VOIP_ID, incomingMessage.voipId)
-                values.put(COLUMN_DATE, incomingMessage.date.time / 1000L)
-                values.put(COLUMN_INCOMING,
-                           if (incomingMessage.isIncoming) 1L else 0L)
-                values.put(COLUMN_DID, incomingMessage.did)
-                values.put(COLUMN_CONTACT, incomingMessage.contact)
-                values.put(COLUMN_MESSAGE, incomingMessage.text)
-                values.put(COLUMN_UNREAD,
-                           if (incomingMessage.isIncoming) 1L else 0L)
-                values.put(COLUMN_DELIVERED, 1L)
-                values.put(COLUMN_DELIVERY_IN_PROGRESS, 0L)
-
-                val newId = database.insertOrThrow(TABLE_MESSAGE, null,
-                                                   values)
-                if (newId == -1L) {
-                    throw Exception("Returned database ID was -1")
-                }
-                addedConversationIds.add(
-                    ConversationId(
-                        incomingMessage.did,
-                        incomingMessage.contact))
-                addedDatabaseIds.add(newId)
-
-                // Mark conversation as unarchived
-                database.delete(TABLE_ARCHIVED,
-                                "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                                arrayOf(incomingMessage.did,
-                                        incomingMessage.contact))
+                return@read addedConversationIds
+            } finally {
+                database.endTransaction()
             }
-
-            database.setTransactionSuccessful()
-
-            addedDatabaseIds
-                .mapNotNull { getMessageDatabaseIdWithoutLock(it) }
-                .forEach {
-                    addMessageToIndexOnNewThread(context, it)
-                }
-            if (addedDatabaseIds.isNotEmpty()) {
-                updateShortcuts()
-            }
-
-            return addedConversationIds
-        } finally {
-            database.endTransaction()
         }
     }
 
     /**
      * Inserts messages originally taken from the database.
      */
-    fun insertMessages(messages: List<Message>) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun insertMessages(messages: List<Message>) =
+        withContext(Dispatchers.IO) {
+            importExportLock.read {
+                try {
+                    database.beginTransactionNonExclusive()
 
-            for (message in messages) {
-                if (message.voipId != null) {
-                    val databaseId = getMessageDatabaseIdVoipId(
-                        message.did, message.voipId)
-                    if (databaseId != null) {
-                        // Don't add the message if it already exists in our
-                        // database
-                        continue
+                    for (message in messages) {
+                        if (message.voipId != null) {
+                            val databaseId = getMessageDatabaseIdVoipId(
+                                message.did, message.voipId)
+                            if (databaseId != null) {
+                                // Don't add the message if it already exists in our
+                                // database
+                                continue
+                            }
+                        }
+
+                        // Add new message to database
+                        val values = ContentValues()
+                        values.put(COLUMN_VOIP_ID, message.voipId)
+                        values.put(COLUMN_DATE, message.date.time / 1000L)
+                        values.put(COLUMN_INCOMING,
+                                   if (message.isIncoming) 1L else 0L)
+                        values.put(COLUMN_DID, message.did)
+                        values.put(COLUMN_CONTACT, message.contact)
+                        values.put(COLUMN_MESSAGE, message.text)
+                        values.put(COLUMN_UNREAD,
+                                   if (message.isUnread) 1L else 0L)
+                        values.put(COLUMN_DELIVERED,
+                                   if (message.isDelivered) 1L else 0L)
+                        values.put(COLUMN_DELIVERY_IN_PROGRESS,
+                                   if (message.isDeliveryInProgress) 1L else 0L)
+
+                        val newId = database.insertOrThrow(TABLE_MESSAGE, null,
+                                                           values)
+                        if (newId == -1L) {
+                            throw Exception("Returned database ID was -1")
+                        }
                     }
-                }
 
-                // Add new message to database
-                val values = ContentValues()
-                values.put(COLUMN_VOIP_ID, message.voipId)
-                values.put(COLUMN_DATE, message.date.time / 1000L)
-                values.put(COLUMN_INCOMING,
-                           if (message.isIncoming) 1L else 0L)
-                values.put(COLUMN_DID, message.did)
-                values.put(COLUMN_CONTACT, message.contact)
-                values.put(COLUMN_MESSAGE, message.text)
-                values.put(COLUMN_UNREAD,
-                           if (message.isUnread) 1L else 0L)
-                values.put(COLUMN_DELIVERED,
-                           if (message.isDelivered) 1L else 0L)
-                values.put(COLUMN_DELIVERY_IN_PROGRESS,
-                           if (message.isDeliveryInProgress) 1L else 0L)
+                    database.setTransactionSuccessful()
 
-                val newId = database.insertOrThrow(TABLE_MESSAGE, null,
-                                                   values)
-                if (newId == -1L) {
-                    throw Exception("Returned database ID was -1")
+                    updateShortcuts()
+                } finally {
+                    database.endTransaction()
                 }
             }
-
-            database.setTransactionSuccessful()
-
-            updateShortcuts()
-        } finally {
-            database.endTransaction()
         }
-    }
 
     /**
      * Returns whether the specified conversation is archived.
      */
-    fun isConversationArchived(
-        conversationId: ConversationId): Boolean = importExportLock.read {
-        return database.query(TABLE_ARCHIVED,
-                              archivedColumns,
-                              "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                              arrayOf(conversationId.did,
-                                      conversationId.contact),
-                              null, null, null).use { cursor ->
-            cursor.moveToFirst()
-            !cursor.isAfterLast
-        }
-    }
-
-    /**
-     * Returns whether the specified conversation has any messages or drafts.
-     */
-    fun isConversationEmpty(
-        conversationId: ConversationId): Boolean = importExportLock.read {
-        return database.query(TABLE_MESSAGE,
-                              messageColumns,
-                              "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                              arrayOf(conversationId.did,
-                                      conversationId.contact),
-                              null, null, null).use { cursor ->
-            cursor.moveToFirst()
-            !cursor.isAfterLast || getMessageDraftWithoutLock(
-                conversationId) != null
+    suspend fun isConversationArchived(
+        conversationId: ConversationId): Boolean = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            return@read database.query(TABLE_ARCHIVED,
+                                       archivedColumns,
+                                       "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                                       arrayOf(conversationId.did,
+                                               conversationId.contact),
+                                       null, null, null).use { cursor ->
+                cursor.moveToFirst()
+                !cursor.isAfterLast
+            }
         }
     }
 
     /**
      * Marks the specified conversation as archived.
      */
-    fun markConversationArchived(
-        conversationId: ConversationId) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun markConversationArchived(
+        conversationId: ConversationId) = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            val databaseId = getArchivedDatabaseIdConversation(conversationId)
+                val databaseId =
+                    getArchivedDatabaseIdConversation(conversationId)
 
-            val values = ContentValues()
-            if (databaseId != null) {
-                values.put(COLUMN_DATABASE_ID, databaseId)
+                val values = ContentValues()
+                if (databaseId != null) {
+                    values.put(COLUMN_DATABASE_ID, databaseId)
+                }
+                values.put(COLUMN_DID, conversationId.did)
+                values.put(COLUMN_CONTACT, conversationId.contact)
+                values.put(COLUMN_ARCHIVED, "1")
+
+                database.replaceOrThrow(TABLE_ARCHIVED, null, values)
+
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
             }
-            values.put(COLUMN_DID, conversationId.did)
-            values.put(COLUMN_CONTACT, conversationId.contact)
-            values.put(COLUMN_ARCHIVED, "1")
-
-            database.replaceOrThrow(TABLE_ARCHIVED, null, values)
-
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
     /**
      * Marks the specified conversation as read.
      **/
-    fun markConversationRead(
-        conversationId: ConversationId) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun markConversationRead(
+        conversationId: ConversationId) = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            val contentValues = ContentValues()
-            contentValues.put(COLUMN_UNREAD, "0")
+                val contentValues = ContentValues()
+                contentValues.put(COLUMN_UNREAD, "0")
 
-            database.update(TABLE_MESSAGE,
-                            contentValues,
-                            "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                            arrayOf(conversationId.did, conversationId.contact))
+                database.update(TABLE_MESSAGE,
+                                contentValues,
+                                "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                                arrayOf(conversationId.did,
+                                        conversationId.contact))
 
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 
     /**
      * Marks the specified conversation as unarchived.
      */
-    fun markConversationUnarchived(
-        conversationId: ConversationId) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun markConversationUnarchived(
+        conversationId: ConversationId) = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            database.delete(TABLE_ARCHIVED,
-                            "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                            arrayOf(conversationId.did, conversationId.contact))
+                database.delete(TABLE_ARCHIVED,
+                                "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                                arrayOf(conversationId.did,
+                                        conversationId.contact))
 
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 
     /**
      * Marks the specified conversation as unread.
      */
-    fun markConversationUnread(
-        conversationId: ConversationId) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun markConversationUnread(
+        conversationId: ConversationId) = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            val contentValues = ContentValues()
-            contentValues.put(COLUMN_UNREAD, "1")
+                val contentValues = ContentValues()
+                contentValues.put(COLUMN_UNREAD, "1")
 
-            database.update(TABLE_MESSAGE,
-                            contentValues,
-                            "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
-                            arrayOf(conversationId.did, conversationId.contact))
+                database.update(TABLE_MESSAGE,
+                                contentValues,
+                                "$COLUMN_DID=? AND $COLUMN_CONTACT=?",
+                                arrayOf(conversationId.did,
+                                        conversationId.contact))
 
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 
@@ -775,23 +817,25 @@ class Database private constructor(private val context: Context) {
      * Marks the message with the specified database ID as in the process of
      * being delivered.
      */
-    fun markMessageDeliveryInProgress(
-        databaseId: Long) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun markMessageDeliveryInProgress(
+        databaseId: Long) = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            val contentValues = ContentValues()
-            contentValues.put(COLUMN_DELIVERED, "0")
-            contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "1")
+                val contentValues = ContentValues()
+                contentValues.put(COLUMN_DELIVERED, "0")
+                contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "1")
 
-            database.update(TABLE_MESSAGE,
-                            contentValues,
-                            "$COLUMN_DATABASE_ID=?",
-                            arrayOf(databaseId.toString()))
+                database.update(TABLE_MESSAGE,
+                                contentValues,
+                                "$COLUMN_DATABASE_ID=?",
+                                arrayOf(databaseId.toString()))
 
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 
@@ -799,55 +843,60 @@ class Database private constructor(private val context: Context) {
      * Marks the message with the specified database ID as having failed to
      * be sent.
      */
-    fun markMessageNotSent(databaseId: Long) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun markMessageNotSent(databaseId: Long) =
+        withContext(Dispatchers.IO) {
+            importExportLock.read {
+                try {
+                    database.beginTransactionNonExclusive()
 
-            val contentValues = ContentValues()
-            contentValues.put(COLUMN_DELIVERED, "0")
-            contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "0")
+                    val contentValues = ContentValues()
+                    contentValues.put(COLUMN_DELIVERED, "0")
+                    contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "0")
 
-            database.update(TABLE_MESSAGE,
-                            contentValues,
-                            "$COLUMN_DATABASE_ID=?",
-                            arrayOf(databaseId.toString()))
+                    database.update(TABLE_MESSAGE,
+                                    contentValues,
+                                    "$COLUMN_DATABASE_ID=?",
+                                    arrayOf(databaseId.toString()))
 
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
+                    database.setTransactionSuccessful()
+                } finally {
+                    database.endTransaction()
+                }
+            }
         }
-    }
 
     /**
      * Marks the message with the specified database ID as having been sent.
      * In addition, adds the specified VoIP.ms ID to the message.
      */
-    fun markMessageSent(databaseId: Long,
-                        voipId: Long) = importExportLock.read {
-        try {
-            database.beginTransactionNonExclusive()
+    suspend fun markMessageSent(databaseId: Long,
+                                voipId: Long) = withContext(Dispatchers.IO) {
+        importExportLock.read {
+            try {
+                database.beginTransactionNonExclusive()
 
-            val contentValues = ContentValues()
-            contentValues.put(COLUMN_VOIP_ID, voipId)
-            contentValues.put(COLUMN_DELIVERED, "1")
-            contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "0")
-            contentValues.put(COLUMN_DATE, Date().time / 1000L)
+                val contentValues = ContentValues()
+                contentValues.put(COLUMN_VOIP_ID, voipId)
+                contentValues.put(COLUMN_DELIVERED, "1")
+                contentValues.put(COLUMN_DELIVERY_IN_PROGRESS, "0")
+                contentValues.put(COLUMN_DATE, Date().time / 1000L)
 
-            database.update(TABLE_MESSAGE,
-                            contentValues,
-                            "$COLUMN_DATABASE_ID=?",
-                            arrayOf(databaseId.toString()))
+                database.update(TABLE_MESSAGE,
+                                contentValues,
+                                "$COLUMN_DATABASE_ID=?",
+                                arrayOf(databaseId.toString()))
 
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 
     /**
      * Update the app shortcuts.
      */
-    fun updateShortcuts() {
+    suspend fun updateShortcuts() = withContext(Dispatchers.IO) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             // There is one static shortcut, which reduces the number of
             // dynamic shortcut slots available.

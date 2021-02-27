@@ -24,7 +24,7 @@ import net.kourlas.voipms_sms.network.NetworkManager.Companion.getInstance
 import net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment
 import net.kourlas.voipms_sms.preferences.getAppTheme
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.sms.Database.Companion.getInstance
+import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.util.*
 
@@ -92,7 +92,7 @@ class CustomApplication : Application() {
         }
 
         // Open database
-        getInstance(applicationContext)
+        Database.getInstance(applicationContext)
 
         // Subscribe to topics for current DIDs
         subscribeToDidTopics(applicationContext)

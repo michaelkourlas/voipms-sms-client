@@ -23,6 +23,9 @@ import androidx.core.app.JobIntentService
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
@@ -89,7 +92,9 @@ class RetrieveDidsService : JobIntentService() {
                 setDids(applicationContext,
                         getDids(applicationContext).plus(dids))
                 enablePushNotifications(applicationContext)
-                replaceIndexOnNewThread(applicationContext)
+                GlobalScope.launch(Dispatchers.Default) {
+                    replaceIndex(applicationContext)
+                }
             }
         } catch (e: Exception) {
             logException(e)

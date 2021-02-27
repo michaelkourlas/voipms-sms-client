@@ -32,6 +32,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
@@ -105,6 +106,7 @@ class SignInActivity : AppCompatActivity() {
                 finish()
             }
         }
+    private var hasDids: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -149,6 +151,10 @@ class SignInActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+
+        hasDids = runBlocking {
+            Database.getInstance(applicationContext).getDids().isNotEmpty()
+        }
 
         setupToolbar()
         setupTextView()
@@ -241,7 +247,7 @@ class SignInActivity : AppCompatActivity() {
      */
     private fun blockFinish(): Boolean {
         return !didsConfigured(applicationContext)
-               && Database.getInstance(applicationContext).getDids().isEmpty()
+               && !hasDids
                && !accountConfigured(applicationContext)
                && firstRun(applicationContext)
     }

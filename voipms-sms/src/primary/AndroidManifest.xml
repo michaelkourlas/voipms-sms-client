@@ -45,8 +45,5 @@
         <service
             android:name=".notifications.services.NotificationsRegistrationService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name=".sms.services.AppIndexingService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 </manifest>

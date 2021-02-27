@@ -40,9 +40,11 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.moshi.JsonClass
+import kotlinx.coroutines.*
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
@@ -205,8 +207,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
             val contactDid = uri.getQueryParameter("contact")
             if (id != null) {
                 // Firebase message index URL
-                val message = Database.getInstance(this)
-                    .getMessageDatabaseId(id.toLong())
+                val message = runBlocking {
+                    Database.getInstance(applicationContext)
+                        .getMessageDatabaseId(id.toLong())
+                }
                 if (message == null) {
                     abortActivity(
                         this,
@@ -453,9 +457,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 maxLength - bytesCount, msgsCount)
         }
 
-        runOnNewThread {
-            Database.getInstance(this).insertMessageDraft(conversationId,
-                                                          newText)
+        lifecycleScope.launch(Dispatchers.IO) {
+            Database.getInstance(applicationContext)
+                .insertMessageDraft(conversationId,
+                                    newText)
         }
     }
 
@@ -496,7 +501,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             messageEditText.setText("")
 
             // Send the message using the SendMessageService.
-            runOnNewThread {
+            lifecycleScope.launch(Dispatchers.IO) {
                 val ids = Database.getInstance(
                     applicationContext)
                     .insertMessageDeliveryInProgress(
@@ -507,7 +512,9 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     SendMessageWorker.sendMessage(applicationContext, id)
                 }
 
-                runOnUiThread {
+                ensureActive()
+
+                lifecycleScope.launch(Dispatchers.Default) {
                     // Refresh adapter to show message being sent.
                     adapter.refresh()
 
@@ -533,10 +540,14 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // Load draft message
         val messageText = findViewById<EditText>(R.id.message_edit_text)
-        runOnNewThread {
-            val draftMessage = Database.getInstance(this).getMessageDraft(
-                conversationId)
-            runOnUiThread {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val draftMessage =
+                Database.getInstance(applicationContext).getMessageDraft(
+                    conversationId)
+
+            ensureActive()
+
+            withContext(Dispatchers.Main) {
                 if (draftMessage != null) {
                     messageText.setText(draftMessage.text)
                     messageText.requestFocus()
@@ -560,7 +571,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 .clearNotificationState(
                     conversationId)
         }
-        runOnNewThread {
+        lifecycleScope.launch(Dispatchers.IO) {
             Database.getInstance(applicationContext).markConversationRead(
                 conversationId)
         }
@@ -711,16 +722,18 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // Override standard "up" behaviour because this activity
         // has multiple parents
-        runOnNewThread {
-            val clazz = if (Database.getInstance(this)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val clazz = if (Database.getInstance(applicationContext)
                     .isConversationArchived(conversationId)) {
                 ConversationsArchivedActivity::class.java
             } else {
                 ConversationsActivity::class.java
             }
 
-            runOnUiThread {
-                val intent = Intent(this, clazz)
+            ensureActive()
+
+            withContext(Dispatchers.Main) {
+                val intent = Intent(applicationContext, clazz)
                 // Simulate normal behaviour of up button with these particular
                 // flags
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
@@ -789,10 +802,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
     private fun onBubbleButtonClick(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             moveTaskToBack(true)
-            Notifications.getInstance(applicationContext)
-                .showNotifications(setOf(conversationId),
-                                   bubbleOnly = true,
-                                   autoLaunchBubble = true)
+            lifecycleScope.launch {
+                Notifications.getInstance(applicationContext)
+                    .showNotifications(setOf(conversationId),
+                                       bubbleOnly = true,
+                                       autoLaunchBubble = true)
+            }
         }
         return true
     }
@@ -858,18 +873,16 @@ open class ConversationActivity(val bubble: Boolean = false) :
      * Handles the resend button.
      */
     private fun onResendButtonClick(mode: ActionMode): Boolean {
-        // Resends all checked items
-
+        // Resend all checked items.
         val databaseIds = adapter.messageItems.filter { it.checked }
             .map { it.message.databaseId }
-        runOnNewThread {
+        lifecycleScope.launch(Dispatchers.IO) {
             for (databaseId in databaseIds) {
-                Database.getInstance(this)
+                Database.getInstance(applicationContext)
                     .markMessageDeliveryInProgress(databaseId)
                 SendMessageWorker.sendMessage(applicationContext, databaseId)
             }
         }
-
         mode.finish()
         return true
     }
@@ -980,7 +993,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             .filter { it.checked }
             .map { it.message }
 
-        runOnNewThread {
+        lifecycleScope.launch(Dispatchers.IO) {
             // Delete each message.
             for (message in messages) {
                 Database.getInstance(applicationContext)
@@ -988,12 +1001,14 @@ open class ConversationActivity(val bubble: Boolean = false) :
                                    message.voipId)
             }
 
-            runOnUiThread {
+            ensureActive()
+
+            withContext(Dispatchers.Main) {
                 adapter.refresh()
                 mode.finish()
 
                 showSnackbar(
-                    this,
+                    this@ConversationActivity,
                     R.id.coordinator_layout,
                     if (messages.size > 1)
                         getString(
@@ -1003,12 +1018,14 @@ open class ConversationActivity(val bubble: Boolean = false) :
                         getString(R.string.conversation_message_deleted),
                     getString(R.string.undo),
                     {
-                        runOnNewThread {
+                        lifecycleScope.launch(Dispatchers.IO) {
                             // Restore the messages.
                             Database.getInstance(applicationContext)
                                 .insertMessages(messages)
 
-                            runOnUiThread {
+                            ensureActive()
+
+                            withContext(Dispatchers.Main) {
                                 adapter.refresh()
                             }
                         }
@@ -1031,8 +1048,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 val messageItem = adapter[position]
                 val message = messageItem.message
                 if (!message.isDelivered && !message.isDeliveryInProgress) {
-                    runOnNewThread {
-                        Database.getInstance(this)
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        Database.getInstance(applicationContext)
                             .markMessageDeliveryInProgress(
                                 messageItem.message.databaseId)
                         SendMessageWorker.sendMessage(

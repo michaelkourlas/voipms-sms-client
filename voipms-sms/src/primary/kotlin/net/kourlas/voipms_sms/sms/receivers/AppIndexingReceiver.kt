@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018-2019 Michael Kourlas
+ * Copyright (C) 2018-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import net.kourlas.voipms_sms.sms.services.AppIndexingService
+import net.kourlas.voipms_sms.sms.workers.AppIndexingWorker
 import net.kourlas.voipms_sms.utils.logException
 
 /**
@@ -30,10 +30,7 @@ import net.kourlas.voipms_sms.utils.logException
 class AppIndexingReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
-            if (context == null || intent == null) {
-                return
-            }
-            AppIndexingService.startService(context)
+            AppIndexingWorker.performIndexing(context ?: return)
         } catch (e: Exception) {
             logException(e)
         }

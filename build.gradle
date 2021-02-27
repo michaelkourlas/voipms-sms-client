@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.4.30'
+    ext.kotlin_version = '1.4.31'
     repositories {
         google()
         jcenter()
@@ -10,7 +10,7 @@ buildscript {
 
         // Remove from F-Droid builds
         classpath 'com.google.gms:google-services:4.3.5'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.0'
     }
 }
 

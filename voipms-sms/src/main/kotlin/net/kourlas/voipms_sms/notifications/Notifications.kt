@@ -194,7 +194,7 @@ class Notifications private constructor(private val context: Context) {
     /**
      * Delete notification channels for conversations that are no longer active.
      */
-    fun deleteNotificationChannelsAndGroups() {
+    suspend fun deleteNotificationChannelsAndGroups() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Remove any channel for which there is no conversation with
             // notifications enabled in the database
@@ -326,7 +326,7 @@ class Notifications private constructor(private val context: Context) {
     /**
      * Show notifications for new messages for the specified conversations.
      */
-    fun showNotifications(
+    suspend fun showNotifications(
         conversationIds: Set<ConversationId>,
         bubbleOnly: Boolean = false,
         autoLaunchBubble: Boolean = false,
@@ -339,31 +339,29 @@ class Notifications private constructor(private val context: Context) {
             return
         }
 
-        runOnNewThread {
-            for (conversationId in conversationIds) {
-                // Do not show notifications when notifications are disabled.
-                if (!getNotificationsEnabled(conversationId)) {
-                    continue
-                }
-
-                // Do not show notifications when the conversation view is
-                // open, unless this is for a bubble only.
-                if (CustomApplication.getApplication()
-                        .conversationActivityVisible(conversationId)
-                    && !bubbleOnly) {
-                    continue
-                }
-
-                showNotification(
-                    conversationId,
-                    if (bubbleOnly || inlineReplyMessages.isNotEmpty())
-                        emptyList()
-                    else Database.getInstance(context)
-                        .getMessagesUnread(conversationId),
-                    inlineReplyMessages,
-                    bubbleOnly,
-                    autoLaunchBubble)
+        for (conversationId in conversationIds) {
+            // Do not show notifications when notifications are disabled.
+            if (!getNotificationsEnabled(conversationId)) {
+                continue
             }
+
+            // Do not show notifications when the conversation view is
+            // open, unless this is for a bubble only.
+            if (CustomApplication.getApplication()
+                    .conversationActivityVisible(conversationId)
+                && !bubbleOnly) {
+                continue
+            }
+
+            showNotification(
+                conversationId,
+                if (bubbleOnly || inlineReplyMessages.isNotEmpty())
+                    emptyList()
+                else Database.getInstance(context)
+                    .getMessagesUnread(conversationId),
+                inlineReplyMessages,
+                bubbleOnly,
+                autoLaunchBubble)
         }
     }
 

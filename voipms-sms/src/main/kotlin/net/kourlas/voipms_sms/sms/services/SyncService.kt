@@ -30,6 +30,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -134,7 +135,9 @@ class SyncService : Service() {
         }
 
         // Perform synchronization
-        handleSync(intent)
+        runBlocking {
+            handleSync(intent)
+        }
 
         // Send a broadcast indicating that the database has been
         // synchronized (or an attempt has been made to synchronize it)
@@ -158,7 +161,7 @@ class SyncService : Service() {
     /**
      * Perform synchronization.
      */
-    private fun handleSync(intent: Intent?) {
+    private suspend fun handleSync(intent: Intent?) {
         try {
             // Terminate quietly if intent does not exist or does not contain
             // the sync action
@@ -312,8 +315,9 @@ class SyncService : Service() {
      * @param retrieveDeletedMessages If true, messages are retrieved from
      * VoIP.ms even after being deleted locally.
      */
-    private fun processRequests(retrievalRequests: List<RetrievalRequest>,
-                                retrieveDeletedMessages: Boolean) {
+    private suspend fun processRequests(
+        retrievalRequests: List<RetrievalRequest>,
+        retrieveDeletedMessages: Boolean) {
         val incomingMessages = mutableListOf<IncomingMessage>()
         for (i in retrievalRequests.indices) {
             if (requestCancellation.get()) {

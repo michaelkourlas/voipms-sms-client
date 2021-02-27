@@ -33,6 +33,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
@@ -314,24 +315,26 @@ class ConversationsRecyclerViewAdapter<T>(
             @Suppress("ConstantConditionIf")
             if (!BuildConfig.IS_DEMO) {
                 val activeDid = getActiveDid(activity)
-                resultsObject.messages.addAll(
-                    Database.getInstance(activity)
-                        .getMessagesMostRecentFiltered(
-                            if (activeDid == "")
-                                getDids(activity,
-                                        onlyShowInConversationsView = true)
-                            else setOf(activeDid),
-                            constraint.toString()
-                                .trim { it <= ' ' }
-                                .toLowerCase(Locale.getDefault())).filter {
-                            val archived = Database.getInstance(activity)
-                                .isConversationArchived(it.conversationId)
-                            if (activity is ConversationsArchivedActivity) {
-                                archived
-                            } else {
-                                !archived
-                            }
-                        })
+                runBlocking {
+                    resultsObject.messages.addAll(
+                        Database.getInstance(activity)
+                            .getMessagesMostRecentFiltered(
+                                if (activeDid == "")
+                                    getDids(activity,
+                                            onlyShowInConversationsView = true)
+                                else setOf(activeDid),
+                                constraint.toString()
+                                    .trim { it <= ' ' }
+                                    .toLowerCase(Locale.getDefault())).filter {
+                                val archived = Database.getInstance(activity)
+                                    .isConversationArchived(it.conversationId)
+                                if (activity is ConversationsArchivedActivity) {
+                                    archived
+                                } else {
+                                    !archived
+                                }
+                            })
+                }
             } else {
                 resultsObject.messages.addAll(
                     getConversationsDemoMessages())
