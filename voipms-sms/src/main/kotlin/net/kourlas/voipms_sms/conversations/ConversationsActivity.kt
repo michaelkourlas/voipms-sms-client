@@ -359,6 +359,12 @@ open class ConversationsActivity(val archived: Boolean = false) :
 
         // Update navigation view
         updateNavigationView()
+
+        // Turn off the refreshing indicator in the SwipeRefreshLayout in
+        // case we missed a "sync complete" notification
+        val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
+            R.id.swipe_refresh_layout)
+        swipeRefreshLayout.isRefreshing = false
     }
 
     /**
