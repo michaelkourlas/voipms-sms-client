@@ -43,8 +43,7 @@ class FcmListenerService : FirebaseMessagingService() {
             // database and shows notifications for any new messages
             if (Notifications.getInstance(
                     application).getNotificationsEnabled()) {
-                SyncWorker.performSynchronization(applicationContext,
-                                                  forceRecent = true)
+                SyncWorker.performPartialSynchronization(applicationContext)
             }
         } else {
             // Otherwise, unsubscribe from this topic

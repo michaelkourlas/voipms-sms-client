@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.kourlas.voipms_sms
 
 import android.app.Application
@@ -23,8 +24,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import net.kourlas.voipms_sms.network.NetworkManager.Companion.getInstance
 import net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment
 import net.kourlas.voipms_sms.preferences.getAppTheme
+import net.kourlas.voipms_sms.preferences.getSyncInterval
+import net.kourlas.voipms_sms.preferences.setRawSyncInterval
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.util.*
 
@@ -73,6 +77,12 @@ class CustomApplication : Application() {
         // Create static reference to self.
         self = this
 
+        // Limit synchronization interval to 15 minutes. Previous versions
+        // supported a shorter interval.
+        if (getSyncInterval(applicationContext) < (15.0 / (24 * 60)) ) {
+            setRawSyncInterval(applicationContext, "0.01041666666")
+        }
+
         // Update theme
         when (getAppTheme(applicationContext)) {
             AppearancePreferencesFragment.SYSTEM_DEFAULT -> AppCompatDelegate.setDefaultNightMode(
@@ -96,6 +106,10 @@ class CustomApplication : Application() {
 
         // Subscribe to topics for current DIDs
         subscribeToDidTopics(applicationContext)
+
+        // Schedule a database synchronization, if required.
+        SyncWorker.performFullSynchronization(applicationContext,
+                                              scheduleOnly = true)
     }
 
     companion object {

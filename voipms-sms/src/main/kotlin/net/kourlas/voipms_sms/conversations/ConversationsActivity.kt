@@ -239,7 +239,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
             R.id.swipe_refresh_layout)
         swipeRefreshLayout.setOnRefreshListener {
             adapter.refresh()
-            SyncWorker.performSynchronization(this, forceRecent = false)
+            SyncWorker.performFullSynchronization(applicationContext)
         }
         swipeRefreshLayout.setColorSchemeResources(R.color.swipe_refresh_icon)
     }
@@ -329,10 +329,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
         performAccountDidCheck()
         val firstSyncRequired = performInitialSetup()
 
-        // Refresh and perform limited synchronization\
+        // Refresh and perform limited synchronization
         if (!firstSyncRequired) {
             adapter.refresh()
-            SyncWorker.performSynchronization(this, forceRecent = true)
+            SyncWorker.performPartialSynchronization(applicationContext)
         }
 
         // Refresh on resume just in case the contacts permission was newly
@@ -399,7 +399,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
             val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
                 R.id.swipe_refresh_layout)
             swipeRefreshLayout.isRefreshing = true
-            SyncWorker.performSynchronization(this, forceRecent = false)
+            SyncWorker.performFullSynchronization(applicationContext)
 
             val emptyTextView = findViewById<TextView>(
                 R.id.empty_text)

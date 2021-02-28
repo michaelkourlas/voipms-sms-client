@@ -23,16 +23,19 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.sms.receivers.SyncIntervalReceiver
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.preferences
 
 class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     // Preference change handlers
     private val syncIntervalPreferenceChangeListener =
-        Preference.OnPreferenceChangeListener { _, _ ->
+        Preference.OnPreferenceChangeListener { _, newValue ->
             activity?.let {
-                SyncIntervalReceiver.setInterval(it)
+                SyncWorker.performFullSynchronization(
+                    it,
+                    customPeriod = (newValue as String).toDouble(),
+                    scheduleOnly = true)
             }
             true
         }

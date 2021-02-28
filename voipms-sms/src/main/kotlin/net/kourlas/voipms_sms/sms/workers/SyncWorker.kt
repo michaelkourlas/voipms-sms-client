@@ -34,7 +34,6 @@ import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Database
-import net.kourlas.voipms_sms.sms.receivers.SyncIntervalReceiver
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.toBoolean
@@ -43,6 +42,7 @@ import java.io.IOException
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
 /**
@@ -134,14 +134,6 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             val retrievalRequests = createRetrievalRequests(
                 retrieveOnlyRecentMessages)
             processRequests(retrievalRequests, retrieveDeletedMessages)
-
-            // If this was not an intentionally limited database
-            // synchronization, set a new alarm for the next sync
-            if (!forceRecent) {
-                setLastCompleteSyncTime(applicationContext,
-                                        System.currentTimeMillis())
-                SyncIntervalReceiver.setInterval(applicationContext)
-            }
         } catch (e: CancellationException) {
             // We need to propagate the exception from processRequests
             throw e
@@ -414,25 +406,49 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         /**
          * Synchronize the database with VoIP.ms.
          *
-         * @param forceRecent If true, retrieves only the most recent messages
-         * regardless of the app configuration.
+         * @param customPeriod A custom period for synchronization, in
+         * fractions of a day. If not provided, the system configuration will
+         * be used.
+         * @param scheduleOnly Do not perform synchronization immediately.
          */
-        fun performSynchronization(context: Context,
-                                   forceRecent: Boolean = false) {
-            val work = OneTimeWorkRequestBuilder<SyncWorker>()
-                .setInputData(
-                    workDataOf(
-                        context.getString(
-                            R.string.sync_force_recent) to forceRecent))
-                .build()
-            WorkManager.getInstance(context)
-                .enqueueUniqueWork(
+        fun performFullSynchronization(context: Context,
+                                       customPeriod: Double? = null,
+                                       scheduleOnly: Boolean = false) {
+            val delayInterval = (
+                (customPeriod ?: getSyncInterval(context))
+                * (24 * 60 * 60 * 1000)).toLong()
+            if (delayInterval != 0L) {
+                val workRequest = PeriodicWorkRequestBuilder<SyncWorker>(
+                    delayInterval,
+                    TimeUnit.MILLISECONDS)
+                if (scheduleOnly) {
+                    workRequest.setInitialDelay(delayInterval,
+                                                TimeUnit.MILLISECONDS)
+                }
+                val work = workRequest.build()
+                WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                     context.getString(R.string.sync_work_id),
-                    if (forceRecent)
-                        ExistingWorkPolicy.KEEP
-                    else
-                        ExistingWorkPolicy.REPLACE,
+                    ExistingPeriodicWorkPolicy.REPLACE,
                     work)
+            } else {
+                val work = OneTimeWorkRequestBuilder<SyncWorker>().build()
+                WorkManager.getInstance(context)
+                    .enqueueUniqueWork(context.getString(R.string.sync_work_id),
+                                       ExistingWorkPolicy.REPLACE, work)
+            }
+        }
+
+        /**
+         * Check VoIP.ms for new messages.
+         */
+        fun performPartialSynchronization(context: Context) {
+            val work = OneTimeWorkRequestBuilder<SyncWorker>().setInputData(
+                workDataOf(
+                    context.getString(R.string.sync_force_recent) to true))
+                .build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                context.getString(R.string.sync_partial_work_id),
+                ExistingWorkPolicy.KEEP, work)
         }
     }
 }

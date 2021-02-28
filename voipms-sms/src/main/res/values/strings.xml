@@ -122,7 +122,6 @@
     <string name="preferences_database_fail_open_document">No handler available to select database import location</string>
 
     <!-- Uncategorized -->
-    <string name="preferences_sync_last_complete_time_key">sync_last_complete_time</string>
     <string name="preferences_perm_denied_external_storage">External storage permission required to access ringtones</string>
     <string name="preferences_setup_completed_for_version_key" translatable="false">setup_completed_for_version</string>
     <string name="preferences_setup_completed_for_version_default_value" translatable="false">0</string>
@@ -279,6 +278,7 @@
 
     <!-- SyncWorker -->
     <string name="sync_work_id" translatable="false">net.kourlas.voipms_sms.SYNC_WORK_ID</string>
+    <string name="sync_partial_work_id" translatable="false">net.kourlas.voipms_sms.SYNC_PARTIAL_WORK_ID</string>
     <string name="sync_force_recent" translatable="false">net.kourlas.voipms_sms.SYNC_FORCE_RECENT</string>
     <string name="sync_error_network">Sync failed: network unavailable</string>
     <string name="sync_error_api_request">Sync failed: VoIP.ms unavailable</string>

@@ -20,6 +20,8 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import net.kourlas.voipms_sms.preferences.getSyncInterval
+import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.logException
 
 /**
@@ -36,7 +38,7 @@ class SyncBootReceiver : BroadcastReceiver() {
                 && intent.action != "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED") {
                 throw Exception("Unrecognized action " + intent.action)
             }
-            SyncIntervalReceiver.setInterval(context)
+            SyncWorker.performFullSynchronization(context, scheduleOnly = true)
         } catch (e: Exception) {
             logException(e)
         }

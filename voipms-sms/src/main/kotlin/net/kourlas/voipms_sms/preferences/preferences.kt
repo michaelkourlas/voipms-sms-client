@@ -111,12 +111,6 @@ fun getFirstSyncAfterSignIn(context: Context): Boolean =
         context.getString(R.string.preferences_first_sync_after_sign_in_key),
         false)
 
-fun getLastCompleteSyncTime(context: Context): Long =
-    getLongPreference(context,
-                      context.getString(
-                          R.string.preferences_sync_last_complete_time_key),
-                      0)
-
 fun getMessageTextBoxMaximumSize(context: Context): Int =
     getStringPreference(
         context,
@@ -354,12 +348,6 @@ fun setFirstSyncAfterSignIn(context: Context, firstSyncAfterSignIn: Boolean) {
         firstSyncAfterSignIn)
 }
 
-fun setLastCompleteSyncTime(context: Context,
-                            lastCompleteSyncTime: Long) =
-    setLongPreference(
-        context, context.getString(
-        R.string.preferences_sync_last_complete_time_key), lastCompleteSyncTime)
-
 fun setSetupCompletedForVersion(context: Context, version: Long) {
     if (getLongPreference(context,
                           context.getString(
@@ -383,6 +371,11 @@ fun setStartDate(context: Context, date: Date) {
         context,
         context.getString(R.string.preferences_sync_start_date_key),
         SimpleDateFormat("MM/dd/yyyy", Locale.US).format(date))
+}
+
+fun setRawSyncInterval(context: Context, string: String) {
+    setStringPreference(context, context.getString(
+        R.string.preferences_sync_interval_key), string)
 }
 
 @Suppress("SameParameterValue")
