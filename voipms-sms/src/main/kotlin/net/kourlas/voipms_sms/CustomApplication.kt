@@ -79,7 +79,8 @@ class CustomApplication : Application() {
 
         // Limit synchronization interval to 15 minutes. Previous versions
         // supported a shorter interval.
-        if (getSyncInterval(applicationContext) < (15.0 / (24 * 60)) ) {
+        if (getSyncInterval(applicationContext) != 0.0
+            && getSyncInterval(applicationContext) < (15.0 / (24 * 60))) {
             setRawSyncInterval(applicationContext, "0.01041666666")
         }
 
