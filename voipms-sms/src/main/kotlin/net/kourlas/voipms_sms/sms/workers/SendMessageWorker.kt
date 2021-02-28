@@ -24,7 +24,6 @@ import android.os.Build
 import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -175,8 +174,6 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                     setOf(ConversationId(inlineReplyDid, inlineReplyContact)),
                     inlineReplyMessages = listOf(message))
             }
-        } catch (e: CancellationException) {
-            throw e
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(

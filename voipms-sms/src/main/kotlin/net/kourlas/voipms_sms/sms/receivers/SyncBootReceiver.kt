@@ -30,11 +30,11 @@ class SyncBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             if (context == null || intent == null) {
-                return
+                throw Exception("No context or intent provided")
             }
             if (intent.action != "android.intent.action.BOOT_COMPLETED"
                 && intent.action != "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED") {
-                return
+                throw Exception("Unrecognized action " + intent.action)
             }
             SyncIntervalReceiver.setInterval(context)
         } catch (e: Exception) {

@@ -25,7 +25,6 @@ import androidx.work.*
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getDids
@@ -114,8 +113,6 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 enablePushNotifications(applicationContext)
                 replaceIndex(applicationContext)
             }
-        } catch (e: CancellationException) {
-            throw e
         } catch (e: Exception) {
             logException(e)
         }
@@ -145,8 +142,6 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 mapOf("api_username" to getEmail(applicationContext),
                       "api_password" to getPassword(applicationContext),
                       "method" to "getDIDsInfo"))
-        } catch (e: CancellationException) {
-            throw e
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.preferences_dids_error_api_request)

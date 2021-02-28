@@ -143,6 +143,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                 SyncIntervalReceiver.setInterval(applicationContext)
             }
         } catch (e: CancellationException) {
+            // We need to propagate the exception from processRequests
             throw e
         } catch (e: Exception) {
             logException(e)

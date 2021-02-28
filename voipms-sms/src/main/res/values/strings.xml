@@ -313,7 +313,6 @@
 
     <!-- SyncIntervalReceiver -->
     <string name="sync_interval_action" translatable="false">net.kourlas.voipms_sms.SYNC_INTERVAL_ACTION</string>
-    <string name="sync_interval_force_recent" translatable="false">net.kourlas.voipms_sms.SYNC_INTERVAL_FORCE_RECENT</string>
 
     <!-- Sent message receiver -->
     <string name="sent_message_action" translatable="false">net.kourlas.voipms_sms.SENT_MESSAGE_ACTION_%1$s_%2$s</string>

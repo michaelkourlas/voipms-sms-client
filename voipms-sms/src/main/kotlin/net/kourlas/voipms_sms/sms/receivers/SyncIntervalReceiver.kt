@@ -37,17 +37,13 @@ class SyncIntervalReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             if (context == null || intent == null) {
-                return
+                throw Exception("No context or intent provided")
             }
             if (intent.action != context.getString(
                     R.string.sync_interval_action)) {
-                return
+                throw Exception("Unrecognized action " + intent.action)
             }
-            val forceRecent = intent.extras?.get(
-                context.getString(
-                    R.string.sync_interval_force_recent)) as Boolean?
-                              ?: throw Exception("Force recent missing")
-            SyncWorker.performSynchronization(context, forceRecent)
+            SyncWorker.performSynchronization(context)
         } catch (e: Exception) {
             logException(e)
         }

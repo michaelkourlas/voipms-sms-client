@@ -24,7 +24,6 @@ import android.os.Build
 import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
@@ -63,8 +62,6 @@ class NotificationsRegistrationWorker(context: Context,
             val responses = getVoipMsApiCallbackResponses(dids)
             callbackFailedDids = parseVoipMsApiCallbackResponses(dids,
                                                                  responses)
-        } catch (e: CancellationException) {
-            throw e
         } catch (e: Exception) {
             logException(e)
         }
@@ -137,8 +134,6 @@ class NotificationsRegistrationWorker(context: Context,
                               + "voipmssms-notify?did={TO}"),
                           "url_callback_retry" to "0")))
                 responses[did] = didResponses
-            } catch (e: CancellationException) {
-                throw e
             } catch (e: IOException) {
                 // Do nothing.
             } catch (e: JsonDataException) {

@@ -30,7 +30,8 @@ import net.kourlas.voipms_sms.utils.logException
 class AppIndexingReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
-            AppIndexingWorker.performIndexing(context ?: return)
+            AppIndexingWorker.performIndexing(
+                context ?: throw Exception("No context provided"))
         } catch (e: Exception) {
             logException(e)
         }

@@ -24,7 +24,6 @@ import android.os.Build
 import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
@@ -101,8 +100,6 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
             if (response != null) {
                 return verifyResponse(response)
             }
-        } catch (e: CancellationException) {
-            throw e
         } catch (e: Exception) {
             logException(e)
         }
@@ -126,8 +123,6 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
                 mapOf("api_username" to email,
                       "api_password" to password,
                       "method" to "getDIDsInfo"))
-        } catch (e: CancellationException) {
-            throw e
         } catch (e: IOException) {
             error = applicationContext.getString(
                 R.string.verify_credentials_error_api_request)
