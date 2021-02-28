@@ -430,7 +430,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                     context.getString(R.string.sync_work_id),
                     ExistingPeriodicWorkPolicy.REPLACE,
                     work)
-            } else {
+            } else if (!scheduleOnly) {
                 val work = OneTimeWorkRequestBuilder<SyncWorker>().build()
                 WorkManager.getInstance(context)
                     .enqueueUniqueWork(context.getString(R.string.sync_work_id),
