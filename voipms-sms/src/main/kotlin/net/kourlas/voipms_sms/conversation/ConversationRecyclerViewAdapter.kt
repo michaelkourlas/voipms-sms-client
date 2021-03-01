@@ -39,9 +39,9 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.demo.getConversationDemoMessages
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.*
@@ -343,14 +343,14 @@ class ConversationRecyclerViewAdapter(
                         .trim { it <= ' ' }
                         .toLowerCase(Locale.getDefault())
                     maxLimit = Database.getInstance(activity)
-                        .getMessagesConversationFilteredCount(
+                        .getConversationMessagesFilteredCount(
                             conversationId, filterString)
                     if (currLimit > maxLimit) {
                         currLimit = maxLimit
                     }
                     resultsObject.messages.addAll(
                         Database.getInstance(activity)
-                            .getMessagesConversationFiltered(
+                            .getConversationMessagesFiltered(
                                 conversationId,
                                 filterString,
                                 currLimit).asReversed())

@@ -32,8 +32,8 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.preferences
 import net.kourlas.voipms_sms.utils.showAlertDialog
 import net.kourlas.voipms_sms.utils.showSnackbar
@@ -222,14 +222,14 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 val deletedMessages = selectedOptions.contains(0)
                 val removedDids = selectedOptions.contains(1)
 
-                lifecycleScope.launch(Dispatchers.IO) {
+                lifecycleScope.launch(Dispatchers.Default) {
                     if (deletedMessages) {
-                        Database.getInstance(context).deleteTableDeleted()
+                        Database.getInstance(context)
+                            .deleteTableDeletedContents()
                     }
                     if (removedDids) {
-                        Database.getInstance(context).deleteMessages(
-                            getDids(
-                                context))
+                        Database.getInstance(context).deleteMessagesWithoutDids(
+                            getDids(context))
                     }
                 }
             }
@@ -251,10 +251,10 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                         activity.applicationContext
                             .getString(R.string.delete),
                         { _, _ ->
-                            lifecycleScope.launch(Dispatchers.IO) {
+                            lifecycleScope.launch(Dispatchers.Default) {
                                 Database.getInstance(
                                     activity.applicationContext)
-                                    .deleteTablesAll()
+                                    .deleteTablesContents()
                             }
                         },
                         activity.getString(R.string.cancel), null)

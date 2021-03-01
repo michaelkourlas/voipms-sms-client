@@ -39,9 +39,9 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.conversation.ConversationBubbleActivity
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.receivers.MarkReadReceiver
 import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
@@ -418,7 +418,7 @@ class Notifications private constructor(private val context: Context) {
                 if (bubbleOnly || inlineReplyMessages.isNotEmpty())
                     emptyList()
                 else Database.getInstance(context)
-                    .getMessagesUnread(conversationId),
+                    .getConversationMessagesUnread(conversationId),
                 inlineReplyMessages,
                 bubbleOnly,
                 autoLaunchBubble)

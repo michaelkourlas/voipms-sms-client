@@ -25,6 +25,8 @@ import androidx.work.*
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getDids
@@ -89,14 +91,14 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
      *
      * @return Null if an error occurred.
      */
-    private suspend fun retrieveDids(): Set<String>? {
+    private suspend fun retrieveDids(): Set<String>? = coroutineScope {
         // Retrieve DIDs from VoIP.ms API
         var dids: Set<String>? = null
         try {
             // Terminate quietly if email and password are undefined.
             if (getEmail(applicationContext) == ""
                 || getPassword(applicationContext) == "") {
-                return dids
+                return@coroutineScope dids
             }
 
             val response = getApiResponse()
@@ -111,12 +113,14 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 setDids(applicationContext,
                         getDids(applicationContext).plus(dids))
                 enablePushNotifications(applicationContext)
-                replaceIndex(applicationContext)
+                launch {
+                    replaceIndex(applicationContext)
+                }
             }
         } catch (e: Exception) {
             logException(e)
         }
-        return dids
+        return@coroutineScope dids
     }
 
     @JsonClass(generateAdapter = true)

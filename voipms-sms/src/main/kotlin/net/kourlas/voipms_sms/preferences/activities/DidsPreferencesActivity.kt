@@ -30,10 +30,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.DidsPreferencesFragment
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.workers.RetrieveDidsWorker
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar

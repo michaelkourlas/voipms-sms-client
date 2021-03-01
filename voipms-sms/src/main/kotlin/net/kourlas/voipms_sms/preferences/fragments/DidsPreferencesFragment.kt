@@ -28,12 +28,12 @@ import com.takisoft.preferencex.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity
 import net.kourlas.voipms_sms.preferences.controls.MasterSwitchPreference
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.*
 
 class DidsPreferencesFragment : PreferenceFragmentCompat(),
@@ -192,7 +192,7 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
                                         activityToShowError = it)
             }
 
-            lifecycleScope.launch(Dispatchers.IO) {
+            lifecycleScope.launch(Dispatchers.Default) {
                 Database.getInstance(it).updateShortcuts()
                 replaceIndex(it)
             }

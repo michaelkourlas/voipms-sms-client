@@ -25,8 +25,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.workers.SendMessageWorker
 import net.kourlas.voipms_sms.utils.getMessageTexts
 import net.kourlas.voipms_sms.utils.logException
@@ -60,12 +60,12 @@ class SendMessageReceiver : BroadcastReceiver() {
 
             val pendingResult =
                 goAsync() ?: throw Exception("No PendingResult returned")
-            GlobalScope.launch(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.Default) {
                 // Insert the messages into the database, then tell the
                 // SendMessageWorker to send them.
                 try {
                     val databaseIds = Database.getInstance(context)
-                        .insertMessageDeliveryInProgress(
+                        .insertConversationMessagesDeliveryInProgress(
                             ConversationId(did, contact),
                             getMessageTexts(context, messageText))
                     for (id in databaseIds) {

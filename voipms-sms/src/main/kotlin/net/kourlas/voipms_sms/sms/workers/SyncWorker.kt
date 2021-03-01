@@ -29,11 +29,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.toBoolean
@@ -54,36 +54,39 @@ class SyncWorker(context: Context, params: WorkerParameters) :
     private var progress: Int = 0
 
     override suspend fun doWork(): Result {
-        // Make this a foreground service to ensure immediate execution.
-        // This will be changed to setExpedited in Android 12.
         try {
-            setForeground(getForegroundInfo())
-        } catch (e: Exception) {
-            throw e
-        }
+            // Make this a foreground service to ensure immediate execution.
+            // This will be changed to setExpedited in Android 12.
+            try {
+                setForeground(getForegroundInfo())
+            } catch (e: Exception) {
+                throw e
+            }
 
-        // Perform database synchronization.
-        handleSync()
+            // Perform database synchronization.
+            handleSync()
 
-        // Send a broadcast indicating that the database has been
-        // synchronized or an attempt has been made to synchronize it.
-        val syncCompleteBroadcastIntent = Intent(
-            applicationContext.getString(
-                R.string.sync_complete_action))
-        syncCompleteBroadcastIntent.putExtra(applicationContext.getString(
-            R.string.sync_complete_error), error)
-        if (!inputData.getBoolean(applicationContext.getString(
-                R.string.sync_force_recent), false)) {
+            return if (error == null) {
+                Result.success()
+            } else {
+                Log.w("tag", error ?: "")
+                Result.failure()
+            }
+        } finally {
+            // Send a broadcast indicating that the database has been
+            // synchronized or an attempt has been made to synchronize it.
+            val syncCompleteBroadcastIntent = Intent(
+                applicationContext.getString(
+                    R.string.sync_complete_action))
             syncCompleteBroadcastIntent.putExtra(applicationContext.getString(
-                R.string.sync_complete_full), true)
-        }
-        applicationContext.sendBroadcast(syncCompleteBroadcastIntent)
-
-        return if (error == null) {
-            Result.success()
-        } else {
-            Log.w("tag", error ?: "")
-            Result.failure()
+                R.string.sync_complete_error), error)
+            if (!inputData.getBoolean(applicationContext.getString(
+                    R.string.sync_force_recent), false)) {
+                syncCompleteBroadcastIntent.putExtra(
+                    applicationContext.getString(
+                        R.string.sync_complete_full), true)
+            }
+            applicationContext.sendBroadcast(syncCompleteBroadcastIntent)
         }
     }
 
@@ -136,6 +139,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             processRequests(retrievalRequests, retrieveDeletedMessages)
         } catch (e: CancellationException) {
             // We need to propagate the exception from processRequests
+            error = applicationContext.getString(R.string.sync_error_cancelled)
             throw e
         } catch (e: Exception) {
             logException(e)
@@ -151,7 +155,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      * retrieval requests should date back to the most recent message or the
      * message retrieval start date.
      */
-    private fun createRetrievalRequests(
+    private suspend fun createRetrievalRequests(
         retrieveOnlyRecentMessages: Boolean): List<RetrievalRequest> {
         val retrievalRequests = mutableListOf<RetrievalRequest>()
 

@@ -26,8 +26,8 @@ import com.google.firebase.appindexing.builders.MessageBuilder
 import com.google.firebase.appindexing.builders.PersonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 
 /**

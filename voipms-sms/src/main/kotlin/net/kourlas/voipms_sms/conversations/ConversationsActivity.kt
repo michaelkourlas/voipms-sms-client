@@ -53,6 +53,7 @@ import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversation.ConversationActivity
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.newConversation.NewConversationActivity
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
@@ -61,7 +62,6 @@ import net.kourlas.voipms_sms.preferences.activities.PreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.SynchronizationPreferencesActivity
 import net.kourlas.voipms_sms.signIn.SignInActivity
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.*
@@ -341,14 +341,14 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 this, android.Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED) {
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
-            lifecycleScope.launch(Dispatchers.IO) {
+            lifecycleScope.launch(Dispatchers.Default) {
                 Database.getInstance(applicationContext).updateShortcuts()
             }
         }
 
         // Delete any notification channels and groups that are no longer
         // needed and rename existing channels if necessary
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.Default) {
             Notifications.getInstance(applicationContext)
                 .createDefaultNotificationChannel()
             Notifications.getInstance(applicationContext)
@@ -683,7 +683,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
      */
     private fun onMarkReadButtonClick(mode: ActionMode): Boolean {
         // Mark all selected conversations as read
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             adapter
                 .filter { it.checked }
                 .map { it.message }
@@ -707,7 +707,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
      */
     private fun onMarkUnreadButtonClick(mode: ActionMode): Boolean {
         // Mark all selected conversations as unread
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             adapter
                 .filter { it.checked }
                 .map { it.message }
@@ -813,7 +813,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                         // If the permission request was granted, try refreshing
                         // and loading the contact name and photo
                         adapter.notifyItemRangeChanged(0, adapter.itemCount)
-                        lifecycleScope.launch(Dispatchers.IO) {
+                        lifecycleScope.launch(Dispatchers.Default) {
                             Database.getInstance(applicationContext)
                                 .updateShortcuts()
                         }
@@ -834,7 +834,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
      */
     private fun archiveConversations(messages: List<Message>,
                                      mode: ActionMode? = null) {
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             // Archive the conversations.
             for (message in messages) {
                 Database.getInstance(applicationContext)
@@ -856,7 +856,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                         messages.size),
                     getString(R.string.undo),
                     {
-                        lifecycleScope.launch(Dispatchers.IO) {
+                        lifecycleScope.launch(Dispatchers.Default) {
                             for (message in messages) {
                                 Database.getInstance(applicationContext)
                                     .markConversationUnarchived(
@@ -879,7 +879,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
      */
     private fun unarchiveConversations(messages: List<Message>,
                                        mode: ActionMode? = null) {
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             // Archive the conversations.
             for (message in messages) {
                 Database.getInstance(applicationContext)
@@ -901,7 +901,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                         messages.size),
                     getString(R.string.undo),
                     {
-                        lifecycleScope.launch(Dispatchers.IO) {
+                        lifecycleScope.launch(Dispatchers.Default) {
                             for (message in messages) {
                                 Database.getInstance(applicationContext)
                                     .markConversationArchived(
@@ -924,11 +924,11 @@ open class ConversationsActivity(val archived: Boolean = false) :
      */
     private fun deleteConversations(messages: List<Message>,
                                     mode: ActionMode? = null) {
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             // Collect existing state in case we need to undo this.
             val conversations = messages.map {
                 Database.getInstance(applicationContext)
-                    .getMessagesConversation(it.conversationId)
+                    .getConversationMessagesUnsorted(it.conversationId)
             }
             val archived = mutableMapOf<ConversationId, Boolean>()
             for (message in messages) {
@@ -940,13 +940,13 @@ open class ConversationsActivity(val archived: Boolean = false) :
             for (message in messages) {
                 drafts[message.conversationId] =
                     Database.getInstance(applicationContext)
-                        .getMessageDraft(message.conversationId)
+                        .getConversationDraft(message.conversationId)
             }
 
             // Delete the conversations.
             for (message in messages) {
                 Database.getInstance(applicationContext)
-                    .deleteMessages(message.conversationId)
+                    .deleteConversation(message.conversationId)
             }
 
             ensureActive()
@@ -964,11 +964,11 @@ open class ConversationsActivity(val archived: Boolean = false) :
                                                 messages.size),
                     getString(R.string.undo),
                     {
-                        lifecycleScope.launch(Dispatchers.IO) {
+                        lifecycleScope.launch(Dispatchers.Default) {
                             // Restore the conversations.
                             for (conversation in conversations) {
                                 Database.getInstance(applicationContext)
-                                    .insertMessages(conversation)
+                                    .insertMessagesDatabase(conversation)
                             }
                             for ((conversationId, isArchived) in archived) {
                                 if (isArchived) {
@@ -980,8 +980,8 @@ open class ConversationsActivity(val archived: Boolean = false) :
                             for ((conversationId, draft) in drafts) {
                                 if (draft != null) {
                                     Database.getInstance(applicationContext)
-                                        .insertMessageDraft(conversationId,
-                                                            draft.text)
+                                        .updateConversationDraft(conversationId,
+                                                                 draft.text)
                                 }
                             }
 

@@ -286,6 +286,7 @@
     <string name="sync_error_api_error">Sync failed: API error \'%1$s\'</string>
     <string name="sync_error_api_error_invalid_credentials">Sync failed: invalid credentials</string>
     <string name="sync_error_database">Sync failed: unknown DB error</string>
+    <string name="sync_error_cancelled">Sync failed: cancelled</string>
     <string name="sync_error_unknown">Sync failed: unknown error</string>
 
     <!-- VerifyCredentialsWorker -->

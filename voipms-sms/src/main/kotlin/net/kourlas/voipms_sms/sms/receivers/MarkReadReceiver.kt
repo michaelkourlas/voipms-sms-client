@@ -24,9 +24,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.logException
 
 /**
@@ -54,7 +54,7 @@ class MarkReadReceiver : BroadcastReceiver() {
 
             val pendingResult =
                 goAsync() ?: throw Exception("No PendingResult returned")
-            GlobalScope.launch(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.Default) {
                 try {
                     // Mark the conversation as read.
                     Database.getInstance(context)

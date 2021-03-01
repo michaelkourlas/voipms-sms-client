@@ -17,6 +17,9 @@
 
 package net.kourlas.voipms_sms.sms
 
+import androidx.room.ColumnInfo
+import net.kourlas.voipms_sms.database.entities.Sms
+
 /**
  * A conversation is uniquely identified by its participants, which are
  * represented by a DID and a contact phone number.
@@ -24,7 +27,11 @@ package net.kourlas.voipms_sms.sms
  * @param did The DID associated with the conversation.
  * @param contact The contact associated with the conversation.
  */
-data class ConversationId(val did: String, val contact: String) {
+data class ConversationId(
+    @ColumnInfo(name = Sms.COLUMN_DID)
+    val did: String,
+    @ColumnInfo(name = Sms.COLUMN_CONTACT)
+    val contact: String) {
     /**
      * Gets a unique identifier for this conversation.
      */

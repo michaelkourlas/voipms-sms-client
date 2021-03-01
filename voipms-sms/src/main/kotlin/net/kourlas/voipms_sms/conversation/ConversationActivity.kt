@@ -50,6 +50,7 @@ import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.conversations.ConversationsArchivedActivity
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.demo.getDemoNotification
 import net.kourlas.voipms_sms.newConversation.NewConversationActivity
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -58,7 +59,6 @@ import net.kourlas.voipms_sms.preferences.getDidShowInConversationsView
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getMessageTextBoxMaximumSize
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.workers.SendMessageWorker
 import net.kourlas.voipms_sms.ui.FastScroller
@@ -470,10 +470,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 maxLength - bytesCount, msgsCount)
         }
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             Database.getInstance(applicationContext)
-                .insertMessageDraft(conversationId,
-                                    newText)
+                .updateConversationDraft(conversationId,
+                                         newText)
         }
     }
 
@@ -514,10 +514,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
             messageEditText.setText("")
 
             // Send the message using the SendMessageService.
-            lifecycleScope.launch(Dispatchers.IO) {
+            lifecycleScope.launch(Dispatchers.Default) {
                 val ids = Database.getInstance(
                     applicationContext)
-                    .insertMessageDeliveryInProgress(
+                    .insertConversationMessagesDeliveryInProgress(
                         ConversationId(did,
                                        contact),
                         getMessageTexts(applicationContext, messageText))
@@ -553,9 +553,9 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // Load draft message
         val messageText = findViewById<EditText>(R.id.message_edit_text)
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             val draftMessage =
-                Database.getInstance(applicationContext).getMessageDraft(
+                Database.getInstance(applicationContext).getConversationDraft(
                     conversationId)
 
             ensureActive()
@@ -584,7 +584,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 .clearNotificationState(
                     conversationId)
         }
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             Database.getInstance(applicationContext).markConversationRead(
                 conversationId)
         }
@@ -735,7 +735,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // Override standard "up" behaviour because this activity
         // has multiple parents
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             val clazz = if (Database.getInstance(applicationContext)
                     .isConversationArchived(conversationId)) {
                 ConversationsArchivedActivity::class.java
@@ -815,7 +815,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
     private fun onBubbleButtonClick(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             moveTaskToBack(true)
-            lifecycleScope.launch {
+            lifecycleScope.launch(Dispatchers.Default) {
                 Notifications.getInstance(applicationContext)
                     .showNotifications(setOf(conversationId),
                                        bubbleOnly = true,
@@ -889,7 +889,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Resend all checked items.
         val databaseIds = adapter.messageItems.filter { it.checked }
             .map { it.message.databaseId }
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             for (databaseId in databaseIds) {
                 Database.getInstance(applicationContext)
                     .markMessageDeliveryInProgress(databaseId)
@@ -1006,7 +1006,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             .filter { it.checked }
             .map { it.message }
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             // Delete each message.
             for (message in messages) {
                 Database.getInstance(applicationContext)
@@ -1029,10 +1029,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
                         messages.size),
                     getString(R.string.undo),
                     {
-                        lifecycleScope.launch(Dispatchers.IO) {
+                        lifecycleScope.launch(Dispatchers.Default) {
                             // Restore the messages.
                             Database.getInstance(applicationContext)
-                                .insertMessages(messages)
+                                .insertMessagesDatabase(messages)
 
                             ensureActive()
 
@@ -1059,7 +1059,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 val messageItem = adapter[position]
                 val message = messageItem.message
                 if (!message.isDelivered && !message.isDeliveryInProgress) {
-                    lifecycleScope.launch(Dispatchers.IO) {
+                    lifecycleScope.launch(Dispatchers.Default) {
                         Database.getInstance(applicationContext)
                             .markMessageDeliveryInProgress(
                                 messageItem.message.databaseId)

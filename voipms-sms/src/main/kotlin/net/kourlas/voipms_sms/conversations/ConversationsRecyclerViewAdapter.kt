@@ -36,10 +36,10 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.demo.getConversationsDemoMessages
 import net.kourlas.voipms_sms.preferences.getActiveDid
 import net.kourlas.voipms_sms.preferences.getDids
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.utils.*
 import java.util.*
@@ -318,7 +318,7 @@ class ConversationsRecyclerViewAdapter<T>(
                 runBlocking {
                     resultsObject.messages.addAll(
                         Database.getInstance(activity)
-                            .getMessagesMostRecentFiltered(
+                            .getConversationsMessageMostRecentFiltered(
                                 if (activeDid == "")
                                     getDids(activity,
                                             onlyShowInConversationsView = true)

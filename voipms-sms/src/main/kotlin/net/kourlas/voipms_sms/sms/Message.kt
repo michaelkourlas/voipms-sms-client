@@ -18,6 +18,8 @@
 package net.kourlas.voipms_sms.sms
 
 import com.squareup.moshi.JsonClass
+import net.kourlas.voipms_sms.database.entities.Draft
+import net.kourlas.voipms_sms.database.entities.Sms
 import net.kourlas.voipms_sms.utils.toBoolean
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import java.util.*
@@ -25,10 +27,12 @@ import java.util.*
 /**
  * Represents a single SMS message.
  *
+ * This constructor is used when initializing a message using data from VoIP.ms.
+ *
  * @param databaseId The database ID of the message.
- * @param voipId The ID assigned to the message by VoIP.ms. This value may be null if no
- * ID has yet been assigned to the message because the message has not yet
- * been sent.
+ * @param voipId The ID assigned to the message by VoIP.ms. This value may be
+ * null if no ID has yet been assigned to the message because the message has
+ * not yet been sent.
  * @param date The UNIX timestamp of the message.
  * @param isIncoming Whether or not the message is incoming (1 for
  * incoming, 0 for outgoing).
@@ -49,9 +53,32 @@ class Message(val databaseId: Long, val voipId: Long?, date: Long,
               var text: String, isUnread: Long, isDelivered: Long,
               isDeliveryInProgress: Long, val isDraft: Boolean = false) :
     Comparable<Message> {
-    // Used to construct a draft message
-    constructor(did: String, contact: String, text: String) :
-        this(0, 0, Date().time / 1000, 0, did, contact, text, 0, 0, 0, true)
+
+    /**
+     * This constructor is used when initializing a message from a regular
+     * message in the database.
+     */
+    constructor(sms: Sms) :
+        this(sms.databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
+             sms.contact, sms.text, sms.unread, sms.delivered,
+             sms.deliveryInProgress)
+
+    /**
+     * This constructor is used when initializing a message from a regular
+     * message in the database, but the database ID is provided separately.
+     */
+    constructor(sms: Sms, databaseId: Long) :
+        this(databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
+             sms.contact, sms.text, sms.unread, sms.delivered,
+             sms.deliveryInProgress)
+
+    /**
+     * This constructor is used when initializing a message from a draft
+     * message in the database.
+     */
+    constructor(draft: Draft) :
+        this(0, 0, Date().time / 1000, 0, draft.did, draft.contact, draft.text,
+             0, 0, 0, true)
 
     init {
         validatePhoneNumber(did)
@@ -281,7 +308,8 @@ class Message(val databaseId: Long, val voipId: Long?, date: Long,
          * @param conversationId The ID of the specified conversation.
          */
         fun getConversationUrl(
-            conversationId: ConversationId): String = "voipmssms://conversation?did=${conversationId.did}" +
-                                                      "&contact=${conversationId.contact}"
+            conversationId: ConversationId): String =
+            "voipmssms://conversation?did=${conversationId.did}" +
+            "&contact=${conversationId.contact}"
     }
 }

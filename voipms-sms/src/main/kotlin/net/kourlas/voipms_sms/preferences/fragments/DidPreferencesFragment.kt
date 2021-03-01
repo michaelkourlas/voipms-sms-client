@@ -31,8 +31,8 @@ import com.takisoft.preferencex.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.*
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.utils.*
 
 class DidPreferencesFragment : PreferenceFragmentCompat(),
@@ -91,7 +91,7 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
                 enablePushNotifications(it.applicationContext,
                                         activityToShowError = it)
             }
-            lifecycleScope.launch(Dispatchers.IO) {
+            lifecycleScope.launch(Dispatchers.Default) {
                 replaceIndex(it)
             }
 
@@ -181,7 +181,7 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
         showNotificationsPreference.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { _, _ ->
                 context?.let {
-                    lifecycleScope.launch(Dispatchers.IO) {
+                    lifecycleScope.launch(Dispatchers.Default) {
                         Database.getInstance(it).updateShortcuts()
                         replaceIndex(it)
                     }

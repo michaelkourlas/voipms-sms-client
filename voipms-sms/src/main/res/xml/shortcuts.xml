@@ -17,7 +17,7 @@
 
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <!-- Update Database.kt when adding new static shortcuts -->
+    <!-- Update SmsDatabase.kt when adding new static shortcuts -->
     <shortcut
         android:enabled="true"
         android:icon="@drawable/ic_shortcut_chat"

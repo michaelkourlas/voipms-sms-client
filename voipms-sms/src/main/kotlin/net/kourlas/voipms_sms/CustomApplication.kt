@@ -21,13 +21,13 @@ import android.app.Application
 import android.net.ConnectivityManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager.Companion.getInstance
 import net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment
 import net.kourlas.voipms_sms.preferences.getAppTheme
 import net.kourlas.voipms_sms.preferences.getSyncInterval
 import net.kourlas.voipms_sms.preferences.setRawSyncInterval
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.sms.Database
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
 import java.util.*

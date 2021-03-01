@@ -11,6 +11,15 @@ android {
         targetSdkVersion 30
         versionCode 138
         versionName '0.6.18'
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                    "room.schemaLocation": "$projectDir/schemas".toString(),
+                    "room.incremental": "true",
+                ]
+            }
+        }
     }
     flavorDimensions 'version', 'demo'
     productFlavors {
@@ -79,12 +88,15 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0'
     implementation 'androidx.preference:preference-ktx:1.1.1'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation "androidx.room:room-runtime:2.2.6"
+    implementation "androidx.room:room-ktx:2.2.6"
     implementation 'androidx.sharetarget:sharetarget:1.1.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.work:work-runtime:2.5.0'
     implementation 'androidx.work:work-runtime-ktx:2.5.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
+    kapt "androidx.room:room-compiler:2.2.6"
 
     // Firebase libraries
     primaryImplementation 'com.google.firebase:firebase-analytics:18.0.2'
