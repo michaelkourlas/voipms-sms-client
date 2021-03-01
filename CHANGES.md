@@ -1,3 +1,7 @@
+## 0.6.19 ##
+
+* Bug fixes and performance improvements
+
 ## 0.6.18 ##
 
 * Bug fixes
