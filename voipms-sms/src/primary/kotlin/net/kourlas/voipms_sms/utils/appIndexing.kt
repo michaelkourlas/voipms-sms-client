@@ -36,9 +36,13 @@ import net.kourlas.voipms_sms.sms.Message
 @Suppress("BlockingMethodInNonBlockingContext", "HasPlatformType")
 suspend fun addMessageToIndex(context: Context, message: Message) =
     withContext(Dispatchers.IO) {
-        Tasks.await(FirebaseAppIndex.getInstance(context).update(
-            getMessageBuilder(
-                context, message).build()))
+        try {
+            Tasks.await(FirebaseAppIndex.getInstance(context).update(
+                getMessageBuilder(
+                    context, message).build()))
+        } catch (e: Exception) {
+            logException(e)
+        }
     }
 
 /**
@@ -47,7 +51,11 @@ suspend fun addMessageToIndex(context: Context, message: Message) =
 @Suppress("BlockingMethodInNonBlockingContext", "HasPlatformType")
 suspend fun removeFromIndex(context: Context, string: String) =
     withContext(Dispatchers.IO) {
-        Tasks.await(FirebaseAppIndex.getInstance(context).remove(string))
+        try {
+            Tasks.await(FirebaseAppIndex.getInstance(context).remove(string))
+        } catch (e: Exception) {
+            logException(e)
+        }
     }
 
 /**
@@ -56,7 +64,11 @@ suspend fun removeFromIndex(context: Context, string: String) =
 @Suppress("BlockingMethodInNonBlockingContext", "HasPlatformType")
 suspend fun removeAllFromIndex(context: Context) =
     withContext(Dispatchers.IO) {
-        Tasks.await(FirebaseAppIndex.getInstance(context).removeAll())
+        try {
+            Tasks.await(FirebaseAppIndex.getInstance(context).removeAll())
+        } catch (e: Exception) {
+            logException(e)
+        }
     }
 
 /**
@@ -80,20 +92,25 @@ suspend fun replaceIndex(context: Context) = withContext(Dispatchers.IO) {
             contactPhotoUriCache).build()
     }
 
-    // Delete app index and update index with indexables
-    Tasks.await(FirebaseAppIndex.getInstance(applicationContext).removeAll())
-    val max = Indexable.MAX_INDEXABLES_TO_BE_UPDATED_IN_ONE_CALL
-    (indexables.indices step max)
-        .map {
-            indexables.subList(
-                it,
-                if (indexables.size > it + max) it + max - 1
-                else indexables.size - 1)
-        }
-        .forEach {
-            FirebaseAppIndex.getInstance(context).update(
-                *it.toTypedArray())
-        }
+    try {
+        // Delete app index and update index with indexables
+        Tasks.await(
+            FirebaseAppIndex.getInstance(applicationContext).removeAll())
+        val max = Indexable.MAX_INDEXABLES_TO_BE_UPDATED_IN_ONE_CALL
+        (indexables.indices step max)
+            .map {
+                indexables.subList(
+                    it,
+                    if (indexables.size > it + max) it + max - 1
+                    else indexables.size - 1)
+            }
+            .forEach {
+                Tasks.await(FirebaseAppIndex.getInstance(context).update(
+                    *it.toTypedArray()))
+            }
+    } catch (e: Exception) {
+        logException(e)
+    }
 }
 
 /**
