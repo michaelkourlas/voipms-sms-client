@@ -9,8 +9,8 @@ android {
         applicationId 'net.kourlas.voipms_sms'
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 139
-        versionName '0.6.19'
+        versionCode 140
+        versionName '0.6.20'
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -96,7 +96,7 @@ dependencies {
     implementation 'androidx.work:work-runtime-ktx:2.5.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
-    kapt "androidx.room:room-compiler:2.2.6"
+    kapt 'androidx.room:room-compiler:2.2.6'
 
     // Firebase libraries
     primaryImplementation 'com.google.firebase:firebase-analytics:18.0.2'
