@@ -1,3 +1,7 @@
+## 0.6.21 ##
+
+* Restored donation in-app purchase mechanism
+
 ## 0.6.20 ##
 
 * Bug fixes

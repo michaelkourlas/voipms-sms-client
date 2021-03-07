@@ -40,6 +40,10 @@
         android:title="@string/conversations_action_privacy"
         app:showAsAction="never" />
     <item
+        android:id="@+id/donate_button"
+        android:title="@string/conversations_action_donate"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/license_button"
         android:title="@string/conversations_action_license"
         app:showAsAction="never" />

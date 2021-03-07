@@ -12,7 +12,7 @@
 
 # Account
 
-This app requires access to the VoIP.ms API in order to retrieve messages from your VoIP.ms account. To facilitate this, go to the VoIP.ms [API Configuration menu](https://www.voip.ms/m/api.php) and:
+This app requires access to the VoIP.ms API in order to retrieve messages from your VoIP.ms account. Go to the VoIP.ms [API Configuration menu](https://www.voip.ms/m/api.php) and:
 * enable API access for your VoIP.ms account;
 * set an API password (which is **distinct** from your account password); and
 * set the list of approved IP addresses to "0.0.0.0".
@@ -31,9 +31,9 @@ You can hide messages from the conversations view, block the retrieval of messag
 
 ## Push notifications
 
-This application supports push notifications using Firebase Cloud Messaging. Push notifications are automatically setup when selecting phone numbers if notifications are enabled.
+The Google Play version of the app supports push notifications using Firebase Cloud Messaging. Push notifications are automatically setup when selecting phone numbers if notifications are enabled.
 
-However, if setup fails for whatever reason, you can configure them manually by:
+However, if push notifications don't appear to be working, it's possible that the automatic setup failed. You can configure them manually by:
 * accessing the settings for your phone numbers (DIDs) on the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php);
 * enabling the *SMS URL Callback* option; and
 * entering the following URL into the neighbouring field: [https://us-south.functions.appdomain.cloud/api/v1/web/michael%40kourlas.com_dev/default/voipmssms-notify?did={TO}](https://us-south.functions.appdomain.cloud/api/v1/web/michael%40kourlas.com_dev/default/voipmssms-notify?did={TO})
@@ -106,12 +106,14 @@ This option deletes the entire database.
 
 # Donations
 
-If you'd like, you can make a donation to the developer using [PayPal](https://paypal.me/kourlas). Note that making a donation does not unlock any additional features.
+If you like the app, you can make a donation using [PayPal](https://paypal.me/kourlas). You can also use Google Play in-app billing, but Google will take a 30% cut and may also charge you tax.
+
+Please note that making a donation does not guarantee access to support or unlock any additional features.
 
 # Reporting bugs
 
-If you believe you've found a bug, feel free to file a report at the project's GitHub repository [here](https://github.com/michaelkourlas/voipms-sms-client/issues).
+If you believe you've found a bug, feel free to file a report at the project's [GitHub repository](https://github.com/michaelkourlas/voipms-sms-client/issues).
 
 # Contacting the developer
 
-If you have any further questions, feel free to contact the developer at [michael@kourlas.com](mailto:michael@kourlas.com).
+If you have any questions, feel free to contact me at [michael@kourlas.com](mailto:michael@kourlas.com).

@@ -52,6 +52,7 @@ import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.billing.Billing
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.newConversation.NewConversationActivity
@@ -138,6 +139,12 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 setSetupCompletedForVersion(this@ConversationsActivity, 134)
             }
         }
+    private val donationCompleteReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            showSnackbar(this@ConversationsActivity, R.id.coordinator_layout,
+                         getString(R.string.donation_complete_message))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -324,6 +331,9 @@ open class ConversationsActivity(val archived: Boolean = false) :
             pushNotificationsRegistrationCompleteReceiver,
             IntentFilter(getString(
                 R.string.push_notifications_reg_complete_action)))
+        registerReceiver(donationCompleteReceiver,
+                         IntentFilter(getString(
+                             R.string.donation_complete_action)))
 
         // Perform initial setup as well as account and DID check
         performAccountDidCheck()
@@ -493,10 +503,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
 
         // Unregister all dynamic receivers for this activity
         safeUnregisterReceiver(this, syncCompleteReceiver)
-        @Suppress("ConstantConditionIf")
         safeUnregisterReceiver(
             this,
             pushNotificationsRegistrationCompleteReceiver)
+        safeUnregisterReceiver(this, donationCompleteReceiver)
 
         // Track number of activities
         (application as CustomApplication).conversationsActivityDecrementCount()
@@ -597,6 +607,13 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     showSnackbar(this, R.id.coordinator_layout,
                                  getString(
                                      R.string.conversations_fail_web_browser))
+                }
+                return true
+            }
+            R.id.donate_button -> {
+                lifecycleScope.launch {
+                    Billing.getInstance(this@ConversationsActivity)
+                        .askForDonation(this@ConversationsActivity)
                 }
                 return true
             }

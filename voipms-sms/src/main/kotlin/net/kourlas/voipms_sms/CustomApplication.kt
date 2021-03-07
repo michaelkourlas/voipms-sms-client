@@ -21,6 +21,7 @@ import android.app.Application
 import android.net.ConnectivityManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import net.kourlas.voipms_sms.billing.Billing
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager.Companion.getInstance
 import net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment
@@ -102,15 +103,18 @@ class CustomApplication : Application() {
                 getInstance())
         }
 
-        // Open database
+        // Open the database.
         Database.getInstance(applicationContext)
 
-        // Subscribe to topics for current DIDs
+        // Subscribe to topics for current DIDs.
         subscribeToDidTopics(applicationContext)
 
         // Schedule a database synchronization, if required.
         SyncWorker.performFullSynchronization(applicationContext,
                                               scheduleOnly = true)
+
+        // Initialize the billing service.
+        Billing.getInstance(applicationContext)
     }
 
     companion object {
