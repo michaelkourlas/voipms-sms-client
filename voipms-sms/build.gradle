@@ -107,7 +107,7 @@ dependencies {
     primaryImplementation 'com.google.firebase:firebase-messaging:21.0.1'
 
     // Google Play libraries
-    implementation 'com.android.billingclient:billing-ktx:3.0.2'
+    primaryImplementation 'com.android.billingclient:billing-ktx:3.0.2'
 
     // Other third-party libraries
     implementation 'com.squareup.moshi:moshi-adapters:1.11.0'
@@ -121,11 +121,14 @@ dependencies {
     kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.11.0'
 }
 
-// Remove from F-Droid builds
 tasks.whenTaskAdded {task ->
-    if (task.name.contains('Fdroid') && task.name.contains('GoogleServices')) {
+    if (task.name.contains('Fdroid')
+        && (task.name.contains('GoogleServices')
+            || task.name.contains('Crashlytics')))
+    {
         task.enabled = false
     }
 }
+
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
