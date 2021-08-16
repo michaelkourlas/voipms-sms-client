@@ -9,8 +9,8 @@ android {
         applicationId 'net.kourlas.voipms_sms'
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 142
-        versionName '0.6.21'
+        versionCode 143
+        versionName '0.6.22'
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -63,11 +63,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -85,29 +85,29 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
 
     // Android support libraries
-    implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.core:core-ktx:1.5.0-beta02'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0'
+    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     implementation 'androidx.preference:preference-ktx:1.1.1'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'androidx.room:room-ktx:2.2.6'
-    implementation 'androidx.room:room-runtime:2.2.6'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.room:room-ktx:2.3.0'
+    implementation 'androidx.room:room-runtime:2.3.0'
     implementation 'androidx.sharetarget:sharetarget:1.1.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.work:work-runtime-ktx:2.5.0'
-    implementation 'com.google.android.material:material:1.3.0'
-    kapt 'androidx.room:room-compiler:2.2.6'
+    implementation 'com.google.android.material:material:1.4.0'
+    kapt 'androidx.room:room-compiler:2.3.0'
 
     // Firebase libraries
-    primaryImplementation 'com.google.firebase:firebase-analytics:18.0.2'
-    primaryImplementation 'com.google.firebase:firebase-appindexing:19.2.0'
-    primaryImplementation 'com.google.firebase:firebase-core:18.0.2'
-    primaryImplementation 'com.google.firebase:firebase-crashlytics:17.3.1'
-    primaryImplementation 'com.google.firebase:firebase-messaging:21.0.1'
+    primaryImplementation 'com.google.firebase:firebase-analytics:19.0.0'
+    primaryImplementation 'com.google.firebase:firebase-appindexing:20.0.0'
+    primaryImplementation 'com.google.firebase:firebase-core:19.0.0'
+    primaryImplementation 'com.google.firebase:firebase-crashlytics:18.2.1'
+    primaryImplementation 'com.google.firebase:firebase-messaging:22.0.0'
 
     // Google Play libraries
-    primaryImplementation 'com.android.billingclient:billing-ktx:3.0.2'
+    primaryImplementation 'com.android.billingclient:billing-ktx:4.0.0'
 
     // Other third-party libraries
     implementation 'com.squareup.moshi:moshi-adapters:1.11.0'
@@ -117,7 +117,7 @@ dependencies {
     implementation 'com.takisoft.preferencex:preferencex-ringtone:1.1.0'
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
     implementation 'de.adorsys.android:securestoragelibrary:1.2.2'
-    implementation 'it.xabaras.android:recyclerview-swipedecorator:1.2.3'
+    implementation 'com.github.xabaras:RecyclerViewSwipeDecorator:1.3'
     kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.11.0'
 }
 

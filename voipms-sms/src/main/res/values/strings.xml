@@ -186,7 +186,7 @@
     <string name="conversations_action_chat">Chat</string>
     <string name="conversations_action_credits">Credits</string>
     <string name="conversations_action_delete">Delete</string>
-    <string name="conversations_action_donate">Donate</string>
+    <string name="conversations_action_coffee">Buy me a coffee</string>
     <string name="conversations_action_help">Help</string>
     <string name="conversations_action_license">License</string>
     <string name="conversations_action_mark_read">Mark read</string>
@@ -339,11 +339,11 @@
     <string name="verify_credentials_complete_valid" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_COMPLETE_VALID</string>
     <string name="verify_credentials_complete_error" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_COMPLETE_ERROR</string>
 
-    <!-- Donation complete receiver -->
-    <string name="donation_complete_action" translatable="false">net.kourlas.voipms_sms.DONATION_COMPLETE_ACTION</string>
-    <string name="donation_complete_message" translatable="false">Thanks for the donation!</string>
-    <string name="donation_fail_google_play" translatable="false">Donation failed: try again later</string>
-    <string name="donation_fail_unknown" translatable="false">Donation failed: unknown error</string>
+    <!-- Buy me a coffee complete receiver -->
+    <string name="coffee_complete_action" translatable="false">net.kourlas.voipms_sms.COFFEE_COMPLETE_ACTION</string>
+    <string name="coffee_complete_message" translatable="false">Thanks for buying me a coffee!</string>
+    <string name="coffee_fail_google_play" translatable="false">Tip failed: try again later</string>
+    <string name="coffee_fail_unknown" translatable="false">Tip failed: unknown error</string>
 
     <!-- SINGLETONS -->
 
@@ -377,7 +377,7 @@
     <!-- URLS -->
     <string name="help_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md</string>
     <string name="privacy_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/PRIVACY.md</string>
-    <string name="donate_url" translatable="false">https://www.paypal.com/paypalme/kourlas</string>
+    <string name="coffee_url" translatable="false">https://www.paypal.com/paypalme/kourlas</string>
     <string name="license_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE</string>
     <string name="credits_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE</string>
 

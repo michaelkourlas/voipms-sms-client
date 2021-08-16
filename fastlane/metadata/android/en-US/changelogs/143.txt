@@ -1,0 +1,2 @@
+0.6.22
+• Rename in-app purchase mechanism to "buy me a coffee"

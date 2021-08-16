@@ -40,8 +40,8 @@
         android:title="@string/conversations_action_privacy"
         app:showAsAction="never" />
     <item
-        android:id="@+id/donate_button"
-        android:title="@string/conversations_action_donate"
+        android:id="@+id/coffee_button"
+        android:title="@string/conversations_action_coffee"
         app:showAsAction="never" />
     <item
         android:id="@+id/license_button"

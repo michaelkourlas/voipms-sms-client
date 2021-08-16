@@ -1,3 +1,7 @@
+## 0.6.22 ##
+
+* Rename in-app purchase mechanism to "buy me a coffee"
+
 ## 0.6.21 ##
 
 * Restored donation in-app purchase mechanism

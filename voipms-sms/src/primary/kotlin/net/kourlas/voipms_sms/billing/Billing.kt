@@ -53,29 +53,40 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
         }
     }
 
-    suspend fun askForDonation(activity: FragmentActivity) {
+    suspend fun askForCoffee(activity: FragmentActivity) {
         try {
             // If the client is not connected, we can't do anything.
             if (!connected) {
-                showSnackbar(activity, R.id.coordinator_layout,
-                             activity.getString(
-                                 R.string.donation_fail_google_play))
+                showSnackbar(
+                    activity, R.id.coordinator_layout,
+                    activity.getString(
+                        R.string.coffee_fail_google_play
+                    )
+                )
                 return
             }
 
-            // Consume the donation purchase if it hasn't been consumed yet.
-            val purchasesResult = client.queryPurchases(SKU)
-            if (purchasesResult.responseCode == BillingResponseCode.OK) {
-                consumeDonationPurchases(
-                    purchasesResult.purchasesList ?: emptyList())
+            // Consume the purchase if it hasn't been consumed yet.
+            val purchasesList = suspendCoroutine<List<Purchase>> {
+                client.queryPurchasesAsync(SKU) { result, purchases ->
+                    if (result.responseCode == BillingResponseCode.OK) {
+                        it.resume(purchases)
+                    } else {
+                        it.resume(emptyList())
+                    }
+                }
             }
+            consumeDonationPurchases(purchasesList)
 
-            // Get the donation SKU.
-            val skuDetails = getDonationSkuDetails()
+            // Get the SKU.
+            val skuDetails = getCoffeeSkuDetails()
             if (skuDetails == null) {
-                showSnackbar(activity, R.id.coordinator_layout,
-                             activity.getString(
-                                 R.string.donation_fail_unknown))
+                showSnackbar(
+                    activity, R.id.coordinator_layout,
+                    activity.getString(
+                        R.string.coffee_fail_unknown
+                    )
+                )
                 return
             }
 
@@ -86,16 +97,22 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
             client.launchBillingFlow(activity, flowParams)
         } catch (e: Exception) {
             logException(e)
-            showSnackbar(activity, R.id.coordinator_layout,
-                         activity.getString(
-                             R.string.donation_fail_unknown))
+            showSnackbar(
+                activity, R.id.coordinator_layout,
+                activity.getString(
+                    R.string.coffee_fail_unknown
+                )
+            )
         }
     }
 
-    override fun onPurchasesUpdated(result: BillingResult,
-                                    purchases: MutableList<Purchase>?) {
+    override fun onPurchasesUpdated(
+        result: BillingResult,
+        purchases: MutableList<Purchase>?
+    ) {
         if (result.responseCode == BillingResponseCode.OK
-            && purchases != null) {
+            && purchases != null
+        ) {
             GlobalScope.launch {
                 consumeDonationPurchases(purchases)
             }
@@ -113,12 +130,15 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
     private suspend fun consumeDonationPurchases(purchases: List<Purchase>) =
         withContext(Dispatchers.IO) {
             for (purchase in purchases) {
-                if (purchase.sku == SKU
-                    && purchase.purchaseState == PurchaseState.PURCHASED) {
-                    val donationCompleteBroadcastIntent = Intent(
+                if (purchase.skus.contains(SKU)
+                    && purchase.purchaseState == PurchaseState.PURCHASED
+                ) {
+                    val coffeeCompleteBroadcastIntent = Intent(
                         context.getString(
-                            R.string.donation_complete_action))
-                    context.sendBroadcast(donationCompleteBroadcastIntent)
+                            R.string.coffee_complete_action
+                        )
+                    )
+                    context.sendBroadcast(coffeeCompleteBroadcastIntent)
 
                     val consumeParams = ConsumeParams.newBuilder()
                         .setPurchaseToken(purchase.purchaseToken).build()
@@ -132,16 +152,18 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
             }
         }
 
-    private suspend fun getDonationSkuDetails() = withContext(Dispatchers.IO) {
+    private suspend fun getCoffeeSkuDetails() = withContext(Dispatchers.IO) {
         val skuDetailsParams = SkuDetailsParams.newBuilder()
         skuDetailsParams
             .setSkusList(listOf(SKU))
             .setType(BillingClient.SkuType.INAPP)
         val skuDetailsList = suspendCoroutine<List<SkuDetails>> {
             client.querySkuDetailsAsync(
-                skuDetailsParams.build()) { result, details ->
+                skuDetailsParams.build()
+            ) { result, details ->
                 if (result.responseCode == BillingResponseCode.OK
-                    && details != null) {
+                    && details != null
+                ) {
                     it.resume(details)
                 } else {
                     it.resume(emptyList())
@@ -161,8 +183,8 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
         @SuppressLint("StaticFieldLeak")
         private var instance: Billing? = null
 
-        // The SKU for donations.
-        private const val SKU = "donation2"
+        // The SKU for buying me a coffee.
+        private const val SKU = "coffee"
 
         /**
          * Gets the sole instance of the Billing class. Initializes the
@@ -171,7 +193,8 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
         fun getInstance(context: Context): Billing =
             instance ?: synchronized(this) {
                 instance ?: Billing(
-                    context.applicationContext).also { instance = it }
+                    context.applicationContext
+                ).also { instance = it }
             }
     }
 }

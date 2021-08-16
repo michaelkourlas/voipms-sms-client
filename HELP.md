@@ -6,7 +6,7 @@
 * [Synchronization](#synchronization)
 * [Network](#network)
 * [Database](#database)
-* [Donations](#donations)
+* [Buy me a coffee](#buy-me-a-coffee)
 * [Reporting bugs](#reporting-bugs)
 * [Contacting the developer](#contacting-the-developer)
 
@@ -104,11 +104,11 @@ This option allows you to remove certain data from the database that might be co
 
 This option deletes the entire database.
 
-# Donations
+# Buy me a coffee
 
-If you like the app, you can make a donation using [PayPal](https://paypal.me/kourlas). You can also use Google Play in-app billing, but Google will take a 30% cut and may also charge you tax.
-
-Please note that making a donation does not guarantee access to support or unlock any additional features.
+If you like the app, you can buy me a coffee
+using [PayPal](https://paypal.me/kourlas). You can also use Google Play in-app
+billing, but Google will take a 15% cut and may also charge you tax.
 
 # Reporting bugs
 

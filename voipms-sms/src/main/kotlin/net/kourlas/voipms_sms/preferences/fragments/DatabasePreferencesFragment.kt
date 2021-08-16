@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018-2019 Michael Kourlas
+ * Copyright (C) 2018-2021 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@
 package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.CATEGORY_OPENABLE
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import com.takisoft.preferencex.PreferenceFragmentCompat
@@ -44,34 +45,54 @@ import net.kourlas.voipms_sms.utils.showSnackbar
 class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     // Preference listeners
     private val importListener = Preference.OnPreferenceClickListener {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-        intent.type = "*/*"
-        intent.addCategory(CATEGORY_OPENABLE)
         try {
-            startActivityForResult(intent,
-                                   IMPORT_REQUEST_CODE)
+            val activityResultLauncher =
+                registerForActivityResult(object : ActivityResultContracts.OpenDocument() {
+                    override fun createIntent(context: Context, input: Array<out String>): Intent {
+                        val intent = super.createIntent(context, input)
+                        intent.addCategory(CATEGORY_OPENABLE)
+                        return intent
+                    }
+                }) {
+                    import(it)
+                }
+            activityResultLauncher.launch(arrayOf("*/*"))
         } catch (_: ActivityNotFoundException) {
             activity?.let {
                 showSnackbar(
                     it, R.id.coordinator_layout,
                     getString(
-                        R.string.preferences_database_fail_open_document))
+                        R.string.preferences_database_fail_open_document
+                    )
+                )
             }
         }
         true
     }
     private val exportListener = Preference.OnPreferenceClickListener {
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-        intent.type = "application/octet-stream"
         try {
-            startActivityForResult(intent,
-                                   EXPORT_REQUEST_CODE)
+            val activityResultLauncher = registerForActivityResult(object :
+                ActivityResultContracts.CreateDocument() {
+                override fun createIntent(
+                    context: Context,
+                    input: String
+                ): Intent {
+                    val intent = super.createIntent(context, input)
+                    intent.type = "application/octet-stream"
+                    return intent
+                }
+            }) {
+                export(it)
+            }
+            activityResultLauncher.launch("sms.db")
         } catch (_: ActivityNotFoundException) {
             activity?.let {
                 showSnackbar(
                     it, R.id.coordinator_layout,
                     getString(
-                        R.string.preferences_database_fail_create_document))
+                        R.string.preferences_database_fail_create_document
+                    )
+                )
             }
         }
         true
@@ -85,8 +106,10 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
         true
     }
 
-    override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
-                                        rootKey: String?) {
+    override fun onCreatePreferencesFix(
+        savedInstanceState: Bundle?,
+        rootKey: String?
+    ) {
         // Add preferences
         addPreferencesFromResource(R.xml.preferences_database)
 
@@ -94,34 +117,23 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
         for (preference in preferenceScreen.preferences) {
             when (preference.key) {
                 getString(
-                    R.string.preferences_database_import_key) ->
+                    R.string.preferences_database_import_key
+                ) ->
                     preference.onPreferenceClickListener = importListener
                 getString(
-                    R.string.preferences_database_export_key) ->
+                    R.string.preferences_database_export_key
+                ) ->
                     preference.onPreferenceClickListener = exportListener
                 getString(
-                    R.string.preferences_database_clean_up_key) ->
+                    R.string.preferences_database_clean_up_key
+                ) ->
                     preference.onPreferenceClickListener = cleanUpListener
                 getString(
-                    R.string.preferences_database_delete_key) ->
+                    R.string.preferences_database_delete_key
+                ) ->
                     preference.onPreferenceClickListener = deleteListener
             }
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int,
-                                  data: Intent?) {
-        // Handle ACTION_OPEN_DOCUMENT and ACTION_CREATE_DOCUMENT results
-        data?.data?.let {
-            if (requestCode == IMPORT_REQUEST_CODE
-                && resultCode == RESULT_OK) {
-                import(it)
-            } else if (requestCode == EXPORT_REQUEST_CODE
-                       && resultCode == RESULT_OK) {
-                export(it)
-            }
-        }
-
     }
 
     /**
@@ -132,7 +144,9 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val importFd = it.contentResolver.openFileDescriptor(
-                        uri, "r") ?: throw Exception("Could not open file")
+                        uri, "r"
+                    )
+                        ?: throw Exception("Could not open file")
                     Database.getInstance(it).import(importFd)
                 } catch (e: Exception) {
                     ensureActive()
@@ -143,7 +157,9 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                             R.id.coordinator_layout,
                             getString(
                                 R.string.preferences_database_import_fail,
-                                "${e.message} (${e.javaClass.simpleName})"))
+                                "${e.message} (${e.javaClass.simpleName})"
+                            )
+                        )
                     }
                     return@launch
                 }
@@ -151,8 +167,11 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 ensureActive()
 
                 lifecycleScope.launch(Dispatchers.Main) {
-                    showSnackbar(it, R.id.coordinator_layout, it.getString(
-                        R.string.preferences_database_import_success))
+                    showSnackbar(
+                        it, R.id.coordinator_layout, it.getString(
+                        R.string.preferences_database_import_success
+                    )
+                    )
                 }
             }
         }
@@ -166,7 +185,9 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val exportFd = it.contentResolver.openFileDescriptor(
-                        uri, "w") ?: throw Exception("Could not open file")
+                        uri, "w"
+                    )
+                        ?: throw Exception("Could not open file")
                     Database.getInstance(it).export(exportFd)
                 } catch (e: Exception) {
                     ensureActive()
@@ -177,7 +198,9 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                             R.id.coordinator_layout,
                             getString(
                                 R.string.preferences_database_export_fail,
-                                "${e.message} (${e.javaClass.simpleName})"))
+                                "${e.message} (${e.javaClass.simpleName})"
+                            )
+                        )
 
                     }
                     return@launch
@@ -186,8 +209,11 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 ensureActive()
 
                 withContext(Dispatchers.Default) {
-                    showSnackbar(it, R.id.coordinator_layout, it.getString(
-                        R.string.preferences_database_export_success))
+                    showSnackbar(
+                        it, R.id.coordinator_layout, it.getString(
+                        R.string.preferences_database_export_success
+                    )
+                    )
 
                 }
             }
@@ -199,18 +225,25 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
 
         val options = arrayOf(
             activity.getString(
-                R.string.preferences_database_clean_up_deleted_messages),
+                R.string.preferences_database_clean_up_deleted_messages
+            ),
             activity.getString(
-                R.string.preferences_database_clean_up_removed_dids))
+                R.string.preferences_database_clean_up_removed_dids
+            )
+        )
         val selectedOptions = mutableListOf<Int>()
 
         // Ask user which kind of clean up is desired, and then perform that
         // clean up
         AlertDialog.Builder(activity).apply {
-            setTitle(context.getString(
-                R.string.preferences_database_clean_up_title))
+            setTitle(
+                context.getString(
+                    R.string.preferences_database_clean_up_title
+                )
+            )
             setMultiChoiceItems(
-                options, null) { _, which, isChecked ->
+                options, null
+            ) { _, which, isChecked ->
                 if (isChecked) {
                     selectedOptions.add(which)
                 } else {
@@ -218,7 +251,8 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 }
             }
             setPositiveButton(
-                context.getString(R.string.ok)) { _, _ ->
+                context.getString(R.string.ok)
+            ) { _, _ ->
                 val deletedMessages = selectedOptions.contains(0)
                 val removedDids = selectedOptions.contains(1)
 
@@ -229,7 +263,8 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                     }
                     if (removedDids) {
                         Database.getInstance(context).deleteMessagesWithoutDids(
-                            getDids(context))
+                            getDids(context)
+                        )
                     }
                 }
             }
@@ -243,26 +278,25 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
         val activity = activity ?: return
 
         // Prompt the user before actually deleting the entire database
-        showAlertDialog(activity,
-                        activity.getString(
-                            R.string.preferences_database_delete_confirm_title),
-                        activity.getString(
-                            R.string.preferences_database_delete_confirm_message),
+        showAlertDialog(
+            activity,
+            activity.getString(
+                R.string.preferences_database_delete_confirm_title
+            ),
+            activity.getString(
+                R.string.preferences_database_delete_confirm_message
+            ),
+            activity.applicationContext
+                .getString(R.string.delete),
+            { _, _ ->
+                lifecycleScope.launch(Dispatchers.Default) {
+                    Database.getInstance(
                         activity.applicationContext
-                            .getString(R.string.delete),
-                        { _, _ ->
-                            lifecycleScope.launch(Dispatchers.Default) {
-                                Database.getInstance(
-                                    activity.applicationContext)
-                                    .deleteTablesContents()
-                            }
-                        },
-                        activity.getString(R.string.cancel), null)
-    }
-
-    companion object {
-        // Request codes for file choosers for importing and exporting databases
-        const val IMPORT_REQUEST_CODE = 1
-        const val EXPORT_REQUEST_CODE = 2
+                    )
+                        .deleteTablesContents()
+                }
+            },
+            activity.getString(R.string.cancel), null
+        )
     }
 }

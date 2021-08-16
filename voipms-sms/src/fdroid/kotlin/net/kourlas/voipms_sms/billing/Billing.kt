@@ -29,17 +29,25 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.showSnackbar
 
 class Billing(private val context: Context) {
-    suspend fun askForDonation(activity: FragmentActivity) =
+    suspend fun askForCoffee(activity: FragmentActivity) =
         withContext(Dispatchers.Main) {
             try {
-                val intent = Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(context.getString(
-                                        R.string.donate_url)))
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(
+                        context.getString(
+                            R.string.coffee_url
+                        )
+                    )
+                )
                 activity.startActivity(intent)
             } catch (_: ActivityNotFoundException) {
-                showSnackbar(activity, R.id.coordinator_layout,
-                             context.getString(
-                                 R.string.conversations_fail_web_browser))
+                showSnackbar(
+                    activity, R.id.coordinator_layout,
+                    context.getString(
+                        R.string.conversations_fail_web_browser
+                    )
+                )
             }
         }
 
