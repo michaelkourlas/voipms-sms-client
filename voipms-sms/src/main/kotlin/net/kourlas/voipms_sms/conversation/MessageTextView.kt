@@ -34,9 +34,9 @@ import androidx.appcompat.widget.AppCompatTextView
 
 class MessageTextView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-                                               ) : AppCompatTextView(context,
-                                                                     attrs,
-                                                                     defStyleAttr) {
+) : AppCompatTextView(context,
+                      attrs,
+                      defStyleAttr) {
     private var longClick = false
     var messageLongClickListener: (() -> Unit)? = null
 

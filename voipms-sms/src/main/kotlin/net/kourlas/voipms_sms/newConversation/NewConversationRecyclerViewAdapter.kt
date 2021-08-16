@@ -230,11 +230,11 @@ class NewConversationRecyclerViewAdapter(
                 val match =
                     contactItem.name.lowercase(Locale.getDefault()).contains(
                         currConstraint.lowercase(Locale.getDefault()))
-                        || contactItem.primaryPhoneNumber
+                    || contactItem.primaryPhoneNumber
                         .lowercase(Locale.getDefault())
                         .contains(currConstraint.lowercase(
                             Locale.getDefault()))
-                        || (getDigitsOfString(currConstraint) != ""
+                    || (getDigitsOfString(currConstraint) != ""
                         && getDigitsOfString(
                         contactItem.primaryPhoneNumber).contains(
                         getDigitsOfString(currConstraint)))

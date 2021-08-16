@@ -84,8 +84,8 @@ class Message(val databaseId: Long, val voipId: Long?, val date: Date,
      */
     constructor(sms: Sms) :
         this(sms.databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
-            sms.contact, sms.text, sms.unread, sms.delivered,
-            sms.deliveryInProgress)
+             sms.contact, sms.text, sms.unread, sms.delivered,
+             sms.deliveryInProgress)
 
     /**
      * This constructor is used when initializing a message from a regular
@@ -93,8 +93,8 @@ class Message(val databaseId: Long, val voipId: Long?, val date: Date,
      */
     constructor(sms: Sms, databaseId: Long) :
         this(databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
-            sms.contact, sms.text, sms.unread, sms.delivered,
-            sms.deliveryInProgress)
+             sms.contact, sms.text, sms.unread, sms.delivered,
+             sms.deliveryInProgress)
 
     /**
      * This constructor is used when initializing a message from a draft
@@ -102,7 +102,7 @@ class Message(val databaseId: Long, val voipId: Long?, val date: Date,
      */
     constructor(draft: Draft) :
         this(0, 0, Date().time / 1000, 0, draft.did, draft.contact, draft.text,
-            0, 0, 0, true)
+             0, 0, 0, true)
 
     init {
         validatePhoneNumber(did)
@@ -308,6 +308,6 @@ class Message(val databaseId: Long, val voipId: Long?, val date: Date,
         fun getConversationUrl(
             conversationId: ConversationId): String =
             "voipmssms://conversation?did=${conversationId.did}" +
-                "&contact=${conversationId.contact}"
+            "&contact=${conversationId.contact}"
     }
 }

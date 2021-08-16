@@ -35,7 +35,8 @@ import java.util.*
 
 class CustomApplication : Application() {
     private var conversationsActivitiesVisible = 0
-    private val conversationActivitiesVisible: MutableMap<ConversationId, Int> = HashMap()
+    private val conversationActivitiesVisible: MutableMap<ConversationId, Int> =
+        HashMap()
 
     fun conversationsActivityVisible(): Boolean {
         return conversationsActivitiesVisible > 0

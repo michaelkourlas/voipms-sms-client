@@ -48,15 +48,16 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
                     // Show error if one occurred
                     intent?.getStringArrayListExtra(getString(
                         R.string
-                            .push_notifications_reg_complete_failed_dids))?.let {
-                        if (it.isNotEmpty()) {
-                            // Some DIDs failed registration
-                            showSnackbar(
-                                activity, R.id.coordinator_layout,
-                                getString(
-                                    R.string.push_notifications_fail_register))
-                        }
-                    } ?: run {
+                            .push_notifications_reg_complete_failed_dids))
+                        ?.let {
+                            if (it.isNotEmpty()) {
+                                // Some DIDs failed registration
+                                showSnackbar(
+                                    activity, R.id.coordinator_layout,
+                                    getString(
+                                        R.string.push_notifications_fail_register))
+                            }
+                        } ?: run {
                         // Unknown error
                         showSnackbar(
                             activity, R.id.coordinator_layout,

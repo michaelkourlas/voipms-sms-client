@@ -268,7 +268,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                         selectedIndex = which
                     }
                     setPositiveButton(context.getString(R.string.ok)
-                                     ) { _, _ ->
+                    ) { _, _ ->
                         startConversationActivity(
                             phoneNumbers[selectedIndex])
                     }

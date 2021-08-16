@@ -96,12 +96,12 @@ class ConversationRecyclerViewAdapter(
             R.layout.conversation_item_incoming -> {
                 LayoutInflater.from(parent.context)
                     .inflate(R.layout.conversation_item_incoming,
-                        parent, false)
+                             parent, false)
             }
             R.layout.conversation_item_outgoing -> {
                 LayoutInflater.from(parent.context)
                     .inflate(R.layout.conversation_item_outgoing,
-                        parent, false)
+                             parent, false)
             }
             else -> throw Exception("Unknown view type $viewType")
         }
@@ -132,7 +132,7 @@ class ConversationRecyclerViewAdapter(
             as ViewGroup.MarginLayoutParams
         marginParams.topMargin =
             if (isFirstMessageInGroup(position,
-                    combineIncomingOutgoing = false)) {
+                                      combineIncomingOutgoing = false)) {
                 activity.resources.getDimension(
                     R.dimen.conversation_item_margin_top_primary).toInt()
             } else {
@@ -158,7 +158,7 @@ class ConversationRecyclerViewAdapter(
         if (contactBadge != null) {
             // Show contact badge if first message in group
             if (isFirstMessageInGroup(position,
-                    combineIncomingOutgoing = false)) {
+                                      combineIncomingOutgoing = false)) {
                 holder.contactBadge.visibility = View.VISIBLE
                 contactBadge.assignContactFromPhone(message.contact, true)
                 contactBadge.setImageBitmap(contactBitmap)
@@ -381,8 +381,8 @@ class ConversationRecyclerViewAdapter(
                                     results: FilterResults?) {
             if (results?.values == null) {
                 showSnackbar(activity, R.id.coordinator_layout,
-                    activity.getString(
-                        R.string.new_conversation_error_refresh))
+                             activity.getString(
+                                 R.string.new_conversation_error_refresh))
                 return
             }
 
@@ -426,7 +426,7 @@ class ConversationRecyclerViewAdapter(
                     comparison > 0 -> {
                         // Add new message
                         _messageItems.add(newIdx,
-                            MessageItem(newMessages[newIdx]))
+                                          MessageItem(newMessages[newIdx]))
                         notifyItemInserted(newIdx)
                         newIdx += 1
                     }
@@ -536,9 +536,9 @@ class ConversationRecyclerViewAdapter(
             null
         }
         return previousMessage == null
-            || (!combineIncomingOutgoing
-            && message.isIncoming != previousMessage.isIncoming)
-            || message.date.time - previousMessage.date.time > 60000
+               || (!combineIncomingOutgoing
+                   && message.isIncoming != previousMessage.isIncoming)
+               || message.date.time - previousMessage.date.time > 60000
     }
 
     /**

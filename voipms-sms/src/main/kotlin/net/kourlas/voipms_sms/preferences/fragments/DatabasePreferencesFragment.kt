@@ -46,7 +46,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     // Preference listeners
     private val importActivityResultLauncher =
         registerForActivityResult(object :
-            ActivityResultContracts.OpenDocument() {
+                                      ActivityResultContracts.OpenDocument() {
             override fun createIntent(context: Context,
                                       input: Array<out String>): Intent {
                 val intent = super.createIntent(context, input)
@@ -75,7 +75,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     }
     private val exportActivityResultLauncher =
         registerForActivityResult(object :
-            ActivityResultContracts.CreateDocument() {
+                                      ActivityResultContracts.CreateDocument() {
             override fun createIntent(
                 context: Context,
                 input: String
@@ -153,7 +153,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                     val importFd = it.contentResolver.openFileDescriptor(
                         uri, "r"
                     )
-                        ?: throw Exception("Could not open file")
+                                   ?: throw Exception("Could not open file")
                     Database.getInstance(it).import(importFd)
                 } catch (e: Exception) {
                     ensureActive()
@@ -194,7 +194,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                     val exportFd = it.contentResolver.openFileDescriptor(
                         uri, "w"
                     )
-                        ?: throw Exception("Could not open file")
+                                   ?: throw Exception("Could not open file")
                     Database.getInstance(it).export(exportFd)
                 } catch (e: Exception) {
                     ensureActive()

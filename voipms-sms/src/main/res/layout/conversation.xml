@@ -135,8 +135,8 @@
                     android:background="@drawable/conversation_button_send"
                     android:contentDescription="@string/conversation_action_send"
                     android:padding="@dimen/half_margin"
-                    app:tint="@color/send_icon"
-                    app:srcCompat="@drawable/ic_send_toolbar_24dp" />
+                    app:srcCompat="@drawable/ic_send_toolbar_24dp"
+                    app:tint="@color/send_icon" />
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>

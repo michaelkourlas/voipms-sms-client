@@ -321,7 +321,7 @@ class ConversationsRecyclerViewAdapter<T>(
                             .getConversationsMessageMostRecentFiltered(
                                 if (activeDid == "")
                                     getDids(activity,
-                                        onlyShowInConversationsView = true)
+                                            onlyShowInConversationsView = true)
                                 else setOf(activeDid),
                                 constraint.toString()
                                     .trim { it <= ' ' }
