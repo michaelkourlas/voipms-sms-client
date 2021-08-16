@@ -1,5 +1,6 @@
 ## 0.6.22 ##
 
+* Bug fixes
 * Rename in-app purchase mechanism to "buy me a coffee"
 
 ## 0.6.21 ##

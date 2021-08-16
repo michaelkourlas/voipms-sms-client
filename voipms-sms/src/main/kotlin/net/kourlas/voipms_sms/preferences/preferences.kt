@@ -56,7 +56,7 @@ fun getConnectTimeout(context: Context): Int =
         context.getString(R.string.preferences_network_connect_timeout_key),
         context.getString(
             R.string.preferences_network_connect_timeout_default_value))
-        .toIntOrNull() ?: 0
+        .toIntOrNull() ?: 15
 
 fun getDids(context: Context,
             onlyShowInConversationsView: Boolean = false,
@@ -181,7 +181,7 @@ fun getReadTimeout(context: Context): Int =
         context.getString(R.string.preferences_network_read_timeout_key),
         context.getString(
             R.string.preferences_network_read_timeout_default_value))
-        .toIntOrNull() ?: 0
+        .toIntOrNull() ?: 15
 
 fun getRetrieveDeletedMessages(context: Context): Boolean {
     val value: String = context.getString(

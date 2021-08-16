@@ -44,21 +44,23 @@ import net.kourlas.voipms_sms.utils.showSnackbar
  */
 class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     // Preference listeners
+    private val importActivityResultLauncher =
+        registerForActivityResult(object :
+            ActivityResultContracts.OpenDocument() {
+            override fun createIntent(context: Context,
+                                      input: Array<out String>): Intent {
+                val intent = super.createIntent(context, input)
+                intent.addCategory(CATEGORY_OPENABLE)
+                return intent
+            }
+        }) {
+            if (it != null) {
+                import(it)
+            }
+        }
     private val importListener = Preference.OnPreferenceClickListener {
         try {
-            val activityResultLauncher =
-                registerForActivityResult(object :
-                    ActivityResultContracts.OpenDocument() {
-                    override fun createIntent(context: Context,
-                                              input: Array<out String>): Intent {
-                        val intent = super.createIntent(context, input)
-                        intent.addCategory(CATEGORY_OPENABLE)
-                        return intent
-                    }
-                }) {
-                    import(it)
-                }
-            activityResultLauncher.launch(arrayOf("*/*"))
+            importActivityResultLauncher.launch(arrayOf("*/*"))
         } catch (_: ActivityNotFoundException) {
             activity?.let {
                 showSnackbar(
@@ -71,22 +73,25 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
         }
         true
     }
-    private val exportListener = Preference.OnPreferenceClickListener {
-        try {
-            val activityResultLauncher = registerForActivityResult(object :
-                ActivityResultContracts.CreateDocument() {
-                override fun createIntent(
-                    context: Context,
-                    input: String
-                ): Intent {
-                    val intent = super.createIntent(context, input)
-                    intent.type = "application/octet-stream"
-                    return intent
-                }
-            }) {
+    private val exportActivityResultLauncher =
+        registerForActivityResult(object :
+            ActivityResultContracts.CreateDocument() {
+            override fun createIntent(
+                context: Context,
+                input: String
+            ): Intent {
+                val intent = super.createIntent(context, input)
+                intent.type = "application/octet-stream"
+                return intent
+            }
+        }) {
+            if (it != null) {
                 export(it)
             }
-            activityResultLauncher.launch("sms.db")
+        }
+    private val exportListener = Preference.OnPreferenceClickListener {
+        try {
+            exportActivityResultLauncher.launch("sms.db")
         } catch (_: ActivityNotFoundException) {
             activity?.let {
                 showSnackbar(

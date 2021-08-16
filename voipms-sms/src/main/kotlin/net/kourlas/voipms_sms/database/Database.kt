@@ -279,17 +279,6 @@ class Database private constructor(private val context: Context) {
      * Gets all messages in a specified conversation. The resulting list is not
      * sorted.
      */
-    suspend fun getConversationMessagesUnsent(
-        conversationId: ConversationId): List<Message> =
-        importExportLock.read {
-            database.smsDao().getConversationMessagesUnsent(conversationId.did,
-                conversationId.contact).map { it.toMessage() }
-        }
-
-    /**
-     * Gets all messages in a specified conversation. The resulting list is not
-     * sorted.
-     */
     suspend fun getConversationMessagesUnsorted(
         conversationId: ConversationId): List<Message> =
         importExportLock.read {

@@ -591,18 +591,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
         }
         adapter.refresh()
 
-        // If there are any unsent messages, try sending them again.
-        lifecycleScope.launch(Dispatchers.Default) {
-            val messages = Database.getInstance(applicationContext)
-                .getConversationMessagesUnsent(conversationId)
-            for (message in messages) {
-                Database.getInstance(applicationContext)
-                    .markMessageDeliveryInProgress(message.databaseId)
-                SendMessageWorker.sendMessage(applicationContext,
-                    message.databaseId)
-            }
-        }
-
         // Track number of activities
         if (!bubble) {
             (application as CustomApplication)

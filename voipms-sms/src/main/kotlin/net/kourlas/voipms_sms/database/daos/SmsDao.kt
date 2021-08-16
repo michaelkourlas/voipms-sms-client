@@ -77,11 +77,6 @@ interface SmsDao {
                                                        date: Long): List<Sms>
 
     @Query(
-        "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact AND ${Sms.COLUMN_DELIVERED} = 0 AND ${Sms.COLUMN_DELIVERY_IN_PROGRESS} = 0 ")
-    suspend fun getConversationMessagesUnsent(did: String,
-                                              contact: String): List<Sms>
-
-    @Query(
         "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact")
     suspend fun getConversationMessagesUnsorted(did: String,
                                                 contact: String): List<Sms>
