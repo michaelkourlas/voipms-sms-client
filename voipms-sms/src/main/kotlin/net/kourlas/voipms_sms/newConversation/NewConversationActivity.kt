@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.newConversation
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -144,6 +145,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                 applicationContext, R.color.search_hint))
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 try {
+                    @SuppressLint("DiscouragedPrivateApi")
                     val field = TextView::class.java.getDeclaredField(
                         "mCursorDrawableRes")
                     field.isAccessible = true

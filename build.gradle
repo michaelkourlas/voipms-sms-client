@@ -21,7 +21,7 @@ allprojects {
         maven { url 'https://jitpack.io' }
         maven { url 'https://maven.google.com/' }
 
-        //noinspection JcenterRepositoryObsolete
+        // We are still using certain libraries only available on JCenter.
         jcenter()
     }
 }

@@ -57,16 +57,16 @@ class Message(val databaseId: Long, val voipId: Long?, val date: Date,
      * null if no ID has yet been assigned to the message because the message has
      * not yet been sent.
      * @param date The UNIX timestamp of the message.
-     * @param incoming Whether or not the message is incoming (1 for
+     * @param isIncoming Whether or not the message is incoming (1 for
      * incoming, 0 for outgoing).
      * @param did The DID associated with the message.
      * @param contact The contact associated with the message.
      * @param text The text of the message.
-     * @param unread Whether or not the message is unread (1 for true, 0 for
+     * @param isUnread Whether or not the message is unread (1 for true, 0 for
      * false).
-     * @param delivered Whether or not the message has been delivered (1 for
+     * @param isDelivered Whether or not the message has been delivered (1 for
      * true, 0 for false).
-     * @param deliveryInProgress Whether or not the message is currently in
+     * @param isDeliveryInProgress Whether or not the message is currently in
      * the process of being delivered (1 for true, 0 for false).
      * @param isDraft Whether or not the message is a draft.
      */

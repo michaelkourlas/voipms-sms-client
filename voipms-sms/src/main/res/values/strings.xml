@@ -290,9 +290,6 @@
     <string name="sync_error_cancelled">Sync failed: cancelled</string>
     <string name="sync_error_unknown">Sync failed: unknown error</string>
 
-    <!-- UnsentMessagesWorker -->
-    <string name="unsent_messages_work_id" translatable="false">net.kourlas.voipms_sms.UNSENT_MESSAGES_WORK_ID</string>
-
     <!-- VerifyCredentialsWorker -->
     <string name="verify_credentials_work_id" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_WORK_ID</string>
     <string name="verify_credentials_email" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_EMAIL</string>

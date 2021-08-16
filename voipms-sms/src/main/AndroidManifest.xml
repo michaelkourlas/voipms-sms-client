@@ -68,6 +68,7 @@
 
         <activity
             android:name=".conversations.ConversationsActivity"
+            android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter>
@@ -84,6 +85,7 @@
             android:parentActivityName=".conversations.ConversationsActivity" />
         <activity
             android:name=".conversation.ConversationActivity"
+            android:exported="true"
             android:parentActivityName=".conversations.ConversationsActivity">
             <intent-filter
                 android:autoVerify="true"
@@ -135,6 +137,7 @@
             android:parentActivityName=".conversations.ConversationsActivity" />
         <activity
             android:name=".preferences.activities.DidPreferencesActivity"
+            android:exported="false"
             android:parentActivityName=".preferences.activities.DidsPreferencesActivity">
             <intent-filter>
                 <action android:name=".preferences.DidPreferencesActivity" />
@@ -143,6 +146,7 @@
         </activity>
         <activity
             android:name=".preferences.activities.DidsPreferencesActivity"
+            android:exported="false"
             android:label="@string/preferences_did_name"
             android:parentActivityName=".preferences.activities.AccountPreferencesActivity">
             <intent-filter>
@@ -152,6 +156,7 @@
         </activity>
         <activity
             android:name=".preferences.activities.AccountPreferencesActivity"
+            android:exported="false"
             android:label="@string/preferences_account_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
@@ -161,6 +166,7 @@
         </activity>
         <activity
             android:name=".preferences.activities.AppearancePreferencesActivity"
+            android:exported="false"
             android:label="@string/preferences_appearance_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
@@ -170,6 +176,7 @@
         </activity>
         <activity
             android:name=".preferences.activities.DatabasePreferencesActivity"
+            android:exported="false"
             android:label="@string/preferences_database_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
@@ -179,6 +186,7 @@
         </activity>
         <activity
             android:name=".preferences.activities.NetworkPreferencesActivity"
+            android:exported="false"
             android:label="@string/preferences_network_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
@@ -188,6 +196,7 @@
         </activity>
         <activity
             android:name=".preferences.activities.NotificationsPreferencesActivity"
+            android:exported="false"
             android:label="@string/preferences_notifications_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
@@ -197,6 +206,7 @@
         </activity>
         <activity
             android:name=".preferences.activities.SynchronizationPreferencesActivity"
+            android:exported="false"
             android:label="@string/preferences_sync_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
@@ -206,6 +216,7 @@
         </activity>
         <activity
             android:name=".signIn.SignInActivity"
+            android:exported="false"
             android:label="@string/sign_in_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
@@ -218,7 +229,9 @@
 
         <receiver android:name=".sms.receivers.MarkReadReceiver" />
         <receiver android:name=".sms.receivers.SendMessageReceiver" />
-        <receiver android:name=".sms.receivers.SyncBootReceiver">
+        <receiver
+            android:name=".sms.receivers.SyncBootReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_LOCKED_BOOT_COMPLETED" />

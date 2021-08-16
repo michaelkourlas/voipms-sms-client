@@ -115,10 +115,6 @@ interface SmsDao {
         "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DID} IN(:dids) ORDER BY ${Sms.COLUMN_DELIVERY_IN_PROGRESS} DESC, ${Sms.COLUMN_DATE} DESC, ${Sms.COLUMN_VOIP_ID} DESC, ${Sms.COLUMN_DATABASE_ID} DESC LIMIT 1")
     suspend fun getMostRecent(dids: Set<String>): Sms?
 
-    @Query(
-        "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DELIVERED} = 0 AND ${Sms.COLUMN_DELIVERY_IN_PROGRESS} = 0 ")
-    suspend fun getUnsent(): List<Sms>
-
     @Insert
     suspend fun insert(sms: Sms): Long
 
