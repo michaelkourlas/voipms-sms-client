@@ -1,3 +1,20 @@
+/*
+ * VoIP.ms SMS
+ * Copyright (C) 2021 Michael Kourlas
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.kourlas.voipms_sms.database.daos
 
 import androidx.room.Dao
@@ -60,6 +77,11 @@ interface SmsDao {
                                                        date: Long): List<Sms>
 
     @Query(
+        "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact AND ${Sms.COLUMN_DELIVERED} = 0 AND ${Sms.COLUMN_DELIVERY_IN_PROGRESS} = 0 ")
+    suspend fun getConversationMessagesUnsent(did: String,
+                                              contact: String): List<Sms>
+
+    @Query(
         "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact")
     suspend fun getConversationMessagesUnsorted(did: String,
                                                 contact: String): List<Sms>
@@ -97,6 +119,10 @@ interface SmsDao {
     @Query(
         "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DID} IN(:dids) ORDER BY ${Sms.COLUMN_DELIVERY_IN_PROGRESS} DESC, ${Sms.COLUMN_DATE} DESC, ${Sms.COLUMN_VOIP_ID} DESC, ${Sms.COLUMN_DATABASE_ID} DESC LIMIT 1")
     suspend fun getMostRecent(dids: Set<String>): Sms?
+
+    @Query(
+        "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DELIVERED} = 0 AND ${Sms.COLUMN_DELIVERY_IN_PROGRESS} = 0 ")
+    suspend fun getUnsent(): List<Sms>
 
     @Insert
     suspend fun insert(sms: Sms): Long

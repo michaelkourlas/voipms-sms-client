@@ -95,7 +95,6 @@ class Database private constructor(private val context: Context) {
             }
         }
 
-
     /**
      * Deletes the messages in the specified conversation from the database.
      * Also deletes any draft message if one exists.
@@ -143,7 +142,6 @@ class Database private constructor(private val context: Context) {
             database.deletedDao().deleteAll()
         }
 
-
     /**
      * Deletes all rows in all tables in the database.
      */
@@ -162,7 +160,6 @@ class Database private constructor(private val context: Context) {
             updateShortcuts()
         }
     }
-
 
     /**
      * Exports the database to the specified file descriptor.
@@ -197,7 +194,6 @@ class Database private constructor(private val context: Context) {
             }
         }
 
-
     /**
      * Gets the draft message for the specified conversation.
      *
@@ -210,7 +206,6 @@ class Database private constructor(private val context: Context) {
                 conversationId.did, conversationId.contact)?.toMessage()
         }
 
-
     /**
      * Gets all conversation IDs in the database associated with the specified
      * DIDs.
@@ -220,7 +215,6 @@ class Database private constructor(private val context: Context) {
         importExportLock.read {
             getConversationIdsWithoutLock(dids)
         }
-
 
     /**
      * Gets all messages in a specified conversation that match a specified
@@ -239,11 +233,10 @@ class Database private constructor(private val context: Context) {
             } else {
                 database.smsDao()
                     .getConversationMessagesFiltered(conversationId.did,
-                                                     conversationId.contact,
-                                                     filterConstraint)
+                        conversationId.contact,
+                        filterConstraint)
             }.map { it.toMessage() }
         }
-
 
     /**
      * Gets the number of messages in a specified conversation that match a
@@ -255,8 +248,8 @@ class Database private constructor(private val context: Context) {
         importExportLock.read {
             database.smsDao()
                 .getConversationMessagesFilteredCount(conversationId.did,
-                                                      conversationId.contact,
-                                                      filterConstraint)
+                    conversationId.contact,
+                    filterConstraint)
         }
 
     /**
@@ -270,9 +263,9 @@ class Database private constructor(private val context: Context) {
         importExportLock.read {
             // Retrieve the date of the most recent outgoing message.
             val date = database.smsDao()
-                           .getConversationMessageDateMostRecentOutgoing(
-                               conversationId.did,
-                               conversationId.contact) ?: 0
+                .getConversationMessageDateMostRecentOutgoing(
+                    conversationId.did,
+                    conversationId.contact) ?: 0
 
             // Retrieve all unread messages with a date equal to or after
             // this date.
@@ -282,6 +275,16 @@ class Database private constructor(private val context: Context) {
                 .map { it.toMessage() }
         }
 
+    /**
+     * Gets all messages in a specified conversation. The resulting list is not
+     * sorted.
+     */
+    suspend fun getConversationMessagesUnsent(
+        conversationId: ConversationId): List<Message> =
+        importExportLock.read {
+            database.smsDao().getConversationMessagesUnsent(conversationId.did,
+                conversationId.contact).map { it.toMessage() }
+        }
 
     /**
      * Gets all messages in a specified conversation. The resulting list is not
@@ -292,7 +295,6 @@ class Database private constructor(private val context: Context) {
         importExportLock.read {
             getConversationMessagesUnsortedWithoutLock(conversationId)
         }
-
 
     /**
      * Gets the most recent message in each conversation associated with the
@@ -310,7 +312,6 @@ class Database private constructor(private val context: Context) {
                 contactNameCache)
         }
 
-
     /**
      * Gets all DIDs used in the database.
      */
@@ -318,7 +319,6 @@ class Database private constructor(private val context: Context) {
         importExportLock.read {
             database.smsDao().getDids().toSet()
         }
-
 
     /**
      * Retrieves the message with the specified database ID from the database.
@@ -329,7 +329,6 @@ class Database private constructor(private val context: Context) {
         importExportLock.read {
             database.smsDao().getById(databaseId)?.toMessage()
         }
-
 
     /**
      * Gets the most recent message in the set of messages associated with the
@@ -351,7 +350,6 @@ class Database private constructor(private val context: Context) {
         importExportLock.read {
             database.smsDao().getAll(dids).map { it.toMessage() }
         }
-
 
     /**
      * Imports the database from the specified file descriptor.
@@ -406,7 +404,6 @@ class Database private constructor(private val context: Context) {
             replaceIndex(context)
         }
     }
-
 
     /**
      * Inserts new outgoing messages into the database with the specified
@@ -505,7 +502,7 @@ class Database private constructor(private val context: Context) {
                             // messages.
                             database.deletedDao()
                                 .delete(setOf(incomingMessage.did),
-                                        incomingMessage.voipId)
+                                    incomingMessage.voipId)
                         } else if (database.deletedDao().get(
                                 incomingMessage.did,
                                 incomingMessage.voipId) != null) {
@@ -572,7 +569,6 @@ class Database private constructor(private val context: Context) {
                 conversationId.did, conversationId.contact)?.archived == 1
         }
 
-
     /**
      * Marks the specified conversation as archived.
      */
@@ -584,12 +580,11 @@ class Database private constructor(private val context: Context) {
                     .getConversation(conversationId.did, conversationId.contact)
                 val newArchived =
                     Archived(databaseId = existingArchived?.databaseId ?: 0,
-                             did = conversationId.did,
-                             contact = conversationId.contact, archived = 1)
+                        did = conversationId.did,
+                        contact = conversationId.contact, archived = 1)
                 database.archivedDao().update(newArchived)
             }
         }
-
 
     /**
      * Marks the specified conversation as unarchived.
@@ -602,12 +597,11 @@ class Database private constructor(private val context: Context) {
                     .getConversation(conversationId.did, conversationId.contact)
                 val newArchived =
                     Archived(databaseId = existingArchived?.databaseId ?: 0,
-                             did = conversationId.did,
-                             contact = conversationId.contact, archived = 0)
+                        did = conversationId.did,
+                        contact = conversationId.contact, archived = 0)
                 database.archivedDao().update(newArchived)
             }
         }
-
 
     /**
      * Marks the specified conversation as read.
@@ -619,7 +613,6 @@ class Database private constructor(private val context: Context) {
                 conversationId.did,
                 conversationId.contact)
         }
-
 
     /**
      * Marks the specified conversation as unread.
@@ -713,17 +706,17 @@ class Database private constructor(private val context: Context) {
                         contactName ?: getFormattedPhoneNumber(it.contact)
                     val icon = IconCompat.createWithAdaptiveBitmap(
                         getContactPhotoAdaptiveBitmap(context, contactName,
-                                                      it.contact))
+                            it.contact))
                     ShortcutInfoCompat.Builder(
                         context, it.conversationId.getId())
                         .setIcon(icon)
                         .setIntent(intent)
                         .setPerson(Person.Builder()
-                                       .setName(label)
-                                       .setKey(it.contact)
-                                       .setIcon(icon)
-                                       .setUri("tel:${it.contact}")
-                                       .build())
+                            .setName(label)
+                            .setKey(it.contact)
+                            .setIcon(icon)
+                            .setUri("tel:${it.contact}")
+                            .build())
                         .setLongLabel(label)
                         .setShortLabel(
                             if (contactName != null) label.split(
@@ -738,7 +731,7 @@ class Database private constructor(private val context: Context) {
                     shortcutInfoList.zip(0 until maxCount).map { it.first }
                 try {
                     ShortcutManagerCompat.updateShortcuts(context,
-                                                          shortcutInfoList)
+                        shortcutInfoList)
                     ShortcutManagerCompat.setDynamicShortcuts(
                         context, dynamicShortcutInfoList)
                 } catch (e: Exception) {
@@ -800,7 +793,7 @@ class Database private constructor(private val context: Context) {
         conversationId: ConversationId): List<Message> {
         return database.smsDao()
             .getConversationMessagesUnsorted(conversationId.did,
-                                             conversationId.contact)
+                conversationId.contact)
             .map { it.toMessage() }
     }
 
@@ -880,9 +873,9 @@ class Database private constructor(private val context: Context) {
             // Otherwise, simply get the most recent message for the
             // conversation without using any filters.
             val sms = database.smsDao()
-                          .getConversationMessageMostRecent(
-                              conversationId.did,
-                              conversationId.contact) ?: continue
+                .getConversationMessageMostRecent(
+                    conversationId.did,
+                    conversationId.contact) ?: continue
 
             // If no filter constraint was provided, just add the message
             // to the list.
@@ -958,7 +951,7 @@ class Database private constructor(private val context: Context) {
         // If text is empty, then just delete any existing draft message.
         if (text == "") {
             database.draftDao().deleteConversation(conversationId.did,
-                                                   conversationId.contact)
+                conversationId.contact)
             return
         }
 
@@ -966,9 +959,9 @@ class Database private constructor(private val context: Context) {
         val existingDraft = database.draftDao().getConversation(
             conversationId.did, conversationId.contact)
         val newDraft = Draft(databaseId = existingDraft?.databaseId ?: 0,
-                             did = conversationId.did,
-                             contact = conversationId.contact,
-                             text = text)
+            did = conversationId.did,
+            contact = conversationId.contact,
+            text = text)
         database.draftDao().update(newDraft)
     }
 
@@ -1003,7 +996,7 @@ class Database private constructor(private val context: Context) {
          */
         private fun createDatabase(context: Context): AbstractDatabase {
             return Room.databaseBuilder(context, AbstractDatabase::class.java,
-                                        DATABASE_NAME)
+                DATABASE_NAME)
                 .addMigrations(migration9To10)
                 .fallbackToDestructiveMigration()
                 .build()
