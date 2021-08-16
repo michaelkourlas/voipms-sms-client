@@ -45,8 +45,7 @@ class CoroutineReadWriteLock(val readers: Int) {
             var permitsAcquired = 0
             try {
                 // To obtain a write lock, we must acquire all of the permits
-                // provided by r. While we are trying to do this, no new
-                // readers will be able to acquire a permit.
+                // provided by r.
                 repeat(readers) {
                     r.acquire()
                     permitsAcquired += 1
