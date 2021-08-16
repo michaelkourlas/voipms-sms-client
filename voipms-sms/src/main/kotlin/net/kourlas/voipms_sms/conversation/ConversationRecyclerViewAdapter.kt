@@ -185,8 +185,8 @@ class ConversationRecyclerViewAdapter(
 
         // Highlight text that matches filter
         if (currConstraint != "") {
-            val index = message.text.toLowerCase(Locale.getDefault()).indexOf(
-                currConstraint.toLowerCase(Locale.getDefault()))
+            val index = message.text.lowercase(Locale.getDefault()).indexOf(
+                currConstraint.lowercase(Locale.getDefault()))
             if (index != -1) {
                 messageTextBuilder.setSpan(
                     BackgroundColorSpan(
@@ -341,7 +341,7 @@ class ConversationRecyclerViewAdapter(
                 runBlocking {
                     val filterString = constraint.toString()
                         .trim { it <= ' ' }
-                        .toLowerCase(Locale.getDefault())
+                        .lowercase(Locale.getDefault())
                     maxLimit = Database.getInstance(activity)
                         .getConversationMessagesFilteredCount(
                             conversationId, filterString)

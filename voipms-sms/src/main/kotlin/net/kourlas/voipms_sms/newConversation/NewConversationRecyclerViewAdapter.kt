@@ -228,13 +228,13 @@ class NewConversationRecyclerViewAdapter(
             val currConstraint = constraint.toString().trim { it <= ' ' }
             for (contactItem in allContactItems) {
                 val match =
-                    contactItem.name.toLowerCase(Locale.getDefault()).contains(
-                        currConstraint.toLowerCase(Locale.getDefault()))
-                    || contactItem.primaryPhoneNumber
-                        .toLowerCase(Locale.getDefault())
-                        .contains(currConstraint.toLowerCase(
+                    contactItem.name.lowercase(Locale.getDefault()).contains(
+                        currConstraint.lowercase(Locale.getDefault()))
+                        || contactItem.primaryPhoneNumber
+                        .lowercase(Locale.getDefault())
+                        .contains(currConstraint.lowercase(
                             Locale.getDefault()))
-                    || (getDigitsOfString(currConstraint) != ""
+                        || (getDigitsOfString(currConstraint) != ""
                         && getDigitsOfString(
                         contactItem.primaryPhoneNumber).contains(
                         getDigitsOfString(currConstraint)))

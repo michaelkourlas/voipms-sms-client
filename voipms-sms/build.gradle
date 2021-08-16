@@ -118,7 +118,7 @@ dependencies {
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
     implementation 'de.adorsys.android:securestoragelibrary:1.2.2'
     implementation 'com.github.xabaras:RecyclerViewSwipeDecorator:1.3'
-    kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.11.0'
+    kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.12.0'
 }
 
 tasks.whenTaskAdded {task ->

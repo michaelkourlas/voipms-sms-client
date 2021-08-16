@@ -302,7 +302,7 @@ fun calculateInSampleSize(options: BitmapFactory.Options,
  * Gets the initial corresponding to the specified name.
  */
 fun getContactInitial(name: String?): String =
-    name?.toUpperCase(Locale.getDefault())?.getOrNull(0)?.let {
+    name?.uppercase(Locale.getDefault())?.getOrNull(0)?.let {
         when {
             it.isLetter() -> it.toString()
             it.isDigit() -> "#"

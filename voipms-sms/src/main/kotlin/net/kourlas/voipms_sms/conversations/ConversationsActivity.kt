@@ -280,7 +280,8 @@ open class ConversationsActivity(val archived: Boolean = false) :
                                 )
                             )
                     ItemTouchHelper.RIGHT -> deleteConversations(
-                        listOf(adapter[viewHolder.bindingAdapterPosition].message)
+                        listOf(
+                            adapter[viewHolder.bindingAdapterPosition].message)
                     )
                 }
             }

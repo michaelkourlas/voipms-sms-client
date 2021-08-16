@@ -830,7 +830,7 @@ class Database private constructor(private val context: Context) {
         return getConversationsMessageDraft(dids)
             .filter {
                 it.text
-                    .toLowerCase(Locale.getDefault())
+                    .lowercase(Locale.getDefault())
                     .contains(filterConstraint)
             }
             .toMutableList()
@@ -895,9 +895,9 @@ class Database private constructor(private val context: Context) {
             // filter. We could not check this as part of the first SQL
             // query, since it requires an external lookup.
             val contactName = getContactName(context,
-                                             sms.contact,
-                                             contactNameCache)
-            val lowercaseContactName = contactName?.toLowerCase(
+                sms.contact,
+                contactNameCache)
+            val lowercaseContactName = contactName?.lowercase(
                 Locale.getDefault())
             if (lowercaseContactName?.contains(filterConstraint) == true) {
                 messages.add(sms.toMessage())

@@ -47,8 +47,10 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     private val importListener = Preference.OnPreferenceClickListener {
         try {
             val activityResultLauncher =
-                registerForActivityResult(object : ActivityResultContracts.OpenDocument() {
-                    override fun createIntent(context: Context, input: Array<out String>): Intent {
+                registerForActivityResult(object :
+                    ActivityResultContracts.OpenDocument() {
+                    override fun createIntent(context: Context,
+                                              input: Array<out String>): Intent {
                         val intent = super.createIntent(context, input)
                         intent.addCategory(CATEGORY_OPENABLE)
                         return intent

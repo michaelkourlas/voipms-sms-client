@@ -134,8 +134,8 @@ class ConversationsRecyclerViewAdapter<T>(
         // Highlight text that matches filter
         if (currConstraint != "") {
             val index = contactTextBuilder.toString()
-                .toLowerCase(Locale.getDefault())
-                .indexOf(currConstraint.toLowerCase(Locale.getDefault()))
+                .lowercase(Locale.getDefault())
+                .indexOf(currConstraint.lowercase(Locale.getDefault()))
             if (index != -1) {
                 contactTextBuilder.setSpan(
                     BackgroundColorSpan(
@@ -179,8 +179,8 @@ class ConversationsRecyclerViewAdapter<T>(
         val messageTextBuilder = SpannableStringBuilder()
 
         // Highlight text that matches filter
-        val index = message.text.toLowerCase(Locale.getDefault()).indexOf(
-            currConstraint.toLowerCase(Locale.getDefault()))
+        val index = message.text.lowercase(Locale.getDefault()).indexOf(
+            currConstraint.lowercase(Locale.getDefault()))
         if (currConstraint != "" && index != -1) {
             var nonMessageOffset = index
             if (message.isOutgoing) {
@@ -321,11 +321,11 @@ class ConversationsRecyclerViewAdapter<T>(
                             .getConversationsMessageMostRecentFiltered(
                                 if (activeDid == "")
                                     getDids(activity,
-                                            onlyShowInConversationsView = true)
+                                        onlyShowInConversationsView = true)
                                 else setOf(activeDid),
                                 constraint.toString()
                                     .trim { it <= ' ' }
-                                    .toLowerCase(Locale.getDefault())).filter {
+                                    .lowercase(Locale.getDefault())).filter {
                                 val archived = Database.getInstance(activity)
                                     .isConversationArchived(it.conversationId)
                                 if (activity is ConversationsArchivedActivity) {
