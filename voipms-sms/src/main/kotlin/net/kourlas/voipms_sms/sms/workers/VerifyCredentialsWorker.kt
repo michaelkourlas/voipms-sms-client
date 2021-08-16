@@ -117,13 +117,18 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
     private suspend fun getApiResponse(email: String,
                                        password: String): VerifyCredentialsResponse? {
         try {
-            return httpPostWithMultipartFormData(
-                applicationContext,
-                "https://www.voip.ms/api/v1/rest.php",
-                mapOf("api_username" to email,
-                      "api_password" to password,
-                      "method" to "getDIDsInfo"))
-        } catch (e: IOException) {
+            repeat(3) {
+                try {
+                    return httpPostWithMultipartFormData(
+                        applicationContext,
+                        "https://www.voip.ms/api/v1/rest.php",
+                        mapOf("api_username" to email,
+                              "api_password" to password,
+                              "method" to "getDIDsInfo"))
+                } catch (e: IOException) {
+                    // Try again...
+                }
+            }
             error = applicationContext.getString(
                 R.string.verify_credentials_error_api_request)
             return null

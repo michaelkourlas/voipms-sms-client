@@ -191,32 +191,7 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
      */
     private suspend fun sendMessageWithVoipMsApi(message: Message): Long? {
         // Get JSON response from API
-        val response: MessageResponse?
-        try {
-            response = httpPostWithMultipartFormData(
-                applicationContext,
-                "https://www.voip.ms/api/v1/rest.php",
-                mapOf("api_username" to getEmail(applicationContext),
-                      "api_password" to getPassword(applicationContext),
-                      "method" to "sendSMS",
-                      "did" to message.did,
-                      "dst" to message.contact,
-                      "message" to message.text))
-        } catch (e: IOException) {
-            error = applicationContext.getString(
-                R.string.send_message_error_api_request)
-            return null
-        } catch (e: JsonDataException) {
-            logException(e)
-            error = applicationContext.getString(
-                R.string.send_message_error_api_parse)
-            return null
-        } catch (e: Exception) {
-            logException(e)
-            error = applicationContext.getString(
-                R.string.send_message_error_unknown)
-            return null
-        }
+        val response: MessageResponse? = getMessageResponse(message)
 
         // Get VoIP.ms ID from response
         if (response?.status == "") {
@@ -253,6 +228,39 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
             return null
         }
         return response.sms
+    }
+
+    private suspend fun getMessageResponse(message: Message): MessageResponse? {
+        try {
+            repeat(3) {
+                try {
+                    return httpPostWithMultipartFormData(
+                        applicationContext,
+                        "https://www.voip.ms/api/v1/rest.php",
+                        mapOf("api_username" to getEmail(applicationContext),
+                              "api_password" to getPassword(applicationContext),
+                              "method" to "sendSMS",
+                              "did" to message.did,
+                              "dst" to message.contact,
+                              "message" to message.text))
+                } catch (e: IOException) {
+                    // Try again...
+                }
+            }
+            error = applicationContext.getString(
+                R.string.send_message_error_api_request)
+            return null
+        } catch (e: JsonDataException) {
+            logException(e)
+            error = applicationContext.getString(
+                R.string.send_message_error_api_parse)
+            return null
+        } catch (e: Exception) {
+            logException(e)
+            error = applicationContext.getString(
+                R.string.send_message_error_unknown)
+            return null
+        }
     }
 
     companion object {

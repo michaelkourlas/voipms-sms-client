@@ -140,13 +140,18 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
      */
     private suspend fun getApiResponse(): DidsResponse? {
         try {
-            return httpPostWithMultipartFormData(
-                applicationContext,
-                "https://www.voip.ms/api/v1/rest.php",
-                mapOf("api_username" to getEmail(applicationContext),
-                      "api_password" to getPassword(applicationContext),
-                      "method" to "getDIDsInfo"))
-        } catch (e: IOException) {
+            repeat(3) {
+                try {
+                    return httpPostWithMultipartFormData(
+                        applicationContext,
+                        "https://www.voip.ms/api/v1/rest.php",
+                        mapOf("api_username" to getEmail(applicationContext),
+                              "api_password" to getPassword(applicationContext),
+                              "method" to "getDIDsInfo"))
+                } catch (e: IOException) {
+                    // Try again...
+                }
+            }
             error = applicationContext.getString(
                 R.string.preferences_dids_error_api_request)
             return null

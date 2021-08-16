@@ -360,11 +360,16 @@ class SyncWorker(context: Context, params: WorkerParameters) :
     private suspend fun sendRequestWithVoipMsApi(
         request: RetrievalRequest): MessagesResponse? {
         try {
-            return httpPostWithMultipartFormData(
-                applicationContext,
-                "https://www.voip.ms/api/v1/rest.php",
-                request.formData)
-        } catch (e: IOException) {
+            repeat(3) {
+                try {
+                    return httpPostWithMultipartFormData(
+                        applicationContext,
+                        "https://www.voip.ms/api/v1/rest.php",
+                        request.formData)
+                } catch (e: IOException) {
+                    // Try again...
+                }
+            }
             error = applicationContext.getString(
                 R.string.sync_error_api_request)
             return null
