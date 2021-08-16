@@ -23,8 +23,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 
 /**
- * Temporary implementation of a write-preferring coroutine-compatible
- * read-write lock.
+ * Temporary implementation of a coroutine-compatible read-write lock.
  *
  * This should be removed once coroutine-compatible read-write locks are
  * supported by the Kotlin standard library.
