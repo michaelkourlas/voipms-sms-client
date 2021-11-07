@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -36,6 +37,7 @@ import net.kourlas.voipms_sms.utils.logException
  * PendingIntent to a SendMessageWorker.
  */
 class SendMessageReceiver : BroadcastReceiver() {
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             // Collect the required state.
@@ -55,8 +57,10 @@ class SendMessageReceiver : BroadcastReceiver() {
             val remoteInput = RemoteInput.getResultsFromIntent(intent)
             val messageText = remoteInput?.getCharSequence(
                 context.getString(
-                    R.string.notifications_reply_key))?.toString()
-                              ?: throw Exception("No message text provided")
+                    R.string.notifications_reply_key
+                )
+            )?.toString()
+                ?: throw Exception("No message text provided")
 
             val pendingResult =
                 goAsync() ?: throw Exception("No PendingResult returned")

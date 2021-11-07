@@ -56,8 +56,11 @@ fun getContactName(context: Context, phoneNumber: String,
             null, null, null)
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                val name = cursor.getString(cursor.getColumnIndex(
-                    ContactsContract.PhoneLookup.DISPLAY_NAME))
+                val name = cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                        ContactsContract.PhoneLookup.DISPLAY_NAME
+                    )
+                )
                 cursor.close()
                 if (contactNameCache != null && name != null) {
                     contactNameCache[phoneNumber] = name
@@ -222,8 +225,11 @@ fun getContactPhotoUri(
             null, null, null)
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                val photoUri = cursor.getString(cursor.getColumnIndex(
-                    ContactsContract.Contacts.PHOTO_THUMBNAIL_URI))
+                val photoUri = cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                        ContactsContract.Contacts.PHOTO_THUMBNAIL_URI
+                    )
+                )
                 cursor.close()
                 if (contactPhotoUriCache != null) {
                     contactPhotoUriCache[uri] = photoUri

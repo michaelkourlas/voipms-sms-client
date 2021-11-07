@@ -55,14 +55,6 @@ class SyncWorker(context: Context, params: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         try {
-            // Make this a foreground service to ensure immediate execution.
-            // This will be changed to setExpedited in Android 12.
-            try {
-                setForeground(getForegroundInfo())
-            } catch (e: Exception) {
-                throw e
-            }
-
             // Perform database synchronization.
             handleSync()
 
@@ -90,16 +82,20 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         }
     }
 
-    private fun getForegroundInfo(): ForegroundInfo {
+    override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncDatabaseNotification(id, progress)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ForegroundInfo(Notifications.SYNC_DATABASE_NOTIFICATION_ID,
-                           notification,
-                           ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            ForegroundInfo(
+                Notifications.SYNC_DATABASE_NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
         } else {
-            ForegroundInfo(Notifications.SYNC_DATABASE_NOTIFICATION_ID,
-                           notification)
+            ForegroundInfo(
+                Notifications.SYNC_DATABASE_NOTIFICATION_ID,
+                notification
+            )
         }
     }
 
@@ -434,6 +430,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                     workRequest.setInitialDelay(delayInterval,
                                                 TimeUnit.MILLISECONDS)
                 }
+                workRequest.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 val work = workRequest.build()
                 WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                     context.getString(R.string.sync_work_id),
@@ -453,7 +450,9 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         fun performPartialSynchronization(context: Context) {
             val work = OneTimeWorkRequestBuilder<SyncWorker>().setInputData(
                 workDataOf(
-                    context.getString(R.string.sync_force_recent) to true))
+                    context.getString(R.string.sync_force_recent) to true
+                )
+            ).setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.sync_partial_work_id),

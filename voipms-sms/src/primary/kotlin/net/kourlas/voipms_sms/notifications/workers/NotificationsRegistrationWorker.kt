@@ -39,10 +39,6 @@ class NotificationsRegistrationWorker(context: Context,
     CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        // Make this a foreground service to ensure immediate execution.
-        // This will be changed to setExpedited in Android 12.
-        setForeground(getForegroundInfo())
-
         // Terminate quietly if notifications are not enabled
         if (!Notifications.getInstance(applicationContext)
                 .getNotificationsEnabled()) {
@@ -81,16 +77,20 @@ class NotificationsRegistrationWorker(context: Context,
         return Result.success()
     }
 
-    private fun getForegroundInfo(): ForegroundInfo {
+    override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncRegisterPushNotificationsNotification()
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ForegroundInfo(Notifications.SYNC_REGISTER_PUSH_NOTIFICATION_ID,
-                           notification,
-                           ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            ForegroundInfo(
+                Notifications.SYNC_REGISTER_PUSH_NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
         } else {
-            ForegroundInfo(Notifications.SYNC_REGISTER_PUSH_NOTIFICATION_ID,
-                           notification)
+            ForegroundInfo(
+                Notifications.SYNC_REGISTER_PUSH_NOTIFICATION_ID,
+                notification
+            )
         }
     }
 
@@ -180,7 +180,9 @@ class NotificationsRegistrationWorker(context: Context,
          */
         fun registerForPushNotifications(context: Context) {
             val work =
-                OneTimeWorkRequestBuilder<NotificationsRegistrationWorker>()
+                OneTimeWorkRequestBuilder<NotificationsRegistrationWorker>().setExpedited(
+                    OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST
+                )
                     .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.push_notifications_work_id),

@@ -58,10 +58,6 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
         }
 
         try {
-            // Make this a foreground service to ensure immediate execution.
-            // This will be changed to setExpedited in Android 12.
-            setForeground(getForegroundInfo())
-
             // Send the message we were asked to send.
             sendMessage(databaseId)
 
@@ -99,16 +95,20 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
         }
     }
 
-    private fun getForegroundInfo(): ForegroundInfo {
+    override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncMessageSendNotification()
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ForegroundInfo(Notifications.SYNC_SEND_MESSAGE_NOTIFICATION_ID,
-                           notification,
-                           ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            ForegroundInfo(
+                Notifications.SYNC_SEND_MESSAGE_NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
         } else {
-            ForegroundInfo(Notifications.SYNC_SEND_MESSAGE_NOTIFICATION_ID,
-                           notification)
+            ForegroundInfo(
+                Notifications.SYNC_SEND_MESSAGE_NOTIFICATION_ID,
+                notification
+            )
         }
     }
 
@@ -273,16 +273,23 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                 .setInputData(
                     workDataOf(
                         context.getString(
-                            R.string.send_message_database_id) to databaseId,
+                            R.string.send_message_database_id
+                        ) to databaseId,
                         context.getString(
-                            R.string.send_message_inline_reply)
+                            R.string.send_message_inline_reply
+                        )
                             to (inlineReplyConversationId != null),
                         context.getString(
-                            R.string.send_message_inline_reply_did)
+                            R.string.send_message_inline_reply_did
+                        )
                             to inlineReplyConversationId?.did,
                         context.getString(
-                            R.string.send_message_inline_reply_contact)
-                            to inlineReplyConversationId?.contact))
+                            R.string.send_message_inline_reply_contact
+                        )
+                            to inlineReplyConversationId?.contact
+                    )
+                )
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.send_message_work_id, databaseId),

@@ -19,7 +19,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="net.kourlas.voipms_sms">
 
-    <application tools:ignore="GoogleAppIndexingWarning">
+    <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
         <!-- BROADCAST RECEIVERS -->
 
         <receiver

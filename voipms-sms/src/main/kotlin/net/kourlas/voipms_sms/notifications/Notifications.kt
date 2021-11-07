@@ -445,12 +445,20 @@ class Notifications private constructor(private val context: Context) {
             val channel = getNotificationChannelId(did, contact)
             val notificationManager: NotificationManager =
                 context.getSystemService(
-                    Context.NOTIFICATION_SERVICE) as NotificationManager
-            if (!notificationManager.areBubblesAllowed()) {
+                    Context.NOTIFICATION_SERVICE
+                ) as NotificationManager
+            val bubblesAllowed =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    notificationManager.bubblePreference == NotificationManager.BUBBLE_PREFERENCE_ALL
+                } else {
+                    @Suppress("DEPRECATION")
+                    notificationManager.areBubblesAllowed()
+                }
+            if (!bubblesAllowed) {
                 val notificationChannel =
                     notificationManager.getNotificationChannel(channel)
                 return notificationChannel != null
-                       && notificationChannel.canBubble()
+                    && notificationChannel.canBubble()
             }
             return true
         }
@@ -608,42 +616,63 @@ class Notifications private constructor(private val context: Context) {
         }
         notificationMessages[conversationId] =
             (style.historicMessages.toMutableList()
-             + style.messages.toMutableList())
+                + style.messages.toMutableList())
         notification.setStyle(style)
 
         // Mark as read button
         val markReadIntent = MarkReadReceiver.getIntent(context, did, contact)
         markReadIntent.component = ComponentName(
-            context, MarkReadReceiver::class.java)
+            context, MarkReadReceiver::class.java
+        )
+        val markReadFlags = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        } else {
+            PendingIntent.FLAG_CANCEL_CURRENT
+        }
         val markReadPendingIntent = PendingIntent.getBroadcast(
             context, (did + contact + "markRead").hashCode(),
-            markReadIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+            markReadIntent, markReadFlags
+        )
         val markReadAction = NotificationCompat.Action.Builder(
             R.drawable.ic_drafts_toolbar_24dp,
             context.getString(R.string.notifications_button_mark_read),
-            markReadPendingIntent)
+            markReadPendingIntent
+        )
             .setSemanticAction(
-                NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
+                NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ
+            )
             .setShowsUserInterface(false)
             .build()
         notification.addAction(markReadAction)
 
         // Reply button
         val replyIntent = SendMessageReceiver.getIntent(
-            context, did, contact)
+            context, did, contact
+        )
         replyIntent.component = ComponentName(
-            context, SendMessageReceiver::class.java)
+            context, SendMessageReceiver::class.java
+        )
+        val replyFlags = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
+        } else {
+            PendingIntent.FLAG_CANCEL_CURRENT
+        }
         val replyPendingIntent = PendingIntent.getBroadcast(
             context, (did + contact + "reply").hashCode(),
-            replyIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        val remoteInput = RemoteInput.Builder(context.getString(
-            R.string.notifications_reply_key))
+            replyIntent, replyFlags
+        )
+        val remoteInput = RemoteInput.Builder(
+            context.getString(
+                R.string.notifications_reply_key
+            )
+        )
             .setLabel(context.getString(R.string.notifications_button_reply))
             .build()
         val replyActionBuilder = NotificationCompat.Action.Builder(
             R.drawable.ic_reply_toolbar_24dp,
             context.getString(R.string.notifications_button_reply),
-            replyPendingIntent)
+            replyPendingIntent
+        )
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
             .setShowsUserInterface(false)
             .setAllowGeneratedReplies(true)
@@ -656,24 +685,44 @@ class Notifications private constructor(private val context: Context) {
 
             // Inline reply is not supported, so just show the conversation
             // activity
-            val visibleReplyIntent = Intent(context,
-                                            ConversationActivity::class.java)
-            visibleReplyIntent.putExtra(context.getString(
-                R.string.conversation_did), did)
-            visibleReplyIntent.putExtra(context.getString(
-                R.string.conversation_contact), contact)
-            visibleReplyIntent.putExtra(context.getString(
-                R.string.conversation_extra_focus), true)
+            val visibleReplyIntent = Intent(
+                context,
+                ConversationActivity::class.java
+            )
+            visibleReplyIntent.putExtra(
+                context.getString(
+                    R.string.conversation_did
+                ), did
+            )
+            visibleReplyIntent.putExtra(
+                context.getString(
+                    R.string.conversation_contact
+                ), contact
+            )
+            visibleReplyIntent.putExtra(
+                context.getString(
+                    R.string.conversation_extra_focus
+                ), true
+            )
             visibleReplyIntent.flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+            val visibleReplyFlags =
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
+                    PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
+                } else {
+                    PendingIntent.FLAG_CANCEL_CURRENT
+                }
             val visibleReplyPendingIntent = PendingIntent.getActivity(
                 context, (did + contact + "replyVisible").hashCode(),
-                visibleReplyIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                visibleReplyIntent, visibleReplyFlags
+            )
             val visibleReplyActionBuilder = NotificationCompat.Action.Builder(
                 R.drawable.ic_reply_toolbar_24dp,
                 context.getString(R.string.notifications_button_reply),
-                visibleReplyPendingIntent)
+                visibleReplyPendingIntent
+            )
                 .setSemanticAction(
-                    NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
+                    NotificationCompat.Action.SEMANTIC_ACTION_REPLY
+                )
                 .setShowsUserInterface(true)
                 .addRemoteInput(remoteInput)
             notification.addAction(visibleReplyActionBuilder.build())
@@ -722,17 +771,35 @@ class Notifications private constructor(private val context: Context) {
 
         // Bubble
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val bubbleIntent = Intent(context,
-                                      ConversationBubbleActivity::class.java)
-            bubbleIntent.putExtra(context.getString(
-                R.string.conversation_did), did)
-            bubbleIntent.putExtra(context.getString(
-                R.string.conversation_contact), contact)
-            val bubblePendingIntent = PendingIntent.getActivity(context, 0,
-                                                                bubbleIntent, 0)
+            val bubbleIntent = Intent(
+                context,
+                ConversationBubbleActivity::class.java
+            )
+            bubbleIntent.putExtra(
+                context.getString(
+                    R.string.conversation_did
+                ), did
+            )
+            bubbleIntent.putExtra(
+                context.getString(
+                    R.string.conversation_contact
+                ), contact
+            )
+            val bubbleFlags =
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
+                    PendingIntent.FLAG_MUTABLE
+                } else {
+                    0
+                }
+            val bubblePendingIntent = PendingIntent.getActivity(
+                context, 0,
+                bubbleIntent, bubbleFlags
+            )
             val bubbleMetadata =
-                NotificationCompat.BubbleMetadata.Builder(bubblePendingIntent,
-                                                          adaptiveIcon)
+                NotificationCompat.BubbleMetadata.Builder(
+                    bubblePendingIntent,
+                    adaptiveIcon
+                )
                     .setDesiredHeight(600)
                     .setSuppressNotification(bubbleOnly)
                     .setAutoExpandBubble(autoLaunchBubble)

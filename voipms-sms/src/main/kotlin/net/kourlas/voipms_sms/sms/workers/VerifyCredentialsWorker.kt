@@ -38,10 +38,6 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
     private var error: String? = null
 
     override suspend fun doWork(): Result {
-        // Make this a foreground service to ensure immediate execution.
-        // This will be changed to setExpedited in Android 12.
-        setForeground(getForegroundInfo())
-
         // Verify that credentials are valid.
         val valid = verifyCredentials()
 
@@ -64,14 +60,15 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
         }
     }
 
-    private fun getForegroundInfo(): ForegroundInfo {
+    override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncVerifyCredentialsNotification()
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ForegroundInfo(
                 Notifications.SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID,
                 notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
         } else {
             ForegroundInfo(
                 Notifications.SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID,
@@ -178,9 +175,14 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
                 .setInputData(
                     workDataOf(
                         context.getString(
-                            R.string.verify_credentials_email) to email,
+                            R.string.verify_credentials_email
+                        ) to email,
                         context.getString(
-                            R.string.verify_credentials_password) to password))
+                            R.string.verify_credentials_password
+                        ) to password
+                    )
+                )
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.verify_credentials_work_id),

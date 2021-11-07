@@ -47,10 +47,6 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
     private var error: String? = null
 
     override suspend fun doWork(): Result {
-        // Make this a foreground service to ensure immediate execution.
-        // This will be changed to setExpedited in Android 12.
-        setForeground(getForegroundInfo())
-
         // Retrieve DIDs.
         val dids = retrieveDids()
 
@@ -72,16 +68,20 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
         }
     }
 
-    private fun getForegroundInfo(): ForegroundInfo {
+    override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncRetrieveDidsNotification()
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ForegroundInfo(Notifications.SYNC_RETRIEVE_DIDS_NOTIFICATION_ID,
-                           notification,
-                           ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            ForegroundInfo(
+                Notifications.SYNC_RETRIEVE_DIDS_NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
         } else {
-            ForegroundInfo(Notifications.SYNC_RETRIEVE_DIDS_NOTIFICATION_ID,
-                           notification)
+            ForegroundInfo(
+                Notifications.SYNC_RETRIEVE_DIDS_NOTIFICATION_ID,
+                notification
+            )
         }
     }
 
@@ -204,7 +204,11 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 .setInputData(
                     workDataOf(
                         context.getString(
-                            R.string.retrieve_dids_auto_add) to autoAdd))
+                            R.string.retrieve_dids_auto_add
+                        ) to autoAdd
+                    )
+                )
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.retrieve_dids_work_id),

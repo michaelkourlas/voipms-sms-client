@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ import net.kourlas.voipms_sms.utils.logException
  * PendingIntent.
  */
 class MarkReadReceiver : BroadcastReceiver() {
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             // Collect the required state.
@@ -45,11 +47,13 @@ class MarkReadReceiver : BroadcastReceiver() {
                 throw Exception("Unrecognized action " + intent.action)
             }
             val did = intent.getStringExtra(
-                context.getString(R.string.mark_read_receiver_did))
-                      ?: throw Exception("No DID provided")
+                context.getString(R.string.mark_read_receiver_did)
+            )
+                ?: throw Exception("No DID provided")
             val contact = intent.getStringExtra(
-                context.getString(R.string.mark_read_receiver_contact))
-                          ?: throw Exception("No contact provided")
+                context.getString(R.string.mark_read_receiver_contact)
+            )
+                ?: throw Exception("No contact provided")
             val conversationId = ConversationId(did, contact)
 
             val pendingResult =

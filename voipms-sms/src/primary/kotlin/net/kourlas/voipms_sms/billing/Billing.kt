@@ -24,10 +24,7 @@ import androidx.fragment.app.FragmentActivity
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.Purchase.PurchaseState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.showSnackbar
@@ -106,6 +103,7 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onPurchasesUpdated(
         result: BillingResult,
         purchases: MutableList<Purchase>?

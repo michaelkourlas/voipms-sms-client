@@ -82,6 +82,7 @@
         </activity>
         <activity
             android:name=".conversations.ConversationsArchivedActivity"
+            android:exported="false"
             android:parentActivityName=".conversations.ConversationsActivity" />
         <activity
             android:name=".conversation.ConversationActivity"
@@ -125,15 +126,18 @@
             android:name=".conversation.ConversationBubbleActivity"
             android:allowEmbedded="true"
             android:resizeableActivity="true"
+            android:exported="false"
             tools:targetApi="n" />
         <activity
             android:name=".newConversation.NewConversationActivity"
             android:noHistory="true"
+            android:exported="false"
             android:parentActivityName=".conversations.ConversationsActivity" />
         <activity
             android:name=".preferences.activities.PreferencesActivity"
             android:label="@string/preferences_name"
             android:launchMode="singleTop"
+            android:exported="false"
             android:parentActivityName=".conversations.ConversationsActivity" />
         <activity
             android:name=".preferences.activities.DidPreferencesActivity"
@@ -227,8 +231,12 @@
 
         <!-- BROADCAST RECEIVERS -->
 
-        <receiver android:name=".sms.receivers.MarkReadReceiver" />
-        <receiver android:name=".sms.receivers.SendMessageReceiver" />
+        <receiver
+            android:name=".sms.receivers.MarkReadReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".sms.receivers.SendMessageReceiver"
+            android:exported="false" />
         <receiver
             android:name=".sms.receivers.SyncBootReceiver"
             android:exported="true">

@@ -402,42 +402,91 @@ class NewConversationRecyclerViewAdapter(
                 + " COLLATE NOCASE ASC")
             if (cursor != null) {
                 while (cursor.moveToNext()) {
-                    if (cursor.getString(cursor.getColumnIndex(
-                            ContactsContract.Contacts.HAS_PHONE_NUMBER)) == "1") {
-                        val id = cursor.getLong(
-                            cursor.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Phone
-                                    .CONTACT_ID))
+                    var index = cursor.getColumnIndex(
+                        ContactsContract.Contacts.HAS_PHONE_NUMBER
+                    )
+                    if (index < 0) {
+                        continue
+                    }
+                    if (cursor.getString(index) == "1") {
+                        index = cursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds.Phone
+                                .CONTACT_ID
+                        )
+                        if (index < 0) {
+                            continue
+                        }
+                        val id = cursor.getLong(index)
+
+                        index = cursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds
+                                .Phone.NUMBER
+                        )
+                        if (index < 0) {
+                            continue
+                        }
                         val phoneNumber = cursor.getString(
-                            cursor.getColumnIndex(
-                                ContactsContract.CommonDataKinds
-                                    .Phone.NUMBER)) ?: continue
+                            index
+                        ) ?: continue
+
+                        index = cursor.getColumnIndex(
+                            ContactsContract.Contacts.DISPLAY_NAME
+                        )
+                        if (index < 0) {
+                            continue
+                        }
                         val contact = cursor.getString(
-                            cursor.getColumnIndex(
-                                ContactsContract.Contacts.DISPLAY_NAME))
-                                      ?: getFormattedPhoneNumber(phoneNumber)
+                            index
+                        )
+                            ?: getFormattedPhoneNumber(phoneNumber)
+
+                        index = cursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds
+                                .Phone.TYPE
+                        )
+                        if (index < 0) {
+                            continue
+                        }
                         val phoneNumberType = getPhoneNumberType(
                             cursor.getInt(
-                                cursor.getColumnIndex(
-                                    ContactsContract.CommonDataKinds
-                                        .Phone.TYPE)))
+                                index
+                            )
+                        )
+
+                        index = cursor.getColumnIndex(
+                            ContactsContract.Contacts.PHOTO_URI
+                        )
+                        if (index < 0) {
+                            continue
+                        }
                         val photoUri = cursor.getString(
-                            cursor.getColumnIndex(
-                                ContactsContract.Contacts.PHOTO_URI))
+                            index
+                        )
+
+                        index = cursor.getColumnIndex(
+                            ContactsContract.Contacts.DISPLAY_NAME
+                        )
+                        if (index < 0) {
+                            continue
+                        }
                         val bitmap = photoUri?.let {
                             getBitmapFromUri(
                                 activity,
                                 Uri.parse(it),
                                 activity.resources.getDimensionPixelSize(
-                                    R.dimen.contact_badge))
+                                    R.dimen.contact_badge
+                                )
+                            )
                         } ?: getGenericContactPhotoBitmap(
                             activity,
                             cursor.getString(
-                                cursor.getColumnIndex(
-                                    ContactsContract.Contacts.DISPLAY_NAME)),
+                                index
+                            ),
                             phoneNumber,
                             activity.resources.getDimensionPixelSize(
-                                R.dimen.contact_badge))
+                                R.dimen.contact_badge
+                            )
+                        )
 
                         val previousContactItem =
                             if (allContactItems.size > 0) {
