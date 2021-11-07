@@ -49,7 +49,8 @@ class PreferencesActivity : AppCompatActivity(),
         if (savedInstanceState == null) {
             fragment = PreferencesFragment()
             supportFragmentManager.beginTransaction().replace(
-                R.id.preference_fragment_content, fragment).commit()
+                R.id.preference_fragment_content, fragment
+            ).commit()
         }
     }
 }

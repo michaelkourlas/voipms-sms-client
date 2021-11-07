@@ -27,7 +27,8 @@ class Archived(
     @ColumnInfo(name = COLUMN_DATABASE_ID) val databaseId: Long = 0,
     @ColumnInfo(name = COLUMN_DID) val did: String,
     @ColumnInfo(name = COLUMN_CONTACT) val contact: String,
-    @ColumnInfo(name = COLUMN_ARCHIVED) val archived: Int) {
+    @ColumnInfo(name = COLUMN_ARCHIVED) val archived: Int
+) {
     companion object {
         const val TABLE_NAME = "archived"
 

@@ -31,8 +31,10 @@ import java.util.*
  * Gets the name of a contact from the Android contacts provider, given a
  * phone number.
  */
-fun getContactName(context: Context, phoneNumber: String,
-                   contactNameCache: MutableMap<String, String>? = null): String? {
+fun getContactName(
+    context: Context, phoneNumber: String,
+    contactNameCache: MutableMap<String, String>? = null
+): String? {
     try {
         if (contactNameCache != null && phoneNumber in contactNameCache) {
             return contactNameCache[phoneNumber]
@@ -48,12 +50,16 @@ fun getContactName(context: Context, phoneNumber: String,
 
         val uri = Uri.withAppendedPath(
             ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-            Uri.encode(phoneNumber))
+            Uri.encode(phoneNumber)
+        )
         val cursor = context.contentResolver.query(
             uri,
-            arrayOf(ContactsContract.PhoneLookup._ID,
-                    ContactsContract.PhoneLookup.DISPLAY_NAME),
-            null, null, null)
+            arrayOf(
+                ContactsContract.PhoneLookup._ID,
+                ContactsContract.PhoneLookup.DISPLAY_NAME
+            ),
+            null, null, null
+        )
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 val name = cursor.getString(
@@ -86,7 +92,8 @@ fun getContactPhotoBitmap(
     name: String?,
     phoneNumber: String,
     size: Int,
-    contactBitmapCache: MutableMap<String, Bitmap>? = null): Bitmap {
+    contactBitmapCache: MutableMap<String, Bitmap>? = null
+): Bitmap {
     // Attempt to provide a contact photo.
     try {
         val cachedBitmap = contactBitmapCache?.get(phoneNumber)
@@ -114,10 +121,12 @@ fun getContactPhotoBitmap(
  * Retrieves a generic contact photo bitmap corresponding to the specified name
  * and phone number using the specified context.
  */
-fun getGenericContactPhotoBitmap(context: Context,
-                                 name: String?,
-                                 phoneNumber: String,
-                                 size: Int): Bitmap {
+fun getGenericContactPhotoBitmap(
+    context: Context,
+    name: String?,
+    phoneNumber: String,
+    size: Int
+): Bitmap {
     val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     bitmap.eraseColor(getMaterialDesignColour(getDigitsOfString(phoneNumber)))
     val canvas = Canvas(bitmap)
@@ -139,7 +148,8 @@ fun getGenericContactPhotoBitmap(context: Context,
     } else {
         val iconDrawable = ContextCompat.getDrawable(
             context,
-            R.drawable.ic_account_circle_inverted_toolbar_24dp) ?: return bitmap
+            R.drawable.ic_account_circle_inverted_toolbar_24dp
+        ) ?: return bitmap
         iconDrawable.setBounds(0, 0, size, size)
         iconDrawable.draw(canvas)
     }
@@ -156,20 +166,26 @@ fun getContactPhotoAdaptiveBitmap(
     context: Context,
     name: String?,
     phoneNumber: String,
-    contactBitmapCache: MutableMap<String, Bitmap>? = null): Bitmap {
+    contactBitmapCache: MutableMap<String, Bitmap>? = null
+): Bitmap {
     val bitmap = getContactPhotoBitmap(
         context,
         name,
         phoneNumber,
         context.resources.getDimensionPixelSize(
-            R.dimen.adaptive_icon_drawable_inner),
-        contactBitmapCache)
+            R.dimen.adaptive_icon_drawable_inner
+        ),
+        contactBitmapCache
+    )
     val adaptiveBitmap = Bitmap.createBitmap(
         context.resources.getDimensionPixelSize(
-            R.dimen.adaptive_icon_drawable_outer),
+            R.dimen.adaptive_icon_drawable_outer
+        ),
         context.resources.getDimensionPixelSize(
-            R.dimen.adaptive_icon_drawable_outer),
-        Bitmap.Config.ARGB_8888)
+            R.dimen.adaptive_icon_drawable_outer
+        ),
+        Bitmap.Config.ARGB_8888
+    )
     adaptiveBitmap.eraseColor(Color.TRANSPARENT)
     val adaptiveCanvas = Canvas(adaptiveBitmap)
     val left = (adaptiveBitmap.width - bitmap.width) / 2f
@@ -185,7 +201,8 @@ fun getContactPhotoAdaptiveBitmap(
 fun getContactPhotoUri(
     context: Context,
     phoneNumber: String,
-    contactPhotoUriCache: MutableMap<String, String>? = null): String? {
+    contactPhotoUriCache: MutableMap<String, String>? = null
+): String? {
     try {
         if (contactPhotoUriCache != null && phoneNumber in contactPhotoUriCache) {
             return contactPhotoUriCache[phoneNumber]
@@ -193,7 +210,8 @@ fun getContactPhotoUri(
 
         val uri = Uri.withAppendedPath(
             ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-            Uri.encode(phoneNumber))
+            Uri.encode(phoneNumber)
+        )
         val photoUri = getContactPhotoUri(context, uri)
         if (photoUri != null) {
             if (contactPhotoUriCache != null) {
@@ -213,16 +231,20 @@ fun getContactPhotoUri(
 fun getContactPhotoUri(
     context: Context,
     uri: Uri,
-    contactPhotoUriCache: MutableMap<Uri, String>? = null): String? {
+    contactPhotoUriCache: MutableMap<Uri, String>? = null
+): String? {
     try {
         if (contactPhotoUriCache != null && uri in contactPhotoUriCache) {
             return contactPhotoUriCache[uri]
         }
 
         val cursor = context.contentResolver.query(
-            uri, arrayOf(ContactsContract.PhoneLookup._ID,
-                         ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI),
-            null, null, null)
+            uri, arrayOf(
+                ContactsContract.PhoneLookup._ID,
+                ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI
+            ),
+            null, null, null
+        )
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 val photoUri = cursor.getString(
@@ -258,14 +280,17 @@ fun getBitmapFromUri(context: Context, uri: Uri, size: Int): Bitmap? {
     try {
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
-        BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri),
-                                   null, options)
+        BitmapFactory.decodeStream(
+            context.contentResolver.openInputStream(uri),
+            null, options
+        )
 
         options.inJustDecodeBounds = false
         options.inSampleSize = calculateInSampleSize(options, size, size)
         val bitmap = BitmapFactory.decodeStream(
-            context.contentResolver.openInputStream(uri), null, options)
-                     ?: return null
+            context.contentResolver.openInputStream(uri), null, options
+        )
+            ?: return null
         return Bitmap.createScaledBitmap(bitmap, size, size, true)
     } catch (e: Exception) {
         return null
@@ -281,8 +306,10 @@ fun getBitmapFromUri(context: Context, uri: Uri, size: Int): Bitmap? {
  * This code is therefore licensed under the Apache 2.0 license and is
  * copyrighted by Google.
  */
-fun calculateInSampleSize(options: BitmapFactory.Options,
-                          reqWidth: Int, reqHeight: Int): Int {
+fun calculateInSampleSize(
+    options: BitmapFactory.Options,
+    reqWidth: Int, reqHeight: Int
+): Int {
     // Raw height and width of image
     val height = options.outHeight
     val width = options.outWidth
@@ -296,7 +323,8 @@ fun calculateInSampleSize(options: BitmapFactory.Options,
         // keeps both height and width larger than the requested height and
         // width
         while (halfHeight / inSampleSize >= reqHeight
-               && halfWidth / inSampleSize >= reqWidth) {
+            && halfWidth / inSampleSize >= reqWidth
+        ) {
             inSampleSize *= 2
         }
     }

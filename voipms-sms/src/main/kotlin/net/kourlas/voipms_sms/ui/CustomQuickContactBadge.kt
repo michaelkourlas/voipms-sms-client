@@ -27,24 +27,35 @@ import net.kourlas.voipms_sms.R
 
 class CustomQuickContactBadge : QuickContactBadge {
     constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context,
-                                                                 attrs)
+    constructor(context: Context?, attrs: AttributeSet?) : super(
+        context,
+        attrs
+    )
 
-    constructor(context: Context?, attrs: AttributeSet?,
-                defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(
+        context: Context?, attrs: AttributeSet?,
+        defStyleAttr: Int
+    ) : super(context, attrs, defStyleAttr)
 
     @Suppress("unused")
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int,
-                defStyleRes: Int) : super(context, attrs, defStyleAttr,
-                                          defStyleRes)
+    constructor(
+        context: Context?, attrs: AttributeSet?, defStyleAttr: Int,
+        defStyleRes: Int
+    ) : super(
+        context, attrs, defStyleAttr,
+        defStyleRes
+    )
 
     override fun onClick(v: View) {
         try {
             super.onClick(v)
         } catch (ex: ActivityNotFoundException) {
-            Toast.makeText(context, context.getString(
-                R.string.conversations_no_contact_app),
-                           Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context, context.getString(
+                    R.string.conversations_no_contact_app
+                ),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 }

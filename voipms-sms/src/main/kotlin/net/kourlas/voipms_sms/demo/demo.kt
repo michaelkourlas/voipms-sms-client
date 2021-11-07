@@ -28,31 +28,51 @@ import java.util.*
 
 fun getConversationsDemoMessages(): List<Message> {
     val messages = mutableListOf<Message>()
-    messages.add(Message(1, 1, Date().time / 1000, 0,
-                         "6135559483",
-                         "6135556019",
-                         "Have you considered asking him whether they...",
-                         0, 1, 0, true))
-    messages.add(Message(1, 1, Date().time / 1000, 1,
-                         "6135559483",
-                         "5145553495",
-                         "Sounds great!",
-                         1, 1, 0))
-    messages.add(Message(1, 1, Date().time / 1000 - 138900, 0,
-                         "6135559483",
-                         "4385557321",
-                         "Maybe later.",
-                         0, 1, 0))
-    messages.add(Message(1, 1, Date().time / 1000 - 1002900, 1,
-                         "6135550942",
-                         "4165550919",
-                         "Thank you for your help! It's much appreciated.",
-                         0, 1, 0))
-    messages.add(Message(1, 1, Date().time / 1000 - 39623700, 1,
-                         "6135559483",
-                         "55555",
-                         "Your verification code is: 123456.",
-                         0, 1, 0))
+    messages.add(
+        Message(
+            1, 1, Date().time / 1000, 0,
+            "6135559483",
+            "6135556019",
+            "Have you considered asking him whether they...",
+            0, 1, 0, true
+        )
+    )
+    messages.add(
+        Message(
+            1, 1, Date().time / 1000, 1,
+            "6135559483",
+            "5145553495",
+            "Sounds great!",
+            1, 1, 0
+        )
+    )
+    messages.add(
+        Message(
+            1, 1, Date().time / 1000 - 138900, 0,
+            "6135559483",
+            "4385557321",
+            "Maybe later.",
+            0, 1, 0
+        )
+    )
+    messages.add(
+        Message(
+            1, 1, Date().time / 1000 - 1002900, 1,
+            "6135550942",
+            "4165550919",
+            "Thank you for your help! It's much appreciated.",
+            0, 1, 0
+        )
+    )
+    messages.add(
+        Message(
+            1, 1, Date().time / 1000 - 39623700, 1,
+            "6135559483",
+            "55555",
+            "Your verification code is: 123456.",
+            0, 1, 0
+        )
+    )
     return messages
 }
 
@@ -62,33 +82,53 @@ fun getConversationDemoMessages(bubble: Boolean): List<Message> {
     }
 
     val messages = mutableListOf<Message>()
-    messages.add(Message(1, 1, Date().time / 1000 - 120, 1,
-                         "6135559483",
-                         "5145553495",
-                         "Want to grab some lunch?",
-                         1, 1, 0))
-    messages.add(Message(1, 1, Date().time / 1000 - 70, 0,
-                         "6135559483",
-                         "5145553495",
-                         "Sure! How about that new place down the street?",
-                         1, 1, 0))
-    messages.add(Message(1, 1, Date().time / 1000 - 60, 0,
-                         "6135559483",
-                         "5145553495",
-                         "Meet you there in a minute.",
-                         1, 1, 0))
-    messages.add(Message(1, 1, Date().time / 1000 - 30, 1,
-                         "6135559483",
-                         "5145553495",
-                         "Sounds great!",
-                         1, 1, 0))
+    messages.add(
+        Message(
+            1, 1, Date().time / 1000 - 120, 1,
+            "6135559483",
+            "5145553495",
+            "Want to grab some lunch?",
+            1, 1, 0
+        )
+    )
+    messages.add(
+        Message(
+            1, 1, Date().time / 1000 - 70, 0,
+            "6135559483",
+            "5145553495",
+            "Sure! How about that new place down the street?",
+            1, 1, 0
+        )
+    )
+    messages.add(
+        Message(
+            1, 1, Date().time / 1000 - 60, 0,
+            "6135559483",
+            "5145553495",
+            "Meet you there in a minute.",
+            1, 1, 0
+        )
+    )
+    messages.add(
+        Message(
+            1, 1, Date().time / 1000 - 30, 1,
+            "6135559483",
+            "5145553495",
+            "Sounds great!",
+            1, 1, 0
+        )
+    )
     @Suppress("ConstantConditionIf")
     if (BuildConfig.IS_DEMO_SENDING) {
-        messages.add(Message(1, 1, Date().time / 1000, 0,
-                             "6135559483",
-                             "5145553495",
-                             "Where are you?",
-                             1, 0, 1))
+        messages.add(
+            Message(
+                1, 1, Date().time / 1000, 0,
+                "6135559483",
+                "5145553495",
+                "Where are you?",
+                1, 0, 1
+            )
+        )
     }
     return messages
 }
@@ -98,62 +138,93 @@ fun getDemoNotification(): Message = Message(
     "6135559483",
     "6135551242",
     "Hey, how are you? Haven't seen you in a while.",
-    1, 1, 0)
+    1, 1, 0
+)
 
 fun getNewConversationContacts(
-    context: Context): List<NewConversationRecyclerViewAdapter.ContactItem> {
+    context: Context
+): List<NewConversationRecyclerViewAdapter.ContactItem> {
     val contactItems =
         mutableListOf<NewConversationRecyclerViewAdapter.ContactItem>()
-    contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
-        1,
-        "Craig Johnson",
-        mutableListOf(
-            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
-                "4165550919", "Mobile")),
-        getGenericContactPhotoBitmap(
-            context,
+    contactItems.add(
+        NewConversationRecyclerViewAdapter.ContactItem(
+            1,
             "Craig Johnson",
-            "4165550919",
-            context.resources.getDimensionPixelSize(
-                R.dimen.contact_badge))))
-    contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
-        3,
-        "Jennifer Morris",
-        mutableListOf(
-            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
-                "6135556019", "Work")),
-        getGenericContactPhotoBitmap(
-            context,
+            mutableListOf(
+                NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                    "4165550919", "Mobile"
+                )
+            ),
+            getGenericContactPhotoBitmap(
+                context,
+                "Craig Johnson",
+                "4165550919",
+                context.resources.getDimensionPixelSize(
+                    R.dimen.contact_badge
+                )
+            )
+        )
+    )
+    contactItems.add(
+        NewConversationRecyclerViewAdapter.ContactItem(
+            3,
             "Jennifer Morris",
-            "6135556019",
-            context.resources.getDimensionPixelSize(
-                R.dimen.contact_badge))))
-    contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
-        4,
-        "Martin Wheeler",
-        mutableListOf(
-            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
-                "6135551242", "Home")),
-        getGenericContactPhotoBitmap(
-            context,
+            mutableListOf(
+                NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                    "6135556019", "Work"
+                )
+            ),
+            getGenericContactPhotoBitmap(
+                context,
+                "Jennifer Morris",
+                "6135556019",
+                context.resources.getDimensionPixelSize(
+                    R.dimen.contact_badge
+                )
+            )
+        )
+    )
+    contactItems.add(
+        NewConversationRecyclerViewAdapter.ContactItem(
+            4,
             "Martin Wheeler",
-            "6135551242",
-            context.resources.getDimensionPixelSize(
-                R.dimen.contact_badge))))
-    contactItems.add(NewConversationRecyclerViewAdapter.ContactItem(
-        2,
-        "Monica Alexander",
-        mutableListOf(
-            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
-                "5145553495", "Home"),
-            NewConversationRecyclerViewAdapter.PhoneNumberAndType(
-                "5145553496", "Work")),
-        getGenericContactPhotoBitmap(
-            context,
+            mutableListOf(
+                NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                    "6135551242", "Home"
+                )
+            ),
+            getGenericContactPhotoBitmap(
+                context,
+                "Martin Wheeler",
+                "6135551242",
+                context.resources.getDimensionPixelSize(
+                    R.dimen.contact_badge
+                )
+            )
+        )
+    )
+    contactItems.add(
+        NewConversationRecyclerViewAdapter.ContactItem(
+            2,
             "Monica Alexander",
-            "5145553495",
-            context.resources.getDimensionPixelSize(
-                R.dimen.contact_badge))))
+            mutableListOf(
+                NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                    "5145553495", "Home"
+                ),
+                NewConversationRecyclerViewAdapter.PhoneNumberAndType(
+                    "5145553496", "Work"
+                )
+            ),
+            getGenericContactPhotoBitmap(
+                context,
+                "Monica Alexander",
+                "5145553495",
+                context.resources.getDimensionPixelSize(
+                    R.dimen.contact_badge
+                )
+            )
+        )
+    )
     return contactItems
 }
 

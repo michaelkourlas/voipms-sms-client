@@ -35,18 +35,23 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
             activity?.let {
                 when (newValue) {
                     SYSTEM_DEFAULT -> AppCompatDelegate.setDefaultNightMode(
-                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    )
                     LIGHT -> AppCompatDelegate.setDefaultNightMode(
-                        AppCompatDelegate.MODE_NIGHT_NO)
+                        AppCompatDelegate.MODE_NIGHT_NO
+                    )
                     DARK -> AppCompatDelegate.setDefaultNightMode(
-                        AppCompatDelegate.MODE_NIGHT_YES)
+                        AppCompatDelegate.MODE_NIGHT_YES
+                    )
                 }
             }
             true
         }
 
-    override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
-                                        rootKey: String?) {
+    override fun onCreatePreferencesFix(
+        savedInstanceState: Bundle?,
+        rootKey: String?
+    ) {
         // Add preferences
         addPreferencesFromResource(R.xml.preferences_appearance)
 
@@ -75,8 +80,10 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
         }
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences,
-                                           key: String) {
+    override fun onSharedPreferenceChanged(
+        sharedPreferences: SharedPreferences,
+        key: String
+    ) {
         // It's not clear why onSharedPreferenceChanged is called before the
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
@@ -96,7 +103,9 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
         } else if (preference is EditTextPreference) {
             // Display value of preference as summary text
             if (preference.key == getString(
-                    R.string.preferences_message_text_box_maximum_size_key)) {
+                    R.string.preferences_message_text_box_maximum_size_key
+                )
+            ) {
                 preference.summary = preference.text + " lines"
             } else {
                 preference.summary = preference.text
@@ -109,7 +118,9 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
      */
     private fun updateHandlersForPreference(preference: Preference) {
         if (preference.key == getString(
-                R.string.preferences_theme_key)) {
+                R.string.preferences_theme_key
+            )
+        ) {
             preference.onPreferenceChangeListener =
                 themePreferenceChangeListener
         }

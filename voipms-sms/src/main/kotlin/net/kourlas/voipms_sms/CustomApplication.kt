@@ -56,7 +56,8 @@ class CustomApplication : Application() {
     }
 
     fun conversationActivityIncrementCount(
-        conversationId: ConversationId) {
+        conversationId: ConversationId
+    ) {
         var count = conversationActivitiesVisible[conversationId]
         if (count == null) {
             count = 0
@@ -65,7 +66,8 @@ class CustomApplication : Application() {
     }
 
     fun conversationActivityDecrementCount(
-        conversationId: ConversationId) {
+        conversationId: ConversationId
+    ) {
         var count = conversationActivitiesVisible[conversationId]
         if (count == null) {
             count = 0
@@ -82,26 +84,32 @@ class CustomApplication : Application() {
         // Limit synchronization interval to 15 minutes. Previous versions
         // supported a shorter interval.
         if (getSyncInterval(applicationContext) != 0.0
-            && getSyncInterval(applicationContext) < (15.0 / (24 * 60))) {
+            && getSyncInterval(applicationContext) < (15.0 / (24 * 60))
+        ) {
             setRawSyncInterval(applicationContext, "0.01041666666")
         }
 
         // Update theme
         when (getAppTheme(applicationContext)) {
             AppearancePreferencesFragment.SYSTEM_DEFAULT -> AppCompatDelegate.setDefaultNightMode(
-                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            )
             AppearancePreferencesFragment.LIGHT -> AppCompatDelegate.setDefaultNightMode(
-                AppCompatDelegate.MODE_NIGHT_NO)
+                AppCompatDelegate.MODE_NIGHT_NO
+            )
             AppearancePreferencesFragment.DARK -> AppCompatDelegate.setDefaultNightMode(
-                AppCompatDelegate.MODE_NIGHT_YES)
+                AppCompatDelegate.MODE_NIGHT_YES
+            )
         }
 
         // Register for network callbacks
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val connectivityManager = getSystemService(
-                CONNECTIVITY_SERVICE) as ConnectivityManager
+                CONNECTIVITY_SERVICE
+            ) as ConnectivityManager
             connectivityManager.registerDefaultNetworkCallback(
-                getInstance())
+                getInstance()
+            )
         }
 
         // Open the database.
@@ -111,8 +119,10 @@ class CustomApplication : Application() {
         subscribeToDidTopics(applicationContext)
 
         // Schedule a database synchronization, if required.
-        SyncWorker.performFullSynchronization(applicationContext,
-                                              scheduleOnly = true)
+        SyncWorker.performFullSynchronization(
+            applicationContext,
+            scheduleOnly = true
+        )
 
         // Initialize the billing service.
         Billing.getInstance(applicationContext)

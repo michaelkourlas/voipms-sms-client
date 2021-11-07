@@ -51,8 +51,11 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
         // Terminate quietly if we cannot find the message we are supposed
         // to send.
         val databaseId =
-            inputData.getLong(applicationContext.getString(
-                R.string.send_message_database_id), -1)
+            inputData.getLong(
+                applicationContext.getString(
+                    R.string.send_message_database_id
+                ), -1
+            )
         if (databaseId == -1L) {
             return Result.failure()
         }
@@ -66,11 +69,15 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
             conversationId?.let {
                 val sentMessageBroadcastIntent = Intent(
                     applicationContext.getString(
-                        R.string.sent_message_action, it.did, it.contact))
+                        R.string.sent_message_action, it.did, it.contact
+                    )
+                )
                 if (error != null) {
                     sentMessageBroadcastIntent.putExtra(
                         applicationContext.getString(
-                            R.string.sent_message_error), error)
+                            R.string.sent_message_error
+                        ), error
+                    )
                 }
                 applicationContext.sendBroadcast(sentMessageBroadcastIntent)
             }
@@ -87,8 +94,10 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
             if (!markedAsSent && !markedAsNotSent) {
                 try {
                     Database.getInstance(
-                        applicationContext).markMessageNotSent(
-                        databaseId)
+                        applicationContext
+                    ).markMessageNotSent(
+                        databaseId
+                    )
                 } catch (e: Exception) {
                 }
             }
@@ -135,12 +144,17 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
 
             // Terminate if no network connection is available.
             if (!NetworkManager.getInstance().isNetworkConnectionAvailable(
-                    applicationContext)) {
+                    applicationContext
+                )
+            ) {
                 error = applicationContext.getString(
-                    R.string.send_message_error_network)
+                    R.string.send_message_error_network
+                )
                 Database.getInstance(
-                    applicationContext).markMessageNotSent(
-                    message.databaseId)
+                    applicationContext
+                ).markMessageNotSent(
+                    message.databaseId
+                )
                 return
             }
 
@@ -149,35 +163,48 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
             val voipId = sendMessageWithVoipMsApi(message)
             if (voipId != null) {
                 Database.getInstance(
-                    applicationContext).markMessageSent(
-                    message.databaseId, voipId)
+                    applicationContext
+                ).markMessageSent(
+                    message.databaseId, voipId
+                )
                 markedAsSent = true
             } else {
                 Database.getInstance(
-                    applicationContext).markMessageNotSent(
-                    message.databaseId)
+                    applicationContext
+                ).markMessageNotSent(
+                    message.databaseId
+                )
                 markedAsNotSent = true
             }
 
             // If this request came from an inline reply, refresh the
             // notification.
-            val inlineReply = inputData.getBoolean(applicationContext.getString(
-                R.string.send_message_inline_reply), false)
+            val inlineReply = inputData.getBoolean(
+                applicationContext.getString(
+                    R.string.send_message_inline_reply
+                ), false
+            )
             if (inlineReply) {
                 val inlineReplyDid = inputData.getString(
                     applicationContext.getString(
-                        R.string.send_message_inline_reply_did)) ?: return
+                        R.string.send_message_inline_reply_did
+                    )
+                ) ?: return
                 val inlineReplyContact = inputData.getString(
                     applicationContext.getString(
-                        R.string.send_message_inline_reply_contact)) ?: return
+                        R.string.send_message_inline_reply_contact
+                    )
+                ) ?: return
                 Notifications.getInstance(applicationContext).showNotifications(
                     setOf(ConversationId(inlineReplyDid, inlineReplyContact)),
-                    inlineReplyMessages = listOf(message))
+                    inlineReplyMessages = listOf(message)
+                )
             }
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(
-                R.string.send_message_error_unknown)
+                R.string.send_message_error_unknown
+            )
         }
     }
 
@@ -196,35 +223,46 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
         // Get VoIP.ms ID from response
         if (response?.status == "") {
             error = applicationContext.getString(
-                R.string.send_message_error_api_parse)
+                R.string.send_message_error_api_parse
+            )
             return null
         }
         if (response?.status != "success") {
             error = when (response?.status) {
                 "invalid_credentials" -> applicationContext.getString(
-                    R.string.send_message_error_api_error_invalid_credentials)
+                    R.string.send_message_error_api_error_invalid_credentials
+                )
                 "invalid_dst" -> applicationContext.getString(
-                    R.string.send_message_error_api_error_invalid_dst)
+                    R.string.send_message_error_api_error_invalid_dst
+                )
                 "invalid_sms" -> applicationContext.getString(
-                    R.string.send_message_error_api_error_invalid_sms)
+                    R.string.send_message_error_api_error_invalid_sms
+                )
                 "limit_reached" -> applicationContext.getString(
-                    R.string.send_message_error_api_error_limit_reached)
+                    R.string.send_message_error_api_error_limit_reached
+                )
                 "message_empty" -> applicationContext.getString(
-                    R.string.send_message_error_api_error_message_empty)
+                    R.string.send_message_error_api_error_message_empty
+                )
                 "missing_sms" -> applicationContext.getString(
-                    R.string.send_message_error_api_error_missing_sms)
+                    R.string.send_message_error_api_error_missing_sms
+                )
                 "sms_failed" -> applicationContext.getString(
-                    R.string.send_message_error_api_error_sms_failed)
+                    R.string.send_message_error_api_error_sms_failed
+                )
                 "sms_toolong" -> applicationContext.getString(
-                    R.string.send_message_error_api_error_sms_toolong)
+                    R.string.send_message_error_api_error_sms_toolong
+                )
                 else -> applicationContext.getString(
-                    R.string.send_message_error_api_error, response?.status)
+                    R.string.send_message_error_api_error, response?.status
+                )
             }
             return null
         }
         if (response.sms == 0L) {
             error = applicationContext.getString(
-                R.string.send_message_error_api_parse)
+                R.string.send_message_error_api_parse
+            )
             return null
         }
         return response.sms
@@ -237,28 +275,34 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                     return httpPostWithMultipartFormData(
                         applicationContext,
                         "https://www.voip.ms/api/v1/rest.php",
-                        mapOf("api_username" to getEmail(applicationContext),
-                              "api_password" to getPassword(applicationContext),
-                              "method" to "sendSMS",
-                              "did" to message.did,
-                              "dst" to message.contact,
-                              "message" to message.text))
+                        mapOf(
+                            "api_username" to getEmail(applicationContext),
+                            "api_password" to getPassword(applicationContext),
+                            "method" to "sendSMS",
+                            "did" to message.did,
+                            "dst" to message.contact,
+                            "message" to message.text
+                        )
+                    )
                 } catch (e: IOException) {
                     // Try again...
                 }
             }
             error = applicationContext.getString(
-                R.string.send_message_error_api_request)
+                R.string.send_message_error_api_request
+            )
             return null
         } catch (e: JsonDataException) {
             logException(e)
             error = applicationContext.getString(
-                R.string.send_message_error_api_parse)
+                R.string.send_message_error_api_parse
+            )
             return null
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(
-                R.string.send_message_error_unknown)
+                R.string.send_message_error_unknown
+            )
             return null
         }
     }
@@ -267,8 +311,10 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
         /**
          * Sends the message associated with the specified database ID.
          */
-        fun sendMessage(context: Context, databaseId: Long,
-                        inlineReplyConversationId: ConversationId? = null) {
+        fun sendMessage(
+            context: Context, databaseId: Long,
+            inlineReplyConversationId: ConversationId? = null
+        ) {
             val work = OneTimeWorkRequestBuilder<SendMessageWorker>()
                 .setInputData(
                     workDataOf(
@@ -293,7 +339,8 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.send_message_work_id, databaseId),
-                ExistingWorkPolicy.KEEP, work)
+                ExistingWorkPolicy.KEEP, work
+            )
         }
     }
 }

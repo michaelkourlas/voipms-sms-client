@@ -45,15 +45,25 @@ class SendMessageReceiver : BroadcastReceiver() {
                 throw Exception("No context or intent provided")
             }
             if (intent.action != context.getString(
-                    R.string.send_message_receiver_action)) {
+                    R.string.send_message_receiver_action
+                )
+            ) {
                 throw Exception("Unrecognized action " + intent.action)
             }
-            val did = intent.getStringExtra(context.getString(
-                R.string.send_message_receiver_did)) ?: throw Exception(
-                "No DID provided")
-            val contact = intent.getStringExtra(context.getString(
-                R.string.send_message_receiver_contact)) ?: throw Exception(
-                "No contact provided")
+            val did = intent.getStringExtra(
+                context.getString(
+                    R.string.send_message_receiver_did
+                )
+            ) ?: throw Exception(
+                "No DID provided"
+            )
+            val contact = intent.getStringExtra(
+                context.getString(
+                    R.string.send_message_receiver_contact
+                )
+            ) ?: throw Exception(
+                "No contact provided"
+            )
             val remoteInput = RemoteInput.getResultsFromIntent(intent)
             val messageText = remoteInput?.getCharSequence(
                 context.getString(
@@ -71,12 +81,15 @@ class SendMessageReceiver : BroadcastReceiver() {
                     val databaseIds = Database.getInstance(context)
                         .insertConversationMessagesDeliveryInProgress(
                             ConversationId(did, contact),
-                            getMessageTexts(context, messageText))
+                            getMessageTexts(context, messageText)
+                        )
                     for (id in databaseIds) {
                         SendMessageWorker.sendMessage(
                             context, id,
                             inlineReplyConversationId = ConversationId(
-                                did, contact))
+                                did, contact
+                            )
+                        )
                     }
                 } catch (e: Exception) {
                     logException(e)
@@ -98,10 +111,16 @@ class SendMessageReceiver : BroadcastReceiver() {
             val intent = Intent()
             intent.action =
                 context.getString(R.string.send_message_receiver_action)
-            intent.putExtra(context.getString(
-                R.string.send_message_receiver_did), did)
-            intent.putExtra(context.getString(
-                R.string.send_message_receiver_contact), contact)
+            intent.putExtra(
+                context.getString(
+                    R.string.send_message_receiver_did
+                ), did
+            )
+            intent.putExtra(
+                context.getString(
+                    R.string.send_message_receiver_contact
+                ), contact
+            )
             return intent
         }
     }

@@ -53,12 +53,18 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
         // Send broadcast with DIDs.
         val retrieveDidsCompleteIntent = Intent(
             applicationContext.getString(
-                R.string.retrieve_dids_complete_action))
-        retrieveDidsCompleteIntent.putExtra(applicationContext.getString(
-            R.string.retrieve_dids_complete_error), error)
+                R.string.retrieve_dids_complete_action
+            )
+        )
+        retrieveDidsCompleteIntent.putExtra(
+            applicationContext.getString(
+                R.string.retrieve_dids_complete_error
+            ), error
+        )
         retrieveDidsCompleteIntent.putStringArrayListExtra(
             applicationContext.getString(R.string.retrieve_dids_complete_dids),
-            if (dids != null) ArrayList<String>(dids.toList()) else null)
+            if (dids != null) ArrayList<String>(dids.toList()) else null
+        )
         applicationContext.sendBroadcast(retrieveDidsCompleteIntent)
 
         return if (error == null) {
@@ -97,7 +103,8 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
         try {
             // Terminate quietly if email and password are undefined.
             if (getEmail(applicationContext) == ""
-                || getPassword(applicationContext) == "") {
+                || getPassword(applicationContext) == ""
+            ) {
                 return@coroutineScope dids
             }
 
@@ -108,10 +115,13 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
 
             val autoAdd = inputData.getBoolean(
                 applicationContext.getString(R.string.retrieve_dids_auto_add),
-                false)
+                false
+            )
             if (autoAdd && dids?.isNotEmpty() == true) {
-                setDids(applicationContext,
-                        getDids(applicationContext).plus(dids))
+                setDids(
+                    applicationContext,
+                    getDids(applicationContext).plus(dids)
+                )
                 enablePushNotifications(applicationContext)
                 launch {
                     replaceIndex(applicationContext)
@@ -126,12 +136,14 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
     @JsonClass(generateAdapter = true)
     data class DidResponse(
         @Json(name = "sms_enabled") val smsEnabled: String?,
-        val did: String)
+        val did: String
+    )
 
     @JsonClass(generateAdapter = true)
     data class DidsResponse(
         val status: String,
-        @Suppress("ArrayInDataClass") val dids: List<DidResponse>?)
+        @Suppress("ArrayInDataClass") val dids: List<DidResponse>?
+    )
 
     /**
      * Gets the response of a getDIDsInfo call to the VoIP.ms API.
@@ -145,25 +157,31 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                     return httpPostWithMultipartFormData(
                         applicationContext,
                         "https://www.voip.ms/api/v1/rest.php",
-                        mapOf("api_username" to getEmail(applicationContext),
-                              "api_password" to getPassword(applicationContext),
-                              "method" to "getDIDsInfo"))
+                        mapOf(
+                            "api_username" to getEmail(applicationContext),
+                            "api_password" to getPassword(applicationContext),
+                            "method" to "getDIDsInfo"
+                        )
+                    )
                 } catch (e: IOException) {
                     // Try again...
                 }
             }
             error = applicationContext.getString(
-                R.string.preferences_dids_error_api_request)
+                R.string.preferences_dids_error_api_request
+            )
             return null
         } catch (e: JsonDataException) {
             logException(e)
             error = applicationContext.getString(
-                R.string.preferences_dids_error_api_parse)
+                R.string.preferences_dids_error_api_parse
+            )
             return null
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(
-                R.string.preferences_dids_error_unknown)
+                R.string.preferences_dids_error_unknown
+            )
             return null
         }
     }
@@ -181,10 +199,12 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
             }
             error = when (response.status) {
                 "invalid_credentials" -> applicationContext.getString(
-                    R.string.preferences_dids_error_api_error_invalid_credentials)
+                    R.string.preferences_dids_error_api_error_invalid_credentials
+                )
                 else -> applicationContext.getString(
                     R.string.preferences_dids_error_api_error,
-                    response.status)
+                    response.status
+                )
             }
             return null
         }
@@ -212,7 +232,8 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.retrieve_dids_work_id),
-                ExistingWorkPolicy.REPLACE, work)
+                ExistingWorkPolicy.REPLACE, work
+            )
         }
     }
 }

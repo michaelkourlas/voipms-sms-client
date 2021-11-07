@@ -34,7 +34,8 @@ import java.util.concurrent.TimeUnit
 @Suppress("BlockingMethodInNonBlockingContext")
 suspend inline fun <reified T> httpPostWithMultipartFormData(
     context: Context, url: String,
-    formData: Map<String, String> = emptyMap()): T? {
+    formData: Map<String, String> = emptyMap()
+): T? {
     val requestBodyBuilder = MultipartBody.Builder()
     requestBodyBuilder.setType(MultipartBody.FORM)
     for ((key, value) in formData) {
@@ -49,8 +50,10 @@ suspend inline fun <reified T> httpPostWithMultipartFormData(
 
     val requestClient = HttpClientManager.getInstance().client.newBuilder()
         .readTimeout(getReadTimeout(context) * 1000L, TimeUnit.MILLISECONDS)
-        .connectTimeout(getConnectTimeout(context) * 1000L,
-                        TimeUnit.MILLISECONDS)
+        .connectTimeout(
+            getConnectTimeout(context) * 1000L,
+            TimeUnit.MILLISECONDS
+        )
         .build()
 
     val adapter = JsonParserManager.getInstance().parser.adapter(T::class.java)

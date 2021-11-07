@@ -30,15 +30,18 @@ interface ArchivedDao {
     suspend fun deleteAll()
 
     @Query(
-        "DELETE FROM ${Archived.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact")
+        "DELETE FROM ${Archived.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact"
+    )
     suspend fun deleteConversation(did: String, contact: String)
 
     @Query(
-        "DELETE FROM ${Archived.TABLE_NAME} WHERE ${Archived.COLUMN_DID} NOT IN(:dids)")
+        "DELETE FROM ${Archived.TABLE_NAME} WHERE ${Archived.COLUMN_DID} NOT IN(:dids)"
+    )
     suspend fun deleteWithoutDids(dids: Set<String>)
 
     @Query(
-        "SELECT * FROM ${Archived.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact LIMIT 1")
+        "SELECT * FROM ${Archived.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact LIMIT 1"
+    )
     suspend fun getConversation(did: String, contact: String): Archived?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

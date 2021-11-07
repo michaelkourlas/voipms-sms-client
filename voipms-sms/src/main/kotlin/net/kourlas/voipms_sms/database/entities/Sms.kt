@@ -36,7 +36,8 @@ data class Sms(
     @ColumnInfo(name = COLUMN_UNREAD) val unread: Long = 0,
     @ColumnInfo(name = COLUMN_DELIVERED) val delivered: Long = 0,
     @ColumnInfo(name = COLUMN_DELIVERY_IN_PROGRESS)
-    val deliveryInProgress: Long = 0) {
+    val deliveryInProgress: Long = 0
+) {
     fun toMessage(): Message = Message(this)
 
     fun toMessage(databaseId: Long): Message = Message(this, databaseId)

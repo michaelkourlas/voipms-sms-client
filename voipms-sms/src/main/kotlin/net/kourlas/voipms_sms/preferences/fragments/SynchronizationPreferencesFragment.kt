@@ -35,13 +35,16 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
                 SyncWorker.performFullSynchronization(
                     it,
                     customPeriod = (newValue as String).toDouble(),
-                    scheduleOnly = true)
+                    scheduleOnly = true
+                )
             }
             true
         }
 
-    override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
-                                        rootKey: String?) {
+    override fun onCreatePreferencesFix(
+        savedInstanceState: Bundle?,
+        rootKey: String?
+    ) {
         // Add preferences
         addPreferencesFromResource(R.xml.preferences_synchronization)
 
@@ -70,8 +73,10 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
         }
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences,
-                                           key: String) {
+    override fun onSharedPreferenceChanged(
+        sharedPreferences: SharedPreferences,
+        key: String
+    ) {
         // It's not clear why onSharedPreferenceChanged is called before the
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
@@ -96,7 +101,9 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
      */
     private fun updateHandlersForPreference(preference: Preference) {
         if (preference.key == getString(
-                R.string.preferences_sync_interval_key)) {
+                R.string.preferences_sync_interval_key
+            )
+        ) {
             preference.onPreferenceChangeListener =
                 syncIntervalPreferenceChangeListener
         }

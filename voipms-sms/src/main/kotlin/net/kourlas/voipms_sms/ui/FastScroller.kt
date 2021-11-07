@@ -48,8 +48,10 @@ import kotlin.math.min
  * bubble alongside it that shows extra information.
  */
 @SuppressLint("InflateParams")
-class FastScroller private constructor(private val mRv: RecyclerView,
-                                       position: Int) :
+class FastScroller private constructor(
+    private val mRv: RecyclerView,
+    position: Int
+) :
     RecyclerView.OnScrollListener(), OnLayoutChangeListener,
     RecyclerView.OnItemTouchListener {
     private val mContext: Context = mRv.context
@@ -121,23 +123,31 @@ class FastScroller private constructor(private val mRv: RecyclerView,
         val res = mContext.resources
         mTrackWidth = res.getDimensionPixelSize(R.dimen.fastscroll_track_width)
         mThumbHeight = res.getDimensionPixelSize(
-            R.dimen.fastscroll_thumb_height)
+            R.dimen.fastscroll_thumb_height
+        )
         mPreviewHeight = res.getDimensionPixelSize(
-            R.dimen.fastscroll_preview_height)
+            R.dimen.fastscroll_preview_height
+        )
         mPreviewMinWidth = res.getDimensionPixelSize(
-            R.dimen.fastscroll_preview_min_width)
+            R.dimen.fastscroll_preview_min_width
+        )
         mPreviewMarginTop = res.getDimensionPixelOffset(
-            R.dimen.fastscroll_preview_margin_top)
+            R.dimen.fastscroll_preview_margin_top
+        )
         mPreviewMarginLeftRight = res.getDimensionPixelOffset(
-            R.dimen.fastscroll_preview_margin_left_right)
+            R.dimen.fastscroll_preview_margin_left_right
+        )
         mTouchSlop = res.getDimensionPixelOffset(R.dimen.fastscroll_touch_slop)
         val inflator = LayoutInflater.from(mContext)
         mTrackImageView = inflator.inflate(
-            R.layout.fastscroll_track, null) as ImageView
+            R.layout.fastscroll_track, null
+        ) as ImageView
         mThumbImageView = inflator.inflate(
-            R.layout.fastscroll_thumb, null) as ImageView
+            R.layout.fastscroll_thumb, null
+        ) as ImageView
         mPreviewTextView = inflator.inflate(
-            R.layout.fastscroll_preview, null) as TextView
+            R.layout.fastscroll_preview, null
+        ) as TextView
         refreshConversationThemeColor()
         // Add the fast scroll views to the overlay, so they are rendered above
         // the list
@@ -151,25 +161,36 @@ class FastScroller private constructor(private val mRv: RecyclerView,
 
     private fun refreshConversationThemeColor() {
         mPreviewTextView.background = if (mPosRight)
-            ContextCompat.getDrawable(mContext,
-                                      R.drawable.fastscroll_preview_right)
+            ContextCompat.getDrawable(
+                mContext,
+                R.drawable.fastscroll_preview_right
+            )
         else
-            ContextCompat.getDrawable(mContext,
-                                      R.drawable.fastscroll_preview_left)
+            ContextCompat.getDrawable(
+                mContext,
+                R.drawable.fastscroll_preview_left
+            )
         val drawable = StateListDrawable()
         drawable.addState(
             intArrayOf(android.R.attr.state_pressed),
-            ContextCompat.getDrawable(mContext,
-                                      R.drawable.fastscroll_thumb_pressed))
+            ContextCompat.getDrawable(
+                mContext,
+                R.drawable.fastscroll_thumb_pressed
+            )
+        )
         drawable.addState(
             StateSet.WILD_CARD,
-            ContextCompat.getDrawable(mContext,
-                                      R.drawable.fastscroll_thumb))
+            ContextCompat.getDrawable(
+                mContext,
+                R.drawable.fastscroll_thumb
+            )
+        )
         mThumbImageView.setImageDrawable(drawable)
     }
 
     override fun onScrollStateChanged(
-        view: RecyclerView, newState: Int) {
+        view: RecyclerView, newState: Int
+    ) {
         if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
             // Only show the scrollbar once the user starts scrolling
             if (!mVisible && isEnabled) {
@@ -188,9 +209,11 @@ class FastScroller private constructor(private val mRv: RecyclerView,
         }
         // Slide the scrollbar in from the side
         val trackSlide = ObjectAnimator.ofFloat(
-            mTrackImageView, View.TRANSLATION_X, 0f)
+            mTrackImageView, View.TRANSLATION_X, 0f
+        )
         val thumbSlide = ObjectAnimator.ofFloat(
-            mThumbImageView, View.TRANSLATION_X, 0f)
+            mThumbImageView, View.TRANSLATION_X, 0f
+        )
         val animation = AnimatorSet()
         animation.playTogether(trackSlide, thumbSlide)
         animation.duration = SHOW_ANIMATION_DURATION_MS.toLong()
@@ -217,10 +240,12 @@ class FastScroller private constructor(private val mRv: RecyclerView,
             // Slide the scrollbar off to the side
             val trackSlide = ObjectAnimator.ofFloat(
                 mTrackImageView, View.TRANSLATION_X,
-                hiddenTranslationX.toFloat())
+                hiddenTranslationX.toFloat()
+            )
             val thumbSlide = ObjectAnimator.ofFloat(
                 mThumbImageView, View.TRANSLATION_X,
-                hiddenTranslationX.toFloat())
+                hiddenTranslationX.toFloat()
+            )
             mHideAnimation = AnimatorSet().also {
                 it.playTogether(trackSlide, thumbSlide)
                 it.duration = HIDE_ANIMATION_DURATION_MS.toLong()
@@ -242,14 +267,16 @@ class FastScroller private constructor(private val mRv: RecyclerView,
 
     private fun hidePreview() {
         mHidePreviewAnimation = ObjectAnimator.ofFloat(
-            mPreviewTextView, View.ALPHA, 0f).also {
+            mPreviewTextView, View.ALPHA, 0f
+        ).also {
             it.duration = HIDE_ANIMATION_DURATION_MS.toLong()
             it.start()
         }
     }
 
     override fun onScrolled(
-        view: RecyclerView, dx: Int, dy: Int) {
+        view: RecyclerView, dx: Int, dy: Int
+    ) {
         updateScrollPos()
     }
 
@@ -302,7 +329,8 @@ class FastScroller private constructor(private val mRv: RecyclerView,
     }
 
     override fun onInterceptTouchEvent(
-        rv: RecyclerView, e: MotionEvent): Boolean {
+        rv: RecyclerView, e: MotionEvent
+    ): Boolean {
         if (!mVisible) {
             return false
         }
@@ -352,7 +380,8 @@ class FastScroller private constructor(private val mRv: RecyclerView,
     }
 
     override fun onRequestDisallowInterceptTouchEvent(
-        disallowIntercept: Boolean) {
+        disallowIntercept: Boolean
+    ) {
     }
 
     private fun startDrag() {
@@ -388,7 +417,8 @@ class FastScroller private constructor(private val mRv: RecyclerView,
 
     override fun onLayoutChange(
         v: View, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int,
-        oldTop: Int, oldRight: Int, oldBottom: Int) {
+        oldTop: Int, oldRight: Int, oldBottom: Int
+    ) {
         if (!mVisible) {
             hide(false /* animate */)
         }
@@ -403,9 +433,11 @@ class FastScroller private constructor(private val mRv: RecyclerView,
     private fun layoutTrack() {
         val trackHeight = max(0, mContainer.height())
         val widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-            mTrackWidth, MeasureSpec.EXACTLY)
+            mTrackWidth, MeasureSpec.EXACTLY
+        )
         val heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-            trackHeight, MeasureSpec.EXACTLY)
+            trackHeight, MeasureSpec.EXACTLY
+        )
         mTrackImageView.measure(widthMeasureSpec, heightMeasureSpec)
         val left = if (mPosRight)
             mContainer.right - mTrackWidth
@@ -422,9 +454,11 @@ class FastScroller private constructor(private val mRv: RecyclerView,
 
     private fun layoutThumb(centerY: Int) {
         val widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-            mTrackWidth, MeasureSpec.EXACTLY)
+            mTrackWidth, MeasureSpec.EXACTLY
+        )
         val heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-            mThumbHeight, MeasureSpec.EXACTLY)
+            mThumbHeight, MeasureSpec.EXACTLY
+        )
         mThumbImageView.measure(widthMeasureSpec, heightMeasureSpec)
         val left = if (mPosRight)
             mContainer.right - mTrackWidth
@@ -441,14 +475,17 @@ class FastScroller private constructor(private val mRv: RecyclerView,
 
     private fun layoutPreview(centerY: Int) {
         var widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-            mContainer.width(), MeasureSpec.AT_MOST)
+            mContainer.width(), MeasureSpec.AT_MOST
+        )
         val heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-            mPreviewHeight, MeasureSpec.EXACTLY)
+            mPreviewHeight, MeasureSpec.EXACTLY
+        )
         mPreviewTextView.measure(widthMeasureSpec, heightMeasureSpec)
         // Ensure that the preview bubble is at least as wide as it is tall
         if (mPreviewTextView.measuredWidth < mPreviewMinWidth) {
             widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                mPreviewMinWidth, MeasureSpec.EXACTLY)
+                mPreviewMinWidth, MeasureSpec.EXACTLY
+            )
             mPreviewTextView.measure(widthMeasureSpec, heightMeasureSpec)
         }
         val previewMinY = mContainer.top + mPreviewMarginTop

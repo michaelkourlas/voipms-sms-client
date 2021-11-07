@@ -50,7 +50,8 @@ class AccountPreferencesActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             fragment = AccountPreferencesFragment()
             supportFragmentManager.beginTransaction().replace(
-                R.id.preferences_fragment_layout, fragment).commit()
+                R.id.preferences_fragment_layout, fragment
+            ).commit()
         }
     }
 

@@ -36,7 +36,9 @@ fun subscribeToDidTopics(context: Context) {
     // Do not subscribe to DID topics if Google Play Services is unavailable
     if (GoogleApiAvailability.getInstance()
             .isGooglePlayServicesAvailable(
-                context) != ConnectionResult.SUCCESS) {
+                context
+            ) != ConnectionResult.SUCCESS
+    ) {
         return
     }
 
@@ -51,16 +53,23 @@ fun subscribeToDidTopics(context: Context) {
  * using a snackbar on the specified activity if Google Play Services is
  * unavailable.
  */
-fun enablePushNotifications(context: Context,
-                            activityToShowError: FragmentActivity? = null) {
+fun enablePushNotifications(
+    context: Context,
+    activityToShowError: FragmentActivity? = null
+) {
     // Check if Google Play Services is available
     if (GoogleApiAvailability.getInstance()
             .isGooglePlayServicesAvailable(
-                context) != ConnectionResult.SUCCESS) {
+                context
+            ) != ConnectionResult.SUCCESS
+    ) {
         if (activityToShowError != null) {
-            showSnackbar(activityToShowError, R.id.coordinator_layout,
-                         activityToShowError.getString(
-                             R.string.push_notifications_fail_google_play))
+            showSnackbar(
+                activityToShowError, R.id.coordinator_layout,
+                activityToShowError.getString(
+                    R.string.push_notifications_fail_google_play
+                )
+            )
         }
         setSetupCompletedForVersion(context, 134)
         return
@@ -69,7 +78,8 @@ fun enablePushNotifications(context: Context,
     // Check if DIDs are configured and that notifications are enabled,
     // and silently quit if not
     if (!didsConfigured(context)
-        || !Notifications.getInstance(context).getNotificationsEnabled()) {
+        || !Notifications.getInstance(context).getNotificationsEnabled()
+    ) {
         setSetupCompletedForVersion(context, 134)
         return
     }

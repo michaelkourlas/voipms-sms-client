@@ -28,7 +28,8 @@ class Draft(
     @ColumnInfo(name = COLUMN_DATABASE_ID) val databaseId: Long = 0,
     @ColumnInfo(name = COLUMN_DID) val did: String,
     @ColumnInfo(name = COLUMN_CONTACT) val contact: String,
-    @ColumnInfo(name = COLUMN_MESSAGE) val text: String) {
+    @ColumnInfo(name = COLUMN_MESSAGE) val text: String
+) {
     fun toMessage(): Message = Message(this)
 
     companion object {

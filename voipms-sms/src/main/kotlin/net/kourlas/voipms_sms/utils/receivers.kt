@@ -24,8 +24,10 @@ import androidx.fragment.app.FragmentActivity
  * Unregisters the specified broadcast receiver from the specified activity.
  * Ignores IllegalArgumentExceptions.
  */
-fun safeUnregisterReceiver(activity: FragmentActivity,
-                           receiver: BroadcastReceiver) = try {
+fun safeUnregisterReceiver(
+    activity: FragmentActivity,
+    receiver: BroadcastReceiver
+) = try {
     activity.unregisterReceiver(receiver)
 } catch (_: IllegalArgumentException) {
     // Do nothing.

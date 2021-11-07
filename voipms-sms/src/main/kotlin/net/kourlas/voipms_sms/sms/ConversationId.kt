@@ -31,7 +31,8 @@ data class ConversationId(
     @ColumnInfo(name = Sms.COLUMN_DID)
     val did: String,
     @ColumnInfo(name = Sms.COLUMN_CONTACT)
-    val contact: String) {
+    val contact: String
+) {
     /**
      * Gets a unique identifier for this conversation.
      */

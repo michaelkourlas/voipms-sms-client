@@ -30,19 +30,23 @@ interface DraftDao {
     suspend fun deleteAll()
 
     @Query(
-        "DELETE FROM ${Draft.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact")
+        "DELETE FROM ${Draft.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact"
+    )
     suspend fun deleteConversation(did: String, contact: String)
 
     @Query(
-        "DELETE FROM ${Draft.TABLE_NAME} WHERE ${Draft.COLUMN_DID} NOT IN(:dids)")
+        "DELETE FROM ${Draft.TABLE_NAME} WHERE ${Draft.COLUMN_DID} NOT IN(:dids)"
+    )
     suspend fun deleteWithoutDids(dids: Set<String>)
 
     @Query(
-        "SELECT * FROM ${Draft.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact")
+        "SELECT * FROM ${Draft.TABLE_NAME} WHERE ${Sms.COLUMN_DID} = :did AND ${Sms.COLUMN_CONTACT} = :contact"
+    )
     suspend fun getConversation(did: String, contact: String): Draft?
 
     @Query(
-        "SELECT * FROM ${Draft.TABLE_NAME} WHERE ${Draft.COLUMN_DID} IN(:dids) ORDER BY ${Draft.COLUMN_DID} DESC, ${Draft.COLUMN_CONTACT} DESC")
+        "SELECT * FROM ${Draft.TABLE_NAME} WHERE ${Draft.COLUMN_DID} IN(:dids) ORDER BY ${Draft.COLUMN_DID} DESC, ${Draft.COLUMN_CONTACT} DESC"
+    )
     suspend fun getConversations(dids: Set<String>): List<Draft>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

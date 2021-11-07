@@ -41,15 +41,19 @@ fun getDigitsOfString(str: String): String {
 fun getFormattedPhoneNumber(phoneNumber: String): String {
     if (phoneNumber.length == 10) {
         val phoneNumberFormat = MessageFormat("({0}) {1}-{2}")
-        val phoneNumberArray = arrayOf(phoneNumber.substring(0, 3),
-                                       phoneNumber.substring(3, 6),
-                                       phoneNumber.substring(6))
+        val phoneNumberArray = arrayOf(
+            phoneNumber.substring(0, 3),
+            phoneNumber.substring(3, 6),
+            phoneNumber.substring(6)
+        )
         return phoneNumberFormat.format(phoneNumberArray)
     } else if (phoneNumber.length == 11 && phoneNumber[0] == '1') {
         val phoneNumberFormat = MessageFormat("({0}) {1}-{2}")
-        val phoneNumberArray = arrayOf(phoneNumber.substring(1, 4),
-                                       phoneNumber.substring(4, 7),
-                                       phoneNumber.substring(7))
+        val phoneNumberArray = arrayOf(
+            phoneNumber.substring(1, 4),
+            phoneNumber.substring(4, 7),
+            phoneNumber.substring(7)
+        )
         return phoneNumberFormat.format(phoneNumberArray)
     }
 
@@ -79,6 +83,7 @@ fun getPhoneNumberType(type: Int): String = when (type) {
 fun validatePhoneNumber(value: String) {
     if (getDigitsOfString(value) != value) {
         throw IllegalArgumentException(
-            "value must consist only of numbers")
+            "value must consist only of numbers"
+        )
     }
 }

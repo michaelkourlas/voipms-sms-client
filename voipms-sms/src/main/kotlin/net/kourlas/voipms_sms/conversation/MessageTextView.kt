@@ -34,16 +34,19 @@ import androidx.appcompat.widget.AppCompatTextView
 
 class MessageTextView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : AppCompatTextView(context,
-                      attrs,
-                      defStyleAttr) {
+) : AppCompatTextView(
+    context,
+    attrs,
+    defStyleAttr
+) {
     private var longClick = false
     var messageLongClickListener: (() -> Unit)? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (!(event?.action == MotionEvent.ACTION_UP
-              || event?.action == MotionEvent.ACTION_DOWN)) {
+                || event?.action == MotionEvent.ACTION_DOWN)
+        ) {
             if (event?.action == MotionEvent.ACTION_CANCEL) {
                 longClick = false
             }
@@ -53,9 +56,9 @@ class MessageTextView @JvmOverloads constructor(
         val x = event.x.toInt() - totalPaddingLeft + scrollX
         val y = event.y.toInt() - totalPaddingTop + scrollY
         val line = layout?.getLineForVertical(y)
-                   ?: return super.onTouchEvent(event)
+            ?: return super.onTouchEvent(event)
         val off = layout?.getOffsetForHorizontal(line, x.toFloat())
-                  ?: return super.onTouchEvent(event)
+            ?: return super.onTouchEvent(event)
 
         val buffer = text
         if (buffer !is Spannable) {
@@ -74,17 +77,21 @@ class MessageTextView @JvmOverloads constructor(
                     longClick = false
                 }
                 MotionEvent.ACTION_DOWN -> {
-                    Selection.setSelection(buffer,
-                                           buffer.getSpanStart(link),
-                                           buffer.getSpanEnd(link))
+                    Selection.setSelection(
+                        buffer,
+                        buffer.getSpanStart(link),
+                        buffer.getSpanEnd(link)
+                    )
                     postDelayed(
                         {
                             longClick = true
                             performHapticFeedback(
-                                HapticFeedbackConstants.LONG_PRESS)
+                                HapticFeedbackConstants.LONG_PRESS
+                            )
                             messageLongClickListener?.invoke()
                         },
-                        ViewConfiguration.getLongPressTimeout().toLong())
+                        ViewConfiguration.getLongPressTimeout().toLong()
+                    )
                 }
             }
             return true

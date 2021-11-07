@@ -43,7 +43,9 @@ class MarkReadReceiver : BroadcastReceiver() {
                 throw Exception("No context or intent provided")
             }
             if (intent.action != context.getString(
-                    R.string.mark_read_receiver_action)) {
+                    R.string.mark_read_receiver_action
+                )
+            ) {
                 throw Exception("Unrecognized action " + intent.action)
             }
             val did = intent.getStringExtra(
@@ -66,7 +68,8 @@ class MarkReadReceiver : BroadcastReceiver() {
 
                     // Cancel the existing notification.
                     Notifications.getInstance(context).cancelNotification(
-                        conversationId)
+                        conversationId
+                    )
                 } catch (e: Exception) {
                     logException(e)
                 } finally {
@@ -87,11 +90,14 @@ class MarkReadReceiver : BroadcastReceiver() {
             val intent = Intent()
             intent.action =
                 context.getString(R.string.mark_read_receiver_action)
-            intent.putExtra(context.getString(R.string.mark_read_receiver_did),
-                            did)
+            intent.putExtra(
+                context.getString(R.string.mark_read_receiver_did),
+                did
+            )
             intent.putExtra(
                 context.getString(R.string.mark_read_receiver_contact),
-                contact)
+                contact
+            )
             return intent
         }
     }

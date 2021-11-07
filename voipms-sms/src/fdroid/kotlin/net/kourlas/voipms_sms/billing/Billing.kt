@@ -64,7 +64,8 @@ class Billing(private val context: Context) {
         fun getInstance(context: Context): Billing =
             instance ?: synchronized(this) {
                 instance ?: Billing(
-                    context.applicationContext).also { instance = it }
+                    context.applicationContext
+                ).also { instance = it }
             }
     }
 }

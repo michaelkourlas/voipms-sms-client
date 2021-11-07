@@ -47,7 +47,8 @@ class AppearancePreferencesActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             fragment = AppearancePreferencesFragment()
             supportFragmentManager.beginTransaction().replace(
-                R.id.preferences_fragment_layout, fragment).commit()
+                R.id.preferences_fragment_layout, fragment
+            ).commit()
         }
     }
 }

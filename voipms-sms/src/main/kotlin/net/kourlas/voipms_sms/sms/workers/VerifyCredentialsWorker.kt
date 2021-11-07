@@ -44,13 +44,20 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
         // Send broadcast.
         val verifyCredentialsCompleteIntent = Intent(
             applicationContext.getString(
-                R.string.verify_credentials_complete_action))
-        verifyCredentialsCompleteIntent.putExtra(applicationContext.getString(
-            R.string.verify_credentials_complete_error), error)
+                R.string.verify_credentials_complete_action
+            )
+        )
         verifyCredentialsCompleteIntent.putExtra(
             applicationContext.getString(
-                R.string.verify_credentials_complete_valid),
-            valid)
+                R.string.verify_credentials_complete_error
+            ), error
+        )
+        verifyCredentialsCompleteIntent.putExtra(
+            applicationContext.getString(
+                R.string.verify_credentials_complete_valid
+            ),
+            valid
+        )
         applicationContext.sendBroadcast(verifyCredentialsCompleteIntent)
 
         return if (error == null) {
@@ -72,7 +79,8 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
         } else {
             ForegroundInfo(
                 Notifications.SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID,
-                notification)
+                notification
+            )
         }
     }
 
@@ -85,10 +93,14 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
         try {
             val email = inputData.getString(
                 applicationContext.getString(
-                    R.string.verify_credentials_email))
+                    R.string.verify_credentials_email
+                )
+            )
             val password = inputData.getString(
                 applicationContext.getString(
-                    R.string.verify_credentials_password))
+                    R.string.verify_credentials_password
+                )
+            )
             if (email == null || password == null) {
                 return false
             }
@@ -111,33 +123,41 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
      *
      * @return Null if an error occurred.
      */
-    private suspend fun getApiResponse(email: String,
-                                       password: String): VerifyCredentialsResponse? {
+    private suspend fun getApiResponse(
+        email: String,
+        password: String
+    ): VerifyCredentialsResponse? {
         try {
             repeat(3) {
                 try {
                     return httpPostWithMultipartFormData(
                         applicationContext,
                         "https://www.voip.ms/api/v1/rest.php",
-                        mapOf("api_username" to email,
-                              "api_password" to password,
-                              "method" to "getDIDsInfo"))
+                        mapOf(
+                            "api_username" to email,
+                            "api_password" to password,
+                            "method" to "getDIDsInfo"
+                        )
+                    )
                 } catch (e: IOException) {
                     // Try again...
                 }
             }
             error = applicationContext.getString(
-                R.string.verify_credentials_error_api_request)
+                R.string.verify_credentials_error_api_request
+            )
             return null
         } catch (e: JsonDataException) {
             logException(e)
             error = applicationContext.getString(
-                R.string.verify_credentials_error_api_parse)
+                R.string.verify_credentials_error_api_parse
+            )
             return null
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(
-                R.string.verify_credentials_error_unknown)
+                R.string.verify_credentials_error_unknown
+            )
             return null
         }
     }
@@ -153,12 +173,15 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
             }
             error = when (response.status) {
                 "invalid_credentials" -> applicationContext.getString(
-                    R.string.verify_credentials_error_api_error_invalid_credentials)
+                    R.string.verify_credentials_error_api_error_invalid_credentials
+                )
                 "missing_credentials" -> applicationContext.getString(
-                    R.string.verify_credentials_error_api_error_missing_credentials)
+                    R.string.verify_credentials_error_api_error_missing_credentials
+                )
                 else -> applicationContext.getString(
                     R.string.verify_credentials_error_api_error,
-                    response.status)
+                    response.status
+                )
             }
             return false
         }
@@ -169,8 +192,10 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
         /**
          * Verify credentials for a VoIP.ms account.
          */
-        fun verifyCredentials(context: Context, email: String,
-                              password: String) {
+        fun verifyCredentials(
+            context: Context, email: String,
+            password: String
+        ) {
             val work = OneTimeWorkRequestBuilder<VerifyCredentialsWorker>()
                 .setInputData(
                     workDataOf(
@@ -186,7 +211,8 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.verify_credentials_work_id),
-                ExistingWorkPolicy.REPLACE, work)
+                ExistingWorkPolicy.REPLACE, work
+            )
         }
     }
 }

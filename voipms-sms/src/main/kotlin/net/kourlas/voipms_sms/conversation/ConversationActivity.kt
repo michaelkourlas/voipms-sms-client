@@ -98,10 +98,15 @@ open class ConversationActivity(val bubble: Boolean = false) :
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 // Show error in snackbar if one occurred
-                intent?.getStringExtra(getString(
-                    R.string.sync_complete_error))?.let {
-                    showSnackbar(this@ConversationActivity,
-                                 R.id.coordinator_layout, it)
+                intent?.getStringExtra(
+                    getString(
+                        R.string.sync_complete_error
+                    )
+                )?.let {
+                    showSnackbar(
+                        this@ConversationActivity,
+                        R.id.coordinator_layout, it
+                    )
                 }
 
                 // Refresh adapter to show new messages
@@ -113,10 +118,15 @@ open class ConversationActivity(val bubble: Boolean = false) :
     private val sentMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             // Show error in snackbar if one occurred
-            intent?.getStringExtra(getString(
-                R.string.sent_message_error))?.let {
-                showSnackbar(this@ConversationActivity,
-                             R.id.coordinator_layout, it)
+            intent?.getStringExtra(
+                getString(
+                    R.string.sent_message_error
+                )
+            )?.let {
+                showSnackbar(
+                    this@ConversationActivity,
+                    R.id.coordinator_layout, it
+                )
             }
 
             if (::adapter.isInitialized) {
@@ -155,8 +165,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
         setupSendButton()
         setupDemo()
 
-        ShortcutManagerCompat.reportShortcutUsed(applicationContext,
-                                                 conversationId.getId())
+        ShortcutManagerCompat.reportShortcutUsed(
+            applicationContext,
+            conversationId.getId()
+        )
     }
 
     /**
@@ -168,7 +180,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
     private fun setupDidAndContact(intent: Intent): Boolean {
         if (Intent.ACTION_SEND == intent.action
             && "text/plain" == intent.type
-            && intent.getStringExtra(Intent.EXTRA_TEXT) != null) {
+            && intent.getStringExtra(Intent.EXTRA_TEXT) != null
+        ) {
             // Generic text share; forward to NewConversationActivity
             val shortcutId =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -180,11 +193,14 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 val newIntent = Intent()
                 newIntent.action = Intent.ACTION_SEND
                 newIntent.type = "text/plain"
-                newIntent.putExtra(Intent.EXTRA_TEXT,
-                                   intent.getStringExtra(Intent.EXTRA_TEXT))
+                newIntent.putExtra(
+                    Intent.EXTRA_TEXT,
+                    intent.getStringExtra(Intent.EXTRA_TEXT)
+                )
                 newIntent.component = ComponentName(
                     applicationContext,
-                    NewConversationActivity::class.java)
+                    NewConversationActivity::class.java
+                )
                 startActivity(newIntent)
                 finish()
                 return false
@@ -193,14 +209,16 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 if (components.size != 2) {
                     abortActivity(
                         this,
-                        Exception("Invalid shortcut ID: '$shortcutId'"))
+                        Exception("Invalid shortcut ID: '$shortcutId'")
+                    )
                     return false
                 }
                 did = components[0]
                 contact = components[1]
             }
         } else if (Intent.ACTION_VIEW == intent.action
-                   && intent.dataString != null) {
+            && intent.dataString != null
+        ) {
             // Firebase URL intent
             val uri = Uri.parse(intent.dataString)
             val id = uri.getQueryParameter("id")
@@ -215,7 +233,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 if (message == null) {
                     abortActivity(
                         this,
-                        Exception("Invalid URI: '$intent.dataString'"))
+                        Exception("Invalid URI: '$intent.dataString'")
+                    )
                     return false
                 } else {
                     did = message.did
@@ -228,19 +247,27 @@ open class ConversationActivity(val bubble: Boolean = false) :
             } else {
                 abortActivity(
                     this,
-                    Exception("Invalid URI: '$intent.dataString'"))
+                    Exception("Invalid URI: '$intent.dataString'")
+                )
                 return false
             }
         } else {
             // Standard intent
             val d =
                 intent.getStringExtra(getString(R.string.conversation_did))
-            val c = intent.getStringExtra(getString(
-                R.string.conversation_contact))
+            val c = intent.getStringExtra(
+                getString(
+                    R.string.conversation_contact
+                )
+            )
             if (d == null || c == null) {
-                abortActivity(this,
-                              Exception("No DID or contact specified:" +
-                                        " did: '$d', contact: '$c'"))
+                abortActivity(
+                    this,
+                    Exception(
+                        "No DID or contact specified:" +
+                            " did: '$d', contact: '$c'"
+                    )
+                )
                 return false
             } else {
                 did = d
@@ -257,11 +284,15 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // We shouldn't show a conversation for a DID that is not configured to
         // be displayed in the conversation view
-        if (!getDidShowInConversationsView(applicationContext,
-                                           did) && !BuildConfig.IS_DEMO) {
+        if (!getDidShowInConversationsView(
+                applicationContext,
+                did
+            ) && !BuildConfig.IS_DEMO
+        ) {
             abortActivity(
                 this,
-                Exception("DID '$did' not displayed in conversation view"))
+                Exception("DID '$did' not displayed in conversation view")
+            )
             return false
         }
 
@@ -284,7 +315,9 @@ open class ConversationActivity(val bubble: Boolean = false) :
             contactName,
             contact,
             resources.getDimensionPixelSize(
-                R.dimen.contact_badge))
+                R.dimen.contact_badge
+            )
+        )
 
         return true
     }
@@ -312,14 +345,19 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Allow contact phone number to be copied by long clicking the toolbar
         findViewById<Toolbar>(R.id.toolbar).setOnLongClickListener {
             val clipboard = getSystemService(
-                Context.CLIPBOARD_SERVICE) as ClipboardManager
+                Context.CLIPBOARD_SERVICE
+            ) as ClipboardManager
             val clip = ClipData.newPlainText(
                 getString(R.string.conversation_contact_clipboard_description),
-                getFormattedPhoneNumber(contact))
+                getFormattedPhoneNumber(contact)
+            )
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, getString(
-                R.string.conversation_copied_contact_toast_message),
-                           Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this, getString(
+                    R.string.conversation_copied_contact_toast_message
+                ),
+                Toast.LENGTH_SHORT
+            ).show()
             true
         }
 
@@ -335,23 +373,28 @@ open class ConversationActivity(val bubble: Boolean = false) :
         layoutManager.orientation = RecyclerView.VERTICAL
         layoutManager.stackFromEnd = true
         recyclerView = findViewById(R.id.list)
-        adapter = ConversationRecyclerViewAdapter(this,
-                                                  recyclerView,
-                                                  layoutManager,
-                                                  conversationId,
-                                                  contactName,
-                                                  contactBitmap)
+        adapter = ConversationRecyclerViewAdapter(
+            this,
+            recyclerView,
+            layoutManager,
+            conversationId,
+            contactName,
+            contactBitmap
+        )
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
         recyclerView.addOnScrollListener(object :
                                              RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int,
-                                    dy: Int) {
+            override fun onScrolled(
+                recyclerView: RecyclerView, dx: Int,
+                dy: Int
+            ) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (!adapter.loadingMoreItems
                     && layoutManager.findFirstVisibleItemPosition()
-                    <= ConversationRecyclerViewAdapter.START_LOAD_INDEX) {
+                    <= ConversationRecyclerViewAdapter.START_LOAD_INDEX
+                ) {
                     adapter.loadMoreItems()
                 }
             }
@@ -360,7 +403,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // Set up fast scroller
         FastScroller.addTo(
-            recyclerView, FastScroller.POSITION_RIGHT_SIDE)
+            recyclerView, FastScroller.POSITION_RIGHT_SIDE
+        )
     }
 
     /**
@@ -371,18 +415,23 @@ open class ConversationActivity(val bubble: Boolean = false) :
         val messageSection = findViewById<LinearLayout>(R.id.message_section)
         ViewCompat.setElevation(
             messageSection,
-            resources.getDimension(R.dimen.send_message_elevation))
+            resources.getDimension(R.dimen.send_message_elevation)
+        )
         applyRoundedCornersMask(messageSection)
 
         // Set up message text box
         val messageEditText = findViewById<EditText>(R.id.message_edit_text)
         messageEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int,
-                                           count: Int,
-                                           after: Int) = Unit
+            override fun beforeTextChanged(
+                s: CharSequence, start: Int,
+                count: Int,
+                after: Int
+            ) = Unit
 
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int,
-                                       count: Int) = Unit
+            override fun onTextChanged(
+                s: CharSequence, start: Int, before: Int,
+                count: Int
+            ) = Unit
 
             override fun afterTextChanged(s: Editable) =
                 onMessageTextChange(s.toString())
@@ -394,13 +443,15 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 }
             }
         val intentMessageText = intent.getStringExtra(
-            getString(R.string.conversation_extra_message_text))
+            getString(R.string.conversation_extra_message_text)
+        )
         if (intentMessageText != null) {
             messageEditText.setText(intentMessageText)
             messageEditText.setSelection(messageEditText.text.length)
         }
         val intentFocus = intent.getBooleanExtra(
-            getString(R.string.conversation_extra_focus), false)
+            getString(R.string.conversation_extra_focus), false
+        )
         if (intentFocus) {
             messageEditText.requestFocus()
         }
@@ -411,9 +462,11 @@ open class ConversationActivity(val bubble: Boolean = false) :
      */
     private fun getMessageTextFromIntent() {
         if (Intent.ACTION_SEND == intent.action
-            && "text/plain" == intent.type) {
+            && "text/plain" == intent.type
+        ) {
             val messageText = findViewById<EditText>(
-                R.id.message_edit_text)
+                R.id.message_edit_text
+            )
             if (intent.getStringExtra(Intent.EXTRA_TEXT) != null) {
                 messageText.setText(intent.getStringExtra(Intent.EXTRA_TEXT))
                 messageText.requestFocus()
@@ -427,9 +480,11 @@ open class ConversationActivity(val bubble: Boolean = false) :
      */
     private fun onMessageTextChange(newText: String) {
         val maxLength = applicationContext.resources.getInteger(
-            R.integer.sms_max_length)
+            R.integer.sms_max_length
+        )
         val charsRemainingTextView = findViewById<TextView>(
-            R.id.chars_remaining_text)
+            R.id.chars_remaining_text
+        )
 
         // VoIP.ms uses UTF-8 encoding for text messages; any message
         // exceeding N bytes when encoded using UTF-8 is too long
@@ -468,13 +523,16 @@ open class ConversationActivity(val bubble: Boolean = false) :
             charsRemainingTextView.visibility = View.VISIBLE
             charsRemainingTextView.text = getString(
                 R.string.conversation_char_rem,
-                maxLength - bytesCount, msgsCount)
+                maxLength - bytesCount, msgsCount
+            )
         }
 
         lifecycleScope.launch(Dispatchers.Default) {
             Database.getInstance(applicationContext)
-                .updateConversationDraft(conversationId,
-                                         newText)
+                .updateConversationDraft(
+                    conversationId,
+                    newText
+                )
         }
     }
 
@@ -496,7 +554,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
         @Suppress("ConstantConditionIf")
         if (BuildConfig.IS_DEMO) {
             Notifications.getInstance(applicationContext).showDemoNotification(
-                getDemoNotification())
+                getDemoNotification()
+            )
         }
     }
 
@@ -510,18 +569,23 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         if (messageText.trim() != ""
             && accountConfigured(applicationContext)
-            && did in getDids(applicationContext)) {
+            && did in getDids(applicationContext)
+        ) {
             // Clear the message text box.
             messageEditText.setText("")
 
             // Send the message using the SendMessageService.
             lifecycleScope.launch(Dispatchers.Default) {
                 val ids = Database.getInstance(
-                    applicationContext)
+                    applicationContext
+                )
                     .insertConversationMessagesDeliveryInProgress(
-                        ConversationId(did,
-                                       contact),
-                        getMessageTexts(applicationContext, messageText))
+                        ConversationId(
+                            did,
+                            contact
+                        ),
+                        getMessageTexts(applicationContext, messageText)
+                    )
                 for (id in ids) {
                     SendMessageWorker.sendMessage(applicationContext, id)
                 }
@@ -546,18 +610,26 @@ open class ConversationActivity(val bubble: Boolean = false) :
         super.onResume()
 
         // Register all dynamic receivers for this activity
-        registerReceiver(syncCompleteReceiver,
-                         IntentFilter(getString(R.string.sync_complete_action)))
-        registerReceiver(sentMessageReceiver,
-                         IntentFilter(applicationContext.getString(
-                             R.string.sent_message_action, did, contact)))
+        registerReceiver(
+            syncCompleteReceiver,
+            IntentFilter(getString(R.string.sync_complete_action))
+        )
+        registerReceiver(
+            sentMessageReceiver,
+            IntentFilter(
+                applicationContext.getString(
+                    R.string.sent_message_action, did, contact
+                )
+            )
+        )
 
         // Load draft message
         val messageText = findViewById<EditText>(R.id.message_edit_text)
         lifecycleScope.launch(Dispatchers.Default) {
             val draftMessage =
                 Database.getInstance(applicationContext).getConversationDraft(
-                    conversationId)
+                    conversationId
+                )
 
             ensureActive()
 
@@ -578,16 +650,19 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // mode)
         if (!bubble) {
             Notifications.getInstance(applicationContext).cancelNotification(
-                conversationId)
+                conversationId
+            )
         } else {
             // If this is a bubble, still clear the notification state.
             Notifications.getInstance(applicationContext)
                 .clearNotificationState(
-                    conversationId)
+                    conversationId
+                )
         }
         lifecycleScope.launch(Dispatchers.Default) {
             Database.getInstance(applicationContext).markConversationRead(
-                conversationId)
+                conversationId
+            )
         }
         adapter.refresh()
 
@@ -621,24 +696,32 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // Replace DID menu item with DID
         val didMenuItem = menu.findItem(R.id.did_button)
-        didMenuItem.title = getString(R.string.conversation_action_did,
-                                      getFormattedPhoneNumber(did))
+        didMenuItem.title = getString(
+            R.string.conversation_action_did,
+            getFormattedPhoneNumber(did)
+        )
         didMenuItem.setOnMenuItemClickListener {
             val clipboard = getSystemService(
-                Context.CLIPBOARD_SERVICE) as ClipboardManager
+                Context.CLIPBOARD_SERVICE
+            ) as ClipboardManager
             val clip = ClipData.newPlainText(
                 getString(R.string.conversation_did_clipboard_description),
-                getFormattedPhoneNumber(did))
+                getFormattedPhoneNumber(did)
+            )
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, getString(
-                R.string.conversation_copied_did_toast_message),
-                           Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this, getString(
+                    R.string.conversation_copied_did_toast_message
+                ),
+                Toast.LENGTH_SHORT
+            ).show()
             true
         }
 
         // Hide the call button on devices without telephony support
         if (!packageManager
-                .hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+                .hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+        ) {
             val phoneMenuItem = menu.findItem(R.id.call_button)
             phoneMenuItem.isVisible = false
         }
@@ -654,7 +737,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // are already in a bubble.
         if (bubble
             || !Notifications.getInstance(applicationContext)
-                .canBubble(did, contact)) {
+                .canBubble(did, contact)
+        ) {
             val bubbleItem = menu.findItem(R.id.bubble_button)
             bubbleItem.isVisible = false
         }
@@ -671,7 +755,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Configure the search box to trigger adapter filtering when the
         // text changes
         val searchView = menu.findItem(
-            R.id.search_button).actionView as SearchView
+            R.id.search_button
+        ).actionView as SearchView
         searchView.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean = false
@@ -685,16 +770,24 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Set cursor color and hint text
         val searchAutoComplete = searchView.findViewById<
             SearchView.SearchAutoComplete>(
-            androidx.appcompat.R.id.search_src_text)
+            androidx.appcompat.R.id.search_src_text
+        )
         searchAutoComplete.hint = getString(R.string.conversation_action_search)
-        searchAutoComplete.setTextColor(ContextCompat.getColor(
-            applicationContext, android.R.color.white))
-        searchAutoComplete.setHintTextColor(ContextCompat.getColor(
-            applicationContext, R.color.search_hint))
+        searchAutoComplete.setTextColor(
+            ContextCompat.getColor(
+                applicationContext, android.R.color.white
+            )
+        )
+        searchAutoComplete.setHintTextColor(
+            ContextCompat.getColor(
+                applicationContext, R.color.search_hint
+            )
+        )
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             try {
                 val field = TextView::class.java.getDeclaredField(
-                    "mCursorDrawableRes")
+                    "mCursorDrawableRes"
+                )
                 field.isAccessible = true
                 field.set(searchAutoComplete, R.drawable.search_cursor)
             } catch (_: java.lang.Exception) {
@@ -725,10 +818,16 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Launch the conversation if we are in a bubble.
         if (bubble) {
             val intent = Intent(this, ConversationActivity::class.java)
-            intent.putExtra(getString(
-                R.string.conversation_did), did)
-            intent.putExtra(getString(
-                R.string.conversation_contact), contact)
+            intent.putExtra(
+                getString(
+                    R.string.conversation_did
+                ), did
+            )
+            intent.putExtra(
+                getString(
+                    R.string.conversation_contact
+                ), contact
+            )
             val stackBuilder = TaskStackBuilder.create(this)
             stackBuilder.addNextIntentWithParentStack(intent)
             stackBuilder.startActivities()
@@ -739,7 +838,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // has multiple parents
         lifecycleScope.launch(Dispatchers.Default) {
             val clazz = if (Database.getInstance(applicationContext)
-                    .isConversationArchived(conversationId)) {
+                    .isConversationArchived(conversationId)
+            ) {
                 ConversationsArchivedActivity::class.java
             } else {
                 ConversationsActivity::class.java
@@ -769,14 +869,16 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Before trying to call the contact's phone number, request the
         // CALL_PHONE permission
         val permission = ContextCompat.checkSelfPermission(
-            this, Manifest.permission.CALL_PHONE)
+            this, Manifest.permission.CALL_PHONE
+        )
         if (permission != PackageManager.PERMISSION_GRANTED) {
             // We don't yet have the permission, so request it; if granted,
             // this method will be called again
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.CALL_PHONE),
-                0)
+                0
+            )
         } else {
             // We have the permission
             try {
@@ -795,16 +897,23 @@ open class ConversationActivity(val bubble: Boolean = false) :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notifications.getInstance(applicationContext)
                 .createDidNotificationChannel(
-                    did, contact)
+                    did, contact
+                )
 
             val intent = Intent(
-                Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-            intent.putExtra(Settings.EXTRA_APP_PACKAGE,
-                            packageName)
-            intent.putExtra(Settings.EXTRA_CHANNEL_ID,
-                            getString(
-                                R.string.notifications_channel_contact,
-                                did, contact))
+                Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS
+            )
+            intent.putExtra(
+                Settings.EXTRA_APP_PACKAGE,
+                packageName
+            )
+            intent.putExtra(
+                Settings.EXTRA_CHANNEL_ID,
+                getString(
+                    R.string.notifications_channel_contact,
+                    did, contact
+                )
+            )
             startActivity(intent)
         }
 
@@ -819,9 +928,11 @@ open class ConversationActivity(val bubble: Boolean = false) :
             moveTaskToBack(true)
             lifecycleScope.launch(Dispatchers.Default) {
                 Notifications.getInstance(applicationContext)
-                    .showNotifications(setOf(conversationId),
-                                       bubbleOnly = true,
-                                       autoLaunchBubble = true)
+                    .showNotifications(
+                        setOf(conversationId),
+                        bubbleOnly = true,
+                        autoLaunchBubble = true
+                    )
             }
         }
         return true
@@ -834,22 +945,32 @@ open class ConversationActivity(val bubble: Boolean = false) :
         try {
             val messages = adapter.messageItems.map { it.message }
             val json = JsonParserManager.getInstance().parser.adapter(
-                ExportableMessages::class.java)
+                ExportableMessages::class.java
+            )
                 .toJson(ExportableMessages(messages))
             val clipboard = getSystemService(
-                Context.CLIPBOARD_SERVICE) as ClipboardManager
+                Context.CLIPBOARD_SERVICE
+            ) as ClipboardManager
             val clip = ClipData.newPlainText(
                 getString(
-                    R.string.conversation_conversation_clipboard_description),
-                json)
+                    R.string.conversation_conversation_clipboard_description
+                ),
+                json
+            )
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, getString(
-                R.string.conversation_copied_conversation_toast_message),
-                           Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this, getString(
+                    R.string.conversation_copied_conversation_toast_message
+                ),
+                Toast.LENGTH_SHORT
+            ).show()
         } catch (e: Exception) {
-            Toast.makeText(this, getString(
-                R.string.conversation_copied_conversation_fail_toast_message),
-                           Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this, getString(
+                    R.string.conversation_copied_conversation_fail_toast_message
+                ),
+                Toast.LENGTH_SHORT
+            ).show()
         }
         return true
     }
@@ -863,8 +984,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean =
         false
 
-    override fun onActionItemClicked(mode: ActionMode,
-                                     item: MenuItem): Boolean {
+    override fun onActionItemClicked(
+        mode: ActionMode,
+        item: MenuItem
+    ): Boolean {
         when (item.itemId) {
             R.id.resend_button -> return onResendButtonClick(mode)
             R.id.info_button -> return onInfoButtonClick(mode)
@@ -914,40 +1037,67 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Display info dialog for that item
         if (message != null) {
             val dateFormat = SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
+            )
             val dialogText = StringBuilder()
             if (message.voipId != null) {
-                dialogText.append(getString(
-                    R.string.conversation_info_id, message.voipId))
+                dialogText.append(
+                    getString(
+                        R.string.conversation_info_id, message.voipId
+                    )
+                )
                 dialogText.append("\n")
             }
             if (message.isIncoming) {
-                dialogText.append(getString(
-                    R.string.conversation_info_to, getFormattedPhoneNumber(
-                    message.did)))
+                dialogText.append(
+                    getString(
+                        R.string.conversation_info_to, getFormattedPhoneNumber(
+                            message.did
+                        )
+                    )
+                )
                 dialogText.append("\n")
-                dialogText.append(getString(
-                    R.string.conversation_info_from, getFormattedPhoneNumber(
-                    message.contact)))
+                dialogText.append(
+                    getString(
+                        R.string.conversation_info_from,
+                        getFormattedPhoneNumber(
+                            message.contact
+                        )
+                    )
+                )
                 dialogText.append("\n")
             } else {
-                dialogText.append(getString(
-                    R.string.conversation_info_to, getFormattedPhoneNumber(
-                    message.contact)))
+                dialogText.append(
+                    getString(
+                        R.string.conversation_info_to, getFormattedPhoneNumber(
+                            message.contact
+                        )
+                    )
+                )
                 dialogText.append("\n")
-                dialogText.append(getString(
-                    R.string.conversation_info_from, getFormattedPhoneNumber(
-                    message.did)))
+                dialogText.append(
+                    getString(
+                        R.string.conversation_info_from,
+                        getFormattedPhoneNumber(
+                            message.did
+                        )
+                    )
+                )
                 dialogText.append("\n")
             }
-            dialogText.append(getString(
-                R.string.conversation_info_date, dateFormat.format(
-                message.date)))
+            dialogText.append(
+                getString(
+                    R.string.conversation_info_date, dateFormat.format(
+                        message.date
+                    )
+                )
+            )
             showAlertDialog(
                 this,
                 getString(R.string.conversation_info_title),
                 dialogText.toString(),
-                getString(R.string.ok), null, null, null)
+                getString(R.string.ok), null, null, null
+            )
         }
 
         mode.finish()
@@ -966,10 +1116,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Copy text of message to clipboard
         if (message != null) {
             val clipboard = getSystemService(
-                Context.CLIPBOARD_SERVICE) as ClipboardManager
+                Context.CLIPBOARD_SERVICE
+            ) as ClipboardManager
             val clip = ClipData.newPlainText(
                 getString(R.string.conversation_message_clipboard_description),
-                message.text)
+                message.text
+            )
             clipboard.setPrimaryClip(clip)
         }
 
@@ -990,8 +1142,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
         if (message != null) {
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
-            intent.putExtra(Intent.EXTRA_TEXT,
-                            message.text)
+            intent.putExtra(
+                Intent.EXTRA_TEXT,
+                message.text
+            )
             startActivity(Intent.createChooser(intent, null))
         }
 
@@ -1012,8 +1166,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
             // Delete each message.
             for (message in messages) {
                 Database.getInstance(applicationContext)
-                    .deleteMessage(message.did, message.databaseId,
-                                   message.voipId)
+                    .deleteMessage(
+                        message.did, message.databaseId,
+                        message.voipId
+                    )
             }
 
             ensureActive()
@@ -1028,7 +1184,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     resources.getQuantityString(
                         R.plurals.conversation_message_deleted,
                         messages.size,
-                        messages.size),
+                        messages.size
+                    ),
                     getString(R.string.undo),
                     {
                         lifecycleScope.launch(Dispatchers.Default) {
@@ -1056,7 +1213,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
         } else {
             // Resend message if has not yet been sent
             val position = recyclerView.getChildAdapterPosition(
-                getRecyclerViewContainingItem(view))
+                getRecyclerViewContainingItem(view)
+            )
             if (position != RecyclerView.NO_POSITION) {
                 val messageItem = adapter[position]
                 val message = messageItem.message
@@ -1064,17 +1222,20 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     lifecycleScope.launch(Dispatchers.Default) {
                         Database.getInstance(applicationContext)
                             .markMessageDeliveryInProgress(
-                                messageItem.message.databaseId)
+                                messageItem.message.databaseId
+                            )
                         SendMessageWorker.sendMessage(
                             applicationContext,
-                            messageItem.message.databaseId)
+                            messageItem.message.databaseId
+                        )
                     }
                 }
             }
 
             // Toggle the date
             val date = getRecyclerViewContainingItem(
-                view).findViewById<TextView>(R.id.date)
+                view
+            ).findViewById<TextView>(R.id.date)
             if (date.visibility == View.GONE) {
                 date.visibility = View.VISIBLE
             } else {
@@ -1110,11 +1271,15 @@ open class ConversationActivity(val bubble: Boolean = false) :
         super.onBackPressed()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions,
-                                         grantResults)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(
+            requestCode, permissions,
+            grantResults
+        )
         if (requestCode == 0) {
             permissions.indices
                 .filter { permissions[it] == Manifest.permission.CALL_PHONE }
@@ -1128,7 +1293,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
                         showPermissionSnackbar(
                             this,
                             R.id.coordinator_layout,
-                            getString(R.string.conversation_perm_denied_call))
+                            getString(R.string.conversation_perm_denied_call)
+                        )
                     }
                 }
         }
@@ -1172,7 +1338,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             val count = adapter.getCheckedItemCount()
             resendAction.isVisible = adapter.singleOrNull { item ->
                 item.checked && !item.message.isDelivered
-                && !item.message.isDeliveryInProgress
+                    && !item.message.isDeliveryInProgress
             } != null
 
             // Certain buttons should not be visible if there is more than one

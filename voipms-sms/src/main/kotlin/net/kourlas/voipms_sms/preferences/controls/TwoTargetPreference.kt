@@ -27,15 +27,21 @@ import net.kourlas.voipms_sms.R
 open class TwoTargetPreference : Preference {
     protected open val secondTargetResId: Int = 0
 
-    constructor(context: Context, attrs: AttributeSet,
-                defStyleAttr: Int, defStyleRes: Int) : super(context, attrs,
-                                                             defStyleAttr,
-                                                             defStyleRes) {
+    constructor(
+        context: Context, attrs: AttributeSet,
+        defStyleAttr: Int, defStyleRes: Int
+    ) : super(
+        context, attrs,
+        defStyleAttr,
+        defStyleRes
+    ) {
         init()
     }
 
-    constructor(context: Context, attrs: AttributeSet,
-                defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(
+        context: Context, attrs: AttributeSet,
+        defStyleAttr: Int
+    ) : super(context, attrs, defStyleAttr) {
         init()
     }
 

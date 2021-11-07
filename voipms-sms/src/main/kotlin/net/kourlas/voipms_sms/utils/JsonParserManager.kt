@@ -5,8 +5,10 @@ import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import java.util.*
 
 class JsonParserManager {
-    val parser: Moshi = Moshi.Builder().add(Date::class.java,
-                                            Rfc3339DateJsonAdapter()).build()
+    val parser: Moshi = Moshi.Builder().add(
+        Date::class.java,
+        Rfc3339DateJsonAdapter()
+    ).build()
 
     companion object {
         private var instance: JsonParserManager? = null

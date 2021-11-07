@@ -31,7 +31,8 @@ class AppIndexingReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             AppIndexingWorker.performIndexing(
-                context ?: throw Exception("No context provided"))
+                context ?: throw Exception("No context provided")
+            )
         } catch (e: Exception) {
             logException(e)
         }

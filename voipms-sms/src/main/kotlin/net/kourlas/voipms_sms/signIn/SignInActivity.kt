@@ -52,10 +52,14 @@ class SignInActivity : AppCompatActivity() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val valid = intent?.getBooleanExtra(
                     getString(
-                        R.string.verify_credentials_complete_valid), false)
+                        R.string.verify_credentials_complete_valid
+                    ), false
+                )
                 val error = intent?.getStringExtra(
                     getString(
-                        R.string.verify_credentials_complete_error))
+                        R.string.verify_credentials_complete_error
+                    )
+                )
 
                 when {
                     error != null -> {
@@ -64,7 +68,8 @@ class SignInActivity : AppCompatActivity() {
                         showSnackbar(
                             this@SignInActivity,
                             R.id.coordinator_layout,
-                            error)
+                            error
+                        )
                     }
                     valid == false -> {
                         // If valid is false, then some error occurred
@@ -73,25 +78,34 @@ class SignInActivity : AppCompatActivity() {
                             this@SignInActivity,
                             R.id.coordinator_layout,
                             getString(
-                                R.string.verify_credentials_error_unknown))
+                                R.string.verify_credentials_error_unknown
+                            )
+                        )
                     }
                     valid == true -> {
                         // If we managed to verify the credentials, then we
                         // save them and try to enable all of the DIDs in the
                         // account
                         val username = findViewById<TextInputEditText>(
-                            R.id.username)
+                            R.id.username
+                        )
                         val password = findViewById<TextInputEditText>(
-                            R.id.password)
-                        setEmail(applicationContext,
-                                 username.text?.toString() ?: "")
-                        setPassword(applicationContext,
-                                    password.text?.toString() ?: "")
+                            R.id.password
+                        )
+                        setEmail(
+                            applicationContext,
+                            username.text?.toString() ?: ""
+                        )
+                        setPassword(
+                            applicationContext,
+                            password.text?.toString() ?: ""
+                        )
 
                         setFirstSyncAfterSignIn(this@SignInActivity, true)
 
                         RetrieveDidsWorker.retrieveDids(
-                            this@SignInActivity, autoAdd = true)
+                            this@SignInActivity, autoAdd = true
+                        )
                     }
                 }
             }
@@ -129,12 +143,20 @@ class SignInActivity : AppCompatActivity() {
         // Register dynamic receivers for this fragment
         registerReceiver(
             verifyCredentialsCompleteReceiver,
-            IntentFilter(getString(
-                R.string.verify_credentials_complete_action)))
+            IntentFilter(
+                getString(
+                    R.string.verify_credentials_complete_action
+                )
+            )
+        )
         registerReceiver(
             didRetrievalCompleteReceiver,
-            IntentFilter(getString(
-                R.string.retrieve_dids_complete_action)))
+            IntentFilter(
+                getString(
+                    R.string.retrieve_dids_complete_action
+                )
+            )
+        )
     }
 
     override fun onPause() {
@@ -143,10 +165,12 @@ class SignInActivity : AppCompatActivity() {
         // Unregister dynamic receivers for this fragment
         safeUnregisterReceiver(
             this,
-            verifyCredentialsCompleteReceiver)
+            verifyCredentialsCompleteReceiver
+        )
         safeUnregisterReceiver(
             this,
-            didRetrievalCompleteReceiver)
+            didRetrievalCompleteReceiver
+        )
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -182,11 +206,13 @@ class SignInActivity : AppCompatActivity() {
         val textView = findViewById<TextView>(R.id.text_view)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             textView.text = Html.fromHtml(
-                getString(R.string.sign_in_info), 0)
+                getString(R.string.sign_in_info), 0
+            )
         } else {
             @Suppress("DEPRECATION")
             textView.text = Html.fromHtml(
-                getString(R.string.sign_in_info))
+                getString(R.string.sign_in_info)
+            )
         }
         textView.movementMethod = LinkMovementMethod.getInstance()
     }
@@ -204,7 +230,8 @@ class SignInActivity : AppCompatActivity() {
             VerifyCredentialsWorker.verifyCredentials(
                 applicationContext,
                 username.text?.toString() ?: "",
-                password.text?.toString() ?: "")
+                password.text?.toString() ?: ""
+            )
         }
 
         val skipButton = findViewById<MaterialButton>(R.id.skip_button)
@@ -247,9 +274,9 @@ class SignInActivity : AppCompatActivity() {
      */
     private fun blockFinish(): Boolean {
         return !didsConfigured(applicationContext)
-               && !hasDids
-               && !accountConfigured(applicationContext)
-               && firstRun(applicationContext)
+            && !hasDids
+            && !accountConfigured(applicationContext)
+            && firstRun(applicationContext)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

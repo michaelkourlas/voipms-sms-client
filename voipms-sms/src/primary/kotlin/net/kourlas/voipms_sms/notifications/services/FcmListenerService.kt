@@ -42,7 +42,9 @@ class FcmListenerService : FirebaseMessagingService() {
             // If so, and if notifications are enabled, update the message
             // database and shows notifications for any new messages
             if (Notifications.getInstance(
-                    application).getNotificationsEnabled()) {
+                    application
+                ).getNotificationsEnabled()
+            ) {
                 SyncWorker.performPartialSynchronization(applicationContext)
             }
         } else {

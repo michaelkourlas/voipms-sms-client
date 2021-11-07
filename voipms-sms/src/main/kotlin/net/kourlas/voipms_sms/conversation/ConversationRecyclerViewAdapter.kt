@@ -65,7 +65,8 @@ class ConversationRecyclerViewAdapter(
     private val layoutManager: LinearLayoutManager,
     private val conversationId: ConversationId,
     private val contactName: String?,
-    private val contactBitmap: Bitmap) :
+    private val contactBitmap: Bitmap
+) :
     RecyclerView.Adapter<ConversationRecyclerViewAdapter.MessageViewHolder>(),
     Filterable,
     Iterable<ConversationRecyclerViewAdapter.MessageItem>,
@@ -89,27 +90,35 @@ class ConversationRecyclerViewAdapter(
     // Whether the adapter is currently loading additional items.
     var loadingMoreItems = false
 
-    override fun onCreateViewHolder(parent: ViewGroup,
-                                    viewType: Int): MessageViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): MessageViewHolder {
         // Inflate the appropriate view, given the view type
         val itemView = when (viewType) {
             R.layout.conversation_item_incoming -> {
                 LayoutInflater.from(parent.context)
-                    .inflate(R.layout.conversation_item_incoming,
-                             parent, false)
+                    .inflate(
+                        R.layout.conversation_item_incoming,
+                        parent, false
+                    )
             }
             R.layout.conversation_item_outgoing -> {
                 LayoutInflater.from(parent.context)
-                    .inflate(R.layout.conversation_item_outgoing,
-                             parent, false)
+                    .inflate(
+                        R.layout.conversation_item_outgoing,
+                        parent, false
+                    )
             }
             else -> throw Exception("Unknown view type $viewType")
         }
         return MessageViewHolder(itemView, viewType)
     }
 
-    override fun onBindViewHolder(holder: MessageViewHolder,
-                                  position: Int) {
+    override fun onBindViewHolder(
+        holder: MessageViewHolder,
+        position: Int
+    ) {
         // Set up view to match message at position
         updateViewHolderViewHeight(holder, position)
         updateViewHolderContactBadge(holder, position)
@@ -126,18 +135,25 @@ class ConversationRecyclerViewAdapter(
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    private fun updateViewHolderViewHeight(holder: MessageViewHolder,
-                                           position: Int) {
+    private fun updateViewHolderViewHeight(
+        holder: MessageViewHolder,
+        position: Int
+    ) {
         val marginParams = holder.itemView.layoutParams
             as ViewGroup.MarginLayoutParams
         marginParams.topMargin =
-            if (isFirstMessageInGroup(position,
-                                      combineIncomingOutgoing = false)) {
+            if (isFirstMessageInGroup(
+                    position,
+                    combineIncomingOutgoing = false
+                )
+            ) {
                 activity.resources.getDimension(
-                    R.dimen.conversation_item_margin_top_primary).toInt()
+                    R.dimen.conversation_item_margin_top_primary
+                ).toInt()
             } else {
                 activity.resources.getDimension(
-                    R.dimen.conversation_item_margin_top_secondary).toInt()
+                    R.dimen.conversation_item_margin_top_secondary
+                ).toInt()
             }
     }
 
@@ -149,16 +165,21 @@ class ConversationRecyclerViewAdapter(
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    private fun updateViewHolderContactBadge(holder: MessageViewHolder,
-                                             position: Int) {
+    private fun updateViewHolderContactBadge(
+        holder: MessageViewHolder,
+        position: Int
+    ) {
         val messageItem = messageItems[position]
         val message = messageItem.message
 
         val contactBadge = holder.contactBadge
         if (contactBadge != null) {
             // Show contact badge if first message in group
-            if (isFirstMessageInGroup(position,
-                                      combineIncomingOutgoing = false)) {
+            if (isFirstMessageInGroup(
+                    position,
+                    combineIncomingOutgoing = false
+                )
+            ) {
                 holder.contactBadge.visibility = View.VISIBLE
                 contactBadge.assignContactFromPhone(message.contact, true)
                 contactBadge.setImageBitmap(contactBitmap)
@@ -175,8 +196,10 @@ class ConversationRecyclerViewAdapter(
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    private fun updateViewHolderMessageText(holder: MessageViewHolder,
-                                            position: Int) {
+    private fun updateViewHolderMessageText(
+        holder: MessageViewHolder,
+        position: Int
+    ) {
         val messageItem = messageItems[position]
         val message = messageItem.message
 
@@ -187,22 +210,29 @@ class ConversationRecyclerViewAdapter(
         // Highlight text that matches filter
         if (currConstraint != "") {
             val index = message.text.lowercase(Locale.getDefault()).indexOf(
-                currConstraint.lowercase(Locale.getDefault()))
+                currConstraint.lowercase(Locale.getDefault())
+            )
             if (index != -1) {
                 messageTextBuilder.setSpan(
                     BackgroundColorSpan(
                         ContextCompat.getColor(
-                            activity, R.color.highlight)),
+                            activity, R.color.highlight
+                        )
+                    ),
                     index,
                     index + currConstraint.length,
-                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE)
+                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
+                )
                 messageTextBuilder.setSpan(
                     ForegroundColorSpan(
                         ContextCompat.getColor(
-                            activity, android.R.color.black)),
+                            activity, android.R.color.black
+                        )
+                    ),
                     index,
                     index + currConstraint.length,
-                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE)
+                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
+                )
             }
         }
         messageText.text = messageTextBuilder
@@ -229,8 +259,10 @@ class ConversationRecyclerViewAdapter(
      * @param holder The message view holder to use.
      * @param position The position of the view in the adapter.
      */
-    private fun updateViewHolderDateText(holder: MessageViewHolder,
-                                         position: Int) {
+    private fun updateViewHolderDateText(
+        holder: MessageViewHolder,
+        position: Int
+    ) {
         val messageItem = messageItems[position]
         val message = messageItem.message
 
@@ -240,26 +272,34 @@ class ConversationRecyclerViewAdapter(
             if (!message.isDeliveryInProgress) {
                 // Show tried but failed to send text
                 val dateTextBuilder = SpannableStringBuilder()
-                dateTextBuilder.append(activity.getString(
-                    R.string.conversation_message_not_sent))
+                dateTextBuilder.append(
+                    activity.getString(
+                        R.string.conversation_message_not_sent
+                    )
+                )
                 dateTextBuilder.setSpan(
                     ForegroundColorSpan(
                         ContextCompat.getColor(
                             activity,
-                            android.R.color.holo_red_dark)),
+                            android.R.color.holo_red_dark
+                        )
+                    ),
                     0,
                     dateTextBuilder.length,
-                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+                )
                 dateTextBuilder.setSpan(
                     StyleSpan(Typeface.BOLD),
                     0,
                     dateTextBuilder.length,
-                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+                )
                 dateText.text = dateTextBuilder
             } else {
                 // Show sending text
                 dateText.text = activity.getString(
-                    R.string.conversation_message_sending)
+                    R.string.conversation_message_sending
+                )
             }
             dateText.visibility = View.VISIBLE
         } else {
@@ -293,14 +333,16 @@ class ConversationRecyclerViewAdapter(
         if (message.isIncoming) {
             if (messageItem.checked) {
                 smsContainer.setBackgroundResource(
-                    R.color.message_incoming_checked)
+                    R.color.message_incoming_checked
+                )
             } else {
                 smsContainer.setBackgroundResource(R.color.message_incoming)
             }
         } else {
             if (messageItem.checked) {
                 smsContainer.setBackgroundResource(
-                    R.color.message_outgoing_checked)
+                    R.color.message_outgoing_checked
+                )
             } else {
                 smsContainer.setBackgroundResource(R.color.message_outgoing)
             }
@@ -345,7 +387,8 @@ class ConversationRecyclerViewAdapter(
                         .lowercase(Locale.getDefault())
                     maxLimit = Database.getInstance(activity)
                         .getConversationMessagesFilteredCount(
-                            conversationId, filterString)
+                            conversationId, filterString
+                        )
                     if (currLimit > maxLimit) {
                         currLimit = max(maxLimit, ADDITIONAL_ITEMS_INCREMENT)
                     }
@@ -354,17 +397,23 @@ class ConversationRecyclerViewAdapter(
                             .getConversationMessagesFiltered(
                                 conversationId,
                                 filterString,
-                                currLimit).asReversed())
+                                currLimit
+                            ).asReversed()
+                    )
                 }
             } else {
-                resultsObject.messages.addAll(getConversationDemoMessages(
-                    activity.bubble))
+                resultsObject.messages.addAll(
+                    getConversationDemoMessages(
+                        activity.bubble
+                    )
+                )
             }
             return resultsObject
         }
 
         override fun performFiltering(
-            constraint: CharSequence): FilterResults = try {
+            constraint: CharSequence
+        ): FilterResults = try {
             val resultsObject = doFiltering(constraint)
 
             // Return filtered messages
@@ -377,12 +426,17 @@ class ConversationRecyclerViewAdapter(
             FilterResults()
         }
 
-        override fun publishResults(constraint: CharSequence,
-                                    results: FilterResults?) {
+        override fun publishResults(
+            constraint: CharSequence,
+            results: FilterResults?
+        ) {
             if (results?.values == null) {
-                showSnackbar(activity, R.id.coordinator_layout,
-                             activity.getString(
-                                 R.string.new_conversation_error_refresh))
+                showSnackbar(
+                    activity, R.id.coordinator_layout,
+                    activity.getString(
+                        R.string.new_conversation_error_refresh
+                    )
+                )
                 return
             }
 
@@ -425,8 +479,10 @@ class ConversationRecyclerViewAdapter(
                     }
                     comparison > 0 -> {
                         // Add new message
-                        _messageItems.add(newIdx,
-                                          MessageItem(newMessages[newIdx]))
+                        _messageItems.add(
+                            newIdx,
+                            MessageItem(newMessages[newIdx])
+                        )
                         notifyItemInserted(newIdx)
                         newIdx += 1
                     }
@@ -463,14 +519,17 @@ class ConversationRecyclerViewAdapter(
 
             // Show message if filter returned no messages
             val emptyTextView = activity.findViewById<TextView>(
-                R.id.empty_text)
+                R.id.empty_text
+            )
             if (messageItems.isEmpty()) {
                 if (currConstraint == "") {
                     emptyTextView.text = activity.getString(
-                        R.string.conversation_no_messages)
+                        R.string.conversation_no_messages
+                    )
                 } else {
                     emptyTextView.text = activity.getString(
-                        R.string.conversation_no_results, currConstraint)
+                        R.string.conversation_no_results, currConstraint
+                    )
                 }
             } else {
                 emptyTextView.text = ""
@@ -480,7 +539,8 @@ class ConversationRecyclerViewAdapter(
             // text box
             if (messageItems.size > 1) {
                 if (layoutManager.findLastVisibleItemPosition()
-                    >= messageItems.size - 2) {
+                    >= messageItems.size - 2
+                ) {
                     layoutManager.scrollToPosition(messageItems.size - 1)
                 }
             }
@@ -528,7 +588,8 @@ class ConversationRecyclerViewAdapter(
      * messages are considered to be part of the same group.
      */
     private fun isFirstMessageInGroup(
-        position: Int, combineIncomingOutgoing: Boolean): Boolean {
+        position: Int, combineIncomingOutgoing: Boolean
+    ): Boolean {
         val message = _messageItems[position].message
         val previousMessage: Message? = if (position > 0) {
             _messageItems[position - 1].message
@@ -536,9 +597,9 @@ class ConversationRecyclerViewAdapter(
             null
         }
         return previousMessage == null
-               || (!combineIncomingOutgoing
-                   && message.isIncoming != previousMessage.isIncoming)
-               || message.date.time - previousMessage.date.time > 60000
+            || (!combineIncomingOutgoing
+            && message.isIncoming != previousMessage.isIncoming)
+            || message.date.time - previousMessage.date.time > 60000
     }
 
     /**
@@ -589,8 +650,10 @@ class ConversationRecyclerViewAdapter(
      */
     inner class MessageViewHolder internal constructor(
         itemView: View,
-        viewType: Int) : RecyclerView.ViewHolder(
-        itemView) {
+        viewType: Int
+    ) : RecyclerView.ViewHolder(
+        itemView
+    ) {
         // All configurable views on a message item
         internal val contactBadge: QuickContactBadge? =
             if (viewType == R.layout.conversation_item_incoming) {

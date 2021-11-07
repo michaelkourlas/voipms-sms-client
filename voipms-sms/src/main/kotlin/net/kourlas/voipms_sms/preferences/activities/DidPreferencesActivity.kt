@@ -61,15 +61,19 @@ class DidPreferencesActivity : AppCompatActivity() {
 
         // Load preferences fragment
         val bundle = Bundle()
-        bundle.putString(getString(
-            R.string.preferences_did_fragment_argument_did), did)
+        bundle.putString(
+            getString(
+                R.string.preferences_did_fragment_argument_did
+            ), did
+        )
 
         // Load preferences fragment
         if (savedInstanceState == null) {
             fragment = DidPreferencesFragment()
             fragment.arguments = bundle
             supportFragmentManager.beginTransaction().replace(
-                R.id.preferences_fragment_layout, fragment).commit()
+                R.id.preferences_fragment_layout, fragment
+            ).commit()
         }
     }
 }

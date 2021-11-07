@@ -27,8 +27,10 @@ import net.kourlas.voipms_sms.utils.preferences
 
 class NetworkPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
-                                        rootKey: String?) {
+    override fun onCreatePreferencesFix(
+        savedInstanceState: Bundle?,
+        rootKey: String?
+    ) {
         // Add preferences
         addPreferencesFromResource(R.xml.preferences_network)
 
@@ -56,8 +58,10 @@ class NetworkPreferencesFragment : PreferenceFragmentCompat(),
         }
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences,
-                                           key: String) {
+    override fun onSharedPreferenceChanged(
+        sharedPreferences: SharedPreferences,
+        key: String
+    ) {
         // It's not clear why onSharedPreferenceChanged is called before the
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
@@ -74,9 +78,12 @@ class NetworkPreferencesFragment : PreferenceFragmentCompat(),
         if (preference is EditTextPreference) {
             // Display value of preference as summary text
             if (preference.key == getString(
-                    R.string.preferences_network_connect_timeout_key)
+                    R.string.preferences_network_connect_timeout_key
+                )
                 || preference.key == getString(
-                    R.string.preferences_network_read_timeout_key)) {
+                    R.string.preferences_network_read_timeout_key
+                )
+            ) {
                 try {
                     if (preference.text.toInt() == 0) {
                         preference.summary = "Infinite"

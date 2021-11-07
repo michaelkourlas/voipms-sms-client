@@ -34,15 +34,19 @@ import net.kourlas.voipms_sms.utils.preferences
  * Fragment used to display the app's preferences.
  */
 class PreferencesFragment : PreferenceFragmentCompat() {
-    override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
-                                        rootKey: String?) {
+    override fun onCreatePreferencesFix(
+        savedInstanceState: Bundle?,
+        rootKey: String?
+    ) {
         // Populate fragment with preferences defined in XML file
         addPreferencesFromResource(R.xml.preferences)
 
         context?.let {
             for (preference in preferenceScreen.preferences) {
                 if (preference.title == getString(
-                        R.string.preferences_notifications_category_name)) {
+                        R.string.preferences_notifications_category_name
+                    )
+                ) {
                     // Set the behaviour of the notifications preference; this
                     // is different depending on whether the system supports
                     // notification customization natively
@@ -52,24 +56,33 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                             .createDefaultNotificationChannel()
 
                         val intent = Intent(
-                            Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                        intent.putExtra(Settings.EXTRA_APP_PACKAGE,
-                                        it.packageName)
+                            Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                        )
+                        intent.putExtra(
+                            Settings.EXTRA_APP_PACKAGE,
+                            it.packageName
+                        )
                         preference.intent = intent
                     } else {
                         preference.intent = Intent(
                             context,
-                            NotificationsPreferencesActivity::class.java)
+                            NotificationsPreferencesActivity::class.java
+                        )
                     }
                 } else if (preference.title == getString(
-                        R.string.preferences_account_category_name)) {
+                        R.string.preferences_account_category_name
+                    )
+                ) {
                     // Set the behaviour of the account preference
                     if (accountConfigured(it)) {
                         preference.intent = Intent(
-                            context, AccountPreferencesActivity::class.java)
+                            context, AccountPreferencesActivity::class.java
+                        )
                     } else {
-                        preference.intent = Intent(context,
-                                                   SignInActivity::class.java)
+                        preference.intent = Intent(
+                            context,
+                            SignInActivity::class.java
+                        )
                     }
                 }
             }

@@ -69,14 +69,25 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             // synchronized or an attempt has been made to synchronize it.
             val syncCompleteBroadcastIntent = Intent(
                 applicationContext.getString(
-                    R.string.sync_complete_action))
-            syncCompleteBroadcastIntent.putExtra(applicationContext.getString(
-                R.string.sync_complete_error), error)
-            if (!inputData.getBoolean(applicationContext.getString(
-                    R.string.sync_force_recent), false)) {
+                    R.string.sync_complete_action
+                )
+            )
+            syncCompleteBroadcastIntent.putExtra(
+                applicationContext.getString(
+                    R.string.sync_complete_error
+                ), error
+            )
+            if (!inputData.getBoolean(
+                    applicationContext.getString(
+                        R.string.sync_force_recent
+                    ), false
+                )
+            ) {
                 syncCompleteBroadcastIntent.putExtra(
                     applicationContext.getString(
-                        R.string.sync_complete_full), true)
+                        R.string.sync_complete_full
+                    ), true
+                )
             }
             applicationContext.sendBroadcast(syncCompleteBroadcastIntent)
         }
@@ -107,22 +118,28 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             // Terminate quietly if it is impossible to sync due to account
             // configuration.
             if (!accountConfigured(applicationContext) || !didsConfigured(
-                    applicationContext)) {
+                    applicationContext
+                )
+            ) {
                 return
             }
 
             // Terminate if no network connection is available.
             if (!NetworkManager.getInstance().isNetworkConnectionAvailable(
-                    applicationContext)) {
+                    applicationContext
+                )
+            ) {
                 error = applicationContext.getString(
-                    R.string.sync_error_network)
+                    R.string.sync_error_network
+                )
                 return
             }
 
             // Retrieve all messages from VoIP.ms, or only those messages
             // dated after the most recent message stored locally
             val forceRecent = inputData.getBoolean(
-                applicationContext.getString(R.string.sync_force_recent), false)
+                applicationContext.getString(R.string.sync_force_recent), false
+            )
             val retrieveOnlyRecentMessages =
                 forceRecent || getRetrieveOnlyRecentMessages(applicationContext)
             // Retrieve messages from VoIP.ms that were deleted locally
@@ -131,7 +148,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
 
             // Process retrieval requests separately
             val retrievalRequests = createRetrievalRequests(
-                retrieveOnlyRecentMessages)
+                retrieveOnlyRecentMessages
+            )
             processRequests(retrievalRequests, retrieveDeletedMessages)
         } catch (e: CancellationException) {
             // We need to propagate the exception from processRequests
@@ -140,7 +158,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(
-                R.string.sync_error_unknown)
+                R.string.sync_error_unknown
+            )
         }
     }
 
@@ -152,7 +171,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      * message retrieval start date.
      */
     private suspend fun createRetrievalRequests(
-        retrieveOnlyRecentMessages: Boolean): List<RetrievalRequest> {
+        retrieveOnlyRecentMessages: Boolean
+    ): List<RetrievalRequest> {
         val retrievalRequests = mutableListOf<RetrievalRequest>()
 
         val dids = getDids(applicationContext, onlyRetrieveMessages = true)
@@ -166,9 +186,11 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         val mostRecentMessage = Database.getInstance(applicationContext)
             .getMessageMostRecent(dids)
         val thenCalendar = Calendar.getInstance(
-            TimeZone.getTimeZone("America/New_York"), Locale.US)
+            TimeZone.getTimeZone("America/New_York"), Locale.US
+        )
         thenCalendar.time = if (mostRecentMessage == null
-                                || !retrieveOnlyRecentMessages) {
+            || !retrieveOnlyRecentMessages
+        ) {
             getStartDate(applicationContext)
         } else {
             mostRecentMessage.date
@@ -179,7 +201,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         thenCalendar.set(Calendar.MILLISECOND, 0)
         val then = thenCalendar.time
         val nowCalendar = Calendar.getInstance(
-            TimeZone.getTimeZone("America/New_York"), Locale.US)
+            TimeZone.getTimeZone("America/New_York"), Locale.US
+        )
         nowCalendar.time = Date()
         nowCalendar.set(Calendar.HOUR_OF_DAY, 0)
         nowCalendar.set(Calendar.MINUTE, 0)
@@ -187,7 +210,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         nowCalendar.set(Calendar.MILLISECOND, 0)
         val now = nowCalendar.time
         val daysDifference = ceil(
-            ((now.time - then.time) / (1000 * 60 * 60 * 24)).toDouble())
+            ((now.time - then.time) / (1000 * 60 * 60 * 24)).toDouble()
+        )
             .toLong()
 
         // Split this number into 90 day periods (which is approximately the
@@ -198,7 +222,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         while (daysRemaining > 90L) {
             val last = if (periods.isEmpty()) then else periods.last().second
             val calendar = Calendar.getInstance(
-                TimeZone.getTimeZone("America/New_York"), Locale.US)
+                TimeZone.getTimeZone("America/New_York"), Locale.US
+            )
             calendar.time = last
             calendar.add(Calendar.DAY_OF_YEAR, 90)
             periods.add(Pair(last, calendar.time))
@@ -217,14 +242,16 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         for (period in periods) {
             encodedDids
                 .map {
-                    mapOf("api_username" to getEmail(applicationContext),
-                          "api_password" to getPassword(applicationContext),
-                          "method" to "getSMS",
-                          "did" to it,
-                          "limit" to "1000000",
-                          "from" to sdf.format(period.first),
-                          "to" to sdf.format(period.second),
-                          "timezone" to "-5") // -5 corresponds to EDT
+                    mapOf(
+                        "api_username" to getEmail(applicationContext),
+                        "api_password" to getPassword(applicationContext),
+                        "method" to "getSMS",
+                        "did" to it,
+                        "limit" to "1000000",
+                        "from" to sdf.format(period.first),
+                        "to" to sdf.format(period.second),
+                        "timezone" to "-5"
+                    ) // -5 corresponds to EDT
                 }
                 .mapTo(retrievalRequests) {
                     RetrievalRequest(it, period)
@@ -243,13 +270,15 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      */
     private suspend fun processRequests(
         retrievalRequests: List<RetrievalRequest>,
-        retrieveDeletedMessages: Boolean) = coroutineScope {
+        retrieveDeletedMessages: Boolean
+    ) = coroutineScope {
         val incomingMessages = mutableListOf<IncomingMessage>()
         for (i in retrievalRequests.indices) {
             ensureActive()
 
             val nextIncomingMessages = processRetrievalRequest(
-                retrievalRequests[i])
+                retrievalRequests[i]
+            )
             if (nextIncomingMessages != null) {
                 incomingMessages.addAll(nextIncomingMessages)
             } else {
@@ -264,20 +293,25 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         val newConversationIds: Set<ConversationId>
         try {
             newConversationIds = Database.getInstance(
-                applicationContext)
-                .insertMessagesVoipMsApi(incomingMessages,
-                                         retrieveDeletedMessages)
+                applicationContext
+            )
+                .insertMessagesVoipMsApi(
+                    incomingMessages,
+                    retrieveDeletedMessages
+                )
         } catch (e: Exception) {
             logException(e)
             error = applicationContext.getString(
-                R.string.sync_error_database)
+                R.string.sync_error_database
+            )
             return@coroutineScope
         }
 
         // Show notifications for new messages
         if (newConversationIds.isNotEmpty()) {
             Notifications.getInstance(applicationContext).showNotifications(
-                newConversationIds)
+                newConversationIds
+            )
         }
     }
 
@@ -288,12 +322,14 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         val type: String,
         val did: String,
         val contact: String,
-        val message: String?)
+        val message: String?
+    )
 
     @JsonClass(generateAdapter = true)
     data class MessagesResponse(
         val status: String,
-        @Suppress("ArrayInDataClass") val sms: List<MessageResponse>?)
+        @Suppress("ArrayInDataClass") val sms: List<MessageResponse>?
+    )
 
     /**
      * Processes the specified retrieval request using the VoIP.ms API.
@@ -301,7 +337,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      * @return Null if the request failed.
      */
     private suspend fun processRetrievalRequest(
-        request: RetrievalRequest): List<IncomingMessage>? {
+        request: RetrievalRequest
+    ): List<IncomingMessage>? {
         val response = sendRequestWithVoipMsApi(request) ?: return null
 
         // Extract messages from the VoIP.ms API response
@@ -309,10 +346,12 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         if (response.status != "success" && response.status != "no_sms") {
             error = when (response.status) {
                 "invalid_credentials" -> applicationContext.getString(
-                    R.string.sync_error_api_error_invalid_credentials)
+                    R.string.sync_error_api_error_invalid_credentials
+                )
                 else -> applicationContext.getString(
                     R.string.sync_error_api_error,
-                    response.status)
+                    response.status
+                )
             }
             return null
         }
@@ -331,16 +370,19 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                     val incomingMessage = IncomingMessage(
                         message.id.toLong(),
                         sdf.parse(message.date) ?: throw Exception(
-                            "Failed to parse date ${message.date}"),
+                            "Failed to parse date ${message.date}"
+                        ),
                         toBoolean(message.type),
                         message.did,
                         message.contact,
-                        message.message)
+                        message.message
+                    )
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
                     logException(e)
                     error = applicationContext.getString(
-                        R.string.sync_error_api_parse)
+                        R.string.sync_error_api_parse
+                    )
                     return null
                 }
             }
@@ -354,20 +396,23 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      * as JSON.
      */
     private suspend fun sendRequestWithVoipMsApi(
-        request: RetrievalRequest): MessagesResponse? {
+        request: RetrievalRequest
+    ): MessagesResponse? {
         try {
             repeat(3) {
                 try {
                     return httpPostWithMultipartFormData(
                         applicationContext,
                         "https://www.voip.ms/api/v1/rest.php",
-                        request.formData)
+                        request.formData
+                    )
                 } catch (e: IOException) {
                     // Try again...
                 }
             }
             error = applicationContext.getString(
-                R.string.sync_error_api_request)
+                R.string.sync_error_api_request
+            )
             return null
         } catch (e: JsonDataException) {
             logException(e)
@@ -391,9 +436,11 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      * @param contact The contact associated with the message.
      * @param text The text of the message.
      */
-    data class IncomingMessage(val voipId: Long, val date: Date,
-                               val isIncoming: Boolean, val did: String,
-                               val contact: String, val text: String) {
+    data class IncomingMessage(
+        val voipId: Long, val date: Date,
+        val isIncoming: Boolean, val did: String,
+        val contact: String, val text: String
+    ) {
         init {
             validatePhoneNumber(did)
             validatePhoneNumber(contact)
@@ -404,8 +451,10 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      * A request to the VoIP.ms API to retrieve the messages from the specified
      * period using the specified URL.
      */
-    data class RetrievalRequest(val formData: Map<String, String>,
-                                private val period: Pair<Date, Date>)
+    data class RetrievalRequest(
+        val formData: Map<String, String>,
+        private val period: Pair<Date, Date>
+    )
 
     companion object {
         /**
@@ -416,31 +465,39 @@ class SyncWorker(context: Context, params: WorkerParameters) :
          * be used.
          * @param scheduleOnly Do not perform synchronization immediately.
          */
-        fun performFullSynchronization(context: Context,
-                                       customPeriod: Double? = null,
-                                       scheduleOnly: Boolean = false) {
+        fun performFullSynchronization(
+            context: Context,
+            customPeriod: Double? = null,
+            scheduleOnly: Boolean = false
+        ) {
             val delayInterval = (
                 (customPeriod ?: getSyncInterval(context))
-                * (24 * 60 * 60 * 1000)).toLong()
+                    * (24 * 60 * 60 * 1000)).toLong()
             if (delayInterval != 0L) {
                 val workRequest = PeriodicWorkRequestBuilder<SyncWorker>(
                     delayInterval,
-                    TimeUnit.MILLISECONDS)
+                    TimeUnit.MILLISECONDS
+                )
                 if (scheduleOnly) {
-                    workRequest.setInitialDelay(delayInterval,
-                                                TimeUnit.MILLISECONDS)
+                    workRequest.setInitialDelay(
+                        delayInterval,
+                        TimeUnit.MILLISECONDS
+                    )
                 }
                 workRequest.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 val work = workRequest.build()
                 WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                     context.getString(R.string.sync_work_id),
                     ExistingPeriodicWorkPolicy.REPLACE,
-                    work)
+                    work
+                )
             } else if (!scheduleOnly) {
                 val work = OneTimeWorkRequestBuilder<SyncWorker>().build()
                 WorkManager.getInstance(context)
-                    .enqueueUniqueWork(context.getString(R.string.sync_work_id),
-                                       ExistingWorkPolicy.REPLACE, work)
+                    .enqueueUniqueWork(
+                        context.getString(R.string.sync_work_id),
+                        ExistingWorkPolicy.REPLACE, work
+                    )
             }
         }
 
@@ -456,7 +513,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.sync_partial_work_id),
-                ExistingWorkPolicy.KEEP, work)
+                ExistingWorkPolicy.KEEP, work
+            )
         }
     }
 }

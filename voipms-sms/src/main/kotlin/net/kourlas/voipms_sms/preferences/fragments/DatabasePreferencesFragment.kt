@@ -47,8 +47,10 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     private val importActivityResultLauncher =
         registerForActivityResult(object :
                                       ActivityResultContracts.OpenDocument() {
-            override fun createIntent(context: Context,
-                                      input: Array<out String>): Intent {
+            override fun createIntent(
+                context: Context,
+                input: Array<out String>
+            ): Intent {
                 val intent = super.createIntent(context, input)
                 intent.addCategory(CATEGORY_OPENABLE)
                 return intent
@@ -153,7 +155,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                     val importFd = it.contentResolver.openFileDescriptor(
                         uri, "r"
                     )
-                                   ?: throw Exception("Could not open file")
+                        ?: throw Exception("Could not open file")
                     Database.getInstance(it).import(importFd)
                 } catch (e: Exception) {
                     ensureActive()
@@ -176,8 +178,8 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 lifecycleScope.launch(Dispatchers.Main) {
                     showSnackbar(
                         it, R.id.coordinator_layout, it.getString(
-                        R.string.preferences_database_import_success
-                    )
+                            R.string.preferences_database_import_success
+                        )
                     )
                 }
             }
@@ -194,7 +196,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                     val exportFd = it.contentResolver.openFileDescriptor(
                         uri, "w"
                     )
-                                   ?: throw Exception("Could not open file")
+                        ?: throw Exception("Could not open file")
                     Database.getInstance(it).export(exportFd)
                 } catch (e: Exception) {
                     ensureActive()
@@ -218,8 +220,8 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 withContext(Dispatchers.Default) {
                     showSnackbar(
                         it, R.id.coordinator_layout, it.getString(
-                        R.string.preferences_database_export_success
-                    )
+                            R.string.preferences_database_export_success
+                        )
                     )
 
                 }

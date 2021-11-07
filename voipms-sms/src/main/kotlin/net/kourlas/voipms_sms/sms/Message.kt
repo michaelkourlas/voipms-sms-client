@@ -43,10 +43,12 @@ import java.util.*
  * @param isDraft Whether or not the message is a draft.
  */
 @JsonClass(generateAdapter = true)
-class Message(val databaseId: Long, val voipId: Long?, val date: Date,
-              val isIncoming: Boolean, val did: String, val contact: String,
-              var text: String, val isUnread: Boolean, val isDelivered: Boolean,
-              val isDeliveryInProgress: Boolean, val isDraft: Boolean = false) :
+class Message(
+    val databaseId: Long, val voipId: Long?, val date: Date,
+    val isIncoming: Boolean, val did: String, val contact: String,
+    var text: String, val isUnread: Boolean, val isDelivered: Boolean,
+    val isDeliveryInProgress: Boolean, val isDraft: Boolean = false
+) :
     Comparable<Message> {
 
     /**
@@ -70,39 +72,48 @@ class Message(val databaseId: Long, val voipId: Long?, val date: Date,
      * the process of being delivered (1 for true, 0 for false).
      * @param isDraft Whether or not the message is a draft.
      */
-    constructor(databaseId: Long, voipId: Long?, date: Long,
-                isIncoming: Long, did: String, contact: String,
-                text: String, isUnread: Long, isDelivered: Long,
-                isDeliveryInProgress: Long, isDraft: Boolean = false) : this(
+    constructor(
+        databaseId: Long, voipId: Long?, date: Long,
+        isIncoming: Long, did: String, contact: String,
+        text: String, isUnread: Long, isDelivered: Long,
+        isDeliveryInProgress: Long, isDraft: Boolean = false
+    ) : this(
         databaseId, voipId, Date(date * 1000), toBoolean(isIncoming), did,
         contact, text, toBoolean(isUnread), toBoolean(isDelivered),
-        toBoolean(isDeliveryInProgress), isDraft)
+        toBoolean(isDeliveryInProgress), isDraft
+    )
 
     /**
      * This constructor is used when initializing a message from a regular
      * message in the database.
      */
     constructor(sms: Sms) :
-        this(sms.databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
-             sms.contact, sms.text, sms.unread, sms.delivered,
-             sms.deliveryInProgress)
+        this(
+            sms.databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
+            sms.contact, sms.text, sms.unread, sms.delivered,
+            sms.deliveryInProgress
+        )
 
     /**
      * This constructor is used when initializing a message from a regular
      * message in the database, but the database ID is provided separately.
      */
     constructor(sms: Sms, databaseId: Long) :
-        this(databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
-             sms.contact, sms.text, sms.unread, sms.delivered,
-             sms.deliveryInProgress)
+        this(
+            databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
+            sms.contact, sms.text, sms.unread, sms.delivered,
+            sms.deliveryInProgress
+        )
 
     /**
      * This constructor is used when initializing a message from a draft
      * message in the database.
      */
     constructor(draft: Draft) :
-        this(0, 0, Date().time / 1000, 0, draft.did, draft.contact, draft.text,
-             0, 0, 0, true)
+        this(
+            0, 0, Date().time / 1000, 0, draft.did, draft.contact, draft.text,
+            0, 0, 0, true
+        )
 
     init {
         validatePhoneNumber(did)
@@ -297,7 +308,8 @@ class Message(val databaseId: Long, val voipId: Long?, val date: Date,
          * specified message.
          */
         fun getMessageUrl(
-            databaseId: Long): String = "voipmssms://message?id=$databaseId"
+            databaseId: Long
+        ): String = "voipmssms://message?id=$databaseId"
 
         /**
          * Gets a URL used for Firebase indexing representing a single
@@ -306,8 +318,9 @@ class Message(val databaseId: Long, val voipId: Long?, val date: Date,
          * @param conversationId The ID of the specified conversation.
          */
         fun getConversationUrl(
-            conversationId: ConversationId): String =
+            conversationId: ConversationId
+        ): String =
             "voipmssms://conversation?did=${conversationId.did}" +
-            "&contact=${conversationId.contact}"
+                "&contact=${conversationId.contact}"
     }
 }

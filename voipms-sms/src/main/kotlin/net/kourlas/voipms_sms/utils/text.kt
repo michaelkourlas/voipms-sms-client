@@ -26,7 +26,8 @@ fun getMessageTexts(context: Context, message: String): List<String> {
     // If the message text exceeds the maximum length of an SMS message,
     // split it into multiple message texts
     val maxLength = context.resources.getInteger(
-        R.integer.sms_max_length)
+        R.integer.sms_max_length
+    )
     val messageTexts = mutableListOf<String>()
 
     // VoIP.ms uses UTF-8 encoding for text messages; any message

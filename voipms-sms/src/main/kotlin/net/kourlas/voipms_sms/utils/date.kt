@@ -46,26 +46,35 @@ fun getScrollBarDate(date: Date): String {
 
     if (compareDateWithoutTime(Calendar.getInstance(), calendar) == 0) {
         // Today: "h:mm a"
-        val format = SimpleDateFormat("h:mm a",
-                                      Locale.getDefault())
+        val format = SimpleDateFormat(
+            "h:mm a",
+            Locale.getDefault()
+        )
         return format.format(date)
     }
 
     if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR)
         == calendar.get(
-            Calendar.WEEK_OF_YEAR)
+            Calendar.WEEK_OF_YEAR
+        )
         && Calendar.getInstance().get(
-            Calendar.YEAR)
-        == calendar.get(Calendar.YEAR)) {
+            Calendar.YEAR
+        )
+        == calendar.get(Calendar.YEAR)
+    ) {
         // This week: "EEE"
-        val format = SimpleDateFormat("EEE",
-                                      Locale.getDefault())
+        val format = SimpleDateFormat(
+            "EEE",
+            Locale.getDefault()
+        )
         return format.format(date)
     }
 
     // Any: "MMM d"
-    val format = SimpleDateFormat("MMM d",
-                                  Locale.getDefault())
+    val format = SimpleDateFormat(
+        "MMM d",
+        Locale.getDefault()
+    )
     return format.format(date)
 }
 
@@ -88,42 +97,54 @@ fun getConversationsViewDate(context: Context, date: Date): String {
     if (oneHourAgo.time.before(date)) {
         // Last hour: "X min"
         val minutes = (Calendar.getInstance().time.time
-                       - calendar.time.time) / (1000 * 60)
+            - calendar.time.time) / (1000 * 60)
         return "$minutes " + context.getString(
-            R.string.utils_date_minutes_ago)
+            R.string.utils_date_minutes_ago
+        )
     }
 
     if (compareDateWithoutTime(Calendar.getInstance(), calendar) == 0) {
         // Today: "h:mm a"
-        val format = SimpleDateFormat("h:mm a",
-                                      Locale.getDefault())
+        val format = SimpleDateFormat(
+            "h:mm a",
+            Locale.getDefault()
+        )
         return format.format(date)
     }
 
     if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR)
         == calendar.get(
-            Calendar.WEEK_OF_YEAR)
+            Calendar.WEEK_OF_YEAR
+        )
         && Calendar.getInstance().get(
-            Calendar.YEAR)
-        == calendar.get(Calendar.YEAR)) {
+            Calendar.YEAR
+        )
+        == calendar.get(Calendar.YEAR)
+    ) {
         // This week: "EEE"
         val format = SimpleDateFormat(
             "EEE",
-            Locale.getDefault())
+            Locale.getDefault()
+        )
         return format.format(date)
     }
 
     if (Calendar.getInstance().get(Calendar.YEAR)
-        == calendar.get(Calendar.YEAR)) {
+        == calendar.get(Calendar.YEAR)
+    ) {
         // This year: "MMM d"
-        val format = SimpleDateFormat("MMM d",
-                                      Locale.getDefault())
+        val format = SimpleDateFormat(
+            "MMM d",
+            Locale.getDefault()
+        )
         return format.format(date)
     }
 
     // Any: "MMM d, yyyy"
-    val format = SimpleDateFormat("MMM d, yyyy",
-                                  Locale.getDefault())
+    val format = SimpleDateFormat(
+        "MMM d, yyyy",
+        Locale.getDefault()
+    )
     return format.format(date)
 }
 
@@ -137,35 +158,46 @@ fun getConversationViewTopDate(date: Date): String {
 
     if (compareDateWithoutTime(Calendar.getInstance(), calendar) == 0) {
         // Today: "h:mm a"
-        val format = SimpleDateFormat("h:mm a",
-                                      Locale.getDefault())
+        val format = SimpleDateFormat(
+            "h:mm a",
+            Locale.getDefault()
+        )
         return format.format(date)
     }
 
     if (Calendar.getInstance().get(Calendar.WEEK_OF_YEAR)
         == calendar.get(
-            Calendar.WEEK_OF_YEAR)
+            Calendar.WEEK_OF_YEAR
+        )
         && Calendar.getInstance().get(
-            Calendar.YEAR)
-        == calendar.get(Calendar.YEAR)) {
+            Calendar.YEAR
+        )
+        == calendar.get(Calendar.YEAR)
+    ) {
         // This week: "EEEEEEEEE • h:mm a"
         val format = SimpleDateFormat(
             "EEEEEEEEE • h:mm a",
-            Locale.getDefault())
+            Locale.getDefault()
+        )
         return format.format(date)
     }
 
     if (Calendar.getInstance().get(Calendar.YEAR)
-        == calendar.get(Calendar.YEAR)) {
+        == calendar.get(Calendar.YEAR)
+    ) {
         // This year: "EEEEEEEEE, MMM d • h:mm a"
-        val format = SimpleDateFormat("EEEEEEEEE, MMM d • h:mm a",
-                                      Locale.getDefault())
+        val format = SimpleDateFormat(
+            "EEEEEEEEE, MMM d • h:mm a",
+            Locale.getDefault()
+        )
         return format.format(date)
     }
 
     // Any: "EEEEEEEEE, MMM d, yyyy • h:mm a"
-    val format = SimpleDateFormat("EEEEEEEEE, MMM d, yyyy • h:mm a",
-                                  Locale.getDefault())
+    val format = SimpleDateFormat(
+        "EEEEEEEEE, MMM d, yyyy • h:mm a",
+        Locale.getDefault()
+    )
     return format.format(date)
 }
 
@@ -189,20 +221,25 @@ fun getConversationViewDate(context: Context, date: Date): String {
     if (oneHourAgo.time.before(date)) {
         // Last hour: "X min"
         val minutes = (Calendar.getInstance().time.time
-                       - calendar.time.time) / (1000 * 60)
+            - calendar.time.time) / (1000 * 60)
         return "$minutes " + context.getString(
-            R.string.utils_date_minutes_ago)
+            R.string.utils_date_minutes_ago
+        )
     }
 
     if (compareDateWithoutTime(Calendar.getInstance(), calendar) == 0) {
         // Today: "h:mm a"
-        val format = SimpleDateFormat("h:mm a",
-                                      Locale.getDefault())
+        val format = SimpleDateFormat(
+            "h:mm a",
+            Locale.getDefault()
+        )
         return format.format(date)
     }
 
     // Any: "MMM d, h:mm a"
-    val format = SimpleDateFormat("MMM d, h:mm a",
-                                  Locale.getDefault())
+    val format = SimpleDateFormat(
+        "MMM d, h:mm a",
+        Locale.getDefault()
+    )
     return format.format(date)
 }

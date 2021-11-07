@@ -58,21 +58,27 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
             override fun onReceive(context: Context?, intent: Intent?) {
                 activity?.let { activity ->
                     // Show error if one occurred
-                    intent?.getStringArrayListExtra(getString(
-                        R.string.push_notifications_reg_complete_failed_dids))
+                    intent?.getStringArrayListExtra(
+                        getString(
+                            R.string.push_notifications_reg_complete_failed_dids
+                        )
+                    )
                         ?.let {
                             if (it.isNotEmpty()) {
                                 // Some DIDs failed registration
                                 showSnackbar(
                                     activity, R.id.coordinator_layout,
                                     getString(
-                                        R.string.push_notifications_fail_register))
+                                        R.string.push_notifications_fail_register
+                                    )
+                                )
                             }
                         } ?: run {
                         // Unknown error
                         showSnackbar(
                             activity, R.id.coordinator_layout,
-                            getString(R.string.push_notifications_fail_unknown))
+                            getString(R.string.push_notifications_fail_unknown)
+                        )
                     }
 
                     // Regardless of whether an error occurred, mark setup as
@@ -82,8 +88,10 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
             }
         }
 
-    override fun onCreatePreferencesFix(savedInstanceState: Bundle?,
-                                        rootKey: String?) {
+    override fun onCreatePreferencesFix(
+        savedInstanceState: Bundle?,
+        rootKey: String?
+    ) {
         activity?.let {
             // Load empty list of preferences
             addPreferencesFromResource(R.xml.preferences_dids)
@@ -92,14 +100,20 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
             preferenceScreen.removeAll()
 
             // Retrieve all DIDs
-            retrievedDids = arguments?.getStringArrayList(getString(
-                R.string.preferences_dids_fragment_retrieved_dids_key))
-                                ?.toSet()
-                            ?: emptySet()
-            databaseDids = arguments?.getStringArrayList(getString(
-                R.string.preferences_dids_fragment_database_dids_key))
-                               ?.toSet()
-                           ?: emptySet()
+            retrievedDids = arguments?.getStringArrayList(
+                getString(
+                    R.string.preferences_dids_fragment_retrieved_dids_key
+                )
+            )
+                ?.toSet()
+                ?: emptySet()
+            databaseDids = arguments?.getStringArrayList(
+                getString(
+                    R.string.preferences_dids_fragment_database_dids_key
+                )
+            )
+                ?.toSet()
+                ?: emptySet()
             activeDids = getDids(it)
 
             // Transfer all DIDs into common set
@@ -117,7 +131,8 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
                 preference.title = getFormattedPhoneNumber(did)
                 if (did !in retrievedDids) {
                     preference.summary = getString(
-                        R.string.preferences_dids_stored_locally)
+                        R.string.preferences_dids_stored_locally
+                    )
                 }
                 preference.onPreferenceChangeListener = this
                 preference.onPreferenceClickListener = this
@@ -133,15 +148,19 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
         // Register dynamic receivers for this fragment
         activity?.registerReceiver(
             pushNotificationsRegistrationCompleteReceiver,
-            IntentFilter(getString(
-                R.string.push_notifications_reg_complete_action)))
+            IntentFilter(
+                getString(
+                    R.string.push_notifications_reg_complete_action
+                )
+            )
+        )
 
         // Load DIDs and create preference for each
         if (!beforeFirstPreferenceLoad) {
             for (preference in preferenceScreen.preferences) {
                 (preference as MasterSwitchPreference).let {
                     val did = preferenceDidMap[it]
-                              ?: throw Exception("Unrecognized preference")
+                        ?: throw Exception("Unrecognized preference")
                     it.isChecked = did in activeDids
                 }
             }
@@ -156,7 +175,8 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
             // Unregister dynamic receivers for this fragment
             safeUnregisterReceiver(
                 it,
-                pushNotificationsRegistrationCompleteReceiver)
+                pushNotificationsRegistrationCompleteReceiver
+            )
         }
     }
 
@@ -164,7 +184,7 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
         // Show the DID preference activity associated with the selected
         // preference
         val did = preferenceDidMap[preference]
-                  ?: throw Exception("Unrecognized preference")
+            ?: throw Exception("Unrecognized preference")
         val intent = Intent(activity, DidPreferencesActivity::class.java)
         intent.putExtra(getString(R.string.preferences_did_did), did)
         startActivity(intent)
@@ -172,12 +192,14 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
         return true
     }
 
-    override fun onPreferenceChange(preference: Preference?,
-                                    newValue: Any?): Boolean {
+    override fun onPreferenceChange(
+        preference: Preference?,
+        newValue: Any?
+    ): Boolean {
         activity?.let {
             // Enable the selected DID
             val did = preferenceDidMap[preference]
-                      ?: throw Exception("Unrecognized preference")
+                ?: throw Exception("Unrecognized preference")
 
             val dids = if (newValue as Boolean) {
                 getDids(it).plus(did)
@@ -188,8 +210,10 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
 
             if (dids.isNotEmpty()) {
                 // Re-register for push notifications when DIDs change
-                enablePushNotifications(it.applicationContext,
-                                        activityToShowError = it)
+                enablePushNotifications(
+                    it.applicationContext,
+                    activityToShowError = it
+                )
             }
 
             lifecycleScope.launch(Dispatchers.Default) {

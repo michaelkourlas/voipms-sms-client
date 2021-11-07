@@ -38,17 +38,21 @@ import kotlin.math.abs
  * Applies a circular mask to a bitmap.
  */
 fun applyCircularMask(bitmap: Bitmap): Bitmap {
-    val output = Bitmap.createBitmap(bitmap.width,
-                                     bitmap.height,
-                                     Bitmap.Config.ARGB_8888)
+    val output = Bitmap.createBitmap(
+        bitmap.width,
+        bitmap.height,
+        Bitmap.Config.ARGB_8888
+    )
     val canvas = Canvas(output)
     val paint = Paint()
     val rect = Rect(0, 0, bitmap.width, bitmap.height)
 
     canvas.drawARGB(0, 0, 0, 0)
-    canvas.drawCircle((bitmap.width / 2).toFloat(),
-                      (bitmap.height / 2).toFloat(),
-                      (bitmap.width / 2).toFloat(), paint)
+    canvas.drawCircle(
+        (bitmap.width / 2).toFloat(),
+        (bitmap.height / 2).toFloat(),
+        (bitmap.width / 2).toFloat(), paint
+    )
     paint.isAntiAlias = true
     paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
     canvas.drawBitmap(bitmap, rect, rect, paint)
@@ -89,7 +93,8 @@ private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
             val pixels = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 22f,
-                view.context.resources.displayMetrics)
+                view.context.resources.displayMetrics
+            )
             outline.setRoundRect(0, 0, view.width, view.height, pixels)
         }
 
@@ -105,7 +110,8 @@ fun showAlertDialog(
     positiveButtonText: String? = null,
     positiveButtonAction: DialogInterface.OnClickListener? = null,
     negativeButtonText: String? = null,
-    negativeButtonAction: DialogInterface.OnClickListener? = null): AlertDialog? {
+    negativeButtonAction: DialogInterface.OnClickListener? = null
+): AlertDialog? {
     if (!activity.isFinishing) {
         val builder = AlertDialog.Builder(activity)
         builder.setMessage(text)
@@ -121,8 +127,10 @@ fun showAlertDialog(
 /**
  * Shows a generic snackbar.
  */
-fun showSnackbar(activity: FragmentActivity, viewId: Int,
-                 text: String, length: Int = Snackbar.LENGTH_LONG): Snackbar? {
+fun showSnackbar(
+    activity: FragmentActivity, viewId: Int,
+    text: String, length: Int = Snackbar.LENGTH_LONG
+): Snackbar? {
     if (!activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
         val snackbar = Snackbar.make(view, text, length)
@@ -135,11 +143,13 @@ fun showSnackbar(activity: FragmentActivity, viewId: Int,
 /**
  * Shows a generic snackbar with a button.
  */
-fun showSnackbar(activity: FragmentActivity, viewId: Int,
-                 text: String,
-                 buttonText: String? = null,
-                 buttonAction: View.OnClickListener? = null,
-                 length: Int = Snackbar.LENGTH_LONG): Snackbar? {
+fun showSnackbar(
+    activity: FragmentActivity, viewId: Int,
+    text: String,
+    buttonText: String? = null,
+    buttonAction: View.OnClickListener? = null,
+    length: Int = Snackbar.LENGTH_LONG
+): Snackbar? {
     if (!activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
         val snackbar = Snackbar.make(view, text, length)
@@ -154,8 +164,10 @@ fun showSnackbar(activity: FragmentActivity, viewId: Int,
  * Shows a snackbar requesting a permission with a button linking to the
  * application settings page.
  */
-fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
-                           text: String): Snackbar? {
+fun showPermissionSnackbar(
+    activity: AppCompatActivity, viewId: Int,
+    text: String
+): Snackbar? {
     if (activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
         val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
@@ -179,12 +191,16 @@ fun showPermissionSnackbar(activity: AppCompatActivity, viewId: Int,
  * Shows a toast with the value of the specified exception and aborts the
  * specified activity.
  */
-fun abortActivity(activity: FragmentActivity, ex: Exception,
-                  duration: Int = Toast.LENGTH_SHORT) {
+fun abortActivity(
+    activity: FragmentActivity, ex: Exception,
+    duration: Int = Toast.LENGTH_SHORT
+) {
     logException(ex)
-    Toast.makeText(activity,
-                   activity.getString(R.string.toast_error, ex.message),
-                   duration).show()
+    Toast.makeText(
+        activity,
+        activity.getString(R.string.toast_error, ex.message),
+        duration
+    ).show()
     activity.finish()
 }
 
@@ -193,15 +209,17 @@ fun abortActivity(activity: FragmentActivity, ex: Exception,
  * the specified phone number.
  */
 fun getMaterialDesignColour(phoneNumber: String): Int {
-    val colours = listOf(rgb(0xd5, 0x00, 0x00), rgb(0xc5, 0x11, 0x62),
-                         rgb(0xaa, 0x00, 0xff), rgb(0x62, 0x00, 0xea),
-                         rgb(0x30, 0x4f, 0xfe), rgb(0x29, 0x62, 0xff),
-                         rgb(0x00, 0x91, 0xea), rgb(0x00, 0xb8, 0xd4),
-                         rgb(0x00, 0xbf, 0xa5), rgb(0x00, 0xc8, 0x53),
-                         rgb(0x64, 0xdd, 0x17), rgb(0xae, 0xea, 0x00),
-                         rgb(0xff, 0xd6, 0x00), rgb(0xff, 0xab, 0x00),
-                         rgb(0xff, 0x6d, 0x00), rgb(0xdd, 0x2c, 0x00),
-                         rgb(0x3e, 0x27, 0x23), rgb(0x21, 0x21, 0x21),
-                         rgb(0x26, 0x32, 0x38))
+    val colours = listOf(
+        rgb(0xd5, 0x00, 0x00), rgb(0xc5, 0x11, 0x62),
+        rgb(0xaa, 0x00, 0xff), rgb(0x62, 0x00, 0xea),
+        rgb(0x30, 0x4f, 0xfe), rgb(0x29, 0x62, 0xff),
+        rgb(0x00, 0x91, 0xea), rgb(0x00, 0xb8, 0xd4),
+        rgb(0x00, 0xbf, 0xa5), rgb(0x00, 0xc8, 0x53),
+        rgb(0x64, 0xdd, 0x17), rgb(0xae, 0xea, 0x00),
+        rgb(0xff, 0xd6, 0x00), rgb(0xff, 0xab, 0x00),
+        rgb(0xff, 0x6d, 0x00), rgb(0xdd, 0x2c, 0x00),
+        rgb(0x3e, 0x27, 0x23), rgb(0x21, 0x21, 0x21),
+        rgb(0x26, 0x32, 0x38)
+    )
     return colours[abs(phoneNumber.hashCode()) % colours.size]
 }

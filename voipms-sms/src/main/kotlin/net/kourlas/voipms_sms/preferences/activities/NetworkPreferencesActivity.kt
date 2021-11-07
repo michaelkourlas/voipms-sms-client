@@ -47,7 +47,8 @@ class NetworkPreferencesActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             fragment = NetworkPreferencesFragment()
             supportFragmentManager.beginTransaction().replace(
-                R.id.preferences_fragment_layout, fragment).commit()
+                R.id.preferences_fragment_layout, fragment
+            ).commit()
         }
     }
 }

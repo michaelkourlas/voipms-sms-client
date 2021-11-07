@@ -34,7 +34,8 @@ class SyncBootReceiver : BroadcastReceiver() {
                 throw Exception("No context or intent provided")
             }
             if (intent.action != "android.intent.action.BOOT_COMPLETED"
-                && intent.action != "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED") {
+                && intent.action != "android.intent.action.ACTION_LOCKED_BOOT_COMPLETED"
+            ) {
                 throw Exception("Unrecognized action " + intent.action)
             }
             SyncWorker.performFullSynchronization(context, scheduleOnly = true)

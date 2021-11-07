@@ -104,7 +104,8 @@ class Database private constructor(private val context: Context) {
             val messages = importExportLock.read {
                 database.withTransaction {
                     val messages = getConversationMessagesUnsortedWithoutLock(
-                        conversationId)
+                        conversationId
+                    )
                     for (message in messages) {
                         if (message.voipId != null) {
                             insertVoipIdDeleted(message.did, message.voipId)
@@ -112,11 +113,14 @@ class Database private constructor(private val context: Context) {
                     }
 
                     database.smsDao().deleteConversation(
-                        conversationId.did, conversationId.contact)
+                        conversationId.did, conversationId.contact
+                    )
                     database.draftDao().deleteConversation(
-                        conversationId.did, conversationId.contact)
+                        conversationId.did, conversationId.contact
+                    )
                     database.archivedDao().deleteConversation(
-                        conversationId.did, conversationId.contact)
+                        conversationId.did, conversationId.contact
+                    )
 
                     updateConversationDraftWithoutLock(conversationId, "")
 
@@ -200,10 +204,12 @@ class Database private constructor(private val context: Context) {
      * @return Null if the message does not exist.
      */
     suspend fun getConversationDraft(
-        conversationId: ConversationId): Message? =
+        conversationId: ConversationId
+    ): Message? =
         importExportLock.read {
             database.draftDao().getConversation(
-                conversationId.did, conversationId.contact)?.toMessage()
+                conversationId.did, conversationId.contact
+            )?.toMessage()
         }
 
     /**
@@ -211,7 +217,8 @@ class Database private constructor(private val context: Context) {
      * DIDs.
      */
     suspend fun getConversationIds(
-        dids: Set<String>): Set<ConversationId> =
+        dids: Set<String>
+    ): Set<ConversationId> =
         importExportLock.read {
             getConversationIdsWithoutLock(dids)
         }
@@ -224,17 +231,21 @@ class Database private constructor(private val context: Context) {
     suspend fun getConversationMessagesFiltered(
         conversationId: ConversationId,
         filterConstraint: String,
-        itemLimit: Long?): List<Message> =
+        itemLimit: Long?
+    ): List<Message> =
         importExportLock.read {
             if (itemLimit != null) {
                 database.smsDao().getConversationMessagesFilteredWithLimit(
                     conversationId.did, conversationId.contact,
-                    filterConstraint, itemLimit)
+                    filterConstraint, itemLimit
+                )
             } else {
                 database.smsDao()
-                    .getConversationMessagesFiltered(conversationId.did,
-                                                     conversationId.contact,
-                                                     filterConstraint)
+                    .getConversationMessagesFiltered(
+                        conversationId.did,
+                        conversationId.contact,
+                        filterConstraint
+                    )
             }.map { it.toMessage() }
         }
 
@@ -244,12 +255,15 @@ class Database private constructor(private val context: Context) {
      */
     suspend fun getConversationMessagesFilteredCount(
         conversationId: ConversationId,
-        filterConstraint: String): Long =
+        filterConstraint: String
+    ): Long =
         importExportLock.read {
             database.smsDao()
-                .getConversationMessagesFilteredCount(conversationId.did,
-                                                      conversationId.contact,
-                                                      filterConstraint)
+                .getConversationMessagesFilteredCount(
+                    conversationId.did,
+                    conversationId.contact,
+                    filterConstraint
+                )
         }
 
     /**
@@ -259,19 +273,22 @@ class Database private constructor(private val context: Context) {
      * The resulting list is sorted by date, from least recent to most recent.
      */
     suspend fun getConversationMessagesUnread(
-        conversationId: ConversationId): List<Message> =
+        conversationId: ConversationId
+    ): List<Message> =
         importExportLock.read {
             // Retrieve the date of the most recent outgoing message.
             val date = database.smsDao()
-                           .getConversationMessageDateMostRecentOutgoing(
-                               conversationId.did,
-                               conversationId.contact) ?: 0
+                .getConversationMessageDateMostRecentOutgoing(
+                    conversationId.did,
+                    conversationId.contact
+                ) ?: 0
 
             // Retrieve all unread messages with a date equal to or after
             // this date.
             database.smsDao()
                 .getConversationMessagesUnreadAfterDate(
-                    conversationId.did, conversationId.contact, date)
+                    conversationId.did, conversationId.contact, date
+                )
                 .map { it.toMessage() }
         }
 
@@ -280,7 +297,8 @@ class Database private constructor(private val context: Context) {
      * sorted.
      */
     suspend fun getConversationMessagesUnsorted(
-        conversationId: ConversationId): List<Message> =
+        conversationId: ConversationId
+    ): List<Message> =
         importExportLock.read {
             getConversationMessagesUnsortedWithoutLock(conversationId)
         }
@@ -293,12 +311,14 @@ class Database private constructor(private val context: Context) {
     suspend fun getConversationsMessageMostRecentFiltered(
         dids: Set<String>,
         filterConstraint: String = "",
-        contactNameCache: MutableMap<String, String>? = null) =
+        contactNameCache: MutableMap<String, String>? = null
+    ) =
         importExportLock.read {
             getConversationsMessageMostRecentFilteredWithoutLock(
                 dids,
                 filterConstraint,
-                contactNameCache)
+                contactNameCache
+            )
         }
 
     /**
@@ -403,13 +423,16 @@ class Database private constructor(private val context: Context) {
      */
     suspend fun insertConversationMessagesDeliveryInProgress(
         conversationId: ConversationId,
-        texts: List<String>): List<Long> = coroutineScope {
+        texts: List<String>
+    ): List<Long> = coroutineScope {
         val messages = importExportLock.read {
             val smses = texts.map {
-                Sms(did = conversationId.did,
+                Sms(
+                    did = conversationId.did,
                     contact = conversationId.contact,
                     text = it,
-                    deliveryInProgress = 1)
+                    deliveryInProgress = 1
+                )
             }
             database.withTransaction {
                 smses.map {
@@ -449,13 +472,16 @@ class Database private constructor(private val context: Context) {
                             unread = if (message.isUnread) 1L else 0L,
                             delivered = if (message.isDelivered) 1L else 0L,
                             deliveryInProgress = if (message.isDeliveryInProgress)
-                                1L else 0L)
+                                1L else 0L
+                        )
 
                         // Don't add the message if it already exists in our
                         // database.
                         if (message.voipId == null
                             || database.smsDao().getIdByVoipId(
-                                message.did, message.voipId) == null) {
+                                message.did, message.voipId
+                            ) == null
+                        ) {
                             database.smsDao().insert(sms)
                         }
                     }
@@ -477,7 +503,8 @@ class Database private constructor(private val context: Context) {
      */
     suspend fun insertMessagesVoipMsApi(
         incomingMessages: List<SyncWorker.IncomingMessage>,
-        retrieveDeletedMessages: Boolean): Set<ConversationId> =
+        retrieveDeletedMessages: Boolean
+    ): Set<ConversationId> =
         coroutineScope {
             val (addedMessages, addedConversationIds) = importExportLock.read {
                 val addedConversationIds = mutableSetOf<ConversationId>()
@@ -490,11 +517,15 @@ class Database private constructor(private val context: Context) {
                             // remove this message from our list of deleted
                             // messages.
                             database.deletedDao()
-                                .delete(setOf(incomingMessage.did),
-                                        incomingMessage.voipId)
+                                .delete(
+                                    setOf(incomingMessage.did),
+                                    incomingMessage.voipId
+                                )
                         } else if (database.deletedDao().get(
                                 incomingMessage.did,
-                                incomingMessage.voipId) != null) {
+                                incomingMessage.voipId
+                            ) != null
+                        ) {
                             // Retrieve deleted messages is not true and this
                             // message has been previously deleted, so we
                             // shouldn't add it back
@@ -502,7 +533,8 @@ class Database private constructor(private val context: Context) {
                         }
 
                         val databaseId = database.smsDao().getIdByVoipId(
-                            incomingMessage.did, incomingMessage.voipId)
+                            incomingMessage.did, incomingMessage.voipId
+                        )
                         if (databaseId != null) {
                             continue
                         }
@@ -518,18 +550,22 @@ class Database private constructor(private val context: Context) {
                             unread = if (incomingMessage.isIncoming)
                                 1L else 0L,
                             delivered = 1L,
-                            deliveryInProgress = 0L)
+                            deliveryInProgress = 0L
+                        )
                         val newDatabaseId = database.smsDao().insert(sms)
 
                         addedConversationIds.add(
                             ConversationId(
                                 incomingMessage.did,
-                                incomingMessage.contact))
+                                incomingMessage.contact
+                            )
+                        )
                         addedMessages.add(sms.toMessage(newDatabaseId))
 
                         // Mark the conversation as unarchived.
                         database.archivedDao().deleteConversation(
-                            incomingMessage.did, incomingMessage.contact)
+                            incomingMessage.did, incomingMessage.contact
+                        )
                     }
                 }
 
@@ -552,25 +588,30 @@ class Database private constructor(private val context: Context) {
      * Returns whether the specified conversation is archived.
      */
     suspend fun isConversationArchived(
-        conversationId: ConversationId): Boolean =
+        conversationId: ConversationId
+    ): Boolean =
         importExportLock.read {
             database.archivedDao().getConversation(
-                conversationId.did, conversationId.contact)?.archived == 1
+                conversationId.did, conversationId.contact
+            )?.archived == 1
         }
 
     /**
      * Marks the specified conversation as archived.
      */
     suspend fun markConversationArchived(
-        conversationId: ConversationId) =
+        conversationId: ConversationId
+    ) =
         importExportLock.read {
             database.withTransaction {
                 val existingArchived = database.archivedDao()
                     .getConversation(conversationId.did, conversationId.contact)
                 val newArchived =
-                    Archived(databaseId = existingArchived?.databaseId ?: 0,
-                             did = conversationId.did,
-                             contact = conversationId.contact, archived = 1)
+                    Archived(
+                        databaseId = existingArchived?.databaseId ?: 0,
+                        did = conversationId.did,
+                        contact = conversationId.contact, archived = 1
+                    )
                 database.archivedDao().update(newArchived)
             }
         }
@@ -579,15 +620,18 @@ class Database private constructor(private val context: Context) {
      * Marks the specified conversation as unarchived.
      */
     suspend fun markConversationUnarchived(
-        conversationId: ConversationId) =
+        conversationId: ConversationId
+    ) =
         importExportLock.read {
             database.withTransaction {
                 val existingArchived = database.archivedDao()
                     .getConversation(conversationId.did, conversationId.contact)
                 val newArchived =
-                    Archived(databaseId = existingArchived?.databaseId ?: 0,
-                             did = conversationId.did,
-                             contact = conversationId.contact, archived = 0)
+                    Archived(
+                        databaseId = existingArchived?.databaseId ?: 0,
+                        did = conversationId.did,
+                        contact = conversationId.contact, archived = 0
+                    )
                 database.archivedDao().update(newArchived)
             }
         }
@@ -596,11 +640,13 @@ class Database private constructor(private val context: Context) {
      * Marks the specified conversation as read.
      **/
     suspend fun markConversationRead(
-        conversationId: ConversationId) =
+        conversationId: ConversationId
+    ) =
         importExportLock.read {
             database.smsDao().markConversationRead(
                 conversationId.did,
-                conversationId.contact)
+                conversationId.contact
+            )
         }
 
     /**
@@ -610,7 +656,8 @@ class Database private constructor(private val context: Context) {
         importExportLock.read {
             database.smsDao().markConversationUnread(
                 conversationId.did,
-                conversationId.contact)
+                conversationId.contact
+            )
         }
 
     /**
@@ -649,8 +696,10 @@ class Database private constructor(private val context: Context) {
      * automatically removed. If an empty message is inserted, any existing
      * message is removed from the database.
      */
-    suspend fun updateConversationDraft(conversationId: ConversationId,
-                                        text: String) =
+    suspend fun updateConversationDraft(
+        conversationId: ConversationId,
+        text: String
+    ) =
         importExportLock.read {
             database.withTransaction {
                 updateConversationDraftWithoutLock(conversationId, text)
@@ -667,7 +716,8 @@ class Database private constructor(private val context: Context) {
                 // dynamic shortcut slots available.
                 val maxCount =
                     ShortcutManagerCompat.getMaxShortcutCountPerActivity(
-                        context) - 1
+                        context
+                    ) - 1
 
                 // Update the dynamic shortcuts.
                 val messages = if (BuildConfig.IS_DEMO) {
@@ -675,7 +725,9 @@ class Database private constructor(private val context: Context) {
                 } else {
                     getConversationsMessageMostRecentFilteredWithoutLock(
                         net.kourlas.voipms_sms.preferences.getDids(
-                            context, onlyShowInConversationsView = true))
+                            context, onlyShowInConversationsView = true
+                        )
+                    )
                 }
                 val conversationIdStrings =
                     messages.map { it.conversationId.getId() }
@@ -685,31 +737,41 @@ class Database private constructor(private val context: Context) {
                     intent.action = "android.intent.action.VIEW"
                     intent.putExtra(
                         context.getString(R.string.conversation_did),
-                        it.did)
+                        it.did
+                    )
                     intent.putExtra(
                         context.getString(R.string.conversation_contact),
-                        it.contact)
+                        it.contact
+                    )
 
                     val contactName = getContactName(context, it.contact)
                     val label =
                         contactName ?: getFormattedPhoneNumber(it.contact)
                     val icon = IconCompat.createWithAdaptiveBitmap(
-                        getContactPhotoAdaptiveBitmap(context, contactName,
-                                                      it.contact))
+                        getContactPhotoAdaptiveBitmap(
+                            context, contactName,
+                            it.contact
+                        )
+                    )
                     ShortcutInfoCompat.Builder(
-                        context, it.conversationId.getId())
+                        context, it.conversationId.getId()
+                    )
                         .setIcon(icon)
                         .setIntent(intent)
-                        .setPerson(Person.Builder()
-                                       .setName(label)
-                                       .setKey(it.contact)
-                                       .setIcon(icon)
-                                       .setUri("tel:${it.contact}")
-                                       .build())
+                        .setPerson(
+                            Person.Builder()
+                                .setName(label)
+                                .setKey(it.contact)
+                                .setIcon(icon)
+                                .setUri("tel:${it.contact}")
+                                .build()
+                        )
                         .setLongLabel(label)
                         .setShortLabel(
                             if (contactName != null) label.split(
-                                " ")[0] else label)
+                                " "
+                            )[0] else label
+                        )
                         .setLongLived(true)
                         .setLocusId(LocusIdCompat(it.conversationId.getId()))
                         .setCategories(setOf("existing_conversation_target"))
@@ -719,10 +781,13 @@ class Database private constructor(private val context: Context) {
                 val dynamicShortcutInfoList =
                     shortcutInfoList.zip(0 until maxCount).map { it.first }
                 try {
-                    ShortcutManagerCompat.updateShortcuts(context,
-                                                          shortcutInfoList)
+                    ShortcutManagerCompat.updateShortcuts(
+                        context,
+                        shortcutInfoList
+                    )
                     ShortcutManagerCompat.setDynamicShortcuts(
-                        context, dynamicShortcutInfoList)
+                        context, dynamicShortcutInfoList
+                    )
                 } catch (e: Exception) {
                     // Occasionally this will fail because the maximum number of
                     // dynamic shortcuts was exceeded? There's nothing we can do
@@ -736,23 +801,30 @@ class Database private constructor(private val context: Context) {
                 val existingPinnedShortcutInfoList =
                     ShortcutManagerCompat.getShortcuts(
                         context,
-                        ShortcutManagerCompat.FLAG_MATCH_PINNED)
+                        ShortcutManagerCompat.FLAG_MATCH_PINNED
+                    )
                 for (shortcutInfo in existingPinnedShortcutInfoList) {
                     if (shortcutInfo.id !in conversationIdStrings) {
-                        ShortcutManagerCompat.disableShortcuts(context, listOf(
-                            shortcutInfo.id), context.getString(
-                            R.string.pinned_shortcut_disable_error))
+                        ShortcutManagerCompat.disableShortcuts(
+                            context, listOf(
+                                shortcutInfo.id
+                            ), context.getString(
+                                R.string.pinned_shortcut_disable_error
+                            )
+                        )
                     }
                 }
                 val existingCachedShortcutInfoList =
                     ShortcutManagerCompat.getShortcuts(
                         context,
-                        ShortcutManagerCompat.FLAG_MATCH_CACHED)
+                        ShortcutManagerCompat.FLAG_MATCH_CACHED
+                    )
                 for (shortcutInfo in existingCachedShortcutInfoList) {
                     if (shortcutInfo.id !in conversationIdStrings) {
                         ShortcutManagerCompat.removeLongLivedShortcuts(
                             context,
-                            listOf(shortcutInfo.id))
+                            listOf(shortcutInfo.id)
+                        )
                     }
                 }
             }
@@ -767,7 +839,8 @@ class Database private constructor(private val context: Context) {
      * responsibility of the caller.
      */
     private suspend fun getConversationIdsWithoutLock(
-        dids: Set<String>): Set<ConversationId> {
+        dids: Set<String>
+    ): Set<ConversationId> {
         return database.smsDao().getConversationIds(dids).toSet()
     }
 
@@ -779,10 +852,13 @@ class Database private constructor(private val context: Context) {
      * responsibility of the caller.
      */
     private suspend fun getConversationMessagesUnsortedWithoutLock(
-        conversationId: ConversationId): List<Message> {
+        conversationId: ConversationId
+    ): List<Message> {
         return database.smsDao()
-            .getConversationMessagesUnsorted(conversationId.did,
-                                             conversationId.contact)
+            .getConversationMessagesUnsorted(
+                conversationId.did,
+                conversationId.contact
+            )
             .map { it.toMessage() }
     }
 
@@ -794,7 +870,8 @@ class Database private constructor(private val context: Context) {
      * responsibility of the caller.
      */
     private suspend fun getConversationsMessageDraft(
-        dids: Set<String>): List<Message> {
+        dids: Set<String>
+    ): List<Message> {
         return database.draftDao()
             .getConversations(dids)
             .map { it.toMessage() }
@@ -808,7 +885,8 @@ class Database private constructor(private val context: Context) {
      * responsibility of the caller.
      */
     private suspend fun getConversationsMessageDraftFiltered(
-        dids: Set<String>, filterConstraint: String): List<Message> {
+        dids: Set<String>, filterConstraint: String
+    ): List<Message> {
         return getConversationsMessageDraft(dids)
             .filter {
                 it.text
@@ -829,7 +907,8 @@ class Database private constructor(private val context: Context) {
     private suspend fun getConversationsMessageMostRecentFilteredWithoutLock(
         dids: Set<String>,
         filterConstraint: String = "",
-        contactNameCache: MutableMap<String, String>? = null): List<Message> {
+        contactNameCache: MutableMap<String, String>? = null
+    ): List<Message> {
         val numericFilterConstraint = getDigitsOfString(filterConstraint)
 
         var messages = mutableListOf<Message>()
@@ -844,13 +923,15 @@ class Database private constructor(private val context: Context) {
                             conversationId.did,
                             conversationId.contact,
                             filterConstraint,
-                            numericFilterConstraint)
+                            numericFilterConstraint
+                        )
                 } else {
                     database.smsDao()
                         .getConversationMessageMostRecentFiltered(
                             conversationId.did,
                             conversationId.contact,
-                            filterConstraint)
+                            filterConstraint
+                        )
                 }
 
                 if (sms != null) {
@@ -862,9 +943,10 @@ class Database private constructor(private val context: Context) {
             // Otherwise, simply get the most recent message for the
             // conversation without using any filters.
             val sms = database.smsDao()
-                          .getConversationMessageMostRecent(
-                              conversationId.did,
-                              conversationId.contact) ?: continue
+                .getConversationMessageMostRecent(
+                    conversationId.did,
+                    conversationId.contact
+                ) ?: continue
 
             // If no filter constraint was provided, just add the message
             // to the list.
@@ -876,11 +958,14 @@ class Database private constructor(private val context: Context) {
             // Otherwise, check if the message matches our contact name
             // filter. We could not check this as part of the first SQL
             // query, since it requires an external lookup.
-            val contactName = getContactName(context,
-                                             sms.contact,
-                                             contactNameCache)
+            val contactName = getContactName(
+                context,
+                sms.contact,
+                contactNameCache
+            )
             val lowercaseContactName = contactName?.lowercase(
-                Locale.getDefault())
+                Locale.getDefault()
+            )
             if (lowercaseContactName?.contains(filterConstraint) == true) {
                 messages.add(sms.toMessage())
             }
@@ -888,7 +973,8 @@ class Database private constructor(private val context: Context) {
 
         // Replace messages with any applicable draft messages
         val draftMessages = getConversationsMessageDraftFiltered(
-            dids, filterConstraint)
+            dids, filterConstraint
+        )
         for (draftMessage in draftMessages) {
             var added = false
             messages = messages.map {
@@ -936,21 +1022,27 @@ class Database private constructor(private val context: Context) {
      */
     private suspend fun updateConversationDraftWithoutLock(
         conversationId: ConversationId,
-        text: String) {
+        text: String
+    ) {
         // If text is empty, then just delete any existing draft message.
         if (text == "") {
-            database.draftDao().deleteConversation(conversationId.did,
-                                                   conversationId.contact)
+            database.draftDao().deleteConversation(
+                conversationId.did,
+                conversationId.contact
+            )
             return
         }
 
         // Otherwise, update the draft message, if any.
         val existingDraft = database.draftDao().getConversation(
-            conversationId.did, conversationId.contact)
-        val newDraft = Draft(databaseId = existingDraft?.databaseId ?: 0,
-                             did = conversationId.did,
-                             contact = conversationId.contact,
-                             text = text)
+            conversationId.did, conversationId.contact
+        )
+        val newDraft = Draft(
+            databaseId = existingDraft?.databaseId ?: 0,
+            did = conversationId.did,
+            contact = conversationId.contact,
+            text = text
+        )
         database.draftDao().update(newDraft)
     }
 
@@ -977,15 +1069,18 @@ class Database private constructor(private val context: Context) {
         fun getInstance(context: Context): Database =
             instance ?: synchronized(this) {
                 instance ?: Database(
-                    context.applicationContext).also { instance = it }
+                    context.applicationContext
+                ).also { instance = it }
             }
 
         /**
          * Creates a RoomDatabase instance.
          */
         private fun createDatabase(context: Context): AbstractDatabase {
-            return Room.databaseBuilder(context, AbstractDatabase::class.java,
-                                        DATABASE_NAME)
+            return Room.databaseBuilder(
+                context, AbstractDatabase::class.java,
+                DATABASE_NAME
+            )
                 .addMigrations(migration9To10)
                 .fallbackToDestructiveMigration()
                 .build()

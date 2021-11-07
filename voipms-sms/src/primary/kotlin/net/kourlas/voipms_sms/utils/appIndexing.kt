@@ -37,9 +37,13 @@ import net.kourlas.voipms_sms.sms.Message
 suspend fun addMessageToIndex(context: Context, message: Message) =
     withContext(Dispatchers.IO) {
         try {
-            Tasks.await(FirebaseAppIndex.getInstance(context).update(
-                getMessageBuilder(
-                    context, message).build()))
+            Tasks.await(
+                FirebaseAppIndex.getInstance(context).update(
+                    getMessageBuilder(
+                        context, message
+                    ).build()
+                )
+            )
         } catch (e: Exception) {
             logException(e)
         }
@@ -83,30 +87,38 @@ suspend fun replaceIndex(context: Context) = withContext(Dispatchers.IO) {
     val contactNameCache = mutableMapOf<String, String>()
     val contactPhotoUriCache = mutableMapOf<String, String>()
     val messages = Database.getInstance(
-        context).getMessagesAll(
-        getDids(context, onlyShowInConversationsView = true))
+        context
+    ).getMessagesAll(
+        getDids(context, onlyShowInConversationsView = true)
+    )
     messages.mapTo(indexables) {
         getMessageBuilder(
             context, it,
             contactNameCache,
-            contactPhotoUriCache).build()
+            contactPhotoUriCache
+        ).build()
     }
 
     try {
         // Delete app index and update index with indexables
         Tasks.await(
-            FirebaseAppIndex.getInstance(applicationContext).removeAll())
+            FirebaseAppIndex.getInstance(applicationContext).removeAll()
+        )
         val max = Indexable.MAX_INDEXABLES_TO_BE_UPDATED_IN_ONE_CALL
         (indexables.indices step max)
             .map {
                 indexables.subList(
                     it,
                     if (indexables.size > it + max) it + max - 1
-                    else indexables.size - 1)
+                    else indexables.size - 1
+                )
             }
             .forEach {
-                Tasks.await(FirebaseAppIndex.getInstance(context).update(
-                    *it.toTypedArray()))
+                Tasks.await(
+                    FirebaseAppIndex.getInstance(context).update(
+                        *it.toTypedArray()
+                    )
+                )
             }
     } catch (e: Exception) {
         logException(e)
@@ -122,22 +134,27 @@ private fun getMessageBuilder(
     contactNameCache: MutableMap<String, String> =
         mutableMapOf(),
     contactPhotoUriCache: MutableMap<String, String> =
-        mutableMapOf()): MessageBuilder {
+        mutableMapOf()
+): MessageBuilder {
     val messageBuilder = Indexables.messageBuilder()
         .setUrl(message.messageUrl)
         .setName(message.text)
-        .setIsPartOf(Indexables.conversationBuilder()
-                         .setUrl(message.conversationUrl)
-                         .setId("${message.did},${message.contact}"))
+        .setIsPartOf(
+            Indexables.conversationBuilder()
+                .setUrl(message.conversationUrl)
+                .setId("${message.did},${message.contact}")
+        )
 
     val contactBuilder = getContactBuilder(
         context,
         message, contactNameCache,
-        contactPhotoUriCache)
+        contactPhotoUriCache
+    )
     val didBuilder = getDidBuilder(
         context,
         message, contactNameCache,
-        contactPhotoUriCache)
+        contactPhotoUriCache
+    )
 
     if (message.isIncoming) {
         messageBuilder.setDateReceived(message.date)
@@ -159,21 +176,24 @@ private fun getMessageBuilder(
 private fun getContactBuilder(
     context: Context, message: Message,
     contactNameCache: MutableMap<String, String>,
-    contactPhotoUriCache: MutableMap<String, String>): PersonBuilder {
+    contactPhotoUriCache: MutableMap<String, String>
+): PersonBuilder {
     val contactBuilder = Indexables.personBuilder()
         .setTelephone(message.contact)
         .setUrl(message.conversationUrl)
 
     // Set contact photo URI
     val contactPhotoUri = getContactPhotoUri(
-        context, message.contact, contactPhotoUriCache)
+        context, message.contact, contactPhotoUriCache
+    )
     if (contactPhotoUri != null) {
         contactBuilder.setImage(contactPhotoUri)
     }
 
     // Set contact name
     val contactName = getContactName(
-        context, message.contact, contactNameCache)
+        context, message.contact, contactNameCache
+    )
     if (contactName != null) {
         contactBuilder.setName(contactName)
     }
@@ -188,7 +208,8 @@ private fun getContactBuilder(
 private fun getDidBuilder(
     context: Context, message: Message,
     contactNameCache: MutableMap<String, String>,
-    contactPhotoUriCache: MutableMap<String, String>): PersonBuilder {
+    contactPhotoUriCache: MutableMap<String, String>
+): PersonBuilder {
     val didBuilder = Indexables.personBuilder()
         .setTelephone(message.did)
         .setUrl(message.conversationUrl)
@@ -196,14 +217,16 @@ private fun getDidBuilder(
 
     // Set DID photo URI
     val didPhotoUri = getContactPhotoUri(
-        context, message.did, contactPhotoUriCache)
+        context, message.did, contactPhotoUriCache
+    )
     if (didPhotoUri != null) {
         didBuilder.setImage(didPhotoUri)
     }
 
     // Set DID name
     val didName = getContactName(
-        context, message.did, contactNameCache)
+        context, message.did, contactNameCache
+    )
     if (didName != null) {
         didBuilder.setName(didName)
     }

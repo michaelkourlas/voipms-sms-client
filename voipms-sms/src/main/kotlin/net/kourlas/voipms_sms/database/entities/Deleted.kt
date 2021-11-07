@@ -26,7 +26,8 @@ class Deleted(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = COLUMN_DATABASE_ID) val databaseId: Long = 0,
     @ColumnInfo(name = COLUMN_VOIP_ID) val voipId: Long,
-    @ColumnInfo(name = COLUMN_DID) val did: String) {
+    @ColumnInfo(name = COLUMN_DID) val did: String
+) {
     companion object {
         const val TABLE_NAME = "deleted"
 

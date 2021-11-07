@@ -34,20 +34,24 @@ import java.io.IOException
 /**
  * Service that registers a VoIP.ms callback for each DID.
  */
-class NotificationsRegistrationWorker(context: Context,
-                                      params: WorkerParameters) :
+class NotificationsRegistrationWorker(
+    context: Context,
+    params: WorkerParameters
+) :
     CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
         // Terminate quietly if notifications are not enabled
         if (!Notifications.getInstance(applicationContext)
-                .getNotificationsEnabled()) {
+                .getNotificationsEnabled()
+        ) {
             return Result.success()
         }
 
         // Terminate quietly if account or DIDs are not configured
         if (!didsConfigured(applicationContext)
-            || !accountConfigured(applicationContext)) {
+            || !accountConfigured(applicationContext)
+        ) {
             return Result.success()
         }
 
@@ -56,8 +60,10 @@ class NotificationsRegistrationWorker(context: Context,
         try {
             // Try to register URL callbacks with VoIP.ms for DIDs
             val responses = getVoipMsApiCallbackResponses(dids)
-            callbackFailedDids = parseVoipMsApiCallbackResponses(dids,
-                                                                 responses)
+            callbackFailedDids = parseVoipMsApiCallbackResponses(
+                dids,
+                responses
+            )
         } catch (e: Exception) {
             logException(e)
         }
@@ -65,13 +71,18 @@ class NotificationsRegistrationWorker(context: Context,
         // Send broadcast with DIDs that failed registration
         val registrationCompleteIntent = Intent(
             applicationContext.getString(
-                R.string.push_notifications_reg_complete_action))
+                R.string.push_notifications_reg_complete_action
+            )
+        )
         registrationCompleteIntent.putStringArrayListExtra(
             applicationContext.getString(
-                R.string.push_notifications_reg_complete_failed_dids),
+                R.string.push_notifications_reg_complete_failed_dids
+            ),
             if (callbackFailedDids != null)
                 ArrayList<String>(
-                    callbackFailedDids.toList()) else null)
+                    callbackFailedDids.toList()
+                ) else null
+        )
         applicationContext.sendBroadcast(registrationCompleteIntent)
 
         return Result.success()
@@ -101,38 +112,49 @@ class NotificationsRegistrationWorker(context: Context,
      * Gets the response of a setSMS call to the VoIP.ms API for each DID.
      */
     private suspend fun getVoipMsApiCallbackResponses(
-        dids: Set<String>): Map<String, List<RegisterResponse?>> {
+        dids: Set<String>
+    ): Map<String, List<RegisterResponse?>> {
         val responses = mutableMapOf<String, MutableList<RegisterResponse?>>()
         for (did in dids) {
             try {
                 // Work around a bug in the VoIP.ms API by disabling SMS for
                 // the DID before changing the URL callback.
                 val didResponses = mutableListOf<RegisterResponse?>()
-                didResponses.add(httpPostWithMultipartFormData(
-                    applicationContext,
-                    "https://www.voip.ms/api/v1/rest.php",
-                    mapOf("api_username" to getEmail(applicationContext),
-                          "api_password" to getPassword(applicationContext),
-                          "method" to "setSMS",
-                          "did" to did,
-                          "enable" to "0",
-                          "url_callback_enable" to "0",
-                          "url_callback" to "",
-                          "url_callback_retry" to "0")))
-                didResponses.add(httpPostWithMultipartFormData(
-                    applicationContext,
-                    "https://www.voip.ms/api/v1/rest.php",
-                    mapOf("api_username" to getEmail(applicationContext),
-                          "api_password" to getPassword(applicationContext),
-                          "method" to "setSMS",
-                          "did" to did,
-                          "enable" to "1",
-                          "url_callback_enable" to "1",
-                          ("url_callback"
-                              to "https://us-south.functions.appdomain.cloud/"
-                              + "api/v1/web/michael%40kourlas.com_dev/default/"
-                              + "voipmssms-notify?did={TO}"),
-                          "url_callback_retry" to "0")))
+                didResponses.add(
+                    httpPostWithMultipartFormData(
+                        applicationContext,
+                        "https://www.voip.ms/api/v1/rest.php",
+                        mapOf(
+                            "api_username" to getEmail(applicationContext),
+                            "api_password" to getPassword(applicationContext),
+                            "method" to "setSMS",
+                            "did" to did,
+                            "enable" to "0",
+                            "url_callback_enable" to "0",
+                            "url_callback" to "",
+                            "url_callback_retry" to "0"
+                        )
+                    )
+                )
+                didResponses.add(
+                    httpPostWithMultipartFormData(
+                        applicationContext,
+                        "https://www.voip.ms/api/v1/rest.php",
+                        mapOf(
+                            "api_username" to getEmail(applicationContext),
+                            "api_password" to getPassword(applicationContext),
+                            "method" to "setSMS",
+                            "did" to did,
+                            "enable" to "1",
+                            "url_callback_enable" to "1",
+                            ("url_callback"
+                                to "https://us-south.functions.appdomain.cloud/"
+                                + "api/v1/web/michael%40kourlas.com_dev/default/"
+                                + "voipmssms-notify?did={TO}"),
+                            "url_callback_retry" to "0"
+                        )
+                    )
+                )
                 responses[did] = didResponses
             } catch (e: IOException) {
                 // Do nothing.
@@ -153,7 +175,8 @@ class NotificationsRegistrationWorker(context: Context,
      */
     private fun parseVoipMsApiCallbackResponses(
         dids: Set<String>,
-        responses: Map<String, List<RegisterResponse?>>): Set<String> {
+        responses: Map<String, List<RegisterResponse?>>
+    ): Set<String> {
         val failedDids = mutableSetOf<String>()
         for (did in dids) {
             if (did !in responses) {
@@ -186,7 +209,8 @@ class NotificationsRegistrationWorker(context: Context,
                     .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 context.getString(R.string.push_notifications_work_id),
-                ExistingWorkPolicy.REPLACE, work)
+                ExistingWorkPolicy.REPLACE, work
+            )
         }
     }
 }

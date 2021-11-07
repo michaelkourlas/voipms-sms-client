@@ -52,11 +52,13 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
         val textView = findViewById<TextView>(R.id.info_text_view)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             textView.text = Html.fromHtml(
-                getString(R.string.preferences_sync_info), 0)
+                getString(R.string.preferences_sync_info), 0
+            )
         } else {
             @Suppress("DEPRECATION")
             textView.text = Html.fromHtml(
-                getString(R.string.preferences_sync_info))
+                getString(R.string.preferences_sync_info)
+            )
         }
         textView.movementMethod = LinkMovementMethod.getInstance()
 
@@ -67,7 +69,8 @@ class SynchronizationPreferencesActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             fragment = SynchronizationPreferencesFragment()
             supportFragmentManager.beginTransaction().replace(
-                R.id.preferences_fragment_layout, fragment).commit()
+                R.id.preferences_fragment_layout, fragment
+            ).commit()
         }
     }
 }

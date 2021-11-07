@@ -18,7 +18,8 @@ import net.kourlas.voipms_sms.database.entities.Sms
         Archived::class,
         Draft::class,
         Deleted::class],
-    version = DATABASE_VERSION)
+    version = DATABASE_VERSION
+)
 abstract class AbstractDatabase : RoomDatabase() {
     abstract fun smsDao(): SmsDao
     abstract fun deletedDao(): DeletedDao

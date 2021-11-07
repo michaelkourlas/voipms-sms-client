@@ -52,27 +52,35 @@ class NotificationsPreferencesActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             fragment = NotificationsPreferencesFragment()
             supportFragmentManager.beginTransaction().replace(
-                R.id.preferences_fragment_layout, fragment).commit()
+                R.id.preferences_fragment_layout, fragment
+            ).commit()
         }
 
         // Ask for external storage permission (required to display
         // information associated with ringtones on external storage)
         if (ContextCompat.checkSelfPermission(
                 this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                PermissionIndex.EXTERNAL_STORAGE.ordinal)
+                PermissionIndex.EXTERNAL_STORAGE.ordinal
+            )
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions,
-                                         grantResults)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(
+            requestCode, permissions,
+            grantResults
+        )
         if (requestCode == PermissionIndex.EXTERNAL_STORAGE.ordinal) {
             permissions.indices
                 .filter {
@@ -87,7 +95,9 @@ class NotificationsPreferencesActivity : AppCompatActivity() {
                             R.id.coordinator_layout,
                             getString(
                                 R.string
-                                    .preferences_perm_denied_external_storage))
+                                    .preferences_perm_denied_external_storage
+                            )
+                        )
                     } else {
                         // Otherwise, continue updating summary and handlers
                         fragment.updateSummaries()
