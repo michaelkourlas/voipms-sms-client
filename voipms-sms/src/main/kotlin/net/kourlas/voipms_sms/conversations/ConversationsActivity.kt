@@ -570,7 +570,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 setActiveDid(applicationContext, activeDid)
             }
 
-            for (did in listOf("").union(dids)) {
+            for (did in listOf("") + dids.sorted()) {
                 val menuItem = navigationView.menu.add(
                     if (did == "") getString(R.string.conversations_all_dids)
                     else getFormattedPhoneNumber(did)
