@@ -488,7 +488,6 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                         TimeUnit.MILLISECONDS
                     )
                 }
-                workRequest.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 val work = workRequest.build()
                 WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                     context.getString(R.string.sync_work_id),
