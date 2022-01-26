@@ -286,7 +286,11 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             }
 
             progress = ((i + 1) * 100) / retrievalRequests.size
-            setForeground(getForegroundInfo())
+            try {
+                setForeground(getForegroundInfo())
+            } catch (e: Exception) {
+                // Do nothing.
+            }
         }
 
         // Add new messages from the server

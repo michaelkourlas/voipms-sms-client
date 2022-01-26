@@ -1,16 +1,16 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-kapt"
 
 android {
     compileSdkVersion 31
-    buildToolsVersion '31.0.0'
+    buildToolsVersion "31.0.0"
     defaultConfig {
-        applicationId 'net.kourlas.voipms_sms'
+        applicationId "net.kourlas.voipms_sms"
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 143
-        versionName '0.6.22'
+        versionName "0.6.22"
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -21,43 +21,43 @@ android {
             }
         }
     }
-    flavorDimensions 'version', 'demo'
+    flavorDimensions "version", "demo"
     productFlavors {
         primary {
-            dimension 'version'
-            buildConfigField 'boolean', 'IS_FDROID', 'false'
+            dimension "version"
+            buildConfigField "boolean", "IS_FDROID", "false"
         }
         fdroid {
-            dimension 'version'
-            versionNameSuffix '-fdroid'
-            buildConfigField 'boolean', 'IS_FDROID', 'true'
+            dimension "version"
+            versionNameSuffix "-fdroid"
+            buildConfigField "boolean", "IS_FDROID", "true"
         }
         full {
-            dimension 'demo'
-            buildConfigField 'boolean', 'IS_DEMO', 'false'
-            buildConfigField 'boolean', 'IS_DEMO_SENDING', 'false'
+            dimension "demo"
+            buildConfigField "boolean", "IS_DEMO", "false"
+            buildConfigField "boolean", "IS_DEMO_SENDING", "false"
         }
         demoNotSending {
-            dimension 'demo'
-            applicationId 'net.kourlas.voipms_sms.demo'
-            buildConfigField 'boolean', 'IS_DEMO', 'true'
-            buildConfigField 'boolean', 'IS_DEMO_SENDING', 'false'
-            versionNameSuffix '-demo'
+            dimension "demo"
+            applicationId "net.kourlas.voipms_sms.demo"
+            buildConfigField "boolean", "IS_DEMO", "true"
+            buildConfigField "boolean", "IS_DEMO_SENDING", "false"
+            versionNameSuffix "-demo"
         }
         demoSending {
-            dimension 'demo'
-            applicationId 'net.kourlas.voipms_sms.demo'
-            buildConfigField 'boolean', 'IS_DEMO', 'true'
-            buildConfigField 'boolean', 'IS_DEMO_SENDING', 'true'
-            versionNameSuffix '-demo'
+            dimension "demo"
+            applicationId "net.kourlas.voipms_sms.demo"
+            buildConfigField "boolean", "IS_DEMO", "true"
+            buildConfigField "boolean", "IS_DEMO_SENDING", "true"
+            versionNameSuffix "-demo"
         }
     }
     variantFilter { variant ->
         def names = variant.flavors*.name
-        def isDemo = (names.contains('demoSending')
-                      || names.contains('demoNotSending'))
-        def isRelease = variant.buildType.name == 'release'
-        def isPrimary = names.contains('primary')
+        def isDemo = (names.contains("demoSending")
+                      || names.contains("demoNotSending"))
+        def isRelease = variant.buildType.name == "release"
+        def isPrimary = names.contains("primary")
         if (isDemo && (isPrimary || isRelease)) {
             variant.setIgnore(true)
         }
@@ -71,64 +71,67 @@ android {
         freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
     sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-        primary.java.srcDirs += 'src/primary/kotlin'
-        fdroid.java.srcDirs += 'src/fdroid/kotlin'
+        main.java.srcDirs += "src/main/kotlin"
+        primary.java.srcDirs += "src/primary/kotlin"
+        fdroid.java.srcDirs += "src/fdroid/kotlin"
     }
-    lintOptions {
+    lint {
         abortOnError false
     }
 }
 
 dependencies {
+    def room_version = "2.4.1"
+    def moshi_version = "1.13.0"
+
     // Kotlin libraries
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.1'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
 
     // Android support libraries
-    implementation 'androidx.annotation:annotation:1.2.0'
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
-    implementation 'androidx.preference:preference-ktx:1.1.1'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'androidx.room:room-ktx:2.3.0'
-    implementation 'androidx.room:room-runtime:2.3.0'
-    implementation 'androidx.sharetarget:sharetarget:1.2.0-beta01'
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'androidx.work:work-runtime-ktx:2.7.0'
-    implementation 'com.google.android.material:material:1.4.0'
-    kapt 'androidx.room:room-compiler:2.3.0'
+    implementation "androidx.annotation:annotation:1.3.0"
+    implementation "androidx.appcompat:appcompat:1.4.1"
+    implementation "androidx.core:core-ktx:1.7.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
+    implementation "androidx.preference:preference-ktx:1.1.1"
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
+    implementation "androidx.room:room-ktx:$room_version"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.sharetarget:sharetarget:1.2.0-rc01"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation "androidx.work:work-runtime-ktx:2.7.1"
+    implementation "com.google.android.material:material:1.5.0"
+    kapt "androidx.room:room-compiler:$room_version"
 
     // Firebase libraries
-    primaryImplementation platform('com.google.firebase:firebase-bom:28.3.1')
-    primaryImplementation 'com.google.firebase:firebase-analytics-ktx'
-    primaryImplementation 'com.google.firebase:firebase-appindexing'
-    primaryImplementation 'com.google.firebase:firebase-crashlytics-ktx'
-    primaryImplementation 'com.google.firebase:firebase-messaging-ktx'
+    primaryImplementation platform("com.google.firebase:firebase-bom:29.0.4")
+    primaryImplementation "com.google.firebase:firebase-analytics-ktx"
+    primaryImplementation "com.google.firebase:firebase-appindexing"
+    primaryImplementation "com.google.firebase:firebase-crashlytics-ktx"
+    primaryImplementation "com.google.firebase:firebase-messaging-ktx"
 
     // Google Play libraries
-    primaryImplementation 'com.android.billingclient:billing-ktx:4.0.0'
+    primaryImplementation "com.android.billingclient:billing-ktx:4.0.0"
 
     // Other third-party libraries
-    implementation 'com.squareup.moshi:moshi-adapters:1.11.0'
-    implementation 'com.squareup.moshi:moshi:1.12.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
-    implementation 'com.takisoft.preferencex:preferencex-datetimepicker:1.1.0'
-    implementation 'com.takisoft.preferencex:preferencex-ringtone:1.1.0'
-    implementation 'com.takisoft.preferencex:preferencex:1.1.0'
-    implementation 'de.adorsys.android:securestoragelibrary:1.2.2'
-    implementation 'com.github.xabaras:RecyclerViewSwipeDecorator:1.3'
-    kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.12.0'
+    implementation "com.squareup.moshi:moshi-adapters:$moshi_version"
+    implementation "com.squareup.moshi:moshi:$moshi_version"
+    implementation "com.squareup.okhttp3:okhttp:4.9.3"
+    implementation "com.takisoft.preferencex:preferencex-datetimepicker:1.1.0"
+    implementation "com.takisoft.preferencex:preferencex-ringtone:1.1.0"
+    implementation "com.takisoft.preferencex:preferencex:1.1.0"
+    implementation "de.adorsys.android:securestoragelibrary:1.2.4"
+    implementation "com.github.xabaras:RecyclerViewSwipeDecorator:1.3"
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
 }
 
 tasks.whenTaskAdded {task ->
-    if (task.name.contains('Fdroid')
-        && (task.name.contains('GoogleServices')
-            || task.name.contains('Crashlytics')))
+    if (task.name.contains("Fdroid")
+        && (task.name.contains("GoogleServices")
+            || task.name.contains("Crashlytics")))
     {
         task.enabled = false
     }
 }
 
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: "com.google.gms.google-services"
+apply plugin: "com.google.firebase.crashlytics"

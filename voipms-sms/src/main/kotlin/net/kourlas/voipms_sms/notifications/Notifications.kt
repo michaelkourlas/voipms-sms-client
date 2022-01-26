@@ -710,11 +710,12 @@ class Notifications private constructor(private val context: Context) {
         markReadIntent.component = ComponentName(
             context, MarkReadReceiver::class.java
         )
-        val markReadFlags = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
-            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        } else {
-            PendingIntent.FLAG_CANCEL_CURRENT
-        }
+        val markReadFlags =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            } else {
+                PendingIntent.FLAG_CANCEL_CURRENT
+            }
         val markReadPendingIntent = PendingIntent.getBroadcast(
             context, (did + contact + "markRead").hashCode(),
             markReadIntent, markReadFlags
@@ -738,7 +739,7 @@ class Notifications private constructor(private val context: Context) {
         replyIntent.component = ComponentName(
             context, SendMessageReceiver::class.java
         )
-        val replyFlags = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
+        val replyFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
         } else {
             PendingIntent.FLAG_CANCEL_CURRENT
@@ -792,7 +793,7 @@ class Notifications private constructor(private val context: Context) {
             )
             visibleReplyIntent.flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
             val visibleReplyFlags =
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
                 } else {
                     PendingIntent.FLAG_CANCEL_CURRENT
@@ -832,10 +833,16 @@ class Notifications private constructor(private val context: Context) {
             val intent = Intent(context, ConversationsActivity::class.java)
             val stackBuilder = TaskStackBuilder.create(context)
             stackBuilder.addNextIntentWithParentStack(intent)
+            val groupFlags =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                } else {
+                    PendingIntent.FLAG_CANCEL_CURRENT
+                }
             groupNotification.setContentIntent(
                 stackBuilder.getPendingIntent(
                     "group".hashCode(),
-                    PendingIntent.FLAG_CANCEL_CURRENT
+                    groupFlags
                 )
             )
 
@@ -866,10 +873,16 @@ class Notifications private constructor(private val context: Context) {
         )
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addNextIntentWithParentStack(intent)
+        val primaryFlags =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            } else {
+                PendingIntent.FLAG_CANCEL_CURRENT
+            }
         notification.setContentIntent(
             stackBuilder.getPendingIntent(
                 (did + contact).hashCode(),
-                PendingIntent.FLAG_CANCEL_CURRENT
+                primaryFlags
             )
         )
 
@@ -890,7 +903,7 @@ class Notifications private constructor(private val context: Context) {
                 ), contact
             )
             val bubbleFlags =
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     PendingIntent.FLAG_MUTABLE
                 } else {
                     0
