@@ -31,7 +31,6 @@ import net.kourlas.voipms_sms.preferences.setRawSyncInterval
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
-import java.util.*
 
 class CustomApplication : Application() {
     private var conversationsActivitiesVisible = 0
