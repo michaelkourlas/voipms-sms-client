@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 11,
-    "identityHash": "b83f230471e49a956483114c9606d48a",
+    "identityHash": "1d2c1bbbdc453e0e598d07bb29793a91",
     "entities": [
       {
         "tableName": "sms",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `VoipId` INTEGER, `Date` INTEGER NOT NULL, `Type` INTEGER NOT NULL, `Did` TEXT NOT NULL, `Contact` TEXT NOT NULL, `Text` TEXT NOT NULL, `Unread` INTEGER NOT NULL, `Delivered` INTEGER NOT NULL, `DeliveryInProgress` INTEGER NOT NULL, `Media1` TEXT, `Media2` TEXT, `Media3` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `VoipId` INTEGER, `Date` INTEGER NOT NULL, `Type` INTEGER NOT NULL, `Did` TEXT NOT NULL, `Contact` TEXT NOT NULL, `Text` TEXT, `Unread` INTEGER NOT NULL, `Delivered` INTEGER NOT NULL, `DeliveryInProgress` INTEGER NOT NULL, `Media1` TEXT, `Media2` TEXT, `Media3` TEXT)",
         "fields": [
           {
             "fieldPath": "databaseId",
@@ -48,7 +48,7 @@
             "fieldPath": "text",
             "columnName": "Text",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "unread",
@@ -208,7 +208,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b83f230471e49a956483114c9606d48a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1d2c1bbbdc453e0e598d07bb29793a91')"
     ]
   }
 }
