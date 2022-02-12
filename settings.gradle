@@ -1,1 +1,20 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+
+        // We are still using certain libraries only available on JCenter.
+        jcenter()
+    }
+}
+rootProject.name = "VoIP.ms SMS"
 include ':voipms-sms'

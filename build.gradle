@@ -1,12 +1,11 @@
 buildscript {
-    ext.kotlin_version = '1.6.10'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:7.1.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
 
         // Remove from F-Droid builds
         classpath 'com.google.gms:google-services:4.3.10'
@@ -14,14 +13,6 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://maven.google.com/' }
-
-        // We are still using certain libraries only available on JCenter.
-        jcenter()
-    }
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }

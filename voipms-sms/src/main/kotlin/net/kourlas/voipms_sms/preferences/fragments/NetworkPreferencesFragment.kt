@@ -35,8 +35,9 @@ class NetworkPreferencesFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.preferences_network)
 
         // Add listener for preference changes
-        preferenceScreen.sharedPreferences
-            .registerOnSharedPreferenceChangeListener(this)
+        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
+            this
+        )
 
         // Update preferences summaries
         updateSummaries()
@@ -85,7 +86,7 @@ class NetworkPreferencesFragment : PreferenceFragmentCompat(),
                 )
             ) {
                 try {
-                    if (preference.text.toInt() == 0) {
+                    if (preference.text?.toInt() == 0) {
                         preference.summary = "Infinite"
                     } else {
                         preference.summary = preference.text + " seconds"

@@ -38,8 +38,9 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.preferences_notifications)
 
         // Add listener for preference changes
-        preferenceScreen.sharedPreferences
-            .registerOnSharedPreferenceChangeListener(this)
+        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
+            this
+        )
 
         // Update preferences summaries
         updateSummaries()

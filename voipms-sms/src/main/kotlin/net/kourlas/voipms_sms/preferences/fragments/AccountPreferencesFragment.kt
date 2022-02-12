@@ -47,8 +47,9 @@ class AccountPreferencesFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.preferences_account)
 
         // Add listener for preference changes
-        preferenceScreen.sharedPreferences
-            .registerOnSharedPreferenceChangeListener(this)
+        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
+            this
+        )
 
         // Update preference summaries and behaviours
         updateSummariesAndHandlers()

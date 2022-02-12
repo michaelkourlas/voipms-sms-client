@@ -49,8 +49,9 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.preferences_synchronization)
 
         // Add listener for preference changes
-        preferenceScreen.sharedPreferences
-            .registerOnSharedPreferenceChangeListener(this)
+        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
+            this
+        )
 
         // Update preference summaries and handlers
         updateSummariesAndHandlers()

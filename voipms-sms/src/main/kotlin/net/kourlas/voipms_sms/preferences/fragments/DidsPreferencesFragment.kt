@@ -180,7 +180,7 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
         }
     }
 
-    override fun onPreferenceClick(preference: Preference?): Boolean {
+    override fun onPreferenceClick(preference: Preference): Boolean {
         // Show the DID preference activity associated with the selected
         // preference
         val did = preferenceDidMap[preference]
@@ -193,7 +193,7 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     override fun onPreferenceChange(
-        preference: Preference?,
+        preference: Preference,
         newValue: Any?
     ): Boolean {
         activity?.let {

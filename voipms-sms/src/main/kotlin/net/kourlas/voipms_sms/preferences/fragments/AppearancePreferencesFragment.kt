@@ -56,8 +56,9 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.preferences_appearance)
 
         // Add listener for preference changes
-        preferenceScreen.sharedPreferences
-            .registerOnSharedPreferenceChangeListener(this)
+        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
+            this
+        )
 
         // Update preferences summaries
         updateSummaries()
