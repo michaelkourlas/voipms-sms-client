@@ -547,6 +547,9 @@ class Database private constructor(private val context: Context) {
                             did = incomingMessage.did,
                             contact = incomingMessage.contact,
                             text = incomingMessage.text,
+                            media1 = incomingMessage.media1,
+                            media2 = incomingMessage.media2,
+                            media3 = incomingMessage.media3,
                             unread = if (incomingMessage.isIncoming)
                                 1L else 0L,
                             delivered = 1L,
@@ -698,7 +701,7 @@ class Database private constructor(private val context: Context) {
      */
     suspend fun updateConversationDraft(
         conversationId: ConversationId,
-        text: String
+        text: String?
     ) =
         importExportLock.read {
             database.withTransaction {
@@ -890,8 +893,8 @@ class Database private constructor(private val context: Context) {
         return getConversationsMessageDraft(dids)
             .filter {
                 it.text
-                    .lowercase(Locale.getDefault())
-                    .contains(filterConstraint)
+                    ?.lowercase(Locale.getDefault())
+                    ?.contains(filterConstraint) ?: false
             }
             .toMutableList()
     }
@@ -1022,10 +1025,10 @@ class Database private constructor(private val context: Context) {
      */
     private suspend fun updateConversationDraftWithoutLock(
         conversationId: ConversationId,
-        text: String
+        text: String?
     ) {
         // If text is empty, then just delete any existing draft message.
-        if (text == "") {
+        if (text == null || text == "") {
             database.draftDao().deleteConversation(
                 conversationId.did,
                 conversationId.contact
@@ -1048,11 +1051,12 @@ class Database private constructor(private val context: Context) {
 
     companion object {
         private const val DATABASE_NAME = "sms.db"
-        const val DATABASE_VERSION = 10
+        const val DATABASE_VERSION = 11
 
         private val migration9To10 = object : Migration(9, 10) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Do nothing.
+                // Do nothing. The database did not change when we switched
+                // to Room.
             }
         }
 

@@ -281,7 +281,7 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                             "method" to "sendSMS",
                             "did" to message.did,
                             "dst" to message.contact,
-                            "message" to message.text
+                            "message" to (message.text ?: "")
                         )
                     )
                 } catch (e: IOException) {

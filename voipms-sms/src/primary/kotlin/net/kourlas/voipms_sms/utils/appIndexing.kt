@@ -138,7 +138,7 @@ private fun getMessageBuilder(
 ): MessageBuilder {
     val messageBuilder = Indexables.messageBuilder()
         .setUrl(message.messageUrl)
-        .setName(message.text)
+        .setName(message.text ?: "Media")
         .setIsPartOf(
             Indexables.conversationBuilder()
                 .setUrl(message.conversationUrl)

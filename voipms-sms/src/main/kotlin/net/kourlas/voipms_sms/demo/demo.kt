@@ -30,47 +30,88 @@ fun getConversationsDemoMessages(): List<Message> {
     val messages = mutableListOf<Message>()
     messages.add(
         Message(
-            1, 1, Date().time / 1000, 0,
+            1,
+            1,
+            Date().time / 1000,
+            0,
             "6135559483",
             "6135556019",
             "Have you considered asking him whether they...",
-            0, 1, 0, true
+            null,
+            null,
+            null,
+            0,
+            1,
+            0,
+            true
         )
     )
     messages.add(
         Message(
-            1, 1, Date().time / 1000, 1,
+            1,
+            1,
+            Date().time / 1000,
+            1,
             "6135559483",
             "5145553495",
             "Sounds great!",
-            1, 1, 0
+            null,
+            null,
+            null,
+            1,
+            1,
+            0
         )
     )
     messages.add(
         Message(
-            1, 1, Date().time / 1000 - 138900, 0,
+            1,
+            1,
+            Date().time / 1000 - 138900,
+            0,
             "6135559483",
             "4385557321",
             "Maybe later.",
-            0, 1, 0
+            null,
+            null,
+            null,
+            0,
+            1,
+            0
         )
     )
     messages.add(
         Message(
-            1, 1, Date().time / 1000 - 1002900, 1,
+            1,
+            1,
+            Date().time / 1000 - 1002900,
+            1,
             "6135550942",
             "4165550919",
             "Thank you for your help! It's much appreciated.",
-            0, 1, 0
+            null,
+            null,
+            null,
+            0,
+            1,
+            0
         )
     )
     messages.add(
         Message(
-            1, 1, Date().time / 1000 - 39623700, 1,
+            1,
+            1,
+            Date().time / 1000 - 39623700,
+            1,
             "6135559483",
             "55555",
             "Your verification code is: 123456.",
-            0, 1, 0
+            null,
+            null,
+            null,
+            0,
+            1,
+            0
         )
     )
     return messages
@@ -84,49 +125,89 @@ fun getConversationDemoMessages(bubble: Boolean): List<Message> {
     val messages = mutableListOf<Message>()
     messages.add(
         Message(
-            1, 1, Date().time / 1000 - 120, 1,
+            1,
+            1,
+            Date().time / 1000 - 120,
+            1,
             "6135559483",
             "5145553495",
             "Want to grab some lunch?",
-            1, 1, 0
+            null,
+            null,
+            null,
+            1,
+            1,
+            0
         )
     )
     messages.add(
         Message(
-            1, 1, Date().time / 1000 - 70, 0,
+            1,
+            1,
+            Date().time / 1000 - 70,
+            0,
             "6135559483",
             "5145553495",
             "Sure! How about that new place down the street?",
-            1, 1, 0
+            null,
+            null,
+            null,
+            1,
+            1,
+            0
         )
     )
     messages.add(
         Message(
-            1, 1, Date().time / 1000 - 60, 0,
+            1,
+            1,
+            Date().time / 1000 - 60,
+            0,
             "6135559483",
             "5145553495",
             "Meet you there in a minute.",
-            1, 1, 0
+            null,
+            null,
+            null,
+            1,
+            1,
+            0
         )
     )
     messages.add(
         Message(
-            1, 1, Date().time / 1000 - 30, 1,
+            1,
+            1,
+            Date().time / 1000 - 30,
+            1,
             "6135559483",
             "5145553495",
             "Sounds great!",
-            1, 1, 0
+            null,
+            null,
+            null,
+            1,
+            1,
+            0
         )
     )
     @Suppress("ConstantConditionIf")
     if (BuildConfig.IS_DEMO_SENDING) {
         messages.add(
             Message(
-                1, 1, Date().time / 1000, 0,
+                1,
+                1,
+                Date().time / 1000,
+                0,
                 "6135559483",
                 "5145553495",
                 "Where are you?",
-                1, 0, 1
+                null,
+                null,
+                null,
+                1,
+                0,
+                1
             )
         )
     }
@@ -134,11 +215,19 @@ fun getConversationDemoMessages(bubble: Boolean): List<Message> {
 }
 
 fun getDemoNotification(): Message = Message(
-    1, 1, Date().time / 1000, 1,
+    1,
+    1,
+    Date().time / 1000,
+    1,
     "6135559483",
     "6135551242",
     "Hey, how are you? Haven't seen you in a while.",
-    1, 1, 0
+    null,
+    null,
+    null,
+    1,
+    1,
+    0
 )
 
 fun getNewConversationContacts(

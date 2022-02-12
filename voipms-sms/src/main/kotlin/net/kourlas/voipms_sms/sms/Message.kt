@@ -35,7 +35,11 @@ import java.util.*
  * @param isIncoming Whether or not the message is incoming.
  * @param did The DID associated with the message.
  * @param contact The contact associated with the message.
- * @param text The text of the message.
+ * @param text The text of the message. This may not be present for MMS
+ * messages.
+ * @param media1 The URI to the first media item associated with the message.
+ * @param media2 The URI to the second media item associated with the message.
+ * @param media3 The URI to the third media item associated with the message.
  * @param isUnread Whether or not the message is unread.
  * @param isDelivered Whether or not the message has been delivered.
  * @param isDeliveryInProgress Whether or not the message is currently in
@@ -44,10 +48,20 @@ import java.util.*
  */
 @JsonClass(generateAdapter = true)
 class Message(
-    val databaseId: Long, val voipId: Long?, val date: Date,
-    val isIncoming: Boolean, val did: String, val contact: String,
-    var text: String, val isUnread: Boolean, val isDelivered: Boolean,
-    val isDeliveryInProgress: Boolean, val isDraft: Boolean = false
+    val databaseId: Long,
+    val voipId: Long?,
+    val date: Date,
+    val isIncoming: Boolean,
+    val did: String,
+    val contact: String,
+    var text: String?,
+    val media1: String?,
+    val media2: String?,
+    val media3: String?,
+    val isUnread: Boolean,
+    val isDelivered: Boolean,
+    val isDeliveryInProgress: Boolean,
+    val isDraft: Boolean = false
 ) :
     Comparable<Message> {
 
@@ -75,12 +89,26 @@ class Message(
     constructor(
         databaseId: Long, voipId: Long?, date: Long,
         isIncoming: Long, did: String, contact: String,
-        text: String, isUnread: Long, isDelivered: Long,
+        text: String?,
+        media1: String?,
+        media2: String?,
+        media3: String?, isUnread: Long, isDelivered: Long,
         isDeliveryInProgress: Long, isDraft: Boolean = false
     ) : this(
-        databaseId, voipId, Date(date * 1000), toBoolean(isIncoming), did,
-        contact, text, toBoolean(isUnread), toBoolean(isDelivered),
-        toBoolean(isDeliveryInProgress), isDraft
+        databaseId,
+        voipId,
+        Date(date * 1000),
+        toBoolean(isIncoming),
+        did,
+        contact,
+        text,
+        media1,
+        media2,
+        media3,
+        toBoolean(isUnread),
+        toBoolean(isDelivered),
+        toBoolean(isDeliveryInProgress),
+        isDraft
     )
 
     /**
@@ -89,8 +117,18 @@ class Message(
      */
     constructor(sms: Sms) :
         this(
-            sms.databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
-            sms.contact, sms.text, sms.unread, sms.delivered,
+            sms.databaseId,
+            sms.voipId,
+            sms.date,
+            sms.incoming,
+            sms.did,
+            sms.contact,
+            sms.text,
+            sms.media1,
+            sms.media2,
+            sms.media3,
+            sms.unread,
+            sms.delivered,
             sms.deliveryInProgress
         )
 
@@ -100,8 +138,18 @@ class Message(
      */
     constructor(sms: Sms, databaseId: Long) :
         this(
-            databaseId, sms.voipId, sms.date, sms.incoming, sms.did,
-            sms.contact, sms.text, sms.unread, sms.delivered,
+            databaseId,
+            sms.voipId,
+            sms.date,
+            sms.incoming,
+            sms.did,
+            sms.contact,
+            sms.text,
+            sms.media1,
+            sms.media2,
+            sms.media3,
+            sms.unread,
+            sms.delivered,
             sms.deliveryInProgress
         )
 
@@ -111,8 +159,20 @@ class Message(
      */
     constructor(draft: Draft) :
         this(
-            0, 0, Date().time / 1000, 0, draft.did, draft.contact, draft.text,
-            0, 0, 0, true
+            0,
+            0,
+            Date().time / 1000,
+            0,
+            draft.did,
+            draft.contact,
+            draft.text,
+            null,
+            null,
+            null,
+            0,
+            0,
+            0,
+            true
         )
 
     init {
@@ -120,9 +180,15 @@ class Message(
         validatePhoneNumber(contact)
 
         // Remove training newline if one exists
-        if (isIncoming && this.text.endsWith("\n")) {
-            this.text = text.substring(0, text.length - 1)
+        if (isIncoming) {
+            this.text?.let {
+                if (isIncoming && it.endsWith("\n")) {
+                    this.text = it.substring(0, it.length - 1)
+                }
+            }
         }
+
+
     }
 
     /**
@@ -148,6 +214,24 @@ class Message(
      */
     val conversationUrl: String
         get() = getConversationUrl(conversationId)
+
+    /**
+     * Gets the file name used to store the first image or video in the message.
+     */
+    val getMedia1LocalFileName: String
+        get() = "$did-$contact-$voipId-media1"
+
+    /**
+     * Gets the file name used to store the second image or video in the message.
+     */
+    val getMedia2LocalFileName: String
+        get() = "$did-$contact-$voipId-media2"
+
+    /**
+     * Gets the file name used to store the third image or video in the message.
+     */
+    val getMedia3LocalFileName: String
+        get() = "$did-$contact-$voipId-media3"
 
     fun conversationsViewCompareTo(other: Message): Int {
         if (this.contact == other.contact && this.did == other.did) {
@@ -225,10 +309,20 @@ class Message(
             return 1
         }
 
-        if (this.text > other.text) {
-            return -1
-        } else if (this.text < other.text) {
-            return 1
+        this.text.let {
+            other.text.let { it2 ->
+                if (it != null && it2 != null) {
+                    if (it > it2) {
+                        return -1
+                    } else if (it < it2) {
+                        return 1
+                    }
+                } else if (it != null) {
+                    return -1
+                } else if (it2 != null) {
+                    return 1
+                }
+            }
         }
 
         if (this.isDraft > other.isDraft) {
@@ -275,6 +369,9 @@ class Message(
         if (did != other.did) return false
         if (contact != other.contact) return false
         if (text != other.text) return false
+        if (media1 != other.media1) return false
+        if (media2 != other.media2) return false
+        if (media3 != other.media3) return false
         if (isDraft != other.isDraft) return false
         if (date != other.date) return false
         if (isIncoming != other.isIncoming) return false
@@ -291,6 +388,9 @@ class Message(
         result = 31 * result + did.hashCode()
         result = 31 * result + contact.hashCode()
         result = 31 * result + text.hashCode()
+        result = 31 * result + media1.hashCode()
+        result = 31 * result + media2.hashCode()
+        result = 31 * result + media3.hashCode()
         result = 31 * result + isDraft.hashCode()
         result = 31 * result + date.hashCode()
         result = 31 * result + isIncoming.hashCode()

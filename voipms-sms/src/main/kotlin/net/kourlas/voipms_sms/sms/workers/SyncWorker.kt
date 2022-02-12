@@ -245,7 +245,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                     mapOf(
                         "api_username" to getEmail(applicationContext),
                         "api_password" to getPassword(applicationContext),
-                        "method" to "getSMS",
+                        "method" to "getMMS",
                         "did" to it,
                         "limit" to "1000000",
                         "from" to sdf.format(period.first),
@@ -324,7 +324,10 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         val type: String,
         val did: String,
         val contact: String,
-        val message: String?
+        val message: String?,
+        val col_media1: String?,
+        val col_media2: String?,
+        val col_media3: String?,
     )
 
     @JsonClass(generateAdapter = true)
@@ -364,9 +367,12 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                 sdf.timeZone = TimeZone.getTimeZone("America/New_York")
 
                 try {
-                    if (message.message == null) {
-                        // This is probably an MMS message, which we don't
-                        // support yet.
+                    if (message.message == null
+                        && message.col_media1 == null
+                        && message.col_media2 == null
+                        && message.col_media3 == null
+                    ) {
+                        // This message is malformed.
                         continue
                     }
                     val incomingMessage = IncomingMessage(
@@ -377,7 +383,10 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                         toBoolean(message.type),
                         message.did,
                         message.contact,
-                        message.message
+                        message.message,
+                        message.col_media1,
+                        message.col_media2,
+                        message.col_media3
                     )
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
@@ -437,11 +446,20 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      * @param did The DID associated with the message.
      * @param contact The contact associated with the message.
      * @param text The text of the message.
+     * @param media1 The URI to the first media associated with the message.
+     * @param media2 The URI to the second media associated with the message.
+     * @param media3 The URI to the third media associated with the message.
      */
     data class IncomingMessage(
-        val voipId: Long, val date: Date,
-        val isIncoming: Boolean, val did: String,
-        val contact: String, val text: String
+        val voipId: Long,
+        val date: Date,
+        val isIncoming: Boolean,
+        val did: String,
+        val contact: String,
+        val text: String?,
+        val media1: String?,
+        val media2: String?,
+        val media3: String?
     ) {
         init {
             validatePhoneNumber(did)

@@ -29,13 +29,11 @@ import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
-import android.widget.QuickContactBadge
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
@@ -123,6 +121,7 @@ class ConversationRecyclerViewAdapter(
         updateViewHolderViewHeight(holder, position)
         updateViewHolderContactBadge(holder, position)
         updateViewHolderMessageText(holder, position)
+        updateViewHolderMedia(holder, position)
         updateViewHolderDateText(holder, position)
         updateViewHolderColours(holder, position)
     }
@@ -203,13 +202,20 @@ class ConversationRecyclerViewAdapter(
         val messageItem = messageItems[position]
         val message = messageItem.message
 
+        val text = message.text
+        if (text == null) {
+            holder.smsContainer.visibility = View.GONE
+            return
+        }
+        holder.smsContainer.visibility = View.VISIBLE
+
         val messageText = holder.messageText
         val messageTextBuilder = SpannableStringBuilder()
         messageTextBuilder.append(message.text)
 
         // Highlight text that matches filter
         if (currConstraint != "") {
-            val index = message.text.lowercase(Locale.getDefault()).indexOf(
+            val index = text.lowercase(Locale.getDefault()).indexOf(
                 currConstraint.lowercase(Locale.getDefault())
             )
             if (index != -1) {
@@ -244,6 +250,28 @@ class ConversationRecyclerViewAdapter(
             if (pos != -1) {
                 messageItem.toggle(pos)
             }
+        }
+    }
+
+    /**
+     * Displays the media items from the message on the view holder.
+     *
+     * @param holder The message view holder to use.
+     * @param position The position of the view in the adapter.
+     */
+    private fun updateViewHolderMedia(
+        holder: MessageViewHolder,
+        position: Int
+    ) {
+        val messageItem = messageItems[position]
+        val message = messageItem.message
+
+        val media1Container = holder.media1Container
+        if (message.media1 != null) {
+            Glide.with(activity).load(message.media1).into(holder.media1)
+            media1Container.visibility = View.VISIBLE
+        } else {
+            media1Container.visibility = View.GONE
         }
     }
 
@@ -663,6 +691,9 @@ class ConversationRecyclerViewAdapter(
             }
         internal val smsContainer: View =
             itemView.findViewById(R.id.sms_container)
+        internal val media1Container: View =
+            itemView.findViewById(R.id.media1_container)
+        internal val media1: ImageView = itemView.findViewById(R.id.media1)
         internal val messageText: TextView =
             itemView.findViewById(R.id.message)
         internal val dateText: TextView =
@@ -678,6 +709,14 @@ class ConversationRecyclerViewAdapter(
             smsContainer.isLongClickable = true
             smsContainer.setOnLongClickListener(activity)
             applyRoundedCornersMask(smsContainer)
+
+            // Allow the media image views to be selectable and add rounded
+            // corners to them
+            media1Container.isClickable = true
+            media1Container.setOnClickListener(activity)
+            media1Container.isLongClickable = true
+            media1Container.setOnLongClickListener(activity)
+            applyCircularMask(media1Container)
 
             // Apply circular mask to and remove overlay from contact badge
             // to match Android Messages aesthetic

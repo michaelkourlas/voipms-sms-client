@@ -1,5 +1,6 @@
 package net.kourlas.voipms_sms.database
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import net.kourlas.voipms_sms.database.Database.Companion.DATABASE_VERSION
@@ -18,6 +19,9 @@ import net.kourlas.voipms_sms.database.entities.Sms
         Archived::class,
         Draft::class,
         Deleted::class],
+    autoMigrations = [
+        AutoMigration(from = 10, to = 11)
+    ],
     version = DATABASE_VERSION
 )
 abstract class AbstractDatabase : RoomDatabase() {

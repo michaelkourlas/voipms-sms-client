@@ -32,11 +32,14 @@ data class Sms(
     @ColumnInfo(name = COLUMN_INCOMING) val incoming: Long = 0,
     @ColumnInfo(name = COLUMN_DID) val did: String = "",
     @ColumnInfo(name = COLUMN_CONTACT) val contact: String = "",
-    @ColumnInfo(name = COLUMN_TEXT) val text: String = "",
+    @ColumnInfo(name = COLUMN_TEXT) val text: String? = null,
     @ColumnInfo(name = COLUMN_UNREAD) val unread: Long = 0,
     @ColumnInfo(name = COLUMN_DELIVERED) val delivered: Long = 0,
     @ColumnInfo(name = COLUMN_DELIVERY_IN_PROGRESS)
-    val deliveryInProgress: Long = 0
+    val deliveryInProgress: Long = 0,
+    @ColumnInfo(name = COLUMN_MEDIA1) val media1: String? = null,
+    @ColumnInfo(name = COLUMN_MEDIA2) val media2: String? = null,
+    @ColumnInfo(name = COLUMN_MEDIA3) val media3: String? = null
 ) {
     fun toMessage(): Message = Message(this)
 
@@ -55,5 +58,8 @@ data class Sms(
         const val COLUMN_UNREAD = "Unread"
         const val COLUMN_DELIVERED = "Delivered"
         const val COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress"
+        const val COLUMN_MEDIA1 = "Media1"
+        const val COLUMN_MEDIA2 = "Media2"
+        const val COLUMN_MEDIA3 = "Media3"
     }
 }

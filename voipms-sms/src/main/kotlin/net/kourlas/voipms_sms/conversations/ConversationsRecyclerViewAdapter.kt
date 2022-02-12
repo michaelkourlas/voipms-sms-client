@@ -195,61 +195,76 @@ class ConversationsRecyclerViewAdapter<T>(
         val conversationItem = conversationItems[position]
         val message = conversationItem.message
 
+        var text = message.text
+
         val messageTextBuilder = SpannableStringBuilder()
 
-        // Highlight text that matches filter
-        val index = message.text.lowercase(Locale.getDefault()).indexOf(
-            currConstraint.lowercase(Locale.getDefault())
-        )
-        if (currConstraint != "" && index != -1) {
-            var nonMessageOffset = index
-            if (message.isOutgoing) {
-                // Preface with "You: " if outgoing
-                val youStr = activity.getString(
-                    R.string.conversations_message_you
-                ) + " "
-                messageTextBuilder.insert(0, youStr)
-                nonMessageOffset += youStr.length
-            }
-
-            // If match is in the middle of the string, show partial string
-            var substringOffset = index - 20
-            if (substringOffset > 0) {
-                messageTextBuilder.append("…")
-                nonMessageOffset += 1
-
-                while (message.text[substringOffset] != ' '
-                    && substringOffset < index - 1
-                ) {
-                    substringOffset += 1
+        if (text != null) {
+            // Highlight text that matches filter
+            val index = text.lowercase(Locale.getDefault()).indexOf(
+                currConstraint.lowercase(Locale.getDefault())
+            )
+            if (currConstraint != "" && index != -1) {
+                var nonMessageOffset = index
+                if (message.isOutgoing) {
+                    // Preface with "You: " if outgoing
+                    val youStr = activity.getString(
+                        R.string.conversations_message_you
+                    ) + " "
+                    messageTextBuilder.insert(0, youStr)
+                    nonMessageOffset += youStr.length
                 }
-                substringOffset += 1
-            } else {
-                substringOffset = 0
-            }
 
-            messageTextBuilder.append(message.text.substring(substringOffset))
-            messageTextBuilder.setSpan(
-                BackgroundColorSpan(
-                    ContextCompat.getColor(
-                        activity,
-                        R.color.highlight
+                // If match is in the middle of the string, show partial string
+                var substringOffset = index - 20
+                if (substringOffset > 0) {
+                    messageTextBuilder.append("…")
+                    nonMessageOffset += 1
+
+                    while (text[substringOffset] != ' '
+                        && substringOffset < index - 1
+                    ) {
+                        substringOffset += 1
+                    }
+                    substringOffset += 1
+                } else {
+                    substringOffset = 0
+                }
+
+                messageTextBuilder.append(text.substring(substringOffset))
+                messageTextBuilder.setSpan(
+                    BackgroundColorSpan(
+                        ContextCompat.getColor(
+                            activity,
+                            R.color.highlight
+                        )
+                    ),
+                    nonMessageOffset - substringOffset,
+                    nonMessageOffset - substringOffset + currConstraint.length,
+                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
+                )
+                messageTextBuilder.setSpan(
+                    ForegroundColorSpan(
+                        ContextCompat.getColor(
+                            activity, android.R.color.black
+                        )
+                    ),
+                    nonMessageOffset - substringOffset,
+                    nonMessageOffset - substringOffset + currConstraint.length,
+                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
+                )
+            } else {
+                if (message.isOutgoing) {
+                    // Preface with "You: " if outgoing
+                    messageTextBuilder.append(
+                        activity.getString(
+                            R.string.conversations_message_you
+                        )
                     )
-                ),
-                nonMessageOffset - substringOffset,
-                nonMessageOffset - substringOffset + currConstraint.length,
-                SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
-            )
-            messageTextBuilder.setSpan(
-                ForegroundColorSpan(
-                    ContextCompat.getColor(
-                        activity, android.R.color.black
-                    )
-                ),
-                nonMessageOffset - substringOffset,
-                nonMessageOffset - substringOffset + currConstraint.length,
-                SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
-            )
+                    messageTextBuilder.append(" ")
+                }
+                messageTextBuilder.append(message.text)
+            }
         } else {
             if (message.isOutgoing) {
                 // Preface with "You: " if outgoing
@@ -260,8 +275,19 @@ class ConversationsRecyclerViewAdapter<T>(
                 )
                 messageTextBuilder.append(" ")
             }
-            messageTextBuilder.append(message.text)
+
+            val nonMessageOffset = messageTextBuilder.length
+
+            text = "Media"
+            messageTextBuilder.append(text)
+
+            messageTextBuilder.setSpan(
+                StyleSpan(Typeface.ITALIC), nonMessageOffset,
+                messageTextBuilder.length,
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+            )
         }
+
         holder.messageTextView.text = messageTextBuilder
 
         // Mark text as bold and supporting additional lines if unread
