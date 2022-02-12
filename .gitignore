@@ -9,6 +9,5 @@ captures/
 build/
 release/
 testing/
-voipms-sms/schemas/
 local.properties
 google-services.json
