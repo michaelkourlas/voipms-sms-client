@@ -286,10 +286,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             }
 
             progress = ((i + 1) * 100) / retrievalRequests.size
-            try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 setForeground(getForegroundInfo())
-            } catch (e: Exception) {
-                // Do nothing.
             }
         }
 
