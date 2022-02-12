@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "52bde6b750f8d9b9771fc7c07d71e02d",
+    "identityHash": "b12dc609a741e6050fd02271bfcabb4f",
     "entities": [
       {
         "tableName": "sms",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `VoipId` INTEGER, `Date` INTEGER NOT NULL, `Type` INTEGER NOT NULL, `Did` TEXT NOT NULL, `Contact` TEXT NOT NULL, `Text` TEXT NOT NULL, `Unread` INTEGER NOT NULL, `Delivered` INTEGER NOT NULL, `DeliveryInProgress` INTEGER NOT NULL, `Media1` TEXT NOT NULL, `Media2` TEXT NOT NULL, `Media3` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `VoipId` INTEGER, `Date` INTEGER NOT NULL, `Type` INTEGER NOT NULL, `Did` TEXT NOT NULL, `Contact` TEXT NOT NULL, `Text` TEXT NOT NULL, `Unread` INTEGER NOT NULL, `Delivered` INTEGER NOT NULL, `DeliveryInProgress` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "databaseId",
@@ -66,24 +66,6 @@
             "fieldPath": "deliveryInProgress",
             "columnName": "DeliveryInProgress",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "media1",
-            "columnName": "Media1",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "media2",
-            "columnName": "Media2",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "media3",
-            "columnName": "Media3",
-            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -208,7 +190,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '52bde6b750f8d9b9771fc7c07d71e02d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b12dc609a741e6050fd02271bfcabb4f')"
     ]
   }
 }
