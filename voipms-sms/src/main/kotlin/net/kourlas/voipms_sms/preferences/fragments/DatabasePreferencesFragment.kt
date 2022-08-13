@@ -24,6 +24,7 @@ import android.content.Intent.CATEGORY_OPENABLE
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
@@ -49,7 +50,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                                       ActivityResultContracts.OpenDocument() {
             override fun createIntent(
                 context: Context,
-                input: Array<out String>
+                input: Array<String>
             ): Intent {
                 val intent = super.createIntent(context, input)
                 intent.addCategory(CATEGORY_OPENABLE)
@@ -77,7 +78,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     }
     private val exportActivityResultLauncher =
         registerForActivityResult(object :
-                                      ActivityResultContracts.CreateDocument() {
+                                      CreateDocument("todo/todo") {
             override fun createIntent(
                 context: Context,
                 input: String
