@@ -63,7 +63,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
         }
     private val importListener = Preference.OnPreferenceClickListener {
         try {
-            importActivityResultLauncher.launch(arrayOf("*/*"))
+            importActivityResultLauncher.launch(arrayOf("application/vnd.sqlite3"))
         } catch (_: ActivityNotFoundException) {
             activity?.let {
                 showSnackbar(
@@ -78,13 +78,13 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     }
     private val exportActivityResultLauncher =
         registerForActivityResult(object :
-                                      CreateDocument("todo/todo") {
+                                      CreateDocument("application/vnd.sqlite3") {
             override fun createIntent(
                 context: Context,
                 input: String
             ): Intent {
                 val intent = super.createIntent(context, input)
-                intent.type = "application/octet-stream"
+                intent.type = "application/vnd.sqlite3"
                 return intent
             }
         }) {
