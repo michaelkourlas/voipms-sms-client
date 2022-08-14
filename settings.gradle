@@ -11,9 +11,6 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-
-        // We are still using certain libraries only available on JCenter.
-        jcenter()
     }
 }
 rootProject.name = "VoIP.ms SMS"
