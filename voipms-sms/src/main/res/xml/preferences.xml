@@ -19,12 +19,12 @@
     <androidx.preference.Preference
         android:icon="@drawable/ic_account_box_settings_24dp"
         android:title="@string/preferences_account_category_name">
-        <intent android:action=".preferences.AccountPreferencesActivity" />
+        <intent android:action="net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
         android:icon="@drawable/ic_call_settings_24dp"
         android:title="@string/preferences_dids_category_name">
-        <intent android:action=".preferences.DidsPreferencesActivity" />
+        <intent android:action="net.kourlas.voipms_sms.preferences.activities.DidsPreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
         android:icon="@drawable/ic_message_settings_24dp"
@@ -32,21 +32,26 @@
     <androidx.preference.Preference
         android:icon="@drawable/ic_sync_settings_24dp"
         android:title="@string/preferences_sync_category_name">
-        <intent android:action=".preferences.SynchronizationPreferencesActivity" />
+        <intent android:action="net.kourlas.voipms_sms.preferences.activities.SynchronizationPreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
         android:icon="@drawable/ic_brush_settings_24dp"
         android:title="@string/preferences_appearance_category_name">
-        <intent android:action=".preferences.AppearancePreferencesActivity" />
+        <intent android:action="net.kourlas.voipms_sms.preferences.activities.AppearancePreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
         android:icon="@drawable/ic_router_settings_24dp"
         android:title="@string/preferences_network_category_name">
-        <intent android:action=".preferences.NetworkPreferencesActivity" />
+        <intent android:action="net.kourlas.voipms_sms.preferences.activities.NetworkPreferencesActivity" />
     </androidx.preference.Preference>
     <androidx.preference.Preference
         android:icon="@drawable/ic_storage_settings_24dp"
         android:title="@string/preferences_database_category_name">
-        <intent android:action=".preferences.DatabasePreferencesActivity" />
+        <intent android:action="net.kourlas.voipms_sms.preferences.activities.DatabasePreferencesActivity" />
+    </androidx.preference.Preference>
+    <androidx.preference.Preference
+        android:icon="@drawable/ic_info_outline_primary_surface_24dp"
+        android:title="@string/preferences_about_category_name">
+        <intent android:action="net.kourlas.voipms_sms.preferences.activities.AboutPreferencesActivity" />
     </androidx.preference.Preference>
 </androidx.preference.PreferenceScreen>

@@ -18,10 +18,12 @@
 package net.kourlas.voipms_sms.conversations
 
 import android.annotation.SuppressLint
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Canvas
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
@@ -60,6 +62,7 @@ import net.kourlas.voipms_sms.newConversation.NewConversationActivity
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
+import net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.PreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.SynchronizationPreferencesActivity
 import net.kourlas.voipms_sms.signIn.SignInActivity
@@ -656,9 +659,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
             menu.findItem(R.id.archived_button).isVisible = false
             menu.findItem(R.id.preferences_button).isVisible = false
             menu.findItem(R.id.help_button).isVisible = false
-            menu.findItem(R.id.privacy_button).isVisible = false
-            menu.findItem(R.id.license_button).isVisible = false
-            menu.findItem(R.id.credits_button).isVisible = false
         }
 
         return super.onCreateOptionsMenu(menu)
@@ -687,89 +687,19 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 return true
             }
             R.id.help_button -> {
-                try {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(getString(R.string.help_url))
-                    )
-                    startActivity(intent)
-                } catch (_: ActivityNotFoundException) {
-                    showSnackbar(
-                        this, R.id.coordinator_layout,
-                        getString(
-                            R.string.conversations_fail_web_browser
-                        )
-                    )
-                }
-                return true
-            }
-            R.id.privacy_button -> {
-                try {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(
-                            getString(
-                                R.string.privacy_url
-                            )
-                        )
-                    )
-                    startActivity(intent)
-                } catch (_: ActivityNotFoundException) {
-                    showSnackbar(
-                        this, R.id.coordinator_layout,
-                        getString(
-                            R.string.conversations_fail_web_browser
-                        )
-                    )
-                }
+                val intent =
+                    Intent(this, MarkdownPreferencesActivity::class.java)
+                intent.putExtra(
+                    getString(R.string.preferences_markdown_extra),
+                    "HELP"
+                )
+                startActivity(intent)
                 return true
             }
             R.id.coffee_button -> {
                 lifecycleScope.launch {
                     Billing.getInstance(this@ConversationsActivity)
                         .askForCoffee(this@ConversationsActivity)
-                }
-                return true
-            }
-            R.id.license_button -> {
-                try {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(
-                            getString(
-                                R.string.license_url
-                            )
-                        )
-                    )
-                    startActivity(intent)
-                } catch (_: ActivityNotFoundException) {
-                    showSnackbar(
-                        this, R.id.coordinator_layout,
-                        getString(
-                            R.string.conversations_fail_web_browser
-                        )
-                    )
-                }
-                return true
-            }
-            R.id.credits_button -> {
-                try {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(
-                            getString(
-                                R.string.credits_url
-                            )
-                        )
-                    )
-                    startActivity(intent)
-                } catch (_: ActivityNotFoundException) {
-                    showSnackbar(
-                        this, R.id.coordinator_layout,
-                        getString(
-                            R.string.conversations_fail_web_browser
-                        )
-                    )
                 }
                 return true
             }

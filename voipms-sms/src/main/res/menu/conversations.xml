@@ -36,19 +36,7 @@
         android:title="@string/conversations_action_help"
         app:showAsAction="never" />
     <item
-        android:id="@+id/privacy_button"
-        android:title="@string/conversations_action_privacy"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/coffee_button"
         android:title="@string/conversations_action_coffee"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/license_button"
-        android:title="@string/conversations_action_license"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/credits_button"
-        android:title="@string/conversations_action_credits"
         app:showAsAction="never" />
 </menu>

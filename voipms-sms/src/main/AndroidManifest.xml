@@ -142,7 +142,7 @@
             android:exported="false"
             android:parentActivityName=".preferences.activities.DidsPreferencesActivity">
             <intent-filter>
-                <action android:name=".preferences.DidPreferencesActivity" />
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -152,7 +152,18 @@
             android:label="@string/preferences_did_name"
             android:parentActivityName=".preferences.activities.AccountPreferencesActivity">
             <intent-filter>
-                <action android:name=".preferences.DidsPreferencesActivity" />
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.DidsPreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".preferences.activities.AboutPreferencesActivity"
+            android:exported="false"
+            android:label="@string/preferences_about_category_name"
+            android:launchMode="singleTop"
+            android:parentActivityName=".preferences.activities.PreferencesActivity">
+            <intent-filter>
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.AboutPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -162,7 +173,7 @@
             android:label="@string/preferences_account_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
-                <action android:name=".preferences.AccountPreferencesActivity" />
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -172,7 +183,7 @@
             android:label="@string/preferences_appearance_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
-                <action android:name=".preferences.AppearancePreferencesActivity" />
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.AppearancePreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -182,7 +193,15 @@
             android:label="@string/preferences_database_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
-                <action android:name=".preferences.DatabasePreferencesActivity" />
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.DatabasePreferencesActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".preferences.activities.MarkdownPreferencesActivity"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -192,7 +211,7 @@
             android:label="@string/preferences_network_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
-                <action android:name=".preferences.NetworkPreferencesActivity" />
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.NetworkPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -202,7 +221,7 @@
             android:label="@string/preferences_notifications_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
-                <action android:name=".preferences.NotificationsPreferencesActivity" />
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.NotificationsPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -212,7 +231,7 @@
             android:label="@string/preferences_sync_category_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
             <intent-filter>
-                <action android:name=".preferences.SynchronizationPreferencesActivity" />
+                <action android:name="net.kourlas.voipms_sms.preferences.activities.SynchronizationPreferencesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -221,10 +240,6 @@
             android:exported="false"
             android:label="@string/sign_in_name"
             android:parentActivityName=".preferences.activities.PreferencesActivity">
-            <intent-filter>
-                <action android:name=".signin.SignInActivity" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
 
         <!-- BROADCAST RECEIVERS -->
