@@ -138,6 +138,7 @@
     <string name="preferences_setup_completed_for_version_default_value" translatable="false">0</string>
     <string name="preferences_first_sync_after_sign_in_key" translatable="false">first_sync_after_sign_in</string>
     <string name="preferences_first_run" translatable="false">first_run</string>
+    <string name="preferences_encrypted_file_name" translatable="false">%s_encrypted</string>
 
     <!-- ACTIVITIES -->
 
