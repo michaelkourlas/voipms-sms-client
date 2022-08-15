@@ -24,6 +24,7 @@ import android.os.Build
 import androidx.work.*
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.*
@@ -64,6 +65,8 @@ class NotificationsRegistrationWorker(
                 dids,
                 responses
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logException(e)
         }
@@ -160,6 +163,8 @@ class NotificationsRegistrationWorker(
                 // Do nothing.
             } catch (e: JsonDataException) {
                 logException(e)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 logException(e)
             }
