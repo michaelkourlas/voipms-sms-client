@@ -613,7 +613,9 @@ class Notifications private constructor(private val context: Context) {
             val notificationSound = getNotificationSound(context)
             if (notificationSound != "") {
                 @Suppress("DEPRECATION")
-                notification.setSound(Uri.parse(getNotificationSound(context)))
+                notification.setSound(Uri.parse(notificationSound))
+            } else {
+                notification.setSilent(true)
             }
             @Suppress("DEPRECATION")
             if (getNotificationVibrateEnabled(context)) {

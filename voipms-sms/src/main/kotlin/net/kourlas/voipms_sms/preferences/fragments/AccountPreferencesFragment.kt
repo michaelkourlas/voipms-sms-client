@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2019 Michael Kourlas
+ * Copyright (C) 2017-2022 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package net.kourlas.voipms_sms.preferences.fragments
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.preference.Preference
-import com.takisoft.preferencex.PreferenceFragmentCompat
+import androidx.preference.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.setEmail
@@ -35,24 +35,43 @@ class AccountPreferencesFragment : PreferenceFragmentCompat(),
     override fun onResume() {
         super.onResume()
 
-        // Update preference summaries and behaviours
-        updateSummariesAndHandlers()
+        // Update preference summaries
+        updateSummaries()
     }
 
-    override fun onCreatePreferencesFix(
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
         // Add preferences
         addPreferencesFromResource(R.xml.preferences_account)
 
-        // Add listener for preference changes
-        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
-            this
-        )
+        // Add listeners for preference changes
+        preferenceScreen
+            .sharedPreferences
+            ?.registerOnSharedPreferenceChangeListener(this)
 
-        // Update preference summaries and behaviours
-        updateSummariesAndHandlers()
+        // Assign listeners to preferences
+        for (preference in preferenceScreen.preferences) {
+            when (preference.key) {
+                getString(
+                    R.string.preferences_account_sign_out_key
+                ) -> {
+                    activity?.let { activity ->
+                        preference.onPreferenceClickListener =
+                            Preference.OnPreferenceClickListener {
+                                setEmail(activity, "")
+                                setPassword(activity, "")
+                                activity.finish()
+                                true
+                            }
+                    }
+                }
+            }
+        }
+
+        // Update preference summaries
+        updateSummaries()
     }
 
     override fun onSharedPreferenceChanged(
@@ -63,42 +82,29 @@ class AccountPreferencesFragment : PreferenceFragmentCompat(),
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
         if (isAdded) {
-            // Update preference summary and behaviour
-            updateSummaryAndHandlerForPreference(findPreference(key))
+            updateSummary(findPreference(key))
         }
     }
 
     /**
-     * Updates the summary texts and behaviours for selected preferences.
+     * Updates the summaries for all preferences.
      */
-    private fun updateSummariesAndHandlers() {
-        if (preferenceScreen != null) {
-            for (preference in preferenceScreen.preferences) {
-                // Update preference summary and behaviour
-                updateSummaryAndHandlerForPreference(preference)
-            }
+    private fun updateSummaries() {
+        for (preference in preferenceScreen.preferences) {
+            // Update preference summary
+            updateSummary(preference)
         }
     }
 
     /**
-     * Updates the summary texts and behaviours for the specified preference.
+     * Updates the summary for the specified preference.
      */
-    private fun updateSummaryAndHandlerForPreference(
-        preference: Preference?
-    ) {
-        activity?.let { activity ->
-            if (preference?.key == getString(
-                    R.string.preferences_account_sign_out_key
-                )
-            ) {
-                preference.summary = getEmail(activity)
-                preference.onPreferenceClickListener =
-                    Preference.OnPreferenceClickListener {
-                        setEmail(activity, "")
-                        setPassword(activity, "")
-                        activity.finish()
-                        true
-                    }
+    private fun updateSummary(preference: Preference?) {
+        when (preference?.key) {
+            getString(R.string.preferences_account_sign_out_key) -> {
+                activity?.let { activity ->
+                    preference.summary = getEmail(activity)
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2021 Michael Kourlas
+ * Copyright (C) 2017-2022 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import com.takisoft.preferencex.PreferenceFragmentCompat
+import androidx.preference.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.accountConfigured
@@ -34,11 +34,11 @@ import net.kourlas.voipms_sms.utils.preferences
  * Fragment used to display the app's preferences.
  */
 class PreferencesFragment : PreferenceFragmentCompat() {
-    override fun onCreatePreferencesFix(
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
-        // Populate fragment with preferences defined in XML file
+        // Add preferences
         addPreferencesFromResource(R.xml.preferences)
 
         context?.let {

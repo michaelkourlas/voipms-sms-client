@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2020 Michael Kourlas
+ * Copyright (C) 2020-2022 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,35 +20,16 @@ package net.kourlas.voipms_sms.preferences.fragments
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
-import com.takisoft.preferencex.EditTextPreference
-import com.takisoft.preferencex.PreferenceFragmentCompat
+import androidx.preference.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.preferences
 
 class AppearancePreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    // Preference change handlers
-    private val themePreferenceChangeListener =
-        Preference.OnPreferenceChangeListener { _, newValue ->
-            activity?.let {
-                when (newValue) {
-                    SYSTEM_DEFAULT -> AppCompatDelegate.setDefaultNightMode(
-                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                    )
-                    LIGHT -> AppCompatDelegate.setDefaultNightMode(
-                        AppCompatDelegate.MODE_NIGHT_NO
-                    )
-                    DARK -> AppCompatDelegate.setDefaultNightMode(
-                        AppCompatDelegate.MODE_NIGHT_YES
-                    )
-                }
-            }
-            true
-        }
-
-    override fun onCreatePreferencesFix(
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
@@ -56,28 +37,53 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.preferences_appearance)
 
         // Add listener for preference changes
-        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
-            this
-        )
+        preferenceScreen
+            .sharedPreferences
+            ?.registerOnSharedPreferenceChangeListener(this)
 
-        // Update preferences summaries
+        // Assign listeners to preferences
+        for (preference in preferenceScreen.preferences) {
+            when (preference.key) {
+                getString(R.string.preferences_theme_key) -> {
+                    preference.onPreferenceChangeListener =
+                        Preference.OnPreferenceChangeListener { _, newValue ->
+                            when (newValue) {
+                                SYSTEM_DEFAULT ->
+                                    AppCompatDelegate.setDefaultNightMode(
+                                        AppCompatDelegate
+                                            .MODE_NIGHT_FOLLOW_SYSTEM
+                                    )
+                                LIGHT -> AppCompatDelegate.setDefaultNightMode(
+                                    AppCompatDelegate.MODE_NIGHT_NO
+                                )
+                                DARK -> AppCompatDelegate.setDefaultNightMode(
+                                    AppCompatDelegate.MODE_NIGHT_YES
+                                )
+                            }
+
+                            true
+                        }
+                }
+            }
+        }
+
+        // Update preference summaries
         updateSummaries()
     }
 
     override fun onResume() {
         super.onResume()
 
-        // Update preferences summaries
+        // Update preference summaries
         updateSummaries()
     }
 
     /**
-     * Updates the summary text for all preferences.
+     * Updates the summaries for all preferences.
      */
     private fun updateSummaries() {
         for (preference in preferenceScreen.preferences) {
-            updateSummaryTextForPreference(preference)
-            updateHandlersForPreference(preference)
+            updateSummary(preference)
         }
     }
 
@@ -90,14 +96,14 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
         // this check is therefore required to prevent a crash
         if (isAdded) {
             // Update summary text for changed preference
-            updateSummaryTextForPreference(findPreference(key))
+            updateSummary(findPreference(key))
         }
     }
 
     /**
-     * Updates the summary text for the specified preference.
+     * Updates the summary for the specified preference.
      */
-    private fun updateSummaryTextForPreference(preference: Preference?) {
+    private fun updateSummary(preference: Preference?) {
         if (preference is ListPreference) {
             // Display value of selected element as summary text
             preference.summary = preference.entry
@@ -111,19 +117,6 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
             } else {
                 preference.summary = preference.text
             }
-        }
-    }
-
-    /**
-     * Updates the handlers for the specified preference.
-     */
-    private fun updateHandlersForPreference(preference: Preference) {
-        if (preference.key == getString(
-                R.string.preferences_theme_key
-            )
-        ) {
-            preference.onPreferenceChangeListener =
-                themePreferenceChangeListener
         }
     }
 

@@ -401,6 +401,17 @@ fun setEmail(context: Context, email: String) {
     )
 }
 
+@Deprecated(
+    "Remove when Android versions earlier than Oreo are no longer supported."
+)
+fun setNotificationSound(context: Context, uri: String) {
+    setStringPreference(
+        context,
+        context.getString(R.string.preferences_notifications_sound_key),
+        uri
+    )
+}
+
 fun setFirstSyncAfterSignIn(context: Context, firstSyncAfterSignIn: Boolean) {
     setBooleanPreference(
         context,

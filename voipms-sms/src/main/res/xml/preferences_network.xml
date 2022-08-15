@@ -16,13 +16,13 @@
   -->
 
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <com.takisoft.preferencex.EditTextPreference
+    <androidx.preference.EditTextPreference
         android:defaultValue="@string/preferences_network_connect_timeout_default_value"
         android:icon="@android:color/transparent"
         android:inputType="number"
         android:key="@string/preferences_network_connect_timeout_key"
         android:title="@string/preferences_network_connect_timeout_title" />
-    <com.takisoft.preferencex.EditTextPreference
+    <androidx.preference.EditTextPreference
         android:defaultValue="@string/preferences_network_read_timeout_default_value"
         android:icon="@android:color/transparent"
         android:inputType="number"

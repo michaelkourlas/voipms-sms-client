@@ -150,6 +150,7 @@
             android:name=".preferences.activities.DidsPreferencesActivity"
             android:exported="false"
             android:label="@string/preferences_did_name"
+            android:launchMode="singleTop"
             android:parentActivityName=".preferences.activities.AccountPreferencesActivity">
             <intent-filter>
                 <action android:name="net.kourlas.voipms_sms.preferences.activities.DidsPreferencesActivity" />

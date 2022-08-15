@@ -18,11 +18,11 @@
 package net.kourlas.voipms_sms.preferences.fragments
 
 import android.os.Bundle
-import com.takisoft.preferencex.PreferenceFragmentCompat
+import androidx.preference.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 
 class AboutPreferencesFragment : PreferenceFragmentCompat() {
-    override fun onCreatePreferencesFix(
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018-2021 Michael Kourlas
+ * Copyright (C) 2018-2022 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
-import com.takisoft.preferencex.PreferenceFragmentCompat
+import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
@@ -44,47 +44,31 @@ import net.kourlas.voipms_sms.utils.showSnackbar
  * Fragment used to display the database preferences.
  */
 class DatabasePreferencesFragment : PreferenceFragmentCompat() {
-    // Preference listeners
+    // Preference activity launchers
     private val importActivityResultLauncher =
-        registerForActivityResult(object :
-                                      ActivityResultContracts.OpenDocument() {
-            override fun createIntent(
-                context: Context,
-                input: Array<String>
-            ): Intent {
-                val intent = super.createIntent(context, input)
-                intent.addCategory(CATEGORY_OPENABLE)
-                return intent
-            }
-        }) {
+        registerForActivityResult(
+            object : ActivityResultContracts.OpenDocument() {
+                override fun createIntent(
+                    context: Context,
+                    input: Array<String>
+                ): Intent {
+                    val intent = super.createIntent(context, input)
+                    intent.addCategory(CATEGORY_OPENABLE)
+                    return intent
+                }
+            }) {
             if (it != null) {
                 import(it)
             }
         }
-    private val importListener = Preference.OnPreferenceClickListener {
-        try {
-            importActivityResultLauncher.launch(arrayOf("application/vnd.sqlite3"))
-        } catch (_: ActivityNotFoundException) {
-            activity?.let {
-                showSnackbar(
-                    it, R.id.coordinator_layout,
-                    getString(
-                        R.string.preferences_database_fail_open_document
-                    )
-                )
-            }
-        }
-        true
-    }
     private val exportActivityResultLauncher =
-        registerForActivityResult(object :
-                                      CreateDocument("application/vnd.sqlite3") {
+        registerForActivityResult(object : CreateDocument(SQLITE_MIME_TYPE) {
             override fun createIntent(
                 context: Context,
                 input: String
             ): Intent {
                 val intent = super.createIntent(context, input)
-                intent.type = "application/vnd.sqlite3"
+                intent.type = SQLITE_MIME_TYPE
                 return intent
             }
         }) {
@@ -92,56 +76,75 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 export(it)
             }
         }
-    private val exportListener = Preference.OnPreferenceClickListener {
-        try {
-            exportActivityResultLauncher.launch("sms.db")
-        } catch (_: ActivityNotFoundException) {
-            activity?.let {
-                showSnackbar(
-                    it, R.id.coordinator_layout,
-                    getString(
-                        R.string.preferences_database_fail_create_document
-                    )
-                )
-            }
-        }
-        true
-    }
-    private val cleanUpListener = Preference.OnPreferenceClickListener {
-        cleanUp()
-        true
-    }
-    private val deleteListener = Preference.OnPreferenceClickListener {
-        delete()
-        true
-    }
 
-    override fun onCreatePreferencesFix(
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
         // Add preferences
         addPreferencesFromResource(R.xml.preferences_database)
 
-        // Assign handlers to preferences
+        // Assign listeners to preferences
         for (preference in preferenceScreen.preferences) {
             when (preference.key) {
-                getString(
-                    R.string.preferences_database_import_key
-                ) ->
-                    preference.onPreferenceClickListener = importListener
+                getString(R.string.preferences_database_import_key) ->
+                    preference.onPreferenceClickListener =
+                        Preference.OnPreferenceClickListener {
+                            try {
+                                importActivityResultLauncher.launch(
+                                    arrayOf(
+                                        SQLITE_MIME_TYPE
+                                    )
+                                )
+                            } catch (_: ActivityNotFoundException) {
+                                activity?.let {
+                                    showSnackbar(
+                                        it,
+                                        R.id.coordinator_layout,
+                                        getString(
+                                            R.string.preferences_database_fail_open_document
+                                        )
+                                    )
+                                }
+                            }
+                            true
+                        }
                 getString(
                     R.string.preferences_database_export_key
                 ) ->
-                    preference.onPreferenceClickListener = exportListener
+                    preference.onPreferenceClickListener =
+                        Preference.OnPreferenceClickListener {
+                            try {
+                                exportActivityResultLauncher.launch("sms.db")
+                            } catch (_: ActivityNotFoundException) {
+                                activity?.let {
+                                    showSnackbar(
+                                        it,
+                                        R.id.coordinator_layout,
+                                        getString(
+                                            R.string.preferences_database_fail_create_document
+                                        )
+                                    )
+                                }
+                            }
+                            true
+                        }
                 getString(
                     R.string.preferences_database_clean_up_key
                 ) ->
-                    preference.onPreferenceClickListener = cleanUpListener
+                    preference.onPreferenceClickListener =
+                        Preference.OnPreferenceClickListener {
+                            cleanUp()
+                            true
+                        }
                 getString(
                     R.string.preferences_database_delete_key
                 ) ->
-                    preference.onPreferenceClickListener = deleteListener
+                    preference.onPreferenceClickListener =
+                        Preference.OnPreferenceClickListener {
+                            delete()
+                            true
+                        }
             }
         }
     }
@@ -308,5 +311,9 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
             },
             activity.getString(R.string.cancel), null
         )
+    }
+
+    companion object {
+        private const val SQLITE_MIME_TYPE = "application/vnd.sqlite3"
     }
 }

@@ -72,6 +72,7 @@
     <string name="preferences_notifications_sound_key" translatable="false">sms_notification_ringtone</string>
     <string name="preferences_notifications_sound_title">Sound</string>
     <string name="preferences_notifications_sound_default_value" translatable="false">content://settings/system/notification_sound</string>
+    <string name="preferences_notifications_sound_silent">Silent</string>
     <string name="preferences_notifications_sound_unknown">Unknown ringtone</string>
     <string name="preferences_notifications_sound_unknown_perm">Unknown ringtone (external storage permission denied)</string>
     <string name="preferences_notifications_vibrate_key" translatable="false">sms_notification_vibrate</string>

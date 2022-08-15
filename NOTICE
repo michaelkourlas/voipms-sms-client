@@ -18,8 +18,6 @@ The following dependencies are provided under the Apache License 2.0 (https://ww
 * SecurePreferences and KeystoreTool code from secure-storage-android (https://github.com/adorsys/secure-storage-android)
   Copyright (C) 2017 adorsys GmbH & Co. KG
 
-* preferencex-android (https://github.com/takisoft/preferencex-android)
-
 * Link movement code from Better-Link-Movement-Method (https://github.com/saket/Better-Link-Movement-Method)  
   Copyright 2018 Saket Narayan.
 
