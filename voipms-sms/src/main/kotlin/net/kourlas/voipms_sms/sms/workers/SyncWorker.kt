@@ -250,6 +250,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                         "limit" to "1000000",
                         "from" to sdf.format(period.first),
                         "to" to sdf.format(period.second),
+                        "all_messages" to "1",  // Load both MMS and SMS
                         "timezone" to "-5"
                     ) // -5 corresponds to EDT
                 }
