@@ -106,6 +106,7 @@
 
                 <ImageView
                     android:id="@+id/media1"
+                    android:adjustViewBounds="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
