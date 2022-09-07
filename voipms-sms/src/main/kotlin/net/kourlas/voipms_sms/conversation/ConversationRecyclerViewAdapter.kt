@@ -203,7 +203,7 @@ class ConversationRecyclerViewAdapter(
         val message = messageItem.message
 
         val text = message.text
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             holder.smsContainer.visibility = View.GONE
             return
         }
