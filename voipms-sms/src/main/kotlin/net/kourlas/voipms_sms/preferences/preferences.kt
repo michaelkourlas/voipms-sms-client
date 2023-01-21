@@ -551,16 +551,36 @@ private fun getEncryptedSharedPreferences(context: Context): SharedPreferences {
     val masterKey =
         MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
-    return EncryptedSharedPreferences.create(
-        context,
-        context.getString(
-            R.string.preferences_encrypted_file_name,
-            context.packageName
-        ),
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+    try {
+        return EncryptedSharedPreferences.create(
+            context,
+            context.getString(
+                R.string.preferences_encrypted_file_name,
+                context.packageName
+            ),
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    } catch (e: Exception) {
+        context.getSharedPreferences(
+            context.getString(
+                R.string.preferences_encrypted_file_name,
+                context.packageName
+            ),
+            Context.MODE_PRIVATE
+        ).edit().clear().apply()
+        return EncryptedSharedPreferences.create(
+            context,
+            context.getString(
+                R.string.preferences_encrypted_file_name,
+                context.packageName
+            ),
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
 }
 
 fun removePreference(context: Context, key: String) {
