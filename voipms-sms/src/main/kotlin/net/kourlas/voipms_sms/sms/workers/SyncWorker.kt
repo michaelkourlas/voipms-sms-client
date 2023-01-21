@@ -250,7 +250,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                         "limit" to "1000000",
                         "from" to sdf.format(period.first),
                         "to" to sdf.format(period.second),
-                        "timezone" to "-5"
+                        "timezone" to "-5",
+                        "all_messages" to "1",
                     ) // -5 corresponds to EDT
                 }
                 .mapTo(retrievalRequests) {
