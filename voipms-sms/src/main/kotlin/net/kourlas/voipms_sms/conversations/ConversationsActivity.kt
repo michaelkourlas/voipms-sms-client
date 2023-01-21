@@ -366,15 +366,29 @@ open class ConversationsActivity(val archived: Boolean = false) :
      * Requests the contacts permission.
      */
     private fun setupPermissions() {
+        // Notifications permission is required to send notifications
+        val permissions = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+            && ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+
         // Contacts permission is required to get contact names and photos
         if (ContextCompat.checkSelfPermission(
                 this, android.Manifest.permission.READ_CONTACTS
             )
             != PackageManager.PERMISSION_GRANTED
         ) {
+            permissions.add(android.Manifest.permission.READ_CONTACTS)
+        }
+
+        if (permissions.isNotEmpty()) {
             ActivityCompat.requestPermissions(
-                this, arrayOf(android.Manifest.permission.READ_CONTACTS),
-                PermissionIndex.CONTACTS.ordinal
+                this, permissions.toTypedArray(), 0
             )
         }
     }
@@ -902,32 +916,46 @@ open class ConversationsActivity(val archived: Boolean = false) :
             requestCode, permissions,
             grantResults
         )
-        if (requestCode == PermissionIndex.CONTACTS.ordinal) {
-            permissions.indices
-                .filter {
-                    permissions[it] == android.Manifest.permission.READ_CONTACTS
-                }
-                .forEach {
-                    if (grantResults[it] == PackageManager.PERMISSION_GRANTED) {
-                        // If the permission request was granted, try refreshing
-                        // and loading the contact name and photo
-                        adapter.notifyItemRangeChanged(0, adapter.itemCount)
-                        lifecycleScope.launch(Dispatchers.Default) {
-                            Database.getInstance(applicationContext)
-                                .updateShortcuts()
-                        }
-                    } else {
-                        // Otherwise, show a warning
-                        showPermissionSnackbar(
-                            this,
-                            R.id.coordinator_layout,
-                            getString(
-                                R.string.conversations_perm_denied_contacts
-                            )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.indices.filter {
+                permissions[it] == android.Manifest.permission.POST_NOTIFICATIONS
+            }.forEach {
+                if (grantResults[it] != PackageManager.PERMISSION_GRANTED) {
+                    // Otherwise, show a warning
+                    showPermissionSnackbar(
+                        this, R.id.coordinator_layout, getString(
+                            R.string.conversations_perm_denied_notifications
                         )
-                    }
+                    )
                 }
+            }
         }
+
+        permissions.indices
+            .filter {
+                permissions[it] == android.Manifest.permission.READ_CONTACTS
+            }
+            .forEach {
+                if (grantResults[it] == PackageManager.PERMISSION_GRANTED) {
+                    // If the permission request was granted, try refreshing
+                    // and loading the contact name and photo
+                    adapter.notifyItemRangeChanged(0, adapter.itemCount)
+                    lifecycleScope.launch(Dispatchers.Default) {
+                        Database.getInstance(applicationContext)
+                            .updateShortcuts()
+                    }
+                } else {
+                    // Otherwise, show a warning
+                    showPermissionSnackbar(
+                        this,
+                        R.id.coordinator_layout,
+                        getString(
+                            R.string.conversations_perm_denied_contacts
+                        )
+                    )
+                }
+            }
     }
 
     /**
@@ -1172,15 +1200,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
             // Otherwise, show mark read button
             markReadButton.isVisible = true
             markUnreadButton.isVisible = false
-        }
-    }
-
-    companion object {
-        /**
-         * Used to disambiguate between different permission requests.
-         */
-        private enum class PermissionIndex {
-            CONTACTS
         }
     }
 }
