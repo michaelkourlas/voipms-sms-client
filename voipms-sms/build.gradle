@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-kapt"
+apply plugin: "net.kourlas.oss-licenses-plugin"
 
 android {
     compileSdkVersion 32
@@ -128,7 +129,7 @@ dependencies {
     kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
 }
 
-tasks.whenTaskAdded {task ->
+tasks.whenTaskAdded { task ->
     if (task.name.contains("Fdroid")
         && (task.name.contains("GoogleServices")
             || task.name.contains("Crashlytics")))
@@ -152,6 +153,22 @@ task copyToAssets(type: Copy) {
 
 preBuild.dependsOn copyToAssets
 copyToAssets.dependsOn cleanAssets
+
+android.applicationVariants.all { variant ->
+    def generatePackageLicenses = task "generatePackageLicenses${variant.name.capitalize()}"(type: Exec) {
+        commandLine 'python', '../licenses/packageLicenseParser.py', "${variant.name}"
+    }
+
+    tasks.matching { it.name == "${variant.name}OssLicensesTask" }.all { task ->
+        generatePackageLicenses.dependsOn task
+    }
+
+    tasks.matching { it.name == "generate${variant.name.capitalize()}Assets" }.all { task ->
+        task.dependsOn generatePackageLicenses
+    }
+
+    generatePackageLicenses.dependsOn cleanAssets
+}
 
 apply plugin: "com.google.gms.google-services"
 apply plugin: "com.google.firebase.crashlytics"

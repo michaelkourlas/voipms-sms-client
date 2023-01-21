@@ -201,10 +201,6 @@
         <activity
             android:name=".preferences.activities.MarkdownPreferencesActivity"
             android:exported="false">
-            <intent-filter>
-                <action android:name="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".preferences.activities.NetworkPreferencesActivity"

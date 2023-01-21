@@ -27,7 +27,9 @@
     <androidx.preference.Preference
         android:summary="@string/version"
         android:title="@string/preferences_about_changelog_title">
-        <intent android:action="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
             <extra
                 android:name="@string/preferences_markdown_extra"
                 android:value="CHANGELOG" />
@@ -36,24 +38,39 @@
     <androidx.preference.Preference
         android:summary="@string/preferences_about_license_summary"
         android:title="@string/preferences_about_license_title">
-        <intent android:action="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
             <extra
                 android:name="@string/preferences_markdown_extra"
                 android:value="LICENSE" />
         </intent>
     </androidx.preference.Preference>
     <androidx.preference.Preference android:title="@string/preferences_about_privacy_title">
-        <intent android:action="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
             <extra
                 android:name="@string/preferences_markdown_extra"
                 android:value="PRIVACY" />
         </intent>
     </androidx.preference.Preference>
-    <androidx.preference.Preference android:title="@string/preferences_about_credits_title">
-        <intent android:action="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity">
+    <androidx.preference.Preference android:title="@string/preferences_about_third_party_embedded_title">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
             <extra
                 android:name="@string/preferences_markdown_extra"
-                android:value="CREDITS" />
+                android:value="NOTICE" />
+        </intent>
+    </androidx.preference.Preference>
+    <androidx.preference.Preference android:title="@string/preferences_about_third_party_packages_title">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
+            <extra
+                android:name="@string/preferences_markdown_extra"
+                android:value="PACKAGE_LICENSES" />
         </intent>
     </androidx.preference.Preference>
 </androidx.preference.PreferenceScreen>

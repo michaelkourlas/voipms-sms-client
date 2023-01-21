@@ -26,6 +26,7 @@ class AboutPreferencesFragment : PreferenceFragmentCompat() {
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
+        // Add preferences
         addPreferencesFromResource(R.xml.preferences_about)
     }
 }

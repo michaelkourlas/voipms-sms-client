@@ -105,9 +105,16 @@ class MarkdownPreferencesActivity : AppCompatActivity() {
     companion object {
         enum class DocumentType(val resourceString: Int, val fileName: String) {
             HELP(R.string.conversations_action_help, "HELP.md"),
-            CREDITS(R.string.preferences_about_credits_title, "NOTICE"),
             CHANGELOG(R.string.preferences_about_changelog_title, "CHANGES.md"),
             LICENSE(R.string.preferences_about_license_title, "LICENSE.md"),
+            NOTICE(
+                R.string.preferences_about_third_party_embedded_title,
+                "NOTICE"
+            ),
+            PACKAGE_LICENSES(
+                R.string.preferences_about_third_party_packages_title,
+                "PACKAGE_LICENSES.md"
+            ),
             PRIVACY(R.string.preferences_about_privacy_title, "PRIVACY.md");
 
             companion object {

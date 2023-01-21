@@ -128,7 +128,8 @@
     <string name="preferences_about_license_title">License</string>
     <string name="preferences_about_license_summary">Apache License 2.0</string>
     <string name="preferences_about_privacy_title">Privacy</string>
-    <string name="preferences_about_credits_title">Credits</string>
+    <string name="preferences_about_third_party_embedded_title">Third-party notices (embedded code)</string>
+    <string name="preferences_about_third_party_packages_title">Third-party notices (packages)</string>
 
     <!-- Markdown -->
     <string name="preferences_markdown_extra">net.kourlas.voipms_sms.MARKDOWN_DOCUMENT_TYPE</string>
@@ -386,6 +387,7 @@
 
     <!-- URLS -->
     <string name="github_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client</string>
+    <string name="coffee_url" translatable="false">https://paypal.me/kourlas</string>
 
     <!-- SHORTCUTS -->
     <string name="new_conversation_shortcut_short">Compose</string>
@@ -402,7 +404,7 @@
 
     <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>
-    <string name="copyright">Copyright © 2015–2022 Michael Kourlas and other contributors</string>
+    <string name="copyright">Copyright © 2015–2023 Michael Kourlas</string>
     <string name="version">Version 0.6.23</string>
     <string name="toast_error">Error: %1$s</string>
 </resources>
