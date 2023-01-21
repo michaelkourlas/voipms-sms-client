@@ -29,6 +29,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -180,9 +181,28 @@ class SignInActivity : AppCompatActivity() {
             Database.getInstance(applicationContext).getDids().isNotEmpty()
         }
 
+        setupBack()
         setupToolbar()
         setupTextView()
         setupButton()
+    }
+
+    /**
+     * Sets up the back button handler.
+     */
+    private fun setupBack() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    // Block the back button if appropriate
+                    if (blockFinish()) {
+                        return
+                    }
+
+                    finish()
+                }
+            })
     }
 
     /**
@@ -259,14 +279,6 @@ class SignInActivity : AppCompatActivity() {
 
         val password = findViewById<TextInputEditText>(R.id.password)
         password.isEnabled = enabled
-    }
-
-    override fun onBackPressed() {
-        // Block the back button if appropriate
-        if (blockFinish()) {
-            return
-        }
-        super.onBackPressed()
     }
 
     /**

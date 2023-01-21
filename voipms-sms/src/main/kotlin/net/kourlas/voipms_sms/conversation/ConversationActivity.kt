@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2021 Michael Kourlas
+ * Copyright (C) 2015-2023 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
@@ -158,6 +159,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
         if (!setupDidAndContact(intent)) {
             return
         }
+        setupBack()
         setupToolbar()
         setupRecyclerView()
         setupMessageText()
@@ -320,6 +322,35 @@ open class ConversationActivity(val bubble: Boolean = false) :
         )
 
         return true
+    }
+
+    /**
+     * Sets up the back button handler.
+     */
+    private fun setupBack() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    // Close action mode if visible
+                    actionMode?.let {
+                        it.finish()
+                        return
+                    }
+
+                    // Close the search box if visible
+                    if (::menu.isInitialized) {
+                        val searchItem = menu.findItem(R.id.search_button)
+                        val searchView = searchItem.actionView as SearchView
+                        if (!searchView.isIconified) {
+                            searchItem.collapseActionView()
+                            return
+                        }
+                    }
+
+                    finish()
+                }
+            })
     }
 
     /**
@@ -1248,27 +1279,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // On long click, toggle selected item
         toggleItem(getRecyclerViewContainingItem(view))
         return true
-    }
-
-    override fun onBackPressed() {
-        // Close action mode if visible
-        actionMode?.let {
-            it.finish()
-            return
-        }
-
-        // Close the search box if visible
-        if (::menu.isInitialized) {
-            val searchItem = menu.findItem(R.id.search_button)
-            val searchView = searchItem.actionView as SearchView
-            if (!searchView.isIconified) {
-                searchItem.collapseActionView()
-                return
-            }
-        }
-
-        // Otherwise, do normal back button behaviour
-        super.onBackPressed()
     }
 
     override fun onRequestPermissionsResult(

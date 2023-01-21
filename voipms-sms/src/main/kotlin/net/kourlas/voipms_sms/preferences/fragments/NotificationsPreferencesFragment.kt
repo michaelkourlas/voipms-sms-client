@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018-2022 Michael Kourlas
+ * Copyright (C) 2018-2023 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
@@ -37,11 +38,22 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             context?.let {
-                val uri = result
-                    ?.data
-                    ?.getParcelableExtra<Uri?>(
-                        RingtoneManager.EXTRA_RINGTONE_PICKED_URI
-                    )
+                @Suppress("DEPRECATION")
+                val uri =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        result
+                            ?.data
+                            ?.getParcelableArrayListExtra(
+                                RingtoneManager.EXTRA_RINGTONE_PICKED_URI,
+                                Uri::class.java
+                            )
+                    } else {
+                        result
+                            ?.data
+                            ?.getParcelableArrayListExtra<Uri?>(
+                                RingtoneManager.EXTRA_RINGTONE_PICKED_URI
+                            )
+                    }
                 if (uri != null) {
                     @Suppress("DEPRECATION")
                     setNotificationSound(it, uri.toString())

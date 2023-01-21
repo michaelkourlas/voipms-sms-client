@@ -32,6 +32,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
@@ -177,11 +178,41 @@ open class ConversationsActivity(val archived: Boolean = false) :
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
+        setupBack()
         setupToolbar()
         setupRecyclerViewAndSwipeRefreshLayout()
         setupNewConversationButton()
         setupPermissions()
         setupNavigationView()
+    }
+
+    /**
+     * Sets up the back button handler.
+     */
+    private fun setupBack() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    // Close action mode if visible
+                    actionMode?.let {
+                        it.finish()
+                        return
+                    }
+
+                    // Close the search box if visible
+                    if (::menu.isInitialized) {
+                        val searchItem = menu.findItem(R.id.search_button)
+                        val searchView = searchItem.actionView as SearchView
+                        if (!searchView.isIconified) {
+                            searchItem.collapseActionView()
+                            return
+                        }
+                    }
+
+                    finish()
+                }
+            })
     }
 
     /**
@@ -860,27 +891,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
         // On long click, toggle selected item
         toggleItem(view)
         return true
-    }
-
-    override fun onBackPressed() {
-        // Close action mode if visible
-        actionMode?.let {
-            it.finish()
-            return
-        }
-
-        // Close the search box if visible
-        if (::menu.isInitialized) {
-            val searchItem = menu.findItem(R.id.search_button)
-            val searchView = searchItem.actionView as SearchView
-            if (!searchView.isIconified) {
-                searchItem.collapseActionView()
-                return
-            }
-        }
-
-        // Otherwise, do normal back button behaviour
-        super.onBackPressed()
     }
 
     override fun onRequestPermissionsResult(
