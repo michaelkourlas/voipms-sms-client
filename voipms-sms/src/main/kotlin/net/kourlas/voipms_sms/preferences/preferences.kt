@@ -1,6 +1,9 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2020 Michael Kourlas
+ * Copyright (C) 2017-2022 Michael Kourlas
+ *
+ * Portions copyright (C) 2017 adorsys GmbH & Co. KG (taken from
+ * SecurePreferences.java and KeystoreTool.java)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +21,21 @@
 package net.kourlas.voipms_sms.preferences
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
+import android.util.Base64
 import androidx.preference.PreferenceManager
-import de.adorsys.android.securestoragelibrary.SecurePreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
+import java.io.ByteArrayInputStream
+import java.security.KeyStore
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.crypto.Cipher
+import javax.crypto.CipherInputStream
 
 private val securePreferencesLock = Object()
 
@@ -100,32 +112,11 @@ fun getDids(
     return set
 }
 
-fun getEmail(context: Context): String {
-    val email = getSecureStringPreference(
-        context,
-        context.getString(R.string.preferences_account_email_key),
-        null
-    ) ?: ""
-    if (email == "") {
-        val emailAtOldStorageLocation = getStringPreference(
-            context,
-            context.getString(R.string.preferences_account_email_key),
-            ""
-        )
-        if (emailAtOldStorageLocation != "") {
-            // If the email is present at the old storage location, move it to
-            // the secure preferences (which use the Android keystore)
-            setEmail(context, emailAtOldStorageLocation)
-            removePreference(
-                context, context.getString(
-                    R.string.preferences_account_email_key
-                )
-            )
-        }
-        return emailAtOldStorageLocation
-    }
-    return email
-}
+fun getEmail(context: Context): String = getSecureStringPreference(
+    context,
+    context.getString(R.string.preferences_account_email_key),
+    ""
+)
 
 fun getFirstSyncAfterSignIn(context: Context): Boolean =
     getBooleanPreference(
@@ -190,32 +181,11 @@ fun getNotificationSound(context: Context): String =
         )
     )
 
-fun getPassword(context: Context): String {
-    val password = getSecureStringPreference(
-        context,
-        context.getString(R.string.preferences_account_password_key),
-        null
-    ) ?: ""
-    if (password == "") {
-        val passwordAtOldStorageLocation = getStringPreference(
-            context,
-            context.getString(R.string.preferences_account_password_key),
-            ""
-        )
-        if (passwordAtOldStorageLocation != "") {
-            // If the password is present at the old storage location, move it
-            // to the secure preferences (which use the Android keystore)
-            setPassword(context, passwordAtOldStorageLocation)
-            removePreference(
-                context, context.getString(
-                    R.string.preferences_account_password_key
-                )
-            )
-        }
-        return passwordAtOldStorageLocation
-    }
-    return password
-}
+fun getPassword(context: Context): String = getSecureStringPreference(
+    context,
+    context.getString(R.string.preferences_account_password_key),
+    ""
+)
 
 fun getReadTimeout(context: Context): Int =
     getStringPreference(
@@ -431,6 +401,17 @@ fun setEmail(context: Context, email: String) {
     )
 }
 
+@Deprecated(
+    "Remove when Android versions earlier than Oreo are no longer supported."
+)
+fun setNotificationSound(context: Context, uri: String) {
+    setStringPreference(
+        context,
+        context.getString(R.string.preferences_notifications_sound_key),
+        uri
+    )
+}
+
 fun setFirstSyncAfterSignIn(context: Context, firstSyncAfterSignIn: Boolean) {
     setBooleanPreference(
         context,
@@ -485,122 +466,218 @@ fun setRawSyncInterval(context: Context, string: String) {
 @Suppress("SameParameterValue")
 private fun getSecureStringPreference(
     context: Context, key: String,
-    default: String?
-): String? {
-    synchronized(securePreferencesLock) {
-        return SecurePreferences.getStringValue(context, key, default)
-    }
+    default: String
+) = synchronized(securePreferencesLock) {
+    getEncryptedSharedPreferences(context.applicationContext).getString(
+        key,
+        null
+    ) ?: default
 }
 
 private fun getBooleanPreference(
     context: Context, key: String,
     default: Boolean
 ): Boolean {
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+    return PreferenceManager.getDefaultSharedPreferences(
         context.applicationContext
-    )
-    return sharedPreferences.getBoolean(key, default)
+    ).getBoolean(key, default)
 }
 
 private fun getLongPreference(
     context: Context, key: String,
     default: Long
 ): Long {
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+    return PreferenceManager.getDefaultSharedPreferences(
         context.applicationContext
-    )
-    return sharedPreferences.getLong(key, default)
+    ).getLong(key, default)
 }
 
 private fun getStringPreference(
     context: Context, key: String,
     default: String
 ): String {
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+    return PreferenceManager.getDefaultSharedPreferences(
         context.applicationContext
-    )
-    return sharedPreferences.getString(key, null) ?: default
+    ).getString(key, null) ?: default
 }
 
 private fun getStringSetPreference(
     context: Context, key: String,
     default: Set<String>
 ): Set<String> {
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+    return PreferenceManager.getDefaultSharedPreferences(
         context.applicationContext
-    )
-    return sharedPreferences.getStringSet(key, null) ?: default
+    ).getStringSet(key, null) ?: default
 }
 
 private fun setBooleanPreference(
     context: Context, key: String,
     value: Boolean
 ) {
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-        context.applicationContext
-    )
-    val editor = sharedPreferences.edit()
-    with(editor) {
-        putBoolean(key, value)
-        apply()
-    }
+    PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        .edit().putBoolean(key, value).apply()
 }
 
 private fun setSecureStringPreference(
     context: Context, key: String,
     value: String
-) {
-    synchronized(securePreferencesLock) {
-        SecurePreferences.setValue(context, key, value)
-    }
+) = synchronized(securePreferencesLock) {
+    getEncryptedSharedPreferences(context.applicationContext).edit()
+        .putString(key, value).apply()
 }
 
 private fun setStringPreference(
     context: Context, key: String,
     value: String
 ) {
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-        context.applicationContext
-    )
-    val editor = sharedPreferences.edit()
-    with(editor) {
-        putString(key, value)
-        apply()
-    }
+    PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        .edit().putString(key, value).apply()
 }
 
 private fun setLongPreference(context: Context, key: String, value: Long) {
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-        context.applicationContext
-    )
-    val editor = sharedPreferences.edit()
-    with(editor) {
-        putLong(key, value)
-        apply()
-    }
+    PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        .edit().putLong(key, value).apply()
 }
 
 private fun setStringSetPreference(
     context: Context, key: String,
     value: Set<String>
 ) {
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-        context.applicationContext
+    PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        .edit().putStringSet(key, value).apply()
+}
+
+private fun getEncryptedSharedPreferences(context: Context): SharedPreferences {
+    val masterKey =
+        MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+    return EncryptedSharedPreferences.create(
+        context,
+        context.getString(
+            R.string.preferences_encrypted_file_name,
+            context.packageName
+        ),
+        masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
-    val editor = sharedPreferences.edit()
-    with(editor) {
-        putStringSet(key, value)
-        apply()
-    }
 }
 
 fun removePreference(context: Context, key: String) {
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-        context.applicationContext
+    PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        .edit().remove(key).apply()
+}
+
+private const val LEGACY_KEYSTORE_TYPE = "AndroidKeyStore"
+private const val LEGACY_SECURE_SHARED_PREFERENCES_NAME = "SecurePreferences"
+private const val LEGACY_KEY_CIPHER_JELLYBEAN_PROVIDER = "AndroidOpenSSL"
+private const val LEGACY_KEY_CIPHER_MARSHMALLOW_PROVIDER =
+    "AndroidKeyStoreBCWorkaround"
+private const val LEGACY_KEY_TRANSFORMATION_ALGORITHM = "RSA/ECB/PKCS1Padding"
+private const val LEGACY_KEY_ALIAS = "adorsysKeyPair"
+
+fun migrateLegacySecurePreferences(context: Context) = synchronized(
+    securePreferencesLock
+) {
+    // These are the preferences to migrate.
+    val preferenceKeys = listOf(
+        context.getString(R.string.preferences_account_email_key),
+        context.getString(R.string.preferences_account_password_key)
     )
-    val editor = sharedPreferences.edit()
-    with(editor) {
-        editor.remove(key)
-        apply()
+
+    for (preferenceKey in preferenceKeys) {
+        if (getEncryptedSharedPreferences(context).getString(
+                preferenceKey,
+                null
+            ) != null
+        ) {
+            // Migration is not required.
+            continue
+        }
+
+        // First, check whether the preference is stored in plain-text. If so,
+        // migrate it to EncryptedSharedPreferences. We will remove the old
+        // preference later on.
+        val plainTextPreference =
+            getStringPreference(context, preferenceKey, "")
+        if (plainTextPreference != "") {
+            getEncryptedSharedPreferences(context).edit()
+                .putString(preferenceKey, plainTextPreference).apply()
+            continue
+        }
+
+        // Next, check whether the preference is stored in the
+        // secure-storage-android SharedPreferences. If so, migrate it to
+        // EncryptedSharedPreferences. We will remove the old preference later
+        // on.
+        try {
+            // Load the private key used by secure-storage-android from the
+            // keystore.
+            val keyStore = KeyStore.getInstance(LEGACY_KEYSTORE_TYPE)
+            keyStore.load(null)
+            val privateKey = keyStore.getKey(LEGACY_KEY_ALIAS, null) ?: continue
+
+            // Extract the encrypted value.
+            val encryptedValue = context
+                .getSharedPreferences(
+                    LEGACY_SECURE_SHARED_PREFERENCES_NAME,
+                    Context.MODE_PRIVATE
+                ).getString(preferenceKey, null)
+            if (encryptedValue == null || encryptedValue == "") {
+                continue
+            }
+
+            // Decrypt the encrypted value.
+            val cipher = if (VERSION.SDK_INT >= VERSION_CODES.M) {
+                Cipher.getInstance(
+                    LEGACY_KEY_TRANSFORMATION_ALGORITHM,
+                    LEGACY_KEY_CIPHER_MARSHMALLOW_PROVIDER
+                )
+            } else {
+                Cipher.getInstance(
+                    LEGACY_KEY_TRANSFORMATION_ALGORITHM,
+                    LEGACY_KEY_CIPHER_JELLYBEAN_PROVIDER
+                )
+            }
+            cipher.init(Cipher.DECRYPT_MODE, privateKey)
+
+            val decryptedValue = CipherInputStream(
+                ByteArrayInputStream(
+                    Base64.decode(
+                        encryptedValue,
+                        Base64.DEFAULT
+                    )
+                ), cipher
+            ).bufferedReader().use { it.readText() }
+            getEncryptedSharedPreferences(context).edit()
+                .putString(preferenceKey, decryptedValue).apply()
+            continue
+        } catch (e: Exception) {
+            // Do nothing.
+        }
+    }
+
+    // Remove any plain-text preferences. Delete the secure-storage-android
+    // SharedPreferences and the key used to encrypt and decrypt them.
+    try {
+        for (preferenceKey in preferenceKeys) {
+            removePreference(context, preferenceKey)
+        }
+
+        context.getSharedPreferences(
+            LEGACY_SECURE_SHARED_PREFERENCES_NAME,
+            Context.MODE_PRIVATE
+        ).edit().clear().apply()
+        if (VERSION.SDK_INT >= VERSION_CODES.N) {
+            context.deleteSharedPreferences(
+                LEGACY_SECURE_SHARED_PREFERENCES_NAME
+            )
+        }
+
+        val keyStore = KeyStore.getInstance(LEGACY_KEYSTORE_TYPE)
+        keyStore.load(null)
+        keyStore.deleteEntry(LEGACY_KEY_ALIAS)
+    } catch (e: Exception) {
+        // Do nothing.
     }
 }

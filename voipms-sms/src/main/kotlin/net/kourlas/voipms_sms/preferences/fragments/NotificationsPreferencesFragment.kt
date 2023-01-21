@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018-2019 Michael Kourlas
+ * Copyright (C) 2018-2023 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,48 +17,120 @@
 
 package net.kourlas.voipms_sms.preferences.fragments
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
-import com.takisoft.preferencex.PreferenceFragmentCompat
-import com.takisoft.preferencex.RingtonePreference
+import androidx.preference.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.preferences.getNotificationSound
+import net.kourlas.voipms_sms.preferences.setNotificationSound
 import net.kourlas.voipms_sms.utils.preferences
 
 class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    override fun onCreatePreferencesFix(
+    private val ringtoneActivityResultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            context?.let {
+                @Suppress("DEPRECATION")
+                val uri =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        result
+                            ?.data
+                            ?.getParcelableArrayListExtra(
+                                RingtoneManager.EXTRA_RINGTONE_PICKED_URI,
+                                Uri::class.java
+                            )
+                    } else {
+                        result
+                            ?.data
+                            ?.getParcelableArrayListExtra<Uri?>(
+                                RingtoneManager.EXTRA_RINGTONE_PICKED_URI
+                            )
+                    }
+                if (uri != null) {
+                    @Suppress("DEPRECATION")
+                    setNotificationSound(it, uri.toString())
+                } else {
+                    @Suppress("DEPRECATION")
+                    setNotificationSound(it, "")
+                }
+            }
+        }
+
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
-        // Add preferences
-        addPreferencesFromResource(R.xml.preferences_notifications)
+        context?.let {
+            // Add preferences
+            addPreferencesFromResource(R.xml.preferences_notifications)
 
-        // Add listener for preference changes
-        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
-            this
-        )
+            // Add listener for preference changes
+            preferenceScreen
+                .sharedPreferences
+                ?.registerOnSharedPreferenceChangeListener(this)
 
-        // Update preferences summaries
-        updateSummaries()
+            // Add listeners to preferences
+            for (preference in preferenceScreen.preferences) {
+                when (preference.key) {
+                    getString(R.string.preferences_notifications_sound_key) ->
+                        preference.onPreferenceClickListener =
+                            Preference.OnPreferenceClickListener {
+                                context?.let {
+                                    val intent = Intent(
+                                        RingtoneManager.ACTION_RINGTONE_PICKER
+                                    )
+                                    intent.putExtra(
+                                        RingtoneManager.EXTRA_RINGTONE_TYPE,
+                                        RingtoneManager.TYPE_NOTIFICATION
+                                    )
+
+                                    @Suppress("DEPRECATION")
+                                    val uri = getNotificationSound(it)
+                                    if (uri != "") {
+                                        @Suppress("DEPRECATION")
+                                        intent.putExtra(
+                                            RingtoneManager
+                                                .EXTRA_RINGTONE_EXISTING_URI,
+                                            Uri.parse(
+                                                getNotificationSound(it)
+                                            )
+                                        )
+                                    }
+                                    ringtoneActivityResultLauncher.launch(
+                                        intent
+                                    )
+                                }
+                                true
+                            }
+                }
+            }
+
+            // Update preference summaries
+            updateSummaries()
+        }
     }
 
     override fun onResume() {
         super.onResume()
 
-        // Update preferences summaries
+        // Update preference summaries
         updateSummaries()
     }
 
     /**
-     * Updates the summary text for all preferences.
+     * Updates the summaries for all preferences.
      */
     fun updateSummaries() {
         for (preference in preferenceScreen.preferences) {
-            updateSummaryTextForPreference(preference)
+            updateSummary(preference)
         }
     }
 
@@ -70,23 +142,28 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
         if (isAdded) {
-            // Update summary text for changed preference
-            updateSummaryTextForPreference(findPreference(key))
+            updateSummary(findPreference(key))
         }
     }
 
     /**
-     * Updates the summary text for the specified preference.
+     * Updates the summary for the specified preference.
      */
-    private fun updateSummaryTextForPreference(preference: Preference?) {
+    private fun updateSummary(preference: Preference?) {
         context?.let {
-            if (preference is RingtonePreference) {
+            if (preference?.key == getString(
+                    R.string.preferences_notifications_sound_key
+                )
+            ) {
                 // Display selected notification sound as summary text for
                 // notification setting
                 @Suppress("DEPRECATION")
                 val notificationSound = getNotificationSound(it)
                 if (notificationSound == "") {
-                    preference.summary = "None"
+                    preference.summary =
+                        getString(
+                            R.string.preferences_notifications_sound_silent
+                        )
                 } else {
                     try {
                         val ringtone = RingtoneManager.getRingtone(
@@ -103,7 +180,8 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
                         }
                     } catch (ex: SecurityException) {
                         preference.summary = getString(
-                            R.string.preferences_notifications_sound_unknown_perm
+                            R.string
+                                .preferences_notifications_sound_unknown_perm
                         )
                     }
                 }

@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2021 Michael Kourlas
+ * Copyright (C) 2017-2022 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import android.widget.CompoundButton
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
-import com.takisoft.preferencex.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
@@ -35,9 +35,7 @@ import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.utils.*
 
-class DidPreferencesFragment : PreferenceFragmentCompat(),
-    CompoundButton.OnCheckedChangeListener {
-    // Did
+class DidPreferencesFragment : PreferenceFragmentCompat() {
     private lateinit var did: String
 
     // Broadcast receivers
@@ -77,40 +75,7 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
             }
         }
 
-    override fun onCheckedChanged(
-        buttonView: CompoundButton?,
-        isChecked: Boolean
-    ) {
-        activity?.let {
-            if (!::did.isInitialized) {
-                return
-            }
-
-            // When enabled switch is checked or unchecked, enable or
-            // disable and check or uncheck the additional switches as well
-            val dids = if (isChecked) {
-                getDids(it).plus(did)
-            } else {
-                getDids(it).minus(did)
-            }
-            setDids(it, dids)
-
-            if (dids.isNotEmpty()) {
-                // Re-register for push notifications when DIDs change
-                enablePushNotifications(
-                    it.applicationContext,
-                    activityToShowError = it
-                )
-            }
-            lifecycleScope.launch(Dispatchers.Default) {
-                replaceIndex(it)
-            }
-
-            updatePreferences()
-        }
-    }
-
-    override fun onCreatePreferencesFix(
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
@@ -136,7 +101,42 @@ class DidPreferencesFragment : PreferenceFragmentCompat(),
             val enabledSwitch = it.findViewById<SwitchCompat>(
                 R.id.enabled_switch
             )
-            enabledSwitch.setOnCheckedChangeListener(this)
+            enabledSwitch.setOnCheckedChangeListener(
+                object :
+                    CompoundButton.OnCheckedChangeListener {
+                    override fun onCheckedChanged(
+                        buttonView: CompoundButton?,
+                        isChecked: Boolean
+                    ) {
+                        if (!::did.isInitialized) {
+                            return
+                        }
+
+                        // When enabled switch is checked or unchecked, enable
+                        // or disable and check or uncheck the additional
+                        // switches as well
+                        val dids = if (isChecked) {
+                            getDids(it).plus(did)
+                        } else {
+                            getDids(it).minus(did)
+                        }
+                        setDids(it, dids)
+
+                        if (dids.isNotEmpty()) {
+                            // Re-register for push notifications when DIDs
+                            // change
+                            enablePushNotifications(
+                                it.applicationContext,
+                                activityToShowError = it
+                            )
+                        }
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            replaceIndex(it)
+                        }
+
+                        updatePreferences()
+                    }
+                })
         }
     }
 

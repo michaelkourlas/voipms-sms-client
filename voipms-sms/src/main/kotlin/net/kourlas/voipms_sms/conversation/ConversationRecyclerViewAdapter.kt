@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2015-2021 Michael Kourlas
+ * Copyright (C) 2015-2023 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,10 @@ class ConversationRecyclerViewAdapter(
         }
         messageText.text = messageTextBuilder
 
-        Linkify.addLinks(messageText, Linkify.ALL)
+        Linkify.addLinks(
+            messageText,
+            Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS or Linkify.WEB_URLS
+        )
         messageText.movementMethod = null
         (messageText as MessageTextView).messageLongClickListener = {
             val pos = messageItems.indexOf(messageItem)

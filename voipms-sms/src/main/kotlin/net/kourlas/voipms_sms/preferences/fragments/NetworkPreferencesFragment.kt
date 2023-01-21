@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018-2019 Michael Kourlas
+ * Copyright (C) 2018-2022 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ package net.kourlas.voipms_sms.preferences.fragments
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
-import com.takisoft.preferencex.EditTextPreference
-import com.takisoft.preferencex.PreferenceFragmentCompat
+import androidx.preference.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.utils.preferences
 
 class NetworkPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    override fun onCreatePreferencesFix(
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
@@ -35,27 +35,27 @@ class NetworkPreferencesFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.preferences_network)
 
         // Add listener for preference changes
-        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
-            this
-        )
+        preferenceScreen
+            .sharedPreferences
+            ?.registerOnSharedPreferenceChangeListener(this)
 
-        // Update preferences summaries
+        // Update preference summaries
         updateSummaries()
     }
 
     override fun onResume() {
         super.onResume()
 
-        // Update preferences summaries
+        // Update preference summaries
         updateSummaries()
     }
 
     /**
-     * Updates the summary text for all preferences.
+     * Updates the summaries for all preferences.
      */
     private fun updateSummaries() {
         for (preference in preferenceScreen.preferences) {
-            updateSummaryTextForPreference(preference)
+            updateSummary(preference)
         }
     }
 
@@ -67,15 +67,14 @@ class NetworkPreferencesFragment : PreferenceFragmentCompat(),
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
         if (isAdded) {
-            // Update summary text for changed preference
-            updateSummaryTextForPreference(findPreference(key))
+            updateSummary(findPreference(key))
         }
     }
 
     /**
-     * Updates the summary text for the specified preference.
+     * Updates the summary for the specified preference.
      */
-    private fun updateSummaryTextForPreference(preference: Preference?) {
+    private fun updateSummary(preference: Preference?) {
         if (preference is EditTextPreference) {
             // Display value of preference as summary text
             if (preference.key == getString(

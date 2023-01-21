@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2018-2020 Michael Kourlas
+ * Copyright (C) 2018-2022 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,31 +17,23 @@
 
 package net.kourlas.voipms_sms.preferences.fragments
 
+import android.app.DatePickerDialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.preference.ListPreference
 import androidx.preference.Preference
-import com.takisoft.preferencex.PreferenceFragmentCompat
+import androidx.preference.PreferenceFragmentCompat
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.preferences.getStartDate
+import net.kourlas.voipms_sms.preferences.setStartDate
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.preferences
+import java.text.SimpleDateFormat
+import java.util.*
 
 class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    // Preference change handlers
-    private val syncIntervalPreferenceChangeListener =
-        Preference.OnPreferenceChangeListener { _, newValue ->
-            activity?.let {
-                SyncWorker.performFullSynchronization(
-                    it,
-                    customPeriod = (newValue as String).toDouble(),
-                    scheduleOnly = true
-                )
-            }
-            true
-        }
-
-    override fun onCreatePreferencesFix(
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
@@ -49,28 +41,74 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.preferences_synchronization)
 
         // Add listener for preference changes
-        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(
-            this
-        )
+        preferenceScreen
+            .sharedPreferences
+            ?.registerOnSharedPreferenceChangeListener(this)
 
-        // Update preference summaries and handlers
-        updateSummariesAndHandlers()
+        // Add listeners to preferences
+        for (preference in preferenceScreen.preferences) {
+            when (preference.key) {
+                getString(R.string.preferences_sync_start_date_key) ->
+                    preference.onPreferenceClickListener =
+                        Preference.OnPreferenceClickListener {
+                            context?.let {
+                                val calendar = Calendar.getInstance()
+                                calendar.time = getStartDate(it)
+
+                                val dialog = DatePickerDialog(
+                                    it,
+                                    { _, year, month, dayOfMonth ->
+                                        val newCalendar = Calendar.getInstance()
+                                        newCalendar.clear()
+                                        newCalendar.set(Calendar.YEAR, year)
+                                        newCalendar.set(Calendar.MONTH, month)
+                                        newCalendar.set(
+                                            Calendar.DAY_OF_MONTH,
+                                            dayOfMonth
+                                        )
+                                        setStartDate(it, newCalendar.time)
+                                    },
+                                    calendar.get(Calendar.YEAR),
+                                    calendar.get(Calendar.MONTH),
+                                    calendar.get(Calendar.DAY_OF_MONTH)
+                                )
+                                dialog.show()
+                            }
+                            true
+                        }
+                getString(R.string.preferences_sync_interval_key) ->
+                    preference.onPreferenceChangeListener =
+                        Preference.OnPreferenceChangeListener { _, newValue ->
+                            activity?.let {
+                                SyncWorker.performFullSynchronization(
+                                    it,
+                                    customPeriod = (newValue as String)
+                                        .toDouble(),
+                                    scheduleOnly = true
+                                )
+                            }
+                            true
+                        }
+            }
+        }
+
+        // Update preference summaries
+        updateSummaries()
     }
 
     override fun onResume() {
         super.onResume()
 
-        // Update preference summaries and handlers
-        updateSummariesAndHandlers()
+        // Update preference summaries
+        updateSummaries()
     }
 
     /**
-     * Updates the summaries and handlers for all preferences.
+     * Updates the summaries for all preferences.
      */
-    private fun updateSummariesAndHandlers() {
+    private fun updateSummaries() {
         for (preference in preferenceScreen.preferences) {
-            updateSummaryTextForPreference(preference)
-            updateHandlersForPreference(preference)
+            updateSummary(preference)
         }
     }
 
@@ -82,31 +120,27 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
         if (isAdded) {
-            // Update summary text for changed preference
-            updateSummaryTextForPreference(findPreference(key))
+            updateSummary(findPreference(key))
         }
     }
 
     /**
-     * Updates the summary text and handler for the specified preference.
+     * Updates the summary for the specified preference.
      */
-    private fun updateSummaryTextForPreference(preference: Preference?) {
-        if (preference is ListPreference) {
-            // Display value of selected element as summary text
-            preference.summary = preference.entry
-        }
-    }
-
-    /**
-     * Updates the handlers for the specified preference.
-     */
-    private fun updateHandlersForPreference(preference: Preference) {
-        if (preference.key == getString(
-                R.string.preferences_sync_interval_key
-            )
-        ) {
-            preference.onPreferenceChangeListener =
-                syncIntervalPreferenceChangeListener
+    private fun updateSummary(preference: Preference?) {
+        context?.let {
+            if (preference is ListPreference) {
+                // Display value of selected element as summary text
+                preference.summary = preference.entry
+            } else if (
+                preference?.key == getString(
+                    R.string.preferences_sync_start_date_key
+                )
+            ) {
+                // Display start date
+                val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.US)
+                preference.summary = sdf.format(getStartDate(it))
+            }
         }
     }
 }

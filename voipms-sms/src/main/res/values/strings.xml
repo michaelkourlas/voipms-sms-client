@@ -72,6 +72,7 @@
     <string name="preferences_notifications_sound_key" translatable="false">sms_notification_ringtone</string>
     <string name="preferences_notifications_sound_title">Sound</string>
     <string name="preferences_notifications_sound_default_value" translatable="false">content://settings/system/notification_sound</string>
+    <string name="preferences_notifications_sound_silent">Silent</string>
     <string name="preferences_notifications_sound_unknown">Unknown ringtone</string>
     <string name="preferences_notifications_sound_unknown_perm">Unknown ringtone (external storage permission denied)</string>
     <string name="preferences_notifications_vibrate_key" translatable="false">sms_notification_vibrate</string>
@@ -121,12 +122,25 @@
     <string name="preferences_database_fail_create_document">No handler available to select database export location</string>
     <string name="preferences_database_fail_open_document">No handler available to select database import location</string>
 
+    <!-- About -->
+    <string name="preferences_about_category_name">About</string>
+    <string name="preferences_about_changelog_title">Changelog</string>
+    <string name="preferences_about_license_title">License</string>
+    <string name="preferences_about_license_summary">Apache License 2.0</string>
+    <string name="preferences_about_privacy_title">Privacy</string>
+    <string name="preferences_about_third_party_embedded_title">Third-party notices (embedded code)</string>
+    <string name="preferences_about_third_party_packages_title">Third-party notices (packages)</string>
+
+    <!-- Markdown -->
+    <string name="preferences_markdown_extra">net.kourlas.voipms_sms.MARKDOWN_DOCUMENT_TYPE</string>
+
     <!-- Uncategorized -->
     <string name="preferences_perm_denied_external_storage">External storage permission required to access ringtones</string>
     <string name="preferences_setup_completed_for_version_key" translatable="false">setup_completed_for_version</string>
     <string name="preferences_setup_completed_for_version_default_value" translatable="false">0</string>
     <string name="preferences_first_sync_after_sign_in_key" translatable="false">first_sync_after_sign_in</string>
     <string name="preferences_first_run" translatable="false">first_run</string>
+    <string name="preferences_encrypted_file_name" translatable="false">%s_encrypted</string>
 
     <!-- ACTIVITIES -->
 
@@ -184,14 +198,11 @@
     <string name="conversations_action_archive">Archive</string>
     <string name="conversations_action_archived">Archived</string>
     <string name="conversations_action_chat">Chat</string>
-    <string name="conversations_action_credits">Credits</string>
     <string name="conversations_action_delete">Delete</string>
     <string name="conversations_action_coffee">Buy me a coffee</string>
     <string name="conversations_action_help">Help</string>
-    <string name="conversations_action_license">License</string>
     <string name="conversations_action_mark_read">Mark read</string>
     <string name="conversations_action_mark_unread">Mark unread</string>
-    <string name="conversations_action_privacy">Privacy</string>
     <string name="conversations_action_search">Search</string>
     <string name="conversations_action_settings">Settings</string>
     <string name="conversations_action_unarchive">Unarchive</string>
@@ -375,11 +386,8 @@
     <string name="utils_date_minutes_ago">min</string>
 
     <!-- URLS -->
-    <string name="help_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/HELP.md</string>
-    <string name="privacy_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/PRIVACY.md</string>
-    <string name="coffee_url" translatable="false">https://www.paypal.com/paypalme/kourlas</string>
-    <string name="license_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/LICENSE</string>
-    <string name="credits_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client/blob/master/NOTICE</string>
+    <string name="github_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client</string>
+    <string name="coffee_url" translatable="false">https://paypal.me/kourlas</string>
 
     <!-- SHORTCUTS -->
     <string name="new_conversation_shortcut_short">Compose</string>
@@ -396,5 +404,7 @@
 
     <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>
+    <string name="copyright">Copyright © 2015–2023 Michael Kourlas</string>
+    <string name="version">Version 0.6.23</string>
     <string name="toast_error">Error: %1$s</string>
 </resources>

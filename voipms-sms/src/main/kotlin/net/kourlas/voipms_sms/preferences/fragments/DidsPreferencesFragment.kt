@@ -1,6 +1,6 @@
 /*
  * VoIP.ms SMS
- * Copyright (C) 2017-2021 Michael Kourlas
+ * Copyright (C) 2017-2022 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import android.content.IntentFilter
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
-import com.takisoft.preferencex.PreferenceFragmentCompat
+import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
@@ -36,9 +36,7 @@ import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 import net.kourlas.voipms_sms.utils.*
 
-class DidsPreferencesFragment : PreferenceFragmentCompat(),
-    Preference.OnPreferenceChangeListener,
-    Preference.OnPreferenceClickListener {
+class DidsPreferencesFragment : PreferenceFragmentCompat() {
     // Sentinel used to prevent preferences from being loaded twice (once on
     // creation, once on resumption)
     private var beforeFirstPreferenceLoad: Boolean = true
@@ -62,21 +60,22 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
                         getString(
                             R.string.push_notifications_reg_complete_failed_dids
                         )
-                    )
-                        ?.let {
-                            if (it.isNotEmpty()) {
-                                // Some DIDs failed registration
-                                showSnackbar(
-                                    activity, R.id.coordinator_layout,
-                                    getString(
-                                        R.string.push_notifications_fail_register
-                                    )
+                    )?.let {
+                        if (it.isNotEmpty()) {
+                            // Some DIDs failed registration
+                            showSnackbar(
+                                activity,
+                                R.id.coordinator_layout,
+                                getString(
+                                    R.string.push_notifications_fail_register
                                 )
-                            }
-                        } ?: run {
+                            )
+                        }
+                    } ?: run {
                         // Unknown error
                         showSnackbar(
-                            activity, R.id.coordinator_layout,
+                            activity,
+                            R.id.coordinator_layout,
                             getString(R.string.push_notifications_fail_unknown)
                         )
                     }
@@ -88,7 +87,7 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
             }
         }
 
-    override fun onCreatePreferencesFix(
+    override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?
     ) {
@@ -134,8 +133,49 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
                         R.string.preferences_dids_stored_locally
                     )
                 }
-                preference.onPreferenceChangeListener = this
-                preference.onPreferenceClickListener = this
+                preference.onPreferenceChangeListener =
+                    Preference.OnPreferenceChangeListener { pref, newValue ->
+                        // Enable the selected DID
+                        val preferenceDid = preferenceDidMap[pref]
+                            ?: throw Exception("Unrecognized preference")
+
+                        val dids = if (newValue as Boolean) {
+                            getDids(it).plus(preferenceDid)
+                        } else {
+                            getDids(it).minus(preferenceDid)
+                        }
+                        setDids(it, dids)
+
+                        if (dids.isNotEmpty()) {
+                            // Re-register for push notifications when DIDs
+                            // change
+                            enablePushNotifications(
+                                it.applicationContext,
+                                activityToShowError = it
+                            )
+                        }
+
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            Database.getInstance(it).updateShortcuts()
+                            replaceIndex(it)
+                        }
+                        true
+                    }
+                preference.onPreferenceClickListener =
+                    Preference.OnPreferenceClickListener { pref ->
+                        // Show the DID preference activity associated with the
+                        // selected preference
+                        val preferenceDid = preferenceDidMap[pref]
+                            ?: throw Exception("Unrecognized preference")
+                        val intent =
+                            Intent(it, DidPreferencesActivity::class.java)
+                        intent.putExtra(
+                            getString(R.string.preferences_did_did),
+                            preferenceDid
+                        )
+                        startActivity(intent)
+                        true
+                    }
                 preference.isChecked = did in activeDids
                 preferenceScreen.addPreference(preference)
             }
@@ -178,50 +218,5 @@ class DidsPreferencesFragment : PreferenceFragmentCompat(),
                 pushNotificationsRegistrationCompleteReceiver
             )
         }
-    }
-
-    override fun onPreferenceClick(preference: Preference): Boolean {
-        // Show the DID preference activity associated with the selected
-        // preference
-        val did = preferenceDidMap[preference]
-            ?: throw Exception("Unrecognized preference")
-        val intent = Intent(activity, DidPreferencesActivity::class.java)
-        intent.putExtra(getString(R.string.preferences_did_did), did)
-        startActivity(intent)
-
-        return true
-    }
-
-    override fun onPreferenceChange(
-        preference: Preference,
-        newValue: Any?
-    ): Boolean {
-        activity?.let {
-            // Enable the selected DID
-            val did = preferenceDidMap[preference]
-                ?: throw Exception("Unrecognized preference")
-
-            val dids = if (newValue as Boolean) {
-                getDids(it).plus(did)
-            } else {
-                getDids(it).minus(did)
-            }
-            setDids(it, dids)
-
-            if (dids.isNotEmpty()) {
-                // Re-register for push notifications when DIDs change
-                enablePushNotifications(
-                    it.applicationContext,
-                    activityToShowError = it
-                )
-            }
-
-            lifecycleScope.launch(Dispatchers.Default) {
-                Database.getInstance(it).updateShortcuts()
-                replaceIndex(it)
-            }
-        }
-
-        return true
     }
 }

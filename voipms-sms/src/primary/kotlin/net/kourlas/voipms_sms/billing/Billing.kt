@@ -65,7 +65,11 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
 
             // Consume the purchase if it hasn't been consumed yet.
             val purchasesList = suspendCoroutine<List<Purchase>> {
-                client.queryPurchasesAsync(SKU) { result, purchases ->
+                client.queryPurchasesAsync(
+                    QueryPurchasesParams.newBuilder().setProductType(
+                        BillingClient.ProductType.INAPP
+                    ).build()
+                ) { result, purchases ->
                     if (result.responseCode == BillingResponseCode.OK) {
                         it.resume(purchases)
                     } else {
@@ -73,11 +77,11 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
                     }
                 }
             }
-            consumeDonationPurchases(purchasesList)
+            consumeCoffeePurchases(purchasesList)
 
             // Get the SKU.
-            val skuDetails = getCoffeeSkuDetails()
-            if (skuDetails == null) {
+            val productDetails = getProductDetails()
+            if (productDetails == null) {
                 showSnackbar(
                     activity, R.id.coordinator_layout,
                     activity.getString(
@@ -89,7 +93,14 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
 
             // Open the purchase flow for that SKU.
             val flowParams = BillingFlowParams.newBuilder()
-                .setSkuDetails(skuDetails)
+                .setProductDetailsParamsList(
+                    listOf(
+                        BillingFlowParams.ProductDetailsParams.newBuilder()
+                            .setProductDetails(
+                                productDetails
+                            ).build()
+                    )
+                )
                 .build()
             client.launchBillingFlow(activity, flowParams)
         } catch (e: Exception) {
@@ -112,7 +123,7 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
             && purchases != null
         ) {
             GlobalScope.launch {
-                consumeDonationPurchases(purchases)
+                consumeCoffeePurchases(purchases)
             }
         }
     }
@@ -125,10 +136,14 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
         connected = false
     }
 
-    private suspend fun consumeDonationPurchases(purchases: List<Purchase>) =
+    private suspend fun consumeCoffeePurchases(purchases: List<Purchase>) =
         withContext(Dispatchers.IO) {
             for (purchase in purchases) {
-                if (purchase.skus.contains(SKU)
+                if ((purchase.products.contains(PRODUCT_ID) || LEGACY_PRODUCT_IDS.any {
+                        purchase.products.contains(
+                            it
+                        )
+                    })
                     && purchase.purchaseState == PurchaseState.PURCHASED
                 ) {
                     val coffeeCompleteBroadcastIntent = Intent(
@@ -150,26 +165,28 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
             }
         }
 
-    private suspend fun getCoffeeSkuDetails() = withContext(Dispatchers.IO) {
-        val skuDetailsParams = SkuDetailsParams.newBuilder()
-        skuDetailsParams
-            .setSkusList(listOf(SKU))
-            .setType(BillingClient.SkuType.INAPP)
-        val skuDetailsList = suspendCoroutine<List<SkuDetails>> {
-            client.querySkuDetailsAsync(
-                skuDetailsParams.build()
+    private suspend fun getProductDetails() = withContext(Dispatchers.IO) {
+        val queryProductDetailsParams =
+            QueryProductDetailsParams.newBuilder().setProductList(
+                listOf(
+                    QueryProductDetailsParams.Product.newBuilder().setProductId(
+                        PRODUCT_ID
+                    ).setProductType(BillingClient.ProductType.INAPP).build()
+                )
+            ).build()
+        val productDetailsList = suspendCoroutine<List<ProductDetails>> {
+            client.queryProductDetailsAsync(
+                queryProductDetailsParams
             ) { result, details ->
-                if (result.responseCode == BillingResponseCode.OK
-                    && details != null
-                ) {
+                if (result.responseCode == BillingResponseCode.OK) {
                     it.resume(details)
                 } else {
                     it.resume(emptyList())
                 }
             }
         }
-        if (skuDetailsList.size == 1 && skuDetailsList[0].sku == SKU) {
-            skuDetailsList[0]
+        if (productDetailsList.size == 1 && productDetailsList[0].productId == PRODUCT_ID) {
+            productDetailsList[0]
         } else {
             null
         }
@@ -181,8 +198,11 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
         @SuppressLint("StaticFieldLeak")
         private var instance: Billing? = null
 
-        // The SKU for buying me a coffee.
-        private const val SKU = "coffee"
+        // The "buy me a coffee" product.
+        private const val PRODUCT_ID = "coffee"
+
+        // Previous versions of the "buy me a coffee" product.
+        private val LEGACY_PRODUCT_IDS = listOf("donation", "donation2")
 
         /**
          * Gets the sole instance of the Billing class. Initializes the

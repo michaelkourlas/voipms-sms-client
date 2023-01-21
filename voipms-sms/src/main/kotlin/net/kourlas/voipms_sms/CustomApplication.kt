@@ -27,6 +27,7 @@ import net.kourlas.voipms_sms.network.NetworkManager.Companion.getInstance
 import net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment
 import net.kourlas.voipms_sms.preferences.getAppTheme
 import net.kourlas.voipms_sms.preferences.getSyncInterval
+import net.kourlas.voipms_sms.preferences.migrateLegacySecurePreferences
 import net.kourlas.voipms_sms.preferences.setRawSyncInterval
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
@@ -79,6 +80,9 @@ class CustomApplication : Application() {
 
         // Create static reference to self.
         self = this
+
+        // Migrate legacy secure preferences.
+        migrateLegacySecurePreferences(applicationContext)
 
         // Limit synchronization interval to 15 minutes. Previous versions
         // supported a shorter interval.

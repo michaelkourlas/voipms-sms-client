@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ VoIP.ms SMS
+  ~ Copyright (C) 2017-2019 Michael Kourlas
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!--suppress XmlUnusedNamespaceDeclaration -->
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.preference.Preference
+        android:summary="@string/copyright"
+        android:title="@string/app_name">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="@string/github_url" />
+    </androidx.preference.Preference>
+    <androidx.preference.Preference
+        android:summary="@string/version"
+        android:title="@string/preferences_about_changelog_title">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
+            <extra
+                android:name="@string/preferences_markdown_extra"
+                android:value="CHANGELOG" />
+        </intent>
+    </androidx.preference.Preference>
+    <androidx.preference.Preference
+        android:summary="@string/preferences_about_license_summary"
+        android:title="@string/preferences_about_license_title">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
+            <extra
+                android:name="@string/preferences_markdown_extra"
+                android:value="LICENSE" />
+        </intent>
+    </androidx.preference.Preference>
+    <androidx.preference.Preference android:title="@string/preferences_about_privacy_title">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
+            <extra
+                android:name="@string/preferences_markdown_extra"
+                android:value="PRIVACY" />
+        </intent>
+    </androidx.preference.Preference>
+    <androidx.preference.Preference android:title="@string/preferences_about_third_party_embedded_title">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
+            <extra
+                android:name="@string/preferences_markdown_extra"
+                android:value="NOTICE" />
+        </intent>
+    </androidx.preference.Preference>
+    <androidx.preference.Preference android:title="@string/preferences_about_third_party_packages_title">
+        <intent
+            android:targetClass="net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity"
+            android:targetPackage="net.kourlas.voipms_sms">
+            <extra
+                android:name="@string/preferences_markdown_extra"
+                android:value="PACKAGE_LICENSES" />
+        </intent>
+    </androidx.preference.Preference>
+</androidx.preference.PreferenceScreen>

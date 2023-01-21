@@ -22,12 +22,10 @@
         android:key="@string/preferences_notifications_enable_key"
         android:summary="@string/preferences_notifications_enable_summary"
         android:title="@string/preferences_notifications_enable_title" />
-    <com.takisoft.preferencex.RingtonePreference
-        android:defaultValue="@string/preferences_notifications_sound_default_value"
+    <androidx.preference.Preference
         android:dependency="@string/preferences_notifications_enable_key"
         android:icon="@android:color/transparent"
         android:key="@string/preferences_notifications_sound_key"
-        android:ringtoneType="notification"
         android:title="@string/preferences_notifications_sound_title" />
     <androidx.preference.SwitchPreference
         android:defaultValue="@string/preferences_notifications_vibrate_default_value"
