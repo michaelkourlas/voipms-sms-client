@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.sms.workers
 
+import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -288,6 +289,13 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             progress = ((i + 1) * 100) / retrievalRequests.size
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 setForeground(getForegroundInfo())
+            } else {
+                try {
+                    setForeground(getForegroundInfo())
+                } catch (_: ForegroundServiceStartNotAllowedException) {
+                    // Do nothing -- this is expected if the app is running in
+                    // the background.
+                }
             }
         }
 
