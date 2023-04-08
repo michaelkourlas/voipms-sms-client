@@ -231,6 +231,7 @@
     <string name="conversations_first_sync">Please wait for the first synchronization to complete…</string>
     <string name="conversations_no_messages">You have no messages associated with the selected phone number.</string>
     <string name="conversations_no_results">No results found for \'%1$s\'</string>
+    <string name="conversations_perm_denied_notifications">Notifications permission required to send notifications</string>
     <string name="conversations_perm_denied_contacts">Contacts permission required to view names and photos</string>
     <string name="conversations_sync_date_suggestion">Synchronization start date is %1$s</string>
     <string name="conversations_text_hint">Search…</string>
