@@ -199,7 +199,11 @@ class ConversationsRecyclerViewAdapter<T>(
 
         val messageTextBuilder = SpannableStringBuilder()
 
-        if (text != null) {
+        if (text != ""
+            || (message.media1 == ""
+                && message.media2 == ""
+                && message.media3 == "")
+        ) {
             // Highlight text that matches filter
             val index = text.lowercase(Locale.getDefault()).indexOf(
                 currConstraint.lowercase(Locale.getDefault())

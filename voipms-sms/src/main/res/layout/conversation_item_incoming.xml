@@ -69,7 +69,7 @@
             android:layout_marginStart="@dimen/margin" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toStartOf="@id/placeholder"
             android:layout_toEndOf="@id/photo_layout"
@@ -96,16 +96,52 @@
 
             <LinearLayout
                 android:id="@+id/media1_container"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:minHeight="@dimen/contact_badge"
                 android:orientation="vertical"
-                android:padding="@dimen/sms_container_padding"
                 android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/media1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="@dimen/min_image_size"
+                    android:minHeight="@dimen/min_image_size"
+                    android:scaleType="centerCrop" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/media2_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:minHeight="@dimen/contact_badge"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/media2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="@dimen/min_image_size"
+                    android:minHeight="@dimen/min_image_size" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/media3_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:minHeight="@dimen/contact_badge"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/media3"
+                    android:minWidth="@dimen/min_image_size"
+                    android:minHeight="@dimen/min_image_size"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>

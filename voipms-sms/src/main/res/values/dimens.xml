@@ -24,6 +24,7 @@
     <dimen name="conversation_item_margin_top_primary">16dp</dimen>
     <dimen name="conversation_item_margin_top_secondary">2dp</dimen>
     <dimen name="contact_badge">40dp</dimen>
+    <dimen name="min_image_size">100dp</dimen>
     <dimen name="adaptive_icon_drawable_outer">108dp</dimen>
     <dimen name="adaptive_icon_drawable_inner">72dp</dimen>
     <dimen name="send_message_elevation">4dp</dimen>

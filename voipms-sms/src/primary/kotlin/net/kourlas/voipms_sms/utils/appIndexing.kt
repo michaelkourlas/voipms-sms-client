@@ -136,9 +136,18 @@ private fun getMessageBuilder(
     contactPhotoUriCache: MutableMap<String, String> =
         mutableMapOf()
 ): MessageBuilder {
+    val text = if (message.text == ""
+        && (message.media1 != ""
+            || message.media2 != ""
+            || message.media3 != "")
+    ) {
+        "Media"
+    } else {
+        message.text
+    }
     val messageBuilder = Indexables.messageBuilder()
         .setUrl(message.messageUrl)
-        .setName(message.text ?: "Media")
+        .setName(text)
         .setIsPartOf(
             Indexables.conversationBuilder()
                 .setUrl(message.conversationUrl)

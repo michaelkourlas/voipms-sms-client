@@ -472,7 +472,10 @@ class Database private constructor(private val context: Context) {
                             unread = if (message.isUnread) 1L else 0L,
                             delivered = if (message.isDelivered) 1L else 0L,
                             deliveryInProgress = if (message.isDeliveryInProgress)
-                                1L else 0L
+                                1L else 0L,
+                            media1 = message.media1,
+                            media2 = message.media2,
+                            media3 = message.media3,
                         )
 
                         // Don't add the message if it already exists in our
@@ -546,10 +549,10 @@ class Database private constructor(private val context: Context) {
                                 1L else 0L,
                             did = incomingMessage.did,
                             contact = incomingMessage.contact,
-                            text = incomingMessage.text,
-                            media1 = incomingMessage.media1,
-                            media2 = incomingMessage.media2,
-                            media3 = incomingMessage.media3,
+                            text = incomingMessage.text ?: "",
+                            media1 = incomingMessage.media1 ?: "",
+                            media2 = incomingMessage.media2 ?: "",
+                            media3 = incomingMessage.media3 ?: "",
                             unread = if (incomingMessage.isIncoming)
                                 1L else 0L,
                             delivered = 1L,
@@ -893,8 +896,8 @@ class Database private constructor(private val context: Context) {
         return getConversationsMessageDraft(dids)
             .filter {
                 it.text
-                    ?.lowercase(Locale.getDefault())
-                    ?.contains(filterConstraint) ?: false
+                    .lowercase(Locale.getDefault())
+                    .contains(filterConstraint)
             }
             .toMutableList()
     }

@@ -54,10 +54,10 @@ class Message(
     val isIncoming: Boolean,
     val did: String,
     val contact: String,
-    var text: String?,
-    val media1: String?,
-    val media2: String?,
-    val media3: String?,
+    var text: String,
+    val media1: String,
+    val media2: String,
+    val media3: String,
     val isUnread: Boolean,
     val isDelivered: Boolean,
     val isDeliveryInProgress: Boolean,
@@ -89,10 +89,10 @@ class Message(
     constructor(
         databaseId: Long, voipId: Long?, date: Long,
         isIncoming: Long, did: String, contact: String,
-        text: String?,
-        media1: String?,
-        media2: String?,
-        media3: String?, isUnread: Long, isDelivered: Long,
+        text: String,
+        media1: String,
+        media2: String,
+        media3: String, isUnread: Long, isDelivered: Long,
         isDeliveryInProgress: Long, isDraft: Boolean = false
     ) : this(
         databaseId,
@@ -166,9 +166,9 @@ class Message(
             draft.did,
             draft.contact,
             draft.text,
-            null,
-            null,
-            null,
+            "",
+            "",
+            "",
             0,
             0,
             0,
@@ -181,10 +181,8 @@ class Message(
 
         // Remove training newline if one exists
         if (isIncoming) {
-            this.text?.let {
-                if (isIncoming && it.endsWith("\n")) {
-                    this.text = it.substring(0, it.length - 1)
-                }
+            if (isIncoming && this.text.endsWith("\n")) {
+                this.text = this.text.substring(0, this.text.length - 1)
             }
         }
 
@@ -309,20 +307,10 @@ class Message(
             return 1
         }
 
-        this.text.let {
-            other.text.let { it2 ->
-                if (it != null && it2 != null) {
-                    if (it > it2) {
-                        return -1
-                    } else if (it < it2) {
-                        return 1
-                    }
-                } else if (it != null) {
-                    return -1
-                } else if (it2 != null) {
-                    return 1
-                }
-            }
+        if (this.text > other.text) {
+            return -1
+        } else if (this.text < other.text) {
+            return 1
         }
 
         if (this.isDraft > other.isDraft) {

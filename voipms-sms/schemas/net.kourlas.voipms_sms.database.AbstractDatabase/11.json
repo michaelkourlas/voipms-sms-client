@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 11,
-    "identityHash": "1d2c1bbbdc453e0e598d07bb29793a91",
+    "identityHash": "cddedea65b24b844237b4da443fc2181",
     "entities": [
       {
         "tableName": "sms",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `VoipId` INTEGER, `Date` INTEGER NOT NULL, `Type` INTEGER NOT NULL, `Did` TEXT NOT NULL, `Contact` TEXT NOT NULL, `Text` TEXT, `Unread` INTEGER NOT NULL, `Delivered` INTEGER NOT NULL, `DeliveryInProgress` INTEGER NOT NULL, `Media1` TEXT, `Media2` TEXT, `Media3` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `VoipId` INTEGER, `Date` INTEGER NOT NULL, `Type` INTEGER NOT NULL, `Did` TEXT NOT NULL, `Contact` TEXT NOT NULL, `Text` TEXT NOT NULL, `Unread` INTEGER NOT NULL, `Delivered` INTEGER NOT NULL, `DeliveryInProgress` INTEGER NOT NULL, `Media1` TEXT NOT NULL DEFAULT '', `Media2` TEXT NOT NULL DEFAULT '', `Media3` TEXT NOT NULL DEFAULT '')",
         "fields": [
           {
             "fieldPath": "databaseId",
@@ -48,7 +48,7 @@
             "fieldPath": "text",
             "columnName": "Text",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "unread",
@@ -72,26 +72,29 @@
             "fieldPath": "media1",
             "columnName": "Media1",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true,
+            "defaultValue": "''"
           },
           {
             "fieldPath": "media2",
             "columnName": "Media2",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true,
+            "defaultValue": "''"
           },
           {
             "fieldPath": "media3",
             "columnName": "Media3",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true,
+            "defaultValue": "''"
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "DatabaseId"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -126,10 +129,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "DatabaseId"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -164,10 +167,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "DatabaseId"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -196,10 +199,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "DatabaseId"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -208,7 +211,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1d2c1bbbdc453e0e598d07bb29793a91')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cddedea65b24b844237b4da443fc2181')"
     ]
   }
 }

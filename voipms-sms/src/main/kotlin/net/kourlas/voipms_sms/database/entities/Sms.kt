@@ -32,14 +32,16 @@ data class Sms(
     @ColumnInfo(name = COLUMN_INCOMING) val incoming: Long = 0,
     @ColumnInfo(name = COLUMN_DID) val did: String = "",
     @ColumnInfo(name = COLUMN_CONTACT) val contact: String = "",
-    @ColumnInfo(name = COLUMN_TEXT) val text: String? = null,
+    @ColumnInfo(name = COLUMN_TEXT) val text: String = "",
     @ColumnInfo(name = COLUMN_UNREAD) val unread: Long = 0,
     @ColumnInfo(name = COLUMN_DELIVERED) val delivered: Long = 0,
     @ColumnInfo(name = COLUMN_DELIVERY_IN_PROGRESS)
     val deliveryInProgress: Long = 0,
-    @ColumnInfo(name = COLUMN_MEDIA1) val media1: String? = null,
-    @ColumnInfo(name = COLUMN_MEDIA2) val media2: String? = null,
-    @ColumnInfo(name = COLUMN_MEDIA3) val media3: String? = null
+    @ColumnInfo(name = COLUMN_MEDIA1, defaultValue = "")
+    val media1: String = "",
+    @ColumnInfo(name = COLUMN_MEDIA2, defaultValue = "")
+    val media2: String = "",
+    @ColumnInfo(name = COLUMN_MEDIA3, defaultValue = "") val media3: String = ""
 ) {
     fun toMessage(): Message = Message(this)
 

@@ -34,6 +34,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.Target
 import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
@@ -203,7 +204,11 @@ class ConversationRecyclerViewAdapter(
         val message = messageItem.message
 
         val text = message.text
-        if (text == null) {
+        if (text == ""
+            && (message.media1 != ""
+                || message.media2 != ""
+                || message.media3 != "")
+        ) {
             holder.smsContainer.visibility = View.GONE
             return
         }
@@ -270,11 +275,67 @@ class ConversationRecyclerViewAdapter(
         val message = messageItem.message
 
         val media1Container = holder.media1Container
-        if (message.media1 != null) {
-            Glide.with(activity).load(message.media1).into(holder.media1)
+        if (message.media1 != "") {
+            Glide.with(activity).load(message.media1)
+                .override(Target.SIZE_ORIGINAL).into(holder.media1)
             media1Container.visibility = View.VISIBLE
+
+            val media1ContainerMarginParams = media1Container.layoutParams
+                as ViewGroup.MarginLayoutParams
+            media1ContainerMarginParams.topMargin = if (message.text == "") {
+                0
+            } else {
+                activity.resources.getDimension(
+                    R.dimen.conversation_item_margin_top_secondary
+                ).toInt()
+            }
         } else {
             media1Container.visibility = View.GONE
+        }
+
+        val media2Container = holder.media2Container
+        if (message.media2 != "") {
+            Glide.with(activity).load(message.media2)
+                .override(Target.SIZE_ORIGINAL)
+                .into(holder.media2)
+            media2Container.visibility = View.VISIBLE
+
+            val media2ContainerMarginParams = media2Container.layoutParams
+                as ViewGroup.MarginLayoutParams
+            media2ContainerMarginParams.topMargin =
+                if (message.text == "" && message.media1 == "") {
+                    0
+                } else {
+                    activity.resources.getDimension(
+                        R.dimen.conversation_item_margin_top_secondary
+                    ).toInt()
+                }
+        } else {
+            media2Container.visibility = View.GONE
+        }
+
+        val media3Container = holder.media3Container
+        if (message.media3 != "") {
+            Glide.with(activity).load(message.media3)
+                .override(Target.SIZE_ORIGINAL)
+                .into(holder.media3)
+            media3Container.visibility = View.VISIBLE
+
+            val media3ContainerMarginParams = media3Container.layoutParams
+                as ViewGroup.MarginLayoutParams
+            media3ContainerMarginParams.topMargin =
+                if (message.text == ""
+                    && message.media1 == ""
+                    && message.media2 == ""
+                ) {
+                    0
+                } else {
+                    activity.resources.getDimension(
+                        R.dimen.conversation_item_margin_top_secondary
+                    ).toInt()
+                }
+        } else {
+            media3Container.visibility = View.GONE
         }
     }
 
@@ -697,6 +758,12 @@ class ConversationRecyclerViewAdapter(
         internal val media1Container: View =
             itemView.findViewById(R.id.media1_container)
         internal val media1: ImageView = itemView.findViewById(R.id.media1)
+        internal val media2Container: View =
+            itemView.findViewById(R.id.media2_container)
+        internal val media2: ImageView = itemView.findViewById(R.id.media2)
+        internal val media3Container: View =
+            itemView.findViewById(R.id.media3_container)
+        internal val media3: ImageView = itemView.findViewById(R.id.media3)
         internal val messageText: TextView =
             itemView.findViewById(R.id.message)
         internal val dateText: TextView =
@@ -713,13 +780,24 @@ class ConversationRecyclerViewAdapter(
             smsContainer.setOnLongClickListener(activity)
             applyRoundedCornersMask(smsContainer)
 
-            // Allow the media image views to be selectable and add rounded
-            // corners to them
+            // Allow the media image views to be selectable
             media1Container.isClickable = true
             media1Container.setOnClickListener(activity)
             media1Container.isLongClickable = true
             media1Container.setOnLongClickListener(activity)
-            applyCircularMask(media1Container)
+            applyRoundedCornersMask(media1)
+
+            media2Container.isClickable = true
+            media2Container.setOnClickListener(activity)
+            media2Container.isLongClickable = true
+            media2Container.setOnLongClickListener(activity)
+            applyRoundedCornersMask(media2)
+
+            media3Container.isClickable = true
+            media3Container.setOnClickListener(activity)
+            media3Container.isLongClickable = true
+            media3Container.setOnLongClickListener(activity)
+            applyRoundedCornersMask(media3)
 
             // Apply circular mask to and remove overlay from contact badge
             // to match Android Messages aesthetic
