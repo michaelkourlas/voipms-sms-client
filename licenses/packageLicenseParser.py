@@ -15,7 +15,14 @@ licenseMap = {
 }
 
 licenseGroupMap = {
-    ('MIT License', 'com.github.mukeshsolanki', 'MarkdownView-Android', '2.0.0'): 'MarkdownView-Android.txt'
+    # MarkdownView-Android
+    ('MIT License', 'com.github.mukeshsolanki', 'MarkdownView-Android', '2.0.0'): 'MarkdownView-Android.txt',
+
+    # Glide
+    ('Simplified BSD License', 'com.github.bumptech.glide', 'glide', '4.12.0'): 'Glide.txt',
+    ('Simplified BSD License', 'com.github.bumptech.glide', 'annotations', '4.12.0'): 'Glide.txt',
+    ('Simplified BSD License', 'com.github.bumptech.glide', 'disklrucache', '4.12.0'): 'Glide.txt',
+    ('Simplified BSD License', 'com.github.bumptech.glide', 'gifdecoder', '4.12.0'): 'Glide.txt',
 }
 
 dependencies = json.load(open(f'build/generated/oss_licenses/{sys.argv[1]}/dependencies_with_licenses.json'))
