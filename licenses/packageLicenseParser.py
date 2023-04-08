@@ -2,9 +2,14 @@ import json
 import sys
 
 licenseMap = {
+    # Android SDK
     'Android Software Development Kit License': 'Android-SDK.txt',
+
+    # Apache License 2.0
+    'Apache 2.0': 'Apache-2.0.txt',
     'Apache License 2.0': 'Apache-2.0.txt',
     'Apache License, Version 2.0': 'Apache-2.0.txt',
+    'Apache-2.0': 'Apache-2.0.txt',
     'The Apache License, Version 2.0': 'Apache-2.0.txt',
     'The Apache Software License, Version 2.0': 'Apache-2.0.txt',
 }

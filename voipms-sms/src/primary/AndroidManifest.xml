@@ -16,8 +16,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="net.kourlas.voipms_sms">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
         <!-- BROADCAST RECEIVERS -->
