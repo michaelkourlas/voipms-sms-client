@@ -489,7 +489,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                 val work = workRequest.build()
                 WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                     context.getString(R.string.sync_work_id),
-                    ExistingPeriodicWorkPolicy.REPLACE,
+                    ExistingPeriodicWorkPolicy.UPDATE,
                     work
                 )
             } else if (!scheduleOnly) {
