@@ -6,7 +6,12 @@
 
 VoIP.ms SMS is an Android messaging app for VoIP.ms that seeks to replicate the aesthetic of [Google's official SMS app](https://play.google.com/store/apps/details?id=com.google.android.apps.messaging).
 
-<a href='https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="50"/></a><a href="https://f-droid.org/app/net.kourlas.voipms_sms"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="50"></a>
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+    alt="Get it on F-Droid"
+    height="50">](https://f-droid.org/packages/net.kourlas.voipms_sms)
+[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+    alt="Get it on Google Play"
+    height="50">](https://play.google.com/store/apps/details?id=net.kourlas.voipms_sms)
 
 ## Features ##
 
@@ -38,3 +43,5 @@ The app's documentation is available in the [HELP.md file](https://github.com/mi
 ## License ##
 
 VoIP.ms SMS is licensed under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+Google Play and the Google Play logo are trademarks of Google LLC.
