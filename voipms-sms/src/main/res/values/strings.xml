@@ -294,6 +294,8 @@
     <string name="sync_work_id" translatable="false">net.kourlas.voipms_sms.SYNC_WORK_ID</string>
     <string name="sync_partial_work_id" translatable="false">net.kourlas.voipms_sms.SYNC_PARTIAL_WORK_ID</string>
     <string name="sync_force_recent" translatable="false">net.kourlas.voipms_sms.SYNC_FORCE_RECENT</string>
+    <string name="sync_error_account">Sync failed: no account configured</string>
+    <string name="sync_error_dids">Sync failed: no DIDs configured</string>
     <string name="sync_error_network">Sync failed: network unavailable</string>
     <string name="sync_error_api_request">Sync failed: VoIP.ms unavailable</string>
     <string name="sync_error_api_parse">Sync failed: corrupt response</string>
@@ -403,6 +405,10 @@
     <string name="undo">Undo</string>
     <string name="change">Change</string>
     <string name="settings">Settings</string>
+
+    <!-- MESSAGES -->
+    <string name="message_empty">Empty message</string>
+    <string name="message_media">Media</string>
 
     <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>
