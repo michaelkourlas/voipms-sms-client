@@ -157,7 +157,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
 
                 // Regardless of whether an error occurred, mark setup as
                 // complete
-                setSetupCompletedForVersion(this@ConversationsActivity, 134)
+                setSetupCompletedForVersion(
+                    this@ConversationsActivity,
+                    BuildConfig.VERSION_CODE.toLong()
+                )
             }
         }
     private val coffeeCompleteReceiver = object : BroadcastReceiver() {
@@ -569,9 +572,9 @@ open class ConversationsActivity(val archived: Boolean = false) :
             setFirstSyncAfterSignIn(this, false)
         }
 
-        // Perform special setup for version 114: need to re-enable push
+        // Perform special setup for version 145: need to re-enable push
         // notifications
-        if (getSetupCompletedForVersion(this) < 134) {
+        if (getSetupCompletedForVersion(this) < 145) {
             enablePushNotifications(
                 this.applicationContext,
                 activityToShowError = this

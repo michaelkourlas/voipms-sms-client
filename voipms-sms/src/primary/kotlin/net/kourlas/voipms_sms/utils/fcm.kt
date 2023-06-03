@@ -22,6 +22,7 @@ import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.notifications.workers.NotificationsRegistrationWorker
@@ -71,7 +72,7 @@ fun enablePushNotifications(
                 )
             )
         }
-        setSetupCompletedForVersion(context, 134)
+        setSetupCompletedForVersion(context, BuildConfig.VERSION_CODE.toLong())
         return
     }
 
@@ -80,7 +81,7 @@ fun enablePushNotifications(
     if (!didsConfigured(context)
         || !Notifications.getInstance(context).getNotificationsEnabled()
     ) {
-        setSetupCompletedForVersion(context, 134)
+        setSetupCompletedForVersion(context, BuildConfig.VERSION_CODE.toLong())
         return
     }
 
