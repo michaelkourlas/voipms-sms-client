@@ -1184,7 +1184,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             ) as ClipboardManager
             val clip = ClipData.newPlainText(
                 getString(R.string.conversation_message_clipboard_description),
-                message.displayText
+                message.fullDisplayText
             )
             clipboard.setPrimaryClip(clip)
         }
@@ -1208,7 +1208,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             intent.type = "text/plain"
             intent.putExtra(
                 Intent.EXTRA_TEXT,
-                message.displayText
+                message.fullDisplayText
             )
             startActivity(Intent.createChooser(intent, null))
         }

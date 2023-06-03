@@ -137,7 +137,7 @@ private fun getMessageBuilder(
 ): MessageBuilder {
     val messageBuilder = Indexables.messageBuilder()
         .setUrl(message.messageUrl)
-        .setName(message.displayText)
+        .setName(message.summaryDisplayText)
         .setIsPartOf(
             Indexables.conversationBuilder()
                 .setUrl(message.conversationUrl)

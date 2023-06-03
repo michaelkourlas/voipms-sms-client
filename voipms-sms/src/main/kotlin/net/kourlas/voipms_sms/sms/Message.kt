@@ -18,6 +18,8 @@
 package net.kourlas.voipms_sms.sms
 
 import com.squareup.moshi.JsonClass
+import net.kourlas.voipms_sms.CustomApplication
+import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.entities.Draft
 import net.kourlas.voipms_sms.database.entities.Sms
 import net.kourlas.voipms_sms.utils.toBoolean
@@ -210,21 +212,80 @@ class Message(
         get() = getConversationUrl(conversationId)
 
     /**
+     * Gets a list of the media links in the message.
+     */
+    val medias: List<String>
+        get() {
+            val medias = mutableListOf<String>()
+            if (media1 != "") {
+                medias.add(media1)
+            }
+            if (media2 != "") {
+                medias.add(media2)
+            }
+            if (media3 != "") {
+                medias.add(media3)
+            }
+            return medias
+        }
+
+    /**
+     * Gets a version of the message text for display in summary contexts.
+     */
+    val summaryDisplayText: String
+        get() {
+            if (text != "") {
+                return text
+            }
+
+            return if (media1 != ""
+                || media2 != ""
+                || media3 != ""
+            ) {
+                CustomApplication.getApplication().resources.getString(
+                    R.string.message_media
+                )
+            } else {
+                CustomApplication.getApplication().resources.getString(
+                    R.string.message_empty
+                )
+            }
+        }
+
+    /**
      * Gets a version of the message text for display.
      */
-    val displayText: String
+    val fullDisplayText: String
         get() {
             if (text == "") {
-                return if (media1 != ""
-                    || media2 != ""
-                    || media3 != ""
-                ) {
-                    "Media"
-                } else {
-                    "Empty message"
-                }
+                return CustomApplication.getApplication().resources.getString(
+                    R.string.message_empty
+                )
             }
-            return text
+
+            val builder = StringBuilder()
+            builder.append(text)
+            builder.append("\n\n")
+            builder.append(mediaDisplayText)
+            return builder.toString()
+        }
+
+    /**
+     * Gets the media links for display.
+     */
+    val mediaDisplayText: String
+        get() {
+            val builder = StringBuilder()
+            for (media in medias) {
+                builder.append(
+                    CustomApplication.getApplication().resources.getString(
+                        R.string.conversation_info_media, media
+                    )
+                )
+                builder.append("\n\n")
+            }
+            builder.deleteRange(builder.length - 3, builder.length)
+            return builder.toString()
         }
 
     fun conversationsViewCompareTo(other: Message): Int {

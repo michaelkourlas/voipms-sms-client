@@ -664,7 +664,7 @@ class Notifications private constructor(private val context: Context) {
         if (messages.isNotEmpty()) {
             for (message in messages.reversed()) {
                 if (existingMessages.isNotEmpty()
-                    && existingMessages.last().text == message.displayText
+                    && existingMessages.last().text == message.summaryDisplayText
                     && existingMessages.last().person != null
                     && existingMessages.last().timestamp == message.date.time
                 ) {
@@ -678,7 +678,7 @@ class Notifications private constructor(private val context: Context) {
         if (inlineReplyMessages.isNotEmpty()) {
             for (message in inlineReplyMessages) {
                 style.addMessage(
-                    message.displayText,
+                    message.summaryDisplayText,
                     Date().time,
                     null as Person?
                 )
@@ -686,7 +686,7 @@ class Notifications private constructor(private val context: Context) {
         } else if (messagesToAdd.isNotEmpty()) {
             val notificationMessages = messagesToAdd.map {
                 NotificationCompat.MessagingStyle.Message(
-                    it.displayText,
+                    it.summaryDisplayText,
                     it.date.time,
                     if (it.isIncoming)
                         Person.Builder()

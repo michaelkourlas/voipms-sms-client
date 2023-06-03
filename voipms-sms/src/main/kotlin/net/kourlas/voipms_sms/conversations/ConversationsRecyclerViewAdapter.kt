@@ -195,7 +195,7 @@ class ConversationsRecyclerViewAdapter<T>(
         val conversationItem = conversationItems[position]
         val message = conversationItem.message
 
-        val text = message.displayText
+        val text = message.summaryDisplayText
         val messageTextBuilder = SpannableStringBuilder()
 
         if (message.text != "") {

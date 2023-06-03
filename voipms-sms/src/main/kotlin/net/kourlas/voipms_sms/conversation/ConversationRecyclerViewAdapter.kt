@@ -211,14 +211,21 @@ class ConversationRecyclerViewAdapter(
 
         val messageText = holder.messageText
         val messageTextBuilder = SpannableStringBuilder()
-        val text = message.displayText
-        messageTextBuilder.append(text)
 
-        if (message.text != "") {
+        if (message.text == "" && message.medias.isEmpty()) {
+            messageTextBuilder.append(message.fullDisplayText)
+            messageTextBuilder.setSpan(
+                StyleSpan(Typeface.ITALIC), 0,
+                messageTextBuilder.length,
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+            )
+        } else {
             // Highlight text that matches filter
+            messageTextBuilder.append(message.text)
             if (currConstraint != "") {
+                messageTextBuilder.append(message.text)
                 val index =
-                    text.lowercase(Locale.getDefault()).indexOf(
+                    message.text.lowercase(Locale.getDefault()).indexOf(
                         currConstraint.lowercase(Locale.getDefault())
                     )
                 if (index != -1) {
@@ -244,13 +251,23 @@ class ConversationRecyclerViewAdapter(
                     )
                 }
             }
-        } else {
-            messageTextBuilder.setSpan(
-                StyleSpan(Typeface.ITALIC), 0,
-                messageTextBuilder.length,
-                Spanned.SPAN_INCLUSIVE_EXCLUSIVE
-            )
+
+            if (message.medias.isNotEmpty()) {
+                if (message.text != "") {
+                    messageTextBuilder.append("\n\n")
+                }
+
+                val length = messageTextBuilder.length
+
+                messageTextBuilder.append(message.mediaDisplayText)
+                messageTextBuilder.setSpan(
+                    StyleSpan(Typeface.ITALIC), length,
+                    messageTextBuilder.length,
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+                )
+            }
         }
+
         messageText.text = messageTextBuilder
 
         Linkify.addLinks(
