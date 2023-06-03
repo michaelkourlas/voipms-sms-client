@@ -19,13 +19,21 @@ package net.kourlas.voipms_sms.utils
 
 import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color.rgb
+import android.graphics.Outline
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
 import android.net.Uri
 import android.provider.Settings
+import android.text.method.LinkMovementMethod
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewOutlineProvider
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -106,7 +114,7 @@ private fun getRoundRectViewOutlineProvider(): ViewOutlineProvider =
 fun showAlertDialog(
     activity: FragmentActivity,
     title: String?,
-    text: String?,
+    text: CharSequence?,
     positiveButtonText: String? = null,
     positiveButtonAction: DialogInterface.OnClickListener? = null,
     negativeButtonText: String? = null,
@@ -119,7 +127,10 @@ fun showAlertDialog(
         builder.setPositiveButton(positiveButtonText, positiveButtonAction)
         builder.setNegativeButton(negativeButtonText, negativeButtonAction)
         builder.setCancelable(false)
-        return builder.show()
+
+        val dialog = builder.show()
+        dialog.findViewById<TextView>(android.R.id.message)?.movementMethod =
+            LinkMovementMethod.getInstance()
     }
     return null
 }

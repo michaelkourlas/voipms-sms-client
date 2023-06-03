@@ -21,7 +21,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import net.kourlas.voipms_sms.sms.Message
-import java.util.*
+import java.util.Date
 
 @Entity(tableName = Sms.TABLE_NAME)
 data class Sms(

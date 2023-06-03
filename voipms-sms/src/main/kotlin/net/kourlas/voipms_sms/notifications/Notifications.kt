@@ -566,7 +566,6 @@ class Notifications private constructor(private val context: Context) {
             return
         }
 
-        @Suppress("ConstantConditionIf")
         val contactName = if (!BuildConfig.IS_DEMO) {
             getContactName(context, contact) ?: getFormattedPhoneNumber(contact)
         } else {
@@ -612,7 +611,6 @@ class Notifications private constructor(private val context: Context) {
             @Suppress("DEPRECATION")
             val notificationSound = getNotificationSound(context)
             if (notificationSound != "") {
-                @Suppress("DEPRECATION")
                 notification.setSound(Uri.parse(notificationSound))
             } else {
                 notification.setSilent(true)
@@ -666,7 +664,7 @@ class Notifications private constructor(private val context: Context) {
         if (messages.isNotEmpty()) {
             for (message in messages.reversed()) {
                 if (existingMessages.isNotEmpty()
-                    && existingMessages.last().text == message.text
+                    && existingMessages.last().text == message.displayText
                     && existingMessages.last().person != null
                     && existingMessages.last().timestamp == message.date.time
                 ) {
@@ -679,12 +677,16 @@ class Notifications private constructor(private val context: Context) {
 
         if (inlineReplyMessages.isNotEmpty()) {
             for (message in inlineReplyMessages) {
-                style.addMessage(message.text, Date().time, null as Person?)
+                style.addMessage(
+                    message.displayText,
+                    Date().time,
+                    null as Person?
+                )
             }
         } else if (messagesToAdd.isNotEmpty()) {
             val notificationMessages = messagesToAdd.map {
                 NotificationCompat.MessagingStyle.Message(
-                    it.text,
+                    it.displayText,
                     it.date.time,
                     if (it.isIncoming)
                         Person.Builder()
@@ -794,6 +796,7 @@ class Notifications private constructor(private val context: Context) {
                 ), true
             )
             visibleReplyIntent.flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+            @SuppressLint("ObsoleteSdkInt")
             val visibleReplyFlags =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE

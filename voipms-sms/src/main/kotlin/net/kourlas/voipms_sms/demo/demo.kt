@@ -24,7 +24,7 @@ import net.kourlas.voipms_sms.newConversation.NewConversationRecyclerViewAdapter
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 import net.kourlas.voipms_sms.utils.getGenericContactPhotoBitmap
-import java.util.*
+import java.util.Date
 
 fun getConversationsDemoMessages(): List<Message> {
     val messages = mutableListOf<Message>()
@@ -191,7 +191,6 @@ fun getConversationDemoMessages(bubble: Boolean): List<Message> {
             0
         )
     )
-    @Suppress("ConstantConditionIf")
     if (BuildConfig.IS_DEMO_SENDING) {
         messages.add(
             Message(

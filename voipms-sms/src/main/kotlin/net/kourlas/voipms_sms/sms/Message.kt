@@ -22,7 +22,7 @@ import net.kourlas.voipms_sms.database.entities.Draft
 import net.kourlas.voipms_sms.database.entities.Sms
 import net.kourlas.voipms_sms.utils.toBoolean
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
-import java.util.*
+import java.util.Date
 
 /**
  * Represents a single SMS message.
@@ -230,6 +230,24 @@ class Message(
      */
     val getMedia3LocalFileName: String
         get() = "$did-$contact-$voipId-media3"
+
+    /**
+     * Gets a version of the message text for display.
+     */
+    val displayText: String
+        get() {
+            if (text == "") {
+                return if (media1 != ""
+                    || media2 != ""
+                    || media3 != ""
+                ) {
+                    "Media"
+                } else {
+                    "Empty message"
+                }
+            }
+            return text
+        }
 
     fun conversationsViewCompareTo(other: Message): Int {
         if (this.contact == other.contact && this.did == other.did) {

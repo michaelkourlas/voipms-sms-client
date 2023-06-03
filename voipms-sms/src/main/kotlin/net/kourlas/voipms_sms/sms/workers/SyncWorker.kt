@@ -23,7 +23,16 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.CancellationException
@@ -33,7 +42,15 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.preferences.accountConfigured
+import net.kourlas.voipms_sms.preferences.didsConfigured
+import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.preferences.getEmail
+import net.kourlas.voipms_sms.preferences.getPassword
+import net.kourlas.voipms_sms.preferences.getRetrieveDeletedMessages
+import net.kourlas.voipms_sms.preferences.getRetrieveOnlyRecentMessages
+import net.kourlas.voipms_sms.preferences.getStartDate
+import net.kourlas.voipms_sms.preferences.getSyncInterval
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
@@ -42,7 +59,10 @@ import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import java.io.IOException
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
@@ -342,7 +362,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
     @JsonClass(generateAdapter = true)
     data class MessagesResponse(
         val status: String,
-        @Suppress("ArrayInDataClass") val sms: List<MessageResponse>?
+        val sms: List<MessageResponse>?
     )
 
     /**

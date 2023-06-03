@@ -195,15 +195,10 @@ class ConversationsRecyclerViewAdapter<T>(
         val conversationItem = conversationItems[position]
         val message = conversationItem.message
 
-        var text = message.text
-
+        val text = message.displayText
         val messageTextBuilder = SpannableStringBuilder()
 
-        if (text != ""
-            || (message.media1 == ""
-                && message.media2 == ""
-                && message.media3 == "")
-        ) {
+        if (message.text != "") {
             // Highlight text that matches filter
             val index = text.lowercase(Locale.getDefault()).indexOf(
                 currConstraint.lowercase(Locale.getDefault())
@@ -267,7 +262,7 @@ class ConversationsRecyclerViewAdapter<T>(
                     )
                     messageTextBuilder.append(" ")
                 }
-                messageTextBuilder.append(message.text)
+                messageTextBuilder.append(text)
             }
         } else {
             if (message.isOutgoing) {
@@ -282,7 +277,6 @@ class ConversationsRecyclerViewAdapter<T>(
 
             val nonMessageOffset = messageTextBuilder.length
 
-            text = "Media"
             messageTextBuilder.append(text)
 
             messageTextBuilder.setSpan(
@@ -393,7 +387,6 @@ class ConversationsRecyclerViewAdapter<T>(
         fun doFiltering(constraint: CharSequence): ConversationsFilter {
             val resultsObject = ConversationsFilter()
 
-            @Suppress("ConstantConditionIf")
             if (!BuildConfig.IS_DEMO) {
                 val activeDid = getActiveDid(activity)
                 runBlocking {
@@ -425,7 +418,6 @@ class ConversationsRecyclerViewAdapter<T>(
             }
 
             for (message in resultsObject.messages) {
-                @Suppress("ConstantConditionIf")
                 val contactName = if (!BuildConfig.IS_DEMO) {
                     getContactName(
                         activity,
@@ -501,7 +493,6 @@ class ConversationsRecyclerViewAdapter<T>(
             if (results.values != null) {
                 // The Android results interface uses type Any, so we have
                 // no choice but to use an unchecked cast
-                @Suppress("UNCHECKED_CAST")
                 newMessages = resultsObject.messages
             } else {
                 newMessages = emptyList()
@@ -564,7 +555,7 @@ class ConversationsRecyclerViewAdapter<T>(
                 recyclerView.findViewHolderForAdapterPosition(idx)?.let {
                     // Try to update the view holder directly so that we
                     // don't see the "change" animation
-                    @Suppress("RemoveRedundantQualifierName", "UNCHECKED_CAST")
+                    @Suppress("UNCHECKED_CAST")
                     onBindViewHolder(
                         it as ConversationsRecyclerViewAdapter<T>
                         .ConversationViewHolder, idx
@@ -664,7 +655,7 @@ class ConversationsRecyclerViewAdapter<T>(
             if ((previous && !_checked) || (!previous && _checked)) {
 
                 recyclerView.findViewHolderForAdapterPosition(position)?.let {
-                    @Suppress("RemoveRedundantQualifierName", "UNCHECKED_CAST")
+                    @Suppress("UNCHECKED_CAST")
                     updateViewHolderContactBadge(
                         it as ConversationsRecyclerViewAdapter<T>
                         .ConversationViewHolder, position

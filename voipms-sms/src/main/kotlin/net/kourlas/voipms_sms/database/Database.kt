@@ -168,7 +168,6 @@ class Database private constructor(private val context: Context) {
     /**
      * Exports the database to the specified file descriptor.
      */
-    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun export(exportFd: ParcelFileDescriptor) =
         importExportLock.write {
             val dbFile = context.getDatabasePath(DATABASE_NAME)
@@ -363,7 +362,6 @@ class Database private constructor(private val context: Context) {
     /**
      * Imports the database from the specified file descriptor.
      */
-    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun import(importFd: ParcelFileDescriptor) = coroutineScope {
         importExportLock.write {
             val dbFile = context.getDatabasePath(DATABASE_NAME)

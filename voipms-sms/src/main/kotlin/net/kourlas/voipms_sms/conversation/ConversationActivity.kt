@@ -27,7 +27,9 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.text.Editable
+import android.text.SpannableStringBuilder
 import android.text.TextWatcher
+import android.text.util.Linkify
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -41,6 +43,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.text.toSpannable
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -306,7 +309,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // Get DID and contact name and photo for use in recycler view
         // adapter
-        @Suppress("ConstantConditionIf")
         contactName = if (!BuildConfig.IS_DEMO) {
             getContactName(this, contact)
         } else {
@@ -582,7 +584,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
      * Sets up the conversation activity for demo mode.
      */
     private fun setupDemo() {
-        @Suppress("ConstantConditionIf")
         if (BuildConfig.IS_DEMO) {
             Notifications.getInstance(applicationContext).showDemoNotification(
                 getDemoNotification()
@@ -1070,7 +1071,9 @@ open class ConversationActivity(val bubble: Boolean = false) :
             val dateFormat = SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
             )
-            val dialogText = StringBuilder()
+
+            val dialogText = SpannableStringBuilder()
+
             if (message.voipId != null) {
                 dialogText.append(
                     getString(
@@ -1079,6 +1082,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 )
                 dialogText.append("\n")
             }
+
             if (message.isIncoming) {
                 dialogText.append(
                     getString(
@@ -1116,6 +1120,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 )
                 dialogText.append("\n")
             }
+
             dialogText.append(
                 getString(
                     R.string.conversation_info_date, dateFormat.format(
@@ -1123,10 +1128,38 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     )
                 )
             )
+
+            if (message.media1 != "") {
+                dialogText.append("\n")
+                dialogText.append(
+                    getString(
+                        R.string.conversation_info_media, message.media1
+                    )
+                )
+            }
+            if (message.media2 != "") {
+                dialogText.append("\n")
+                dialogText.append(
+                    getString(
+                        R.string.conversation_info_media, message.media2
+                    )
+                )
+            }
+            if (message.media3 != "") {
+                dialogText.append("\n")
+                dialogText.append(
+                    getString(
+                        R.string.conversation_info_media, message.media3
+                    )
+                )
+            }
+
+            Linkify.addLinks(dialogText, Linkify.WEB_URLS)
+
             showAlertDialog(
                 this,
                 getString(R.string.conversation_info_title),
-                dialogText.toString(),
+                dialogText.toSpannable(),
                 getString(R.string.ok), null, null, null
             )
         }
@@ -1151,7 +1184,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             ) as ClipboardManager
             val clip = ClipData.newPlainText(
                 getString(R.string.conversation_message_clipboard_description),
-                message.text
+                message.displayText
             )
             clipboard.setPrimaryClip(clip)
         }
@@ -1175,7 +1208,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             intent.type = "text/plain"
             intent.putExtra(
                 Intent.EXTRA_TEXT,
-                message.text
+                message.displayText
             )
             startActivity(Intent.createChooser(intent, null))
         }

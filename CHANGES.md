@@ -1,6 +1,7 @@
 ### 0.6.24 ###
 
 * Bug fixes
+* Limited initial support for receiving MMS
 * Restructure "about" section of help
 
 ### 0.6.23 ###
