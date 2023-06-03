@@ -12,6 +12,7 @@ licenseMap = {
     'Apache-2.0': 'Apache-2.0.txt',
     'The Apache License, Version 2.0': 'Apache-2.0.txt',
     'The Apache Software License, Version 2.0': 'Apache-2.0.txt',
+    'Apache License v2': 'Apache-2.0.txt',
 }
 
 licenseGroupMap = {
