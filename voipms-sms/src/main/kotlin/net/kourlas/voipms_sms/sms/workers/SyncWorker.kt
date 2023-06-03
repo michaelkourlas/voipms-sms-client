@@ -136,12 +136,26 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      */
     private suspend fun handleSync() {
         try {
+            val forceRecent = inputData.getBoolean(
+                applicationContext.getString(R.string.sync_force_recent), false
+            )
+
             // Terminate quietly if it is impossible to sync due to account
-            // configuration.
-            if (!accountConfigured(applicationContext) || !didsConfigured(
-                    applicationContext
-                )
-            ) {
+            // configuration, unless it is a full sync.
+            if (!accountConfigured(applicationContext)) {
+                if (!forceRecent) {
+                    error = applicationContext.getString(
+                        R.string.sync_error_account
+                    )
+                }
+                return
+            }
+            if (!didsConfigured(applicationContext)) {
+                if (!forceRecent) {
+                    error = applicationContext.getString(
+                        R.string.sync_error_dids
+                    )
+                }
                 return
             }
 
@@ -158,9 +172,6 @@ class SyncWorker(context: Context, params: WorkerParameters) :
 
             // Retrieve all messages from VoIP.ms, or only those messages
             // dated after the most recent message stored locally
-            val forceRecent = inputData.getBoolean(
-                applicationContext.getString(R.string.sync_force_recent), false
-            )
             val retrieveOnlyRecentMessages =
                 forceRecent || getRetrieveOnlyRecentMessages(applicationContext)
             // Retrieve messages from VoIP.ms that were deleted locally
