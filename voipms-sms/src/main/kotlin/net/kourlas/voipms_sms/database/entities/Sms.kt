@@ -21,7 +21,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import net.kourlas.voipms_sms.sms.Message
-import java.util.*
+import java.util.Date
 
 @Entity(tableName = Sms.TABLE_NAME)
 data class Sms(
@@ -36,7 +36,12 @@ data class Sms(
     @ColumnInfo(name = COLUMN_UNREAD) val unread: Long = 0,
     @ColumnInfo(name = COLUMN_DELIVERED) val delivered: Long = 0,
     @ColumnInfo(name = COLUMN_DELIVERY_IN_PROGRESS)
-    val deliveryInProgress: Long = 0
+    val deliveryInProgress: Long = 0,
+    @ColumnInfo(name = COLUMN_MEDIA1, defaultValue = "")
+    val media1: String = "",
+    @ColumnInfo(name = COLUMN_MEDIA2, defaultValue = "")
+    val media2: String = "",
+    @ColumnInfo(name = COLUMN_MEDIA3, defaultValue = "") val media3: String = ""
 ) {
     fun toMessage(): Message = Message(this)
 
@@ -55,5 +60,8 @@ data class Sms(
         const val COLUMN_UNREAD = "Unread"
         const val COLUMN_DELIVERED = "Delivered"
         const val COLUMN_DELIVERY_IN_PROGRESS = "DeliveryInProgress"
+        const val COLUMN_MEDIA1 = "Media1"
+        const val COLUMN_MEDIA2 = "Media2"
+        const val COLUMN_MEDIA3 = "Media3"
     }
 }

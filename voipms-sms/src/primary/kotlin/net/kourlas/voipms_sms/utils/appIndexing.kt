@@ -33,7 +33,7 @@ import net.kourlas.voipms_sms.sms.Message
 /**
  * Adds the specified message to the app index.
  */
-@Suppress("BlockingMethodInNonBlockingContext", "HasPlatformType")
+@Suppress("HasPlatformType")
 suspend fun addMessageToIndex(context: Context, message: Message) =
     withContext(Dispatchers.IO) {
         try {
@@ -52,7 +52,7 @@ suspend fun addMessageToIndex(context: Context, message: Message) =
 /**
  * Remove the entry with the specified URI from the app index.
  */
-@Suppress("BlockingMethodInNonBlockingContext", "HasPlatformType")
+@Suppress("HasPlatformType")
 suspend fun removeFromIndex(context: Context, string: String) =
     withContext(Dispatchers.IO) {
         try {
@@ -65,7 +65,7 @@ suspend fun removeFromIndex(context: Context, string: String) =
 /**
  * Remove the all entries from the app index.
  */
-@Suppress("BlockingMethodInNonBlockingContext", "HasPlatformType")
+@Suppress("HasPlatformType")
 suspend fun removeAllFromIndex(context: Context) =
     withContext(Dispatchers.IO) {
         try {
@@ -78,7 +78,6 @@ suspend fun removeAllFromIndex(context: Context) =
 /**
  * Replace the app index with the conversations in the database.
  */
-@Suppress("BlockingMethodInNonBlockingContext")
 suspend fun replaceIndex(context: Context) = withContext(Dispatchers.IO) {
     val applicationContext = context.applicationContext
     val indexables = mutableListOf<Indexable>()
@@ -138,7 +137,7 @@ private fun getMessageBuilder(
 ): MessageBuilder {
     val messageBuilder = Indexables.messageBuilder()
         .setUrl(message.messageUrl)
-        .setName(message.text)
+        .setName(message.displayText)
         .setIsPartOf(
             Indexables.conversationBuilder()
                 .setUrl(message.conversationUrl)

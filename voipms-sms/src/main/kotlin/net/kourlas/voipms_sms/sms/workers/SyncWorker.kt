@@ -23,7 +23,16 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.CancellationException
@@ -33,7 +42,15 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.preferences.accountConfigured
+import net.kourlas.voipms_sms.preferences.didsConfigured
+import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.preferences.getEmail
+import net.kourlas.voipms_sms.preferences.getPassword
+import net.kourlas.voipms_sms.preferences.getRetrieveDeletedMessages
+import net.kourlas.voipms_sms.preferences.getRetrieveOnlyRecentMessages
+import net.kourlas.voipms_sms.preferences.getStartDate
+import net.kourlas.voipms_sms.preferences.getSyncInterval
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
@@ -42,7 +59,10 @@ import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import java.io.IOException
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
@@ -246,12 +266,13 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                     mapOf(
                         "api_username" to getEmail(applicationContext),
                         "api_password" to getPassword(applicationContext),
-                        "method" to "getSMS",
+                        "method" to "getMMS",
                         "did" to it,
                         "limit" to "1000000",
                         "from" to sdf.format(period.first),
                         "to" to sdf.format(period.second),
-                        "timezone" to "-5"
+                        "timezone" to "-5",
+                        "all_messages" to "1",
                     ) // -5 corresponds to EDT
                 }
                 .mapTo(retrievalRequests) {
@@ -332,13 +353,16 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         val type: String,
         val did: String,
         val contact: String,
-        val message: String?
+        val message: String?,
+        val col_media1: String?,
+        val col_media2: String?,
+        val col_media3: String?,
     )
 
     @JsonClass(generateAdapter = true)
     data class MessagesResponse(
         val status: String,
-        @Suppress("ArrayInDataClass") val sms: List<MessageResponse>?
+        val sms: List<MessageResponse>?
     )
 
     /**
@@ -372,9 +396,12 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                 sdf.timeZone = TimeZone.getTimeZone("America/New_York")
 
                 try {
-                    if (message.message == null) {
-                        // This is probably an MMS message, which we don't
-                        // support yet.
+                    if (message.message == null
+                        && message.col_media1 == null
+                        && message.col_media2 == null
+                        && message.col_media3 == null
+                    ) {
+                        // This message is malformed.
                         continue
                     }
                     val incomingMessage = IncomingMessage(
@@ -385,7 +412,10 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                         toBoolean(message.type),
                         message.did,
                         message.contact,
-                        message.message
+                        message.message,
+                        message.col_media1,
+                        message.col_media2,
+                        message.col_media3
                     )
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
@@ -445,11 +475,20 @@ class SyncWorker(context: Context, params: WorkerParameters) :
      * @param did The DID associated with the message.
      * @param contact The contact associated with the message.
      * @param text The text of the message.
+     * @param media1 The URI to the first media associated with the message.
+     * @param media2 The URI to the second media associated with the message.
+     * @param media3 The URI to the third media associated with the message.
      */
     data class IncomingMessage(
-        val voipId: Long, val date: Date,
-        val isIncoming: Boolean, val did: String,
-        val contact: String, val text: String
+        val voipId: Long,
+        val date: Date,
+        val isIncoming: Boolean,
+        val did: String,
+        val contact: String,
+        val text: String?,
+        val media1: String?,
+        val media2: String?,
+        val media3: String?
     ) {
         init {
             validatePhoneNumber(did)

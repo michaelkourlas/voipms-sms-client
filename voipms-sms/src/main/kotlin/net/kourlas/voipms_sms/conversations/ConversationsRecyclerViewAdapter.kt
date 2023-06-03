@@ -195,61 +195,75 @@ class ConversationsRecyclerViewAdapter<T>(
         val conversationItem = conversationItems[position]
         val message = conversationItem.message
 
+        val text = message.displayText
         val messageTextBuilder = SpannableStringBuilder()
 
-        // Highlight text that matches filter
-        val index = message.text.lowercase(Locale.getDefault()).indexOf(
-            currConstraint.lowercase(Locale.getDefault())
-        )
-        if (currConstraint != "" && index != -1) {
-            var nonMessageOffset = index
-            if (message.isOutgoing) {
-                // Preface with "You: " if outgoing
-                val youStr = activity.getString(
-                    R.string.conversations_message_you
-                ) + " "
-                messageTextBuilder.insert(0, youStr)
-                nonMessageOffset += youStr.length
-            }
-
-            // If match is in the middle of the string, show partial string
-            var substringOffset = index - 20
-            if (substringOffset > 0) {
-                messageTextBuilder.append("…")
-                nonMessageOffset += 1
-
-                while (message.text[substringOffset] != ' '
-                    && substringOffset < index - 1
-                ) {
-                    substringOffset += 1
+        if (message.text != "") {
+            // Highlight text that matches filter
+            val index = text.lowercase(Locale.getDefault()).indexOf(
+                currConstraint.lowercase(Locale.getDefault())
+            )
+            if (currConstraint != "" && index != -1) {
+                var nonMessageOffset = index
+                if (message.isOutgoing) {
+                    // Preface with "You: " if outgoing
+                    val youStr = activity.getString(
+                        R.string.conversations_message_you
+                    ) + " "
+                    messageTextBuilder.insert(0, youStr)
+                    nonMessageOffset += youStr.length
                 }
-                substringOffset += 1
-            } else {
-                substringOffset = 0
-            }
 
-            messageTextBuilder.append(message.text.substring(substringOffset))
-            messageTextBuilder.setSpan(
-                BackgroundColorSpan(
-                    ContextCompat.getColor(
-                        activity,
-                        R.color.highlight
+                // If match is in the middle of the string, show partial string
+                var substringOffset = index - 20
+                if (substringOffset > 0) {
+                    messageTextBuilder.append("…")
+                    nonMessageOffset += 1
+
+                    while (text[substringOffset] != ' '
+                        && substringOffset < index - 1
+                    ) {
+                        substringOffset += 1
+                    }
+                    substringOffset += 1
+                } else {
+                    substringOffset = 0
+                }
+
+                messageTextBuilder.append(text.substring(substringOffset))
+                messageTextBuilder.setSpan(
+                    BackgroundColorSpan(
+                        ContextCompat.getColor(
+                            activity,
+                            R.color.highlight
+                        )
+                    ),
+                    nonMessageOffset - substringOffset,
+                    nonMessageOffset - substringOffset + currConstraint.length,
+                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
+                )
+                messageTextBuilder.setSpan(
+                    ForegroundColorSpan(
+                        ContextCompat.getColor(
+                            activity, android.R.color.black
+                        )
+                    ),
+                    nonMessageOffset - substringOffset,
+                    nonMessageOffset - substringOffset + currConstraint.length,
+                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
+                )
+            } else {
+                if (message.isOutgoing) {
+                    // Preface with "You: " if outgoing
+                    messageTextBuilder.append(
+                        activity.getString(
+                            R.string.conversations_message_you
+                        )
                     )
-                ),
-                nonMessageOffset - substringOffset,
-                nonMessageOffset - substringOffset + currConstraint.length,
-                SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
-            )
-            messageTextBuilder.setSpan(
-                ForegroundColorSpan(
-                    ContextCompat.getColor(
-                        activity, android.R.color.black
-                    )
-                ),
-                nonMessageOffset - substringOffset,
-                nonMessageOffset - substringOffset + currConstraint.length,
-                SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
-            )
+                    messageTextBuilder.append(" ")
+                }
+                messageTextBuilder.append(text)
+            }
         } else {
             if (message.isOutgoing) {
                 // Preface with "You: " if outgoing
@@ -260,8 +274,18 @@ class ConversationsRecyclerViewAdapter<T>(
                 )
                 messageTextBuilder.append(" ")
             }
-            messageTextBuilder.append(message.text)
+
+            val nonMessageOffset = messageTextBuilder.length
+
+            messageTextBuilder.append(text)
+
+            messageTextBuilder.setSpan(
+                StyleSpan(Typeface.ITALIC), nonMessageOffset,
+                messageTextBuilder.length,
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+            )
         }
+
         holder.messageTextView.text = messageTextBuilder
 
         // Mark text as bold and supporting additional lines if unread
@@ -363,7 +387,6 @@ class ConversationsRecyclerViewAdapter<T>(
         fun doFiltering(constraint: CharSequence): ConversationsFilter {
             val resultsObject = ConversationsFilter()
 
-            @Suppress("ConstantConditionIf")
             if (!BuildConfig.IS_DEMO) {
                 val activeDid = getActiveDid(activity)
                 runBlocking {
@@ -395,7 +418,6 @@ class ConversationsRecyclerViewAdapter<T>(
             }
 
             for (message in resultsObject.messages) {
-                @Suppress("ConstantConditionIf")
                 val contactName = if (!BuildConfig.IS_DEMO) {
                     getContactName(
                         activity,
@@ -471,7 +493,6 @@ class ConversationsRecyclerViewAdapter<T>(
             if (results.values != null) {
                 // The Android results interface uses type Any, so we have
                 // no choice but to use an unchecked cast
-                @Suppress("UNCHECKED_CAST")
                 newMessages = resultsObject.messages
             } else {
                 newMessages = emptyList()
@@ -534,7 +555,7 @@ class ConversationsRecyclerViewAdapter<T>(
                 recyclerView.findViewHolderForAdapterPosition(idx)?.let {
                     // Try to update the view holder directly so that we
                     // don't see the "change" animation
-                    @Suppress("RemoveRedundantQualifierName", "UNCHECKED_CAST")
+                    @Suppress("UNCHECKED_CAST")
                     onBindViewHolder(
                         it as ConversationsRecyclerViewAdapter<T>
                         .ConversationViewHolder, idx
@@ -634,7 +655,7 @@ class ConversationsRecyclerViewAdapter<T>(
             if ((previous && !_checked) || (!previous && _checked)) {
 
                 recyclerView.findViewHolderForAdapterPosition(position)?.let {
-                    @Suppress("RemoveRedundantQualifierName", "UNCHECKED_CAST")
+                    @Suppress("UNCHECKED_CAST")
                     updateViewHolderContactBadge(
                         it as ConversationsRecyclerViewAdapter<T>
                         .ConversationViewHolder, position

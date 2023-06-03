@@ -168,7 +168,6 @@ class Database private constructor(private val context: Context) {
     /**
      * Exports the database to the specified file descriptor.
      */
-    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun export(exportFd: ParcelFileDescriptor) =
         importExportLock.write {
             val dbFile = context.getDatabasePath(DATABASE_NAME)
@@ -363,7 +362,6 @@ class Database private constructor(private val context: Context) {
     /**
      * Imports the database from the specified file descriptor.
      */
-    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun import(importFd: ParcelFileDescriptor) = coroutineScope {
         importExportLock.write {
             val dbFile = context.getDatabasePath(DATABASE_NAME)
@@ -472,7 +470,10 @@ class Database private constructor(private val context: Context) {
                             unread = if (message.isUnread) 1L else 0L,
                             delivered = if (message.isDelivered) 1L else 0L,
                             deliveryInProgress = if (message.isDeliveryInProgress)
-                                1L else 0L
+                                1L else 0L,
+                            media1 = message.media1,
+                            media2 = message.media2,
+                            media3 = message.media3,
                         )
 
                         // Don't add the message if it already exists in our
@@ -546,7 +547,10 @@ class Database private constructor(private val context: Context) {
                                 1L else 0L,
                             did = incomingMessage.did,
                             contact = incomingMessage.contact,
-                            text = incomingMessage.text,
+                            text = incomingMessage.text ?: "",
+                            media1 = incomingMessage.media1 ?: "",
+                            media2 = incomingMessage.media2 ?: "",
+                            media3 = incomingMessage.media3 ?: "",
                             unread = if (incomingMessage.isIncoming)
                                 1L else 0L,
                             delivered = 1L,
@@ -1048,11 +1052,12 @@ class Database private constructor(private val context: Context) {
 
     companion object {
         private const val DATABASE_NAME = "sms.db"
-        const val DATABASE_VERSION = 10
+        const val DATABASE_VERSION = 11
 
         private val migration9To10 = object : Migration(9, 10) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Do nothing.
+                // Do nothing. The database did not change when we switched
+                // to Room.
             }
         }
 

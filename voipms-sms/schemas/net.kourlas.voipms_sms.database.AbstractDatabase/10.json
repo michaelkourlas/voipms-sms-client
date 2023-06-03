@@ -1,0 +1,196 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 10,
+    "identityHash": "b12dc609a741e6050fd02271bfcabb4f",
+    "entities": [
+      {
+        "tableName": "sms",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `VoipId` INTEGER, `Date` INTEGER NOT NULL, `Type` INTEGER NOT NULL, `Did` TEXT NOT NULL, `Contact` TEXT NOT NULL, `Text` TEXT NOT NULL, `Unread` INTEGER NOT NULL, `Delivered` INTEGER NOT NULL, `DeliveryInProgress` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "databaseId",
+            "columnName": "DatabaseId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "voipId",
+            "columnName": "VoipId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "Date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "incoming",
+            "columnName": "Type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "did",
+            "columnName": "Did",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contact",
+            "columnName": "Contact",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "Text",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unread",
+            "columnName": "Unread",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "delivered",
+            "columnName": "Delivered",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deliveryInProgress",
+            "columnName": "DeliveryInProgress",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "DatabaseId"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "archived",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `Did` TEXT NOT NULL, `Contact` TEXT NOT NULL, `Archived` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "databaseId",
+            "columnName": "DatabaseId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "did",
+            "columnName": "Did",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contact",
+            "columnName": "Contact",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "archived",
+            "columnName": "Archived",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "DatabaseId"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "draft",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `Did` TEXT NOT NULL, `Contact` TEXT NOT NULL, `Text` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "databaseId",
+            "columnName": "DatabaseId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "did",
+            "columnName": "Did",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contact",
+            "columnName": "Contact",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "Text",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "DatabaseId"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "deleted",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`DatabaseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `VoipId` INTEGER NOT NULL, `Did` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "databaseId",
+            "columnName": "DatabaseId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "voipId",
+            "columnName": "VoipId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "did",
+            "columnName": "Did",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "DatabaseId"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b12dc609a741e6050fd02271bfcabb4f')"
+    ]
+  }
+}

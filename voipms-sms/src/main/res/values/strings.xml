@@ -176,6 +176,7 @@
     <string name="conversation_info_id">ID: %1$d</string>
     <string name="conversation_info_title">Message details</string>
     <string name="conversation_info_to">To: %1$s</string>
+    <string name="conversation_info_media">Media: %1$s</string>
     <string name="conversation_message_clipboard_description">Text message</string>
     <string name="conversation_message_not_sent">Not sent. Touch to try again.</string>
     <string name="conversation_message_sending">Sending…</string>

@@ -44,8 +44,14 @@ import net.kourlas.voipms_sms.demo.getConversationDemoMessages
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.ui.FastScroller
-import net.kourlas.voipms_sms.utils.*
-import java.util.*
+import net.kourlas.voipms_sms.utils.applyCircularMask
+import net.kourlas.voipms_sms.utils.applyRoundedCornersMask
+import net.kourlas.voipms_sms.utils.getConversationViewDate
+import net.kourlas.voipms_sms.utils.getConversationViewTopDate
+import net.kourlas.voipms_sms.utils.getScrollBarDate
+import net.kourlas.voipms_sms.utils.logException
+import net.kourlas.voipms_sms.utils.showSnackbar
+import java.util.Locale
 import kotlin.math.max
 
 /**
@@ -205,35 +211,45 @@ class ConversationRecyclerViewAdapter(
 
         val messageText = holder.messageText
         val messageTextBuilder = SpannableStringBuilder()
-        messageTextBuilder.append(message.text)
+        val text = message.displayText
+        messageTextBuilder.append(text)
 
-        // Highlight text that matches filter
-        if (currConstraint != "") {
-            val index = message.text.lowercase(Locale.getDefault()).indexOf(
-                currConstraint.lowercase(Locale.getDefault())
-            )
-            if (index != -1) {
-                messageTextBuilder.setSpan(
-                    BackgroundColorSpan(
-                        ContextCompat.getColor(
-                            activity, R.color.highlight
-                        )
-                    ),
-                    index,
-                    index + currConstraint.length,
-                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
-                )
-                messageTextBuilder.setSpan(
-                    ForegroundColorSpan(
-                        ContextCompat.getColor(
-                            activity, android.R.color.black
-                        )
-                    ),
-                    index,
-                    index + currConstraint.length,
-                    SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
-                )
+        if (message.text != "") {
+            // Highlight text that matches filter
+            if (currConstraint != "") {
+                val index =
+                    text.lowercase(Locale.getDefault()).indexOf(
+                        currConstraint.lowercase(Locale.getDefault())
+                    )
+                if (index != -1) {
+                    messageTextBuilder.setSpan(
+                        BackgroundColorSpan(
+                            ContextCompat.getColor(
+                                activity, R.color.highlight
+                            )
+                        ),
+                        index,
+                        index + currConstraint.length,
+                        SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
+                    )
+                    messageTextBuilder.setSpan(
+                        ForegroundColorSpan(
+                            ContextCompat.getColor(
+                                activity, android.R.color.black
+                            )
+                        ),
+                        index,
+                        index + currConstraint.length,
+                        SpannableString.SPAN_INCLUSIVE_EXCLUSIVE
+                    )
+                }
             }
+        } else {
+            messageTextBuilder.setSpan(
+                StyleSpan(Typeface.ITALIC), 0,
+                messageTextBuilder.length,
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+            )
         }
         messageText.text = messageTextBuilder
 
@@ -382,7 +398,6 @@ class ConversationRecyclerViewAdapter(
         fun doFiltering(constraint: CharSequence): ConversationFilter {
             // Get filtered messages
             val resultsObject = ConversationFilter()
-            @Suppress("ConstantConditionIf")
             if (!BuildConfig.IS_DEMO) {
                 runBlocking {
                     val filterString = constraint.toString()
