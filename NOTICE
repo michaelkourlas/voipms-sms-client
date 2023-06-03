@@ -16,9 +16,6 @@ VoIP.ms SMS incorporates certain code licensed under the Apache License 2.0 (htt
 * SecurePreferences and KeystoreTool code from secure-storage-android (https://github.com/adorsys/secure-storage-android)
   Copyright (C) 2017 adorsys GmbH & Co. KG
 
-* Link movement code from Better-Link-Movement-Method (https://github.com/saket/Better-Link-Movement-Method)  
-  Copyright 2018 Saket Narayan.
-
 The text of the Apache License 2.0 is as follows:
 
 ```

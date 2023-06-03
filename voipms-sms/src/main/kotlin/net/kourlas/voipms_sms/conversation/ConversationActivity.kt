@@ -77,7 +77,6 @@ import java.util.*
  */
 open class ConversationActivity(val bubble: Boolean = false) :
     AppCompatActivity(), ActionMode.Callback,
-    View.OnLongClickListener, View.OnClickListener,
     ActivityCompat.OnRequestPermissionsResultCallback {
     // UI elements
     private lateinit var recyclerView: RecyclerView
@@ -1270,7 +1269,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
         return true
     }
 
-    override fun onClick(view: View) {
+    fun onItemClick(view: View) {
         if (actionMode != null) {
             // Check or uncheck item when action mode is enabled
             toggleItem(getRecyclerViewContainingItem(view))
@@ -1308,7 +1307,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
         }
     }
 
-    override fun onLongClick(view: View): Boolean {
+    fun onItemLongClick(view: View): Boolean {
         // On long click, toggle selected item
         toggleItem(getRecyclerViewContainingItem(view))
         return true

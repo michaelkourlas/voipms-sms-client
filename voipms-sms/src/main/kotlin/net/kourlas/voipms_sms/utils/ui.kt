@@ -29,7 +29,6 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.net.Uri
 import android.provider.Settings
-import android.text.method.LinkMovementMethod
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewOutlineProvider
@@ -39,6 +38,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.snackbar.Snackbar
+import me.saket.bettermovementmethod.BetterLinkMovementMethod
 import net.kourlas.voipms_sms.R
 import kotlin.math.abs
 
@@ -130,7 +130,7 @@ fun showAlertDialog(
 
         val dialog = builder.show()
         dialog.findViewById<TextView>(android.R.id.message)?.movementMethod =
-            LinkMovementMethod.getInstance()
+            BetterLinkMovementMethod.newInstance()
     }
     return null
 }

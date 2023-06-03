@@ -37,6 +37,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.runBlocking
+import me.saket.bettermovementmethod.BetterLinkMovementMethod
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
@@ -274,13 +275,18 @@ class ConversationRecyclerViewAdapter(
             messageText,
             Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS or Linkify.WEB_URLS
         )
-        messageText.movementMethod = null
-        (messageText as MessageTextView).messageLongClickListener = {
-            val pos = messageItems.indexOf(messageItem)
-            if (pos != -1) {
-                messageItem.toggle(pos)
-            }
+        messageText.setOnClickListener { textView ->
+            activity.onItemClick(textView)
         }
+        messageText.setOnLongClickListener { textView ->
+            activity.onItemLongClick(textView)
+        }
+        messageText.movementMethod =
+            BetterLinkMovementMethod.newInstance().apply {
+                setOnLinkLongClickListener { _, _ ->
+                    true
+                }
+            }
     }
 
     /**
@@ -709,9 +715,7 @@ class ConversationRecyclerViewAdapter(
             // Allow the message view itself to be selectable and add rounded
             // corners to it
             smsContainer.isClickable = true
-            smsContainer.setOnClickListener(activity)
             smsContainer.isLongClickable = true
-            smsContainer.setOnLongClickListener(activity)
             applyRoundedCornersMask(smsContainer)
 
             // Apply circular mask to and remove overlay from contact badge
