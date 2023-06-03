@@ -27,6 +27,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity
@@ -34,7 +35,12 @@ import net.kourlas.voipms_sms.preferences.controls.MasterSwitchPreference
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.enablePushNotifications
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.preferences
+import net.kourlas.voipms_sms.utils.replaceIndex
+import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
+import net.kourlas.voipms_sms.utils.showSnackbar
 
 class DidsPreferencesFragment : PreferenceFragmentCompat() {
     // Sentinel used to prevent preferences from being loaded twice (once on
@@ -82,7 +88,10 @@ class DidsPreferencesFragment : PreferenceFragmentCompat() {
 
                     // Regardless of whether an error occurred, mark setup as
                     // complete
-                    setSetupCompletedForVersion(activity, 134)
+                    setSetupCompletedForVersion(
+                        activity,
+                        BuildConfig.VERSION_CODE.toLong()
+                    )
                 }
             }
         }

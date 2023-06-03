@@ -30,10 +30,20 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
-import net.kourlas.voipms_sms.preferences.*
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.preferences.getDidRetrieveMessages
+import net.kourlas.voipms_sms.preferences.getDidShowInConversationsView
+import net.kourlas.voipms_sms.preferences.getDidShowNotifications
+import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.preferences.setDids
+import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
+import net.kourlas.voipms_sms.utils.abortActivity
+import net.kourlas.voipms_sms.utils.enablePushNotifications
+import net.kourlas.voipms_sms.utils.replaceIndex
+import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
+import net.kourlas.voipms_sms.utils.showSnackbar
 
 class DidPreferencesFragment : PreferenceFragmentCompat() {
     private lateinit var did: String
@@ -69,7 +79,10 @@ class DidPreferencesFragment : PreferenceFragmentCompat() {
 
                         // Regardless of whether an error occurred, mark setup
                         // as complete
-                        setSetupCompletedForVersion(activity, 134)
+                        setSetupCompletedForVersion(
+                            activity,
+                            BuildConfig.VERSION_CODE.toLong()
+                        )
                     }
                 }
             }

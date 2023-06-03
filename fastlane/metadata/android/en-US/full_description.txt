@@ -1,13 +1,12 @@
 <b>Overview</b>
 <p>VoIP.ms SMS is an Android messaging app for VoIP.ms that seeks to replicate the aesthetic of <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.messaging">Google&#39;s official SMS app</a>.</p>
 <b>Features</b>
-<ul>
-<li>Material design</li>
-<li>Push notifications (if using the Google Play version of the app)</li>
-<li>Synchronization with device contacts</li>
-<li>Message search</li>
-<li>Comprehensive support for synchronization with VoIP.ms</li>
-<li>Completely free</li>
+• Material design
+• Push notifications (if using the Google Play version of the app)
+• Synchronization with device contacts
+• Message search
+• Comprehensive support for synchronization with VoIP.ms
+• Completely free
 </ul>
 <b>Rationale</b>
 <p>A number of people use VoIP.ms as a cheaper alternative to subscribing to a voice plan for their mobile devices.</p>

@@ -21,13 +21,23 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.preferences.accountConfigured
+import net.kourlas.voipms_sms.preferences.didsConfigured
+import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.preferences.getEmail
+import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
 import java.io.IOException
@@ -151,9 +161,8 @@ class NotificationsRegistrationWorker(
                             "enable" to "1",
                             "url_callback_enable" to "1",
                             ("url_callback"
-                                to "https://us-south.functions.appdomain.cloud/"
-                                + "api/v1/web/michael%40kourlas.com_dev/default/"
-                                + "voipmssms-notify?did={TO}"),
+                                to "https://voipmssms-notify.kourlas.com/"
+                                + "?did={TO}"),
                             "url_callback_retry" to "0"
                         )
                     )

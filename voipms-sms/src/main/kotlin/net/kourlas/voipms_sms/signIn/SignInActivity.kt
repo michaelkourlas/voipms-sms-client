@@ -102,7 +102,9 @@ class SignInActivity : AppCompatActivity() {
                             password.text?.toString() ?: ""
                         )
 
-                        setFirstSyncAfterSignIn(this@SignInActivity, true)
+                        if (!didsConfigured(applicationContext)) {
+                            setFirstSyncAfterSignIn(this@SignInActivity, true)
+                        }
 
                         RetrieveDidsWorker.retrieveDids(
                             this@SignInActivity, autoAdd = true

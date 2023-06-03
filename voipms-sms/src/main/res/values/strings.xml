@@ -406,6 +406,6 @@
     <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>
     <string name="copyright">Copyright © 2015–2023 Michael Kourlas</string>
-    <string name="version">Version 0.6.23</string>
+    <string name="version">Version 0.6.24</string>
     <string name="toast_error">Error: %1$s</string>
 </resources>
