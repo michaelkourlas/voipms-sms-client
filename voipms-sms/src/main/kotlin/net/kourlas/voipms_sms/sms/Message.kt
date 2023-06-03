@@ -284,7 +284,7 @@ class Message(
                 )
                 builder.append("\n\n")
             }
-            builder.deleteRange(builder.length - 3, builder.length)
+            builder.deleteRange(builder.length - 2, builder.length)
             return builder.toString()
         }
 
