@@ -1,3 +1,8 @@
+### 0.6.24 ###
+
+* Bug fixes
+* Restructure "about" section of help
+
 ### 0.6.23 ###
 
 * Bug fixes
