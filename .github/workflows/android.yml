@@ -22,7 +22,7 @@ jobs:
           python-version: '3.10'
       - name: Create google-services.json
         env: # Or as an environment variable
-          google_services_key: ${{ secrets.GOOGLE_SERVICES_KEY }}
-        run: printf "%s" "$google_services_key" > voipms-sms/src/primary/google-services.json
+          $google_services_json: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf "%s" "$google_services_json" > voipms-sms/src/primary/google-services.json
       - name: Build with Gradle
         run: ./gradlew build
