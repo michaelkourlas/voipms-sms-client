@@ -275,6 +275,10 @@ class Message(
      */
     val mediaDisplayText: String
         get() {
+            if (medias.isEmpty()) {
+                return ""
+            }
+
             val builder = StringBuilder()
             for (media in medias) {
                 builder.append(
