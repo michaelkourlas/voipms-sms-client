@@ -23,6 +23,6 @@ jobs:
       - name: Create google-services.json
         env: # Or as an environment variable
           $google_services_json: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: printf "%s" "$google_services_json" > voipms-sms/src/primary/google-services.json
+        run: echo $google_services_json | base64 -d > voipms-sms/src/primary/google-services.json
       - name: Build with Gradle
         run: ./gradlew build
