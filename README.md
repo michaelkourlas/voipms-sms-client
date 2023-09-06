@@ -32,9 +32,9 @@ VoIP.ms does provide a [mobile version](https://sms.voip.ms/) of this interface 
 
 ## Installation ##
 
-The standard version of the app uses closed-source Firebase libraries to support push notifications and facilitate crash reporting and analytics, among other purposes. A version of the application that is completely open source is available from F-Droid.
+The Google Play version of the app uses closed-source Firebase libraries to support push notifications and facilitate crash reporting and analytics, among other purposes. The F-Droid version of the application is completely open source.
 
-The standard version of the app can be downloaded from the [Releases section](https://github.com/michaelkourlas/voipms-sms-client/releases) of the GitHub repository.
+The Google Play version of the app can be downloaded from the [Releases section](https://github.com/michaelkourlas/voipms-sms-client/releases) of the GitHub repository.
 
 ## Documentation ##
 
