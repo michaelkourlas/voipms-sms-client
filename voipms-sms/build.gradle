@@ -131,15 +131,6 @@ dependencies {
     kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
 }
 
-tasks.whenTaskAdded { task ->
-    if (task.name.contains("Fdroid")
-        && (task.name.contains("GoogleServices")
-            || task.name.contains("Crashlytics")))
-    {
-        task.enabled = false
-    }
-}
-
 task cleanAssets(type: Delete) {
     delete 'src/main/assets'
 }
@@ -172,5 +163,8 @@ android.applicationVariants.all { variant ->
     generatePackageLicenses.dependsOn cleanAssets
 }
 
-apply plugin: "com.google.gms.google-services"
-apply plugin: "com.google.firebase.crashlytics"
+if (!getGradle().getStartParameter().getTaskRequests().toString().contains(
+        "Fdroid")) {
+    apply plugin: "com.google.gms.google-services"
+    apply plugin: "com.google.firebase.crashlytics"
+}
