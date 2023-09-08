@@ -25,4 +25,4 @@ jobs:
           google_services_json: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: echo $google_services_json | base64 -d > voipms-sms/src/primary/google-services.json
       - name: Build with Gradle
-        run: ./gradlew build primaryFullDebug
+        run: ./gradlew assemblePrimary
