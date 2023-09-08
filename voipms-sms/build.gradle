@@ -163,8 +163,6 @@ android.applicationVariants.all { variant ->
     generatePackageLicenses.dependsOn cleanAssets
 }
 
-if (!getGradle().getStartParameter().getTaskRequests().toString().contains(
-        "Fdroid")) {
-    apply plugin: "com.google.gms.google-services"
-    apply plugin: "com.google.firebase.crashlytics"
-}
+// Comment out for F-Droid builds
+apply plugin: "com.google.gms.google-services"
+apply plugin: "com.google.firebase.crashlytics"
