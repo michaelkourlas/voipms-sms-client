@@ -1,6 +1,8 @@
 ### 0.6.26 ###
 
+* Target API 34
 * Update dependencies
+* Fix lint issues
 
 ### 0.6.25 ###
 
