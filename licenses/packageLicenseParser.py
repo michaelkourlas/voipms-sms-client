@@ -16,6 +16,7 @@ licenseMap = {
 }
 
 licenseGroupMap = {
+    ('The MIT License', 'org.checkerframework', 'checker-qual', '3.12.0'): 'checker-qual.txt',
     ('MIT License', 'com.github.mukeshsolanki', 'MarkdownView-Android', '2.0.0'): 'MarkdownView-Android.txt'
 }
 
