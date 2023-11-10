@@ -21,7 +21,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import net.kourlas.voipms_sms.R
@@ -57,6 +64,9 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
                 R.string.verify_credentials_complete_valid
             ),
             valid
+        )
+        verifyCredentialsCompleteIntent.setPackage(
+            applicationContext.packageName
         )
         applicationContext.sendBroadcast(verifyCredentialsCompleteIntent)
 

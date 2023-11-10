@@ -433,11 +433,13 @@ open class ConversationsActivity(val archived: Boolean = false) :
         (application as CustomApplication).conversationsActivityIncrementCount()
 
         // Register dynamic receivers for this activity
-        registerReceiver(
+        registerNonExportedReceiver(
+            this,
             syncCompleteReceiver,
             IntentFilter(getString(R.string.sync_complete_action))
         )
-        registerReceiver(
+        registerNonExportedReceiver(
+            this,
             pushNotificationsRegistrationCompleteReceiver,
             IntentFilter(
                 getString(
@@ -445,7 +447,8 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 )
             )
         )
-        registerReceiver(
+        registerNonExportedReceiver(
+            this,
             coffeeCompleteReceiver,
             IntentFilter(
                 getString(

@@ -151,6 +151,9 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
                             R.string.coffee_complete_action
                         )
                     )
+                    coffeeCompleteBroadcastIntent.setPackage(
+                        context.packageName
+                    )
                     context.sendBroadcast(coffeeCompleteBroadcastIntent)
 
                     val consumeParams = ConsumeParams.newBuilder()

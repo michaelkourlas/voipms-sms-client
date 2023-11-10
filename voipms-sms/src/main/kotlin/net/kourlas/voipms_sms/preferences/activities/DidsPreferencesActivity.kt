@@ -35,6 +35,7 @@ import net.kourlas.voipms_sms.network.NetworkManager
 import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.fragments.DidsPreferencesFragment
 import net.kourlas.voipms_sms.sms.workers.RetrieveDidsWorker
+import net.kourlas.voipms_sms.utils.registerNonExportedReceiver
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
@@ -111,7 +112,8 @@ class DidsPreferencesActivity : AppCompatActivity() {
         super.onResume()
 
         // Register dynamic receivers for this fragment
-        registerReceiver(
+        registerNonExportedReceiver(
+            this,
             didRetrievalCompleteReceiver,
             IntentFilter(getString(R.string.retrieve_dids_complete_action))
         )

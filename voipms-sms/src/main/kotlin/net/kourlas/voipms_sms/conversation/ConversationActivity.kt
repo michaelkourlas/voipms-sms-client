@@ -641,11 +641,13 @@ open class ConversationActivity(val bubble: Boolean = false) :
         super.onResume()
 
         // Register all dynamic receivers for this activity
-        registerReceiver(
+        registerNonExportedReceiver(
+            this,
             syncCompleteReceiver,
-            IntentFilter(getString(R.string.sync_complete_action))
+            IntentFilter(getString(R.string.sync_complete_action)),
         )
-        registerReceiver(
+        registerNonExportedReceiver(
+            this,
             sentMessageReceiver,
             IntentFilter(
                 applicationContext.getString(

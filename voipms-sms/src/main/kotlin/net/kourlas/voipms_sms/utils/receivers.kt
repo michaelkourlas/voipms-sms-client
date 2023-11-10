@@ -17,8 +17,26 @@
 
 package net.kourlas.voipms_sms.utils
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Context.RECEIVER_NOT_EXPORTED
+import android.content.IntentFilter
+import android.os.Build
 import androidx.fragment.app.FragmentActivity
+
+@SuppressLint("UnspecifiedRegisterReceiverFlag")
+fun registerNonExportedReceiver(
+    context: Context,
+    receiver: BroadcastReceiver,
+    filter: IntentFilter
+) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        context.registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED)
+    } else {
+        context.registerReceiver(receiver, filter)
+    }
+}
 
 /**
  * Unregisters the specified broadcast receiver from the specified activity.

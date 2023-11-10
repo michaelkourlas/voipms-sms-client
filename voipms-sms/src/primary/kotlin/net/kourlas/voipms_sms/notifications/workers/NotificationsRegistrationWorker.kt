@@ -96,6 +96,9 @@ class NotificationsRegistrationWorker(
                     callbackFailedDids.toList()
                 ) else null
         )
+        registrationCompleteIntent.setPackage(
+            applicationContext.packageName
+        )
         applicationContext.sendBroadcast(registrationCompleteIntent)
 
         return Result.success()

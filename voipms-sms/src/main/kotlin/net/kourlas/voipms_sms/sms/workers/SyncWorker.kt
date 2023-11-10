@@ -110,6 +110,9 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                     ), true
                 )
             }
+            syncCompleteBroadcastIntent.setPackage(
+                applicationContext.packageName
+            )
             applicationContext.sendBroadcast(syncCompleteBroadcastIntent)
         }
     }

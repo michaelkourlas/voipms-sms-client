@@ -65,6 +65,9 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
             applicationContext.getString(R.string.retrieve_dids_complete_dids),
             if (dids != null) ArrayList<String>(dids.toList()) else null
         )
+        retrieveDidsCompleteIntent.setPackage(
+            applicationContext.packageName
+        )
         applicationContext.sendBroadcast(retrieveDidsCompleteIntent)
 
         return if (error == null) {

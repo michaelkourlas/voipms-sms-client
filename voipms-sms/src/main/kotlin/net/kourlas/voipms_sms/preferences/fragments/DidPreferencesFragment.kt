@@ -41,6 +41,7 @@ import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 import net.kourlas.voipms_sms.utils.abortActivity
 import net.kourlas.voipms_sms.utils.enablePushNotifications
+import net.kourlas.voipms_sms.utils.registerNonExportedReceiver
 import net.kourlas.voipms_sms.utils.replaceIndex
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
@@ -168,7 +169,8 @@ class DidPreferencesFragment : PreferenceFragmentCompat() {
             }
 
             // Register dynamic receivers for this fragment
-            it.registerReceiver(
+            registerNonExportedReceiver(
+                it,
                 pushNotificationsRegistrationCompleteReceiver,
                 IntentFilter(
                     getString(

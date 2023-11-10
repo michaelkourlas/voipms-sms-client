@@ -40,6 +40,7 @@ import net.kourlas.voipms_sms.preferences.*
 import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.sms.workers.RetrieveDidsWorker
 import net.kourlas.voipms_sms.sms.workers.VerifyCredentialsWorker
+import net.kourlas.voipms_sms.utils.registerNonExportedReceiver
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
@@ -144,7 +145,8 @@ class SignInActivity : AppCompatActivity() {
         }
 
         // Register dynamic receivers for this fragment
-        registerReceiver(
+        registerNonExportedReceiver(
+            this,
             verifyCredentialsCompleteReceiver,
             IntentFilter(
                 getString(
@@ -152,7 +154,8 @@ class SignInActivity : AppCompatActivity() {
                 )
             )
         )
-        registerReceiver(
+        registerNonExportedReceiver(
+            this,
             didRetrievalCompleteReceiver,
             IntentFilter(
                 getString(
