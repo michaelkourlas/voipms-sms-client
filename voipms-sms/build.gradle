@@ -4,14 +4,13 @@ apply plugin: "kotlin-kapt"
 apply plugin: "net.kourlas.oss-licenses-plugin"
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion "32.0.0"
+    compileSdkVersion 34
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 146
-        versionName "0.6.25"
+        targetSdkVersion 34
+        versionCode 147
+        versionName "0.6.26"
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -94,38 +93,40 @@ android {
 }
 
 dependencies {
-    def room_version = "2.5.1"
+    def room_version = "2.6.0"
     def moshi_version = "1.14.0"
 
     // Kotlin libraries
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
 
     // Android support libraries
-    implementation "androidx.annotation:annotation:1.6.0"
+    implementation "androidx.annotation:annotation:1.7.0"
     implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation "androidx.compose.ui:ui:1.4.3"
-    implementation "androidx.core:core-ktx:1.10.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1"
-    implementation "androidx.preference:preference-ktx:1.2.0"
-    implementation "androidx.recyclerview:recyclerview:1.3.0"
+    implementation "androidx.compose.ui:ui:1.5.4"
+    implementation "androidx.core:core-ktx:1.12.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2"
+    implementation "androidx.preference:preference-ktx:1.2.1"
+    implementation "androidx.recyclerview:recyclerview:1.3.2"
     implementation "androidx.room:room-ktx:$room_version"
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
     implementation "androidx.sharetarget:sharetarget:1.2.0"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
     implementation "androidx.work:work-runtime-ktx:2.8.1"
-    implementation "com.google.android.material:material:1.9.0"
+    implementation "com.google.android.material:material:1.10.0"
     kapt "androidx.room:room-compiler:$room_version"
 
-    // Firebase libraries
-    primaryImplementation platform("com.google.firebase:firebase-bom:29.0.4")
-    primaryImplementation "com.google.firebase:firebase-analytics-ktx"
-    primaryImplementation "com.google.firebase:firebase-appindexing"
-    primaryImplementation "com.google.firebase:firebase-crashlytics-ktx"
-    primaryImplementation "com.google.firebase:firebase-messaging-ktx"
+    if (System.getenv("FDROID_BUILD") != "1") {
+        // Firebase libraries
+        primaryImplementation platform("com.google.firebase:firebase-bom:29.0.4")
+        primaryImplementation "com.google.firebase:firebase-analytics-ktx"
+        primaryImplementation "com.google.firebase:firebase-appindexing"
+        primaryImplementation "com.google.firebase:firebase-crashlytics-ktx"
+        primaryImplementation "com.google.firebase:firebase-messaging-ktx"
 
-    // Google Play libraries
-    primaryImplementation "com.android.billingclient:billing-ktx:6.0.0"
+        // Google Play libraries
+        primaryImplementation "com.android.billingclient:billing-ktx:6.0.1"
+    }
 
     // Other third-party libraries
     implementation "com.squareup.moshi:moshi-adapters:$moshi_version"

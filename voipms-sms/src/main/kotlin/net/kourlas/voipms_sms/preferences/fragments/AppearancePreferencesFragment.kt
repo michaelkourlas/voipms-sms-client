@@ -89,12 +89,12 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
 
     override fun onSharedPreferenceChanged(
         sharedPreferences: SharedPreferences,
-        key: String
+        key: String?
     ) {
         // It's not clear why onSharedPreferenceChanged is called before the
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
-        if (isAdded) {
+        if (isAdded && key != null) {
             // Update summary text for changed preference
             updateSummary(findPreference(key))
         }

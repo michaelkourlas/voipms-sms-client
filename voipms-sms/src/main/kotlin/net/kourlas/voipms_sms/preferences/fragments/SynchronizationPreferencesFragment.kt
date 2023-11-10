@@ -29,7 +29,8 @@ import net.kourlas.voipms_sms.preferences.setStartDate
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.preferences
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
@@ -114,12 +115,12 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
 
     override fun onSharedPreferenceChanged(
         sharedPreferences: SharedPreferences,
-        key: String
+        key: String?
     ) {
         // It's not clear why onSharedPreferenceChanged is called before the
         // fragment is actually added to the activity, but it apparently is;
         // this check is therefore required to prevent a crash
-        if (isAdded) {
+        if (isAdded && key != null) {
             updateSummary(findPreference(key))
         }
     }

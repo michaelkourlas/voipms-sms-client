@@ -1055,7 +1055,7 @@ class Database private constructor(private val context: Context) {
         const val DATABASE_VERSION = 11
 
         private val migration9To10 = object : Migration(9, 10) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // Do nothing. The database did not change when we switched
                 // to Room.
             }

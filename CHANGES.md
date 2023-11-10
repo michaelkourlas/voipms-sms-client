@@ -1,3 +1,11 @@
+### 0.6.26 ###
+
+* Update dependencies
+
+### 0.6.25 ###
+
+* Bug fixes
+
 ### 0.6.24 ###
 
 * Bug fixes
