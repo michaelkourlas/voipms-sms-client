@@ -24,14 +24,17 @@ android {
     }
     flavorDimensions "version", "demo"
     productFlavors {
-        primary {
-            dimension "version"
-            buildConfigField "boolean", "IS_FDROID", "false"
-        }
-        fdroid {
-            dimension "version"
-            versionNameSuffix "-fdroid"
-            buildConfigField "boolean", "IS_FDROID", "true"
+        if (System.getenv("FDROID_BUILD") != "1") {
+            primary {
+                dimension "version"
+                buildConfigField "boolean", "IS_FDROID", "false"
+            }
+        } else {
+            fdroid {
+                dimension "version"
+                versionNameSuffix "-fdroid"
+                buildConfigField "boolean", "IS_FDROID", "true"
+            }
         }
         full {
             dimension "demo"
@@ -78,8 +81,11 @@ android {
     }
     sourceSets {
         main.java.srcDirs += "src/main/kotlin"
-        primary.java.srcDirs += "src/primary/kotlin"
-        fdroid.java.srcDirs += "src/fdroid/kotlin"
+        if (System.getenv("FDROID_BUILD") != "1") {
+            primary.java.srcDirs += "src/primary/kotlin"
+        } else {
+            fdroid.java.srcDirs += "src/fdroid/kotlin"
+        }
     }
     lint {
         abortOnError false
@@ -163,6 +169,7 @@ android.applicationVariants.all { variant ->
     generatePackageLicenses.dependsOn cleanAssets
 }
 
-// Comment out for F-Droid builds
-apply plugin: "com.google.gms.google-services"
-apply plugin: "com.google.firebase.crashlytics"
+if (System.getenv("FDROID_BUILD") != "1") {
+    apply plugin: "com.google.gms.google-services"
+    apply plugin: "com.google.firebase.crashlytics"
+}
