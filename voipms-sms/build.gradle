@@ -117,9 +117,8 @@ dependencies {
 
     if (System.getenv("FDROID_BUILD") != "1") {
         // Firebase libraries
-        primaryImplementation platform("com.google.firebase:firebase-bom:29.0.4")
+        primaryImplementation platform("com.google.firebase:firebase-bom:32.5.0")
         primaryImplementation "com.google.firebase:firebase-analytics-ktx"
-        primaryImplementation "com.google.firebase:firebase-appindexing"
         primaryImplementation "com.google.firebase:firebase-crashlytics-ktx"
         primaryImplementation "com.google.firebase:firebase-messaging-ktx"
 

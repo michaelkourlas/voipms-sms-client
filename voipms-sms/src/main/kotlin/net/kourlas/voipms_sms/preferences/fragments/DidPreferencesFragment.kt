@@ -42,7 +42,6 @@ import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 import net.kourlas.voipms_sms.utils.abortActivity
 import net.kourlas.voipms_sms.utils.enablePushNotifications
 import net.kourlas.voipms_sms.utils.registerNonExportedReceiver
-import net.kourlas.voipms_sms.utils.replaceIndex
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
@@ -144,9 +143,6 @@ class DidPreferencesFragment : PreferenceFragmentCompat() {
                                 activityToShowError = it
                             )
                         }
-                        lifecycleScope.launch(Dispatchers.Default) {
-                            replaceIndex(it)
-                        }
 
                         updatePreferences()
                     }
@@ -226,7 +222,6 @@ class DidPreferencesFragment : PreferenceFragmentCompat() {
                 context?.let {
                     lifecycleScope.launch(Dispatchers.Default) {
                         Database.getInstance(it).updateShortcuts()
-                        replaceIndex(it)
                     }
                 }
                 true

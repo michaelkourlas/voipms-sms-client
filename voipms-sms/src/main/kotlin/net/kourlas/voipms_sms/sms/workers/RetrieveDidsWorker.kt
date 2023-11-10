@@ -26,7 +26,6 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.preferences.getDids
@@ -36,7 +35,6 @@ import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.utils.enablePushNotifications
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
-import net.kourlas.voipms_sms.utils.replaceIndex
 import java.io.IOException
 
 /**
@@ -126,9 +124,6 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                     getDids(applicationContext).plus(dids)
                 )
                 enablePushNotifications(applicationContext)
-                launch {
-                    replaceIndex(applicationContext)
-                }
             }
         } catch (e: Exception) {
             logException(e)

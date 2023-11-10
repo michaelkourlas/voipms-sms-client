@@ -23,4 +23,12 @@
 
     <!-- Synchronization -->
     <string name="preferences_sync_info">Since you are using the F-Droid version of the app, it is necessary to set a synchronization interval to retrieve new messages.</string>
+
+    <!-- ACTIVITIES -->
+
+    <!-- ConversationsActivity -->
+    <string name="conversations_fail_web_browser">No web browser installed</string>
+
+    <!-- URLS -->
+    <string name="coffee_url" translatable="false">https://paypal.me/kourlas</string>
 </resources>

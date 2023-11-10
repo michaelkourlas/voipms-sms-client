@@ -49,25 +49,6 @@
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
-    <style name="AppThemeWithActionBar" parent="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Theme colours -->
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorOnPrimary">@color/colorOnPrimary</item>
-        <item name="colorOnSecondary">@color/colorOnSecondary</item>
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
-        <item name="colorSecondary">@color/colorSecondary</item>
-        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
-
-        <!-- Theme fonts -->
-        <item name="textAppearanceBody1">@style/Body1</item>
-        <item name="textAppearanceBody2">@style/Body2</item>
-        <item name="textAppearanceCaption">@style/Caption</item>
-        <item name="textAppearanceHeadline5">@style/Headline5</item>
-        <item name="textAppearanceSubtitle1">@style/Subtitle1</item>
-    </style>
-
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
         <!-- Toolbar button colour -->
         <item name="colorControlNormal">@android:color/white</item>

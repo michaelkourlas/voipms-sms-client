@@ -222,7 +222,6 @@
         <item quantity="other">%1$d conversations unarchived</item>
     </plurals>
     <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>
-    <string name="conversations_fail_web_browser">No web browser installed</string>
     <string name="conversations_message_draft">Draft</string>
     <string name="conversations_message_not_sent">Not sent.</string>
     <string name="conversations_message_sending">Sending…</string>
@@ -328,9 +327,6 @@
     <string name="send_message_receiver_contact" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_RECEIVER_CONTACT</string>
     <string name="send_message_receiver_did" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_RECEIVER_DID</string>
 
-    <!-- SyncIntervalReceiver -->
-    <string name="sync_interval_action" translatable="false">net.kourlas.voipms_sms.SYNC_INTERVAL_ACTION</string>
-
     <!-- Sent message receiver -->
     <string name="sent_message_action" translatable="false">net.kourlas.voipms_sms.SENT_MESSAGE_ACTION_%1$s_%2$s</string>
     <string name="sent_message_error" translatable="false">net.kourlas.voipms_sms.SENT_MESSAGE_ERROR</string>
@@ -357,8 +353,6 @@
     <!-- Buy me a coffee complete receiver -->
     <string name="coffee_complete_action" translatable="false">net.kourlas.voipms_sms.COFFEE_COMPLETE_ACTION</string>
     <string name="coffee_complete_message" translatable="false">Thanks for buying me a coffee!</string>
-    <string name="coffee_fail_google_play" translatable="false">Tip failed: try again later</string>
-    <string name="coffee_fail_unknown" translatable="false">Tip failed: unknown error</string>
 
     <!-- SINGLETONS -->
 
@@ -391,7 +385,6 @@
 
     <!-- URLS -->
     <string name="github_url" translatable="false">https://github.com/michaelkourlas/voipms-sms-client</string>
-    <string name="coffee_url" translatable="false">https://paypal.me/kourlas</string>
 
     <!-- SHORTCUTS -->
     <string name="new_conversation_shortcut_short">Compose</string>

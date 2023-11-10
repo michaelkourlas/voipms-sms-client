@@ -76,7 +76,6 @@ class Database private constructor(private val context: Context) {
             }
 
             launch {
-                removeFromIndex(context, Message.getMessageUrl(databaseId))
                 updateShortcuts()
             }
         }
@@ -129,9 +128,6 @@ class Database private constructor(private val context: Context) {
             }
 
             launch {
-                for (message in messages) {
-                    removeFromIndex(context, message.messageUrl)
-                }
                 updateShortcuts()
             }
 
@@ -160,7 +156,6 @@ class Database private constructor(private val context: Context) {
         }
 
         launch {
-            removeAllFromIndex(context)
             updateShortcuts()
         }
     }
@@ -350,16 +345,6 @@ class Database private constructor(private val context: Context) {
         }
 
     /**
-     * Gets all of the messages in the message table with the specified DIDs.
-     * The resulting list is sorted by VoIP.ms ID and by database ID in
-     * descending order.
-     */
-    suspend fun getMessagesAll(dids: Set<String>): List<Message> =
-        importExportLock.read {
-            database.smsDao().getAll(dids).map { it.toMessage() }
-        }
-
-    /**
      * Imports the database from the specified file descriptor.
      */
     suspend fun import(importFd: ParcelFileDescriptor) = coroutineScope {
@@ -406,10 +391,6 @@ class Database private constructor(private val context: Context) {
                 backupFile.delete()
             }
         }
-
-        launch {
-            replaceIndex(context)
-        }
     }
 
     /**
@@ -443,9 +424,6 @@ class Database private constructor(private val context: Context) {
         }
 
         launch {
-            for (message in messages) {
-                addMessageToIndex(context, message)
-            }
             updateShortcuts()
         }
 
@@ -577,9 +555,6 @@ class Database private constructor(private val context: Context) {
             }
 
             launch {
-                for (message in addedMessages) {
-                    addMessageToIndex(context, message)
-                }
                 if (addedMessages.isNotEmpty()) {
                     updateShortcuts()
                 }

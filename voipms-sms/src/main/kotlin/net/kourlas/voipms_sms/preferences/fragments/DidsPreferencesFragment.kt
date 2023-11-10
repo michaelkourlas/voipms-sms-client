@@ -39,7 +39,6 @@ import net.kourlas.voipms_sms.utils.enablePushNotifications
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 import net.kourlas.voipms_sms.utils.preferences
 import net.kourlas.voipms_sms.utils.registerNonExportedReceiver
-import net.kourlas.voipms_sms.utils.replaceIndex
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showSnackbar
 
@@ -167,7 +166,6 @@ class DidsPreferencesFragment : PreferenceFragmentCompat() {
 
                         lifecycleScope.launch(Dispatchers.Default) {
                             Database.getInstance(it).updateShortcuts()
-                            replaceIndex(it)
                         }
                         true
                     }
