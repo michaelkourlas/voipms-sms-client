@@ -284,7 +284,7 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                 try {
                     return httpPostWithMultipartFormData(
                         applicationContext,
-                        "https://www.voip.ms/api/v1/rest.php",
+                        "https://voip.ms/api/v1/rest.php",
                         mapOf(
                             "api_username" to getEmail(applicationContext),
                             "api_password" to getPassword(applicationContext),

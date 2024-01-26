@@ -12,7 +12,7 @@
 
 ## Account
 
-This app requires access to the VoIP.ms API in order to retrieve messages from your VoIP.ms account. Go to the VoIP.ms [API Configuration menu](https://www.voip.ms/m/api.php) and:
+This app requires access to the VoIP.ms API in order to retrieve messages from your VoIP.ms account. Go to the VoIP.ms [API Configuration menu](https://voip.ms/m/api.php) and:
 * enable API access for your VoIP.ms account;
 * set an API password (which is **distinct** from your account password); and
 * set the list of approved IP addresses to "0.0.0.0".

@@ -250,7 +250,7 @@
 
     <!-- SignInActivity -->
     <string name="sign_in_name">Sign in to the VoIP.ms API</string>
-    <string name="sign_in_info">&lt;strong&gt;Please read these instructions carefully.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;A VoIP.ms account is required to use this app. Sign up for an account on the &lt;a href="https://www.voip.ms"&gt;VoIP.ms website&lt;/a&gt;. You must use the email address you use to log into the VoIP.ms website to log into this app.&lt;br&gt;&lt;br&gt;VoIP.ms API access is also required to use this app. Use the &lt;a href="https://www.voip.ms/m/api.php"&gt;VoIP.ms API configuration menu&lt;/a&gt; to enable API access, set an API password, and add "0.0.0.0" to the list of IP addresses approved for API access. You must use the API password to log into this app, not your normal account password.</string>
+    <string name="sign_in_info">&lt;strong&gt;Please read these instructions carefully.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;A VoIP.ms account is required to use this app. Sign up for an account on the &lt;a href="https://voip.ms"&gt;VoIP.ms website&lt;/a&gt;. You must use the email address you use to log into the VoIP.ms website to log into this app.&lt;br&gt;&lt;br&gt;VoIP.ms API access is also required to use this app. Use the &lt;a href="https://voip.ms/m/api.php"&gt;VoIP.ms API configuration menu&lt;/a&gt; to enable API access, set an API password, and add "0.0.0.0" to the list of IP addresses approved for API access. You must use the API password to log into this app, not your normal account password.</string>
     <string name="sign_in_email_hint">VoIP.ms account email address</string>
     <string name="sign_in_password_hint">VoIP.ms API password</string>
     <string name="sign_in_button">Sign in</string>
