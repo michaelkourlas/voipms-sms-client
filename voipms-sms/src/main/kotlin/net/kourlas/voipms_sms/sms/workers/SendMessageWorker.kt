@@ -55,62 +55,72 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
     private var markedAsNotSent: Boolean = false
 
     override suspend fun doWork(): Result {
-        // Terminate quietly if we cannot find the message we are supposed
+        // Terminate quietly if we cannot find the messages we are supposed
         // to send.
-        val databaseId =
-            inputData.getLong(
-                applicationContext.getString(
-                    R.string.send_message_database_id
-                ), -1
+        val databaseIds = inputData.getLongArray(
+            applicationContext.getString(
+                R.string.send_message_database_ids
             )
-        if (databaseId == -1L) {
-            return Result.failure()
+        ) ?: return Result.failure()
+
+        var success = true
+        for (databaseId in databaseIds) {
+            try {
+                // Reset our state before sending the message.
+                conversationId = null
+                error = null
+                markedAsSent = false
+                markedAsNotSent = false
+
+                // Send the message.
+                sendMessage(databaseId)
+                if (error != null) {
+                    success = false
+                }
+
+                // Send a broadcast indicating that the message has been sent,
+                // or that an attempt to send it was made.
+                conversationId?.let {
+                    val sentMessageBroadcastIntent = Intent(
+                        applicationContext.getString(
+                            R.string.sent_message_action, it.did, it.contact
+                        )
+                    )
+                    if (error != null) {
+                        sentMessageBroadcastIntent.putExtra(
+                            applicationContext.getString(
+                                R.string.sent_message_error
+                            ), error
+                        )
+                    }
+                    sentMessageBroadcastIntent.setPackage(
+                        applicationContext.packageName
+                    )
+                    applicationContext.sendBroadcast(
+                        sentMessageBroadcastIntent
+                    )
+                }
+            } finally {
+                // We are not going to try sending this message again unless the
+                // user triggers it by clicking on the message, so ensure the
+                // database is correctly updated even on failure.
+                if (!markedAsSent && !markedAsNotSent) {
+                    try {
+                        Database.getInstance(
+                            applicationContext
+                        ).markMessageNotSent(
+                            databaseId
+                        )
+                    } catch (e: Exception) {
+                    }
+                }
+            }
         }
 
-        try {
-            // Send the message we were asked to send.
-            sendMessage(databaseId)
-
-            // Send a broadcast indicating that the message has been sent, or that
-            // an attempt to send it was made.
-            conversationId?.let {
-                val sentMessageBroadcastIntent = Intent(
-                    applicationContext.getString(
-                        R.string.sent_message_action, it.did, it.contact
-                    )
-                )
-                if (error != null) {
-                    sentMessageBroadcastIntent.putExtra(
-                        applicationContext.getString(
-                            R.string.sent_message_error
-                        ), error
-                    )
-                }
-                sentMessageBroadcastIntent.setPackage(
-                    applicationContext.packageName
-                )
-                applicationContext.sendBroadcast(sentMessageBroadcastIntent)
-            }
-
-            return if (error == null) {
-                Result.success()
-            } else {
-                Result.failure()
-            }
-        } finally {
-            // We are not going to try sending this message again unless the
-            // user triggers it by clicking on the message, so ensure the
-            // database is correctly updated even on failure.
-            if (!markedAsSent && !markedAsNotSent) {
-                try {
-                    Database.getInstance(
-                        applicationContext
-                    ).markMessageNotSent(
-                        databaseId
-                    )
-                } catch (e: Exception) {
-                }
-            }
+        return if (success) {
+            Result.success()
+        } else {
+            Result.failure()
         }
     }
 
@@ -321,16 +331,17 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
         /**
          * Sends the message associated with the specified database ID.
          */
-        fun sendMessage(
-            context: Context, databaseId: Long,
+        fun sendMessages(
+            context: Context,
+            databaseIds: List<Long>,
             inlineReplyConversationId: ConversationId? = null
         ) {
             val work = OneTimeWorkRequestBuilder<SendMessageWorker>()
                 .setInputData(
                     workDataOf(
                         context.getString(
-                            R.string.send_message_database_id
-                        ) to databaseId,
+                            R.string.send_message_database_ids
+                        ) to databaseIds.toLongArray(),
                         context.getString(
                             R.string.send_message_inline_reply
                         )
@@ -348,9 +359,21 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                 .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
-                context.getString(R.string.send_message_work_id, databaseId),
-                ExistingWorkPolicy.KEEP, work
+                context.getString(
+                    R.string.send_message_work_id,
+                    databaseIds.first()
+                ),
+                ExistingWorkPolicy.KEEP,
+                work
             )
+        }
+
+        fun sendMessage(
+            context: Context,
+            databaseId: Long,
+            inlineReplyConversationId: ConversationId? = null
+        ) {
+            sendMessages(context, listOf(databaseId), inlineReplyConversationId)
         }
     }
 }

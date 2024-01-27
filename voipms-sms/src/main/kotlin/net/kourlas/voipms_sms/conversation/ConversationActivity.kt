@@ -617,9 +617,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                         ),
                         getMessageTexts(applicationContext, messageText)
                     )
-                for (id in ids) {
-                    SendMessageWorker.sendMessage(applicationContext, id)
-                }
+                SendMessageWorker.sendMessages(applicationContext, ids)
 
                 ensureActive()
 
@@ -1293,7 +1291,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
                             applicationContext,
                             messageItem.message.databaseId
                         )
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            // Refresh adapter to show message being sent.
+                            adapter.refresh()
+                        }
                     }
+                    return
                 }
             }
 

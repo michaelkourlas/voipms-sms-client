@@ -576,6 +576,15 @@ class Database private constructor(private val context: Context) {
         }
 
     /**
+     * Marks all delivery in progress messages as not sent.
+     */
+    suspend fun markAllDeliveryInProgressMessagesAsNotSent() {
+        database.withTransaction {
+            database.smsDao().markAllDeliveryInProgressMessagesAsNotSent()
+        }
+    }
+
+    /**
      * Marks the specified conversation as archived.
      */
     suspend fun markConversationArchived(

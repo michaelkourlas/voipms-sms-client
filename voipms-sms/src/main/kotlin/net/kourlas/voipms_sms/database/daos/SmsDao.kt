@@ -174,6 +174,11 @@ interface SmsDao {
     suspend fun markMessageNotSent(id: Long)
 
     @Query(
+        "UPDATE ${Sms.TABLE_NAME} SET ${Sms.COLUMN_DELIVERED} = 0, ${Sms.COLUMN_DELIVERY_IN_PROGRESS} = 0 WHERE ${Sms.COLUMN_DELIVERY_IN_PROGRESS} = 1"
+    )
+    suspend fun markAllDeliveryInProgressMessagesAsNotSent()
+
+    @Query(
         "UPDATE ${Sms.TABLE_NAME} SET ${Sms.COLUMN_VOIP_ID} = :voipId, ${Sms.COLUMN_DELIVERED} = 1, ${Sms.COLUMN_DELIVERY_IN_PROGRESS} = 0, ${Sms.COLUMN_DATE} = :date WHERE ${Sms.COLUMN_DATABASE_ID} = :id"
     )
     suspend fun markMessageSent(id: Long, voipId: Long, date: Long)

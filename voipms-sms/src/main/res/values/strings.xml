@@ -267,7 +267,7 @@
 
     <!-- SendMessageWorker -->
     <string name="send_message_work_id" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_WORK_ID_%1$d</string>
-    <string name="send_message_database_id" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_DATABASE_ID</string>
+    <string name="send_message_database_ids" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_DATABASE_IDS</string>
     <string name="send_message_inline_reply" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY</string>
     <string name="send_message_inline_reply_contact" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY_CONTACT</string>
     <string name="send_message_inline_reply_did" translatable="false">net.kourlas.voipms_sms.SEND_MESSAGE_INLINE_REPLY_DID</string>

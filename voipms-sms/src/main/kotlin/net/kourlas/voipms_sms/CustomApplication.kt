@@ -21,6 +21,10 @@ import android.app.Application
 import android.net.ConnectivityManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.billing.Billing
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager.Companion.getInstance
@@ -75,6 +79,7 @@ class CustomApplication : Application() {
         conversationActivitiesVisible[conversationId] = count - 1
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
 
@@ -97,9 +102,11 @@ class CustomApplication : Application() {
             AppearancePreferencesFragment.SYSTEM_DEFAULT -> AppCompatDelegate.setDefaultNightMode(
                 AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             )
+
             AppearancePreferencesFragment.LIGHT -> AppCompatDelegate.setDefaultNightMode(
                 AppCompatDelegate.MODE_NIGHT_NO
             )
+
             AppearancePreferencesFragment.DARK -> AppCompatDelegate.setDefaultNightMode(
                 AppCompatDelegate.MODE_NIGHT_YES
             )
@@ -129,6 +136,13 @@ class CustomApplication : Application() {
 
         // Initialize the billing service.
         Billing.getInstance(applicationContext)
+
+        // If any messages are still marked as "sending" for some reason, mark
+        // them as "not sent" -- clearly, they weren't.
+        GlobalScope.launch(Dispatchers.Default) {
+            Database.getInstance(applicationContext)
+                .markAllDeliveryInProgressMessagesAsNotSent()
+        }
     }
 
     companion object {
