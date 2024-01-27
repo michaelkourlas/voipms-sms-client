@@ -39,9 +39,14 @@ However, if push notifications don't appear to be working, it's possible that th
 * entering the following URL into the neighbouring
   field: [https://voipmssms-notify.kourlas.com/?did={TO}](https://voipmssms-notify.kourlas.com/?did={TO})
 
-If push notifications are configured correctly, VoIP.ms will send a callback to an IBM Cloud Function maintained by me when your phone number receives a text message. The Cloud Function will then forward the callback to your device using Firebase Cloud Messaging. When the app receives the callback, it performs a synchronization with the VoIP.ms servers and retrieves the text message. 
+If push notifications are configured correctly, VoIP.ms will send a callback to
+a Cloudflare Worker maintained by me when your phone number receives a text
+message. The Cloud Function will then forward the callback to your device using
+Firebase Cloud Messaging. When the app receives the callback, it performs a
+synchronization with the VoIP.ms servers and retrieves the text message.
 
-To protect your privacy, the callback is configured to **only** include your phone number. It does not include the text of individual messages.
+To protect your privacy, the callback is configured to **only** include your
+phone number. It does not include the text of individual messages.
 
 ### Regular notifications
 
