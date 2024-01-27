@@ -389,13 +389,19 @@ class SyncWorker(context: Context, params: WorkerParameters) :
     ): List<IncomingMessage>? {
         val response = sendRequestWithVoipMsApi(request) ?: return null
 
-        // Extract messages from the VoIP.ms API response
+        // Extract messages from the VoIP.ms API response. If an invalid DID
+        // was used, ignore the error so that we can fetch messages for the
+        // other DIDs.
         val incomingMessages = mutableListOf<IncomingMessage>()
-        if (response.status != "success" && response.status != "no_sms") {
+        if (response.status != "success"
+            && response.status != "no_sms"
+            && response.status != "invalid_did"
+        ) {
             error = when (response.status) {
                 "invalid_credentials" -> applicationContext.getString(
                     R.string.sync_error_api_error_invalid_credentials
                 )
+
                 else -> applicationContext.getString(
                     R.string.sync_error_api_error,
                     response.status
@@ -404,7 +410,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             return null
         }
 
-        if (response.status != "no_sms") {
+        if (response.status == "success") {
             for (message in response.sms ?: emptyList()) {
                 val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
                 sdf.timeZone = TimeZone.getTimeZone("America/New_York")
