@@ -41,7 +41,7 @@ However, if push notifications don't appear to be working, it's possible that th
 
 If push notifications are configured correctly, VoIP.ms will send a callback to
 a Cloudflare Worker maintained by me when your phone number receives a text
-message. The Cloud Function will then forward the callback to your device using
+message. The Worker will then forward the callback to your device using
 Firebase Cloud Messaging. When the app receives the callback, it performs a
 synchronization with the VoIP.ms servers and retrieves the text message.
 
