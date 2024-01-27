@@ -117,4 +117,5 @@ If you believe you've found a bug, feel free to file a report at the project's [
 
 ## Contacting the developer
 
-If you have any questions, feel free to contact me at [michael@kourlas.com](mailto:michael@kourlas.com).
+If you have any questions, feel free to contact me
+at [voipmssms@kourlas.com](mailto:voipmssms@kourlas.com).
