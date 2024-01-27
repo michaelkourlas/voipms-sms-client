@@ -131,11 +131,7 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
             ForegroundInfo(
                 Notifications.SYNC_SEND_MESSAGE_NOTIFICATION_ID,
                 notification,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                } else {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-                }
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
             )
         } else {
             ForegroundInfo(
