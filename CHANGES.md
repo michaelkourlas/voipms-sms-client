@@ -3,6 +3,7 @@
 * Target API 34
 * Update dependencies
 * Fix lint issues
+* Bug fixes
 
 ### 0.6.25 ###
 
