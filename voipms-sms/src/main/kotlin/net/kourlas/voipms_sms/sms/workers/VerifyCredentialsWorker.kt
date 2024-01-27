@@ -142,7 +142,7 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
                 try {
                     return httpPostWithMultipartFormData(
                         applicationContext,
-                        "https://www.voip.ms/api/v1/rest.php",
+                        "https://voip.ms/api/v1/rest.php",
                         mapOf(
                             "api_username" to email,
                             "api_password" to password,
