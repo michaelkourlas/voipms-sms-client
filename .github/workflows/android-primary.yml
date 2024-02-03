@@ -1,4 +1,4 @@
-name: Android CI
+name: Android CI (primary)
 
 on:
   push:
@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: set up JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
           java-version: '17'
-      - name: set up Python 3.10
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -24,11 +24,5 @@ jobs:
         env:
           google_services_json: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: echo $google_services_json | base64 -d > voipms-sms/src/primary/google-services.json
-      - name: Build with Gradle (primary)
-        run: ./gradlew build
-        env:
-          FDROID_BUILD: '0'
-      - name: Build with Gradle (F-Droid)
-        run: ./gradlew build
-        env:
-          FDROID_BUILD: '1'
+      - name: Build with Gradle
+        run: ./gradlew assemblePrimaryFullRelease

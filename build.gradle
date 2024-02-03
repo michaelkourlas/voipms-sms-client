@@ -9,10 +9,10 @@ buildscript {
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20'
         classpath 'com.github.michaelkourlas:oss-licenses-plugin:0.0.2'
 
-        if (System.getenv("FDROID_BUILD") != "1") {
-            classpath 'com.google.gms:google-services:4.4.0'
-            classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
-        }
+        // fdroid-remove-start
+        classpath 'com.google.gms:google-services:4.4.0'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
+        // fdroid-remove-end
     }
 }
 

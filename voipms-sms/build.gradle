@@ -22,17 +22,16 @@ android {
     }
     flavorDimensions = ["version", "demo"]
     productFlavors {
-        if (System.getenv("FDROID_BUILD") != "1") {
-            primary {
-                dimension "version"
-                buildConfigField "boolean", "IS_FDROID", "false"
-            }
-        } else {
-            fdroid {
-                dimension "version"
-                versionNameSuffix "-fdroid"
-                buildConfigField "boolean", "IS_FDROID", "true"
-            }
+        // fdroid-remove-start
+        primary {
+            dimension "version"
+            buildConfigField "boolean", "IS_FDROID", "false"
+        }
+        // fdroid-remove-end
+        fdroid {
+            dimension "version"
+            versionNameSuffix "-fdroid"
+            buildConfigField "boolean", "IS_FDROID", "true"
         }
         full {
             dimension "demo"
@@ -79,11 +78,10 @@ android {
     }
     sourceSets {
         main.java.srcDirs += "src/main/kotlin"
-        if (System.getenv("FDROID_BUILD") != "1") {
-            primary.java.srcDirs += "src/primary/kotlin"
-        } else {
-            fdroid.java.srcDirs += "src/fdroid/kotlin"
-        }
+        // fdroid-remove-start
+        primary.java.srcDirs += "src/primary/kotlin"
+        // fdroid-remove-end
+        fdroid.java.srcDirs += "src/fdroid/kotlin"
     }
     lint {
         abortOnError false
@@ -115,16 +113,18 @@ dependencies {
     implementation "com.google.android.material:material:1.11.0"
     ksp "androidx.room:room-compiler:$room_version"
 
-    if (System.getenv("FDROID_BUILD") != "1") {
-        // Firebase libraries
-        primaryImplementation platform("com.google.firebase:firebase-bom:32.7.1")
-        primaryImplementation "com.google.firebase:firebase-analytics-ktx"
-        primaryImplementation "com.google.firebase:firebase-crashlytics-ktx"
-        primaryImplementation "com.google.firebase:firebase-messaging-ktx"
+    // fdroid-remove-start
 
-        // Google Play libraries
-        primaryImplementation "com.android.billingclient:billing-ktx:6.1.0"
-    }
+    // Firebase libraries
+    primaryImplementation platform("com.google.firebase:firebase-bom:32.7.1")
+    primaryImplementation "com.google.firebase:firebase-analytics-ktx"
+    primaryImplementation "com.google.firebase:firebase-crashlytics-ktx"
+    primaryImplementation "com.google.firebase:firebase-messaging-ktx"
+
+    // Google Play libraries
+    primaryImplementation "com.android.billingclient:billing-ktx:6.1.0"
+
+    // fdroid-remove-end
 
     // Other third-party libraries
     implementation "com.squareup.moshi:moshi-adapters:$moshi_version"
@@ -168,7 +168,7 @@ android.applicationVariants.configureEach { variant ->
     generatePackageLicenses.dependsOn cleanAssets
 }
 
-if (System.getenv("FDROID_BUILD") != "1") {
-    apply plugin: "com.google.gms.google-services"
-    apply plugin: "com.google.firebase.crashlytics"
-}
+// fdroid-remove-start
+apply plugin: "com.google.gms.google-services"
+apply plugin: "com.google.firebase.crashlytics"
+// fdroid-remove-end
