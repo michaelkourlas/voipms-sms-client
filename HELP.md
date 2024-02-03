@@ -112,7 +112,7 @@ This option deletes the entire database.
 
 ## Buy me a coffee
 
-If you like the app, you can [buy me a coffee](https://kourlas.com/donate).
+If you like the app, you can [buy me a coffee](https://kourlas.com/coffee).
 
 ## Reporting bugs
 
