@@ -1,6 +1,6 @@
 # VoIP.ms SMS #
 
-![Android CI](https://github.com/michaelkourlas/voipms-sms-client/workflows/Android%20CI/badge.svg)
+[![Android CI (primary)](https://github.com/michaelkourlas/voipms-sms-client/actions/workflows/android-primary.yml/badge.svg)](https://github.com/michaelkourlas/voipms-sms-client/actions/workflows/android-primary.yml) [![Android CI (F-Droid)](https://github.com/michaelkourlas/voipms-sms-client/actions/workflows/android-fdroid.yml/badge.svg)](https://github.com/michaelkourlas/voipms-sms-client/actions/workflows/android-fdroid.yml)
 
 ## Overview ##
 
