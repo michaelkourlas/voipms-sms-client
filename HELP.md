@@ -112,9 +112,7 @@ This option deletes the entire database.
 
 ## Buy me a coffee
 
-If you like the app, you can buy me a coffee
-using [PayPal](https://paypal.me/kourlas). You can also use Google Play in-app
-billing, but Google will take a 15% cut and may also charge you tax.
+If you like the app, you can buy me a coffee using [Ko-fi](https://ko-fi.com/michaelkourlas). You can also use Google Play in-app billing, but Google will take a 15% cut and may also charge you tax.
 
 ## Reporting bugs
 
