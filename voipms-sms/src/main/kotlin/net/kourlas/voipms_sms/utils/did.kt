@@ -83,7 +83,20 @@ fun getPhoneNumberType(type: Int): String = when (type) {
 fun validatePhoneNumber(value: String) {
     if (getDigitsOfString(value) != value) {
         throw IllegalArgumentException(
-            "value must consist only of numbers"
+            "value $value must consist only of numbers"
         )
     }
+}
+
+/**
+ * Normalize a phone number received from VoIP.ms.
+ */
+fun normalizeVoipMsPhoneNumber(phoneNumber: String): String {
+    if (phoneNumber.startsWith("+1")) {
+        return phoneNumber.substring(2)
+    }
+    if (phoneNumber.startsWith("+")) {
+        return phoneNumber.substring(1)
+    }
+    return phoneNumber
 }

@@ -1,3 +1,7 @@
+### 0.6.27 ###
+
+* Support E164 format in VoIP.ms API
+
 ### 0.6.26 ###
 
 * Target API 34

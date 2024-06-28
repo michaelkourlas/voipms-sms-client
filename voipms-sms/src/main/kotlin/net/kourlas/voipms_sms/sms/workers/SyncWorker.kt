@@ -54,6 +54,7 @@ import net.kourlas.voipms_sms.preferences.getSyncInterval
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
 import net.kourlas.voipms_sms.utils.logException
+import net.kourlas.voipms_sms.utils.normalizeVoipMsPhoneNumber
 import net.kourlas.voipms_sms.utils.toBoolean
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
 import java.io.IOException
@@ -430,8 +431,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                             "Failed to parse date ${message.date}"
                         ),
                         toBoolean(message.type),
-                        message.did,
-                        message.contact,
+                        normalizeVoipMsPhoneNumber(message.did),
+                        normalizeVoipMsPhoneNumber(message.contact),
                         message.message,
                         message.col_media1,
                         message.col_media2,
