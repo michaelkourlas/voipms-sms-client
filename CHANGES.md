@@ -1,6 +1,8 @@
 ### 0.6.27 ###
 
 * Support E164 format in VoIP.ms API
+* Update dependencies
+* Bug fixes
 
 ### 0.6.26 ###
 
