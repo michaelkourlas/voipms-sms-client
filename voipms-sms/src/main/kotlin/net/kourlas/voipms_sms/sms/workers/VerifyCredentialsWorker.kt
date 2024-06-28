@@ -187,9 +187,11 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
                 "invalid_credentials" -> applicationContext.getString(
                     R.string.verify_credentials_error_api_error_invalid_credentials
                 )
+
                 "missing_credentials" -> applicationContext.getString(
                     R.string.verify_credentials_error_api_error_missing_credentials
                 )
+
                 else -> applicationContext.getString(
                     R.string.verify_credentials_error_api_error,
                     response.status

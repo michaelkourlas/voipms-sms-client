@@ -204,8 +204,7 @@
         </activity>
         <activity
             android:name=".preferences.activities.MarkdownPreferencesActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".preferences.activities.NetworkPreferencesActivity"
             android:exported="false"
@@ -240,8 +239,7 @@
             android:name=".signIn.SignInActivity"
             android:exported="false"
             android:label="@string/sign_in_name"
-            android:parentActivityName=".preferences.activities.PreferencesActivity">
-        </activity>
+            android:parentActivityName=".preferences.activities.PreferencesActivity" />
 
         <!-- BROADCAST RECEIVERS -->
 

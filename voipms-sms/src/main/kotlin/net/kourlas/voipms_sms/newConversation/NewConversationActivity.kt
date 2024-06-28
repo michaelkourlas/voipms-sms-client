@@ -345,6 +345,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         when {
             dids.isEmpty() -> // Silently fail if no DID set
                 return
+
             dids.size > 1 -> {
                 var selectedIndex = 0
                 AlertDialog.Builder(this).apply {
@@ -372,6 +373,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                     show()
                 }
             }
+
             else -> {
                 intent.putExtra(
                     getString(R.string.conversation_did),

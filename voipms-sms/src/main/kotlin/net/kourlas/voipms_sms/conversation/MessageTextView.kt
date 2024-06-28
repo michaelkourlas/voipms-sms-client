@@ -76,6 +76,7 @@ class MessageTextView @JvmOverloads constructor(
                     }
                     longClick = false
                 }
+
                 MotionEvent.ACTION_DOWN -> {
                     Selection.setSelection(
                         buffer,

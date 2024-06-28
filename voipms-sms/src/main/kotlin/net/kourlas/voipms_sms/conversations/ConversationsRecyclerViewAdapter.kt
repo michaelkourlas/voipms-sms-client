@@ -533,12 +533,14 @@ class ConversationsRecyclerViewAdapter<T>(
                         notifyItemInserted(newIdx)
                         newIdx += 1
                     }
+
                     comparison > 0 -> {
                         // Remove old message
                         _conversationItems.removeAt(newIdx)
                         notifyItemRemoved(newIdx)
                         oldIdx += 1
                     }
+
                     else -> {
                         // Update the underlying message
                         conversationItems[newIdx].message = newMessages[newIdx]
@@ -581,10 +583,12 @@ class ConversationsRecyclerViewAdapter<T>(
                             emptyTextView.text = activity.getString(
                                 R.string.conversations_no_dids
                             )
+
                         activity is ConversationsArchivedActivity ->
                             emptyTextView.text = activity.getString(
                                 R.string.conversations_archived_no_messages
                             )
+
                         else -> emptyTextView.text = activity.getString(
                             R.string.conversations_no_messages
                         )

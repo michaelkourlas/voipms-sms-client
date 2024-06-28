@@ -73,6 +73,7 @@ class SignInActivity : AppCompatActivity() {
                             error
                         )
                     }
+
                     valid == false -> {
                         // If valid is false, then some error occurred
                         toggleControls(enabled = true)
@@ -84,6 +85,7 @@ class SignInActivity : AppCompatActivity() {
                             )
                         )
                     }
+
                     valid == true -> {
                         // If we managed to verify the credentials, then we
                         // save them and try to enable all of the DIDs in the
@@ -305,6 +307,7 @@ class SignInActivity : AppCompatActivity() {
                 }
                 return super.onOptionsItemSelected(item)
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

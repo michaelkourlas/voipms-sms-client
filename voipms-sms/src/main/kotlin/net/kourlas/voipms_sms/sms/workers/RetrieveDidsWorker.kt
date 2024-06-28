@@ -201,6 +201,7 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 "invalid_credentials" -> applicationContext.getString(
                     R.string.preferences_dids_error_api_error_invalid_credentials
                 )
+
                 else -> applicationContext.getString(
                     R.string.preferences_dids_error_api_error,
                     response.status

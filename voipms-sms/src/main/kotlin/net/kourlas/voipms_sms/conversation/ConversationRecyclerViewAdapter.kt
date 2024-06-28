@@ -108,6 +108,7 @@ class ConversationRecyclerViewAdapter(
                         parent, false
                     )
             }
+
             R.layout.conversation_item_outgoing -> {
                 LayoutInflater.from(parent.context)
                     .inflate(
@@ -115,6 +116,7 @@ class ConversationRecyclerViewAdapter(
                         parent, false
                     )
             }
+
             else -> throw Exception("Unknown view type $viewType")
         }
         return MessageViewHolder(itemView, viewType)
@@ -517,6 +519,7 @@ class ConversationRecyclerViewAdapter(
                         notifyItemRemoved(newIdx)
                         oldIdx += 1
                     }
+
                     comparison > 0 -> {
                         // Add new message
                         _messageItems.add(
@@ -526,6 +529,7 @@ class ConversationRecyclerViewAdapter(
                         notifyItemInserted(newIdx)
                         newIdx += 1
                     }
+
                     else -> {
                         // Even though the view might not need to be changed,
                         // update the underlying message anyways just to be

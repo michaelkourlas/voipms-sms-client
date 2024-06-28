@@ -77,6 +77,7 @@ class SynchronizationPreferencesFragment : PreferenceFragmentCompat(),
                             }
                             true
                         }
+
                 getString(R.string.preferences_sync_interval_key) ->
                     preference.onPreferenceChangeListener =
                         Preference.OnPreferenceChangeListener { _, newValue ->

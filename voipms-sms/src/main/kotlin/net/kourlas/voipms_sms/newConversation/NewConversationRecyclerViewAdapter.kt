@@ -357,12 +357,14 @@ class NewConversationRecyclerViewAdapter(
                         notifyItemRemoved(newIdx)
                         oldIdx += 1
                     }
+
                     comparison > 0 -> {
                         // Add new contact
                         _contactItems.add(newIdx, newContactItems[newIdx])
                         notifyItemInserted(newIdx)
                         newIdx += 1
                     }
+
                     else -> {
                         // Replace existing contact, just to be safe
                         _contactItems[newIdx] = newContactItems[newIdx]

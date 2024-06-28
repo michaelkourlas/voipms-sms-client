@@ -109,6 +109,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                             }
                             true
                         }
+
                 getString(
                     R.string.preferences_database_export_key
                 ) ->
@@ -129,6 +130,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                             }
                             true
                         }
+
                 getString(
                     R.string.preferences_database_clean_up_key
                 ) ->
@@ -137,6 +139,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                             cleanUp()
                             true
                         }
+
                 getString(
                     R.string.preferences_database_delete_key
                 ) ->

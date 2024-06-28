@@ -53,9 +53,11 @@ class AppearancePreferencesFragment : PreferenceFragmentCompat(),
                                         AppCompatDelegate
                                             .MODE_NIGHT_FOLLOW_SYSTEM
                                     )
+
                                 LIGHT -> AppCompatDelegate.setDefaultNightMode(
                                     AppCompatDelegate.MODE_NIGHT_NO
                                 )
+
                                 DARK -> AppCompatDelegate.setDefaultNightMode(
                                     AppCompatDelegate.MODE_NIGHT_YES
                                 )
