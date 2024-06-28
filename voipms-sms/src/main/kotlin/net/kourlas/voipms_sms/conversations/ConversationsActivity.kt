@@ -316,6 +316,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                                     adapter[viewHolder.bindingAdapterPosition].message
                                 )
                             )
+
                     ItemTouchHelper.RIGHT -> deleteConversations(
                         listOf(
                             adapter[viewHolder.bindingAdapterPosition].message
@@ -724,6 +725,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 drawerLayout.openDrawer(GravityCompat.START)
                 return true
             }
+
             R.id.archived_button -> {
                 val intent = Intent(
                     this,
@@ -732,11 +734,13 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 startActivity(intent)
                 return true
             }
+
             R.id.preferences_button -> {
                 val intent = Intent(this, PreferencesActivity::class.java)
                 startActivity(intent)
                 return true
             }
+
             R.id.help_button -> {
                 val intent =
                     Intent(this, MarkdownPreferencesActivity::class.java)
@@ -747,6 +751,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 startActivity(intent)
                 return true
             }
+
             R.id.coffee_button -> {
                 lifecycleScope.launch {
                     Billing.getInstance(this@ConversationsActivity)
@@ -754,6 +759,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 }
                 return true
             }
+
             else -> return super.onOptionsItemSelected(item)
         }
     }
@@ -781,11 +787,30 @@ open class ConversationsActivity(val archived: Boolean = false) :
         item: MenuItem
     ): Boolean {
         when (item.itemId) {
-            R.id.archive_button -> return onArchiveButtonClick(mode)
-            R.id.unarchive_button -> return onUnarchiveButtonClick(mode)
-            R.id.mark_read_button -> return onMarkReadButtonClick(mode)
-            R.id.mark_unread_button -> return onMarkUnreadButtonClick(mode)
-            R.id.delete_button -> return onDeleteButtonClick()
+            R.id.archive_button -> {
+                onArchiveButtonClick(mode)
+                return true
+            }
+
+            R.id.unarchive_button -> {
+                onUnarchiveButtonClick(mode)
+                return true
+            }
+
+            R.id.mark_read_button -> {
+                onMarkReadButtonClick(mode)
+                return true
+            }
+
+            R.id.mark_unread_button -> {
+                onMarkUnreadButtonClick(mode)
+                return true
+            }
+
+            R.id.delete_button -> {
+                onDeleteButtonClick()
+                return true
+            }
         }
         return false
     }
@@ -801,19 +826,18 @@ open class ConversationsActivity(val archived: Boolean = false) :
     /**
      * Handles the archive button.
      */
-    private fun onArchiveButtonClick(mode: ActionMode): Boolean {
+    private fun onArchiveButtonClick(mode: ActionMode) {
         val messages = adapter
             .filter { it.checked }
             .map { it.message }
 
         archiveConversations(messages, mode)
-        return true
     }
 
     /**
      * Handles the mark read button.
      */
-    private fun onMarkReadButtonClick(mode: ActionMode): Boolean {
+    private fun onMarkReadButtonClick(mode: ActionMode) {
         // Mark all selected conversations as read
         lifecycleScope.launch(Dispatchers.Default) {
             adapter
@@ -831,13 +855,12 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 adapter.refresh()
             }
         }
-        return true
     }
 
     /**
      * Handles the mark unread button.
      */
-    private fun onMarkUnreadButtonClick(mode: ActionMode): Boolean {
+    private fun onMarkUnreadButtonClick(mode: ActionMode) {
         // Mark all selected conversations as unread
         lifecycleScope.launch(Dispatchers.Default) {
             adapter
@@ -855,31 +878,28 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 adapter.refresh()
             }
         }
-        return true
     }
 
     /**
      * Handles the delete button.
      */
-    private fun onDeleteButtonClick(): Boolean {
+    private fun onDeleteButtonClick() {
         val messages = adapter
             .filter { it.checked }
             .map { it.message }
 
         deleteConversations(messages)
-        return true
     }
 
     /**
      * Handles the unarchive button.
      */
-    private fun onUnarchiveButtonClick(mode: ActionMode): Boolean {
+    private fun onUnarchiveButtonClick(mode: ActionMode) {
         val messages = adapter
             .filter { it.checked }
             .map { it.message }
 
         unarchiveConversations(messages, mode)
-        return true
     }
 
     override fun onClick(view: View) {

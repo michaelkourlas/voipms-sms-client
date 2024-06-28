@@ -18,14 +18,20 @@
 package net.kourlas.voipms_sms.utils
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.Typeface
 import android.net.Uri
 import android.provider.ContactsContract
 import androidx.core.content.ContextCompat
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.getNewConversationContacts
-import java.util.*
+import java.util.Locale
 
 /**
  * Gets the name of a contact from the Android contacts provider, given a
@@ -112,6 +118,7 @@ fun getContactPhotoBitmap(
             }
         }
     } catch (e: Exception) {
+        // Do nothing.
     }
 
     return getGenericContactPhotoBitmap(context, name, phoneNumber, size)

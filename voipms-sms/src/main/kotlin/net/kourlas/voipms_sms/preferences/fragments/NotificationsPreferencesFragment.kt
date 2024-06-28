@@ -50,7 +50,7 @@ class NotificationsPreferencesFragment : PreferenceFragmentCompat(),
                     } else {
                         result
                             ?.data
-                            ?.getParcelableArrayListExtra<Uri?>(
+                            ?.getParcelableArrayListExtra(
                                 RingtoneManager.EXTRA_RINGTONE_PICKED_URI
                             )
                     }

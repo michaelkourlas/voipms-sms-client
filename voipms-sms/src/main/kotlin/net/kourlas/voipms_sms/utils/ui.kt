@@ -119,7 +119,7 @@ fun showAlertDialog(
     positiveButtonAction: DialogInterface.OnClickListener? = null,
     negativeButtonText: String? = null,
     negativeButtonAction: DialogInterface.OnClickListener? = null
-): AlertDialog? {
+) {
     if (!activity.isFinishing) {
         val builder = AlertDialog.Builder(activity)
         builder.setMessage(text)
@@ -132,7 +132,6 @@ fun showAlertDialog(
         dialog.findViewById<TextView>(android.R.id.message)?.movementMethod =
             BetterLinkMovementMethod.newInstance()
     }
-    return null
 }
 
 /**

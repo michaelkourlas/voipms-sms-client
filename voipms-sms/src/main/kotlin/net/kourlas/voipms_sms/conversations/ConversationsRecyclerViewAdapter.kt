@@ -489,13 +489,12 @@ class ConversationsRecyclerViewAdapter<T>(
             val resultsObject = results.values as ConversationsFilter
 
             // Get new messages from results list
-            val newMessages: List<Message>
-            if (results.values != null) {
+            val newMessages: List<Message> = if (results.values != null) {
                 // The Android results interface uses type Any, so we have
                 // no choice but to use an unchecked cast
-                newMessages = resultsObject.messages
+                resultsObject.messages
             } else {
-                newMessages = emptyList()
+                emptyList()
             }
 
             // Create copy of current messages

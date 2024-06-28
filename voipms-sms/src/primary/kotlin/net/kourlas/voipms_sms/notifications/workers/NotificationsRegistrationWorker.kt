@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.notifications.workers
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -104,6 +105,7 @@ class NotificationsRegistrationWorker(
         return Result.success()
     }
 
+    @SuppressLint("InlinedApi")
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncRegisterPushNotificationsNotification()

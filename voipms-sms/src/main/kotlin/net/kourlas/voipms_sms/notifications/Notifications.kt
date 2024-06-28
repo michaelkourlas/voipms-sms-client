@@ -1010,8 +1010,8 @@ class Notifications private constructor(private val context: Context) {
      */
     private fun validateGroupNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val noOtherNotifications = notificationManager.activeNotifications
-                .filter {
+            val noOtherNotifications =
+                notificationManager.activeNotifications.none {
                     it.id != SYNC_DATABASE_NOTIFICATION_ID
                         && it.id != SYNC_SEND_MESSAGE_NOTIFICATION_ID
                         && it.id != SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID
@@ -1019,7 +1019,6 @@ class Notifications private constructor(private val context: Context) {
                         && it.id != SYNC_REGISTER_PUSH_NOTIFICATION_ID
                         && it.id != GROUP_NOTIFICATION_ID
                 }
-                .none()
             if (noOtherNotifications) {
                 NotificationManagerCompat.from(context).cancel(
                     GROUP_NOTIFICATION_ID

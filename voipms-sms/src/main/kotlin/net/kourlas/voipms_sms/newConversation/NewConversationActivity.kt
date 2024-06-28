@@ -226,8 +226,15 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.dialpad_button -> return onDialpadButtonClick(item)
-            R.id.keyboard_button -> return onKeyboardButtonClick(item)
+            R.id.dialpad_button -> {
+                onDialpadButtonClick(item)
+                return true
+            }
+
+            R.id.keyboard_button -> {
+                onKeyboardButtonClick(item)
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -235,7 +242,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * Handles the dialpad button.
      */
-    private fun onDialpadButtonClick(item: MenuItem): Boolean {
+    private fun onDialpadButtonClick(item: MenuItem) {
         supportActionBar?.let {
             val searchView = it.customView.findViewById<SearchView>(
                 R.id.search_view
@@ -244,13 +251,12 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
             item.isVisible = false
             menu.findItem(R.id.keyboard_button)?.isVisible = true
         }
-        return true
     }
 
     /**
      * Handles the keyboard button.
      */
-    private fun onKeyboardButtonClick(item: MenuItem): Boolean {
+    private fun onKeyboardButtonClick(item: MenuItem) {
         supportActionBar?.let {
             val searchView = it.customView.findViewById<SearchView>(
                 R.id.search_view
@@ -259,7 +265,6 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
             item.isVisible = false
             menu.findItem(R.id.dialpad_button)?.isVisible = true
         }
-        return true
     }
 
     override fun onClick(v: View) {

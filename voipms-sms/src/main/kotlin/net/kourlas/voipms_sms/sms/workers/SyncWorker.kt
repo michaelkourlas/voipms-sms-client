@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.sms.workers
 
+import android.annotation.SuppressLint
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import android.content.Intent
@@ -118,6 +119,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         }
     }
 
+    @SuppressLint("InlinedApi")
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncDatabaseNotification(id, progress)
@@ -369,9 +371,9 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         val did: String,
         val contact: String,
         val message: String?,
-        val col_media1: String?,
-        val col_media2: String?,
-        val col_media3: String?,
+        @Suppress("PropertyName") val col_media1: String?,
+        @Suppress("PropertyName") val col_media2: String?,
+        @Suppress("PropertyName") val col_media3: String?,
     )
 
     @JsonClass(generateAdapter = true)

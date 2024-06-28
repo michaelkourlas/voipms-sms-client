@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.sms.workers
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -112,6 +113,7 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                             databaseId
                         )
                     } catch (e: Exception) {
+                        // Do nothing.
                     }
                 }
             }
@@ -124,6 +126,7 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
         }
     }
 
+    @SuppressLint("InlinedApi")
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncMessageSendNotification()

@@ -346,10 +346,6 @@ class FastScroller private constructor(
                 if (mDragging) {
                     return true
                 }
-                if (mDragging) {
-                    cancelDrag()
-                }
-                return false
             }
             MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP -> {
                 if (mDragging) {

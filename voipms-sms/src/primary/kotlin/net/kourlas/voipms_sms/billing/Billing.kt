@@ -158,7 +158,7 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
 
                     val consumeParams = ConsumeParams.newBuilder()
                         .setPurchaseToken(purchase.purchaseToken).build()
-                    suspendCoroutine<Unit> {
+                    suspendCoroutine {
                         client.consumeAsync(consumeParams) { _, _ ->
                             it.resume(Unit)
                         }

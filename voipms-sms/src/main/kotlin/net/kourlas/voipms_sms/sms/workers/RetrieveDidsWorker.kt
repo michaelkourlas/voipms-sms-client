@@ -17,6 +17,7 @@
 
 package net.kourlas.voipms_sms.sms.workers
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -75,6 +76,7 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
         }
     }
 
+    @SuppressLint("InlinedApi")
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = Notifications.getInstance(applicationContext)
             .getSyncRetrieveDidsNotification()
@@ -106,7 +108,7 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
             if (getEmail(applicationContext) == ""
                 || getPassword(applicationContext) == ""
             ) {
-                return@coroutineScope dids
+                return@coroutineScope null
             }
 
             val response = getApiResponse()
@@ -140,7 +142,7 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
     @JsonClass(generateAdapter = true)
     data class DidsResponse(
         val status: String,
-        @Suppress("ArrayInDataClass") val dids: List<DidResponse>?
+        val dids: List<DidResponse>?
     )
 
     /**

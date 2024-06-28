@@ -430,7 +430,6 @@ class NewConversationRecyclerViewAdapter(
      * Loads all contacts from the Android contacts provider.
      */
     private fun loadAllContactItems() {
-        @Suppress("ConstantConditionIf")
         if (BuildConfig.IS_DEMO) {
             allContactItems.addAll(getNewConversationContacts(activity))
             return

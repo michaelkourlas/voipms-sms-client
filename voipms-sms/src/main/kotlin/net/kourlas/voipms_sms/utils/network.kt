@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit
  * Sends a POST request with a multipart/form-data encoded request body to the
  * specified URL, and retrieves a JSON response body.
  */
-@Suppress("BlockingMethodInNonBlockingContext")
+@Suppress("SameParameterValue")
 suspend inline fun <reified T> httpPostWithMultipartFormData(
     context: Context, url: String,
     formData: Map<String, String> = emptyMap()

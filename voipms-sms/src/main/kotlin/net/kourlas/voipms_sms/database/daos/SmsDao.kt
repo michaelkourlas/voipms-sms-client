@@ -44,11 +44,6 @@ interface SmsDao {
     suspend fun deleteWithoutDids(dids: Set<String>)
 
     @Query(
-        "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DID} IN(:dids) ORDER BY ${Sms.COLUMN_VOIP_ID} DESC, ${Sms.COLUMN_DATABASE_ID} DESC"
-    )
-    suspend fun getAll(dids: Set<String>): List<Sms>
-
-    @Query(
         "SELECT * FROM ${Sms.TABLE_NAME} WHERE ${Sms.COLUMN_DATABASE_ID} = :id"
     )
     suspend fun getById(id: Long): Sms?

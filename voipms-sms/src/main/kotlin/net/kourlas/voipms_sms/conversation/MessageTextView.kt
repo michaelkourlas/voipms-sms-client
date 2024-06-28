@@ -40,7 +40,7 @@ class MessageTextView @JvmOverloads constructor(
     defStyleAttr
 ) {
     private var longClick = false
-    var messageLongClickListener: (() -> Unit)? = null
+    private var messageLongClickListener: (() -> Unit)? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {

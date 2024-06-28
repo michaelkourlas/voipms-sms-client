@@ -63,7 +63,6 @@ import kotlin.math.max
  * @param layoutManager The layout manager used by the recycler view.
  * @param conversationId The conversation ID of the conversation displayed by
  * the activity, consisting of the DID and contact.
- * @param contactName The name associated with the contact.
  * @param contactBitmap The photo associated with the contact.
  */
 class ConversationRecyclerViewAdapter(
@@ -71,7 +70,6 @@ class ConversationRecyclerViewAdapter(
     private val recyclerView: RecyclerView,
     private val layoutManager: LinearLayoutManager,
     private val conversationId: ConversationId,
-    private val contactName: String?,
     private val contactBitmap: Bitmap
 ) :
     RecyclerView.Adapter<ConversationRecyclerViewAdapter.MessageViewHolder>(),
@@ -280,6 +278,7 @@ class ConversationRecyclerViewAdapter(
         }
         messageText.setOnLongClickListener { textView ->
             activity.onItemLongClick(textView)
+            true
         }
         messageText.movementMethod =
             BetterLinkMovementMethod.newInstance().apply {

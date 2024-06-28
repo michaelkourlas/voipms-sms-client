@@ -200,18 +200,6 @@ class Message(
         get() = !isIncoming
 
     /**
-     * Gets the URL that can be used to access this message.
-     */
-    val messageUrl: String
-        get() = getMessageUrl(databaseId)
-
-    /**
-     * Gets the URL that can be used to access the conversation.
-     */
-    val conversationUrl: String
-        get() = getConversationUrl(conversationId)
-
-    /**
      * Gets a list of the media links in the message.
      */
     val medias: List<String>
@@ -447,29 +435,5 @@ class Message(
         result = 31 * result + isDelivered.hashCode()
         result = 31 * result + isDeliveryInProgress.hashCode()
         return result
-    }
-
-    companion object {
-        /**
-         * Gets a URL used for Firebase indexing representing a single message.
-         *
-         * @param databaseId The database ID that uniquely identifies the
-         * specified message.
-         */
-        fun getMessageUrl(
-            databaseId: Long
-        ): String = "voipmssms://message?id=$databaseId"
-
-        /**
-         * Gets a URL used for Firebase indexing representing a single
-         * conversation.
-         *
-         * @param conversationId The ID of the specified conversation.
-         */
-        fun getConversationUrl(
-            conversationId: ConversationId
-        ): String =
-            "voipmssms://conversation?did=${conversationId.did}" +
-                "&contact=${conversationId.contact}"
     }
 }

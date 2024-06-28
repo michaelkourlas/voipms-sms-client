@@ -410,7 +410,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
             recyclerView,
             layoutManager,
             conversationId,
-            contactName,
             contactBitmap
         )
         recyclerView.setHasFixedSize(true)
@@ -833,10 +832,25 @@ open class ConversationActivity(val bubble: Boolean = false) :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> return onUpButtonClick()
-            R.id.call_button -> return onCallButtonClick()
-            R.id.notifications_button -> return onNotificationsButtonClick()
-            R.id.bubble_button -> return onBubbleButtonClick()
-            R.id.export_button -> return onExportButtonClick()
+            R.id.call_button -> {
+                onCallButtonClick()
+                return true
+            }
+
+            R.id.notifications_button -> {
+                onNotificationsButtonClick()
+                return true
+            }
+
+            R.id.bubble_button -> {
+                onBubbleButtonClick()
+                return true
+            }
+
+            R.id.export_button -> {
+                onExportButtonClick()
+                return true
+            }
         }
 
         return super.onOptionsItemSelected(item)
@@ -893,7 +907,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
     /**
      * Handles the call button.
      */
-    private fun onCallButtonClick(): Boolean {
+    private fun onCallButtonClick() {
         val intent = Intent(Intent.ACTION_CALL)
         intent.data = Uri.parse("tel:$contact")
 
@@ -918,13 +932,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 // Do nothing.
             }
         }
-        return true
     }
 
     /**
      * Handles the notifications button.
      */
-    private fun onNotificationsButtonClick(): Boolean {
+    private fun onNotificationsButtonClick() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notifications.getInstance(applicationContext)
                 .createDidNotificationChannel(
@@ -947,14 +960,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
             )
             startActivity(intent)
         }
-
-        return true
     }
 
     /**
      * Handles the bubble button.
      */
-    private fun onBubbleButtonClick(): Boolean {
+    private fun onBubbleButtonClick() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             moveTaskToBack(true)
             lifecycleScope.launch(Dispatchers.Default) {
@@ -966,13 +977,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     )
             }
         }
-        return true
     }
 
     /**
      * Handles the export button.
      */
-    private fun onExportButtonClick(): Boolean {
+    private fun onExportButtonClick() {
         try {
             val messages = adapter.messageItems.map { it.message }
             val json = JsonParserManager.getInstance().parser.adapter(
@@ -1003,7 +1013,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 Toast.LENGTH_SHORT
             ).show()
         }
-        return true
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
@@ -1020,11 +1029,30 @@ open class ConversationActivity(val bubble: Boolean = false) :
         item: MenuItem
     ): Boolean {
         when (item.itemId) {
-            R.id.resend_button -> return onResendButtonClick(mode)
-            R.id.info_button -> return onInfoButtonClick(mode)
-            R.id.copy_button -> return onCopyButtonClick(mode)
-            R.id.share_button -> return onShareButtonClick(mode)
-            R.id.delete_button -> return onDeleteButtonClick(mode)
+            R.id.resend_button -> {
+                onResendButtonClick(mode)
+                return true
+            }
+
+            R.id.info_button -> {
+                onInfoButtonClick(mode)
+                return true
+            }
+
+            R.id.copy_button -> {
+                onCopyButtonClick(mode)
+                return true
+            }
+
+            R.id.share_button -> {
+                onShareButtonClick(mode)
+                return true
+            }
+
+            R.id.delete_button -> {
+                onDeleteButtonClick(mode)
+                return true
+            }
         }
 
         return false
@@ -1041,7 +1069,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
     /**
      * Handles the resend button.
      */
-    private fun onResendButtonClick(mode: ActionMode): Boolean {
+    private fun onResendButtonClick(mode: ActionMode) {
         // Resend all checked items.
         val databaseIds = adapter.messageItems.filter { it.checked }
             .map { it.message.databaseId }
@@ -1053,13 +1081,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
             }
         }
         mode.finish()
-        return true
     }
 
     /**
      * Handles the info button.
      */
-    private fun onInfoButtonClick(mode: ActionMode): Boolean {
+    private fun onInfoButtonClick(mode: ActionMode) {
         // Get first checked item
         val message: Message? = adapter.messageItems
             .firstOrNull { it.checked }
@@ -1164,13 +1191,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
         }
 
         mode.finish()
-        return true
     }
 
     /**
      * Handles the copy button.
      */
-    private fun onCopyButtonClick(mode: ActionMode): Boolean {
+    private fun onCopyButtonClick(mode: ActionMode) {
         // Get first checked item
         val message: Message? = adapter.messageItems
             .firstOrNull { it.checked }
@@ -1189,13 +1215,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
         }
 
         mode.finish()
-        return true
     }
 
     /**
      * Handles the share button.
      */
-    private fun onShareButtonClick(mode: ActionMode): Boolean {
+    private fun onShareButtonClick(mode: ActionMode) {
         // Get first checked item
         val message: Message? = adapter.messageItems
             .firstOrNull { it.checked }
@@ -1213,13 +1238,12 @@ open class ConversationActivity(val bubble: Boolean = false) :
         }
 
         mode.finish()
-        return true
     }
 
     /**
      * Handles the delete button.
      */
-    private fun onDeleteButtonClick(mode: ActionMode): Boolean {
+    private fun onDeleteButtonClick(mode: ActionMode) {
         // Get the messages that are checked.
         val messages = adapter.messageItems
             .filter { it.checked }
@@ -1265,8 +1289,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     })
             }
         }
-
-        return true
     }
 
     fun onItemClick(view: View) {
@@ -1312,10 +1334,9 @@ open class ConversationActivity(val bubble: Boolean = false) :
         }
     }
 
-    fun onItemLongClick(view: View): Boolean {
+    fun onItemLongClick(view: View) {
         // On long click, toggle selected item
         toggleItem(getRecyclerViewContainingItem(view))
-        return true
     }
 
     override fun onRequestPermissionsResult(
