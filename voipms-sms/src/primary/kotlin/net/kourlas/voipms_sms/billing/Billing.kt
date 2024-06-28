@@ -35,7 +35,10 @@ class Billing(private val context: Context) : PurchasesUpdatedListener,
     BillingClientStateListener {
     private val client =
         BillingClient.newBuilder(context)
-            .enablePendingPurchases()
+            .enablePendingPurchases(
+                PendingPurchasesParams.newBuilder().enableOneTimeProducts()
+                    .build()
+            )
             .setListener(this)
             .build()
     private var connected = false
