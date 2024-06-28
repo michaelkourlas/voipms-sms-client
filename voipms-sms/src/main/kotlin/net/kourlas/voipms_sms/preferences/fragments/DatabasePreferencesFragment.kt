@@ -93,7 +93,8 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                             try {
                                 importActivityResultLauncher.launch(
                                     arrayOf(
-                                        SQLITE_MIME_TYPE
+                                        SQLITE_MIME_TYPE,
+                                        OCTET_STREAM_MIME_TYPE
                                     )
                                 )
                             } catch (_: ActivityNotFoundException) {
@@ -317,6 +318,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
     }
 
     companion object {
-        private const val SQLITE_MIME_TYPE = "application/vnd.sqlite3"
+        private const val SQLITE_MIME_TYPE = "application/x-sqlite3"
+        private const val OCTET_STREAM_MIME_TYPE = "application/octet-stream"
     }
 }
