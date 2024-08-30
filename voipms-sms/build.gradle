@@ -121,9 +121,6 @@ dependencies {
     primaryImplementation "com.google.firebase:firebase-crashlytics-ktx"
     primaryImplementation "com.google.firebase:firebase-messaging-ktx"
 
-    // Google Play libraries
-    primaryImplementation "com.android.billingclient:billing-ktx:7.0.0"
-
     // fdroid-remove-end
 
     // Other third-party libraries
