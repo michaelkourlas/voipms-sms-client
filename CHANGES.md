@@ -1,3 +1,7 @@
+### 0.6.28 ###
+
+* Remove in-app purchase mechanism/"buy me a coffee" link
+
 ### 0.6.27 ###
 
 * Support E164 format in VoIP.ms API

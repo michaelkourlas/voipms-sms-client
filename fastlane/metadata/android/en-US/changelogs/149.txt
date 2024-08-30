@@ -1,0 +1,2 @@
+0.6.27
+• Remove in-app purchase mechanism/"buy me a coffee" link

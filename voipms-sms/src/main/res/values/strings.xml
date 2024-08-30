@@ -200,7 +200,6 @@
     <string name="conversations_action_archived">Archived</string>
     <string name="conversations_action_chat">Chat</string>
     <string name="conversations_action_delete">Delete</string>
-    <string name="conversations_action_coffee">Buy me a coffee</string>
     <string name="conversations_action_help">Help</string>
     <string name="conversations_action_mark_read">Mark read</string>
     <string name="conversations_action_mark_unread">Mark unread</string>
@@ -350,10 +349,6 @@
     <string name="verify_credentials_complete_valid" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_COMPLETE_VALID</string>
     <string name="verify_credentials_complete_error" translatable="false">net.kourlas.voipms_sms.VERIFY_CREDENTIALS_COMPLETE_ERROR</string>
 
-    <!-- Buy me a coffee complete receiver -->
-    <string name="coffee_complete_action" translatable="false">net.kourlas.voipms_sms.COFFEE_COMPLETE_ACTION</string>
-    <string name="coffee_complete_message" translatable="false">Thanks for buying me a coffee!</string>
-
     <!-- SINGLETONS -->
 
     <!-- Notifications -->
@@ -406,6 +401,6 @@
     <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>
     <string name="copyright">Copyright © 2015–2024 Michael Kourlas</string>
-    <string name="version">Version 0.6.27</string>
+    <string name="version">Version 0.6.28</string>
     <string name="toast_error">Error: %1$s</string>
 </resources>

@@ -29,10 +29,4 @@
     <!-- PushNotificationsRegistrationWorker -->
     <string name="push_notifications_work_id">net.kourlas.voipms_sms.PUSH_NOTIF_WORK_ID</string>
     <string name="push_notifications_fail_google_play">Register failed: Google Play Services unavailable</string>
-
-    <!-- BROADCAST RECEIVERS -->
-
-    <!-- Buy me a coffee complete receiver -->
-    <string name="coffee_fail_google_play" translatable="false">Tip failed: try again later</string>
-    <string name="coffee_fail_unknown" translatable="false">Tip failed: unknown error</string>
 </resources>

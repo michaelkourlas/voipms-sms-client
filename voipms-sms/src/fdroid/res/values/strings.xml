@@ -28,7 +28,4 @@
 
     <!-- ConversationsActivity -->
     <string name="conversations_fail_web_browser">No web browser installed</string>
-
-    <!-- URLS -->
-    <string name="coffee_url" translatable="false">https://kourlas.com/coffee</string>
 </resources>

@@ -6,7 +6,6 @@
 * [Synchronization](#synchronization)
 * [Network](#network)
 * [Database](#database)
-* [Buy me a coffee](#buy-me-a-coffee)
 * [Reporting bugs](#reporting-bugs)
 * [Contacting the developer](#contacting-the-developer)
 
@@ -109,10 +108,6 @@ This option allows you to remove certain data from the database that might be co
 ### Delete database
 
 This option deletes the entire database.
-
-## Buy me a coffee
-
-If you like the app, you can [buy me a coffee](https://kourlas.com/coffee).
 
 ## Reporting bugs
 

@@ -56,7 +56,6 @@ import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
-import net.kourlas.voipms_sms.billing.Billing
 import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.newConversation.NewConversationActivity
@@ -163,14 +162,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 )
             }
         }
-    private val coffeeCompleteReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            showSnackbar(
-                this@ConversationsActivity, R.id.coordinator_layout,
-                getString(R.string.coffee_complete_message)
-            )
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -448,15 +439,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 )
             )
         )
-        registerNonExportedReceiver(
-            this,
-            coffeeCompleteReceiver,
-            IntentFilter(
-                getString(
-                    R.string.coffee_complete_action
-                )
-            )
-        )
 
         // Perform initial setup as well as account and DID check
         performAccountDidCheck()
@@ -650,7 +632,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
             this,
             pushNotificationsRegistrationCompleteReceiver
         )
-        safeUnregisterReceiver(this, coffeeCompleteReceiver)
 
         // Track number of activities
         (application as CustomApplication).conversationsActivityDecrementCount()
@@ -749,14 +730,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     "HELP"
                 )
                 startActivity(intent)
-                return true
-            }
-
-            R.id.coffee_button -> {
-                lifecycleScope.launch {
-                    Billing.getInstance(this@ConversationsActivity)
-                        .askForCoffee(this@ConversationsActivity)
-                }
                 return true
             }
 

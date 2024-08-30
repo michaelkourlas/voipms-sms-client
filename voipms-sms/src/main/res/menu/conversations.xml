@@ -35,8 +35,4 @@
         android:id="@+id/help_button"
         android:title="@string/conversations_action_help"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/coffee_button"
-        android:title="@string/conversations_action_coffee"
-        app:showAsAction="never" />
 </menu>

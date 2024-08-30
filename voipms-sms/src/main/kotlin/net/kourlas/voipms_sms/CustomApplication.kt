@@ -25,7 +25,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.kourlas.voipms_sms.billing.Billing
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager.Companion.getInstance
 import net.kourlas.voipms_sms.preferences.fragments.AppearancePreferencesFragment
@@ -133,9 +132,6 @@ class CustomApplication : Application() {
             applicationContext,
             scheduleOnly = true
         )
-
-        // Initialize the billing service.
-        Billing.getInstance(applicationContext)
 
         // If any messages are still marked as "sending" for some reason, mark
         // them as "not sent" -- clearly, they weren't.
