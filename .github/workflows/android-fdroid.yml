@@ -21,6 +21,6 @@ jobs:
         with:
           python-version: '3.10'
       - name: Prepare source for F-Droid build
-        run: sed -i "/fdroid-remove-start/,/fdroid-remove-end/d" build.gradle voipms-sms/build.gradle
+        run: sed -i "/fdroid-remove-start/,/fdroid-remove-end/d" build.gradle.kts voipms-sms/build.gradle.kts
       - name: Build with Gradle (F-Droid)
         run: ./gradlew assembleFdroidFullRelease
