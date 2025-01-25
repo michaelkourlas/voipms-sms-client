@@ -62,7 +62,6 @@ import com.squareup.moshi.JsonClass
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
@@ -244,41 +243,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 }
                 did = components[0]
                 contact = components[1]
-            }
-        } else if (Intent.ACTION_VIEW == intent.action
-            && intent.dataString != null
-        ) {
-            // Firebase URL intent
-            val uri = Uri.parse(intent.dataString)
-            val id = uri.getQueryParameter("id")
-            val uriDid = uri.getQueryParameter("did")
-            val contactDid = uri.getQueryParameter("contact")
-            if (id != null) {
-                // Firebase message index URL
-                val message = runBlocking {
-                    Database.getInstance(applicationContext)
-                        .getMessageDatabaseId(id.toLong())
-                }
-                if (message == null) {
-                    abortActivity(
-                        this,
-                        Exception("Invalid URI: '$intent.dataString'")
-                    )
-                    return false
-                } else {
-                    did = message.did
-                    contact = message.contact
-                }
-            } else if (uriDid != null && contactDid != null) {
-                // Firebase conversation index URL
-                did = uriDid
-                contact = contactDid
-            } else {
-                abortActivity(
-                    this,
-                    Exception("Invalid URI: '$intent.dataString'")
-                )
-                return false
             }
         } else {
             // Standard intent
