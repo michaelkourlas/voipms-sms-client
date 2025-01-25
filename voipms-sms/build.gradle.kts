@@ -166,9 +166,15 @@ tasks.getByName("copyToAssets") {
 }
 
 android.applicationVariants.configureEach {
+    val variantName = this.name
+
     val generatePackageLicenses =
-        tasks.register<Exec>("generatePackageLicenses${name}") {
-            commandLine("python", "../licenses/packageLicenseParser.py", name)
+        tasks.register<Exec>("generatePackageLicenses${variantName.capitalized()}") {
+            commandLine(
+                "python",
+                "../licenses/packageLicenseParser.py",
+                variantName
+            )
     }.get()
 
     tasks.matching { it.name == "${name}OssLicensesTask" }
