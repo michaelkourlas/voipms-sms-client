@@ -2,6 +2,9 @@
 
 * Update dependencies
 * Bug fixes
+* Target API 35
+* Fix lint issues
+* Remove legacy code
 
 ### 0.6.28 ###
 
