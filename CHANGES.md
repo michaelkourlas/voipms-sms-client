@@ -1,3 +1,8 @@
+### 0.6.29 ###
+
+* Update dependencies
+* Bug fixes
+
 ### 0.6.28 ###
 
 * Remove in-app purchase mechanism/"buy me a coffee" link
