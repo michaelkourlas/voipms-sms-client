@@ -19,7 +19,13 @@ package net.kourlas.voipms_sms.conversation
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
@@ -33,7 +39,11 @@ import android.text.util.Linkify
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
@@ -49,7 +59,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.moshi.JsonClass
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
@@ -67,10 +81,21 @@ import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.workers.SendMessageWorker
 import net.kourlas.voipms_sms.ui.FastScroller
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.JsonParserManager
+import net.kourlas.voipms_sms.utils.abortActivity
+import net.kourlas.voipms_sms.utils.applyRoundedCornersMask
+import net.kourlas.voipms_sms.utils.getContactName
+import net.kourlas.voipms_sms.utils.getContactPhotoBitmap
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.getMessageTexts
+import net.kourlas.voipms_sms.utils.registerNonExportedReceiver
+import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
+import net.kourlas.voipms_sms.utils.showAlertDialog
+import net.kourlas.voipms_sms.utils.showPermissionSnackbar
+import net.kourlas.voipms_sms.utils.showSnackbar
 import java.text.BreakIterator
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 /**
  * Activity used to display messages in a single conversation.
@@ -542,8 +567,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 // Show "N" when there are N characters left in the first
                 // message and N <= 10
                 charsRemainingTextView.visibility = View.VISIBLE
-                charsRemainingTextView.text =
-                    (maxLength - bytesCount).toString()
+                charsRemainingTextView.text = "${maxLength - bytesCount}"
             } else {
                 // Show nothing
                 charsRemainingTextView.visibility = View.GONE

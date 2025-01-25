@@ -63,8 +63,8 @@ android {
     }
     androidComponents.beforeVariants {
         it.enable = run {
-            val names = it.productFlavors.map { it ->
-                it.second
+            val names = it.productFlavors.map { flavor ->
+                flavor.second
             }
             val isDemo =
                 names.contains("demoSending") || names.contains("demoNotSending")

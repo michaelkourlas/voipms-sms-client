@@ -119,7 +119,7 @@ class MarkdownPreferencesActivity : AppCompatActivity() {
 
             companion object {
                 fun fromName(name: String?) =
-                    values().firstOrNull { it.name == name }
+                    entries.firstOrNull { it.name == name }
             }
         }
     }
