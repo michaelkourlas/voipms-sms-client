@@ -135,25 +135,7 @@ class NotificationsRegistrationWorker(
         val responses = mutableMapOf<String, MutableList<RegisterResponse?>>()
         for (did in dids) {
             try {
-                // Work around a bug in the VoIP.ms API by disabling SMS for
-                // the DID before changing the URL callback.
                 val didResponses = mutableListOf<RegisterResponse?>()
-                didResponses.add(
-                    httpPostWithMultipartFormData(
-                        applicationContext,
-                        "https://voip.ms/api/v1/rest.php",
-                        mapOf(
-                            "api_username" to getEmail(applicationContext),
-                            "api_password" to getPassword(applicationContext),
-                            "method" to "setSMS",
-                            "did" to did,
-                            "enable" to "0",
-                            "url_callback_enable" to "0",
-                            "url_callback" to "",
-                            "url_callback_retry" to "0"
-                        )
-                    )
-                )
                 didResponses.add(
                     httpPostWithMultipartFormData(
                         applicationContext,
