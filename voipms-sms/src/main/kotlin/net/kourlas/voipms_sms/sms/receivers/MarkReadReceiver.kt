@@ -62,14 +62,14 @@ class MarkReadReceiver : BroadcastReceiver() {
                 Dispatchers.Default
             ) {
                 try {
-                    // Mark the conversation as read.
-                    Database.getInstance(context)
-                        .markConversationRead(ConversationId(did, contact))
-
                     // Cancel the existing notification.
                     Notifications.getInstance(context).cancelNotification(
                         conversationId
                     )
+
+                    // Mark the conversation as read.
+                    Database.getInstance(context)
+                        .markConversationRead(ConversationId(did, contact))
                 } catch (e: Exception) {
                     logException(e)
                 } finally {

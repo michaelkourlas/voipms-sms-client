@@ -829,18 +829,19 @@ open class ConversationsActivity(val archived: Boolean = false) :
      * Handles the mark read button.
      */
     private fun onMarkReadButtonClick(mode: ActionMode) {
+        val messages = adapter
+            .filter { it.checked }
+            .map { it.message }
+        mode.finish()
+
         // Mark all selected conversations as read
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
-            adapter
-                .filter { it.checked }
-                .map { it.message }
-                .forEach {
+            messages.forEach {
                     Database.getInstance(applicationContext)
                         .markConversationRead(it.conversationId)
                 }
 
             lifecycleScope.launch(Dispatchers.Main) {
-                mode.finish()
                 adapter.refresh()
             }
         }
@@ -850,18 +851,19 @@ open class ConversationsActivity(val archived: Boolean = false) :
      * Handles the mark unread button.
      */
     private fun onMarkUnreadButtonClick(mode: ActionMode) {
+        val messages = adapter
+            .filter { it.checked }
+            .map { it.message }
+        mode.finish()
+
         // Mark all selected conversations as unread
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
-            adapter
-                .filter { it.checked }
-                .map { it.message }
-                .forEach {
+            messages.forEach {
                     Database.getInstance(applicationContext)
                         .markConversationUnread(it.conversationId)
                 }
 
             lifecycleScope.launch(Dispatchers.Main) {
-                mode.finish()
                 adapter.refresh()
             }
         }
@@ -980,6 +982,8 @@ open class ConversationsActivity(val archived: Boolean = false) :
         messages: List<Message>,
         mode: ActionMode? = null
     ) {
+        mode?.finish()
+
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             // Archive the conversations.
             for (message in messages) {
@@ -988,7 +992,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
             }
 
             lifecycleScope.launch(Dispatchers.Main) {
-                mode?.finish()
                 adapter.refresh()
 
                 showSnackbar(
@@ -1027,6 +1030,8 @@ open class ConversationsActivity(val archived: Boolean = false) :
         messages: List<Message>,
         mode: ActionMode? = null
     ) {
+        mode?.finish()
+
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             // Archive the conversations.
             for (message in messages) {
@@ -1035,7 +1040,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
             }
 
             lifecycleScope.launch(Dispatchers.Main) {
-                mode?.finish()
                 adapter.refresh()
 
                 showSnackbar(
@@ -1074,6 +1078,8 @@ open class ConversationsActivity(val archived: Boolean = false) :
         messages: List<Message>,
         mode: ActionMode? = null
     ) {
+        mode?.finish()
+
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             // Collect existing state in case we need to undo this.
             val conversations = messages.map {
@@ -1100,7 +1106,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
             }
 
             lifecycleScope.launch(Dispatchers.Main) {
-                mode?.finish()
                 adapter.refresh()
 
                 // Show a snackbar to allow the user to undo the action.

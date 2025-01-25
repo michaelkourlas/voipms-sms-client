@@ -1097,6 +1097,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Resend all checked items.
         val databaseIds = adapter.messageItems.filter { it.checked }
             .map { it.message.databaseId }
+        mode.finish()
+        
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             for (databaseId in databaseIds) {
                 Database.getInstance(applicationContext)
@@ -1104,7 +1106,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 SendMessageWorker.sendMessage(applicationContext, databaseId)
             }
         }
-        mode.finish()
     }
 
     /**
@@ -1272,6 +1273,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
         val messages = adapter.messageItems
             .filter { it.checked }
             .map { it.message }
+        mode.finish()
 
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             // Delete each message.
@@ -1285,7 +1287,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
             lifecycleScope.launch(Dispatchers.Main) {
                 adapter.refresh()
-                mode.finish()
 
                 showSnackbar(
                     this@ConversationActivity,
