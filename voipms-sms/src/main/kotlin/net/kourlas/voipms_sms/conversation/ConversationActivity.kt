@@ -582,7 +582,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             )
         }
 
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             Database.getInstance(applicationContext)
                 .updateConversationDraft(
                     conversationId,
@@ -629,7 +629,9 @@ open class ConversationActivity(val bubble: Boolean = false) :
             messageEditText.setText("")
 
             // Send the message using the SendMessageService.
-            lifecycleScope.launch(Dispatchers.Default) {
+            CustomApplication.getApplication().applicationScope.launch(
+                Dispatchers.Default
+            ) {
                 val ids = Database.getInstance(
                     applicationContext
                 )
@@ -641,8 +643,6 @@ open class ConversationActivity(val bubble: Boolean = false) :
                         getMessageTexts(applicationContext, messageText)
                     )
                 SendMessageWorker.sendMessages(applicationContext, ids)
-
-                ensureActive()
 
                 lifecycleScope.launch(Dispatchers.Main) {
                     // Refresh adapter to show message being sent.
@@ -713,7 +713,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     conversationId
                 )
         }
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             Database.getInstance(applicationContext).markConversationRead(
                 conversationId
             )
@@ -1097,7 +1097,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
         // Resend all checked items.
         val databaseIds = adapter.messageItems.filter { it.checked }
             .map { it.message.databaseId }
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             for (databaseId in databaseIds) {
                 Database.getInstance(applicationContext)
                     .markMessageDeliveryInProgress(databaseId)
@@ -1273,7 +1273,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
             .filter { it.checked }
             .map { it.message }
 
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             // Delete each message.
             for (message in messages) {
                 Database.getInstance(applicationContext)
@@ -1283,9 +1283,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     )
             }
 
-            ensureActive()
-
-            withContext(Dispatchers.Main) {
+            lifecycleScope.launch(Dispatchers.Main) {
                 adapter.refresh()
                 mode.finish()
 
@@ -1299,14 +1297,14 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     ),
                     getString(R.string.undo),
                     {
-                        lifecycleScope.launch(Dispatchers.Default) {
+                        CustomApplication.getApplication().applicationScope.launch(
+                            Dispatchers.Default
+                        ) {
                             // Restore the messages.
                             Database.getInstance(applicationContext)
                                 .insertMessagesDatabase(messages)
 
-                            ensureActive()
-
-                            withContext(Dispatchers.Main) {
+                            lifecycleScope.launch(Dispatchers.Main) {
                                 adapter.refresh()
                             }
                         }
@@ -1328,7 +1326,9 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 val messageItem = adapter[position]
                 val message = messageItem.message
                 if (!message.isDelivered && !message.isDeliveryInProgress) {
-                    lifecycleScope.launch(Dispatchers.Default) {
+                    CustomApplication.getApplication().applicationScope.launch(
+                        Dispatchers.Default
+                    ) {
                         Database.getInstance(applicationContext)
                             .markMessageDeliveryInProgress(
                                 messageItem.message.databaseId

@@ -24,13 +24,13 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.widget.CompoundButton
 import androidx.appcompat.widget.SwitchCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.BuildConfig
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.getDidRetrieveMessages
@@ -220,7 +220,9 @@ class DidPreferencesFragment : PreferenceFragmentCompat() {
         showNotificationsPreference.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { _, _ ->
                 context?.let {
-                    lifecycleScope.launch(Dispatchers.Default) {
+                    CustomApplication.getApplication().applicationScope.launch(
+                        Dispatchers.Default
+                    ) {
                         Database.getInstance(it).updateShortcuts()
                     }
                 }

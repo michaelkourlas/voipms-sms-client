@@ -50,7 +50,6 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.kourlas.voipms_sms.BuildConfig
@@ -60,18 +59,35 @@ import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.newConversation.NewConversationActivity
 import net.kourlas.voipms_sms.notifications.Notifications
-import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.preferences.accountConfigured
 import net.kourlas.voipms_sms.preferences.activities.AccountPreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.MarkdownPreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.PreferencesActivity
 import net.kourlas.voipms_sms.preferences.activities.SynchronizationPreferencesActivity
+import net.kourlas.voipms_sms.preferences.didsConfigured
+import net.kourlas.voipms_sms.preferences.firstRun
+import net.kourlas.voipms_sms.preferences.getActiveDid
+import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.preferences.getEmail
+import net.kourlas.voipms_sms.preferences.getFirstSyncAfterSignIn
+import net.kourlas.voipms_sms.preferences.getSetupCompletedForVersion
+import net.kourlas.voipms_sms.preferences.getStartDate
+import net.kourlas.voipms_sms.preferences.setActiveDid
+import net.kourlas.voipms_sms.preferences.setFirstSyncAfterSignIn
+import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 import net.kourlas.voipms_sms.signIn.SignInActivity
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
-import net.kourlas.voipms_sms.utils.*
+import net.kourlas.voipms_sms.utils.applyCircularMask
+import net.kourlas.voipms_sms.utils.enablePushNotifications
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.registerNonExportedReceiver
+import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
+import net.kourlas.voipms_sms.utils.showPermissionSnackbar
+import net.kourlas.voipms_sms.utils.showSnackbar
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 /**
  * Activity that contains a generic list of conversations.
@@ -458,14 +474,16 @@ open class ConversationsActivity(val archived: Boolean = false) :
             == PackageManager.PERMISSION_GRANTED
         ) {
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
-            lifecycleScope.launch(Dispatchers.Default) {
+            CustomApplication.getApplication().applicationScope.launch(
+                Dispatchers.Default
+            ) {
                 Database.getInstance(applicationContext).updateShortcuts()
             }
         }
 
         // Delete any notification channels and groups that are no longer
         // needed and rename existing channels if necessary
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             Notifications.getInstance(applicationContext)
                 .createDefaultNotificationChannel()
             Notifications.getInstance(applicationContext)
@@ -812,7 +830,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
      */
     private fun onMarkReadButtonClick(mode: ActionMode) {
         // Mark all selected conversations as read
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             adapter
                 .filter { it.checked }
                 .map { it.message }
@@ -820,8 +838,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     Database.getInstance(applicationContext)
                         .markConversationRead(it.conversationId)
                 }
-
-            ensureActive()
 
             lifecycleScope.launch(Dispatchers.Main) {
                 mode.finish()
@@ -835,7 +851,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
      */
     private fun onMarkUnreadButtonClick(mode: ActionMode) {
         // Mark all selected conversations as unread
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             adapter
                 .filter { it.checked }
                 .map { it.message }
@@ -843,8 +859,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     Database.getInstance(applicationContext)
                         .markConversationUnread(it.conversationId)
                 }
-
-            ensureActive()
 
             lifecycleScope.launch(Dispatchers.Main) {
                 mode.finish()
@@ -940,7 +954,9 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     // If the permission request was granted, try refreshing
                     // and loading the contact name and photo
                     adapter.notifyItemRangeChanged(0, adapter.itemCount)
-                    lifecycleScope.launch(Dispatchers.Default) {
+                    CustomApplication.getApplication().applicationScope.launch(
+                        Dispatchers.Default
+                    ) {
                         Database.getInstance(applicationContext)
                             .updateShortcuts()
                     }
@@ -964,14 +980,12 @@ open class ConversationsActivity(val archived: Boolean = false) :
         messages: List<Message>,
         mode: ActionMode? = null
     ) {
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             // Archive the conversations.
             for (message in messages) {
                 Database.getInstance(applicationContext)
                     .markConversationArchived(message.conversationId)
             }
-
-            ensureActive()
 
             lifecycleScope.launch(Dispatchers.Main) {
                 mode?.finish()
@@ -987,14 +1001,14 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     ),
                     getString(R.string.undo),
                     {
-                        lifecycleScope.launch(Dispatchers.Default) {
+                        CustomApplication.getApplication().applicationScope.launch(
+                            Dispatchers.Default
+                        ) {
                             for (message in messages) {
                                 Database.getInstance(applicationContext)
                                     .markConversationUnarchived(
                                         message.conversationId
                                     )
-
-                                ensureActive()
 
                                 lifecycleScope.launch(Dispatchers.Main) {
                                     adapter.refresh()
@@ -1013,14 +1027,12 @@ open class ConversationsActivity(val archived: Boolean = false) :
         messages: List<Message>,
         mode: ActionMode? = null
     ) {
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             // Archive the conversations.
             for (message in messages) {
                 Database.getInstance(applicationContext)
                     .markConversationUnarchived(message.conversationId)
             }
-
-            ensureActive()
 
             lifecycleScope.launch(Dispatchers.Main) {
                 mode?.finish()
@@ -1036,14 +1048,14 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     ),
                     getString(R.string.undo),
                     {
-                        lifecycleScope.launch(Dispatchers.Default) {
+                        CustomApplication.getApplication().applicationScope.launch(
+                            Dispatchers.Default
+                        ) {
                             for (message in messages) {
                                 Database.getInstance(applicationContext)
                                     .markConversationArchived(
                                         message.conversationId
                                     )
-
-                                ensureActive()
 
                                 lifecycleScope.launch(Dispatchers.Main) {
                                     adapter.refresh()
@@ -1062,7 +1074,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
         messages: List<Message>,
         mode: ActionMode? = null
     ) {
-        lifecycleScope.launch(Dispatchers.Default) {
+        CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             // Collect existing state in case we need to undo this.
             val conversations = messages.map {
                 Database.getInstance(applicationContext)
@@ -1087,8 +1099,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     .deleteConversation(message.conversationId)
             }
 
-            ensureActive()
-
             lifecycleScope.launch(Dispatchers.Main) {
                 mode?.finish()
                 adapter.refresh()
@@ -1104,7 +1114,9 @@ open class ConversationsActivity(val archived: Boolean = false) :
                     ),
                     getString(R.string.undo),
                     {
-                        lifecycleScope.launch(Dispatchers.Default) {
+                        CustomApplication.getApplication().applicationScope.launch(
+                            Dispatchers.Default
+                        ) {
                             // Restore the conversations.
                             for (conversation in conversations) {
                                 Database.getInstance(applicationContext)
@@ -1127,8 +1139,6 @@ open class ConversationsActivity(val archived: Boolean = false) :
                                         )
                                 }
                             }
-
-                            ensureActive()
 
                             lifecycleScope.launch(Dispatchers.Main) {
                                 adapter.refresh()

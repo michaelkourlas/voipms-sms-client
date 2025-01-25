@@ -22,12 +22,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.BuildConfig
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.activities.DidPreferencesActivity
@@ -164,7 +164,9 @@ class DidsPreferencesFragment : PreferenceFragmentCompat() {
                             )
                         }
 
-                        lifecycleScope.launch(Dispatchers.Default) {
+                        CustomApplication.getApplication().applicationScope.launch(
+                            Dispatchers.Default
+                        ) {
                             Database.getInstance(it).updateShortcuts()
                         }
                         true

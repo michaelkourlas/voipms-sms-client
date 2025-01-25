@@ -21,9 +21,9 @@ import android.app.Application
 import android.net.ConnectivityManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager.Companion.getInstance
@@ -78,7 +78,8 @@ class CustomApplication : Application() {
         conversationActivitiesVisible[conversationId] = count - 1
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    val applicationScope = CoroutineScope(SupervisorJob())
+
     override fun onCreate() {
         super.onCreate()
 
@@ -135,7 +136,7 @@ class CustomApplication : Application() {
 
         // If any messages are still marked as "sending" for some reason, mark
         // them as "not sent" -- clearly, they weren't.
-        GlobalScope.launch(Dispatchers.Default) {
+        applicationScope.launch(Dispatchers.Default) {
             Database.getInstance(applicationContext)
                 .markAllDeliveryInProgressMessagesAsNotSent()
         }

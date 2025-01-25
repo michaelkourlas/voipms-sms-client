@@ -30,9 +30,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.getDids
@@ -158,7 +157,9 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
      */
     private fun import(uri: Uri) {
         activity?.let {
-            lifecycleScope.launch(Dispatchers.IO) {
+            CustomApplication.getApplication().applicationScope.launch(
+                Dispatchers.IO
+            ) {
                 try {
                     val importFd = it.contentResolver.openFileDescriptor(
                         uri, "r"
@@ -166,8 +167,6 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                         ?: throw Exception("Could not open file")
                     Database.getInstance(it).import(importFd)
                 } catch (e: Exception) {
-                    ensureActive()
-
                     lifecycleScope.launch(Dispatchers.Main) {
                         showSnackbar(
                             it,
@@ -180,8 +179,6 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                     }
                     return@launch
                 }
-
-                ensureActive()
 
                 lifecycleScope.launch(Dispatchers.Main) {
                     showSnackbar(
@@ -199,7 +196,9 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
      */
     private fun export(uri: Uri) {
         activity?.let {
-            lifecycleScope.launch(Dispatchers.IO) {
+            CustomApplication.getApplication().applicationScope.launch(
+                Dispatchers.IO
+            ) {
                 try {
                     val exportFd = it.contentResolver.openFileDescriptor(
                         uri, "w"
@@ -207,9 +206,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                         ?: throw Exception("Could not open file")
                     Database.getInstance(it).export(exportFd)
                 } catch (e: Exception) {
-                    ensureActive()
-
-                    withContext(Dispatchers.Default) {
+                    lifecycleScope.launch(Dispatchers.Default) {
                         showSnackbar(
                             it,
                             R.id.coordinator_layout,
@@ -223,9 +220,7 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                     return@launch
                 }
 
-                ensureActive()
-
-                withContext(Dispatchers.Default) {
+                lifecycleScope.launch(Dispatchers.Default) {
                     showSnackbar(
                         it, R.id.coordinator_layout, it.getString(
                             R.string.preferences_database_export_success
@@ -273,7 +268,9 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 val deletedMessages = selectedOptions.contains(0)
                 val removedDids = selectedOptions.contains(1)
 
-                lifecycleScope.launch(Dispatchers.Default) {
+                CustomApplication.getApplication().applicationScope.launch(
+                    Dispatchers.Default
+                ) {
                     if (deletedMessages) {
                         Database.getInstance(context)
                             .deleteTableDeletedContents()
@@ -306,7 +303,9 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
             activity.applicationContext
                 .getString(R.string.delete),
             { _, _ ->
-                lifecycleScope.launch(Dispatchers.Default) {
+                CustomApplication.getApplication().applicationScope.launch(
+                    Dispatchers.Default
+                ) {
                     Database.getInstance(
                         activity.applicationContext
                     )

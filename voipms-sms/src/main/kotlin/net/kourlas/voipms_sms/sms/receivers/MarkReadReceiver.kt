@@ -20,10 +20,9 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -35,7 +34,6 @@ import net.kourlas.voipms_sms.utils.logException
  * PendingIntent.
  */
 class MarkReadReceiver : BroadcastReceiver() {
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
             // Collect the required state.
@@ -60,7 +58,9 @@ class MarkReadReceiver : BroadcastReceiver() {
 
             val pendingResult =
                 goAsync() ?: throw Exception("No PendingResult returned")
-            GlobalScope.launch(Dispatchers.Default) {
+            CustomApplication.getApplication().applicationScope.launch(
+                Dispatchers.Default
+            ) {
                 try {
                     // Mark the conversation as read.
                     Database.getInstance(context)
