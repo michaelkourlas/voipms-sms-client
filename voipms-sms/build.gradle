@@ -7,11 +7,11 @@ apply plugin: "kotlin-android"
 apply plugin: "net.kourlas.oss-licenses-plugin"
 
 android {
-    compileSdk 34
+    compileSdk 35
     defaultConfig {
         applicationId "net.kourlas.voipms_sms"
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode 149
         versionName "0.6.28"
 
