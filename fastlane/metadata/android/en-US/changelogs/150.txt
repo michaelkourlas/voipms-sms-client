@@ -1,3 +1,6 @@
 0.6.29
 • Update dependencies
 • Bug fixes
+• Target API 35
+• Fix lint issues
+• Remove legacy code
