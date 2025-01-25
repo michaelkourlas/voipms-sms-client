@@ -18,7 +18,11 @@
 package net.kourlas.voipms_sms.notifications
 
 import android.annotation.SuppressLint
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationChannelGroup
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -26,7 +30,8 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.widget.Toast
-import androidx.core.app.*
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.app.TaskStackBuilder
@@ -40,13 +45,24 @@ import net.kourlas.voipms_sms.conversation.ConversationActivity
 import net.kourlas.voipms_sms.conversation.ConversationBubbleActivity
 import net.kourlas.voipms_sms.conversations.ConversationsActivity
 import net.kourlas.voipms_sms.database.Database
-import net.kourlas.voipms_sms.preferences.*
+import net.kourlas.voipms_sms.preferences.getDidShowNotifications
+import net.kourlas.voipms_sms.preferences.getDids
+import net.kourlas.voipms_sms.preferences.getNotificationSound
+import net.kourlas.voipms_sms.preferences.getNotificationVibrateEnabled
+import net.kourlas.voipms_sms.preferences.getNotificationsEnabled
+import net.kourlas.voipms_sms.preferences.removePreference
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.sms.receivers.MarkReadReceiver
 import net.kourlas.voipms_sms.sms.receivers.SendMessageReceiver
-import net.kourlas.voipms_sms.utils.*
-import java.util.*
+import net.kourlas.voipms_sms.utils.applyCircularMask
+import net.kourlas.voipms_sms.utils.getContactName
+import net.kourlas.voipms_sms.utils.getContactPhotoAdaptiveBitmap
+import net.kourlas.voipms_sms.utils.getContactPhotoBitmap
+import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+import net.kourlas.voipms_sms.utils.logException
+import java.util.Date
+import java.util.UUID
 
 /**
  * Single-instance class used to send notifications when new SMS messages
@@ -914,7 +930,7 @@ class Notifications private constructor(private val context: Context) {
                     0
                 }
             val bubblePendingIntent = PendingIntent.getActivity(
-                context, 0,
+                context, (did + contact + "bubble").hashCode(),
                 bubbleIntent, bubbleFlags
             )
             val bubbleMetadata =
