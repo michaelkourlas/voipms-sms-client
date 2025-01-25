@@ -82,6 +82,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     sourceSets.getByName("main") {
         java.srcDir("src/main/kotlin")
