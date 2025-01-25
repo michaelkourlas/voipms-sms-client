@@ -823,7 +823,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         // Set cursor color and hint text
         val searchAutoComplete = searchView.findViewById<
-            SearchView.SearchAutoComplete>(
+            TextView>(
             androidx.appcompat.R.id.search_src_text
         )
         searchAutoComplete.hint = getString(R.string.conversation_action_search)
@@ -1098,7 +1098,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
         val databaseIds = adapter.messageItems.filter { it.checked }
             .map { it.message.databaseId }
         mode.finish()
-        
+
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
             for (databaseId in databaseIds) {
                 Database.getInstance(applicationContext)

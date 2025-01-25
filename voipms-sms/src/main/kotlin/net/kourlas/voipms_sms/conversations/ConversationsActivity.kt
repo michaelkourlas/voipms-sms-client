@@ -679,7 +679,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
 
         // Set cursor color and hint text
         val searchAutoComplete = searchView.findViewById<
-            SearchView.SearchAutoComplete>(
+            TextView>(
             androidx.appcompat.R.id.search_src_text
         )
         searchAutoComplete.hint = getString(R.string.conversations_text_hint)

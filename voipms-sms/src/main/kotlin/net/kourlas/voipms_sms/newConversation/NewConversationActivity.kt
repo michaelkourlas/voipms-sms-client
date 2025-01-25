@@ -141,7 +141,7 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
 
             // Set cursor color and hint text
             val searchAutoComplete = searchView.findViewById<
-                SearchView.SearchAutoComplete>(
+                TextView>(
                 androidx.appcompat.R.id.search_src_text
             )
             searchAutoComplete.hint = getString(
