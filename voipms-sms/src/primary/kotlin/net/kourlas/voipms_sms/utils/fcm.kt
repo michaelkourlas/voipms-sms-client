@@ -36,7 +36,11 @@ import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
  * Retrieves the Firebase installation ID.
  */
 suspend fun getInstallationId(): String {
-    return FirebaseInstallations.getInstance().id.await()
+    return try {
+        FirebaseInstallations.getInstance().id.await()
+    } catch (e: Exception) {
+        "Not available"
+    }
 }
 
 /**
