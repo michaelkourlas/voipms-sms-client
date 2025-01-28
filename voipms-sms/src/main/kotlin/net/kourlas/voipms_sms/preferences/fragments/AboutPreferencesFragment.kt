@@ -18,8 +18,12 @@
 package net.kourlas.voipms_sms.preferences.fragments
 
 import android.os.Bundle
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceFragmentCompat
+import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.R
+import net.kourlas.voipms_sms.utils.getInstallationId
+import net.kourlas.voipms_sms.utils.preferences
 
 class AboutPreferencesFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(
@@ -28,5 +32,18 @@ class AboutPreferencesFragment : PreferenceFragmentCompat() {
     ) {
         // Add preferences
         addPreferencesFromResource(R.xml.preferences_about)
+    }
+    override fun onResume() {
+        super.onResume()
+
+        lifecycleScope.launch {
+            val firebaseInstallationId = getInstallationId()
+
+            for (preference in preferenceScreen.preferences) {
+                if (preference.key == getString(R.string.preferences_about_firebase_installation_id_key)) {
+                    preference.summary = firebaseInstallationId
+                }
+            }
+        }
     }
 }

@@ -1,3 +1,9 @@
+### 0.6.30 ###
+
+* Remove all Firebase libraries except for those required for messaging
+* Add Firebase installation ID to "About" section of app
+* Update privacy policy
+
 ### 0.6.29 ###
 
 * Update dependencies

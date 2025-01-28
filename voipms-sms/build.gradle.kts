@@ -9,7 +9,6 @@ plugins {
 
     // fdroid-remove-start
     id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
     // fdroid-remove-end
 }
 
@@ -19,8 +18,8 @@ android {
         applicationId = "net.kourlas.voipms_sms"
         minSdk = 21
         targetSdk = 35
-        versionCode = 150
-        versionName = "0.6.29"
+        versionCode = 151
+        versionName = "0.6.30"
 
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
@@ -127,10 +126,9 @@ dependencies {
 
     // fdroid-remove-start
 
-    // Firebase libraries
+    // Google and Firebase libraries
+    "primaryImplementation"("com.google.android.gms:play-services-base:18.5.0")
     "primaryImplementation"(platform("com.google.firebase:firebase-bom:33.8.0"))
-    "primaryImplementation"("com.google.firebase:firebase-analytics-ktx")
-    "primaryImplementation"("com.google.firebase:firebase-crashlytics-ktx")
     "primaryImplementation"("com.google.firebase:firebase-messaging-ktx")
 
     // fdroid-remove-end

@@ -73,4 +73,7 @@
                 android:value="PACKAGE_LICENSES" />
         </intent>
     </androidx.preference.Preference>
+    <androidx.preference.Preference
+        android:key="@string/preferences_about_firebase_installation_id_key"
+        android:title="@string/preferences_about_firebase_installation_id_title" />
 </androidx.preference.PreferenceScreen>

@@ -21,7 +21,9 @@ import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.tasks.await
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -29,6 +31,13 @@ import net.kourlas.voipms_sms.notifications.workers.NotificationsRegistrationWor
 import net.kourlas.voipms_sms.preferences.didsConfigured
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
+
+/**
+ * Retrieves the Firebase installation ID.
+ */
+suspend fun getInstallationId(): String {
+    return FirebaseInstallations.getInstance().id.await()
+}
 
 /**
  * Subscribes to FCM topics corresponding to the currently configured DIDs.

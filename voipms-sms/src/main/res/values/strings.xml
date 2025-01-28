@@ -130,6 +130,8 @@
     <string name="preferences_about_privacy_title">Privacy</string>
     <string name="preferences_about_third_party_embedded_title">Third-party notices (embedded code)</string>
     <string name="preferences_about_third_party_packages_title">Third-party notices (packages)</string>
+    <string name="preferences_about_firebase_installation_id_title">Firebase installation ID</string>
+    <string name="preferences_about_firebase_installation_id_key" translatable="false">installation_id</string>
 
     <!-- Markdown -->
     <string name="preferences_markdown_extra">net.kourlas.voipms_sms.MARKDOWN_DOCUMENT_TYPE</string>
@@ -400,7 +402,7 @@
 
     <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>
-    <string name="copyright">Copyright © 2015–2024 Michael Kourlas</string>
-    <string name="version">Version 0.6.29</string>
+    <string name="copyright">Copyright © 2015–2025 Michael Kourlas</string>
+    <string name="version">Version 0.6.30</string>
     <string name="toast_error">Error: %1$s</string>
 </resources>

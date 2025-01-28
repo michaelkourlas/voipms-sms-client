@@ -23,6 +23,13 @@ import androidx.fragment.app.FragmentActivity
 /**
  * Stub for F-Droid builds.
  */
+fun getInstallationId() {
+    return "Not supported"
+}
+
+/**
+ * Stub for F-Droid builds.
+ */
 @Suppress("UNUSED_PARAMETER")
 fun subscribeToDidTopics(context: Context) {
     // Do nothing.

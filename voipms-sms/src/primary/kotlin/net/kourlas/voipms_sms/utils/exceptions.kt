@@ -18,7 +18,6 @@
 package net.kourlas.voipms_sms.utils
 
 import android.util.Log
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 /**
  * Log the specified exception.
@@ -26,7 +25,4 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 fun logException(e: Exception) {
     // Log the exception locally
     Log.e("logException", "exception", e)
-
-    // Log the exception remotely as well using Crashlytics
-    FirebaseCrashlytics.getInstance().recordException(e)
 }
