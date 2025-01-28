@@ -23,7 +23,7 @@ import androidx.fragment.app.FragmentActivity
 /**
  * Stub for F-Droid builds.
  */
-fun getInstallationId() {
+fun getInstallationId(): String {
     return "Not supported"
 }
 
