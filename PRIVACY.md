@@ -8,7 +8,7 @@ This privacy policy is in reference to:
 The purpose of this policy is to comprehensively disclose how the app accesses,
 collects, uses, and shares user data.
 
-### Data collected to implement core app functionality
+## Data collected to implement core app functionality
 
 The app collects and uses:
 
@@ -31,7 +31,7 @@ own [privacy policy](https://voip.ms/privacy-policy).
 The collection, usage, storage, and sharing of this data as described in this
 section is essential to implement the app's core functionality.
 
-### Data collected to implement push notifications
+## Data collected to implement push notifications
 
 This section only applies to the Google Play version of the app, not the
 F-Droid version of the app.
