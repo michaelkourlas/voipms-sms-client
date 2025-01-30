@@ -30,15 +30,18 @@ You can hide messages from the conversations view, block the retrieval of messag
 
 ### Push notifications
 
-The Google Play version of the app supports push notifications using Firebase Cloud Messaging. Push notifications are automatically setup when selecting phone numbers if notifications are enabled.
+The Google Play version of the app supports push notifications using Firebase
+Cloud Messaging. Push notifications are automatically configured when selecting
+phone numbers if notifications are enabled.
 
-However, if push notifications don't appear to be working, it's possible that the automatic setup failed. You can configure them manually by:
+However, if push notifications don't appear to be working, it's possible that
+the automatic configuration failed. You can configure them manually by:
 * accessing the settings for your phone numbers (DIDs) on the VoIP.ms [Manage DID menu](https://voip.ms/m/managedid.php);
 * enabling the *SMS URL Callback* option; and
 * entering the following URL into the neighbouring
   field: [https://voipmssms-notify.kourlas.com/?did={TO}](https://voipmssms-notify.kourlas.com/?did={TO})
 
-If push notifications are configured correctly, VoIP.ms will send a callback to
+If push notifications were configured correctly, VoIP.ms will send a callback to
 a Cloudflare Worker maintained by me when your phone number receives a text
 message. The Worker will then forward the callback to your device using
 Firebase Cloud Messaging. When the app receives the callback, it performs a
@@ -49,7 +52,10 @@ phone number. It does not include the text of individual messages.
 
 ### Regular notifications
 
-If push notifications could not be enabled or if you are using the F-Droid version of the app, you will still receive notifications whenever a new message is received during synchronization with the VoIP.ms servers if notifications are enabled. 
+If push notifications were not configured correctly or if you are using the
+F-Droid version of the app, you will still receive notifications whenever a new
+message is received during synchronization with the VoIP.ms servers if
+notifications are enabled.
 
 This can be a reasonable substitute for push notifications if automatic synchronization is enabled, though obviously this solution consumes more battery life.
 
