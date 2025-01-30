@@ -457,7 +457,7 @@ class Notifications private constructor(private val context: Context) {
             }
         }
 
-        return true
+        return NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
 
     /**
