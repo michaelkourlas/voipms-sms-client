@@ -1,3 +1,7 @@
+### 0.6.31 ###
+
+* Bug fixes
+
 ### 0.6.30 ###
 
 * Remove all Firebase libraries except for those required for messaging
