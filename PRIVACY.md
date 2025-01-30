@@ -36,7 +36,7 @@ section is essential to implement the app's core functionality.
 This section only applies to the Google Play version of the app, not the
 F-Droid version of the app.
 
-If you enable push notifications, the app automatically configures your VoIP.ms
+If you enable notifications, the app automatically configures your VoIP.ms
 account to
 ping [a web service hosted by Michael Kourlas](https://voipmssms-notify.kourlas.com)
 (the "Push Notification Service") every time you receive an SMS/MMS message.
