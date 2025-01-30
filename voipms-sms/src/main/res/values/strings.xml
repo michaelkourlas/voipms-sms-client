@@ -403,6 +403,6 @@
     <!-- MISCELLANEOUS -->
     <string name="app_name">VoIP.ms SMS</string>
     <string name="copyright">Copyright © 2015–2025 Michael Kourlas</string>
-    <string name="version">Version 0.6.31</string>
+    <string name="version">Version 0.6.32</string>
     <string name="toast_error">Error: %1$s</string>
 </resources>
