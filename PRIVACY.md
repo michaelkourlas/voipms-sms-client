@@ -2,7 +2,8 @@
 
 This privacy policy is in reference to:
 
-* the app "VoIP.ms SMS", hosted on the Google Play and F-Droid app stores; and
+* the app "[VoIP.ms SMS](https://github.com/michaelkourlas/voipms-sms-client)",
+  hosted on the Google Play and F-Droid app stores; and
 * the developer "Michael Kourlas".
 
 The purpose of this policy is to comprehensively disclose how the app accesses,
