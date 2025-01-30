@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 The Android Open Source Project
- * Modifications copyright (C) 2019-2020 Michael Kourlas
+ * Modifications copyright (C) 2019-2025 Michael Kourlas
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.MeasureSpec
 import android.view.View.OnLayoutChangeListener
+import android.view.ViewGroupOverlay
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -50,6 +51,7 @@ import kotlin.math.min
 @SuppressLint("InflateParams")
 class FastScroller private constructor(
     private val mRv: RecyclerView,
+    private val mViewGroupOverlay: ViewGroupOverlay,
     position: Int
 ) :
     RecyclerView.OnScrollListener(), OnLayoutChangeListener,
@@ -151,10 +153,9 @@ class FastScroller private constructor(
         refreshConversationThemeColor()
         // Add the fast scroll views to the overlay, so they are rendered above
         // the list
-        val mOverlay = mRv.overlay
-        mOverlay.add(mTrackImageView)
-        mOverlay.add(mThumbImageView)
-        mOverlay.add(mPreviewTextView)
+        mViewGroupOverlay.add(mTrackImageView)
+        mViewGroupOverlay.add(mThumbImageView)
+        mViewGroupOverlay.add(mPreviewTextView)
         hide(false /* animate */)
         mPreviewTextView.alpha = 0f
     }
@@ -522,14 +523,20 @@ class FastScroller private constructor(
          * [RecyclerView].
          *
          * @param rv       the conversation RecyclerView
+         * @param overlay  the ViewGroupOverlay where the scrollbar should
+         *                 appear
          * @param position where the scrollbar should appear (either
          * `POSITION_RIGHT_SIDE` or
          * `POSITION_LEFT_SIDE`)
          * @return a new FastScroller, or `null` if fast-scrolling is not
          * supported(the feature requires Jellybean MR2 or newer)
          */
-        fun addTo(rv: RecyclerView, position: Int): FastScroller {
-            return FastScroller(rv, position)
+        fun addTo(
+            rv: RecyclerView,
+            overlay: ViewGroupOverlay,
+            position: Int
+        ): FastScroller {
+            return FastScroller(rv, overlay, position)
         }
     }
 }

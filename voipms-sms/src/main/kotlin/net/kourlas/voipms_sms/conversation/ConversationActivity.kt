@@ -39,7 +39,9 @@ import android.text.util.Linkify
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -55,6 +57,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.text.toSpannable
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -421,9 +425,22 @@ open class ConversationActivity(val bubble: Boolean = false) :
 
         })
 
+        ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { v, windowInsets ->
+            val insets =
+                windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+            v.setPadding(
+                v.paddingLeft,
+                v.paddingTop,
+                v.paddingRight,
+                insets.bottom + resources.getDimensionPixelSize(R.dimen.quadruple_margin)
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+
         // Set up fast scroller
+        val frameLayout = findViewById<FrameLayout>(R.id.frame_layout)
         FastScroller.addTo(
-            recyclerView, FastScroller.POSITION_RIGHT_SIDE
+            recyclerView, frameLayout.overlay, FastScroller.POSITION_RIGHT_SIDE
         )
     }
 
@@ -438,6 +455,15 @@ open class ConversationActivity(val bubble: Boolean = false) :
             resources.getDimension(R.dimen.send_message_elevation)
         )
         applyRoundedCornersMask(messageSection)
+        ViewCompat.setOnApplyWindowInsetsListener(messageSection) { v, windowInsets ->
+            val insets =
+                windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+            v.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin =
+                    insets.bottom + resources.getDimensionPixelSize(R.dimen.margin)
+            }
+            WindowInsetsCompat.CONSUMED
+        }
 
         // Set up message text box
         val messageEditText = findViewById<EditText>(R.id.message_edit_text)

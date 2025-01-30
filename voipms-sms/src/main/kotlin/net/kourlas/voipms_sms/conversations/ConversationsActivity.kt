@@ -30,6 +30,7 @@ import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -39,6 +40,9 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -336,6 +340,18 @@ open class ConversationsActivity(val archived: Boolean = false) :
             recyclerView
         )
 
+        ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { v, windowInsets ->
+            val systemBarsInsets =
+                windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(
+                v.paddingLeft,
+                v.paddingTop,
+                v.paddingRight,
+                systemBarsInsets.bottom
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+
         val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(
             R.id.swipe_refresh_layout
         )
@@ -368,6 +384,17 @@ open class ConversationsActivity(val archived: Boolean = false) :
                         this, NewConversationActivity::class.java
                     )
                     startActivity(newConversationIntent)
+                }
+                ViewCompat.setOnApplyWindowInsetsListener(it) { v, windowInsets ->
+                    val insets =
+                        windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                    v.updateLayoutParams<MarginLayoutParams> {
+                        bottomMargin =
+                            insets.bottom + resources.getDimensionPixelSize(
+                                R.dimen.margin
+                            )
+                    }
+                    WindowInsetsCompat.CONSUMED
                 }
             }
         }
@@ -526,7 +553,7 @@ open class ConversationsActivity(val archived: Boolean = false) :
 
         // Update chat button visibility
         findViewById<FloatingActionButton>(R.id.chat_button).let {
-            if (!didsConfigured(applicationContext) && !BuildConfig.IS_DEMO) {
+            if (archived || !didsConfigured(applicationContext) && !BuildConfig.IS_DEMO) {
                 (it as View).visibility = View.GONE
             } else {
                 (it as View).visibility = View.VISIBLE

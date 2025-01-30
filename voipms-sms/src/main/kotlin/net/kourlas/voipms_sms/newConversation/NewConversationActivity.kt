@@ -25,6 +25,7 @@ import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -33,6 +34,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.kourlas.voipms_sms.BuildConfig
@@ -188,8 +191,25 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
+        ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { v, windowInsets ->
+            val insets =
+                windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(
+                v.paddingLeft,
+                v.paddingTop,
+                v.paddingRight,
+                insets.bottom + resources.getDimensionPixelSize(R.dimen.quadruple_margin)
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+
         // Set up fast scroller
-        FastScroller.addTo(recyclerView, FastScroller.POSITION_RIGHT_SIDE)
+        val frameLayout = findViewById<FrameLayout>(R.id.frame_layout)
+        FastScroller.addTo(
+            recyclerView,
+            frameLayout.overlay,
+            FastScroller.POSITION_RIGHT_SIDE
+        )
     }
 
     override fun onResume() {

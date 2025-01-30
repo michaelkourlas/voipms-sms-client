@@ -38,6 +38,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
+        android:id="@+id/frame_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -71,13 +72,6 @@
                     android:paddingBottom="@dimen/quadruple_margin" />
             </RelativeLayout>
         </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/quadruple_margin"
-            android:layout_gravity="bottom"
-            android:layout_marginBottom="@dimen/double_margin"
-            android:background="@drawable/conversation_fade" />
 
         <LinearLayout
             android:id="@+id/message_section"
