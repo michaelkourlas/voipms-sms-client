@@ -1,7 +1,7 @@
 [versions]
 agp = "9.0.1"
 annotation = "1.9.1"
-appcompat = "1.7.1"
+appcompat = "1.8.0"
 betterLinkMovementMethod = "2.2.0"
 composeUi = "1.10.4"
 coreKtx = "1.17.0"
@@ -19,7 +19,7 @@ playServicesBase = "18.10.0"
 preferenceKtx = "1.2.1"
 recyclerview = "1.4.0"
 recyclerviewswipedecorator = "1.3"
-roomVersion = "2.8.4"
+roomVersion = "2.8.5"
 # The final versions of this library simply deprecated all APIs.
 #noinspection GradleDependency
 securityCrypto = "1.1.0-alpha06"
