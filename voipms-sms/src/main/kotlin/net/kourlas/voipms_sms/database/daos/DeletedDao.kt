@@ -25,9 +25,9 @@ import net.kourlas.voipms_sms.database.entities.Deleted
 @Dao
 interface DeletedDao {
     @Query(
-        "DELETE FROM ${Deleted.TABLE_NAME} WHERE ${Deleted.COLUMN_DID} NOT IN(:dids) AND ${Deleted.COLUMN_VOIP_ID} = :voipId"
+        "DELETE FROM ${Deleted.TABLE_NAME} WHERE ${Deleted.COLUMN_DID} = :did AND ${Deleted.COLUMN_VOIP_ID} = :voipId"
     )
-    suspend fun delete(dids: Set<String>, voipId: Long)
+    suspend fun delete(did: String, voipId: Long)
 
     @Query("DELETE FROM ${Deleted.TABLE_NAME}")
     suspend fun deleteAll()

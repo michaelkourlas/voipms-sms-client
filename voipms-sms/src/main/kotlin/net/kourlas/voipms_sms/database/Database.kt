@@ -503,7 +503,7 @@ class Database private constructor(private val context: Context) {
                             // messages.
                             database.deletedDao()
                                 .delete(
-                                    setOf(incomingMessage.did),
+                                    incomingMessage.did,
                                     incomingMessage.voipId
                                 )
                         } else if (database.deletedDao().get(
