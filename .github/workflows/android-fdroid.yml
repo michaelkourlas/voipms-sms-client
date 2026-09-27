@@ -17,7 +17,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
       - name: Set up Python 3.10
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
       - name: Prepare source for F-Droid build
