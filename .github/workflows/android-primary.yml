@@ -26,3 +26,11 @@ jobs:
         run: echo $google_services_json | base64 -d > voipms-sms/src/primary/google-services.json
       - name: Build with Gradle
         run: ./gradlew assemblePrimaryFullRelease
+      - name: Lint with Gradle
+        run: ./gradlew lintPrimaryFullRelease
+      - name: Upload lint report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report-primary
+          path: voipms-sms/build/reports/lint-results-primaryFullRelease.html

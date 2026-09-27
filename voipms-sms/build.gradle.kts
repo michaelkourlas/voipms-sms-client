@@ -88,7 +88,18 @@ configure<ApplicationExtension> {
         kotlin.directories += "src/fdroid/kotlin"
     }
     lint {
-        abortOnError = false
+        abortOnError = true
+        warningsAsErrors = true
+        // The result of these checks depends on when lint runs, not on the
+        // code: a new release of a dependency or of Android produces a new
+        // warning. They are therefore not suitable for a check that fails the
+        // build.
+        disable += setOf(
+            "AndroidGradlePluginVersion",
+            "GradleDependency",
+            "NewerVersionAvailable",
+            "OldTargetApi"
+        )
     }
     namespace = "net.kourlas.voipms_sms"
 }

@@ -400,7 +400,7 @@ class ConversationsRecyclerViewAdapter<T>(
                                     )
                                 else setOf(activeDid),
                                 constraint.toString()
-                                    .trim { it <= ' ' }
+                                    .trim()
                                     .lowercase(Locale.getDefault())).filter {
                                 val archived = Database.getInstance(activity)
                                     .isConversationArchived(it.conversationId)
@@ -480,7 +480,7 @@ class ConversationsRecyclerViewAdapter<T>(
 
             // Process new filter string
             prevConstraint = currConstraint
-            currConstraint = constraint.toString().trim { it <= ' ' }
+            currConstraint = constraint.toString().trim()
 
             val position = layoutManager.findFirstVisibleItemPosition()
 

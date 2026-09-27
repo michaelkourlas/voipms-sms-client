@@ -24,3 +24,11 @@ jobs:
         run: sed -i "/fdroid-remove-start/,/fdroid-remove-end/d" build.gradle.kts voipms-sms/build.gradle.kts
       - name: Build with Gradle (F-Droid)
         run: ./gradlew assembleFdroidFullRelease
+      - name: Lint with Gradle (F-Droid)
+        run: ./gradlew lintFdroidFullRelease
+      - name: Upload lint report (F-Droid)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report-fdroid
+          path: voipms-sms/build/reports/lint-results-fdroidFullRelease.html

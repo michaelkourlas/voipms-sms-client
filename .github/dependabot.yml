@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    # Only propose releases that have been public for at least a week.
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    ignore:
+      # 1.1.0-alpha06 is pinned on purpose: later versions deprecate the whole
+      # API.
+      - dependency-name: "androidx.security:security-crypto"
+    groups:
+      androidx:
+        patterns:
+          - "androidx.*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

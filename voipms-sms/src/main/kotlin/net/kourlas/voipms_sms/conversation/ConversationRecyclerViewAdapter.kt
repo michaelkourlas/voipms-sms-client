@@ -425,7 +425,7 @@ class ConversationRecyclerViewAdapter(
             if (!BuildConfig.IS_DEMO) {
                 runBlocking {
                     val filterString = constraint.toString()
-                        .trim { it <= ' ' }
+                        .trim()
                         .lowercase(Locale.getDefault())
                     maxLimit = Database.getInstance(activity)
                         .getConversationMessagesFilteredCount(
@@ -484,7 +484,7 @@ class ConversationRecyclerViewAdapter(
 
             // Process new filter string
             prevConstraint = currConstraint
-            currConstraint = constraint.toString().trim { it <= ' ' }
+            currConstraint = constraint.toString().trim()
 
             // The Android results interface uses type Any, so we have
             // no choice but to use an unchecked cast

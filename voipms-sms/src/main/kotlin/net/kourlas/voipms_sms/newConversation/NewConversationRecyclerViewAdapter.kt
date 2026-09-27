@@ -261,7 +261,7 @@ class NewConversationRecyclerViewAdapter(
             }
 
             // Perform actual filtering
-            val currConstraint = constraint.toString().trim { it <= ' ' }
+            val currConstraint = constraint.toString().trim()
             for (contactItem in allContactItems) {
                 val match =
                     contactItem.name.lowercase(Locale.getDefault()).contains(
@@ -318,7 +318,7 @@ class NewConversationRecyclerViewAdapter(
             }
 
             // Process new filter string
-            currConstraint = constraint.toString().trim { it <= ' ' }
+            currConstraint = constraint.toString().trim()
 
             // The Android results interface uses type Any, so we
             // have no choice but to use an unchecked cast)
