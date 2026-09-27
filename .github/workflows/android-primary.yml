@@ -27,9 +27,10 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew assemblePrimaryFullRelease
       - name: Lint with Gradle
+        id: lint
         run: ./gradlew lintPrimaryFullRelease
       - name: Upload lint report
-        if: failure()
+        if: failure() && steps.lint.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
           name: lint-report-primary
