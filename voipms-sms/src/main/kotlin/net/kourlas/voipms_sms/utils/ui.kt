@@ -175,7 +175,7 @@ fun showPermissionSnackbar(
     activity: AppCompatActivity, viewId: Int,
     text: String
 ): Snackbar? {
-    if (activity.isFinishing) {
+    if (!activity.isFinishing) {
         val view = activity.findViewById<View>(viewId)
         val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
         snackbar.setAction(R.string.settings) {
