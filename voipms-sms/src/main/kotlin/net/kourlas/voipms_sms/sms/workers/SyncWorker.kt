@@ -295,6 +295,26 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                 .mapTo(retrievalRequests) {
                     RetrievalRequest(it, period)
                 }
+            // getMMS drops non-GSM-7 text (emoji, Chinese, ...) from the
+            // message, while getSMS keeps it. Fetch both and merge later
+            // (see processRequests).
+            encodedDids
+                .map {
+                    mapOf(
+                        "api_username" to getEmail(applicationContext),
+                        "api_password" to getPassword(applicationContext),
+                        "method" to "getSMS",
+                        "did" to it,
+                        "limit" to "1000000",
+                        "from" to sdf.format(period.first),
+                        "to" to sdf.format(period.second),
+                        "timezone" to "-5",
+                        "all_messages" to "1",
+                    ) // -5 corresponds to EDT
+                }
+                .mapTo(retrievalRequests) {
+                    RetrievalRequest(it, period)
+                }
         }
 
         return retrievalRequests
@@ -337,6 +357,29 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             }
         }
 
+        // getMMS carries the media but strips non-GSM-7 text (emoji, Chinese,
+        // ...); getSMS has the correct text. Both endpoints return the same
+        // message under the same id, so merge by id: take the text from getSMS
+        // and the media from getMMS. Genuine MMS messages have no getSMS twin,
+        // so their text (e.g. a caption) still comes from getMMS.
+        val mergedMessages = incomingMessages
+            .groupBy { it.voipId }
+            .map { (_, msgs) ->
+                if (msgs.size == 1) {
+                    msgs.first()
+                } else {
+                    val mms = msgs.firstOrNull { it.fromMms } ?: msgs.first()
+                    val sms = msgs.firstOrNull { !it.fromMms } ?: mms
+                    mms.copy(
+                        text = if (!sms.text.isNullOrEmpty()) {
+                            sms.text
+                        } else {
+                            mms.text
+                        }
+                    )
+                }
+            }
+
         // Add new messages from the server
         val newConversationIds: Set<ConversationId>
         try {
@@ -344,7 +387,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                 applicationContext
             )
                 .insertMessagesVoipMsApi(
-                    incomingMessages,
+                    mergedMessages,
                     retrieveDeletedMessages
                 )
         } catch (e: Exception) {
@@ -438,7 +481,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                         message.message,
                         message.col_media1,
                         message.col_media2,
-                        message.col_media3
+                        message.col_media3,
+                        fromMms = request.formData["method"] == "getMMS"
                     )
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
@@ -511,7 +555,9 @@ class SyncWorker(context: Context, params: WorkerParameters) :
         val text: String?,
         val media1: String?,
         val media2: String?,
-        val media3: String?
+        val media3: String?,
+        // Whether this record came from getMMS (true) or getSMS (false).
+        val fromMms: Boolean = false
     ) {
         init {
             validatePhoneNumber(did)
