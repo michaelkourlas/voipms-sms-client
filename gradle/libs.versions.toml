@@ -1,10 +1,10 @@
 [versions]
 agp = "9.4.1"
-annotation = "1.9.1"
+annotation = "1.11.0"
 appcompat = "1.8.0"
 betterLinkMovementMethod = "2.2.0"
 composeUi = "1.10.4"
-coreKtx = "1.17.0"
+coreKtx = "1.19.1"
 firebaseBom = "34.10.0"
 google-services = "4.5.0"
 kotlin = "2.3.10"
@@ -25,7 +25,7 @@ roomVersion = "2.8.5"
 securityCrypto = "1.1.0-alpha06"
 sharetarget = "1.2.0"
 swiperefreshlayout = "1.2.0"
-workRuntimeKtx = "2.11.1"
+workRuntimeKtx = "2.12.0"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
