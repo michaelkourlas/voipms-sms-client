@@ -20,8 +20,10 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
-import net.kourlas.voipms_sms.utils.logException
+
+private const val TAG = "SyncBootReceiver"
 
 /**
  * Receiver called on system startup and used to set up the synchronization
@@ -40,7 +42,7 @@ class SyncBootReceiver : BroadcastReceiver() {
             }
             SyncWorker.performFullSynchronization(context, scheduleOnly = true)
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to schedule synchronization after boot", e)
         }
     }
 }

@@ -19,6 +19,7 @@ package net.kourlas.voipms_sms.newConversation
 
 import android.graphics.Bitmap
 import android.provider.ContactsContract
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,9 +41,10 @@ import net.kourlas.voipms_sms.utils.getDigitsOfString
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 import net.kourlas.voipms_sms.utils.getGenericContactPhotoBitmap
 import net.kourlas.voipms_sms.utils.getPhoneNumberType
-import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.showSnackbar
 import java.util.Locale
+
+private const val TAG = "NewConversationAdapter"
 
 /**
  * Recycler view adapter used by [NewConversationActivity].
@@ -299,7 +301,7 @@ class NewConversationRecyclerViewAdapter(
             results.values = filteredContactItems
             results
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to filter contacts", e)
             FilterResults()
         }
 

@@ -29,6 +29,7 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewOutlineProvider
@@ -42,6 +43,8 @@ import com.google.android.material.snackbar.Snackbar
 import me.saket.bettermovementmethod.BetterLinkMovementMethod
 import net.kourlas.voipms_sms.R
 import kotlin.math.abs
+
+private const val TAG = "Ui"
 
 /**
  * Applies a circular mask to a bitmap.
@@ -202,7 +205,7 @@ fun abortActivity(
     activity: FragmentActivity, ex: Exception,
     duration: Int = Toast.LENGTH_SHORT
 ) {
-    logException(ex)
+    Log.e(TAG, "Aborting activity", ex)
     Toast.makeText(
         activity,
         activity.getString(R.string.toast_error, ex.message),

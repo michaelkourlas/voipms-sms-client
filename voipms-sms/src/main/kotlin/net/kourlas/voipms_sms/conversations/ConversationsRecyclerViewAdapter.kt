@@ -25,6 +25,7 @@ import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +44,8 @@ import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.utils.*
 import java.util.*
+
+private const val TAG = "ConversationsAdapter"
 
 /**
  * Recycler view adapter used by [ConversationsActivity] and
@@ -460,7 +463,7 @@ class ConversationsRecyclerViewAdapter<T>(
             results.values = resultsObject
             results
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to filter conversations", e)
             FilterResults()
         }
 

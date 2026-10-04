@@ -54,7 +54,6 @@ import net.kourlas.voipms_sms.preferences.getStartDate
 import net.kourlas.voipms_sms.preferences.getSyncInterval
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
-import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.normalizeVoipMsPhoneNumber
 import net.kourlas.voipms_sms.utils.toBoolean
 import net.kourlas.voipms_sms.utils.validatePhoneNumber
@@ -67,6 +66,8 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
+
+private const val TAG = "SyncWorker"
 
 /**
  * Worker used to synchronize the database with VoIP.ms.
@@ -84,7 +85,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             return if (error == null) {
                 Result.success()
             } else {
-                Log.w("tag", error ?: "")
+                Log.w(TAG, error ?: "")
                 Result.failure()
             }
         } finally {
@@ -194,7 +195,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             error = applicationContext.getString(R.string.sync_error_cancelled)
             throw e
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to synchronize messages", e)
             error = applicationContext.getString(
                 R.string.sync_error_unknown
             )
@@ -348,7 +349,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                     retrieveDeletedMessages
                 )
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to insert synchronized messages", e)
             error = applicationContext.getString(
                 R.string.sync_error_database
             )
@@ -442,7 +443,7 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                     )
                     incomingMessages.add(incomingMessage)
                 } catch (e: Exception) {
-                    logException(e)
+                    Log.e(TAG, "Failed to parse synchronized message", e)
                     error = applicationContext.getString(
                         R.string.sync_error_api_parse
                     )
@@ -478,11 +479,11 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             )
             return null
         } catch (e: JsonDataException) {
-            logException(e)
+            Log.e(TAG, "Failed to parse message retrieval response", e)
             error = applicationContext.getString(R.string.sync_error_api_parse)
             return null
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to send message retrieval request", e)
             error = applicationContext.getString(R.string.sync_error_unknown)
             return null
         }

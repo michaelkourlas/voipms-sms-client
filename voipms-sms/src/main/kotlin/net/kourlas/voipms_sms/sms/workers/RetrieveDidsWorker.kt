@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
@@ -42,8 +43,9 @@ import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.preferences.setDids
 import net.kourlas.voipms_sms.utils.enablePushNotifications
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
-import net.kourlas.voipms_sms.utils.logException
 import java.io.IOException
+
+private const val TAG = "RetrieveDidsWorker"
 
 /**
  * Worker used to retrieve DIDs for a particular account from VoIP.ms.
@@ -135,7 +137,7 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 enablePushNotifications(applicationContext)
             }
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to retrieve DIDs", e)
         }
         return@coroutineScope dids
     }
@@ -179,13 +181,13 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
             )
             return null
         } catch (e: JsonDataException) {
-            logException(e)
+            Log.e(TAG, "Failed to parse DID retrieval response", e)
             error = applicationContext.getString(
                 R.string.preferences_dids_error_api_parse
             )
             return null
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to send DID retrieval request", e)
             error = applicationContext.getString(
                 R.string.preferences_dids_error_unknown
             )

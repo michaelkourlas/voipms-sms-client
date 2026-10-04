@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
@@ -40,8 +41,9 @@ import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.getEmail
 import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
-import net.kourlas.voipms_sms.utils.logException
 import java.io.IOException
+
+private const val TAG = "NotificationsRegWorker"
 
 /**
  * Service that registers a VoIP.ms callback for each DID.
@@ -79,7 +81,7 @@ class NotificationsRegistrationWorker(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to register URL callbacks", e)
         }
 
         // Send broadcast with DIDs that failed registration
@@ -158,11 +160,11 @@ class NotificationsRegistrationWorker(
             } catch (e: IOException) {
                 // Do nothing.
             } catch (e: JsonDataException) {
-                logException(e)
+                Log.e(TAG, "Failed to parse URL callback registration response", e)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                logException(e)
+                Log.e(TAG, "Failed to send URL callback registration request", e)
             }
         }
         return responses

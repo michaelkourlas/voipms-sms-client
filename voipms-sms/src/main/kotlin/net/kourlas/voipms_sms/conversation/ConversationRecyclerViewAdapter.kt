@@ -26,6 +26,7 @@ import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.text.util.Linkify
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,10 +51,11 @@ import net.kourlas.voipms_sms.utils.applyRoundedCornersMask
 import net.kourlas.voipms_sms.utils.getConversationViewDate
 import net.kourlas.voipms_sms.utils.getConversationViewTopDate
 import net.kourlas.voipms_sms.utils.getScrollBarDate
-import net.kourlas.voipms_sms.utils.logException
 import net.kourlas.voipms_sms.utils.showSnackbar
 import java.util.Locale
 import kotlin.math.max
+
+private const val TAG = "ConversationAdapter"
 
 /**
  * Recycler view adapter used by [ConversationActivity].
@@ -464,7 +466,7 @@ class ConversationRecyclerViewAdapter(
             results.values = resultsObject
             results
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to filter messages", e)
             FilterResults()
         }
 

@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import androidx.core.app.Person
 import androidx.core.content.LocusIdCompat
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -51,12 +52,13 @@ import net.kourlas.voipms_sms.utils.getContactName
 import net.kourlas.voipms_sms.utils.getContactPhotoAdaptiveBitmap
 import net.kourlas.voipms_sms.utils.getDigitsOfString
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
-import net.kourlas.voipms_sms.utils.logException
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Date
 import java.util.Locale
+
+private const val TAG = "Database"
 
 
 /**
@@ -787,7 +789,7 @@ class Database private constructor(private val context: Context) {
                     // dynamic shortcuts was exceeded? There's nothing we can do
                     // about this, since we are following
                     // getMaxShortcutCountPerActivity().
-                    logException(e)
+                    Log.e(TAG, "Failed to update shortcuts", e)
                 }
 
                 // Look at our existing list of cached and pinned shortcuts to make

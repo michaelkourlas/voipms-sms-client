@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
@@ -42,8 +43,9 @@ import net.kourlas.voipms_sms.preferences.getPassword
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.Message
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
-import net.kourlas.voipms_sms.utils.logException
 import java.io.IOException
+
+private const val TAG = "SendMessageWorker"
 
 /**
  * Worker used to send an SMS message using the VoIP.ms API.
@@ -224,7 +226,7 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                 )
             }
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to send message", e)
             error = applicationContext.getString(
                 R.string.send_message_error_unknown
             )
@@ -324,13 +326,13 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
             )
             return null
         } catch (e: JsonDataException) {
-            logException(e)
+            Log.e(TAG, "Failed to parse send message response", e)
             error = applicationContext.getString(
                 R.string.send_message_error_api_parse
             )
             return null
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to send message request", e)
             error = applicationContext.getString(
                 R.string.send_message_error_unknown
             )

@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
@@ -35,8 +36,9 @@ import com.squareup.moshi.JsonDataException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
-import net.kourlas.voipms_sms.utils.logException
 import java.io.IOException
+
+private const val TAG = "VerifyCredentialsWorker"
 
 /**
  * Worker used to test credentials for a particular account from VoIP.ms.
@@ -122,7 +124,7 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
                 return verifyResponse(response)
             }
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to verify credentials", e)
         }
         return false
     }
@@ -160,13 +162,13 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
             )
             return null
         } catch (e: JsonDataException) {
-            logException(e)
+            Log.e(TAG, "Failed to parse credential verification response", e)
             error = applicationContext.getString(
                 R.string.verify_credentials_error_api_parse
             )
             return null
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to send credential verification request", e)
             error = applicationContext.getString(
                 R.string.verify_credentials_error_unknown
             )

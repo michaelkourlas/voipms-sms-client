@@ -28,6 +28,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -60,9 +61,10 @@ import net.kourlas.voipms_sms.utils.getContactName
 import net.kourlas.voipms_sms.utils.getContactPhotoAdaptiveBitmap
 import net.kourlas.voipms_sms.utils.getContactPhotoBitmap
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
-import net.kourlas.voipms_sms.utils.logException
 import java.util.Date
 import java.util.UUID
+
+private const val TAG = "Notifications"
 
 /**
  * Single-instance class used to send notifications when new SMS messages
@@ -957,7 +959,7 @@ class Notifications private constructor(private val context: Context) {
                 id, notification.build()
             )
         } catch (e: SecurityException) {
-            logException(e)
+            Log.e(TAG, "Failed to show notification", e)
         }
     }
 

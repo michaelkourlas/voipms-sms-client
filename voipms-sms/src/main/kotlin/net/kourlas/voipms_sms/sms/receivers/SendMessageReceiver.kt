@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.RemoteInput
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +30,8 @@ import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.workers.SendMessageWorker
 import net.kourlas.voipms_sms.utils.getMessageTexts
-import net.kourlas.voipms_sms.utils.logException
+
+private const val TAG = "SendMessageReceiver"
 
 /**
  * Broadcast receiver used to forward send message requests from a notification
@@ -92,13 +94,13 @@ class SendMessageReceiver : BroadcastReceiver() {
                         )
                     }
                 } catch (e: Exception) {
-                    logException(e)
+                    Log.e(TAG, "Failed to send inline reply", e)
                 } finally {
                     pendingResult.finish()
                 }
             }
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to handle inline reply intent", e)
         }
     }
 

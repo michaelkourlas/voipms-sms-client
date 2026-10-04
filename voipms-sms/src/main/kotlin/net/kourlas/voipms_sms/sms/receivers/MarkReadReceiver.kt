@@ -20,6 +20,7 @@ package net.kourlas.voipms_sms.sms.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.CustomApplication
@@ -27,7 +28,8 @@ import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.sms.ConversationId
-import net.kourlas.voipms_sms.utils.logException
+
+private const val TAG = "MarkReadReceiver"
 
 /**
  * Broadcast receiver used to process mark read requests from a notification
@@ -71,13 +73,13 @@ class MarkReadReceiver : BroadcastReceiver() {
                     Database.getInstance(context)
                         .markConversationRead(ConversationId(did, contact))
                 } catch (e: Exception) {
-                    logException(e)
+                    Log.e(TAG, "Failed to mark conversation as read", e)
                 } finally {
                     pendingResult.finish()
                 }
             }
         } catch (e: Exception) {
-            logException(e)
+            Log.e(TAG, "Failed to handle mark read intent", e)
         }
     }
 
