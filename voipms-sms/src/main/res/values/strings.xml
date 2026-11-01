@@ -405,4 +405,5 @@
     <string name="copyright">Copyright © 2015–2026 Michael Kourlas</string>
     <string name="version">Version 0.6.33</string>
     <string name="toast_error">Error: %1$s</string>
+    <string name="toast_unexpected_error">An unexpected error occurred</string>
 </resources>

@@ -20,7 +20,12 @@ package net.kourlas.voipms_sms
 import android.app.Application
 import android.net.ConnectivityManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -35,6 +40,8 @@ import net.kourlas.voipms_sms.preferences.setRawSyncInterval
 import net.kourlas.voipms_sms.sms.ConversationId
 import net.kourlas.voipms_sms.sms.workers.SyncWorker
 import net.kourlas.voipms_sms.utils.subscribeToDidTopics
+
+private const val TAG = "CustomApplication"
 
 class CustomApplication : Application() {
     private var conversationsActivitiesVisible = 0
@@ -78,7 +85,25 @@ class CustomApplication : Application() {
         conversationActivitiesVisible[conversationId] = count - 1
     }
 
-    val applicationScope = CoroutineScope(SupervisorJob())
+    /**
+     * Scope for work that must continue after the activity that started it
+     * stops. If a coroutine in this scope throws an exception and does not
+     * catch it, the handler logs the exception and shows a general toast
+     * instead of stopping the app.
+     */
+    val applicationScope = CoroutineScope(
+        SupervisorJob() + CoroutineExceptionHandler { _, e ->
+            Log.e(TAG, "Uncaught exception in application scope", e)
+            // The handler can run on a background thread, so show the toast
+            // on the main thread.
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(
+                    applicationContext,
+                    getString(R.string.toast_unexpected_error),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        })
 
     override fun onCreate() {
         super.onCreate()
