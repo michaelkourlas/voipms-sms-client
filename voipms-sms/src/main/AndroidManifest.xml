@@ -104,8 +104,7 @@
             android:name=".conversation.ConversationBubbleActivity"
             android:allowEmbedded="true"
             android:resizeableActivity="true"
-            android:exported="false"
-            tools:targetApi="n" />
+            android:exported="false" />
         <activity
             android:name=".newConversation.NewConversationActivity"
             android:noHistory="true"

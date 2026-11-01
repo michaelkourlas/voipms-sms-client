@@ -138,14 +138,12 @@ class CustomApplication : Application() {
         }
 
         // Register for network callbacks
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val connectivityManager = getSystemService(
-                CONNECTIVITY_SERVICE
-            ) as ConnectivityManager
-            connectivityManager.registerDefaultNetworkCallback(
-                getInstance()
-            )
-        }
+        val connectivityManager = getSystemService(
+            CONNECTIVITY_SERVICE
+        ) as ConnectivityManager
+        connectivityManager.registerDefaultNetworkCallback(
+            getInstance()
+        )
 
         // Open the database.
         Database.getInstance(applicationContext)

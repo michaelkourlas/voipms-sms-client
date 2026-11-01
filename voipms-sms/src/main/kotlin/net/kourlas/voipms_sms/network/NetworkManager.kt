@@ -21,17 +21,7 @@ class NetworkManager : ConnectivityManager.NetworkCallback() {
     }
 
     fun isNetworkConnectionAvailable(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            isNetworkConnected
-        } else {
-            @Suppress("DEPRECATION")
-            val networkInfo = connectivityManager.activeNetworkInfo
-            @Suppress("DEPRECATION")
-            networkInfo != null && networkInfo.isConnected
-        }
+        return isNetworkConnected
     }
 
     companion object {

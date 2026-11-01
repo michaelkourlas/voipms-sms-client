@@ -16,7 +16,7 @@ configure<ApplicationExtension> {
     compileSdk = 37
     defaultConfig {
         applicationId = "net.kourlas.voipms_sms"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         versionCode = 154
         versionName = "0.6.33"

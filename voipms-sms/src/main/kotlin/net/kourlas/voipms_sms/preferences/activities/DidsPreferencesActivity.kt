@@ -93,16 +93,9 @@ class DidsPreferencesActivity : AppCompatActivity() {
 
         // Load info message
         val textView = findViewById<TextView>(R.id.info_text_view)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            textView.text = Html.fromHtml(
-                getString(R.string.preferences_dids_info), 0
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            textView.text = Html.fromHtml(
-                getString(R.string.preferences_dids_info)
-            )
-        }
+        textView.text = Html.fromHtml(
+            getString(R.string.preferences_dids_info), 0
+        )
         textView.movementMethod = LinkMovementMethod.getInstance()
 
         retrieveDids()

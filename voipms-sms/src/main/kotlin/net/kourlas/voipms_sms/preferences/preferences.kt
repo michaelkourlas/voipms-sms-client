@@ -691,11 +691,9 @@ fun migrateLegacySecurePreferences(context: Context) = synchronized(
             LEGACY_SECURE_SHARED_PREFERENCES_NAME,
             Context.MODE_PRIVATE
         ).edit { clear() }
-        if (VERSION.SDK_INT >= VERSION_CODES.N) {
-            context.deleteSharedPreferences(
-                LEGACY_SECURE_SHARED_PREFERENCES_NAME
-            )
-        }
+        context.deleteSharedPreferences(
+            LEGACY_SECURE_SHARED_PREFERENCES_NAME
+        )
 
         val keyStore = KeyStore.getInstance(LEGACY_KEYSTORE_TYPE)
         keyStore.load(null)

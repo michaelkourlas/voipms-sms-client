@@ -237,16 +237,9 @@ class SignInActivity : AppCompatActivity() {
      */
     private fun setupTextView() {
         val textView = findViewById<TextView>(R.id.text_view)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            textView.text = Html.fromHtml(
-                getString(R.string.sign_in_info), 0
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            textView.text = Html.fromHtml(
-                getString(R.string.sign_in_info)
-            )
-        }
+        textView.text = Html.fromHtml(
+            getString(R.string.sign_in_info), 0
+        )
         textView.movementMethod = LinkMovementMethod.getInstance()
     }
 

@@ -649,13 +649,11 @@ class Notifications private constructor(private val context: Context) {
                 )
             )
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            notification.setGroup(
-                context.getString(
-                    R.string.notifications_group_key
-                )
+        notification.setGroup(
+            context.getString(
+                R.string.notifications_group_key
             )
-        }
+        )
         notification.setGroupAlertBehavior(
             NotificationCompat.GROUP_ALERT_CHILDREN
         )
@@ -787,96 +785,48 @@ class Notifications private constructor(private val context: Context) {
             .setAllowGeneratedReplies(true)
             .addRemoteInput(remoteInput)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            notification.addAction(replyActionBuilder.build())
-        } else {
-            notification.addInvisibleAction(replyActionBuilder.build())
-
-            // Inline reply is not supported, so just show the conversation
-            // activity
-            val visibleReplyIntent = Intent(
-                context,
-                ConversationActivity::class.java
-            )
-            visibleReplyIntent.putExtra(
-                context.getString(
-                    R.string.conversation_did
-                ), did
-            )
-            visibleReplyIntent.putExtra(
-                context.getString(
-                    R.string.conversation_contact
-                ), contact
-            )
-            visibleReplyIntent.putExtra(
-                context.getString(
-                    R.string.conversation_extra_focus
-                ), true
-            )
-            visibleReplyIntent.flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-            val visibleReplyFlags =
-                PendingIntent.FLAG_CANCEL_CURRENT
-
-            @SuppressLint("UnspecifiedImmutableFlag")
-            val visibleReplyPendingIntent = PendingIntent.getActivity(
-                context, (did + contact + "replyVisible").hashCode(),
-                visibleReplyIntent, visibleReplyFlags
-            )
-            val visibleReplyActionBuilder = NotificationCompat.Action.Builder(
-                R.drawable.ic_reply_toolbar_24dp,
-                context.getString(R.string.notifications_button_reply),
-                visibleReplyPendingIntent
-            )
-                .setSemanticAction(
-                    NotificationCompat.Action.SEMANTIC_ACTION_REPLY
-                )
-                .setShowsUserInterface(true)
-                .addRemoteInput(remoteInput)
-            notification.addAction(visibleReplyActionBuilder.build())
-        }
+        notification.addAction(replyActionBuilder.build())
 
         // Group notification
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val groupNotification = NotificationCompat.Builder(context, channel)
-            groupNotification.setSmallIcon(R.drawable.ic_chat_toolbar_24dp)
-            groupNotification.setGroup(
-                context.getString(
-                    R.string.notifications_group_key
-                )
+        val groupNotification = NotificationCompat.Builder(context, channel)
+        groupNotification.setSmallIcon(R.drawable.ic_chat_toolbar_24dp)
+        groupNotification.setGroup(
+            context.getString(
+                R.string.notifications_group_key
             )
-            groupNotification.setGroupSummary(true)
-            groupNotification.setAutoCancel(true)
-            groupNotification.setGroupAlertBehavior(
-                NotificationCompat.GROUP_ALERT_CHILDREN
-            )
+        )
+        groupNotification.setGroupSummary(true)
+        groupNotification.setAutoCancel(true)
+        groupNotification.setGroupAlertBehavior(
+            NotificationCompat.GROUP_ALERT_CHILDREN
+        )
 
-            val intent = Intent(context, ConversationsActivity::class.java)
-            val stackBuilder = TaskStackBuilder.create(context)
-            stackBuilder.addNextIntentWithParentStack(intent)
-            val groupFlags =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                } else {
-                    PendingIntent.FLAG_CANCEL_CURRENT
-                }
-            groupNotification.setContentIntent(
-                stackBuilder.getPendingIntent(
-                    "group".hashCode(),
-                    groupFlags
-                )
-            )
-
-            try {
-                NotificationManagerCompat.from(context).notify(
-                    GROUP_NOTIFICATION_ID, groupNotification.build()
-                )
-            } catch (e: SecurityException) {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.notifications_security_error),
-                    Toast.LENGTH_LONG
-                ).show()
+        val groupIntent = Intent(context, ConversationsActivity::class.java)
+        val groupStackBuilder = TaskStackBuilder.create(context)
+        groupStackBuilder.addNextIntentWithParentStack(groupIntent)
+        val groupFlags =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            } else {
+                PendingIntent.FLAG_CANCEL_CURRENT
             }
+        groupNotification.setContentIntent(
+            groupStackBuilder.getPendingIntent(
+                "group".hashCode(),
+                groupFlags
+            )
+        )
+
+        try {
+            NotificationManagerCompat.from(context).notify(
+                GROUP_NOTIFICATION_ID, groupNotification.build()
+            )
+        } catch (e: SecurityException) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.notifications_security_error),
+                Toast.LENGTH_LONG
+            ).show()
         }
 
         // Primary notification action
@@ -1024,21 +974,19 @@ class Notifications private constructor(private val context: Context) {
      * Cancels the group notification if required.
      */
     private fun validateGroupNotification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val noOtherNotifications =
-                notificationManager.activeNotifications.none {
-                    it.id != SYNC_DATABASE_NOTIFICATION_ID
-                        && it.id != SYNC_SEND_MESSAGE_NOTIFICATION_ID
-                        && it.id != SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID
-                        && it.id != SYNC_RETRIEVE_DIDS_NOTIFICATION_ID
-                        && it.id != SYNC_REGISTER_PUSH_NOTIFICATION_ID
-                        && it.id != GROUP_NOTIFICATION_ID
-                }
-            if (noOtherNotifications) {
-                NotificationManagerCompat.from(context).cancel(
-                    GROUP_NOTIFICATION_ID
-                )
+        val noOtherNotifications =
+            notificationManager.activeNotifications.none {
+                it.id != SYNC_DATABASE_NOTIFICATION_ID
+                    && it.id != SYNC_SEND_MESSAGE_NOTIFICATION_ID
+                    && it.id != SYNC_VERIFY_CREDENTIALS_NOTIFICATION_ID
+                    && it.id != SYNC_RETRIEVE_DIDS_NOTIFICATION_ID
+                    && it.id != SYNC_REGISTER_PUSH_NOTIFICATION_ID
+                    && it.id != GROUP_NOTIFICATION_ID
             }
+        if (noOtherNotifications) {
+            NotificationManagerCompat.from(context).cancel(
+                GROUP_NOTIFICATION_ID
+            )
         }
     }
 
