@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.RemoteInput
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.CustomApplication
@@ -93,6 +94,8 @@ class SendMessageReceiver : BroadcastReceiver() {
                             )
                         )
                     }
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to send inline reply", e)
                 } finally {

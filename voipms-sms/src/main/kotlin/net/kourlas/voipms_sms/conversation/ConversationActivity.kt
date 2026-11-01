@@ -852,7 +852,8 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 )
                 field.isAccessible = true
                 field.set(searchAutoComplete, R.drawable.search_cursor)
-            } catch (_: java.lang.Exception) {
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to set search cursor drawable", e)
             }
         } else {
             searchAutoComplete.setTextCursorDrawable(R.drawable.search_cursor)
@@ -1038,6 +1039,7 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 Toast.LENGTH_SHORT
             ).show()
         } catch (e: Exception) {
+            Log.e(TAG, "Failed to copy conversation", e)
             Toast.makeText(
                 this, getString(
                     R.string.conversation_copied_conversation_fail_toast_message

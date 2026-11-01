@@ -33,6 +33,7 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.network.NetworkManager
@@ -114,8 +115,10 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                         ).markMessageNotSent(
                             databaseId
                         )
+                    } catch (e: CancellationException) {
+                        throw e
                     } catch (e: Exception) {
-                        // Do nothing.
+                        Log.e(TAG, "Failed to mark message as not sent", e)
                     }
                 }
             }
@@ -225,6 +228,8 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                     inlineReplyMessages = listOf(message)
                 )
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send message", e)
             error = applicationContext.getString(
@@ -331,6 +336,8 @@ class SendMessageWorker(context: Context, params: WorkerParameters) :
                 R.string.send_message_error_api_parse
             )
             return null
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send message request", e)
             error = applicationContext.getString(

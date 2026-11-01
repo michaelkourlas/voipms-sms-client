@@ -18,11 +18,13 @@
 package net.kourlas.voipms_sms.utils
 
 import android.content.Context
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
@@ -32,13 +34,18 @@ import net.kourlas.voipms_sms.preferences.didsConfigured
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.preferences.setSetupCompletedForVersion
 
+private const val TAG = "Fcm"
+
 /**
  * Retrieves the Firebase installation ID.
  */
 suspend fun getInstallationId(): String {
     return try {
         FirebaseInstallations.getInstance().id.await()
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
+        Log.e(TAG, "Failed to get Firebase installation ID", e)
         "Not available"
     }
 }

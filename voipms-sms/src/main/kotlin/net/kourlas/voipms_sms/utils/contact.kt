@@ -27,6 +27,7 @@ import android.graphics.Rect
 import android.graphics.Typeface
 import android.net.Uri
 import android.provider.ContactsContract
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
@@ -35,6 +36,8 @@ import net.kourlas.voipms_sms.BuildConfig
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.demo.getNewConversationContacts
 import java.util.Locale
+
+private const val TAG = "Contact"
 
 /**
  * Gets the name of a contact from the Android contacts provider, given a
@@ -86,7 +89,11 @@ fun getContactName(
             }
         }
         return null
+    } catch (_: SecurityException) {
+        // The app does not have the contacts permission.
+        return null
     } catch (e: Exception) {
+        Log.e(TAG, "Failed to get contact name", e)
         return null
     }
 }
@@ -120,8 +127,10 @@ fun getContactPhotoBitmap(
                 return bitmap
             }
         }
+    } catch (_: SecurityException) {
+        // The app does not have the contacts permission.
     } catch (e: Exception) {
-        // Do nothing.
+        Log.e(TAG, "Failed to get contact photo", e)
     }
 
     return getGenericContactPhotoBitmap(context, name, phoneNumber, size)
@@ -228,7 +237,11 @@ fun getContactPhotoUri(
             return photoUri
         }
         return null
+    } catch (_: SecurityException) {
+        // The app does not have the contacts permission.
+        return null
     } catch (e: Exception) {
+        Log.e(TAG, "Failed to get contact photo URI", e)
         return null
     }
 }
@@ -270,7 +283,11 @@ fun getContactPhotoUri(
             }
         }
         return null
+    } catch (_: SecurityException) {
+        // The app does not have the contacts permission.
+        return null
     } catch (e: Exception) {
+        Log.e(TAG, "Failed to get contact photo URI", e)
         return null
     }
 }
@@ -300,7 +317,11 @@ fun getBitmapFromUri(context: Context, uri: Uri, size: Int): Bitmap? {
         )
             ?: return null
         return bitmap.scale(size, size)
+    } catch (_: SecurityException) {
+        // The app does not have the contacts permission.
+        return null
     } catch (e: Exception) {
+        Log.e(TAG, "Failed to decode contact photo", e)
         return null
     }
 }

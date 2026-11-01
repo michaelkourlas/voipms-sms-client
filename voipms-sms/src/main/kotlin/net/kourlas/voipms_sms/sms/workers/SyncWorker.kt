@@ -348,6 +348,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
                     incomingMessages,
                     retrieveDeletedMessages
                 )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to insert synchronized messages", e)
             error = applicationContext.getString(
@@ -482,6 +484,8 @@ class SyncWorker(context: Context, params: WorkerParameters) :
             Log.e(TAG, "Failed to parse message retrieval response", e)
             error = applicationContext.getString(R.string.sync_error_api_parse)
             return null
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send message retrieval request", e)
             error = applicationContext.getString(R.string.sync_error_unknown)

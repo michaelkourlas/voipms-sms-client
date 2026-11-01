@@ -732,7 +732,8 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 )
                 field.isAccessible = true
                 field.set(searchAutoComplete, R.drawable.search_cursor)
-            } catch (_: java.lang.Exception) {
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to set search cursor drawable", e)
             }
         } else {
             searchAutoComplete.setTextCursorDrawable(R.drawable.search_cursor)

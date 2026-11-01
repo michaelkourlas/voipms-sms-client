@@ -171,7 +171,10 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                     )
                         ?: throw Exception("Could not open file")
                     Database.getInstance(it).import(importFd)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
+                    Log.e(TAG, "Failed to import database", e)
                     lifecycleScope.launch(Dispatchers.Main) {
                         showSnackbar(
                             it,
@@ -210,7 +213,10 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                     )
                         ?: throw Exception("Could not open file")
                     Database.getInstance(it).export(exportFd)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
+                    Log.e(TAG, "Failed to export database", e)
                     lifecycleScope.launch(Dispatchers.Default) {
                         showSnackbar(
                             it,

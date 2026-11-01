@@ -34,6 +34,7 @@ import androidx.work.workDataOf
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
@@ -136,6 +137,8 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 )
                 enablePushNotifications(applicationContext)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to retrieve DIDs", e)
         }
@@ -186,6 +189,8 @@ class RetrieveDidsWorker(context: Context, params: WorkerParameters) :
                 R.string.preferences_dids_error_api_parse
             )
             return null
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send DID retrieval request", e)
             error = applicationContext.getString(

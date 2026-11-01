@@ -22,6 +22,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -49,6 +50,8 @@ import net.kourlas.voipms_sms.signIn.SignInActivity
 import net.kourlas.voipms_sms.ui.FastScroller
 import net.kourlas.voipms_sms.utils.getDigitsOfString
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
+
+private const val TAG = "NewConversationActivity"
 
 /**
  * Activity that contains a list of contacts to select to create a new
@@ -168,7 +171,8 @@ class NewConversationActivity : AppCompatActivity(), View.OnClickListener {
                     )
                     field.isAccessible = true
                     field.set(searchAutoComplete, R.drawable.search_cursor)
-                } catch (_: java.lang.Exception) {
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to set search cursor drawable", e)
                 }
             } else {
                 searchAutoComplete.setTextCursorDrawable(

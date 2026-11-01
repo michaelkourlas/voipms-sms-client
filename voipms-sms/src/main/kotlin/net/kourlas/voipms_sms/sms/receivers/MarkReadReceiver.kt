@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.CustomApplication
@@ -72,6 +73,8 @@ class MarkReadReceiver : BroadcastReceiver() {
                     // Mark the conversation as read.
                     Database.getInstance(context)
                         .markConversationRead(ConversationId(did, contact))
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to mark conversation as read", e)
                 } finally {

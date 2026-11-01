@@ -33,6 +33,7 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.CancellationException
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.notifications.Notifications
 import net.kourlas.voipms_sms.utils.httpPostWithMultipartFormData
@@ -123,6 +124,8 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
             if (response != null) {
                 return verifyResponse(response)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to verify credentials", e)
         }
@@ -167,6 +170,8 @@ class VerifyCredentialsWorker(context: Context, params: WorkerParameters) :
                 R.string.verify_credentials_error_api_parse
             )
             return null
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send credential verification request", e)
             error = applicationContext.getString(

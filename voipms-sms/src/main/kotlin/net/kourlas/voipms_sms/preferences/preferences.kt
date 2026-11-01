@@ -25,6 +25,7 @@ import android.content.SharedPreferences
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.util.Base64
+import android.util.Log
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -39,6 +40,8 @@ import java.util.Date
 import java.util.Locale
 import javax.crypto.Cipher
 import javax.crypto.CipherInputStream
+
+private const val TAG = "Preferences"
 
 private val securePreferencesLock = Any()
 
@@ -256,7 +259,8 @@ fun getStartDate(context: Context): Date {
                 setStartDate(context, calendar.time)
                 calendar.time
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to read synchronization start date", e)
             setStartDate(context, calendar.time)
             calendar.time
         }
@@ -672,7 +676,7 @@ fun migrateLegacySecurePreferences(context: Context) = synchronized(
             }
             continue
         } catch (e: Exception) {
-            // Do nothing.
+            Log.e(TAG, "Failed to migrate legacy secure preference", e)
         }
     }
 
@@ -697,6 +701,6 @@ fun migrateLegacySecurePreferences(context: Context) = synchronized(
         keyStore.load(null)
         keyStore.deleteEntry(LEGACY_KEY_ALIAS)
     } catch (e: Exception) {
-        // Do nothing.
+        Log.e(TAG, "Failed to delete legacy secure preferences", e)
     }
 }
