@@ -644,6 +644,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     throw e
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to send message", e)
+                    // Some rows may have changed before the exception.
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        adapter.refresh()
+                    }
                     showErrorMessage(
                         this@ConversationActivity,
                         R.id.coordinator_layout,
@@ -1120,6 +1124,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to resend messages", e)
+                // Some rows may have changed before the exception.
+                lifecycleScope.launch(Dispatchers.Main) {
+                    adapter.refresh()
+                }
                 showErrorMessage(
                     this@ConversationActivity,
                     R.id.coordinator_layout,
@@ -1310,6 +1318,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to delete messages", e)
+                // Some rows may have changed before the exception.
+                lifecycleScope.launch(Dispatchers.Main) {
+                    adapter.refresh()
+                }
                 showErrorMessage(
                     this@ConversationActivity,
                     R.id.coordinator_layout,
@@ -1342,6 +1354,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
                                 throw e
                             } catch (e: Exception) {
                                 Log.e(TAG, "Failed to restore messages", e)
+                                // Some rows may have changed before the exception.
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    adapter.refresh()
+                                }
                                 showErrorMessage(
                                     this@ConversationActivity,
                                     R.id.coordinator_layout,
@@ -1388,6 +1404,10 @@ open class ConversationActivity(val bubble: Boolean = false) :
                             throw e
                         } catch (e: Exception) {
                             Log.e(TAG, "Failed to resend message", e)
+                            // Some rows may have changed before the exception.
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                adapter.refresh()
+                            }
                             showErrorMessage(
                                 this@ConversationActivity,
                                 R.id.coordinator_layout,

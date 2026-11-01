@@ -878,6 +878,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to mark conversations as read", e)
+                // Some rows may have changed before the exception.
+                lifecycleScope.launch(Dispatchers.Main) {
+                    adapter.refresh()
+                }
                 showErrorMessage(
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
@@ -912,6 +916,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to mark conversations as unread", e)
+                // Some rows may have changed before the exception.
+                lifecycleScope.launch(Dispatchers.Main) {
+                    adapter.refresh()
+                }
                 showErrorMessage(
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
@@ -1052,6 +1060,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to archive conversations", e)
+                // Some rows may have changed before the exception.
+                lifecycleScope.launch(Dispatchers.Main) {
+                    adapter.refresh()
+                }
                 showErrorMessage(
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
@@ -1091,6 +1103,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
                                 throw e
                             } catch (e: Exception) {
                                 Log.e(TAG, "Failed to unarchive conversations", e)
+                                // Some rows may have changed before the exception.
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    adapter.refresh()
+                                }
                                 showErrorMessage(
                                     this@ConversationsActivity,
                                     R.id.coordinator_layout,
@@ -1123,6 +1139,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to unarchive conversations", e)
+                // Some rows may have changed before the exception.
+                lifecycleScope.launch(Dispatchers.Main) {
+                    adapter.refresh()
+                }
                 showErrorMessage(
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
@@ -1162,6 +1182,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
                                 throw e
                             } catch (e: Exception) {
                                 Log.e(TAG, "Failed to archive conversations", e)
+                                // Some rows may have changed before the exception.
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    adapter.refresh()
+                                }
                                 showErrorMessage(
                                     this@ConversationsActivity,
                                     R.id.coordinator_layout,
@@ -1253,6 +1277,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
                                     throw e
                                 } catch (e: Exception) {
                                     Log.e(TAG, "Failed to restore conversations", e)
+                                    // Some rows may have changed before the exception.
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        adapter.refresh()
+                                    }
                                     showErrorMessage(
                                         this@ConversationsActivity,
                                         R.id.coordinator_layout,
@@ -1271,6 +1299,10 @@ open class ConversationsActivity(val archived: Boolean = false) :
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to delete conversations", e)
+                // Some rows may have changed before the exception.
+                lifecycleScope.launch(Dispatchers.Main) {
+                    adapter.refresh()
+                }
                 showErrorMessage(
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
