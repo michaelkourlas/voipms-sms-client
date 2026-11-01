@@ -40,6 +40,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.createBitmap
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.saket.bettermovementmethod.BetterLinkMovementMethod
 import net.kourlas.voipms_sms.R
 import kotlin.math.abs
@@ -168,6 +170,25 @@ fun showSnackbar(
         return snackbar
     }
     return null
+}
+
+/**
+ * Shows the specified error message in a snackbar if the specified activity
+ * is still available, or in a toast otherwise. Switches to the main thread
+ * before it shows the message.
+ */
+suspend fun showErrorMessage(
+    activity: FragmentActivity, viewId: Int, text: String
+) {
+    withContext(Dispatchers.Main) {
+        if (!activity.isFinishing && !activity.isDestroyed) {
+            showSnackbar(activity, viewId, text)
+        } else {
+            Toast.makeText(
+                activity.applicationContext, text, Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 }
 
 /**

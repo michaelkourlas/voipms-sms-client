@@ -27,6 +27,7 @@ import android.graphics.Canvas
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -53,6 +54,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -88,10 +90,13 @@ import net.kourlas.voipms_sms.utils.enablePushNotifications
 import net.kourlas.voipms_sms.utils.getFormattedPhoneNumber
 import net.kourlas.voipms_sms.utils.registerNonExportedReceiver
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
+import net.kourlas.voipms_sms.utils.showErrorMessage
 import net.kourlas.voipms_sms.utils.showPermissionSnackbar
 import net.kourlas.voipms_sms.utils.showSnackbar
 import java.text.SimpleDateFormat
 import java.util.Locale
+
+private const val TAG = "ConversationsActivity"
 
 /**
  * Activity that contains a generic list of conversations.
@@ -863,10 +868,22 @@ open class ConversationsActivity(val archived: Boolean = false) :
 
         // Mark all selected conversations as read
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
-            messages.forEach {
-                    Database.getInstance(applicationContext)
-                        .markConversationRead(it.conversationId)
-                }
+            try {
+                messages.forEach {
+                        Database.getInstance(applicationContext)
+                            .markConversationRead(it.conversationId)
+                    }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to mark conversations as read", e)
+                showErrorMessage(
+                    this@ConversationsActivity,
+                    R.id.coordinator_layout,
+                    getString(R.string.conversations_mark_read_fail)
+                )
+                return@launch
+            }
 
             lifecycleScope.launch(Dispatchers.Main) {
                 adapter.refresh()
@@ -885,10 +902,22 @@ open class ConversationsActivity(val archived: Boolean = false) :
 
         // Mark all selected conversations as unread
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
-            messages.forEach {
-                    Database.getInstance(applicationContext)
-                        .markConversationUnread(it.conversationId)
-                }
+            try {
+                messages.forEach {
+                        Database.getInstance(applicationContext)
+                            .markConversationUnread(it.conversationId)
+                    }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to mark conversations as unread", e)
+                showErrorMessage(
+                    this@ConversationsActivity,
+                    R.id.coordinator_layout,
+                    getString(R.string.conversations_mark_unread_fail)
+                )
+                return@launch
+            }
 
             lifecycleScope.launch(Dispatchers.Main) {
                 adapter.refresh()
@@ -1012,10 +1041,22 @@ open class ConversationsActivity(val archived: Boolean = false) :
         mode?.finish()
 
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
-            // Archive the conversations.
-            for (message in messages) {
-                Database.getInstance(applicationContext)
-                    .markConversationArchived(message.conversationId)
+            try {
+                // Archive the conversations.
+                for (message in messages) {
+                    Database.getInstance(applicationContext)
+                        .markConversationArchived(message.conversationId)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to archive conversations", e)
+                showErrorMessage(
+                    this@ConversationsActivity,
+                    R.id.coordinator_layout,
+                    getString(R.string.conversations_archive_fail)
+                )
+                return@launch
             }
 
             lifecycleScope.launch(Dispatchers.Main) {
@@ -1034,15 +1075,26 @@ open class ConversationsActivity(val archived: Boolean = false) :
                         CustomApplication.getApplication().applicationScope.launch(
                             Dispatchers.Default
                         ) {
-                            for (message in messages) {
-                                Database.getInstance(applicationContext)
-                                    .markConversationUnarchived(
-                                        message.conversationId
-                                    )
+                            try {
+                                for (message in messages) {
+                                    Database.getInstance(applicationContext)
+                                        .markConversationUnarchived(
+                                            message.conversationId
+                                        )
 
-                                lifecycleScope.launch(Dispatchers.Main) {
-                                    adapter.refresh()
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        adapter.refresh()
+                                    }
                                 }
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Failed to unarchive conversations", e)
+                                showErrorMessage(
+                                    this@ConversationsActivity,
+                                    R.id.coordinator_layout,
+                                    getString(R.string.conversations_unarchive_fail)
+                                )
                             }
                         }
                     })
@@ -1060,10 +1112,22 @@ open class ConversationsActivity(val archived: Boolean = false) :
         mode?.finish()
 
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
-            // Archive the conversations.
-            for (message in messages) {
-                Database.getInstance(applicationContext)
-                    .markConversationUnarchived(message.conversationId)
+            try {
+                // Archive the conversations.
+                for (message in messages) {
+                    Database.getInstance(applicationContext)
+                        .markConversationUnarchived(message.conversationId)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to unarchive conversations", e)
+                showErrorMessage(
+                    this@ConversationsActivity,
+                    R.id.coordinator_layout,
+                    getString(R.string.conversations_unarchive_fail)
+                )
+                return@launch
             }
 
             lifecycleScope.launch(Dispatchers.Main) {
@@ -1082,15 +1146,26 @@ open class ConversationsActivity(val archived: Boolean = false) :
                         CustomApplication.getApplication().applicationScope.launch(
                             Dispatchers.Default
                         ) {
-                            for (message in messages) {
-                                Database.getInstance(applicationContext)
-                                    .markConversationArchived(
-                                        message.conversationId
-                                    )
+                            try {
+                                for (message in messages) {
+                                    Database.getInstance(applicationContext)
+                                        .markConversationArchived(
+                                            message.conversationId
+                                        )
 
-                                lifecycleScope.launch(Dispatchers.Main) {
-                                    adapter.refresh()
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        adapter.refresh()
+                                    }
                                 }
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Failed to archive conversations", e)
+                                showErrorMessage(
+                                    this@ConversationsActivity,
+                                    R.id.coordinator_layout,
+                                    getString(R.string.conversations_archive_fail)
+                                )
                             }
                         }
                     })
@@ -1108,75 +1183,98 @@ open class ConversationsActivity(val archived: Boolean = false) :
         mode?.finish()
 
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
-            // Collect existing state in case we need to undo this.
-            val conversations = messages.map {
-                Database.getInstance(applicationContext)
-                    .getConversationMessagesUnsorted(it.conversationId)
-            }
-            val archived = mutableMapOf<ConversationId, Boolean>()
-            for (message in messages) {
-                archived[message.conversationId] =
+            try {
+                // Collect existing state in case we need to undo this.
+                val conversations = messages.map {
                     Database.getInstance(applicationContext)
-                        .isConversationArchived(message.conversationId)
-            }
-            val drafts = mutableMapOf<ConversationId, Message?>()
-            for (message in messages) {
-                drafts[message.conversationId] =
+                        .getConversationMessagesUnsorted(it.conversationId)
+                }
+                val archived = mutableMapOf<ConversationId, Boolean>()
+                for (message in messages) {
+                    archived[message.conversationId] =
+                        Database.getInstance(applicationContext)
+                            .isConversationArchived(message.conversationId)
+                }
+                val drafts = mutableMapOf<ConversationId, Message?>()
+                for (message in messages) {
+                    drafts[message.conversationId] =
+                        Database.getInstance(applicationContext)
+                            .getConversationDraft(message.conversationId)
+                }
+
+                // Delete the conversations.
+                for (message in messages) {
                     Database.getInstance(applicationContext)
-                        .getConversationDraft(message.conversationId)
-            }
+                        .deleteConversation(message.conversationId)
+                }
 
-            // Delete the conversations.
-            for (message in messages) {
-                Database.getInstance(applicationContext)
-                    .deleteConversation(message.conversationId)
-            }
+                lifecycleScope.launch(Dispatchers.Main) {
+                    adapter.refresh()
 
-            lifecycleScope.launch(Dispatchers.Main) {
-                adapter.refresh()
+                    // Show a snackbar to allow the user to undo the action.
+                    showSnackbar(
+                        this@ConversationsActivity,
+                        R.id.coordinator_layout,
+                        resources.getQuantityString(
+                            R.plurals.conversations_deleted,
+                            messages.size,
+                            messages.size
+                        ),
+                        getString(R.string.undo),
+                        {
+                            CustomApplication.getApplication().applicationScope.launch(
+                                Dispatchers.Default
+                            ) {
+                                try {
+                                    // Restore the conversations.
+                                    for (conversation in conversations) {
+                                        Database.getInstance(applicationContext)
+                                            .insertMessagesDatabase(conversation)
+                                    }
+                                    for ((conversationId, isArchived) in archived) {
+                                        if (isArchived) {
+                                            Database.getInstance(applicationContext)
+                                                .markConversationArchived(
+                                                    conversationId
+                                                )
+                                        }
+                                    }
+                                    for ((conversationId, draft) in drafts) {
+                                        if (draft != null) {
+                                            Database.getInstance(applicationContext)
+                                                .updateConversationDraft(
+                                                    conversationId,
+                                                    draft.text
+                                                )
+                                        }
+                                    }
+                                } catch (e: CancellationException) {
+                                    throw e
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Failed to restore conversations", e)
+                                    showErrorMessage(
+                                        this@ConversationsActivity,
+                                        R.id.coordinator_layout,
+                                        getString(R.string.conversations_restore_fail)
+                                    )
+                                    return@launch
+                                }
 
-                // Show a snackbar to allow the user to undo the action.
-                showSnackbar(
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    adapter.refresh()
+                                }
+                            }
+                        })
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to delete conversations", e)
+                showErrorMessage(
                     this@ConversationsActivity,
                     R.id.coordinator_layout,
-                    resources.getQuantityString(
-                        R.plurals.conversations_deleted,
-                        messages.size,
-                        messages.size
-                    ),
-                    getString(R.string.undo),
-                    {
-                        CustomApplication.getApplication().applicationScope.launch(
-                            Dispatchers.Default
-                        ) {
-                            // Restore the conversations.
-                            for (conversation in conversations) {
-                                Database.getInstance(applicationContext)
-                                    .insertMessagesDatabase(conversation)
-                            }
-                            for ((conversationId, isArchived) in archived) {
-                                if (isArchived) {
-                                    Database.getInstance(applicationContext)
-                                        .markConversationArchived(
-                                            conversationId
-                                        )
-                                }
-                            }
-                            for ((conversationId, draft) in drafts) {
-                                if (draft != null) {
-                                    Database.getInstance(applicationContext)
-                                        .updateConversationDraft(
-                                            conversationId,
-                                            draft.text
-                                        )
-                                }
-                            }
-
-                            lifecycleScope.launch(Dispatchers.Main) {
-                                adapter.refresh()
-                            }
-                        }
-                    })
+                    getString(R.string.conversations_delete_fail)
+                )
             }
         }
     }

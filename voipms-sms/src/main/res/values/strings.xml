@@ -119,6 +119,8 @@
     <string name="preferences_database_delete_summary">Delete all messages and associated metadata</string>
     <string name="preferences_database_delete_confirm_title">Delete database?</string>
     <string name="preferences_database_delete_confirm_message">This action cannot be undone.</string>
+    <string name="preferences_database_clean_up_fail">Failed to clean up database</string>
+    <string name="preferences_database_delete_fail">Failed to delete database</string>
     <string name="preferences_database_fail_create_document">No handler available to select database export location</string>
     <string name="preferences_database_fail_open_document">No handler available to select database import location</string>
 
@@ -166,6 +168,9 @@
     <string name="conversation_copied_conversation_toast_message">Copied conversation as JSON</string>
     <string name="conversation_copied_conversation_fail_toast_message">Failed to copy conversation (too large?)</string>
     <string name="conversation_copied_did_toast_message">Copied phone number</string>
+    <string name="conversation_send_fail">Failed to send message</string>
+    <string name="conversation_delete_fail">Failed to delete messages</string>
+    <string name="conversation_restore_fail">Failed to restore messages</string>
     <plurals name="conversation_message_deleted">
         <item quantity="one">%1$d message deleted</item>
         <item quantity="other">%1$d messages deleted</item>
@@ -222,6 +227,12 @@
         <item quantity="one">%1$d conversation unarchived</item>
         <item quantity="other">%1$d conversations unarchived</item>
     </plurals>
+    <string name="conversations_mark_read_fail">Failed to mark conversations as read</string>
+    <string name="conversations_mark_unread_fail">Failed to mark conversations as unread</string>
+    <string name="conversations_archive_fail">Failed to archive conversations</string>
+    <string name="conversations_unarchive_fail">Failed to unarchive conversations</string>
+    <string name="conversations_delete_fail">Failed to delete conversations</string>
+    <string name="conversations_restore_fail">Failed to restore conversations</string>
     <string name="conversations_error_refresh">Conversations view refresh failed; please restart the app</string>
     <string name="conversations_message_draft">Draft</string>
     <string name="conversations_message_not_sent">Not sent.</string>

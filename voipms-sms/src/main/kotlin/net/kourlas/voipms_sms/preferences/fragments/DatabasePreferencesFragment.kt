@@ -23,12 +23,14 @@ import android.content.Intent
 import android.content.Intent.CATEGORY_OPENABLE
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.CustomApplication
@@ -37,7 +39,10 @@ import net.kourlas.voipms_sms.database.Database
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.utils.preferences
 import net.kourlas.voipms_sms.utils.showAlertDialog
+import net.kourlas.voipms_sms.utils.showErrorMessage
 import net.kourlas.voipms_sms.utils.showSnackbar
+
+private const val TAG = "DatabasePrefsFragment"
 
 /**
  * Fragment used to display the database preferences.
@@ -271,13 +276,24 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 CustomApplication.getApplication().applicationScope.launch(
                     Dispatchers.Default
                 ) {
-                    if (deletedMessages) {
-                        Database.getInstance(context)
-                            .deleteTableDeletedContents()
-                    }
-                    if (removedDids) {
-                        Database.getInstance(context).deleteMessagesWithoutDids(
-                            getDids(context)
+                    try {
+                        if (deletedMessages) {
+                            Database.getInstance(context)
+                                .deleteTableDeletedContents()
+                        }
+                        if (removedDids) {
+                            Database.getInstance(context).deleteMessagesWithoutDids(
+                                getDids(context)
+                            )
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to clean up database", e)
+                        showErrorMessage(
+                            activity,
+                            R.id.coordinator_layout,
+                            activity.getString(R.string.preferences_database_clean_up_fail)
                         )
                     }
                 }
@@ -306,10 +322,21 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                 CustomApplication.getApplication().applicationScope.launch(
                     Dispatchers.Default
                 ) {
-                    Database.getInstance(
-                        activity.applicationContext
-                    )
-                        .deleteTablesContents()
+                    try {
+                        Database.getInstance(
+                            activity.applicationContext
+                        )
+                            .deleteTablesContents()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to delete database", e)
+                        showErrorMessage(
+                            activity,
+                            R.id.coordinator_layout,
+                            activity.getString(R.string.preferences_database_delete_fail)
+                        )
+                    }
                 }
             },
             activity.getString(R.string.cancel), null

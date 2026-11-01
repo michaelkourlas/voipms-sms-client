@@ -35,6 +35,7 @@ import android.text.Editable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.text.util.Linkify
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -64,6 +65,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.moshi.JsonClass
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
@@ -95,11 +97,14 @@ import net.kourlas.voipms_sms.utils.getMessageTexts
 import net.kourlas.voipms_sms.utils.registerNonExportedReceiver
 import net.kourlas.voipms_sms.utils.safeUnregisterReceiver
 import net.kourlas.voipms_sms.utils.showAlertDialog
+import net.kourlas.voipms_sms.utils.showErrorMessage
 import net.kourlas.voipms_sms.utils.showPermissionSnackbar
 import net.kourlas.voipms_sms.utils.showSnackbar
 import java.text.BreakIterator
 import java.text.SimpleDateFormat
 import java.util.Locale
+
+private const val TAG = "ConversationActivity"
 
 /**
  * Activity used to display messages in a single conversation.
@@ -623,17 +628,29 @@ open class ConversationActivity(val bubble: Boolean = false) :
             CustomApplication.getApplication().applicationScope.launch(
                 Dispatchers.Default
             ) {
-                val ids = Database.getInstance(
-                    applicationContext
-                )
-                    .insertConversationMessagesDeliveryInProgress(
-                        ConversationId(
-                            did,
-                            contact
-                        ),
-                        getMessageTexts(applicationContext, messageText)
+                try {
+                    val ids = Database.getInstance(
+                        applicationContext
                     )
-                SendMessageWorker.sendMessages(applicationContext, ids)
+                        .insertConversationMessagesDeliveryInProgress(
+                            ConversationId(
+                                did,
+                                contact
+                            ),
+                            getMessageTexts(applicationContext, messageText)
+                        )
+                    SendMessageWorker.sendMessages(applicationContext, ids)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to send message", e)
+                    showErrorMessage(
+                        this@ConversationActivity,
+                        R.id.coordinator_layout,
+                        getString(R.string.conversation_send_fail)
+                    )
+                    return@launch
+                }
 
                 lifecycleScope.launch(Dispatchers.Main) {
                     // Refresh adapter to show message being sent.
@@ -1091,10 +1108,21 @@ open class ConversationActivity(val bubble: Boolean = false) :
         mode.finish()
 
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
-            for (databaseId in databaseIds) {
-                Database.getInstance(applicationContext)
-                    .markMessageDeliveryInProgress(databaseId)
-                SendMessageWorker.sendMessage(applicationContext, databaseId)
+            try {
+                for (databaseId in databaseIds) {
+                    Database.getInstance(applicationContext)
+                        .markMessageDeliveryInProgress(databaseId)
+                    SendMessageWorker.sendMessage(applicationContext, databaseId)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to resend messages", e)
+                showErrorMessage(
+                    this@ConversationActivity,
+                    R.id.coordinator_layout,
+                    getString(R.string.conversation_send_fail)
+                )
             }
         }
     }
@@ -1267,13 +1295,25 @@ open class ConversationActivity(val bubble: Boolean = false) :
         mode.finish()
 
         CustomApplication.getApplication().applicationScope.launch(Dispatchers.Default) {
-            // Delete each message.
-            for (message in messages) {
-                Database.getInstance(applicationContext)
-                    .deleteMessage(
-                        message.did, message.databaseId,
-                        message.voipId
-                    )
+            try {
+                // Delete each message.
+                for (message in messages) {
+                    Database.getInstance(applicationContext)
+                        .deleteMessage(
+                            message.did, message.databaseId,
+                            message.voipId
+                        )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to delete messages", e)
+                showErrorMessage(
+                    this@ConversationActivity,
+                    R.id.coordinator_layout,
+                    getString(R.string.conversation_delete_fail)
+                )
+                return@launch
             }
 
             lifecycleScope.launch(Dispatchers.Main) {
@@ -1292,9 +1332,21 @@ open class ConversationActivity(val bubble: Boolean = false) :
                         CustomApplication.getApplication().applicationScope.launch(
                             Dispatchers.Default
                         ) {
-                            // Restore the messages.
-                            Database.getInstance(applicationContext)
-                                .insertMessagesDatabase(messages)
+                            try {
+                                // Restore the messages.
+                                Database.getInstance(applicationContext)
+                                    .insertMessagesDatabase(messages)
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Failed to restore messages", e)
+                                showErrorMessage(
+                                    this@ConversationActivity,
+                                    R.id.coordinator_layout,
+                                    getString(R.string.conversation_restore_fail)
+                                )
+                                return@launch
+                            }
 
                             lifecycleScope.launch(Dispatchers.Main) {
                                 adapter.refresh()
@@ -1321,14 +1373,26 @@ open class ConversationActivity(val bubble: Boolean = false) :
                     CustomApplication.getApplication().applicationScope.launch(
                         Dispatchers.Default
                     ) {
-                        Database.getInstance(applicationContext)
-                            .markMessageDeliveryInProgress(
+                        try {
+                            Database.getInstance(applicationContext)
+                                .markMessageDeliveryInProgress(
+                                    messageItem.message.databaseId
+                                )
+                            SendMessageWorker.sendMessage(
+                                applicationContext,
                                 messageItem.message.databaseId
                             )
-                        SendMessageWorker.sendMessage(
-                            applicationContext,
-                            messageItem.message.databaseId
-                        )
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to resend message", e)
+                            showErrorMessage(
+                                this@ConversationActivity,
+                                R.id.coordinator_layout,
+                                getString(R.string.conversation_send_fail)
+                            )
+                            return@launch
+                        }
                         lifecycleScope.launch(Dispatchers.Main) {
                             // Refresh adapter to show message being sent.
                             adapter.refresh()
