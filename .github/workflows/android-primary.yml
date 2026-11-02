@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
       - name: Set up Python 3.10
         uses: actions/setup-python@v7
         with:
@@ -26,6 +26,8 @@ jobs:
         run: echo $google_services_json | base64 -d > voipms-sms/src/primary/google-services.json
       - name: Build with Gradle
         run: ./gradlew assemblePrimaryFullRelease
+      - name: Test with Gradle
+        run: ./gradlew testPrimaryFullDebugUnitTest
       - name: Lint with Gradle
         id: lint
         run: ./gradlew lintPrimaryFullRelease

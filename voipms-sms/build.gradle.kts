@@ -87,6 +87,22 @@ configure<ApplicationExtension> {
     sourceSets.getByName("fdroid") {
         kotlin.directories += "src/fdroid/kotlin"
     }
+    sourceSets.getByName("test") {
+        kotlin.directories += "src/test/kotlin"
+    }
+    testOptions {
+        // Robolectric reads the app's resources, for example the strings in
+        // error messages.
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            // Robolectric sets up Android file descriptors through an
+            // internal JDK package, which the JDK does not export by
+            // default.
+            it.jvmArgs(
+                "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED"
+            )
+        }
+    }
     lint {
         abortOnError = true
         warningsAsErrors = true
@@ -147,6 +163,11 @@ dependencies {
     implementation(libs.xabaras.recyclerViewSwipeDecorator)
     implementation(libs.saket.betterLinkMovementMethod)
     ksp(libs.moshi.kotlin.codegen)
+
+    // Test libraries
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 }
 
 tasks.register<Delete>("cleanAssets") {

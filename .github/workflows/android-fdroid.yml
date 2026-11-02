@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
       - name: Set up Python 3.10
         uses: actions/setup-python@v7
         with:
@@ -24,6 +24,8 @@ jobs:
         run: sed -i "/fdroid-remove-start/,/fdroid-remove-end/d" build.gradle.kts voipms-sms/build.gradle.kts
       - name: Build with Gradle (F-Droid)
         run: ./gradlew assembleFdroidFullRelease
+      - name: Test with Gradle (F-Droid)
+        run: ./gradlew testFdroidFullDebugUnitTest
       - name: Lint with Gradle (F-Droid)
         id: lint
         run: ./gradlew lintFdroidFullRelease
