@@ -104,6 +104,8 @@
     <string name="preferences_database_import_summary">Import raw SQLite database from a file</string>
     <string name="preferences_database_import_success">Database imported</string>
     <string name="preferences_database_import_fail">Failed to import database: %1$s</string>
+    <string name="preferences_database_import_fail_damaged">the file is not a VoIP.ms SMS database, or it is damaged</string>
+    <string name="preferences_database_import_fail_version">the file is from an unsupported version of the app</string>
     <string name="preferences_database_export_key" translatable="false">database_export</string>
     <string name="preferences_database_export_title">Export database</string>
     <string name="preferences_database_export_summary">Export raw SQLite database to a file</string>

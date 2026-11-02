@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import net.kourlas.voipms_sms.CustomApplication
 import net.kourlas.voipms_sms.R
 import net.kourlas.voipms_sms.database.Database
+import net.kourlas.voipms_sms.database.DatabaseImportException
 import net.kourlas.voipms_sms.preferences.getDids
 import net.kourlas.voipms_sms.utils.preferences
 import net.kourlas.voipms_sms.utils.showAlertDialog
@@ -181,7 +182,11 @@ class DatabasePreferencesFragment : PreferenceFragmentCompat() {
                             R.id.coordinator_layout,
                             getString(
                                 R.string.preferences_database_import_fail,
-                                "${e.message} (${e.javaClass.simpleName})"
+                                if (e is DatabaseImportException) {
+                                    e.message
+                                } else {
+                                    "${e.message} (${e.javaClass.simpleName})"
+                                }
                             )
                         )
                     }

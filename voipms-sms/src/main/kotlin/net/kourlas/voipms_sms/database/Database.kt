@@ -20,6 +20,8 @@ package net.kourlas.voipms_sms.database
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.util.Log
@@ -353,51 +355,95 @@ class Database private constructor(private val context: Context) {
         }
 
     /**
-     * Imports the database from the specified file descriptor.
+     * Imports the database from the specified file descriptor. Checks the
+     * file before it replaces the current database. If Room cannot open the
+     * imported database, restores the current database.
+     *
+     * @throws DatabaseImportException If the file is not a database, is
+     * damaged, or is from an unsupported schema version.
      */
     suspend fun import(importFd: ParcelFileDescriptor) = coroutineScope {
         importExportLock.write {
             val dbFile = context.getDatabasePath(DATABASE_NAME)
             val backupFile = File("${dbFile.absolutePath}.backup")
+            val importFile = File(context.cacheDir, IMPORT_FILE_NAME)
 
             try {
-                // Close database to persist it to disk before import
-                database.close()
+                // Copy the file to a temporary file and check it before the
+                // current database changes.
+                FileInputStream(importFd.fileDescriptor).use { input ->
+                    importFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                checkImportFile(importFile)
 
-                // Try importing database, but restore from backup on failure
+                // Replace the current database, but keep a backup of it.
+                database.close()
                 dbFile.copyTo(backupFile, overwrite = true)
                 try {
-                    val importStream =
-                        FileInputStream(importFd.fileDescriptor)
-                    val dbStream = FileOutputStream(dbFile)
-
-                    dbStream.channel.truncate(0)
-
-                    val buffer = ByteArray(1024)
-                    do {
-                        val length = importStream.read(buffer)
-                        if (length > 0) {
-                            dbStream.write(buffer, 0, length)
-                        } else {
-                            break
-                        }
-                    } while (true)
-                    importStream.close()
-                    dbStream.close()
-
-                    // Try refreshing database
+                    // deleteDatabase also deletes the -journal, -shm and -wal
+                    // files of the current database.
+                    context.deleteDatabase(DATABASE_NAME)
+                    importFile.copyTo(dbFile)
                     database = createDatabase(context)
+
+                    // Room opens the file only when it is first used. Open it
+                    // here, so that the migration and the schema check run
+                    // while the backup still exists.
+                    database.openHelper.writableDatabase
                 } catch (e: Exception) {
-                    backupFile.copyTo(dbFile, overwrite = true)
+                    database.close()
+                    context.deleteDatabase(DATABASE_NAME)
+                    backupFile.copyTo(dbFile)
+                    database = createDatabase(context)
                     throw e
                 }
             } finally {
-                // Refresh database
-                database.close()
-                database = createDatabase(context)
-
+                importFile.delete()
                 backupFile.delete()
             }
+        }
+    }
+
+    /**
+     * Checks that the specified file is an undamaged SQLite database with a
+     * schema version that can be migrated to the current version. Uses the
+     * framework SQLite API rather than Room, so that the check does not
+     * change the file.
+     *
+     * @throws DatabaseImportException If the check fails.
+     */
+    private fun checkImportFile(file: File) {
+        val version = try {
+            SQLiteDatabase.openDatabase(
+                file.path, null, SQLiteDatabase.OPEN_READONLY
+            ).use { db ->
+                val result = db.rawQuery("PRAGMA quick_check", null).use {
+                    if (it.moveToFirst()) it.getString(0) else null
+                }
+                if (result != "ok") {
+                    throw DatabaseImportException(
+                        context.getString(
+                            R.string.preferences_database_import_fail_damaged
+                        )
+                    )
+                }
+                db.version
+            }
+        } catch (e: SQLiteException) {
+            throw DatabaseImportException(
+                context.getString(
+                    R.string.preferences_database_import_fail_damaged
+                ), e
+            )
+        }
+        if (version !in MIN_IMPORT_DATABASE_VERSION..DATABASE_VERSION) {
+            throw DatabaseImportException(
+                context.getString(
+                    R.string.preferences_database_import_fail_version
+                )
+            )
         }
     }
 
@@ -1044,7 +1090,12 @@ class Database private constructor(private val context: Context) {
 
     companion object {
         private const val DATABASE_NAME = "sms.db"
+        private const val IMPORT_FILE_NAME = "import.db"
         const val DATABASE_VERSION = 11
+
+        // The oldest schema version with a migration path to
+        // DATABASE_VERSION.
+        private const val MIN_IMPORT_DATABASE_VERSION = 9
 
         private val migration9To10 = object : Migration(9, 10) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -1079,7 +1130,6 @@ class Database private constructor(private val context: Context) {
                 DATABASE_NAME
             )
                 .addMigrations(migration9To10)
-                .fallbackToDestructiveMigration(true)
                 .build()
         }
     }
